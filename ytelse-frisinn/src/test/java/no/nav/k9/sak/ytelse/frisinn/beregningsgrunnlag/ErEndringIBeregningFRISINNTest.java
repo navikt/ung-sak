@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -92,11 +93,11 @@ public class ErEndringIBeregningFRISINNTest {
     }
 
     @Test
-    public void skal_ikke_gi_ugust_hvis_diff_er_mindre_enn_toleranse_grense() {
+    public void skal_ikke_gi_ugunst_hvis_diff_er_mindre_enn_toleranse_grense() {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         int bruttoPrÅr = 200000;
-        BigDecimal diffSomIkkeSkaperUgust = BigDecimal.valueOf(13900);
-        BigDecimal nyttBeløp = BigDecimal.valueOf(bruttoPrÅr).subtract(diffSomIkkeSkaperUgust);
+        BigDecimal diffSomIkkeSkaperUgunst = BigDecimal.valueOf(13900);
+        BigDecimal nyttBeløp = BigDecimal.valueOf(bruttoPrÅr).subtract(diffSomIkkeSkaperUgunst);
 
         bgOrginal(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
@@ -107,17 +108,35 @@ public class ErEndringIBeregningFRISINNTest {
     }
 
     @Test
-    public void skal_gi_ugust_hvis_diff_er_større_eller_lik_toleranse_grense() {
+    public void skal_gi_ugunst_hvis_diff_er_større_eller_lik_toleranse_grense() {
         UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
         int bruttoPrÅr = 200000;
-        BigDecimal diffSomSkaperUgust = BigDecimal.valueOf(14040);
-        BigDecimal nyttBeløp = BigDecimal.valueOf(bruttoPrÅr).subtract(diffSomSkaperUgust);
+        BigDecimal diffSomSkaperUgunst = BigDecimal.valueOf(14040);
+        BigDecimal nyttBeløp = BigDecimal.valueOf(bruttoPrÅr).subtract(diffSomSkaperUgunst);
 
         bgOrginal(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
         bgRevurdering(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
         boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
             Optional.of(beregningsgrunnlagOrginal),
             new UttakAktivitet(Collections.singletonList(uttakAktivitetPeriode)));
+        Assertions.assertThat(resultat).isTrue();
+    }
+
+    @Test
+    public void ugunst_skal_aggregeres_over_flere_perioder() {
+        UttakAktivitetPeriode uttakAktivitetPeriode = lagUttakPeriode(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30));
+        UttakAktivitetPeriode uttakAktivitetPeriode2 = lagUttakPeriode(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
+        int bruttoPrÅr = 200000;
+        BigDecimal diffSomIkkeSkaperUgunst = BigDecimal.valueOf(13900);
+        BigDecimal nyttBeløp = BigDecimal.valueOf(bruttoPrÅr).subtract(diffSomIkkeSkaperUgunst);
+
+        bgOrginal(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
+        bgOrginal(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31), bruttoPrÅr, List.of(AktivitetStatus.ARBEIDSTAKER));
+        bgRevurdering(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
+        bgRevurdering(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31), nyttBeløp.intValue(), List.of(AktivitetStatus.ARBEIDSTAKER));
+        boolean resultat = ErEndringIBeregningFRISINN.erUgunst(Optional.of(beregningsgrunnlagRevurdering),
+            Optional.of(beregningsgrunnlagOrginal),
+            new UttakAktivitet(Arrays.asList(uttakAktivitetPeriode, uttakAktivitetPeriode2)));
         Assertions.assertThat(resultat).isTrue();
     }
 
