@@ -132,6 +132,9 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
     private void loggTilApplikasjonslogg(Throwable cause) {
         if (cause instanceof VLException) {
             ((VLException) cause).log(LOGGER);
+        } else if (cause instanceof UnsupportedOperationException) {
+                String message = cause.getMessage() != null ? LoggerUtils.removeLineBreaks(cause.getMessage()) : "";
+                LOGGER.info("Fikk ikke-implementert-feil:" + message, cause); //NOSONAR //$NON-NLS-1$
         } else {
             String message = cause.getMessage() != null ? LoggerUtils.removeLineBreaks(cause.getMessage()) : "";
             LOGGER.error("Fikk uventet feil:" + message, cause); //NOSONAR //$NON-NLS-1$
