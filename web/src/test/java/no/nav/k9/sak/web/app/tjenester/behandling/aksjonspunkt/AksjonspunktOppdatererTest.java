@@ -67,7 +67,7 @@ public class AksjonspunktOppdatererTest {
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 
-        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null);
+        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
         ForeslåVedtakAksjonspunktOppdaterer foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(
             vedtakVarselRepository,
             mock(HistorikkTjenesteAdapter.class),

@@ -37,7 +37,7 @@ class BekreftVedtakUtenTotrinnskontrollOppdaterer extends AbstractVedtaksbrevOve
             builder.medFremoverHopp(FellesTransisjoner.FREMHOPP_TIL_FATTE_VEDTAK);
         }
 
-        oppdaterRedusertUtbetalingÅrsaker(dto, param.getBehandlingId());
+        oppdaterVedtaksvarsel(dto, param.getBehandlingId());
         return builder.build();
     }
 }

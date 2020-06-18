@@ -46,7 +46,7 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
             return false;
         }
 
-        if (erOverstyrtVedtaksbrevFrisinn(ref)) {
+        if (erUndertryktBrevFrisinn(ref)) {
             log.info("Vedtaksbrev for frisinn overstyrt og sendes derfor ikke automatisk for behandling {}", ref.getBehandlingId()); //$NON-NLS-1$
             return false;
         }
@@ -54,12 +54,12 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
     }
 
 
-    private boolean erOverstyrtVedtaksbrevFrisinn(BehandlingReferanse ref) {
-        boolean fritekstVedtaksbrev = vedtakvarselRepository.hentHvisEksisterer(ref.getBehandlingId())
+    private boolean erUndertryktBrevFrisinn(BehandlingReferanse ref) {
+        boolean ingenVedtaksbrev = vedtakvarselRepository.hentHvisEksisterer(ref.getBehandlingId())
             .map(VedtakVarsel::getVedtaksbrev)
-            .map(Vedtaksbrev.FRITEKST::equals)
+            .map(Vedtaksbrev.INGEN::equals)
             .orElse(false);
 
-        return ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN && fritekstVedtaksbrev;
+        return ref.getFagsakYtelseType() == FagsakYtelseType.FRISINN && ingenVedtaksbrev;
     }
 }

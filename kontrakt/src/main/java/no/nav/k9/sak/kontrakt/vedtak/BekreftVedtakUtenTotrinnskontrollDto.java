@@ -24,8 +24,9 @@ public class BekreftVedtakUtenTotrinnskontrollDto extends VedtaksbrevOverstyring
                                                 String overskrift,
                                                 String fritekstBrev,
                                                 boolean skalBrukeOverstyrendeFritekstBrev,
-                                                Set<String> redusertUtbetalingÅrsaker) { // NOSONAR
-        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker);
+                                                Set<String> redusertUtbetalingÅrsaker,
+                                                boolean skalUndertrykke) { // NOSONAR
+        super(begrunnelse, overskrift, fritekstBrev, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker, skalUndertrykke);
     }
 
 }

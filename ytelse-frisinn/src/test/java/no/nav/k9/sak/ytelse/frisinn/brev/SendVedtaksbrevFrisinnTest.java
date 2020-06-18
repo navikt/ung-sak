@@ -143,7 +143,7 @@ public class SendVedtaksbrevFrisinnTest {
         behandling = scenario.lagre(repositoryProvider);
 
         VedtakVarsel varsel = new VedtakVarsel();
-        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
+        varsel.setVedtaksbrev(Vedtaksbrev.INGEN);
         vedtakVarselRepository.lagre(behandling.getId(), varsel);
 
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());

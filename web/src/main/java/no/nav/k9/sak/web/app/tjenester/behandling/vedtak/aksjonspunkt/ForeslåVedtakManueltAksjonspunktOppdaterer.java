@@ -36,7 +36,7 @@ class ForeslåVedtakManueltAksjonspunktOppdaterer extends AbstractVedtaksbrevOve
             super.oppdaterVedtaksbrevForFritekst(dto, param, builder);
             builder.medFremoverHopp(FellesTransisjoner.FREMHOPP_TIL_FATTE_VEDTAK);
         }
-        oppdaterRedusertUtbetalingÅrsaker(dto, param.getBehandlingId());
+        oppdaterVedtaksvarsel(dto, param.getBehandlingId());
         return builder.build();
     }
 }

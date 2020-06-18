@@ -24,8 +24,9 @@ public class ForeslaVedtakAksjonspunktDto extends VedtaksbrevOverstyringDto {
                                         String overskrift,
                                         String fritekst,
                                         boolean skalBrukeOverstyrendeFritekstBrev,
-                                        Set<String> redusertUtbetalingÅrsaker) {
-        super(begrunnelse, overskrift, fritekst, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker);
+                                        Set<String> redusertUtbetalingÅrsaker,
+                                        boolean skalUndertrykke) {
+        super(begrunnelse, overskrift, fritekst, skalBrukeOverstyrendeFritekstBrev, redusertUtbetalingÅrsaker, skalUndertrykke);
     }
 
 }

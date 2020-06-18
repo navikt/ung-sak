@@ -34,6 +34,9 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     @JsonProperty(value = "skalBrukeOverstyrendeFritekstBrev", required = true)
     private boolean skalBrukeOverstyrendeFritekstBrev;
 
+    @JsonProperty(value = "skalUndertrykkeBrev")
+    private boolean skalUndertrykkeBrev = false;
+
     @JsonProperty(value = "redusertUtbetalingÅrsaker")
     @Size(max = 50)
     @Valid
@@ -45,12 +48,14 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
     }
 
     protected VedtaksbrevOverstyringDto(String begrunnelse, String overskrift, String fritekstBrev,
-                                        boolean skalBrukeOverstyrendeFritekstBrev, Set<@NotNull String> redusertUtbetalingÅrsaker) {
+                                        boolean skalBrukeOverstyrendeFritekstBrev, Set<@NotNull String> redusertUtbetalingÅrsaker,
+                                        boolean skalUndertrykkeBrev) {
         super(begrunnelse);
         this.overskrift = overskrift;
         this.fritekstBrev = fritekstBrev;
         this.skalBrukeOverstyrendeFritekstBrev = skalBrukeOverstyrendeFritekstBrev;
         this.setRedusertUtbetalingÅrsaker(redusertUtbetalingÅrsaker);
+        this.skalUndertrykkeBrev = skalUndertrykkeBrev;
     }
 
     public String getFritekstBrev() {
@@ -83,5 +88,13 @@ public abstract class VedtaksbrevOverstyringDto extends BekreftetAksjonspunktDto
 
     public void setRedusertUtbetalingÅrsaker(Set<String> redusertUtbetalingÅrsaker) {
         this.redusertUtbetalingÅrsaker = redusertUtbetalingÅrsaker == null ? Collections.emptySet() : Set.copyOf(redusertUtbetalingÅrsaker);
+    }
+
+    public boolean isSkalUndertrykkeBrev() {
+        return skalUndertrykkeBrev;
+    }
+
+    public void setSkalUndertrykkeBrev(boolean skalUndertrykkeBrev) {
+        this.skalUndertrykkeBrev = skalUndertrykkeBrev;
     }
 }
