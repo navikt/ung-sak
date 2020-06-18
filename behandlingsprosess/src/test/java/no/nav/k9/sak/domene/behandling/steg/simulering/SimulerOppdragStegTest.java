@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import javax.enterprise.inject.Instance;
 import javax.persistence.EntityManager;
 
 import org.junit.Before;
@@ -34,12 +35,14 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class SimulerOppdragStegTest {
 
@@ -60,6 +63,7 @@ public class SimulerOppdragStegTest {
 
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
+    private Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance = new UnitTestLookupInstanceImpl<>(new SimulerOppdragAksjonspunktTjeneste());
 
     @Before
     public void setup() {
@@ -67,6 +71,7 @@ public class SimulerOppdragStegTest {
         behandling = scenario.lagre(repositoryProvider);
         kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
         simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjeneste(tilkjentYtelseTjenesteMock, k9OppdragRestKlientMock);
+
 
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         TilkjentYtelse ty = new TilkjentYtelse(LocalDate.now(), Collections.emptyList());
@@ -95,7 +100,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -107,7 +112,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -135,6 +140,6 @@ public class SimulerOppdragStegTest {
     }
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
     }
 }

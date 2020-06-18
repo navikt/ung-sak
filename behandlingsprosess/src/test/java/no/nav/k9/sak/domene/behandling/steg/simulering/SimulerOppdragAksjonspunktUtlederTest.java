@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
-import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktUtleder;
+import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 
 public class SimulerOppdragAksjonspunktUtlederTest {
 
@@ -35,11 +35,11 @@ public class SimulerOppdragAksjonspunktUtlederTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_hvis_beløp_er_null() {
-        assertThat(SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(new SimuleringResultatDto(null, null, false))).isEmpty();
+        assertThat(new SimulerOppdragAksjonspunktTjeneste().utledAksjonspunkt(new SimuleringResultatDto(null, null, false))).isEmpty();
     }
 
     private Optional<AksjonspunktDefinisjon> finnAksjonspunkt(int feilutbetalt, int inntrekk) {
-        return SimulerOppdragAksjonspunktUtleder.utledAksjonspunkt(new SimuleringResultatDto((long) feilutbetalt, (long) inntrekk, false));
+        return new SimulerOppdragAksjonspunktTjeneste().utledAksjonspunkt(new SimuleringResultatDto((long) feilutbetalt, (long) inntrekk, false));
     }
 
 }
