@@ -11,23 +11,35 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag.ErEndringIBeregningFRISINN;
+import no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag.ErEndringIBeregningRettsgebyrFRISINN;
 import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
 public class SimulerOppdragAksjonspunktFrisinnTjeneste extends SimulerOppdragAksjonspunktTjeneste {
+    private Boolean ignorerUgunstOpptillRettsgebyr;
+
+    public SimulerOppdragAksjonspunktFrisinnTjeneste() {
+        // CDI
+    }
 
     @Inject
-    public SimulerOppdragAksjonspunktFrisinnTjeneste() {
-        //cdi lookup
+    public SimulerOppdragAksjonspunktFrisinnTjeneste(@KonfigVerdi(value = "KAN_HA_UGUNST_OPPTIL_RETTSGEBYR", defaultVerdi = "false") Boolean ugunstMedFeiltoleranse) {
+        this.ignorerUgunstOpptillRettsgebyr = ugunstMedFeiltoleranse;
     }
 
     public Optional<AksjonspunktDefinisjon> utledAksjonspunkt(SimuleringResultatDto simuleringResultatDto) {
-        BigDecimal toleranseGrenseDagsats = ErEndringIBeregningFRISINN.TOLERANSE_GRENSE_DAGSATS;
+        BigDecimal toleranseGrenseDagsats = ErEndringIBeregningRettsgebyrFRISINN.TOLERANSE_GRENSE_DAGSATS;
 
-        if (!isNull(simuleringResultatDto.getSumFeilutbetaling()) && BigDecimal.valueOf(simuleringResultatDto.getSumFeilutbetaling()).compareTo(toleranseGrenseDagsats) >= 0) {
-            return Optional.of(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+        if (ignorerUgunstOpptillRettsgebyr) {
+            if (!isNull(simuleringResultatDto.getSumFeilutbetaling()) && BigDecimal.valueOf(simuleringResultatDto.getSumFeilutbetaling()).compareTo(toleranseGrenseDagsats) >= 0) {
+                return Optional.of(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+            }
+        } else {
+            if (!isNull(simuleringResultatDto.getSumFeilutbetaling()) && simuleringResultatDto.getSumFeilutbetaling() != 0) {
+                return Optional.of(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+            }
         }
         if (!isNull(simuleringResultatDto.getSumInntrekk()) && simuleringResultatDto.getSumInntrekk() != 0) {
             return Optional.of(AksjonspunktDefinisjon.VURDER_INNTREKK);
