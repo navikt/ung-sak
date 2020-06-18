@@ -33,12 +33,12 @@ public final class MottattDokumentXmlParser {
         try {
             DokumentParserKonfig dokumentParserKonfig = SCHEMA_AND_CLASSES_TIL_STRUKTURERTE_DOKUMENTER.get(namespace);
             if (dokumentParserKonfig == null) {
-                throw FACTORY.ukjentNamespace(namespace, new IllegalStateException()).toException();
+                throw FACTORY.ukjentNamespace(namespace).toException();
             }
             mottattDokument = JaxbHelper.unmarshalAndValidateXMLWithStAX(dokumentParserKonfig.jaxbClass, xml, dokumentParserKonfig.xsdLocation);
             return MottattInntektsmeldingWrapper.tilXmlWrapper(mottattDokument);
         } catch (Exception e) {
-            throw FACTORY.uventetFeilVedParsingAvSoeknadsXml(namespace, e).toException();
+            throw FACTORY.uventetFeilVedParsingAvXml(namespace, e).toException();
         }
     }
 
@@ -47,7 +47,7 @@ public final class MottattDokumentXmlParser {
         try {
             namespace = retrieveNameSpaceOfXML(xml);
         } catch (Exception e) {
-            throw FACTORY.uventetFeilVedParsingAvSoeknadsXml("ukjent", e).toException(); //$NON-NLS-1$
+            throw FACTORY.uventetFeilVedParsingAvXml("ukjent", e).toException(); //$NON-NLS-1$
         }
         return namespace;
     }

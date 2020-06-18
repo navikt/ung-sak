@@ -2,6 +2,7 @@ package no.nav.k9.sak.mottak.inntektsmelding;
 
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
@@ -34,4 +35,7 @@ public interface MottattDokumentFeil extends DeklarerteFeil {
 
     @TekniskFeil(feilkode = "FP-187532", feilmelding = "Behandling [%s] pågår, avventer å håndtere mottatt dokument til det er prosessert", logLevel = WARN)
     Feil behandlingPågårAvventerKnytteMottattDokumentTilBehandling(Long id);
+    
+    @TekniskFeil(feilkode = "FP-187533", feilmelding = "Ugyldig inntektsmelding [journalpost=%s], bryter med forretningsregel validering: %s", logLevel = WARN)
+    Feil inntektsmeldingSemantiskValideringFeil(String feilmelding);
 }

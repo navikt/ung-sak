@@ -28,8 +28,10 @@ import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingFeil;
+import no.nav.k9.sak.mottak.inntektsmelding.MottattDokumentFeil;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingOversetter;
 import no.nav.k9.sak.mottak.inntektsmelding.NamespaceRef;
+import no.nav.k9.sak.mottak.inntektsmelding.ValiderInntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -56,6 +58,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     }
 
     private VirksomhetTjeneste virksomhetTjeneste;
+    private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
@@ -95,7 +98,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
         
-        builder.medOppgittFravær(wrapper.getOppgittFravær());
+        builder.medOppgittFravær(validator.validerOmsorgspengerFravær(wrapper.getOppgittFravær()));
         return builder;
     }
     
@@ -108,7 +111,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 var arbeidsforholdRef = EksternArbeidsforholdRef.ref(arbeidsforholdId.getValue());
                 builder.medArbeidsforholdId(arbeidsforholdRef);
             }
-            builder.medBeløp(arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue())
+            builder.medBeløp(validator.validerRefusjonMaks("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()))
                 .medStartDatoPermisjon(wrapper.getStartDatoPermisjon().orElse(null));
         } else {
             throw InntektsmeldingFeil.FACTORY.manglendeInformasjon().toException();
@@ -136,11 +139,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         var optionalRefusjon = wrapper.getRefusjon();
         if (optionalRefusjon.isPresent()) {
             var refusjon = optionalRefusjon.get();
+            BigDecimal refusjonsbeløp = refusjon.getRefusjonsbeloepPrMnd().getValue();
             if (refusjon.getRefusjonsopphoersdato() != null) {
-                builder.medRefusjon(refusjon.getRefusjonsbeloepPrMnd().getValue(),
-                    refusjon.getRefusjonsopphoersdato().getValue());
+                builder.medRefusjon(validator.validerRefusjonMaks("refusjon.refusjonsbeloepPrMnd", refusjonsbeløp), refusjon.getRefusjonsopphoersdato().getValue());
             } else if (refusjon.getRefusjonsbeloepPrMnd() != null) {
-                builder.medRefusjon(refusjon.getRefusjonsbeloepPrMnd().getValue());
+                builder.medRefusjon(refusjonsbeløp);
             }
 
             // Map endring i refusjon
@@ -149,11 +152,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 .map(EndringIRefusjonsListe::getEndringIRefusjon)
                 .orElse(Collections.emptyList())
                 .stream()
-                .forEach(eir -> builder.leggTil(new Refusjon(eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue())));
+                .forEach(eir -> builder.leggTil(new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()), eir.getEndringsdato().getValue())));
 
         }
     }
-
+    
     private void mapUtsettelse(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         for (UtsettelseAvForeldrepenger detaljer : wrapper.getUtsettelser()) {
             // FIXME (weak reference)

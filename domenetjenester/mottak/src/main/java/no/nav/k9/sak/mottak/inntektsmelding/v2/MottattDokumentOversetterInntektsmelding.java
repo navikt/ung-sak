@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingFeil;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingOversetter;
 import no.nav.k9.sak.mottak.inntektsmelding.NamespaceRef;
+import no.nav.k9.sak.mottak.inntektsmelding.ValiderInntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -49,6 +50,7 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.UtsettelseAvForeldrepenger;
 public class MottattDokumentOversetterInntektsmelding implements MottattInntektsmeldingOversetter<MottattDokumentWrapperInntektsmelding> {
 
     private static final LocalDate TIDENES_BEGYNNELSE = LocalDate.of(1, Month.JANUARY, 1);
+    
     private static Map<ÅrsakInnsendingKodeliste, InntektsmeldingInnsendingsårsak> innsendingsårsakMap;
 
     static {
@@ -59,6 +61,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     private VirksomhetTjeneste virksomhetTjeneste;
     private AktørConsumer aktørConsumer;
+    
+    private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
@@ -99,7 +103,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapFerie(wrapper, builder);
         mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
-        builder.medOppgittFravær(wrapper.getOppgittFravær());
+        builder.medOppgittFravær(validator.validerOmsorgspengerFravær(wrapper.getOppgittFravær()));
 
         return builder;
     }
@@ -113,7 +117,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 var arbeidsforholdRef = EksternArbeidsforholdRef.ref(arbeidsforholdId.getValue());
                 builder.medArbeidsforholdId(arbeidsforholdRef);
             }
-            builder.medBeløp(arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue())
+            builder.medBeløp(validator.validerRefusjonMaks("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()))
                 .medStartDatoPermisjon(wrapper.getStartDatoPermisjon().orElse(null));
         } else {
             throw InntektsmeldingFeil.FACTORY.manglendeInformasjon().toException();
@@ -151,11 +155,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         var optionalRefusjon = wrapper.getRefusjon();
         if (optionalRefusjon.isPresent()) {
             var refusjon = optionalRefusjon.get();
+            BigDecimal refusjonsbeløp = validator.validerRefusjonMaks("refusjon.refusjonsbeloepPrMnd", refusjon.getRefusjonsbeloepPrMnd().getValue());
             if (refusjon.getRefusjonsopphoersdato() != null) {
-                builder.medRefusjon(refusjon.getRefusjonsbeloepPrMnd().getValue(),
-                    refusjon.getRefusjonsopphoersdato().getValue());
+                builder.medRefusjon(refusjonsbeløp, refusjon.getRefusjonsopphoersdato().getValue());
             } else if (refusjon.getRefusjonsbeloepPrMnd() != null) {
-                builder.medRefusjon(refusjon.getRefusjonsbeloepPrMnd().getValue());
+                builder.medRefusjon(refusjonsbeløp);
             }
 
             // Map endring i refusjon
@@ -164,7 +168,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 .map(EndringIRefusjonsListe::getEndringIRefusjon)
                 .orElse(Collections.emptyList())
                 .stream()
-                .forEach(eir -> builder.leggTil(new Refusjon(eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue())));
+                .forEach(eir -> builder.leggTil(
+                    new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()), eir.getEndringsdato().getValue())));
 
         }
     }

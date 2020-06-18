@@ -13,8 +13,8 @@ interface MottattDokumentXmlParserFeil extends DeklarerteFeil {
     MottattDokumentXmlParserFeil FACTORY = FeilFactory.create(MottattDokumentXmlParserFeil.class);
 
     @TekniskFeil(feilkode = "FP-958724", feilmelding = "Fant ikke xsd for namespacet '%s'", logLevel = WARN)
-    Feil ukjentNamespace(String namespace, IllegalStateException e);
+    Feil ukjentNamespace(String namespace);
 
     @TekniskFeil(feilkode = "FP-312346", feilmelding = "Feil ved parsing av ukjent journaldokument-type med namespace '%s'", logLevel = ERROR)
-    Feil uventetFeilVedParsingAvSoeknadsXml(String namespace, Exception e);
+    Feil uventetFeilVedParsingAvXml(String namespace, Exception e);
 }

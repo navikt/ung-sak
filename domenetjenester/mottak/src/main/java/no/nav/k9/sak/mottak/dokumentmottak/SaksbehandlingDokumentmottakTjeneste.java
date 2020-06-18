@@ -1,5 +1,7 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -8,17 +10,23 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 @Dependent
 public class SaksbehandlingDokumentmottakTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(SaksbehandlingDokumentmottakTjeneste.class);
 
     private ProsessTaskRepository prosessTaskRepository;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
@@ -57,21 +65,42 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
         MottattDokument mottattDokument = builder.build();
 
-        valider(mottattDokument, saksdokument.getFagsakYtelseType());
+        boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
 
         Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
-        var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
-        prosessTaskData.setFagsakId(saksdokument.getFagsakId());
-        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, mottattDokumentId.toString());
-        settÅrsakHvisDefinert(saksdokument.getBehandlingÅrsakType(), prosessTaskData);
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
+        if (ok) {
+            var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
+            prosessTaskData.setFagsakId(saksdokument.getFagsakId());
+            prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, mottattDokumentId.toString());
+            settÅrsakHvisDefinert(saksdokument.getBehandlingÅrsakType(), prosessTaskData);
+            prosessTaskData.setCallIdFraEksisterende();
+            prosessTaskRepository.lagre(prosessTaskData);
+        }
     }
 
-    private void valider(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
-        var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
-        dokumentmottaker.validerDokument(mottattDokument, ytelseType);
+    private boolean valider(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
+        try {
+            var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
+            dokumentmottaker.validerDokument(mottattDokument, ytelseType);
+            return true;
+        } catch (TekniskException e) {
+            String feilmelding = toFeilmelding(e);
+            // skriver på feilmelding
+            mottattDokument.setFeilmelding(feilmelding);
+            e.getFeil().log(log);
+            return false;
+        }
+    }
+
+    private String toFeilmelding(TekniskException e) {
+        var sw = new StringWriter(1000);
+        try (var pw = new PrintWriter(sw, true)) {
+            e.printStackTrace(pw);
+            pw.flush();
+            var f = e.getFeil();
+            return String.format("%s: %s\n%s", f.getKode(), f.getFeilmelding(), sw);
+        }
     }
 
     private void settÅrsakHvisDefinert(BehandlingÅrsakType behandlingÅrsakType, ProsessTaskData prosessTaskData) {
