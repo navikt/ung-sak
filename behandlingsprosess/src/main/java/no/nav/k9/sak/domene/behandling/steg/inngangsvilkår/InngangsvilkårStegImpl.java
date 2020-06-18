@@ -68,7 +68,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
 
     private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
         var intervaller = perioderTilVurdering(kontekst.getBehandlingId(), vilkår);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(behandling.getId()));
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
         RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), ref, intervaller);
 
         // Oppdater behandling

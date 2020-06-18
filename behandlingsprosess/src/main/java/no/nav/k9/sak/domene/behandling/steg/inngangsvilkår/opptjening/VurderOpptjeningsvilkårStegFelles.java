@@ -57,7 +57,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opres.getResultatOpptjent(), aktiviteter);
 
             håndtereAutomatiskAvslag(behandling, regelResultat, periode);
-        } else {
+        } else if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
             // rydd bort tidligere aktiviteter
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
         }
