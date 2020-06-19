@@ -84,7 +84,7 @@ jobs:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
 
       - name: Lukk gamle issues
-        uses: actions/github-script@v1.1.0
+        uses: actions/github-script@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
