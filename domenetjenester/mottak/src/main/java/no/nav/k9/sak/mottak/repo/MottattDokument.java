@@ -28,8 +28,10 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.engine.jdbc.ClobProxy;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.BrevkodeKodeverdiConverter;
+import no.nav.k9.sak.behandlingslager.kodeverk.DokumentStatusKodeverdiConverter;
 import no.nav.k9.sak.typer.JournalpostId;
 
 /**
@@ -71,6 +73,13 @@ public class MottattDokument extends BaseEntitet {
     /** Arbeidsgiver referanse - orgnummer eller privat arbeidsgiver fnr. */
     @Column(name = "arbeidsgiver")
     private String arbeidsgiver;
+
+    @Convert(converter = DokumentStatusKodeverdiConverter.class)
+    @Column(name = "status", nullable = false)
+    private DokumentStatus status = DokumentStatus.GYLDIG;
+
+    @Column(name = "feilmelding")
+    private String feilmelding;
 
     /**
      * Av historiske årsaker kalles dette kodeverkt for Brevkode her. Vi lagrer kun intern brevkode kode, så vi ikke er avhengig av brev i
@@ -120,6 +129,14 @@ public class MottattDokument extends BaseEntitet {
 
     public String getKanalreferanse() {
         return kanalreferanse;
+    }
+
+    public String getFeilmelding() {
+        return feilmelding;
+    }
+
+    public DokumentStatus getStatus() {
+        return status;
     }
 
     public boolean harPayload() {
@@ -187,6 +204,15 @@ public class MottattDokument extends BaseEntitet {
         this.kanalreferanse = kanalreferanse;
     }
 
+    public void setFeilmelding(String feilmelding) {
+        this.feilmelding = feilmelding;
+        setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
+    }
+
+    private void setStatus(DokumentStatus status) {
+        this.status = Objects.requireNonNull(status, "status");
+    }
+
     public Brevkode getType() {
         return type;
     }
@@ -228,6 +254,16 @@ public class MottattDokument extends BaseEntitet {
 
         public Builder medKanalreferanse(String kanalreferanse) {
             mottatteDokumentMal.kanalreferanse = kanalreferanse;
+            return this;
+        }
+        
+        public Builder medStatus(DokumentStatus status) {
+            mottatteDokumentMal.setStatus(status);
+            return this;
+        }
+        
+        public Builder medFeilmelding(String feilmelding) {
+            mottatteDokumentMal.setFeilmelding(feilmelding);
             return this;
         }
 
