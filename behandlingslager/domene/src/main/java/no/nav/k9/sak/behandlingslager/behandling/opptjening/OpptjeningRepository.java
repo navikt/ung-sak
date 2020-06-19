@@ -84,12 +84,12 @@ public class OpptjeningRepository {
             return nyOpptjening;
         };
 
-        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon);
+        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon, true);
 
         return opptjening;
     }
 
-    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon) {
+    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon, boolean ryddOpptjeningsresultat) {
 
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
 
@@ -98,7 +98,11 @@ public class OpptjeningRepository {
         var builder = new OpptjeningResultatBuilder(tidligereOpptjeninger.orElse(null));
         var opptjening = oppdateringsFunksjon.apply(builder);
 
-        validerMotVilkårsPerioder(behandling, builder);
+        if (ryddOpptjeningsresultat) {
+            ryddMotVilkårsPerioder(behandling, builder);
+        } else {
+            validerMotVilkårsPerioder(behandling, builder);
+        }
         tidligereOpptjeninger.ifPresent(this::deaktiverTidligereOpptjening);
 
         var opptjeningResultat = builder.build();
@@ -108,6 +112,11 @@ public class OpptjeningRepository {
 
         behandlingRepository.verifiserBehandlingLås(behandlingLås);
         return opptjening;
+    }
+
+    private void ryddMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder) {
+        var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+        vilkår.ifPresent(builder::fjernOverflødigePerioder);
     }
 
     private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder) {
@@ -144,7 +153,7 @@ public class OpptjeningRepository {
             return ny;
         };
 
-        return lagre(behandling, oppdateringsfunksjon);
+        return lagre(behandling, oppdateringsfunksjon, false);
     }
 
     /**
@@ -208,6 +217,6 @@ public class OpptjeningRepository {
             return null;
         };
 
-        lagre(behandling, oppdateringsfunksjon);
+        lagre(behandling, oppdateringsfunksjon, false);
     }
 }
