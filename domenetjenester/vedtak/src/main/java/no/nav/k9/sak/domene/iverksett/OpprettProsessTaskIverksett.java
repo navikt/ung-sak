@@ -11,5 +11,5 @@ public interface OpprettProsessTaskIverksett {
         opprettIverksettingstasker(behandling);
     }
 
-    default void meldIfraOmIverksettingTilÅrskvantum(Behandling behandling) { }
+    default void opprettYtelsesSpesifikkeTasks(Behandling behandling) { }
 }

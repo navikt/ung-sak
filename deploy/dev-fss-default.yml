@@ -191,9 +191,10 @@ spec:
     - name: OMP_VARIANT_FILTER_AKTIVERT
       value: "true"
     - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
-      value: "true"
+      value: "false"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
       value: "true"
+
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

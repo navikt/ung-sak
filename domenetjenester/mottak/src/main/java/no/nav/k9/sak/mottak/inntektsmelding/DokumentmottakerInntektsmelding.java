@@ -48,7 +48,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private BeanManager beanManager;
     private BehandlingLåsRepository behandlingLåsRepository;
-    
+
     private InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
     @Inject
@@ -114,7 +114,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         ProsessTaskData prosessTaskData = new ProsessTaskData(OpprettOppgaveVurderDokumentTask.TASKTYPE);
         prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_BEHANDLENDE_ENHET, behandlendeEnhetsId);
         prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_DOKUMENT_TYPE, mottattDokument.getType().getKode());
-        prosessTaskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId());  // tar ikke med behandling her siden det evt. gjelder ny
+        prosessTaskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId()); // tar ikke med behandling her siden det evt. gjelder ny
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
@@ -138,13 +138,10 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         doMottaDokument(mottattDokument, fagsak);
         doFireEvent(new Mottatt(fagsak.getYtelseType(), fagsak.getAktørId(), mottattDokument.getJournalpostId()));
     }
-    
+
     @Override
     public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
-        var res = inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
-        if(res.isEmpty()) {
-            throw new IllegalArgumentException("Fikk ingen inntektsmeldinger fra : " + mottattDokument);
-        }
+        inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
 
     /** Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt. */
@@ -165,7 +162,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
         Behandling behandling = sisteYtelsesbehandling.get();
         sjekkBehandlingKanLåses(behandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
-        
+
         boolean sisteYtelseErFerdigbehandlet = sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.FALSE);
         if (sisteYtelseErFerdigbehandlet) {
             Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
@@ -186,7 +183,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         var lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
         if (lås == null) {
             // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-            throw MottattDokumentFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
         }
 
     }

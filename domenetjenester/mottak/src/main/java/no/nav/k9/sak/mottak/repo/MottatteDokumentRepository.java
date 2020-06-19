@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @Dependent
@@ -48,10 +49,11 @@ public class MottatteDokumentRepository {
      * ikke å anbefale å bruke.
      */
     public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId) {
-        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param";
+        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status=:gyldig)";
         return entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter(PARAM_KEY, fagsakId)
+            .setParameter("gyldig", DokumentStatus.GYLDIG)
             .getResultList();
     }
 
