@@ -8,6 +8,5 @@ select nextval('seq_prosess_task'), 'beregning.tilbakeTilStart',
             inner join prosess_task pt on pt.id = fpt.prosess_task_id
             where pt.task_type ='behandlingskontroll.fortsettBehandling'
             and pt.status = 'FEILET'
-            and fpt.behandling_id = '' + b.id
             and pt.siste_kjoering_feil_tekst like '%FT-KALKULUS-INPUT-1000000: Kalkulus finner ikke kalkulator input for koblingId%'
             and f.ytelse_type = 'FRISINN';
