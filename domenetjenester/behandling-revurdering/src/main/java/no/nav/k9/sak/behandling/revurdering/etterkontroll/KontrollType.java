@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public enum KontrollType {
 
     MANGLENDE_FØDSEL("MANGLENDE_FØDSEL", "Kontroll manglende fødsel"),
-
+    OVERLAPPENDE_YTELSE("OVERLAPPENDE_YTELSE", "Kontroll overlappende ytelse"),
     ;
 
     private static final Map<String, KontrollType> KODER = new LinkedHashMap<>();
@@ -60,7 +60,7 @@ public enum KontrollType {
     public String getKode() {
         return kode;
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

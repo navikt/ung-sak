@@ -85,7 +85,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
         infotrygdFeedService.publiserHendelse(behandling);
 
-        meldIfraOmIverksettingTilÅrskvantum(behandling);
+        opprettYtelsesSpesifikkeTasks(behandling);
     }
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {

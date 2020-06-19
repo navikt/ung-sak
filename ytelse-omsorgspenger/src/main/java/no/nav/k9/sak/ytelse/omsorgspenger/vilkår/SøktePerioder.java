@@ -36,7 +36,6 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
     }
 
     NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(OppgittFravær søknadsperioder) {
-        var timeline = new LocalDateTimeline<Boolean>(List.of());
         var perioder = søknadsperioder.getPerioder()
             .stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
@@ -44,6 +43,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toCollection(TreeSet::new));
 
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
         for (LocalDateSegment<Boolean> periode : perioder) {
             timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
