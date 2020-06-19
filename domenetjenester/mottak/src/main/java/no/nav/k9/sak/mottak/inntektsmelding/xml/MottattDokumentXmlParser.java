@@ -1,11 +1,11 @@
 package no.nav.k9.sak.mottak.inntektsmelding.xml;
 
-import static no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParserFeil.FACTORY;
 import static no.nav.vedtak.felles.xml.XmlUtils.retrieveNameSpaceOfXML;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingFeil;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
 import no.nav.vedtak.felles.integrasjon.felles.ws.JaxbHelper;
 
@@ -33,12 +33,12 @@ public final class MottattDokumentXmlParser {
         try {
             DokumentParserKonfig dokumentParserKonfig = SCHEMA_AND_CLASSES_TIL_STRUKTURERTE_DOKUMENTER.get(namespace);
             if (dokumentParserKonfig == null) {
-                throw FACTORY.ukjentNamespace(namespace).toException();
+                throw MottattInntektsmeldingFeil.FACTORY.ukjentNamespace(namespace).toException();
             }
             mottattDokument = JaxbHelper.unmarshalAndValidateXMLWithStAX(dokumentParserKonfig.jaxbClass, xml, dokumentParserKonfig.xsdLocation);
             return MottattInntektsmeldingWrapper.tilXmlWrapper(mottattDokument);
         } catch (Exception e) {
-            throw FACTORY.uventetFeilVedParsingAvXml(namespace, e).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.uventetFeilVedParsingAvXml(namespace, e).toException();
         }
     }
 
@@ -47,7 +47,7 @@ public final class MottattDokumentXmlParser {
         try {
             namespace = retrieveNameSpaceOfXML(xml);
         } catch (Exception e) {
-            throw FACTORY.uventetFeilVedParsingAvXml("ukjent", e).toException(); //$NON-NLS-1$
+            throw MottattInntektsmeldingFeil.FACTORY.uventetFeilVedParsingAvXml("ukjent", e).toException(); //$NON-NLS-1$
         }
         return namespace;
     }

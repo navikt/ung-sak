@@ -15,14 +15,14 @@ public class ValiderInntektsmelding {
 
     public BigDecimal validerRefusjonEndringMaks(String path, BigDecimal value, LocalDate endringsdato) {
         if (MAX.compareTo(value) <= 0) {
-            throw MottattDokumentFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato)).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato)).toException();
         }
         return value;
     }
 
     public BigDecimal validerRefusjonMaks(String path, BigDecimal value) {
         if (MAX.compareTo(value) <= 0) {
-            throw MottattDokumentFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX)).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX)).toException();
         }
         return value;
     }
@@ -38,7 +38,7 @@ public class ValiderInntektsmelding {
         var maksDato = timeline.getMaxLocalDate();
         var minDato = timeline.getMinLocalDate();
         if (maksDato.getYear() != minDato.getYear()) {
-            throw MottattDokumentFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding dekker ulike år: [%s, %s]", minDato, maksDato)).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding dekker ulike år: [%s, %s]", minDato, maksDato)).toException();
         }
 
         return perioder;

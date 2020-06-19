@@ -183,7 +183,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         var lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
         if (lås == null) {
             // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-            throw MottattDokumentFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
+            throw MottattInntektsmeldingFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
         }
 
     }

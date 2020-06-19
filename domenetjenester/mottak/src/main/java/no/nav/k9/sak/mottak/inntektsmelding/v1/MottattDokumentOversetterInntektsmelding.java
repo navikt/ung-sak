@@ -16,19 +16,15 @@ import javax.xml.bind.JAXBElement;
 
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.NaturalytelseKodeliste;
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakInnsendingKodeliste;
-import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakUtsettelseKodeliste;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
-import no.nav.k9.sak.domene.iay.modell.Gradering;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingFeil;
-import no.nav.k9.sak.mottak.inntektsmelding.MottattDokumentFeil;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingOversetter;
 import no.nav.k9.sak.mottak.inntektsmelding.NamespaceRef;
 import no.nav.k9.sak.mottak.inntektsmelding.ValiderInntektsmelding;
@@ -39,10 +35,8 @@ import no.nav.vedtak.konfig.Tid;
 import no.seres.xsd.nav.inntektsmelding_m._201809.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.EndringIRefusjonsListe;
-import no.seres.xsd.nav.inntektsmelding_m._20180924.GraderingIForeldrepenger;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.NaturalytelseDetaljer;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Periode;
-import no.seres.xsd.nav.inntektsmelding_m._20180924.UtsettelseAvForeldrepenger;
 
 @NamespaceRef(InntektsmeldingConstants.NAMESPACE)
 @ApplicationScoped
@@ -93,9 +87,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
         mapArbeidsforholdOgBeløp(wrapper, builder);
         mapNaturalYtelser(wrapper, builder);
-        mapGradering(wrapper, builder);
         mapFerie(wrapper, builder);
-        mapUtsettelse(wrapper, builder);
         mapRefusjon(wrapper, builder);
         
         builder.medOppgittFravær(validator.validerOmsorgspengerFravær(wrapper.getOppgittFravær()));
@@ -157,16 +149,6 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         }
     }
     
-    private void mapUtsettelse(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
-        for (UtsettelseAvForeldrepenger detaljer : wrapper.getUtsettelser()) {
-            // FIXME (weak reference)
-            ÅrsakUtsettelseKodeliste årsakUtsettelse = ÅrsakUtsettelseKodeliste.fromValue(detaljer.getAarsakTilUtsettelse().getValue());
-            final UtsettelseÅrsak årsak = UtsettelseÅrsak.fraKode(årsakUtsettelse.name());
-            builder.leggTil(UtsettelsePeriode.utsettelse(detaljer.getPeriode().getValue().getFom().getValue(),
-                detaljer.getPeriode().getValue().getTom().getValue(), årsak));
-        }
-    }
-
     private void mapFerie(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         for (Periode periode : wrapper.getAvtaltFerie()) {
             builder.leggTil(UtsettelsePeriode.ferie(periode.getFom().getValue(), periode.getTom().getValue()));
@@ -191,14 +173,6 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
             final NaturalYtelseType ytelseType = NaturalYtelseType.finnForKodeverkEiersKode(naturalytelse.value());
             builder.leggTil(new NaturalYtelse(detaljer.getFom().getValue(), Tid.TIDENES_ENDE,
                 beløp.get(ytelseType), ytelseType));
-        }
-    }
-
-    private void mapGradering(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
-        for (GraderingIForeldrepenger detaljer : wrapper.getGradering()) {
-            builder.leggTil(new Gradering(detaljer.getPeriode().getValue().getFom().getValue(),
-                detaljer.getPeriode().getValue().getTom().getValue(),
-                new BigDecimal(detaljer.getArbeidstidprosent().getValue())));
         }
     }
 }

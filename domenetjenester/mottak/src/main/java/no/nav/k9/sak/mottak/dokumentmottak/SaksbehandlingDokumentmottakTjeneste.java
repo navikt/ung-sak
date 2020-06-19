@@ -17,6 +17,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.exception.TekniskException;
@@ -80,11 +81,11 @@ public class SaksbehandlingDokumentmottakTjeneste {
     }
 
     private boolean valider(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
+        var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
         try {
-            var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
             dokumentmottaker.validerDokument(mottattDokument, ytelseType);
             return true;
-        } catch (TekniskException e) {
+        } catch (MottattInntektsmeldingException e) {
             String feilmelding = toFeilmelding(e);
             // skriver på feilmelding
             mottattDokument.setFeilmelding(feilmelding);
