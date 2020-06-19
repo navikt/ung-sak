@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask(VurderOverlappendeYtelserTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class VurderOverlappendeYtelserTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "iverksetteVedtak.vurderOverlappendeYtelser";
