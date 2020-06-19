@@ -193,6 +193,8 @@ spec:
       value: "true"
     - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
       value: "false"
+    - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
+      value: "false"
 
 
     # Audit logging
