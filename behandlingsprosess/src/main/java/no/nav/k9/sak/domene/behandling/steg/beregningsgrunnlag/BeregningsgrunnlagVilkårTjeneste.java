@@ -58,8 +58,8 @@ public class BeregningsgrunnlagVilkårTjeneste {
     }
 
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
-                                    DatoIntervallEntitet vilkårsPeriode,
-                                    Avslagsårsak avslagsårsak) {
+                                           DatoIntervallEntitet vilkårsPeriode,
+                                           Avslagsårsak avslagsårsak) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettAvslåttVilkårsResultat(
             vilkårene,
@@ -72,7 +72,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
     }
 
     public void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
-                             DatoIntervallEntitet vilkårsPeriode, boolean vilkårOppfylt) {
+                                    DatoIntervallEntitet vilkårsPeriode, boolean vilkårOppfylt) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -137,6 +137,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(vilkårsPeriode);
         vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
+        builder.leggTil(vilkårBuilder);
         var nyttResultat = builder.build();
         behandlingresultatOpt.ifPresent(br -> behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), br));
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), nyttResultat);
