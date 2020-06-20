@@ -28,7 +28,7 @@ public abstract class BehandlingProsessTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var behandlingId = prosessTaskData.getBehandlingId();
-        
+
         if (behandlingLåsRepository != null) {
             behandlingLåsRepository.taLås(behandlingId);
         }
@@ -44,6 +44,15 @@ public abstract class BehandlingProsessTask implements ProsessTaskHandler {
         LOG_CONTEXT.add("behandling_status", behandling.getStatus());
         behandling.getBehandlingStegTilstand().ifPresent(st -> LOG_CONTEXT.add("steg", st.getBehandlingSteg()));
         behandling.getBehandlingStegTilstand().ifPresent(st -> LOG_CONTEXT.add("steg_status", st.getBehandlingStegStatus()));
+    }
+
+    /** symmetri til #logContext. */
+    public static void clearLogContext() {
+        LOG_CONTEXT.remove("saksnummer");
+        LOG_CONTEXT.remove("ytelseType");
+        LOG_CONTEXT.remove("behandling_status");
+        LOG_CONTEXT.remove("steg");
+        LOG_CONTEXT.remove("steg_status");
     }
 
 }
