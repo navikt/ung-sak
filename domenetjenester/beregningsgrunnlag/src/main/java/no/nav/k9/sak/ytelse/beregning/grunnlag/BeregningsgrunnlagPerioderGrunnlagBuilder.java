@@ -68,6 +68,28 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
+    BeregningsgrunnlagPerioderGrunnlagBuilder ryddMotVilkår(Vilkår vilkår) {
+        Objects.requireNonNull(vilkår);
+        if (!VilkårType.BEREGNINGSGRUNNLAGVILKÅR.equals(vilkår.getVilkårType())) {
+            throw new IllegalArgumentException("[Utviklerfeil] krever BEREGNINGSGRUNNLAGVILKÅR");
+        }
+
+        var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
+
+        var perioderUtenKnytningTilVilkårsPerioder = kladd.getGrunnlagPerioder()
+            .stream()
+            .map(BeregningsgrunnlagPeriode::getSkjæringstidspunkt)
+            .filter(it -> vilkårsSkjæringspunkter.stream()
+                .noneMatch(it::equals))
+            .collect(Collectors.toList());
+
+        if (!perioderUtenKnytningTilVilkårsPerioder.isEmpty()) {
+            perioderUtenKnytningTilVilkårsPerioder.forEach(this::deaktiver);
+        }
+
+        return this;
+    }
+
     BeregningsgrunnlagPerioderGrunnlag build() {
         validerState();
         this.built = true;

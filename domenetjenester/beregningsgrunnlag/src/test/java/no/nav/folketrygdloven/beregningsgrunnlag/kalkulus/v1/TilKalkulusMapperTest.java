@@ -12,17 +12,18 @@ import org.junit.Test;
 
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class TilKalkulusMapperTest {
 
     private DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25));
     private DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10));
+    private DatoIntervallEntitet periode3 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(4));
 
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode() {
@@ -144,5 +145,41 @@ public class TilKalkulusMapperTest {
 
         relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding4);
+    }
+
+    @Test
+    public void skal_prioritere_inntektsmelding_nærmest_skjøringstidspunktet() {
+        var sakInntektsmeldinger = new SakInntektsmeldinger(new Saksnummer("123123123"));
+        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
+        var ref = EksternArbeidsforholdRef.ref("123");
+        var inntektsmelding1 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsforholdId(ref)
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
+            .medJournalpostId("1")
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now(), LocalDate.now().plusDays(2))))
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var inntektsmelding2 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsforholdId(ref)
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
+            .medJournalpostId("2")
+            .medBeløp(BigDecimal.ONE)
+            .medKanalreferanse("AR124")
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().plusDays(1), LocalDate.now().plusDays(4))))
+            .medRefusjon(BigDecimal.ONE)
+            .build();
+
+        sakInntektsmeldinger.leggTil(1L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding1);
+        sakInntektsmeldinger.leggTil(2L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding2);
+
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode3);
+
+        assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1);
     }
 }

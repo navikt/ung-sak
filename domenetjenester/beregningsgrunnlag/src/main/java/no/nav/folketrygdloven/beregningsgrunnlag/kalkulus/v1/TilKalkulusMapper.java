@@ -254,7 +254,7 @@ public class TilKalkulusMapper {
         var set = new HashSet<>(Set.of(nyInntektsmeldingDatoNærmestStp));
         var næresteDatoFraEksisterende = finnDatoNærmestSkjæringstidspunktet(gammel, skjæringstidspunkt).orElseThrow();
         set.add(næresteDatoFraEksisterende);
-        var næmest = set.stream().min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(x, skjæringstidspunkt))).orElseThrow();
+        var næmest = set.stream().min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(skjæringstidspunkt, x))).orElseThrow();
         return næmest.equals(næresteDatoFraEksisterende);
     }
 
@@ -272,6 +272,7 @@ public class TilKalkulusMapper {
             .filter(it -> it.getOppgittFravær()
                 .stream()
                 .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
+            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt))
             .collect(Collectors.toSet());
     }
 
