@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
@@ -140,8 +141,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             personMedRelasjoner.getPersonIdent().getIdent(),
             personMedRelasjoner.getFødselsdato(),
             personMedRelasjoner.getDødsdato(),
-            barna,
-            null);
+            barna);
     }
 
     @Override
@@ -221,7 +221,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     @NotNull
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Tuple<Familierelasjon, Optional<Personinfo>> it) {
         var personinfo = it.getElement2().orElseThrow();
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), false);
+        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), BarnType.VANLIG);
     }
 
     private boolean kreverArbeidsgiverRefusjon(InntektsmeldingAggregat inntektsmeldingAggregat,
