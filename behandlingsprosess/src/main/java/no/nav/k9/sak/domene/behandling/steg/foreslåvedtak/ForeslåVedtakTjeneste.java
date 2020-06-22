@@ -2,7 +2,10 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
@@ -29,6 +33,8 @@ class ForeslåVedtakTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
+    private Boolean deaktiverTotrinnSelektivt;
+
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
     }
@@ -36,7 +42,9 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                          @KonfigVerdi(value = "TOTRINN_TEMP_DEAKTIVERT", defaultVerdi = "false") Boolean deaktiverTotrinnSelektivt,
                           SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste) {
+        this.deaktiverTotrinnSelektivt = Objects.requireNonNull(deaktiverTotrinnSelektivt, "deaktiverTotrinnSelektivt");
         this.sjekkMotEksisterendeOppgaverTjeneste = sjekkMotEksisterendeOppgaverTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -49,8 +57,7 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>
-            (sjekkMotEksisterendeOppgaverTjeneste.sjekkMotEksisterendeGsakOppgaver(behandling.getAktørId(), behandling));
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>(sjekkMotEksisterendeOppgaverTjeneste.sjekkMotEksisterendeGsakOppgaver(behandling.getAktørId(), behandling));
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
@@ -87,8 +94,18 @@ class ForeslåVedtakTjeneste {
     }
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
-        return !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
+        var totrinn = !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
             behandling.harAksjonspunktMedTotrinnskontroll();
+
+        if (totrinn && deaktiverTotrinnSelektivt) {
+            var ignorerTotrinnAksMidlertidig = Set.of(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP, AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
+            var totrinnAks = behandling.getAksjonspunkter().stream()
+                .filter(a -> a.isToTrinnsBehandling())
+                .filter(a -> !ignorerTotrinnAksMidlertidig.contains(a.getAksjonspunktDefinisjon()))
+                .collect(Collectors.toList());
+            return !totrinnAks.isEmpty();
+        }
+        return totrinn;
     }
 
     private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst kontekst) {

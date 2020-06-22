@@ -188,10 +188,10 @@ spec:
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
-    - name: OMP_VARIANT_FILTER_AKTIVERT
-      value: "true"
     - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
       value: "false"
+    - name: TOTRINN_TEMP_DEAKTIVERT
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
