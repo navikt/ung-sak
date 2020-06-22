@@ -44,7 +44,7 @@ public class BeregningPerioderGrunnlagRepository {
         if (builder.erForskjellig(aktivtGrunnlag, differ)) {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
 
-            lagre(builder, behandlingId);
+            lagre(builder, behandlingId, true);
         } else {
             log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
@@ -71,7 +71,7 @@ public class BeregningPerioderGrunnlagRepository {
 
             deaktiverEksisterende(grunnlag);
 
-            lagre(builder, behandlingId);
+            lagre(builder, behandlingId, false);
         }
     }
 
@@ -87,8 +87,8 @@ public class BeregningPerioderGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    private void lagre(BeregningsgrunnlagPerioderGrunnlagBuilder builder, Long behandlingId) {
-        validerMotVilkårsPerioder(behandlingId, builder);
+    private void lagre(BeregningsgrunnlagPerioderGrunnlagBuilder builder, Long behandlingId, boolean ryddMotVilkår) {
+        validerMotVilkårsPerioder(behandlingId, builder, ryddMotVilkår);
 
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
@@ -104,12 +104,15 @@ public class BeregningPerioderGrunnlagRepository {
             var grunnlag = aktivtGrunnlag.get();
             var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
 
-            lagre(builder, tilBehandlingId);
+            lagre(builder, tilBehandlingId, false);
         }
     }
 
-    private void validerMotVilkårsPerioder(Long behandlingId, BeregningsgrunnlagPerioderGrunnlagBuilder builder) {
+    private void validerMotVilkårsPerioder(Long behandlingId, BeregningsgrunnlagPerioderGrunnlagBuilder builder, boolean ryddMotVilkår) {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (ryddMotVilkår) {
+            vilkår.ifPresent(builder::ryddMotVilkår);
+        }
         vilkår.ifPresent(builder::validerMotVilkår);
     }
 }
