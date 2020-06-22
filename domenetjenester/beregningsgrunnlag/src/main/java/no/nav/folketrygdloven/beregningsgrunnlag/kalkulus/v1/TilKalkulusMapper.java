@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -118,10 +117,12 @@ public class TilKalkulusMapper {
     }
 
     private static List<Inntekt> finnRelevanteInntekter(InntektFilter inntektFilter) {
-        return new ArrayList<>() {{
-            addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
-            addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
-        }};
+        return new ArrayList<>() {
+            {
+                addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
+                addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
+            }
+        };
     }
 
     private static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjonOpt) {
@@ -129,9 +130,11 @@ public class TilKalkulusMapper {
             return null;
         }
         ArbeidsforholdInformasjon arbeidsforholdInformasjon = arbeidsforholdInformasjonOpt.get();
-        List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream().map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
-            new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse()),
-            new ArbeidsforholdHandlingType(arbeidsforholdOverstyring.getHandling().getKode()))).collect(Collectors.toList());
+        List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream()
+            .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
+                new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse()),
+                new ArbeidsforholdHandlingType(arbeidsforholdOverstyring.getHandling().getKode())))
+            .collect(Collectors.toList());
 
         if (!resultat.isEmpty()) {
             return new ArbeidsforholdInformasjonDto(resultat);
@@ -163,8 +166,7 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNærRelasjon(),
             oppgittEgenNæring.getNyIArbeidslivet(),
-            oppgittEgenNæring.getBruttoInntekt()
-        );
+            oppgittEgenNæring.getBruttoInntekt());
     }
 
     private static List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold) {
@@ -204,7 +206,9 @@ public class TilKalkulusMapper {
                 new BeløpDto(refusjon.getRefusjonsbeløp().getVerdi()),
                 refusjon.getFom())).collect(Collectors.toList());
 
-            var internArbeidsforholdRefDto = inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(inntektsmelding.getArbeidsforholdRef().getReferanse()) : null;
+            var internArbeidsforholdRefDto = inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold()
+                ? new InternArbeidsforholdRefDto(inntektsmelding.getArbeidsforholdRef().getReferanse())
+                : null;
             var startDato = inntektsmelding.getStartDatoPermisjon().isPresent() ? inntektsmelding.getStartDatoPermisjon().get() : null;
             var refusjon = inntektsmelding.getRefusjonOpphører();
             var beløpDto1 = inntektsmelding.getRefusjonBeløpPerMnd() != null ? new BeløpDto(inntektsmelding.getRefusjonBeløpPerMnd().getVerdi()) : null;
@@ -240,10 +244,10 @@ public class TilKalkulusMapper {
         var inntektsmeldingerSomErNærmereEllerNyere = inntektsmeldingene.stream()
             .filter(arbeidsforholdMatcher(inntektsmelding))
             .filter(it -> erNærmereEllerLikeNæreSkjæringtidspunktet(it, datoNærmestSkjæringstidspunktet.get(), vilkårsPeriode.getFomDato())
-                && !InntektsmeldingErNyereVurderer.erNyere(it, inntektsmelding))
+                && InntektsmeldingErNyereVurderer.erNyere(it, inntektsmelding))
             .collect(Collectors.toList());
 
-        return inntektsmeldingerSomErNærmereEllerNyere.isEmpty();
+        return !inntektsmeldingerSomErNærmereEllerNyere.isEmpty();
     }
 
     private static Optional<LocalDate> finnDatoNærmestSkjæringstidspunktet(Inntektsmelding inntektsmelding, LocalDate skjæringstidspunkt) {
@@ -251,11 +255,10 @@ public class TilKalkulusMapper {
     }
 
     private static boolean erNærmereEllerLikeNæreSkjæringtidspunktet(Inntektsmelding gammel, LocalDate nyInntektsmeldingDatoNærmestStp, LocalDate skjæringstidspunkt) {
-        var set = new HashSet<>(Set.of(nyInntektsmeldingDatoNærmestStp));
         var næresteDatoFraEksisterende = finnDatoNærmestSkjæringstidspunktet(gammel, skjæringstidspunkt).orElseThrow();
-        set.add(næresteDatoFraEksisterende);
-        var næmest = set.stream().min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(skjæringstidspunkt, x))).orElseThrow();
-        return næmest.equals(næresteDatoFraEksisterende);
+        long distGammel = Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, næresteDatoFraEksisterende));
+        long distNy = Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, nyInntektsmeldingDatoNærmestStp));
+        return distNy <= distGammel;
     }
 
     private static boolean harInntektsmeldingSomMatcherArbeidsforhold(List<Inntektsmelding> inntektsmeldingene, Inntektsmelding inntektsmelding) {
@@ -266,14 +269,17 @@ public class TilKalkulusMapper {
         return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
     }
 
-    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+        Comparator<Inntektsmelding> comp = Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt)
+            .thenComparing(Comparator.comparing(im -> im.getJournalpostId().getVerdi(), Comparator.nullsFirst(Comparator.naturalOrder())));
+
         return sakInntektsmeldinger.getAlleInntektsmeldinger()
             .stream()
             .filter(it -> it.getOppgittFravær()
                 .stream()
                 .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
-            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt))
-            .collect(Collectors.toSet());
+            .sorted(comp)
+            .collect(Collectors.toList());
     }
 
     private static Predicate<Inntektsmelding> arbeidsforholdMatcher(Inntektsmelding inntektsmelding) {
@@ -317,16 +323,15 @@ public class TilKalkulusMapper {
 
     private static Set<YtelseAnvistDto> mapYtelseAnvist(Collection<YtelseAnvist> ytelseAnvist) {
         return ytelseAnvist.stream().map(ya -> {
-                BeløpDto beløpDto = mapBeløp(ya.getBeløp());
-                BeløpDto dagsatsDto = mapBeløp(ya.getDagsats());
-                BigDecimal bigDecimal = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
-                return new YtelseAnvistDto(new Periode(
-                    ya.getAnvistFOM(), ya.getAnvistTOM()),
-                    beløpDto,
-                    dagsatsDto,
-                    bigDecimal);
-            }
-        ).collect(Collectors.toSet());
+            BeløpDto beløpDto = mapBeløp(ya.getBeløp());
+            BeløpDto dagsatsDto = mapBeløp(ya.getDagsats());
+            BigDecimal bigDecimal = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
+            return new YtelseAnvistDto(new Periode(
+                ya.getAnvistFOM(), ya.getAnvistTOM()),
+                beløpDto,
+                dagsatsDto,
+                bigDecimal);
+        }).collect(Collectors.toSet());
     }
 
     private static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
@@ -339,8 +344,7 @@ public class TilKalkulusMapper {
 
     private static UtbetalingDto mapTilDto(Inntekt inntekt) {
         UtbetalingDto utbetalingDto = new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
-            inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList())
-        );
+            inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList()));
         if (inntekt.getArbeidsgiver() != null) {
             return utbetalingDto.medArbeidsgiver(mapTilAktør(inntekt.getArbeidsgiver()));
         }
@@ -351,8 +355,7 @@ public class TilKalkulusMapper {
         return new UtbetalingsPostDto(
             mapPeriode(inntektspost.getPeriode()),
             new InntektspostType(inntektspost.getInntektspostType().getKode()),
-            inntektspost.getBeløp().getVerdi()
-        );
+            inntektspost.getBeløp().getVerdi());
     }
 
     private static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
@@ -364,10 +367,9 @@ public class TilKalkulusMapper {
     }
 
     private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet) {
-        List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale ->
-            new AktivitetsAvtaleDto(mapPeriode(aktivitetsAvtale.getPeriode()),
-                aktivitetsAvtale.getSisteLønnsendringsdato(),
-                aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
+        List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale -> new AktivitetsAvtaleDto(mapPeriode(aktivitetsAvtale.getPeriode()),
+            aktivitetsAvtale.getSisteLønnsendringsdato(),
+            aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
 
         ).collect(Collectors.toList());
 
@@ -376,28 +378,26 @@ public class TilKalkulusMapper {
             mapTilAktør(yrkesaktivitet.getArbeidsgiver()),
             arbeidsforholdRef != null ? new InternArbeidsforholdRefDto(arbeidsforholdRef) : null,
             new ArbeidType(yrkesaktivitet.getArbeidType().getKode()),
-            aktivitetsAvtaleDtos
-        );
+            aktivitetsAvtaleDtos);
     }
-
 
     public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter) {
         return new OpptjeningAktiviteterDto(opptjeningAktiviteter.getOpptjeningPerioder().stream().map(opptjeningPeriode -> new OpptjeningPeriodeDto(
             new OpptjeningAktivitetType(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
             new Periode(opptjeningPeriode.getPeriode().getFom(), opptjeningPeriode.getPeriode().getTom()),
             mapTilDto(opptjeningPeriode),
-            opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse()) : null))
+            opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null
+                ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse())
+                : null))
             .collect(Collectors.toList()));
     }
 
     public static List<RefusjonskravDatoDto> mapTilDto(List<RefusjonskravDato> refusjonskravDatoes) {
-        return refusjonskravDatoes.stream().map(refusjonskravDato ->
-            new RefusjonskravDatoDto(mapTilAktør(
-                refusjonskravDato.getArbeidsgiver()),
-                refusjonskravDato.getFørsteDagMedRefusjonskrav(),
-                refusjonskravDato.getFørsteInnsendingAvRefusjonskrav(),
-                refusjonskravDato.getHarRefusjonFraStart())
-        ).collect(Collectors.toList());
+        return refusjonskravDatoes.stream().map(refusjonskravDato -> new RefusjonskravDatoDto(mapTilAktør(
+            refusjonskravDato.getArbeidsgiver()),
+            refusjonskravDato.getFørsteDagMedRefusjonskrav(),
+            refusjonskravDato.getFørsteInnsendingAvRefusjonskrav(),
+            refusjonskravDato.getHarRefusjonFraStart())).collect(Collectors.toList());
     }
 
     private static Aktør mapTilDto(OpptjeningPeriode periode) {
@@ -409,11 +409,10 @@ public class TilKalkulusMapper {
     }
 
     public static List<GrunnbeløpDto> mapGrunnbeløp(List<Grunnbeløp> mapGrunnbeløpSatser) {
-        return mapGrunnbeløpSatser.stream().map(grunnbeløp ->
-            new GrunnbeløpDto(
-                new Periode(grunnbeløp.getFom(), grunnbeløp.getTom()),
-                BigDecimal.valueOf(grunnbeløp.getGSnitt()),
-                BigDecimal.valueOf(grunnbeløp.getGVerdi())))
+        return mapGrunnbeløpSatser.stream().map(grunnbeløp -> new GrunnbeløpDto(
+            new Periode(grunnbeløp.getFom(), grunnbeløp.getTom()),
+            BigDecimal.valueOf(grunnbeløp.getGSnitt()),
+            BigDecimal.valueOf(grunnbeløp.getGVerdi())))
             .collect(Collectors.toList());
     }
 }
