@@ -1,9 +1,15 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -19,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public abstract class ForeslåBehandlingsresultatTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(ForeslåBehandlingsresultatTjeneste.class);
 
     private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
     private VedtakVarselRepository vedtakVarselRepository;
@@ -44,20 +52,25 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     public void foreslåVedtakVarsel(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         Long behandlingId = ref.getBehandlingId();
+        
+        
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        // kun for å sette behandlingsresulattype
+        // kun for å sette behandlingsresultattype
         var vedtakVarsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={} (før)", ref.getBehandlingId(), behandling.getBehandlingResultatType());
 
         VedtakVarsel oppdatertVarsel;
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
+            behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             oppdatertVarsel = foreslåVedtakVarselAvslått(ref, behandling, vedtakVarsel);
         } else {
-            behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+            behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);  // kan bli overstyrt dersom dette er revurdering
             oppdatertVarsel = foreslåVedtakVarselInnvilget(ref, vedtakVarsel);
         }
+        log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={}", ref.getBehandlingId(), behandling.getBehandlingResultatType());
         vedtakVarselRepository.lagre(behandlingId, oppdatertVarsel);
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
@@ -66,6 +79,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         if (ref.erRevurdering()) {
             return revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref, vedtakVarsel, erVarselOmRevurderingSendt(ref));
         }
+        log.info("Behandling {} innvilget", ref.getBehandlingId());
         return vedtakVarsel == null ? new VedtakVarsel() : vedtakVarsel;
     }
 
@@ -75,20 +89,22 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         var behandlingId = ref.getBehandlingId();
-        boolean etEllerFlereVilkårAvslått = erAllePeriodeneTilVurderingAvslåttForEtVilkår(vilkårene, behandlingId);
-        if (etEllerFlereVilkårAvslått) {
+        Optional<VilkårType> førsteAvslåttVilkår = erAllePeriodeneTilVurderingAvslåttForEtVilkår(vilkårene, behandlingId);
+        if (førsteAvslåttVilkår.isPresent()) {
+            log.warn("Avslått behandling {} fordi alle perioder med vilkår {} er avslått", behandlingId, førsteAvslåttVilkår.get());
             return true;
         }
         return skalAvslåsBasertPåAndreForhold(ref);
     }
 
-    private boolean erAllePeriodeneTilVurderingAvslåttForEtVilkår(Vilkårene vilkårene, Long behandlingId) {
+    private Optional<VilkårType> erAllePeriodeneTilVurderingAvslåttForEtVilkår(Vilkårene vilkårene, Long behandlingId) {
         var maksPeriode = getMaksPeriode(behandlingId);
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
 
-        return vilkårTidslinjer.values().stream()
-            .anyMatch(timeline -> harAvslåtteVilkårsPerioder(timeline) && harIngenOppfylteVilkårsPerioder(timeline));
+        return vilkårTidslinjer.entrySet().stream()
+            .filter(e -> harAvslåtteVilkårsPerioder(e.getValue()) && harIngenOppfylteVilkårsPerioder(e.getValue()))
+            .findFirst().map(e -> e.getKey());
     }
 
     protected boolean skalAvslåsBasertPåAndreForhold(@SuppressWarnings("unused") BehandlingReferanse ref) {
