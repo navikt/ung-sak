@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,17 @@ public class BeregningPerioderGrunnlagRepository {
 
             lagre(builder, behandlingId, false);
         }
+    }
+
+    public Optional<BeregningsgrunnlagPerioderGrunnlag> getInitilVersjon(Long behandlingId) {
+        // må også sortere på id da opprettetTidspunkt kun er til nærmeste millisekund og ikke satt fra db.
+        TypedQuery<BeregningsgrunnlagPerioderGrunnlag> query = entityManager.createQuery(
+            "SELECT mbg FROM BeregningsgrunnlagPerioderGrunnlag mbg WHERE mbg.behandlingId = :behandling_id ORDER BY mbg.opprettetTidspunkt, mbg.id", //$NON-NLS-1$
+            BeregningsgrunnlagPerioderGrunnlag.class)
+            .setParameter("behandling_id", behandlingId)
+            .setMaxResults(1); // $NON-NLS-1$
+
+        return query.getResultStream().findFirst();
     }
 
     public Optional<BeregningsgrunnlagPerioderGrunnlag> hentGrunnlag(Long behandlingId) {
