@@ -24,6 +24,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -100,5 +102,20 @@ public class ÅrskvantumRestTjeneste {
         var request = årskvantumTjeneste.hentInputTilBeregning(behandlingIdDto.getBehandlingUuid());
 
         return Response.ok(request).build();
+    }
+
+    /**
+     * Hent utbetalingsgrunnlag fra årskvantum for angitt behandling.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(INPUT_PATH)
+    @Operation(description = "Hent utbetalingsgrunnlag fra årskvantum", tags = "behandling - årskvantum/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingsgrunnlagFraÅrskvantum(@NotNull @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        return årskvantumTjeneste.hentUtbetalingGrunnlag(behandlingIdDto.getBehandlingUuid());
     }
 }
