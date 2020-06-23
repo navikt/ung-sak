@@ -14,21 +14,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
-import no.nav.k9.aarskvantum.kontrakter.Barn;
-import no.nav.k9.aarskvantum.kontrakter.BarnType;
-import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
@@ -155,6 +145,11 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             log.info("Feilet i serialisering av årskvantum request: " + årskvantumRequest);
         }
         return årskvantumKlient.hentÅrskvantumUttak(årskvantumRequest);
+    }
+
+    @Override
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
+        return årskvantumKlient.hentUtbetalingGrunnlag(årskvantumGrunnlag);
     }
 
     @NotNull

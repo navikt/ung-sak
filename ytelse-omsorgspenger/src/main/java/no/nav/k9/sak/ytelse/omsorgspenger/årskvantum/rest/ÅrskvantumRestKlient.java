@@ -12,14 +12,10 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.ws.rs.core.HttpHeaders;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.Feil;
@@ -139,6 +135,16 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
+    @Override
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentUtbetalingGrunnlag");
+            return restKlient.post(endpoint, årskvantumGrunnlag, ÅrskvantumUtbetalingGrunnlag.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallHentUtbetalingGrunnlag(e.getMessage(), e).toException();
+        }
+    }
+
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {
@@ -171,6 +177,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000094", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke slettUttaksplan: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilslettUttaksplan(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000095", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hentUtbetalingGrunnlag: %s", logLevel = LogLevel.WARN)
+        Feil feilKallHentUtbetalingGrunnlag(String feilmelding, Throwable t);
 
     }
 
