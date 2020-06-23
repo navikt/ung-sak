@@ -88,7 +88,7 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
         boolean erAktørArbeidEndretForSøker = iayGrunnlagDiff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
         boolean erAktørInntektEndretForSøker = iayGrunnlagDiff.erEndringPåAktørInntektForAktør(skjæringstidspunkt, ref.getAktørId());
-        var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag1);
+        var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag2);
         boolean erInntektsmeldingEndret = erInntektsmeldingEndret(ref, iayGrunnlagDiff, startpunktType);
 
         Saksnummer saksnummer = ref.getSaksnummer();

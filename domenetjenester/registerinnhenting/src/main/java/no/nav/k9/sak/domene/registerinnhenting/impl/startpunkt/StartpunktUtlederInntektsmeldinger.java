@@ -26,6 +26,7 @@ class StartpunktUtlederInntektsmeldinger {
 
             var nyeInntektsmeldinger = sakInntektsmeldinger.hentInntektsmeldingerSidenRef(ref.getBehandlingId(), grunnlag1.getEksternReferanse());
 
+            // TODO: Validere at det faktisk blir endring i periodene
             if (!nyeInntektsmeldinger.isEmpty()) {
                 return StartpunktType.INIT_PERIODER;
             }
