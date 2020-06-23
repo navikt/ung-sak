@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class BeregningPerioderGrunnlagRepository {
         if (builder.erForskjellig(aktivtGrunnlag, differ)) {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
 
-            lagre(builder, behandlingId);
+            lagre(builder, behandlingId, true);
         } else {
             log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
@@ -71,8 +72,19 @@ public class BeregningPerioderGrunnlagRepository {
 
             deaktiverEksisterende(grunnlag);
 
-            lagre(builder, behandlingId);
+            lagre(builder, behandlingId, false);
         }
+    }
+
+    public Optional<BeregningsgrunnlagPerioderGrunnlag> getInitilVersjon(Long behandlingId) {
+        // må også sortere på id da opprettetTidspunkt kun er til nærmeste millisekund og ikke satt fra db.
+        TypedQuery<BeregningsgrunnlagPerioderGrunnlag> query = entityManager.createQuery(
+            "SELECT mbg FROM BeregningsgrunnlagPerioderGrunnlag mbg WHERE mbg.behandlingId = :behandling_id ORDER BY mbg.opprettetTidspunkt, mbg.id", //$NON-NLS-1$
+            BeregningsgrunnlagPerioderGrunnlag.class)
+            .setParameter("behandling_id", behandlingId)
+            .setMaxResults(1); // $NON-NLS-1$
+
+        return query.getResultStream().findFirst();
     }
 
     public Optional<BeregningsgrunnlagPerioderGrunnlag> hentGrunnlag(Long behandlingId) {
@@ -87,8 +99,8 @@ public class BeregningPerioderGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    private void lagre(BeregningsgrunnlagPerioderGrunnlagBuilder builder, Long behandlingId) {
-        validerMotVilkårsPerioder(behandlingId, builder);
+    private void lagre(BeregningsgrunnlagPerioderGrunnlagBuilder builder, Long behandlingId, boolean ryddMotVilkår) {
+        validerMotVilkårsPerioder(behandlingId, builder, ryddMotVilkår);
 
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
@@ -104,12 +116,15 @@ public class BeregningPerioderGrunnlagRepository {
             var grunnlag = aktivtGrunnlag.get();
             var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
 
-            lagre(builder, tilBehandlingId);
+            lagre(builder, tilBehandlingId, false);
         }
     }
 
-    private void validerMotVilkårsPerioder(Long behandlingId, BeregningsgrunnlagPerioderGrunnlagBuilder builder) {
+    private void validerMotVilkårsPerioder(Long behandlingId, BeregningsgrunnlagPerioderGrunnlagBuilder builder, boolean ryddMotVilkår) {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (ryddMotVilkår) {
+            vilkår.ifPresent(builder::ryddMotVilkår);
+        }
         vilkår.ifPresent(builder::validerMotVilkår);
     }
 }

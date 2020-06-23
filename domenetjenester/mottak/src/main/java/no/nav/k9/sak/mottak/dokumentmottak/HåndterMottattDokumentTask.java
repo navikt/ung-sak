@@ -18,7 +18,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";

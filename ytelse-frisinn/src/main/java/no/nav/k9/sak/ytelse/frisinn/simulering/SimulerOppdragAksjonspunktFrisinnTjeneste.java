@@ -29,6 +29,7 @@ public class SimulerOppdragAksjonspunktFrisinnTjeneste extends SimulerOppdragAks
         this.ignorerUgunstOpptillRettsgebyr = ugunstMedFeiltoleranse;
     }
 
+    @Override
     public Optional<AksjonspunktDefinisjon> utledAksjonspunkt(SimuleringResultatDto simuleringResultatDto) {
         BigDecimal toleranseGrenseDagsats = ErEndringIBeregningRettsgebyrFRISINN.TOLERANSE_GRENSE_DAGSATS;
 

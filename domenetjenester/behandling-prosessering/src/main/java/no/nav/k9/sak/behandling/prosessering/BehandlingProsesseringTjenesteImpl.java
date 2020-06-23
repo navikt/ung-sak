@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
@@ -178,7 +179,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
-
+        BehandlingProsessTask.logContext(behandling);
+        
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
         if (behandling.erSaksbehandlingAvsluttet()) {
@@ -189,7 +191,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         String gjenopptaTaskType = GjenopptaBehandlingTask.TASKTYPE;
         var gjenopptaBehandlingTask = new ProsessTaskData(gjenopptaTaskType);
         var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
-        var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
 
         var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
         if (eksisterendeGjenopptaTask.isPresent()) {
@@ -199,16 +200,15 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(gjenopptaBehandlingTask);
+
         if (skalHenteInnRegisterData(behandling)) {
-            leggTilInnhentRegisterdataTasks(behandling, gruppe);
-            diffOgReposisjoner.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
-            try {
-                diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId)));
-            } catch (IOException e) {
-                throw new RuntimeException("Feil ved serialisering av snapshot", e);
-            }
-            gruppe.addNesteSekvensiell(diffOgReposisjoner);
+            log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, fagsakId, behandlingId, gruppe, diffOgReposisjoner);
+        } else {
+            log.info("Gjenopptar behandling {}, innhenter ikke registerdata på nytt", behandlingId);
         }
+
+        var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
@@ -218,6 +218,19 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             gruppe.setCallIdFraEksisterende();
         }
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
+
+    }
+
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe, ProsessTaskData diffOgReposisjoner) {
+        leggTilInnhentRegisterdataTasks(behandling, gruppe);
+        diffOgReposisjoner.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        try {
+            var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
+            diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(snapshotFørInnhenting));
+        } catch (IOException e) {
+            throw new RuntimeException("Feil ved serialisering av snapshot", e);
+        }
+        gruppe.addNesteSekvensiell(diffOgReposisjoner);
     }
 
     private Optional<ProsessTaskData> getEksisterendeTaskAvType(Long fagsakId, Long behandlingId, String taskType) {

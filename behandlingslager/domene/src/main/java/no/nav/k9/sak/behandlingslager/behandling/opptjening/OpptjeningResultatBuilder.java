@@ -73,6 +73,29 @@ class OpptjeningResultatBuilder {
         return this;
     }
 
+
+    OpptjeningResultatBuilder fjernOverflødigePerioder(Vilkår vilkår) {
+        Objects.requireNonNull(vilkår);
+        if (!VilkårType.OPPTJENINGSVILKÅRET.equals(vilkår.getVilkårType())) {
+            throw new IllegalArgumentException("[Utviklerfeil] krever Opptjeningsvilkår");
+        }
+
+        var vilkårsSkjæringspunkter = vilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toSet());
+
+        var opptjeningUtenKnytningTilVilkårsPerioder = kladd.getOpptjeningPerioder()
+            .stream()
+            .map(Opptjening::getSkjæringstidspunkt)
+            .filter(it -> vilkårsSkjæringspunkter.stream()
+                .noneMatch(it::equals))
+            .collect(Collectors.toList());
+
+        if (!opptjeningUtenKnytningTilVilkårsPerioder.isEmpty()) {
+            opptjeningUtenKnytningTilVilkårsPerioder.forEach(this::deaktiver);
+        }
+
+        return this;
+    }
+
     OpptjeningResultat build() {
         validerState();
         this.built = true;

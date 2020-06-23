@@ -22,6 +22,7 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -54,7 +55,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt) {
-        UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false);
+        UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
         grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, skjæringstidspunkt));
 
         return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
@@ -62,21 +63,21 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public KalkulusResultat fortsettBeregning(BehandlingReferanse ref, LocalDate skjæringstidspunkt, BehandlingStegType stegType) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
 
         return finnTjeneste(ref.getFagsakYtelseType()).fortsettBeregning(ref.getFagsakYtelseType(), bgReferanse, stegType);
     }
 
     @Override
     public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
 
         return finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregning(håndterBeregningDto, bgReferanse);
     }
 
     @Override
     public Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentEksaktFastsatt(ref.getFagsakYtelseType(), bgReferanse);
     }
@@ -99,7 +100,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagDto(ref, bgReferanse);
     }
@@ -121,7 +122,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
 
         if (bgReferanse.isEmpty()) {
             return Optional.empty();
@@ -131,7 +132,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
 
         if (bgReferanse.isEmpty()) {
             return Optional.empty();
@@ -148,13 +149,13 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
-            .map(it -> new BeregningsgrunnlagKobling(it, finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), it, true)))
+            .map(it -> new BeregningsgrunnlagKobling(it, finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), it, true, false)))
             .collect(Collectors.toList());
     }
 
     @Override
     public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID bgGrunnlagsVersjon) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
 
         if (bgReferanse.isEmpty()) {
             return Optional.empty();
@@ -164,7 +165,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt);
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
         bgReferanse.ifPresent(bgRef -> finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), bgRef));
     }
 
@@ -172,8 +173,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     public Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt) {
         var behandling1 = behandlingRepository.hentBehandling(behandlingId1);
         var behandling2 = behandlingRepository.hentBehandling(behandlingId2);
-        var bgReferanse1 = finnBeregningsgrunnlagsReferanseFor(behandlingId1, skjæringstidspunkt);
-        var bgReferanse2 = finnBeregningsgrunnlagsReferanseFor(behandlingId2, skjæringstidspunkt);
+        var bgReferanse1 = finnBeregningsgrunnlagsReferanseFor(behandlingId1, skjæringstidspunkt, false);
+        var bgReferanse2 = finnBeregningsgrunnlagsReferanseFor(behandlingId2, skjæringstidspunkt, false);
 
         if (bgReferanse1.isEmpty() || bgReferanse2.isEmpty()) {
             return false;
@@ -188,8 +189,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste for " + fagsakYtelseType));
     }
 
-    private UUID finnBeregningsgrunnlagsReferanseFor(Long behandlingId, LocalDate skjæringstidspunkt, boolean kreverEksisterendeReferanse) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(behandlingId, skjæringstidspunkt);
+    private UUID finnBeregningsgrunnlagsReferanseFor(Long behandlingId, LocalDate skjæringstidspunkt, boolean kreverEksisterendeReferanse, boolean skalLageNyVedLikSomInitiell) {
+        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(behandlingId, skjæringstidspunkt, skalLageNyVedLikSomInitiell);
 
         if (bgReferanse.isEmpty() && kreverEksisterendeReferanse) {
             throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + skjæringstidspunkt);
@@ -197,15 +198,24 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return bgReferanse.orElse(UUID.randomUUID());
     }
 
-    private Optional<UUID> finnBeregningsgrunnlagsReferanseFor(Long behandlingId, LocalDate skjæringstidspunkt) {
+    private Optional<UUID> finnBeregningsgrunnlagsReferanseFor(Long behandlingId, LocalDate skjæringstidspunkt, boolean skalLageNyVedLikSomInitiell) {
         var grunnlagOptional = grunnlagRepository.hentGrunnlag(behandlingId);
-
         if (grunnlagOptional.isPresent()) {
             var grunnlag = grunnlagOptional.get();
 
             var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(skjæringstidspunkt);
+            var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
+            if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
+                var initilVersjon = grunnlagRepository.getInitilVersjon(behandlingId);
+                if (initilVersjon.isPresent()) {
+                    var initReferanse = initilVersjon.get().finnFor(skjæringstidspunkt).map(BeregningsgrunnlagPeriode::getEksternReferanse);
+                    if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {
+                        grunnlagReferanse = Optional.empty();
+                    }
+                }
+            }
 
-            return beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse).filter(v -> v != null);
+            return grunnlagReferanse;
         }
         return Optional.empty();
     }
