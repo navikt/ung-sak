@@ -97,18 +97,24 @@ public class SakInntektsmeldinger {
         var orignInntektsmeldinger = data.get(key);
         var relevanteKeys = data.keySet()
             .stream()
-            .filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.opprettetTidspunkt.isAfter(key.opprettetTidspunkt))
+            .filter(it -> Objects.equals(it.behandlingId, behandlingId) && !it.grunnlagEksternReferanse.equals(eksternReferanse))
             .collect(Collectors.toList());
 
         var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
+        var senesteInnsendingstidspunkt = orignInntektsmeldinger.stream().map(Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).orElse(null);
 
         relevanteKeys.stream()
             .map(data::get)
             .forEach(it -> it.stream()
+                .filter(im -> senesteInnsendingstidspunkt == null || erLiktEllerSenere(senesteInnsendingstidspunkt, im.getInnsendingstidspunkt()))
                 .filter(at -> !orignInntektsmeldinger.contains(at))
                 .forEach(nyeInntektsmeldinger::add));
 
         return nyeInntektsmeldinger;
+    }
+
+    private boolean erLiktEllerSenere(LocalDateTime senesteInnsendingstidspunkt, LocalDateTime innsendingstidspunkt) {
+        return senesteInnsendingstidspunkt.equals(innsendingstidspunkt) || senesteInnsendingstidspunkt.isBefore(innsendingstidspunkt);
     }
 
     static class Key {

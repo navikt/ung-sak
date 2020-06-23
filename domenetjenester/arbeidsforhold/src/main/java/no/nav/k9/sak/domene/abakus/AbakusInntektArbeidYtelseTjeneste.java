@@ -458,12 +458,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private InntektArbeidYtelseGrunnlagRequest initSnapshotRequest(Fagsak fagsak) {
+    private InntektArbeidYtelseGrunnlagRequest initSnapshotRequest(Fagsak fagsak, GrunnlagVersjon siste) {
         var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
         request.medSaksnummer(fagsak.getSaksnummer().getVerdi());
         request.medYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
         request.medDataset(Arrays.asList(Dataset.values()));
-        request.hentGrunnlagVersjon(GrunnlagVersjon.SISTE);
+        request.hentGrunnlagVersjon(siste);
         return request;
     }
 
@@ -480,7 +480,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private List<InntektArbeidYtelseGrunnlag> hentOgMapAlleGrunnlag(Fagsak fagsak) {
-        var request = initSnapshotRequest(fagsak);
+        var request = initSnapshotRequest(fagsak, GrunnlagVersjon.ALLE);
         var dto = hentGrunnlagSnapshot(request);
         return dto.getGrunnlag().stream().map(konvolutt -> mapOgCacheGrunnlag(konvolutt.getData(), fagsak.getAktørId(), false)).collect(Collectors.toList());
     }
