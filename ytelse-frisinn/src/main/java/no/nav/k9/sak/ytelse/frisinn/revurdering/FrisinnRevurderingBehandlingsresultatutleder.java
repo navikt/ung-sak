@@ -69,7 +69,7 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
                 revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
             }
         }
-
+        
         // Oppdatering av vedtaksbrev
         if (!erNySøknadsperiode && revurdering.getBehandlingResultatType().equals(BehandlingResultatType.INGEN_ENDRING)) {
             vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);

@@ -23,14 +23,14 @@ public enum BehandlingResultatType implements Kodeverdi {
     INNVILGET("INNVILGET", "Innvilget"),
     AVSLÅTT("AVSLÅTT", "Avslått"),
     OPPHØR("OPPHØR", "Opphør"),
-    HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket"),
-    HENLAGT_FEILOPPRETTET("HENLAGT_FEILOPPRETTET", "Henlagt, søknaden er feilopprettet"),
-    HENLAGT_BRUKER_DØD("HENLAGT_BRUKER_DØD", "Henlagt, brukeren er død"),
-    MERGET_OG_HENLAGT("MERGET_OG_HENLAGT", "Mottatt ny søknad"),
-    HENLAGT_SØKNAD_MANGLER("HENLAGT_SØKNAD_MANGLER", "Henlagt søknad mangler"),
+    HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket", true),
+    HENLAGT_FEILOPPRETTET("HENLAGT_FEILOPPRETTET", "Henlagt, søknaden er feilopprettet", true),
+    HENLAGT_BRUKER_DØD("HENLAGT_BRUKER_DØD", "Henlagt, brukeren er død", true),
+    MERGET_OG_HENLAGT("MERGET_OG_HENLAGT", "Mottatt ny søknad", true),
+    HENLAGT_SØKNAD_MANGLER("HENLAGT_SØKNAD_MANGLER", "Henlagt søknad mangler", true),
     INNVILGET_ENDRING("INNVILGET_ENDRING", "Endring innvilget"),
     INGEN_ENDRING("INGEN_ENDRING", "Ingen endring"),
-    MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler"),
+    MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler", true),
     ;
 
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, HENLAGT_SØKNAD_MANGLER,
@@ -56,13 +56,21 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     private String kode;
 
+    @JsonIgnore
+    private boolean erHenleggelse;
+    
     private BehandlingResultatType(String kode) {
         this.kode = kode;
     }
 
     private BehandlingResultatType(String kode, String navn) {
+        this(kode, navn, false);
+    }
+    
+    private BehandlingResultatType(String kode, String navn, boolean erHenleggelse) {
         this.kode = kode;
         this.navn = navn;
+        this.erHenleggelse = erHenleggelse;
     }
 
     @JsonCreator
@@ -84,6 +92,11 @@ public enum BehandlingResultatType implements Kodeverdi {
     @Override
     public String getNavn() {
         return navn;
+    }
+    
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public boolean erHenleggelse() {
+        return erHenleggelse;
     }
 
     @JsonProperty
