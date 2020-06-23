@@ -193,7 +193,7 @@ spec:
       value: "false"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
       value: "false"
-    - name: TOTRINN_SELEKTIVT_DEAKTIVERT
+    - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
 
 
