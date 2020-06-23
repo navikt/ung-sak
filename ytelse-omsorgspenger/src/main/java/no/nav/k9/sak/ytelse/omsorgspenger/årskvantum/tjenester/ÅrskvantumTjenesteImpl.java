@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,11 +15,22 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import no.nav.k9.aarskvantum.kontrakter.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
+import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
@@ -27,9 +39,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
@@ -114,9 +126,10 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
         var inntektsmeldingAggregat = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().orElseThrow();
 
-        var fraværPerioder = mapUttaksPerioder(ref, grunnlag, vilkårene, inntektArbeidYtelseGrunnlag);
+        var fraværPerioder = mapUttaksPerioder(ref, grunnlag, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger);
 
         var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
             .stream()
@@ -154,8 +167,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @NotNull
-    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, OppgittFravær grunnlag, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        var inntektsmeldingAggregat = iayGrunnlag.getInntektsmeldinger().orElseThrow();
+    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, OppgittFravær grunnlag, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, grunnlag, iayGrunnlag, vilkårene)
             .values()
@@ -176,7 +188,7 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
             } else {
                 var arbeidsforholdRef = fraværPeriode.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : fraværPeriode.getArbeidsforholdRef();
                 String arbeidsforholdId = arbeidsforholdRef.getReferanse();
-                kreverRefusjon = kreverArbeidsgiverRefusjon(inntektsmeldingAggregat, arb, arbeidsforholdRef, fraværPeriode.getPeriode());
+                kreverRefusjon = kreverArbeidsgiverRefusjon(sakInntektsmeldinger, arb, arbeidsforholdRef, fraværPeriode.getPeriode());
                 arbeidsforhold = new Arbeidsforhold(fraværPeriode.getAktivitetType().getKode(),
                     arb.getOrgnr(),
                     arb.getAktørId() != null ? arb.getAktørId().getId() : null,
@@ -220,11 +232,12 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
         return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), BarnType.VANLIG);
     }
 
-    private boolean kreverArbeidsgiverRefusjon(InntektsmeldingAggregat inntektsmeldingAggregat,
+    private boolean kreverArbeidsgiverRefusjon(SakInntektsmeldinger sakInntektsmeldinger,
                                                Arbeidsgiver arbeidsgiver,
                                                InternArbeidsforholdRef arbeidsforholdRef,
                                                DatoIntervallEntitet periode) {
-        var inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerFor(arbeidsgiver);
+        var alleInntektsmeldinger = sakInntektsmeldinger.getAlleInntektsmeldinger();
+        var inntektsmeldinger = getInntektsmeldingerFor(alleInntektsmeldinger, arbeidsgiver);
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
             .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef)) // TODO: Bør vi matcher på gjelderfor her? Perioder som er sendt inn med arbeidsforholdsId vil da matche med inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
             .filter(it -> it.getOppgittFravær().stream()
@@ -249,6 +262,12 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
                 .orElse(BigDecimal.ZERO);
             return BigDecimal.ZERO.compareTo(verdi) < 0;
         }
+    }
+
+    private Set<Inntektsmelding> getInntektsmeldingerFor(Set<Inntektsmelding> alleInntektsmeldinger, Arbeidsgiver arbeidsgiver) {
+        return alleInntektsmeldinger.stream()
+            .filter(i -> i.getArbeidsgiver().equals(arbeidsgiver))
+            .collect(Collectors.toSet());
     }
 
     @Override
