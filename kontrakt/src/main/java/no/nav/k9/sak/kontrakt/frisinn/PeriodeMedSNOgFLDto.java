@@ -23,9 +23,8 @@ public class PeriodeMedSNOgFLDto {
     @NotNull
     private PeriodeDto måned;
 
-    @JsonProperty(value = "oppgittIMåned", required = true)
+    @JsonProperty(value = "oppgittIMåned")
     @Valid
-    @NotNull
     private OppgittOpptjeningDto oppgittIMåned;
 
     @JsonProperty(value = "søkerFL", required = true)

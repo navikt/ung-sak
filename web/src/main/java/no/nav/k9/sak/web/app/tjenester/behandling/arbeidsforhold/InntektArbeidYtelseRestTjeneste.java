@@ -188,7 +188,8 @@ public class InntektArbeidYtelseRestTjeneste {
         if (oppgittOpptjeningDto != null) {
             var dto = new SøknadsperiodeOgOppgittOpptjeningV2Dto();
             var fastsattUttak = uttakRepository.hentFastsattUttak(behandling.getId());
-            var perioder = FrisinnMapper.finnMåneder(fastsattUttak);
+            var oppgittUttak = uttakRepository.hentOppgittUttak(behandling.getId());
+            var perioder = FrisinnMapper.finnMåneder(oppgittUttak);
             List<PeriodeMedSNOgFLDto> iSøknad = perioder
                 .stream()
                 .map(periode -> FrisinnMapper.map(periode, InntektArbeidYtelseDtoMapper.mapTilPeriode(oppgittOpptjeningDto, periode), fastsattUttak))
