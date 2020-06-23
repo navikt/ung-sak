@@ -191,6 +191,8 @@ spec:
       value: "false"
     - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
       value: "false"
+    - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
+      value: "false"
     - name: TOTRINN_SELEKTIVT_DEAKTIVERT
       value: "true"
 
