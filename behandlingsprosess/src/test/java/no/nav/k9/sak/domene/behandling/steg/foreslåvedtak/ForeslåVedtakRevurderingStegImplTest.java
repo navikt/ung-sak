@@ -74,7 +74,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private VedtakVarsel orginalBehandlingsresultat;
 
-    private EndringIBeregningTjeneste endringIBeregningTjeneste;
+    private DefaultErEndringIBeregningTjeneste endringIBeregningTjeneste;
 
     private BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
     private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingStegForeldrepenger;
@@ -108,7 +108,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         when(kontekstRevurdering.getSkriveLås()).thenReturn(behandlingLås);
         when(behandlingRepository.hentBehandling(kontekstRevurdering.getBehandlingId())).thenReturn(revurdering);
 
-        endringIBeregningTjeneste = new EndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
+        endringIBeregningTjeneste = new DefaultErEndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
 
         foreslåVedtakRevurderingStegForeldrepenger =
             new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste));

@@ -34,7 +34,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private Instance<EndringIBeregningTjeneste> endringIBeregningTjenester;
+    private Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
@@ -42,7 +42,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
                                      BehandlingRepositoryProvider repositoryProvider,
-                                     @Any Instance<EndringIBeregningTjeneste> endringIBeregningTjenester) {
+                                     @Any Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;

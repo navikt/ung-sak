@@ -18,19 +18,20 @@ import java.util.Set;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("*")
-public class EndringIBeregningTjeneste {
+public class DefaultErEndringIBeregningTjeneste implements ErEndringIBeregningVurderer {
 
     protected BeregningTjeneste kalkulusTjeneste;
 
-    public EndringIBeregningTjeneste() {
+    public DefaultErEndringIBeregningTjeneste() {
         // CDI
     }
 
     @Inject
-    public EndringIBeregningTjeneste(BeregningTjeneste kalkulusTjeneste) {
+    public DefaultErEndringIBeregningTjeneste(BeregningTjeneste kalkulusTjeneste) {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
+    @Override
     public boolean vurderUgunst(BehandlingReferanse orginalBeregning, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
         var originaltGrunnlag = kalkulusTjeneste.hentFastsatt(orginalBeregning, skjæringstidspuntk);
         var revurderingsGrunnlag = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
