@@ -25,5 +25,5 @@ public interface ÅrskvantumTjeneste {
 
     ÅrskvantumGrunnlag hentInputTilBeregning(UUID behandlingUuid);
 
-    ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag);
+    ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(UUID behandlingUuid);
 }

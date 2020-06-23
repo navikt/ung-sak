@@ -148,8 +148,9 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
     }
 
     @Override
-    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
-        return årskvantumKlient.hentUtbetalingGrunnlag(årskvantumGrunnlag);
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(UUID behandlingUuid) {
+        var inputTilBeregning = hentInputTilBeregning(behandlingUuid);
+        return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
     @NotNull

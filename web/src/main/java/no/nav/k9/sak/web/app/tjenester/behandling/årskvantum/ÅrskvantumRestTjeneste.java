@@ -116,7 +116,6 @@ public class ÅrskvantumRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumUtbetalingGrunnlag hentUtbetalingsgrunnlagFraÅrskvantum(@NotNull @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-        ÅrskvantumGrunnlag årskvantumGrunnlag = årskvantumTjeneste.hentInputTilBeregning(behandlingIdDto.getBehandlingUuid());
-        return årskvantumTjeneste.hentUtbetalingGrunnlag(årskvantumGrunnlag);
+        return årskvantumTjeneste.hentUtbetalingGrunnlag(behandlingIdDto.getBehandlingUuid());
     }
 }
