@@ -89,7 +89,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         var behandlingId = ref.getBehandlingId();
-        Optional<VilkårType> førsteAvslåttVilkår = erAllePeriodeneTilVurderingAvslåttForEtVilkår(vilkårene, behandlingId);
+        Optional<VilkårType> førsteAvslåttVilkår = sjekkAllePerioderAvslåttForVilkår(vilkårene, behandlingId);
         if (førsteAvslåttVilkår.isPresent()) {
             log.warn("Avslått behandling {} fordi alle perioder med vilkår {} er avslått", behandlingId, førsteAvslåttVilkår.get());
             return true;
@@ -97,7 +97,8 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         return skalAvslåsBasertPåAndreForhold(ref);
     }
 
-    private Optional<VilkårType> erAllePeriodeneTilVurderingAvslåttForEtVilkår(Vilkårene vilkårene, Long behandlingId) {
+    /** @return første vilkår som alle perioder er avslått for. */
+    private Optional<VilkårType> sjekkAllePerioderAvslåttForVilkår(Vilkårene vilkårene, Long behandlingId) {
         var maksPeriode = getMaksPeriode(behandlingId);
 
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
