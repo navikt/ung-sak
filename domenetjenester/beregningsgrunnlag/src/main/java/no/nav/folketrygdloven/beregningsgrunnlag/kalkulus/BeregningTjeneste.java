@@ -26,9 +26,10 @@ public interface BeregningTjeneste {
      * @param referanse {@link BehandlingReferanse}
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag
      * @param skjæringstidspunkt - key for å finne bgReferanse mot kalkulus
+     * @param periodeStart
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt);
+    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt, LocalDate periodeStart);
 
     /** Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>

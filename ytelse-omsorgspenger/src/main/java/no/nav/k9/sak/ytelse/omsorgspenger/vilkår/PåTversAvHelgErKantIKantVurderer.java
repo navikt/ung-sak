@@ -15,6 +15,11 @@ public class PåTversAvHelgErKantIKantVurderer implements KantIKantVurderer {
         return utledTomDato(periode1).equals(utledFom(periode2).minusDays(1)) || utledTomDato(periode2).equals(utledFom(periode1).minusDays(1));
     }
 
+    @Override
+    public boolean erKomprimerbar() {
+        return true;
+    }
+
     private LocalDate utledFom(DatoIntervallEntitet periode1) {
         var fomDato = periode1.getFomDato();
         if (DayOfWeek.SATURDAY.equals(fomDato.getDayOfWeek())) {

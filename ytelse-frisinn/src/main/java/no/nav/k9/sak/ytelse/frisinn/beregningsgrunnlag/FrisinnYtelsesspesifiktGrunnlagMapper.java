@@ -1,17 +1,25 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
 
@@ -48,6 +56,65 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
         frisinnGrunnlag.medPerioderMedSøkerInfo(periodeMedSøkerInfoDtos);
 
         return frisinnGrunnlag;
+    }
+
+    public FrisinnGrunnlag lagYtelsespesifiktGrunnlag_backup(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+        var søknadsperiode = uttakRepository.hentOppgittSøknadsperioder(ref.getBehandlingId()).getMaksPeriode();
+        var fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
+
+        //TODO(OJR) fjern dette når man har fikset kalkulus
+        boolean søkerYtelseForFrilans = fastsattUttak.getPerioder().stream()
+            .anyMatch(p -> p.getPeriode().overlapper(søknadsperiode) && p.getAktivitetType() == UttakArbeidType.FRILANSER);
+
+        boolean søkerYtelseForNæring = fastsattUttak.getPerioder().stream()
+            .anyMatch(p -> p.getPeriode().overlapper(søknadsperiode) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+        //TODO(OJR) fjern mellom todoene
+
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = mapPeriodeMedSøkerInfoDto(fastsattUttak, vilkårsperiode);
+
+        FrisinnGrunnlag frisinnGrunnlag = new FrisinnGrunnlag(søkerYtelseForFrilans, søkerYtelseForNæring);
+        frisinnGrunnlag.medPerioderMedSøkerInfo(periodeMedSøkerInfoDtos);
+
+        return frisinnGrunnlag;
+    }
+
+    List<PeriodeMedSøkerInfoDto> mapPeriodeMedSøkerInfoDto(UttakAktivitet fastsattUttak, DatoIntervallEntitet vilkårsperiode) {
+        Set<UttakAktivitetPeriode> perioder = fastsattUttak.getPerioder().stream()
+            .filter(p -> p.getPeriode().overlapper(vilkårsperiode))
+            .collect(Collectors.toSet());
+        List<LocalDateSegment<PeriodeMedSøkerInfoDto>> frilans = lagSegmenter(UttakArbeidType.FRILANSER, perioder);
+        List<LocalDateSegment<PeriodeMedSøkerInfoDto>> næringsdrivende = lagSegmenter(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, perioder);
+
+        LocalDateTimeline<PeriodeMedSøkerInfoDto> frilansTidsserie = new LocalDateTimeline<>(frilans);
+        LocalDateTimeline<PeriodeMedSøkerInfoDto> næringsdrivendeTidsserie = new LocalDateTimeline<>(næringsdrivende);
+        LocalDateTimeline<PeriodeMedSøkerInfoDto> kombinert = frilansTidsserie.combine(næringsdrivendeTidsserie, FrisinnYtelsesspesifiktGrunnlagMapper::combine, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return kombinert.getDatoIntervaller().stream().map(intervall -> {
+            LocalDateSegment<PeriodeMedSøkerInfoDto> segment = kombinert.getSegment(intervall);
+            return segment.getValue();
+        }).collect(Collectors.toList());
+    }
+
+    private List<LocalDateSegment<PeriodeMedSøkerInfoDto>> lagSegmenter(UttakArbeidType aktivitetType, Set<UttakAktivitetPeriode> perioder) {
+        return perioder
+            .stream()
+            .filter(p -> p.getAktivitetType() == aktivitetType)
+            .map(uttakAktivitetPeriode -> {
+                PeriodeMedSøkerInfoDto dto = new PeriodeMedSøkerInfoDto(new Periode(uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato()), aktivitetType == UttakArbeidType.FRILANSER, aktivitetType == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+
+                return new LocalDateSegment<>(uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato(), dto);
+            }).collect(Collectors.toList());
+    }
+
+    private static LocalDateSegment<PeriodeMedSøkerInfoDto> combine(LocalDateInterval interval,
+                                                                    LocalDateSegment<PeriodeMedSøkerInfoDto> fl,
+                                                                    LocalDateSegment<PeriodeMedSøkerInfoDto> sn) {
+        if (fl != null && sn != null) {
+            return new LocalDateSegment<>(interval, new PeriodeMedSøkerInfoDto(new Periode(interval.getFomDato(), interval.getTomDato()), true, true));
+        } else if (fl != null) {
+            return new LocalDateSegment<>(interval, new PeriodeMedSøkerInfoDto(new Periode(interval.getFomDato(), interval.getTomDato()), true, false));
+        }
+        return new LocalDateSegment<>(interval, new PeriodeMedSøkerInfoDto(new Periode(interval.getFomDato(), interval.getTomDato()), false, true));
     }
 
 }

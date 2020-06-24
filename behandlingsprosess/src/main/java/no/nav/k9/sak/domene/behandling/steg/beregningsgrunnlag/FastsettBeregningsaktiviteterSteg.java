@@ -17,6 +17,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -64,24 +65,24 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
 
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode));
+            aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode, skjæringstidspunkt));
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 
-    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode, Skjæringstidspunkt skjæringstidspunkt) {
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        var skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
+        var periodeStart = vilkårsperiode.getFomDato();
         var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode);
+        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunkt.getUtledetSkjæringstidspunkt(), periodeStart);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {
             return avslåVilkår(kontekst, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat), vilkårsperiode);

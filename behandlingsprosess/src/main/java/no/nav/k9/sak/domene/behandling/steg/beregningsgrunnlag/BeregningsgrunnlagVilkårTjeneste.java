@@ -73,9 +73,9 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     public void lagreVilkårresultat(BehandlingskontrollKontekst kontekst,
                                     DatoIntervallEntitet vilkårsPeriode, boolean vilkårOppfylt) {
-        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode);
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        VilkårResultatBuilder vilkårResultatBuilder = opprettVilkårsResultat(vilkårOppfylt, vilkårene, vilkårsPeriode, behandling);
         if (!vilkårOppfylt) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         }
@@ -102,9 +102,10 @@ public class BeregningsgrunnlagVilkårTjeneste {
         return VilkårUtfallMerknad.fraKode(avslagsårsak.getKode());
     }
 
-    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode) {
+    private VilkårResultatBuilder opprettVilkårsResultat(boolean oppfylt, Vilkårene vilkårene, DatoIntervallEntitet vilkårsPeriode, Behandling behandling) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
@@ -114,6 +115,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
         builder.leggTil(vilkårBuilder);
         return builder;
     }
+
+    private VilkårsPerioderTilVurderingTjeneste getVilkårsPerioderTilVurderingTjeneste(Behandling behandling) {
+        return FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + VilkårsPerioderTilVurderingTjeneste.class.getName() + " for ytelsetype=" + behandling.getFagsakYtelseType()));
+    }
+
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
         Optional<VedtakVarsel> behandlingresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
