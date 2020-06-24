@@ -59,7 +59,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         var årskvantumForbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
         var sisteUttaksplan = årskvantumForbrukteDager.getSisteUttaksplan();
         if (sisteUttaksplan == null) {
-            log.warn("Avslår behandling. Har ingen uttaksplan for behandlingUuid={}", ref.getBehandlingUuid());
+            log.info("Avslår behandling. Har ingen uttaksplan for behandlingUuid={}", ref.getBehandlingUuid());
             return true;
         }
 
@@ -72,7 +72,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         boolean avslå = uttaksperioder.stream().allMatch(it -> Utfall.AVSLÅTT.equals(it.getUtfall()));
         
         if(avslå) {
-            log.warn("Avslår behandling {} pga alle uttaksperioder avslått: {}", ref.getBehandlingUuid(), uttaksperioder);
+            log.info("Avslår behandling {} pga alle uttaksperioder avslått: {}", ref.getBehandlingUuid(), uttaksperioder);
         }
         return avslå;
     }

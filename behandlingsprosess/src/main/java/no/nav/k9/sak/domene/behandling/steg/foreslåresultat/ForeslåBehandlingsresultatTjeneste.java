@@ -91,7 +91,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandlingId = ref.getBehandlingId();
         Optional<VilkårType> førsteAvslåttVilkår = sjekkAllePerioderAvslåttForVilkår(vilkårene, behandlingId);
         if (førsteAvslåttVilkår.isPresent()) {
-            log.warn("Avslått behandling {} fordi alle perioder med vilkår {} er avslått", behandlingId, førsteAvslåttVilkår.get());
+            log.info("Avslått behandling {} fordi alle perioder med vilkår {} er avslått", behandlingId, førsteAvslåttVilkår.get());
             return true;
         }
         return skalAvslåsBasertPåAndreForhold(ref);
