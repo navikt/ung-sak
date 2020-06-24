@@ -1,8 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,12 +15,12 @@ class MapTilBeregningsgrunnlag {
         // Skjul
     }
 
-    static List<Beregningsgrunnlag> mapBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag,
-                                                          Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling,
-                                                          DatoIntervallEntitet sisteSøknadsperiode,
-                                                          boolean erNySøknadsperiode, Boolean skalBenytteTidligereResultat) {
+    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag,
+                                                              Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling,
+                                                              DatoIntervallEntitet sisteSøknadsperiode,
+                                                              Boolean skalBenytteTidligereResultat) {
         Set<BeregningsgrunnlagPeriode.Builder> perioder = new HashSet<>();
-        if (erNySøknadsperiode && skalBenytteTidligereResultat) {
+        if (skalBenytteTidligereResultat) {
             perioder.addAll(finnPerioderForNySøknad(beregningsgrunnlag, sisteSøknadsperiode));
             perioder.addAll(finnOriginalBehandlingPerioder(beregningsgrunnlagOriginalBehandling, sisteSøknadsperiode));
         } else {
@@ -34,7 +32,7 @@ class MapTilBeregningsgrunnlag {
 
 
         if (perioder.isEmpty()) {
-            return Collections.emptyList();
+            return Optional.empty();
         }
 
         Beregningsgrunnlag.Builder bgBuilder = Beregningsgrunnlag.builder(beregningsgrunnlag)
@@ -42,7 +40,7 @@ class MapTilBeregningsgrunnlag {
 
         perioder.forEach(bgBuilder::leggTilBeregningsgrunnlagPeriode);
 
-        return List.of(bgBuilder.build());
+        return Optional.of(bgBuilder.build());
     }
 
     private static Set<BeregningsgrunnlagPeriode.Builder> finnOriginalBehandlingPerioder(Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling, DatoIntervallEntitet sisteSøknadsperiode) {
@@ -57,7 +55,7 @@ class MapTilBeregningsgrunnlag {
     private static Set<BeregningsgrunnlagPeriode.Builder> finnPerioderForNySøknad(Beregningsgrunnlag beregningsgrunnlag, DatoIntervallEntitet sisteSøknadsperiode) {
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .filter(p -> p.getDagsats() != null && p.getDagsats() > 0)
-            .filter(p -> p.getPeriode().overlapper(sisteSøknadsperiode))
+            .filter(p -> !p.getPeriode().getFomDato().isBefore(sisteSøknadsperiode.getFomDato()))
             .map(BeregningsgrunnlagPeriode::builder)
             .collect(Collectors.toSet());
     }
