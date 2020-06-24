@@ -2,7 +2,10 @@ package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -76,7 +79,6 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         var originalBehandling = behandling.getOriginalBehandling();
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
-        var beregningsgrunnlagOriginalBehandling = originalBehandling.flatMap(b -> kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(b), STP_FRISINN));
 
         if (beregningsgrunnlag.isPresent()) {
             UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
@@ -86,9 +88,16 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                 .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
             Boolean erNySøknadsperiode = originalBehandling.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
 
+
             // Kalle regeltjeneste
-            List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), beregningsgrunnlagOriginalBehandling, sisteSøknadsperiode, erNySøknadsperiode, skalBenytteTidligereResultat);
-            var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
+            if (!erNySøknadsperiode) {
+                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), Optional.empty(), sisteSøknadsperiode, false);
+            } else {
+                beregningsgrunnlag = mapForAlleTidligerePerioder(behandling, sisteSøknadsperiode);
+            }
+
+
+            var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag.map(List::of).orElse(Collections.emptyList()), uttakResultat);
 
             // Verifiser beregningsresultat
             BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
@@ -102,6 +111,35 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private Optional<Beregningsgrunnlag> mapForAlleTidligerePerioder(Behandling behandling, DatoIntervallEntitet sisteSøknadsperiode) {
+        Stream<Behandling> sisteBehandlingPrPeriode = flatten(behandling);
+        Iterator<Behandling> iterator = sisteBehandlingPrPeriode.iterator();
+        Behandling sisteBehandling = iterator.next();
+        Optional<Beregningsgrunnlag> beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(sisteBehandling), STP_FRISINN);
+
+        while (iterator.hasNext()) {
+            Behandling neste = iterator.next();
+            var bgNesteBehandling = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(neste), STP_FRISINN);
+            if (beregningsgrunnlag.isPresent()) {
+                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), bgNesteBehandling, sisteSøknadsperiode, skalBenytteTidligereResultat);
+            }
+            sisteSøknadsperiode = uttakRepository.hentGrunnlag(neste.getId()).map(UttakGrunnlag::getOppgittSøknadsperioder).map(Søknadsperioder::getMaksPeriode)
+                .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
+        }
+        return beregningsgrunnlag;
+    }
+
+
+    private Stream<Behandling> flatten(Behandling behandling) {
+        Boolean erNySøknadsperiode = behandling.getOriginalBehandling().map(b -> erNySøknadperiode(behandling, b)).orElse(false);
+        Stream<Behandling> flattened = behandling.getOriginalBehandling().stream().flatMap(this::flatten);
+        if (erNySøknadsperiode) {
+            return Stream.concat(Stream.of(behandling), flattened);
+        } else {
+            return Stream.concat(Stream.of(behandling), flattened.skip(1));
+        }
     }
 
     @Override
