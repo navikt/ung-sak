@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,6 +25,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +38,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -99,20 +103,26 @@ public class MidlertidigDriftRestTjeneste {
         PersonIdent fnr = new PersonIdent(manuellSøknadDto.getFnr());
         AktørId aktørId = tpsTjeneste.hentAktørForFnr(fnr).orElse(null);
         if (aktørId == null) {
-            throw new IllegalArgumentException("Oppgitt personummer er ukjent");
+            return Response.serverError().entity(new FeilDto("Oppgitt personummer er ukjent")).build();
         }
 
         Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now());
 
-        FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
-        frisinnSøknadInnsending.setSøknad(FrisinnSøknad.builder()
+        FrisinnSøknad søknad = FrisinnSøknad.builder()
             .språk(Språk.NORSK_BOKMÅL)
             .søknadId(SøknadId.of("ManueltOpprettet" + fagsak.getSaksnummer().getVerdi())) // lagres ingensteds
             .inntekter(lagDummyInntekt(manuellSøknadDto))
             .søknadsperiode(manuellSøknadDto.getPeriode())
             .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
             .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
-            .build());
+            .build();
+        var valideringsfeil = validerSøknad(fagsak, søknad);
+        if (valideringsfeil.isPresent()) {
+            return Response.serverError().entity(new FeilDto(valideringsfeil.get().getMessage())).build();
+        }
+
+        FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
+        frisinnSøknadInnsending.setSøknad(søknad);
         var behandling = frisinnSøknadMottaker.mottaSøknad(fagsak.getSaksnummer(), null, frisinnSøknadInnsending);
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
@@ -122,9 +132,14 @@ public class MidlertidigDriftRestTjeneste {
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
 
-    private boolean finnesFrisinnFagsak(AktørId aktørId) {
-        return fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
-            .anyMatch(sak -> sak.getYtelseType().equals(FagsakYtelseType.FRISINN));
+    @NotNull
+    private Optional<Exception> validerSøknad(Fagsak fagsak, FrisinnSøknad søknad) {
+        try {
+            frisinnSøknadMottaker.validerSøknad(fagsak, søknad);
+        } catch (Exception e) {
+            return Optional.of(e);
+        }
+        return Optional.empty();
     }
 
     private Inntekter lagDummyInntekt(ManuellSøknadDto manuellSøknadDto) {

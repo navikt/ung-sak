@@ -83,12 +83,9 @@ public class SøknadDokumentmottaker {
 
     private Behandling tilknyttBehandling(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
-        var periode = søknad.getSøknadsperiode();
         var forrigeBehandling = finnForrigeAvsluttedeBehandling(fagsak);
 
-        validerSøknadErForNyPeriode(fagsak, periode.getFraOgMed());
-        validerIngenÅpneBehandlinger(fagsak);
-        validerIngenAvsluttedeBehandlingerIDag(fagsak);
+        validerSøknad(fagsak, søknad);
 
         Behandling behandling;
         if (forrigeBehandling.isEmpty()) {
@@ -100,6 +97,12 @@ public class SøknadDokumentmottaker {
         lagreOppgittOpptjening.lagreOpptjening(behandling, søknad.getInntekter(), søknad.getMottattDato());
 
         return behandling;
+    }
+
+    void validerSøknad(Fagsak fagsak, FrisinnSøknad søknad) {
+        validerSøknadErForNyPeriode(fagsak, søknad.getSøknadsperiode().getFraOgMed());
+        validerIngenÅpneBehandlinger(fagsak);
+        validerIngenAvsluttedeBehandlingerIDag(fagsak);
     }
 
     private Optional<Behandling> finnForrigeAvsluttedeBehandling(Fagsak fagsak) {
