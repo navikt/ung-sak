@@ -28,7 +28,6 @@ public class SimulerInntrekkSjekkeTjeneste {
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private HistorikkRepository historikkRepository;
-    private Instance<SimulerOppdragAksjonspunktTjeneste> tjeneste;
 
     SimulerInntrekkSjekkeTjeneste() {
         // for CDI proxy
@@ -37,12 +36,10 @@ public class SimulerInntrekkSjekkeTjeneste {
     @Inject
     public SimulerInntrekkSjekkeTjeneste(SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                                          TilbakekrevingRepository tilbakekrevingRepository,
-                                         HistorikkRepository historikkRepository,
-                                         Instance<SimulerOppdragAksjonspunktTjeneste> tjeneste) {
+                                         HistorikkRepository historikkRepository) {
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.historikkRepository = historikkRepository;
-        this.tjeneste = tjeneste;
     }
 
     public void sjekkIntrekk(Behandling behandling) {
@@ -52,8 +49,7 @@ public class SimulerInntrekkSjekkeTjeneste {
 
             Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
             if (simuleringResultatDto.isPresent()) {
-                SimulerOppdragAksjonspunktTjeneste simulerOppdragAksjonspunktTjeneste = finnTjeneste(behandling);
-                Optional<AksjonspunktDefinisjon> aksjonspunkt = simulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(simuleringResultatDto.get());
+                Optional<AksjonspunktDefinisjon> aksjonspunkt = SimulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(simuleringResultatDto.get());
                 if (aksjonspunkt.filter(aksjonspunktDefinisjon -> aksjonspunktDefinisjon.equals(AksjonspunktDefinisjon.VURDER_FEILUTBETALING)).isPresent()) {
                     tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, null));
                     opprettHistorikkInnslag(behandling.getId());
@@ -74,10 +70,4 @@ public class SimulerInntrekkSjekkeTjeneste {
         tekstBuilder.build(innslag);
         historikkRepository.lagre(innslag);
     }
-
-    private SimulerOppdragAksjonspunktTjeneste finnTjeneste(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(SimulerOppdragAksjonspunktTjeneste.class, tjeneste, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SimulerOppdragAksjonspunktTjeneste.class.getSimpleName() + " for " + behandling.getUuid()));
-    }
-
 }

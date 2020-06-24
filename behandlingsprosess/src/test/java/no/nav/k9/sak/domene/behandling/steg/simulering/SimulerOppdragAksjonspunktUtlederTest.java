@@ -35,11 +35,11 @@ public class SimulerOppdragAksjonspunktUtlederTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_hvis_beløp_er_null() {
-        assertThat(new SimulerOppdragAksjonspunktTjeneste().utledAksjonspunkt(new SimuleringResultatDto(null, null, false))).isEmpty();
+        assertThat(SimulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(new SimuleringResultatDto(null, null, false))).isEmpty();
     }
 
     private Optional<AksjonspunktDefinisjon> finnAksjonspunkt(int feilutbetalt, int inntrekk) {
-        return new SimulerOppdragAksjonspunktTjeneste().utledAksjonspunkt(new SimuleringResultatDto((long) feilutbetalt, (long) inntrekk, false));
+        return SimulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(new SimuleringResultatDto((long) feilutbetalt, (long) inntrekk, false));
     }
 
 }
