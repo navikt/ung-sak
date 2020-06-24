@@ -50,7 +50,10 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
                 .anyMatch(p -> p.getPeriode().overlapper(søknadsperiode) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
         //TODO(OJR) fjern mellom todoene
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak)
+            .stream()
+            .filter(p -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom())))
+            .collect(Collectors.toList());
 
         FrisinnGrunnlag frisinnGrunnlag = new FrisinnGrunnlag(søkerYtelseForFrilans, søkerYtelseForNæring);
         frisinnGrunnlag.medPerioderMedSøkerInfo(periodeMedSøkerInfoDtos);

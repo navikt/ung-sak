@@ -1,8 +1,10 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -18,7 +20,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@Dependent
+@ApplicationScoped
+@FagsakYtelseTypeRef("*")
 public class KalkulatorInputTjeneste {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -39,14 +42,14 @@ public class KalkulatorInputTjeneste {
     }
 
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        var stp = vilkårsperiode.getFomDato();
+        var stp = finnSkjæringstidspunkt(vilkårsperiode);
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
 
-        var grunnlagDto = TilKalkulusMapper.mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
+        var grunnlagDto = getTilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
@@ -59,6 +62,14 @@ public class KalkulatorInputTjeneste {
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
         return kalkulatorInputDto;
+    }
+
+    protected TilKalkulusMapper getTilKalkulusMapper() {
+        return new TilKalkulusMapper();
+    }
+
+    protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {
+        return vilkårsperiode.getFomDato();
     }
 
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse referanse) {

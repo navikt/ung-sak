@@ -205,7 +205,6 @@ public class VilkårBuilder {
         }
         bygget = true;
         var vilkårsPerioderRaw = vilkårTidslinje
-            .compress()
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)

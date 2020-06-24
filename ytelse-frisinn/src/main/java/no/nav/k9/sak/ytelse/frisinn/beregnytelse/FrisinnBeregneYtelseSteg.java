@@ -72,22 +72,17 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var originalBehandling = behandling.getOriginalBehandling();
 
         //var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling)).stream().findFirst();
-        var beregningsgrunnlagOriginalBehandling = originalBehandling.flatMap(b -> kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(b), STP_FRISINN));
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
 
-        if (beregningsgrunnlag.isPresent()) {
+
+        if (!beregningsgrunnlag.isEmpty()) {
             UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
             UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
-            DatoIntervallEntitet sisteSøknadsperiode = uttakRepository.hentGrunnlag(behandlingId).map(UttakGrunnlag::getOppgittSøknadsperioder).map(Søknadsperioder::getMaksPeriode)
-                .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
-            Boolean erNySøknadsperiode = originalBehandling.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
-
             // Kalle regeltjeneste
-            List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), beregningsgrunnlagOriginalBehandling, sisteSøknadsperiode, erNySøknadsperiode, skalBenytteTidligereResultat);
+            List<Beregningsgrunnlag> beregningsgrunnlagListe = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
             var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlagListe, uttakResultat);
 
             // Verifiser beregningsresultat

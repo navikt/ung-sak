@@ -44,7 +44,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                                    FagsakRepository fagsakRepository,
-                                   KalkulatorInputTjeneste kalkulatorInputTjeneste,
+                                   @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository) {
@@ -68,26 +68,6 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
-    }
-
-
-    @Override
-    protected StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
-
-        AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow()
-            .finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt)
-            .getPeriode();
-        KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag,
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 1), vilkårsPeriode.getFomDato()));
-
-        return new StartBeregningRequest(
-            new UuidDto(bgReferanse),
-            fagsak.getSaksnummer().getVerdi(),
-            aktør,
-            new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()),
-            kalkulatorInputDto);
     }
 
 }

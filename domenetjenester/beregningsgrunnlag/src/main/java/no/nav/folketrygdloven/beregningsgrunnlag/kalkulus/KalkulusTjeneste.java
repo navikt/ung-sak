@@ -93,7 +93,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Inject
     public KalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                             FagsakRepository fagsakRepository,
-                            VilkårResultatRepository vilkårResultatRepository, KalkulatorInputTjeneste kalkulatorInputTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+                            VilkårResultatRepository vilkårResultatRepository,
+                            @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
+                            InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                            ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.restTjeneste = restTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
