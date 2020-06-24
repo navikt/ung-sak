@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -27,7 +26,7 @@ public class MapTilBeregningsgrunnlagTest {
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30));
         Beregningsgrunnlag bg = lagBeregningsgrunnlag(søknadsperiode, BigDecimal.valueOf(260));
 
-        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(bg, Optional.empty(), søknadsperiode, true);
+        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(bg, Optional.empty(), søknadsperiode);
 
         assertThat(mappetGrunnlag).isPresent();
         assertThat(mappetGrunnlag.get().getBeregningsgrunnlagPerioder().size()).isEqualTo(1);
@@ -40,7 +39,7 @@ public class MapTilBeregningsgrunnlagTest {
         Beregningsgrunnlag bg = lagBeregningsgrunnlag(søknadsperiode, BigDecimal.valueOf(260));
         Beregningsgrunnlag bgRevurdering = lagBeregningsgrunnlag(søknadsperiode, BigDecimal.valueOf(260 * 2));
 
-        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(bgRevurdering, Optional.of(bg), søknadsperiode, true);
+        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(bgRevurdering, Optional.of(bg), søknadsperiode);
 
         assertThat(mappetGrunnlag).isPresent();
         assertThat(mappetGrunnlag.get().getBeregningsgrunnlagPerioder().size()).isEqualTo(1);
@@ -56,7 +55,7 @@ public class MapTilBeregningsgrunnlagTest {
 
         Beregningsgrunnlag bgRevurderingSøknad = lagBeregningsgrunnlagMed2Søknadsperioer(søknadsperiodeApril, BigDecimal.valueOf(260 * 2), søknadsperiodeMai, BigDecimal.valueOf(260 * 2));
 
-        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeMai, true);
+        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeMai);
 
         assertThat(mappetGrunnlag).isPresent();
         assertThat(mappetGrunnlag.get().getBeregningsgrunnlagPerioder().size()).isEqualTo(2);
@@ -74,7 +73,7 @@ public class MapTilBeregningsgrunnlagTest {
 
         Beregningsgrunnlag bgRevurderingSøknad = lagBeregningsgrunnlagMed2Søknadsperioer(søknadsperiodeApril, BigDecimal.valueOf(260 * 2), søknadsperiodeJuni, BigDecimal.valueOf(260 * 2));
 
-        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeJuni, true);
+        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeJuni);
 
         assertThat(mappetGrunnlag).isPresent();
         assertThat(mappetGrunnlag.get().getBeregningsgrunnlagPerioder().size()).isEqualTo(2);
@@ -92,7 +91,7 @@ public class MapTilBeregningsgrunnlagTest {
 
         Beregningsgrunnlag bgRevurderingSøknad = lagBeregningsgrunnlagMed2Søknadsperioer(søknadsperiodeApril, BigDecimal.valueOf(260 * 2), søknadsperiodeMai, BigDecimal.valueOf(260 * 2));
 
-        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeMai, true);
+        Optional<Beregningsgrunnlag> mappetGrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(bgRevurderingSøknad, Optional.of(bg), søknadsperiodeMai);
 
         assertThat(mappetGrunnlag).isPresent();
         assertThat(mappetGrunnlag.get().getBeregningsgrunnlagPerioder().size()).isEqualTo(2);

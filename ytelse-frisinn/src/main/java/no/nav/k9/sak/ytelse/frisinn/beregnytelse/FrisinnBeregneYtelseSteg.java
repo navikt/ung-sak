@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+
+import org.jetbrains.annotations.NotNull;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -37,7 +38,6 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FinnEndringsdatoBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "BERYT")
@@ -45,8 +45,6 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
-    private static final LocalDate STP_FRISINN = LocalDate.of(2020, 3, 1);
-    private Boolean skalBenytteTidligereResultat;
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
@@ -62,14 +60,12 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                                     BeregningTjeneste kalkulusTjeneste,
                                     FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                     UttakRepository uttakRepository,
-                                    @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste,
-                                    @KonfigVerdi(value = "SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING", defaultVerdi = "false") Boolean skalBenytteTidligereResultat) {
+                                    @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.uttakRepository = uttakRepository;
-        this.skalBenytteTidligereResultat = skalBenytteTidligereResultat;
     }
 
     @Override
@@ -78,12 +74,9 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var originalBehandling = behandling.getOriginalBehandling();
 
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
 
-        //var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling)).stream().findFirst();
-        var beregningsgrunnlagOriginalBehandling = originalBehandling.flatMap(b -> kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(b), STP_FRISINN));
-
-        if (beregningsgrunnlag.isPresent()) {
+        if (!beregningsgrunnlag.isEmpty()) {
             UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
             UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
 
@@ -91,16 +84,16 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                 .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
             Boolean erNySøknadsperiode = originalBehandling.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
 
-
             // Kalle regeltjeneste
-            if (!erNySøknadsperiode) {
-                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), Optional.empty(), sisteSøknadsperiode, false);
+            if (erNySøknadsperiode) {
+                Optional<Beregningsgrunnlag> mappetBeregningsgrunnlag = mapForAlleTidligerePerioder(behandling, sisteSøknadsperiode);
+                beregningsgrunnlag = mappetBeregningsgrunnlag.map(List::of).orElse(Collections.emptyList());
             } else {
-                beregningsgrunnlag = mapForAlleTidligerePerioder(behandling, sisteSøknadsperiode);
+                Optional<Beregningsgrunnlag> mappetBeregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForRevurdering(beregningsgrunnlag);
+                beregningsgrunnlag = mappetBeregningsgrunnlag.map(List::of).orElse(Collections.emptyList());
             }
 
-
-            var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag.map(List::of).orElse(Collections.emptyList()), uttakResultat);
+            var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
             // Verifiser beregningsresultat
             BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
@@ -120,18 +113,24 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Stream<Behandling> sisteBehandlingPrPeriode = flatten(behandling);
         Iterator<Behandling> iterator = sisteBehandlingPrPeriode.iterator();
         Behandling sisteBehandling = iterator.next();
-        Optional<Beregningsgrunnlag> beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(sisteBehandling), STP_FRISINN);
+        Optional<Beregningsgrunnlag> beregningsgrunnlag = finnBeregningsgrunnlagForSisteSøknadsperiode(sisteBehandling);
 
         while (iterator.hasNext()) {
             Behandling neste = iterator.next();
-            var bgNesteBehandling = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(neste), STP_FRISINN);
+            var bgNesteBehandling = finnBeregningsgrunnlagForSisteSøknadsperiode(neste);
             if (beregningsgrunnlag.isPresent()) {
-                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag.get(), bgNesteBehandling, sisteSøknadsperiode, skalBenytteTidligereResultat);
+                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlagForNyeSøknadsperioder(beregningsgrunnlag.get(), bgNesteBehandling, sisteSøknadsperiode);
             }
             sisteSøknadsperiode = uttakRepository.hentGrunnlag(neste.getId()).map(UttakGrunnlag::getOppgittSøknadsperioder).map(Søknadsperioder::getMaksPeriode)
                 .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
         }
         return beregningsgrunnlag;
+    }
+
+    @NotNull
+    private Optional<Beregningsgrunnlag> finnBeregningsgrunnlagForSisteSøknadsperiode(Behandling sisteBehandling) {
+        List<Beregningsgrunnlag> alleBeregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(sisteBehandling));
+        return alleBeregningsgrunnlag.isEmpty() ? Optional.empty() : Optional.of(alleBeregningsgrunnlag.get(alleBeregningsgrunnlag.size() - 1));
     }
 
 
