@@ -78,7 +78,10 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var originalBehandling = behandling.getOriginalBehandling();
 
-        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
+
+        //var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling)).stream().findFirst();
+        var beregningsgrunnlagOriginalBehandling = originalBehandling.flatMap(b -> kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(b), STP_FRISINN));
 
         if (beregningsgrunnlag.isPresent()) {
             UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
