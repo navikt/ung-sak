@@ -1,22 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.årskvantum;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -32,6 +14,18 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path(ÅrskvantumRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -42,6 +36,7 @@ public class ÅrskvantumRestTjeneste {
     public static final String FORBRUKTEDAGER_PATH = "/forbruktedager";
     public static final String FULL_UTTAKSPLAN_PATH = "/uttaksplan";
     public static final String INPUT_PATH = "/input";
+    public static final String UTBETALINGSGRUNNLAG = "/utbetalingsgrunnlag";
     static final String BASE_PATH = "/behandling/aarskvantum";
     public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
     public static final String FULL_UTTAKSPLAN = BASE_PATH + FULL_UTTAKSPLAN_PATH;
@@ -109,7 +104,7 @@ public class ÅrskvantumRestTjeneste {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path(INPUT_PATH)
+    @Path(UTBETALINGSGRUNNLAG)
     @Operation(description = "Hent utbetalingsgrunnlag fra årskvantum", tags = "behandling - årskvantum/uttak", responses = {
         @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
