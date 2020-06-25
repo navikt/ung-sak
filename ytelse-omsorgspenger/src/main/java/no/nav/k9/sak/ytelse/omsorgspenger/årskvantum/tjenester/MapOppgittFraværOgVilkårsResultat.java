@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -111,7 +112,8 @@ public class MapOppgittFraværOgVilkårsResultat {
         for (Map.Entry<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> entry : fraværsTidslinje.entrySet()) {
             var timeline = entry.getValue().combine(avslåtteVilkårTidslinje, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
 
-            result.put(entry.getKey(), timeline.toSegments()
+            result.put(entry.getKey(), timeline.map(this::splittDelevisFravær)
+                .toSegments()
                 .stream()
                 .filter(it -> it.getValue() != null)
                 .filter(it -> it.getValue().getPeriode() != null)
@@ -120,6 +122,28 @@ public class MapOppgittFraværOgVilkårsResultat {
         }
 
         return result;
+    }
+
+    private List<LocalDateSegment<WrappedOppgittFraværPeriode>> splittDelevisFravær(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
+        if (segment.getValue() == null) {
+            return List.of();
+        }
+        if (segment.getValue().getPeriode() == null) {
+            return List.of();
+        }
+        if (segment.getValue().getPeriode().getFraværPerDag() == null) {
+            return List.of(segment);
+        }
+        var segmenter = new ArrayList<LocalDateSegment<WrappedOppgittFraværPeriode>>();
+        var startDato = segment.getFom();
+        var endDato = segment.getTom();
+        segmenter.add(new LocalDateSegment<>(startDato, startDato, segment.getValue()));
+        while (!startDato.equals(endDato)) {
+            startDato = startDato.plusDays(1);
+            segmenter.add(new LocalDateSegment<>(startDato, startDato, segment.getValue()));
+        }
+
+        return segmenter;
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettVilkårTidslinje(Vilkårene vilkårene) {
