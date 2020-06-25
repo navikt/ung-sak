@@ -95,6 +95,10 @@ public class BehandlingÅrsak extends BaseEntitet {
             Objects.requireNonNull(behandlingÅrsakTyper, "behandlingÅrsakTyper");
             this.behandlingÅrsakTyper = behandlingÅrsakTyper;
         }
+        
+        public Behandling getOriginalBehandling() {
+            return originalBehandling;
+        }
 
         public Builder medOriginalBehandling(Behandling originalBehandling) {
             this.originalBehandling = originalBehandling;

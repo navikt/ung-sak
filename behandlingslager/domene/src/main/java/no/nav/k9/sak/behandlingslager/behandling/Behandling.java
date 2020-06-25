@@ -785,6 +785,9 @@ public class Behandling extends BaseEntitet {
         }
 
         public Builder medBehandlingÅrsak(BehandlingÅrsak.Builder årsakBuilder) {
+            if(forrigeBehandling!=null && årsakBuilder.getOriginalBehandling()==null) {
+                årsakBuilder.medOriginalBehandling(forrigeBehandling);
+            }
             this.behandlingÅrsakBuilder = årsakBuilder;
             return this;
         }
@@ -888,6 +891,10 @@ public class Behandling extends BaseEntitet {
 
     public BehandlingResultatType getBehandlingResultatType() {
         return behandlingResultatType;
+    }
+
+    public List<BehandlingÅrsakType> getBehandlingÅrsakerTyper() {
+        return getBehandlingÅrsaker().stream().map(BehandlingÅrsak::getBehandlingÅrsakType).collect(Collectors.toList());
     }
 
 }
