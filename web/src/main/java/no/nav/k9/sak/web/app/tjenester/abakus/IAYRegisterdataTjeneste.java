@@ -59,7 +59,7 @@ public class IAYRegisterdataTjeneste {
         if (tasksSomVenterPåSvar.size() == 1) {
             mottaHendelse(tasksSomVenterPåSvar.get(0), callback.getOppdatertGrunnlagRef());
         } else if (tasksSomVenterPåSvar.isEmpty()) {
-            log.warn("Mottatt callback hvor ingen task venter på svar... {}", callback);
+            log.info("Mottatt callback hvor ingen task venter på svar... {}", callback);
         } else {
             log.info("Mottatt callback som svarer til flere tasks som venter. callback={}, tasks={}", callback, tasksSomVenterPåSvar);
         }
