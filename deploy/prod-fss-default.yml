@@ -189,7 +189,7 @@ spec:
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
-    - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
+    - name: UGUNST_VURDERES_MED_BEREGNINGSRESULTAT
       value: "false"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
       value: "false"

@@ -63,7 +63,6 @@ public class SimulerOppdragStegTest {
 
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
-    private Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance = new UnitTestLookupInstanceImpl<>(new SimulerOppdragAksjonspunktTjeneste());
 
     @Before
     public void setup() {
@@ -100,7 +99,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -112,7 +111,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -140,6 +139,6 @@ public class SimulerOppdragStegTest {
     }
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock, tjenesteInstance);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
     }
 }

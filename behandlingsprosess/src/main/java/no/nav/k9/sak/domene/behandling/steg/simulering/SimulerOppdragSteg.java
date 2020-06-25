@@ -8,8 +8,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -47,7 +45,6 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private FptilbakeRestKlient fptilbakeRestKlient;
-    private Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance;
 
     SimulerOppdragSteg() {
         // for CDI proxy
@@ -58,14 +55,12 @@ public class SimulerOppdragSteg implements BehandlingSteg {
                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                               SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                               TilbakekrevingRepository tilbakekrevingRepository,
-                              FptilbakeRestKlient fptilbakeRestKlient,
-                              @Any Instance<SimulerOppdragAksjonspunktTjeneste> tjenesteInstance) {
+                              FptilbakeRestKlient fptilbakeRestKlient) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.fptilbakeRestKlient = fptilbakeRestKlient;
-        this.tjenesteInstance = tjenesteInstance;
     }
 
     @Override
@@ -115,7 +110,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
         Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
         if (simuleringResultatDto.isPresent()) {
             tilbakekrevingRepository.lagre(behandling, simuleringResultatDto.get().isSlåttAvInntrekk());
-            Optional<AksjonspunktDefinisjon> utledetAksjonspunkt = finnTjeneste(behandling).utledAksjonspunkt(simuleringResultatDto.get());
+            Optional<AksjonspunktDefinisjon> utledetAksjonspunkt = SimulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(simuleringResultatDto.get());
 
             if (utledetAksjonspunkt.isPresent()) {
                 AksjonspunktDefinisjon aksjonspunktDefinisjon = utledetAksjonspunkt.get();
@@ -154,10 +149,5 @@ public class SimulerOppdragSteg implements BehandlingSteg {
 
     private void lagreTilbakekrevingValg(Behandling behandling, TilbakekrevingValg tilbakekrevingValg) {
         tilbakekrevingRepository.lagre(behandling, tilbakekrevingValg);
-    }
-
-    private SimulerOppdragAksjonspunktTjeneste finnTjeneste(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(SimulerOppdragAksjonspunktTjeneste.class, tjenesteInstance, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SimulerOppdragAksjonspunktTjeneste.class.getSimpleName() + " for " + behandling.getUuid()));
     }
 }

@@ -165,7 +165,7 @@ public class BeregningsresultatEntitet extends BaseEntitet {
             return beregningsresultatFPMal;
         }
 
-        public void verifyStateForBuild() {
+        private void verifyStateForBuild() {
             Objects.requireNonNull(beregningsresultatFPMal.beregningsresultatPerioder, "beregningsresultatPerioder");
             Objects.requireNonNull(beregningsresultatFPMal.regelInput, "regelInput");
             Objects.requireNonNull(beregningsresultatFPMal.regelSporing, "regelSporing");
