@@ -273,12 +273,18 @@ public class Behandling extends BaseEntitet {
     }
 
     public Optional<Behandling> getOriginalBehandling() {
-        return getBehandlingÅrsaker().stream()
+        Set<Behandling> behandlinger = getBehandlingÅrsaker()
+            .stream()
+            .map(bå -> bå.getOriginalBehandling().orElse(null))
             .filter(Objects::nonNull)
-            .map(BehandlingÅrsak::getOriginalBehandling)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findFirst();
+            .collect(Collectors.toSet());
+
+        // invariant kan ikke ha forskjellige behandlinger her
+        // TODO (my future self): flytt original behandling som felt til Behandling
+        if (behandlinger.size() > 1) {
+            throw new IllegalStateException("Datakonsistens feil: Har ulike originalbehandlinger knyttet til " + this.getId() + ": " + behandlinger);
+        }
+        return behandlinger.stream().findFirst();
     }
 
     public boolean erManueltOpprettet() {
@@ -779,6 +785,9 @@ public class Behandling extends BaseEntitet {
         }
 
         public Builder medBehandlingÅrsak(BehandlingÅrsak.Builder årsakBuilder) {
+            if(forrigeBehandling!=null && årsakBuilder.getOriginalBehandling()==null) {
+                årsakBuilder.medOriginalBehandling(forrigeBehandling);
+            }
             this.behandlingÅrsakBuilder = årsakBuilder;
             return this;
         }
@@ -882,6 +891,10 @@ public class Behandling extends BaseEntitet {
 
     public BehandlingResultatType getBehandlingResultatType() {
         return behandlingResultatType;
+    }
+
+    public List<BehandlingÅrsakType> getBehandlingÅrsakerTyper() {
+        return getBehandlingÅrsaker().stream().map(BehandlingÅrsak::getBehandlingÅrsakType).collect(Collectors.toList());
     }
 
 }

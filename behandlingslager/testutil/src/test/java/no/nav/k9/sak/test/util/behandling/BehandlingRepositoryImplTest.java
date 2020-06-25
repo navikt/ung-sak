@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -122,12 +124,13 @@ public class BehandlingRepositoryImplTest {
         Behandling behandling = opprettRevurderingsKandidat();
 
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_AVVIK_ANTALL_BARN)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG)).build();
 
         behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
-        List<Behandling> result = behandlingRepository.hentBehandlingerMedÅrsakerForFagsakId(behandling.getFagsakId(),
-            BehandlingÅrsakType.årsakerForAutomatiskRevurdering());
+        List<Behandling> result = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(behandling.getFagsakId())
+                .stream().filter(b -> !Collections.disjoint(b.getBehandlingÅrsakerTyper(), BehandlingÅrsakType.årsakerForAutomatiskRevurdering()))
+                .collect(Collectors.toList());
         assertThat(result).isNotEmpty();
     }
 

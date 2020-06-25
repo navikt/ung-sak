@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -156,20 +157,6 @@ public class BehandlingRepository {
     }
 
     /**
-     * Hent alle behandlinger for en fagsak som har en av de angitte behandlingsårsaker
-     */
-    public List<Behandling> hentBehandlingerMedÅrsakerForFagsakId(Long fagsakId, Set<BehandlingÅrsakType> årsaker) {
-        TypedQuery<Behandling> query = getEntityManager().createQuery("SELECT b FROM Behandling b" +
-            " WHERE b.fagsak.id = :fagsakId " +
-            " AND EXISTS (SELECT å FROM BehandlingÅrsak å" +
-            "   WHERE å.behandling = b AND å.behandlingÅrsakType IN :årsaker)", Behandling.class);
-        query.setParameter(FAGSAK_ID, fagsakId);
-        query.setParameter("årsaker", årsaker);
-
-        return query.getResultList();
-    }
-
-    /**
      * Hent alle behandlinger som ikke er avsluttet på fagsak.
      */
     public List<Behandling> hentBehandlingerSomIkkeErAvsluttetForFagsakId(Long fagsakId) {
@@ -275,7 +262,11 @@ public class BehandlingRepository {
         query.setParameter(FAGSAK_ID, fagsakId);
         query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, true);
-        return query.getResultList();
+        
+        // lukker bort henlagte
+        return query.getResultList().stream()
+            .filter(b -> !b.getBehandlingResultatType().erHenleggelse())
+            .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
     }
 
     public Optional<Behandling> finnSisteInnvilgetBehandling(Long fagsakId) {
