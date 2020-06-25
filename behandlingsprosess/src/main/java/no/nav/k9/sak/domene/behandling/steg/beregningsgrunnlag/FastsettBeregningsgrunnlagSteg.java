@@ -60,14 +60,4 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
     }
-
-    @Override
-    public void vedHoppOverFramover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType fraSteg, BehandlingStegType tilSteg) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (tilSteg.equals(BehandlingStegType.SØKNADSFRIST)) {
-            if (behandling.erRevurdering()) {
-                throw new IllegalStateException("Støtter ikke denne ennå, lag støtte i kalkulus");
-            }
-        }
-    }
 }

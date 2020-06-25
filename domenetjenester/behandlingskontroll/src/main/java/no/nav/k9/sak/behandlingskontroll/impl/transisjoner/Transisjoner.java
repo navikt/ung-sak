@@ -20,15 +20,13 @@ public class Transisjoner {
         new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_VEDTAK.getId(), BehandlingStegType.FORESLÅ_VEDTAK),
         new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT.getId(), BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT),
         new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT.getId(), BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT),
-        new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_UTTAKSPLAN.getId(), BehandlingStegType.SØKNADSFRIST),
         new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK.getId(), BehandlingStegType.IVERKSETT_VEDTAK),
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_FAKTA),
         new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING),
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT),
         new SpolFremoverTransisjon(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR),
         new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_LØPENDE_MEDLEMSKAP),
-        new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE),
-        new SpolFremoverTransisjon(BehandlingStegType.SØKNADSFRIST)
+        new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE)
     );
 
     private Transisjoner() {

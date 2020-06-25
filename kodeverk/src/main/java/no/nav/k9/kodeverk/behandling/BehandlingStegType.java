@@ -49,7 +49,6 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLER_LØPENDE_MEDLEMSKAP("KOFAK_LOP_MEDL", "Kontroller løpende medlemskap", UTREDES),
     KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT("VURDEROP", "Kontrollerer søkers opplysningsplikt", UTREDES),
     SIMULER_OPPDRAG("SIMOPP", "Simuler oppdrag", UTREDES),
-    SØKNADSFRIST("SØKNADSFRIST", "Vurder søknadsfrist foreldrepenger", UTREDES),
     START_STEG("START", "Start behandling prosess", UTREDES),
     VARSEL_REVURDERING("VRSLREV", "Varsel om revurdering", UTREDES),
     VULOMED("VULOMED", "Vurder løpende medlemskap", UTREDES),
