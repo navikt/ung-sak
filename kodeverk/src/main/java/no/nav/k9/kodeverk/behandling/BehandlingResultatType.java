@@ -1,9 +1,11 @@
 package no.nav.k9.kodeverk.behandling;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -33,22 +35,29 @@ public enum BehandlingResultatType implements Kodeverdi {
     MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler", true),
     ;
 
-    private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, HENLAGT_SØKNAD_MANGLER,
-        MANGLER_BEREGNINGSREGLER);
-    private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER = Set.of(HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILOPPRETTET, HENLAGT_BRUKER_DØD, MERGET_OG_HENLAGT, HENLAGT_SØKNAD_MANGLER,
-        MANGLER_BEREGNINGSREGLER);
+    private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
+    private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, INNVILGET_ENDRING);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "BEHANDLING_RESULTAT_TYPE";
 
+    
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
         }
+        
+        var henlagte = KODER.values().stream().filter( v -> v.erHenleggelse).collect(Collectors.toSet());
+        ALLE_HENLEGGELSESKODER = EnumSet.copyOf(henlagte);
+        
+        var henlagtSøknad = EnumSet.copyOf(henlagte);
+        henlagtSøknad.remove(MERGET_OG_HENLAGT);
+        
+        HENLEGGELSESKODER_FOR_SØKNAD = henlagtSøknad;
     }
 
     @JsonIgnore
