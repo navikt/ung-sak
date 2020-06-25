@@ -13,6 +13,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
@@ -39,4 +40,7 @@ public class FrisinnSøknadMottaker implements SøknadMottakTjeneste<FrisinnSøk
         return dokumentMottaker.finnEllerOpprett(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato);
     }
 
+    public void validerSøknad(Fagsak fagsak, FrisinnSøknad søknad) {
+        dokumentMottaker.validerSøknad(fagsak, søknad);
+    }
 }
