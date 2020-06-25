@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
@@ -25,6 +26,7 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
     public GrunnlagKopiererFrisinn() {
         // for CDI proxy
@@ -33,11 +35,13 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererFrisinn(BehandlingRepositoryProvider repositoryProvider,
                                    UttakRepository uttakRepository,
-                                   InntektArbeidYtelseTjeneste iayTjeneste) {
+                                   InntektArbeidYtelseTjeneste iayTjeneste,
+                                   BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
 
@@ -61,6 +65,7 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         // Delvis kopiering hvor alt unntatt oppgitte opptjening fra søknad kopieres over

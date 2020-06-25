@@ -17,7 +17,7 @@ class MapTilBeregningsgrunnlag {
     }
 
 
-    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlagForRevurdering(List<Beregningsgrunnlag> beregningsgrunnlag) {
+    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
         Set<BeregningsgrunnlagPeriode.Builder> perioder = new HashSet<>(finnPerioderFraListeMedDagsats(beregningsgrunnlag));
         if (perioder.isEmpty()) {
             return Optional.empty();

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -30,9 +31,9 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     }
 
     @Inject
-    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository) {
+    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository, BehandlingRepository behandlingRepository) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
-        final var beregningPeriode = new BeregningPeriode(uttakRepository);
+        final var beregningPeriode = new BeregningPeriode(behandlingRepository, uttakRepository);
         vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
         this.vilkårUtleder = vilkårUtleder;
     }
