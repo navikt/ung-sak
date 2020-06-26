@@ -26,9 +26,16 @@ public class VilkårData {
     /**
      * Ctor som tar alle parametere inkl. regel input og evaluering.
      */
-    public VilkårData(DatoIntervallEntitet periode, VilkårType vilkårType, Utfall utfallType, Properties merknadParametere,
-                      List<AksjonspunktDefinisjon> apDefinisjoner, VilkårUtfallMerknad vilkårUtfallMerknad,
-                      Avslagsårsak avslagsårsak, String regelEvaluering, String regelInput, boolean erOverstyrt) {
+    public VilkårData(DatoIntervallEntitet periode,
+                      VilkårType vilkårType,
+                      Utfall utfallType,
+                      Properties merknadParametere,
+                      List<AksjonspunktDefinisjon> apDefinisjoner,
+                      VilkårUtfallMerknad vilkårUtfallMerknad,
+                      Avslagsårsak avslagsårsak,
+                      String regelEvaluering,
+                      String regelInput,
+                      boolean erOverstyrt) {
         this.periode = periode;
         this.vilkårType = vilkårType;
         this.utfallType = utfallType;

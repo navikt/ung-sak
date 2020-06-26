@@ -13,20 +13,24 @@ import java.util.stream.Collectors;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class RegelResultat {
     private final Vilkårene vilkårene;
-    private final Set<AksjonspunktDefinisjon> aksjonspunktDefinisjoner;
+    private final Set<AksjonspunktResultat> aksjonspunktDefinisjoner;
 
     private final Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater;
 
-    public RegelResultat(Vilkårene vilkårene, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner,
+    public RegelResultat(Vilkårene vilkårene,
+                         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner,
                          Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater) {
         this.vilkårene = vilkårene;
-        this.aksjonspunktDefinisjoner = new HashSet<>(aksjonspunktDefinisjoner);
+        this.aksjonspunktDefinisjoner = aksjonspunktDefinisjoner.stream()
+            .map(AksjonspunktResultat::opprettForAksjonspunkt)
+            .collect(Collectors.toCollection(HashSet::new));
         this.ekstraResultater = ekstraResultater;
     }
 
@@ -42,7 +46,7 @@ public class RegelResultat {
         return Collections.unmodifiableMap(ekstraResultater);
     }
 
-    public Set<AksjonspunktDefinisjon> getAksjonspunktDefinisjoner() {
+    public Set<AksjonspunktResultat> getAksjonspunktDefinisjoner() {
         return aksjonspunktDefinisjoner;
     }
 

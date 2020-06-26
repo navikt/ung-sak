@@ -99,7 +99,7 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Me
         LocalDate skjæringstidspunkt = data.getGrunnlag().getSisteDatoForOpptjening();
 
         // first er 5 i måned etter skjæringstidspunktet
-        LocalDate frist = skjæringstidspunkt.plusMonths(1).withDayOfMonth(5);
+        LocalDate frist = skjæringstidspunkt.plusMonths(1).withDayOfMonth(10);
         return frist;
     }
 

@@ -8,7 +8,10 @@ import java.util.List;
 import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -56,10 +59,25 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
             List<OpptjeningAktivitet> aktiviteter = mapTilOpptjeningsaktiviteter(mapper, opres);
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), opres.getResultatOpptjent(), aktiviteter);
 
+            oppdaterAksjonspunktMedFristerFraRegel(regelResultat, opres);
+
             håndtereAutomatiskAvslag(behandling, regelResultat, periode);
         } else if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
             // rydd bort tidligere aktiviteter
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
+        }
+    }
+
+    private void oppdaterAksjonspunktMedFristerFraRegel(RegelResultat regelResultat, OpptjeningsvilkårResultat opres) {
+        if (opres.getFrist() != null) {
+            var eksisterende = regelResultat.getAksjonspunktDefinisjoner().stream().filter(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER)).findFirst();
+            if (eksisterende.isPresent()) {
+                var aksjonspunktResultat = eksisterende.get();
+                if (aksjonspunktResultat.getFrist() == null || aksjonspunktResultat.getFrist() != null && aksjonspunktResultat.getFrist().isAfter(opres.getFrist().atStartOfDay())) {
+                    regelResultat.getAksjonspunktDefinisjoner().removeIf(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER));
+                    regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER, Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST, opres.getFrist().atStartOfDay()));
+                }
+            }
         }
     }
 

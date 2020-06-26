@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.opptjening;
 
 import javax.enterprise.context.ApplicationScoped;
+
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.HåndtereAutomatiskAvslag;
@@ -14,6 +16,6 @@ public class PleiepengerHåndtereAutomatiskAvslag implements HåndtereAutomatisk
 
     @Override
     public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET));
     }
 }
