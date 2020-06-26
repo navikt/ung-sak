@@ -21,7 +21,6 @@ import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
 
 public class FrisinnMapper {
 
-    public static final LocalDate FØRSTE_DAG_I_APRIL = LocalDate.of(2020, 4, 1);
     public static final LocalDate SISTE_DAG_I_APRIL = LocalDate.of(2020, 4, 30);
     public static final LocalDate SISTE_DAG_I_MARS = LocalDate.of(2020, 3, 30);
 
