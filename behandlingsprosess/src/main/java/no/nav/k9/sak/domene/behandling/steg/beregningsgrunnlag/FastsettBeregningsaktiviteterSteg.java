@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(kode = "FASTSETT_STP_BER")
@@ -42,6 +43,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private Boolean toggletVilkårsperioder;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
@@ -52,13 +54,15 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
-                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
+                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                             @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
@@ -72,17 +76,27 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode, skjæringstidspunkt));
+            aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode));
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 
-    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode, Skjæringstidspunkt skjæringstidspunkt) {
+    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        var periodeStart = vilkårsperiode.getFomDato();
+        LocalDate skjæringstidspunktForPeriode;
+        LocalDate periodeStart;
+        if (toggletVilkårsperioder) {
+            // Trenger forskjell på skjæringstidspunkt og periodestart for å bruke vilkårsperioder (kun Frisinn)
+            skjæringstidspunktForPeriode = skjæringstidspunktTjeneste.hentSkjæringstidspunkterForPeriode(vilkårsperiode);
+            periodeStart = vilkårsperiode.getFomDato();
+        } else {
+            // Ingen forskjell på skjæringstidspunkt og periodestart for gammel modell
+            skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
+            periodeStart = vilkårsperiode.getFomDato();
+        }
         var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunkt.getUtledetSkjæringstidspunkt(), periodeStart);
+        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode, periodeStart);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {
             return avslåVilkår(kontekst, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat), vilkårsperiode);

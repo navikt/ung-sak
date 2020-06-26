@@ -28,6 +28,34 @@ class MapTilBeregningsgrunnlag {
         return Optional.of(bgBuilder.build());
     }
 
+    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag,
+                                                              Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling,
+                                                              DatoIntervallEntitet sisteSøknadsperiode,
+                                                              Boolean skalBenytteTidligereResultat) {
+        Set<BeregningsgrunnlagPeriode.Builder> perioder = new HashSet<>();
+        if (skalBenytteTidligereResultat) {
+            perioder.addAll(finnPerioderForNySøknad(beregningsgrunnlag, sisteSøknadsperiode));
+            perioder.addAll(finnOriginalBehandlingPerioder(beregningsgrunnlagOriginalBehandling, sisteSøknadsperiode));
+        } else {
+            perioder.addAll(beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+                .filter(p -> p.getDagsats() != null && p.getDagsats() > 0)
+                .map(BeregningsgrunnlagPeriode::builder)
+                .collect(Collectors.toSet()));
+        }
+
+
+        if (perioder.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Beregningsgrunnlag.Builder bgBuilder = Beregningsgrunnlag.builder(beregningsgrunnlag)
+            .fjernAllePerioder();
+
+        perioder.forEach(bgBuilder::leggTilBeregningsgrunnlagPeriode);
+
+        return Optional.of(bgBuilder.build());
+    }
+
     static Optional<Beregningsgrunnlag> mapBeregningsgrunnlagForNyeSøknadsperioder(Beregningsgrunnlag beregningsgrunnlag,
                                                                                    Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling,
                                                                                    DatoIntervallEntitet sisteSøknadsperiode) {
