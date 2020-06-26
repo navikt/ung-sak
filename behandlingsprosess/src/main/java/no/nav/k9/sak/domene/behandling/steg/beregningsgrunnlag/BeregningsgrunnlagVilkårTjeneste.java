@@ -60,12 +60,13 @@ public class BeregningsgrunnlagVilkårTjeneste {
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
                                            DatoIntervallEntitet vilkårsPeriode,
                                            Avslagsårsak avslagsårsak) {
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         VilkårResultatBuilder vilkårResultatBuilder = opprettAvslåttVilkårsResultat(
+            behandling,
             vilkårene,
             vilkårsPeriode,
             avslagsårsak);
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
@@ -83,11 +84,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    private VilkårResultatBuilder opprettAvslåttVilkårsResultat(Vilkårene vilkårene,
+    private VilkårResultatBuilder opprettAvslåttVilkårsResultat(Behandling behandling, Vilkårene vilkårene,
                                                                 DatoIntervallEntitet vilkårsPeriode,
                                                                 Avslagsårsak avslagsårsak) {
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
         vilkårBuilder
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
@@ -140,8 +142,10 @@ public class BeregningsgrunnlagVilkårTjeneste {
         if (beregningsvilkåret.isEmpty()) {
             return;
         }
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
         var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(vilkårsPeriode);
         vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
         builder.leggTil(vilkårBuilder);
