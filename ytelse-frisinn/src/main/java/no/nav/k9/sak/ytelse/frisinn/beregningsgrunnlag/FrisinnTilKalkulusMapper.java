@@ -62,6 +62,15 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
         return inntektArbeidYtelseGrunnlagDto;
     }
 
+    /**
+     * Mapper egen næring til kalkulus.
+     *
+     * For frisinn tas det kun med perioder som slutter før skjæringstidspunktet (rapportert inntekt) og perioder som overlapper med vilkårsperiode (løpende inntekt)
+     *
+     * @param egenNæring Oppgitt egen næring
+     * @param vilkårsPeriode vilkårsperiode det mappes for
+     * @return Mappet liste med egen næring
+     */
     @Override
     protected List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring, DatoIntervallEntitet vilkårsPeriode) {
         return egenNæring == null ? null : egenNæring.stream()
@@ -69,6 +78,13 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
             .map(TilKalkulusMapper::mapOppgittEgenNæring).collect(Collectors.toList());
     }
 
+    /**
+     * Mapper oppgitt frilans til kalkulus. Tar kun med frilansoppdrag som overlapper med vilkårsperiode.
+     *
+     * @param oppgittFrilans Oppgitt frilans
+     * @param vilkårsPeriode Vilkårsperiode
+     * @return Mappet oppgitt frilans
+     */
     @Override
     protected OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans, DatoIntervallEntitet vilkårsPeriode) {
         List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
@@ -79,6 +95,13 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
         return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet() == null ? false : oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
 
+    /**
+     * Mapper oppgitte arbeidsforhold som overlapper med vilkårsperiode.
+     *
+     * @param arbeidsforhold Liste med oppgitte arbeidsforhold
+     * @param vilkårsPeriode Vilkårsperiode
+     * @return
+     */
     @Override
     protected List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold, DatoIntervallEntitet vilkårsPeriode) {
         if (arbeidsforhold == null) {

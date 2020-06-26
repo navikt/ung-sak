@@ -26,7 +26,7 @@ public interface BeregningTjeneste {
      * @param referanse {@link BehandlingReferanse}
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag
      * @param skjæringstidspunkt - key for å finne bgReferanse mot kalkulus
-     * @param periodeStart
+     * @param periodeStart første dato i vilkårsperiode
      * @return KalkulusResultat {@link KalkulusResultat}
      */
     KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt, LocalDate periodeStart);
