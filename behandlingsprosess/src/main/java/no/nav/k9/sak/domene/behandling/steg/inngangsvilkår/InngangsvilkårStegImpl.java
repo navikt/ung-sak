@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -58,7 +58,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
             throw new IllegalArgumentException(String.format("Utviklerfeil: Steg[%s] håndterer ikke angitte vilkår %s", this.getClass(), vilkårTyper)); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
-        final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
+        final var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
         // Kall regelmotor
         vilkårTyper.forEach(vilkår -> aksjonspunkter.addAll(vurderVilkårIPerioder(vilkår, behandling, kontekst)));
 
@@ -66,7 +66,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         return stegResultat(aksjonspunkter);
     }
 
-    private List<AksjonspunktDefinisjon> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
+    private List<AksjonspunktResultat> vurderVilkårIPerioder(VilkårType vilkår, Behandling behandling, BehandlingskontrollKontekst kontekst) {
         var intervaller = perioderTilVurdering(kontekst.getBehandlingId(), vilkår);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, inngangsvilkårFellesTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId()));
         RegelResultat regelResultat = inngangsvilkårFellesTjeneste.vurderInngangsvilkår(Set.of(vilkår), ref, intervaller);
@@ -81,8 +81,8 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         return new ArrayList<>(regelResultat.getAksjonspunktDefinisjoner());
     }
 
-    protected BehandleStegResultat stegResultat(List<AksjonspunktDefinisjon> aksjonspunkter) {
-        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
+    protected BehandleStegResultat stegResultat(List<AksjonspunktResultat> aksjonspunkter) {
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
     }
 
     @SuppressWarnings("unused")

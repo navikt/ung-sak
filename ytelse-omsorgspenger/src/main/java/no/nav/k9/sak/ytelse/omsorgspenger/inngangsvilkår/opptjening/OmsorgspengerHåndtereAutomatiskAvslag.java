@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -36,7 +37,7 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
     @Override
     public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
         if (utbetalingTilBrukerIPerioden(behandling, periode)) {
-            regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+            regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET));
         }
     }
 
