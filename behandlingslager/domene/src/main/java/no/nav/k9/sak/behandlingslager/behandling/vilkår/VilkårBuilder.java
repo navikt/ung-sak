@@ -197,11 +197,11 @@ public class VilkårBuilder {
         if (!tilbakestiltePerioder.isEmpty()) {
             justereUtfallVedTilbakestilling();
         }
-        if (kantIKantVurderer.erKomprimerbar()) {
-            vilkårTidslinje.compress();
-        }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
+        }
+        if (kantIKantVurderer.erKomprimerbar()) {
+            vilkårTidslinje = vilkårTidslinje.compress();
         }
         bygget = true;
         var vilkårsPerioderRaw = vilkårTidslinje
