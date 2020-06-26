@@ -4,12 +4,17 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
@@ -21,30 +26,58 @@ import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
  */
 class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
 
-    Søknadsperioder(UttakRepository uttakRepository) {
+    private BehandlingRepository behandlingRepository;
+    private UttakRepository uttakRepository;
+
+    Søknadsperioder(BehandlingRepository behandlingRepository, UttakRepository uttakRepository) {
+        this.behandlingRepository = behandlingRepository;
         this.uttakRepository = uttakRepository;
     }
-
-    private UttakRepository uttakRepository;
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var uttakAktivitet = uttakRepository.hentFastsattUttak(behandlingId);
         List<Periode> søknadsperioder = FrisinnSøknadsperiodeMapper.map(uttakAktivitet);
-        if (søknadsperioder.isEmpty()) {
-            return Collections.emptyNavigableSet();
+
+        var origUttakAktivitet = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandling()
+            .map(orig -> uttakRepository.hentFastsattUttak(orig.getId()));
+
+        var origSøknadsperioder = origUttakAktivitet.map(FrisinnSøknadsperiodeMapper::map)
+            .orElse(Collections.emptyList());
+
+        Optional<Periode> nySøknadsperiode = finnNySøknadsperiode(origSøknadsperioder, søknadsperioder);
+
+        if (nySøknadsperiode.isPresent()) {
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(mapTilFullSøknadsmåned(nySøknadsperiode.get()))));
         } else {
-            Set<DatoIntervallEntitet> søknadsmåneder = søknadsperioder.stream()
-                .map(Periode::getFom)
-                .map(fomDato -> {
-                    if (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH)) {
-                        return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
-                    } else {
-                        return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
-                    }
-                }).collect(Collectors.toSet());
+            Set<DatoIntervallEntitet> søknadsmåneder = mapTilHelePerioder(søknadsperioder);
             return Collections.unmodifiableNavigableSet(new TreeSet<>(søknadsmåneder));
         }
+
+    }
+
+    @NotNull
+    private Set<DatoIntervallEntitet> mapTilHelePerioder(List<Periode> søknadsperioder) {
+        return søknadsperioder.stream().map(this::mapTilFullSøknadsmåned).collect(Collectors.toSet());
+    }
+
+    @NotNull
+    private DatoIntervallEntitet mapTilFullSøknadsmåned(Periode periode) {
+        LocalDate fomDato = periode.getFom();
+        if (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
+        } else {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
+        }
+    }
+
+    private Optional<Periode> finnNySøknadsperiode(List<Periode> perioderOrig, List<Periode> perioder) {
+        if (perioder.size() > perioderOrig.size()) {
+            return perioder.stream()
+                .sorted(Comparator.comparing(Periode::getFom, Comparator.reverseOrder()))
+                .findFirst();
+        }
+        return Optional.empty();
     }
 
 }
