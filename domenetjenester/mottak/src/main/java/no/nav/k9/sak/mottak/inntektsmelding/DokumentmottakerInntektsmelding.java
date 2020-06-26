@@ -144,12 +144,14 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
 
-    /** Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt. */
+    /**
+     * Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt.
+     */
     protected void doFireEvent(InntektsmeldingEvent event) {
         if (beanManager == null) {
             return;
         }
-        beanManager.fireEvent(event, new Annotation[] {});
+        beanManager.fireEvent(event, new Annotation[]{});
     }
 
     private void doMottaDokument(MottattDokument mottattDokument, Fagsak fagsak) {
@@ -168,12 +170,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
             Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
             behandling = sisteAvsluttetBehandling.orElse(behandling);
             // Håndter avsluttet behandling
-            if (behandlingsoppretter.erAvslåttBehandling(behandling)
-                || behandlingsoppretter.harBehandlingsresultatOpphørt(behandling)) {
-                håndterAvslåttEllerOpphørtBehandling(mottattDokument, fagsak, behandling);
-            } else {
-                håndterAvsluttetTidligereBehandling(mottattDokument, behandling);
-            }
+            håndterAvsluttetTidligereBehandling(mottattDokument, behandling);
         } else {
             oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument);
         }
