@@ -98,7 +98,8 @@ public class SjekkTilstrekkeligOpptjeningInklAntatt extends LeafSpecification<Me
     private LocalDate beregnFristForOpptjeningsopplysninger(MellomregningOpptjeningsvilkårData data) {
         LocalDate skjæringstidspunkt = data.getGrunnlag().getSisteDatoForOpptjening();
 
-        // first er 5 i måned etter skjæringstidspunktet
+        // innrapporteringsfirst er 5 i måned etter skjæringstidspunktet
+        // vi planlegger kjøring noen dager etter dette for å sikre at det er innrapportert
         LocalDate frist = skjæringstidspunkt.plusMonths(1).withDayOfMonth(10);
         return frist;
     }
