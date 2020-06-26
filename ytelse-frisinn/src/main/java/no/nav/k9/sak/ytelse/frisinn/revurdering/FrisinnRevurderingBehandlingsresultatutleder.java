@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
 @FagsakYtelseTypeRef("FRISINN")
@@ -33,16 +35,19 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
+    private Boolean toggletVilkårsperioder;
 
     @Inject
     public FrisinnRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
                                                         BeregningTjeneste beregningsgrunnlagTjeneste,
-                                                        UttakRepository uttakRepository) {
+                                                        UttakRepository uttakRepository,
+                                                        @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
 
         this.kalkulusTjeneste = beregningsgrunnlagTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.uttakRepository = uttakRepository;
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
 
@@ -69,7 +74,7 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
                 revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
             }
         }
-        
+
         // Oppdatering av vedtaksbrev
         if (!erNySøknadsperiode && revurdering.getBehandlingResultatType().equals(BehandlingResultatType.INGEN_ENDRING)) {
             vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
@@ -80,6 +85,12 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     }
 
     private boolean erHeltEllerDelvisInnvilget(Vilkår beregningsvilkår) {
+        if (toggletVilkårsperioder) {
+            return beregningsvilkår.getPerioder().stream()
+                .max(Comparator.comparing(p -> p.getPeriode().getFomDato()))
+                .filter(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT))
+                .isPresent();
+        }
         return beregningsvilkår.getPerioder().stream()
             .anyMatch(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
     }
