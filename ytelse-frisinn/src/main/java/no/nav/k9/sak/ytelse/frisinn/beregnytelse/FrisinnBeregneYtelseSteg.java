@@ -107,7 +107,6 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
             var originalBehandling = behandling.getOriginalBehandling();
 
             var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(behandling), STP_FRISINN);
-            var beregningsgrunnlagOriginalBehandling = originalBehandling.flatMap(b -> kalkulusTjeneste.hentEksaktFastsatt(BehandlingReferanse.fra(b), STP_FRISINN));
 
             if (beregningsgrunnlag.isPresent()) {
                 UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
@@ -134,6 +133,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
                 // Lagre beregningsresultat
                 beregningsresultatRepository.lagre(behandling, beregningsresultat);
+            } else {
                 beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build());
             }
         }
