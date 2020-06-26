@@ -65,7 +65,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
     private DatoIntervallEntitet mapTilFullSøknadsmåned(Periode periode) {
         LocalDate fomDato = periode.getFom();
         if (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
+            return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 1), LocalDate.of(2020, 4, 30));
         } else {
             return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
         }
