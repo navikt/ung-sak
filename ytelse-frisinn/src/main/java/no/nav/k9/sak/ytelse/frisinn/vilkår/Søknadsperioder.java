@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,9 +59,24 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
             var endredeSøknadsmåneder = søknadsmåneder.stream()
                 .filter(it -> endredeMånederIRevurdering.stream().anyMatch(endret -> endret.overlapper(it)))
                 .collect(Collectors.toSet());
+            leggTilAprilEllerMaiOmNødvendig(endredeSøknadsmåneder);
             return Collections.unmodifiableNavigableSet(new TreeSet<>(endredeSøknadsmåneder));
         }
 
+    }
+
+    private void leggTilAprilEllerMaiOmNødvendig(Set<DatoIntervallEntitet> endredeSøknadsmåneder) {
+        if (inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && !inkludererMåned(endredeSøknadsmåneder, Month.MAY)) {
+            var mai = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
+            endredeSøknadsmåneder.add(mai);
+        } else if (inkludererMåned(endredeSøknadsmåneder, Month.MAY) && !inkludererMåned(endredeSøknadsmåneder, Month.APRIL)) {
+            var april = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
+            endredeSøknadsmåneder.add(april);
+        }
+    }
+
+    private boolean inkludererMåned(Set<DatoIntervallEntitet> endredeSøknadsmåneder, Month måned) {
+        return endredeSøknadsmåneder.stream().anyMatch(p -> YearMonth.from(p.getTomDato()).equals(YearMonth.of(2020, måned)));
     }
 
     @NotNull
@@ -71,7 +87,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
     @NotNull
     private DatoIntervallEntitet mapTilFullSøknadsmåned(Periode periode) {
         LocalDate fomDato = periode.getFom();
-        if (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH)) {
+        if (fomDato.getYear() == 2020 && (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH))) {
             return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 1), LocalDate.of(2020, 4, 30));
         } else {
             return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
