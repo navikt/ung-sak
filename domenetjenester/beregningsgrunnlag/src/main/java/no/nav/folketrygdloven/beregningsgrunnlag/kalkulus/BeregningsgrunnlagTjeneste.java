@@ -170,6 +170,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
+    public void gjenopprettInitiell(BehandlingReferanse ref) {
+        grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
+    }
+
+    @Override
     public Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt) {
         var behandling1 = behandlingRepository.hentBehandling(behandlingId1);
         var behandling2 = behandlingRepository.hentBehandling(behandlingId2);
@@ -206,7 +211,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(skjæringstidspunkt);
             var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
             if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
-                var initilVersjon = grunnlagRepository.getInitilVersjon(behandlingId);
+                var initilVersjon = grunnlagRepository.getInitiellVersjon(behandlingId);
                 if (initilVersjon.isPresent()) {
                     var initReferanse = initilVersjon.get().finnFor(skjæringstidspunkt).map(BeregningsgrunnlagPeriode::getEksternReferanse);
                     if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {

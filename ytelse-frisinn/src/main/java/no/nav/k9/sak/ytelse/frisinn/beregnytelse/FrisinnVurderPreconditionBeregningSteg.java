@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -45,6 +46,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class FrisinnVurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
+    private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -56,11 +58,13 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
     }
 
     @Inject
-    public FrisinnVurderPreconditionBeregningSteg(BehandlingRepository behandlingRepository,
+    public FrisinnVurderPreconditionBeregningSteg(BeregningTjeneste kalkulusTjeneste,
+                                                  BehandlingRepository behandlingRepository,
                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   @FagsakYtelseTypeRef("FRISINN") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+        this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -80,7 +84,7 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
         }
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (behandling.erRevurdering()) {
-            ryddVilkårForOverstyrtRevurdering(kontekst, behandling);
+            ryddVilkårForOverstyrtRevurdering(kontekst, behandling, behandling.getOriginalBehandling().get());
         }
     }
 
@@ -88,12 +92,12 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
      * Rydder beregningsgrunnlagvilkår for revurdering.
      *
      * Setter vilkårsresultatet tilbake til resultatet fra originalbehandling for perioder som er endret i overstyring.
-     *
-     * @param kontekst Behandlingskontrollkontekst
+     *  @param kontekst Behandlingskontrollkontekst
      * @param behandling Aktiv behandling
+     * @param originalBehandling Original behandling
      */
-    private void ryddVilkårForOverstyrtRevurdering(BehandlingskontrollKontekst kontekst, Behandling behandling) {
-        Optional<Vilkår> origBeregningsvilkår = finnOriginaltBeregningsgrunnlagVilkår(behandling);
+    private void ryddVilkårForOverstyrtRevurdering(BehandlingskontrollKontekst kontekst, Behandling behandling, Behandling originalBehandling) {
+        Optional<Vilkår> origBeregningsvilkår = finnOriginaltBeregningsgrunnlagVilkår(originalBehandling);
 
         if (origBeregningsvilkår.isPresent()) {
             var vilkårResultat = vilkårResultatRepository.hent(behandling.getId());
@@ -102,8 +106,10 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
             }
             VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårResultat);
             var origVilkårsperioder = origBeregningsvilkår.get().getPerioder();
-            vilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling), false)
+            BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+            vilkårTjeneste.utledPerioderTilVurdering(ref, false)
                 .forEach(periode -> tilbakestillUtfallTilOriginal(periode, builder, origVilkårsperioder));
+            kalkulusTjeneste.gjenopprettInitiell(ref);
             vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
         }
     }
@@ -144,8 +150,8 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
         return beregningsvilkåret.isPresent();
     }
 
-    private Optional<Vilkår> finnOriginaltBeregningsgrunnlagVilkår(Behandling behandling) {
-        var origVilkår = behandling.getOriginalBehandling().flatMap(b -> vilkårResultatRepository.hentHvisEksisterer(b.getId()));
+    private Optional<Vilkår> finnOriginaltBeregningsgrunnlagVilkår(Behandling originalBehandling) {
+        var origVilkår = vilkårResultatRepository.hentHvisEksisterer(originalBehandling.getId());
         return origVilkår.stream()
             .flatMap(it -> it.getVilkårene().stream()
                 .filter(v -> v.getVilkårType().equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)))

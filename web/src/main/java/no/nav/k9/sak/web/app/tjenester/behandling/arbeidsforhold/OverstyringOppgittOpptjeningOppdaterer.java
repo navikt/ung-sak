@@ -95,10 +95,6 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         if (toggletVilkårsperioder) {
             var vilkårsperioder = vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
-            // Validerer at vi har perioder som skal vurderes. Vi må hindre dette for å unngå situasjoner der vi ikkje har aktive beregningsgrunnlag i kalkulus
-            if (vilkårsperioder.isEmpty()) {
-                throw new IllegalStateException("Ingen perioder er endret");
-            }
             for (DatoIntervallEntitet vilkårsperiode : vilkårsperioder) {
                 beregningsgrunnlagVilkårTjeneste.settVilkårutfallTilIkkeVurdert(param.getBehandlingId(), vilkårsperiode);
             }

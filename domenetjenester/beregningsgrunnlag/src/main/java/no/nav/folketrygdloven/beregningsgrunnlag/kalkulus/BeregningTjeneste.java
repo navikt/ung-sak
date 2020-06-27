@@ -76,5 +76,13 @@ public interface BeregningTjeneste {
      */
     void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
+    /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
+     *
+     * Brukes kun av FRISINN
+     *
+     * @param ref Behandlingreferanse
+     */
+    void gjenopprettInitiell(BehandlingReferanse ref);
+
     Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);
 }
