@@ -28,10 +28,12 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
 
     private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
+    private UtledPerioderMedEndringTjeneste utledPerioderMedEndringTjeneste;
 
-    Søknadsperioder(BehandlingRepository behandlingRepository, UttakRepository uttakRepository) {
+    Søknadsperioder(BehandlingRepository behandlingRepository, UttakRepository uttakRepository, UtledPerioderMedEndringTjeneste utledPerioderMedEndringTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.uttakRepository = uttakRepository;
+        this.utledPerioderMedEndringTjeneste = utledPerioderMedEndringTjeneste;
     }
 
     @Override
@@ -50,8 +52,13 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
         if (nySøknadsperiode.isPresent()) {
             return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(mapTilFullSøknadsmåned(nySøknadsperiode.get()))));
         } else {
-            Set<DatoIntervallEntitet> søknadsmåneder = mapTilHelePerioder(søknadsperioder);
-            return Collections.unmodifiableNavigableSet(new TreeSet<>(søknadsmåneder));
+            // Revurdering
+            var søknadsmåneder = mapTilHelePerioder(søknadsperioder);
+            var endredeMånederIRevurdering = utledPerioderMedEndringTjeneste.finnPeriodeMedEndring(behandlingId);
+            var endredeSøknadsmåneder = søknadsmåneder.stream()
+                .filter(it -> endredeMånederIRevurdering.stream().anyMatch(endret -> endret.overlapper(it)))
+                .collect(Collectors.toSet());
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(endredeSøknadsmåneder));
         }
 
     }
