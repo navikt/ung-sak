@@ -2,12 +2,17 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vilkår;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårMedPerioderDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeDto;
@@ -50,6 +55,18 @@ class VilkårDtoMapper {
         return Collections.emptyList();
     }
 
+    static List<VilkårMedPerioderDto> lagVilkarMedPerioderTilVurdering(Behandling behandling, Vilkårene vilkårene, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårsperioderVurdert) {
+        if (vilkårene != null) {
+
+            return vilkårene.getVilkårene().stream().map(vilkår -> {
+                NavigableSet<DatoIntervallEntitet> perioderTilVurdering = vilkårsperioderVurdert.getOrDefault(vilkår.getVilkårType(), new TreeSet<>());
+                return mapVilkårMedBarePerioderTilVurdering(vilkår, behandling, perioderTilVurdering);
+            }).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+
     private static VilkårPeriodeDto mapTilPeriode(boolean medVilkårkjøring, VilkårPeriode it) {
         VilkårPeriodeDto dto = new VilkårPeriodeDto();
         dto.setPeriode(new Periode(it.getFom(), it.getTom()));
@@ -68,6 +85,14 @@ class VilkårDtoMapper {
 
     private static VilkårMedPerioderDto mapVilkår(Vilkår vilkår, boolean medVilkårkjøring, Behandling behandling) {
         var vilkårsPerioder = vilkår.getPerioder().stream().map(it -> mapTilPeriode(medVilkårkjøring, it)).collect(Collectors.toList());
+        var vilkårMedPerioderDto = new VilkårMedPerioderDto(vilkår.getVilkårType(), vilkårsPerioder);
+        vilkårMedPerioderDto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
+        vilkårMedPerioderDto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
+        return vilkårMedPerioderDto;
+    }
+
+    private static VilkårMedPerioderDto mapVilkårMedBarePerioderTilVurdering(Vilkår vilkår, Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        var vilkårsPerioder = vilkår.getPerioder().stream().filter(p -> perioderTilVurdering.contains(p.getPeriode())).map(it -> mapTilPeriode(false, it)).collect(Collectors.toList());
         var vilkårMedPerioderDto = new VilkårMedPerioderDto(vilkår.getVilkårType(), vilkårsPerioder);
         vilkårMedPerioderDto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
         vilkårMedPerioderDto.setOverstyrbar(erOverstyrbar(vilkår, behandling));
