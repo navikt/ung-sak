@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingTypeRef("BT-004")
 public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {

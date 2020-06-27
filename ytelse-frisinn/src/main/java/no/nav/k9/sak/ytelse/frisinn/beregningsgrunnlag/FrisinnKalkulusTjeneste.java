@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
@@ -40,7 +39,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                                    FagsakRepository fagsakRepository,
-                                   @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
+                                   FrisinnKalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
@@ -50,9 +49,9 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate periodeStart) {
+    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
         if (!toggletVilkårsperioder) {
-            return super.startBeregning(referanse, ytelseGrunnlag, bgReferanse, periodeStart);
+            return super.startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         }
 
         FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
@@ -60,7 +59,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN);
         }
 
-        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, periodeStart);
+        StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         if (startBeregningRequest.getKalkulatorInput().getOpptjeningAktiviteter().getPerioder().isEmpty()) {
             if (frisinnGrunnlag.getSøkerYtelseForFrilans()) {
                 return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT);
@@ -68,7 +67,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
         }
 
-        TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
+        TilstandResponse tilstandResponse = getKalkulusRestTjeneste().startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
     }
 

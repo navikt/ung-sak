@@ -54,11 +54,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt, LocalDate periodeStart) {
-        UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), periodeStart, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
-        grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, periodeStart));
+    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt) {
+        UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
+        grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, skjæringstidspunkt));
 
-        return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, ytelseGrunnlag, bgReferanse, periodeStart);
+        return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -87,6 +88,7 @@ class MapTilBeregningsgrunnlag {
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .filter(p -> p.getDagsats() != null && p.getDagsats() > 0)
             .filter(p -> !p.getPeriode().getFomDato().isBefore(sisteSøknadsperiode.getFomDato()))
+            .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
             .map(BeregningsgrunnlagPeriode::builder)
             .collect(Collectors.toSet());
     }
@@ -94,6 +96,7 @@ class MapTilBeregningsgrunnlag {
     private static Set<BeregningsgrunnlagPeriode.Builder> finnPerioderFraListeMedDagsats(List<Beregningsgrunnlag> beregningsgrunnlag) {
         return beregningsgrunnlag.stream().flatMap(bg -> bg.getBeregningsgrunnlagPerioder().stream())
             .filter(p -> p.getDagsats() != null && p.getDagsats() > 0)
+            .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
             .map(BeregningsgrunnlagPeriode::builder)
             .collect(Collectors.toSet());
     }

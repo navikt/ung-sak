@@ -200,10 +200,10 @@ public class VilkårBuilder {
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
+        bygget = true;
         if (kantIKantVurderer.erKomprimerbar()) {
             vilkårTidslinje = vilkårTidslinje.compress();
         }
-        bygget = true;
         var vilkårsPerioderRaw = vilkårTidslinje
             .toSegments()
             .stream()

@@ -10,9 +10,4 @@ public class DefaultKantIKantVurderer implements KantIKantVurderer {
     public boolean erKantIKant(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
         return periode2.grenserTil(periode1);
     }
-
-    @Override
-    public boolean erKomprimerbar() {
-        return true;
-    }
 }

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(kode = "FASTSETT_STP_BER")
@@ -43,7 +41,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
-    private Boolean toggletVilkårsperioder;
 
     protected FastsettBeregningsaktiviteterSteg() {
         // for CDI proxy
@@ -54,23 +51,21 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                              @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
-                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                             @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
 
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
 
@@ -84,19 +79,9 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        LocalDate skjæringstidspunktForPeriode;
-        LocalDate periodeStart;
-        if (toggletVilkårsperioder) {
-            // Trenger forskjell på skjæringstidspunkt og periodestart for å bruke vilkårsperioder (kun Frisinn)
-            skjæringstidspunktForPeriode = skjæringstidspunktTjeneste.hentSkjæringstidspunkterForPeriode(vilkårsperiode);
-            periodeStart = vilkårsperiode.getFomDato();
-        } else {
-            // Ingen forskjell på skjæringstidspunkt og periodestart for gammel modell
-            skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
-            periodeStart = vilkårsperiode.getFomDato();
-        }
+        var skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
         var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode, periodeStart);
+        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode);
         Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
         if (vilkårOppfylt != null && !vilkårOppfylt) {
             return avslåVilkår(kontekst, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat), vilkårsperiode);

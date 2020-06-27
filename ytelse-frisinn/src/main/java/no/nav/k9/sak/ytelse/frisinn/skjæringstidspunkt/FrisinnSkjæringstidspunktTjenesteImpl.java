@@ -15,7 +15,6 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -50,11 +49,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         // FIXME K9 skjæringstidspunkt
         return førsteUttaksdag(behandlingId);
-    }
-
-    @Override
-    public LocalDate hentSkjæringstidspunkterForPeriode(DatoIntervallEntitet vilkårsperiode) {
-        return skjæringstidspunkt;
     }
 
     @Override

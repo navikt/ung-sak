@@ -80,10 +80,10 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 @Default
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
-    protected KalkulusRestTjeneste restTjeneste;
-    protected FagsakRepository fagsakRepository;
-    protected VilkårResultatRepository vilkårResultatRepository;
-    protected KalkulatorInputTjeneste kalkulatorInputTjeneste;
+    private KalkulusRestTjeneste restTjeneste;
+    private FagsakRepository fagsakRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private KalkulatorInputTjeneste kalkulatorInputTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
@@ -231,6 +231,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             ytelseSomSkalBeregnes
         );
         return restTjeneste.erEndringIBeregning(request);
+    }
+
+    protected KalkulusRestTjeneste getKalkulusRestTjeneste() {
+        return restTjeneste;
     }
 
     private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse) {

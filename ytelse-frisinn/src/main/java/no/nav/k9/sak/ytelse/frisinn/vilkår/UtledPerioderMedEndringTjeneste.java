@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -25,7 +25,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
 
-@ApplicationScoped
+@Dependent
 public class UtledPerioderMedEndringTjeneste {
 
 

@@ -14,8 +14,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
@@ -89,7 +87,6 @@ import no.nav.k9.sak.typer.Beløp;
 /**
  * Mapper fra k9-format til kalkulus-format, benytter kontrakt v1 fra kalkulus
  */
-@ApplicationScoped
 public class TilKalkulusMapper {
 
     public static final String KODEVERDI_UNDEFINED = "-";
