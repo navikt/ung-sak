@@ -12,7 +12,7 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -34,13 +34,11 @@ import no.nav.k9.sak.typer.AktørId;
  * Bruker inntekter fram til siste dag i vilkårsperioden
  *
  */
-public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
+public class FrisinnTilKalkulusMapper {
 
     public static final LocalDate STP_FRISINN = LocalDate.of(2020, 3, 1);
 
-    @Override
     public InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag,
-                                                    SakInntektsmeldinger sakInntektsmeldinger,
                                                     AktørId aktørId,
                                                     DatoIntervallEntitet vilkårsPeriode,
                                                     OppgittOpptjening oppgittOpptjening) {
@@ -49,18 +47,29 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
         Optional<AktørArbeid> arbeid = grunnlag.getAktørArbeidFraRegister(aktørId);
 
         var yrkesaktiviteterForBeregning = arbeid.map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList());
-        var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
+        var alleRelevanteInntekter = TilKalkulusMapper.finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
-        inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
-        inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
-        inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
+        inntektArbeidYtelseGrunnlagDto.medArbeidDto(TilKalkulusMapper.mapArbeidDto(yrkesaktiviteterForBeregning));
+        inntektArbeidYtelseGrunnlagDto.medInntekterDto(TilKalkulusMapper.mapInntektDto(alleRelevanteInntekter));
+        inntektArbeidYtelseGrunnlagDto.medYtelserDto(TilKalkulusMapper.mapYtelseDto(ytelseFilter.getAlleYtelser()));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(TilKalkulusMapper.mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening, vilkårsPeriode));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(TilKalkulusMapper.mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
     }
+
+    public OppgittOpptjeningDto mapTilOppgittOpptjeningDto(OppgittOpptjening oppgittOpptjening, DatoIntervallEntitet vilkårsPeriode) {
+        if (oppgittOpptjening != null) {
+            return new OppgittOpptjeningDto(
+                oppgittOpptjening.getFrilans().map(oppgittFrilans -> mapOppgittFrilansOppdragListe(oppgittFrilans, vilkårsPeriode)).orElse(null),
+                mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring(), vilkårsPeriode),
+                mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold(), vilkårsPeriode));
+        }
+        return null;
+    }
+
 
     /**
      * Mapper egen næring til kalkulus.
@@ -71,8 +80,7 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
      * @param vilkårsPeriode vilkårsperiode det mappes for
      * @return Mappet liste med egen næring
      */
-    @Override
-    protected List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring, DatoIntervallEntitet vilkårsPeriode) {
+    private List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring, DatoIntervallEntitet vilkårsPeriode) {
         return egenNæring == null ? null : egenNæring.stream()
             .filter(oppgittEgenNæring -> oppgittEgenNæring.getPeriode().getTomDato().isBefore(STP_FRISINN) || oppgittEgenNæring.getPeriode().overlapper(vilkårsPeriode))
             .map(TilKalkulusMapper::mapOppgittEgenNæring).collect(Collectors.toList());
@@ -85,15 +93,15 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
      * @param vilkårsPeriode Vilkårsperiode
      * @return Mappet oppgitt frilans
      */
-    @Override
-    protected OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans, DatoIntervallEntitet vilkårsPeriode) {
+    private OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans, DatoIntervallEntitet vilkårsPeriode) {
         List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
             .stream()
             .filter(frilansoppdrag -> frilansoppdrag.getPeriode().overlapper(vilkårsPeriode))
-            .map(mapFrilansOppdrag())
+            .map(TilKalkulusMapper.mapFrilansOppdrag())
             .collect(Collectors.toList());
         return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet() == null ? false : oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
+
 
     /**
      * Mapper oppgitte arbeidsforhold som overlapper med vilkårsperiode.
@@ -102,8 +110,7 @@ public class FrisinnTilKalkulusMapper extends TilKalkulusMapper {
      * @param vilkårsPeriode Vilkårsperiode
      * @return
      */
-    @Override
-    protected List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold, DatoIntervallEntitet vilkårsPeriode) {
+    private List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold, DatoIntervallEntitet vilkårsPeriode) {
         if (arbeidsforhold == null) {
             return null;
         }

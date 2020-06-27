@@ -115,13 +115,13 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
         inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
-        inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening, vilkårsPeriode));
+        inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
     }
 
-    protected static List<Inntekt> finnRelevanteInntekter(InntektFilter inntektFilter) {
+    public static List<Inntekt> finnRelevanteInntekter(InntektFilter inntektFilter) {
         return new ArrayList<>() {
             {
                 addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
@@ -130,7 +130,7 @@ public class TilKalkulusMapper {
         };
     }
 
-    protected static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjonOpt) {
+    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjonOpt) {
         if (arbeidsforholdInformasjonOpt.isEmpty()) {
             return null;
         }
@@ -147,21 +147,21 @@ public class TilKalkulusMapper {
         return null;
     }
 
-    protected OppgittOpptjeningDto mapTilOppgittOpptjeningDto(OppgittOpptjening oppgittOpptjening, DatoIntervallEntitet vilkårsPeriode) {
+    public OppgittOpptjeningDto mapTilOppgittOpptjeningDto(OppgittOpptjening oppgittOpptjening) {
         if (oppgittOpptjening != null) {
             return new OppgittOpptjeningDto(
-                oppgittOpptjening.getFrilans().map(oppgittFrilans -> mapOppgittFrilansOppdragListe(oppgittFrilans, vilkårsPeriode)).orElse(null),
-                mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring(), vilkårsPeriode),
-                mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold(), vilkårsPeriode));
+                oppgittOpptjening.getFrilans().map(oppgittFrilans -> mapOppgittFrilansOppdragListe(oppgittFrilans)).orElse(null),
+                mapOppgittEgenNæringListe(oppgittOpptjening.getEgenNæring()),
+                mapOppgittArbeidsforholdDto(oppgittOpptjening.getOppgittArbeidsforhold()));
         }
         return null;
     }
 
-    protected List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring, DatoIntervallEntitet vilkårsPeriode) {
+    public List<OppgittEgenNæringDto> mapOppgittEgenNæringListe(List<OppgittEgenNæring> egenNæring) {
         return egenNæring == null ? null : egenNæring.stream().map(TilKalkulusMapper::mapOppgittEgenNæring).collect(Collectors.toList());
     }
 
-    protected static OppgittEgenNæringDto mapOppgittEgenNæring(OppgittEgenNæring oppgittEgenNæring) {
+    public static OppgittEgenNæringDto mapOppgittEgenNæring(OppgittEgenNæring oppgittEgenNæring) {
         return new OppgittEgenNæringDto(
             mapPeriode(oppgittEgenNæring.getPeriode()),
             oppgittEgenNæring.getOrgnr() == null ? null : new Organisasjon(oppgittEgenNæring.getOrgnr()),
@@ -174,18 +174,18 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getBruttoInntekt());
     }
 
-    protected List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold, DatoIntervallEntitet vilkårsPeriode) {
+    private List<OppgittArbeidsforholdDto> mapOppgittArbeidsforholdDto(List<OppgittArbeidsforhold> arbeidsforhold) {
         if (arbeidsforhold == null) {
             return null;
         }
         return arbeidsforhold.stream().map(TilKalkulusMapper::mapArbeidsforhold).collect(Collectors.toList());
     }
 
-    protected static OppgittArbeidsforholdDto mapArbeidsforhold(OppgittArbeidsforhold arb) {
+    public static OppgittArbeidsforholdDto mapArbeidsforhold(OppgittArbeidsforhold arb) {
         return new OppgittArbeidsforholdDto(mapPeriode(arb.getPeriode()), arb.getInntekt());
     }
 
-    protected OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans, DatoIntervallEntitet vilkårsPeriode) {
+    private OppgittFrilansDto mapOppgittFrilansOppdragListe(OppgittFrilans oppgittFrilans) {
         List<OppgittFrilansInntekt> oppdrag = oppgittFrilans.getFrilansoppdrag()
             .stream()
             .map(mapFrilansOppdrag())
@@ -193,7 +193,7 @@ public class TilKalkulusMapper {
         return new OppgittFrilansDto(oppgittFrilans.getErNyoppstartet() == null ? false : oppgittFrilans.getErNyoppstartet(), oppdrag);
     }
 
-    protected static Function<OppgittFrilansoppdrag, OppgittFrilansInntekt> mapFrilansOppdrag() {
+    public static Function<OppgittFrilansoppdrag, OppgittFrilansInntekt> mapFrilansOppdrag() {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
@@ -306,7 +306,7 @@ public class TilKalkulusMapper {
         return arbeidsgiver.getErVirksomhet() ? new Organisasjon(arbeidsgiver.getOrgnr()) : new AktørIdPersonident(arbeidsgiver.getAktørId().getId());
     }
 
-    protected static YtelserDto mapYtelseDto(List<Ytelse> alleYtelser) {
+    public static YtelserDto mapYtelseDto(List<Ytelse> alleYtelser) {
         List<YtelseDto> ytelserDto = alleYtelser.stream().map(ytelse -> new YtelseDto(
             mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
             mapYtelseAnvist(ytelse.getYtelseAnvist()),
@@ -346,7 +346,7 @@ public class TilKalkulusMapper {
         }).collect(Collectors.toSet());
     }
 
-    protected static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
+    public static InntekterDto mapInntektDto(List<Inntekt> alleInntektBeregningsgrunnlag) {
         List<UtbetalingDto> utbetalingDtoer = alleInntektBeregningsgrunnlag.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
         if (!utbetalingDtoer.isEmpty()) {
             return new InntekterDto(utbetalingDtoer);
@@ -370,7 +370,7 @@ public class TilKalkulusMapper {
             inntektspost.getBeløp().getVerdi());
     }
 
-    protected static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
+    public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning) {
         List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList());
         if (!yrkesaktivitetDtoer.isEmpty()) {
             return new ArbeidDto(yrkesaktivitetDtoer);

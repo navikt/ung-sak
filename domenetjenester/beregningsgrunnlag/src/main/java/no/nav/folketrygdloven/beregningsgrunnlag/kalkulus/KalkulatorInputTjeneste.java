@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -13,10 +12,13 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
+import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -44,12 +46,11 @@ public class KalkulatorInputTjeneste {
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
         var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
 
-        var grunnlagDto = getTilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
+        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, inntektArbeidYtelseGrunnlag, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
@@ -64,8 +65,12 @@ public class KalkulatorInputTjeneste {
         return kalkulatorInputDto;
     }
 
-    protected TilKalkulusMapper getTilKalkulusMapper() {
-        return new TilKalkulusMapper();
+    protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse,
+                                                               DatoIntervallEntitet vilkårsperiode,
+                                                               InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
+                                                               OppgittOpptjening oppgittOpptjening) {
+        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
+        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
     }
 
     protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {
