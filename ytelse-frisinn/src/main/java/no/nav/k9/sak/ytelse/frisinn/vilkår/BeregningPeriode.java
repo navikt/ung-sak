@@ -30,3 +30,4 @@ class BeregningPeriode implements VilkårsPeriodiseringsFunksjon {
         }
     }
 }
+

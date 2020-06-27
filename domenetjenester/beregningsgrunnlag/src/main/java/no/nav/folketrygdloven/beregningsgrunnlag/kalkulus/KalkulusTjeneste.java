@@ -80,7 +80,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 @Default
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
-    protected KalkulusRestTjeneste restTjeneste;
+    private KalkulusRestTjeneste restTjeneste;
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
@@ -93,7 +93,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     @Inject
     public KalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                             FagsakRepository fagsakRepository,
-                            VilkårResultatRepository vilkårResultatRepository, KalkulatorInputTjeneste kalkulatorInputTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+                            VilkårResultatRepository vilkårResultatRepository,
+                            @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
+                            InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                            ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.restTjeneste = restTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -152,8 +155,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse) {
-        HentBeregningsgrunnlagDtoForGUIRequest request = lagHentBeregningsgrunnlagRequest(bgReferanse, referanse);
+    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse, LocalDate skjæringstidspunkt) {
+        HentBeregningsgrunnlagDtoForGUIRequest request = lagHentBeregningsgrunnlagRequest(bgReferanse, referanse, skjæringstidspunkt);
         return restTjeneste.hentBeregningsgrunnlagDto(request);
     }
 
@@ -230,7 +233,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return restTjeneste.erEndringIBeregning(request);
     }
 
-    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse) {
+    protected KalkulusRestTjeneste getKalkulusRestTjeneste() {
+        return restTjeneste;
+    }
+
+    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse, LocalDate skjæringstidspunkt) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
         List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse);
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
@@ -243,11 +250,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                 new EksternArbeidsforholdRef(ref.getEksternReferanse().getReferanse())))
             .collect(Collectors.toSet());
 
+        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow().finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getPeriode();
+        LocalDate vilkårFOM = vilkårsPeriode.getFomDato();
         return new HentBeregningsgrunnlagDtoForGUIRequest(
             bgReferanse,
             ytelseSomSkalBeregnes,
             arbeidsgiverOpplysningerListe,
-            referanser
+            referanser, vilkårFOM
         );
     }
 

@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
@@ -31,21 +32,29 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
 
+    private Boolean toggletVilkårsperioder;
+
     public FrisinnKalkulusTjeneste() {
     }
 
     @Inject
     public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
                                    FagsakRepository fagsakRepository,
-                                   KalkulatorInputTjeneste kalkulatorInputTjeneste,
+                                   @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                   VilkårResultatRepository vilkårResultatRepository) {
+                                   VilkårResultatRepository vilkårResultatRepository,
+                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
+        if (!toggletVilkårsperioder) {
+            return super.startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
+        }
+
         FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
         if (frisinnGrunnlag.getPerioderMedSøkerInfo().isEmpty()) {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN);
@@ -59,7 +68,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
         }
 
-        TilstandResponse tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
+        TilstandResponse tilstandResponse = getKalkulusRestTjeneste().startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
     }
+
 }

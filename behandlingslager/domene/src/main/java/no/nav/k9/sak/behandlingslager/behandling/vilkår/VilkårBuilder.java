@@ -54,7 +54,7 @@ public class VilkårBuilder {
         return avstand > 0 && avstand < mellomliggendePeriodeAvstand;
     }
 
-    VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
+    public VilkårBuilder medKantIKantVurderer(KantIKantVurderer vurderer) {
         Objects.requireNonNull(vurderer);
         this.kantIKantVurderer = vurderer;
         return this;
@@ -201,8 +201,10 @@ public class VilkårBuilder {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
         bygget = true;
+        if (kantIKantVurderer.erKomprimerbar()) {
+            vilkårTidslinje = vilkårTidslinje.compress();
+        }
         var vilkårsPerioderRaw = vilkårTidslinje
-            .compress()
             .toSegments()
             .stream()
             .filter(it -> it.getValue() != null)

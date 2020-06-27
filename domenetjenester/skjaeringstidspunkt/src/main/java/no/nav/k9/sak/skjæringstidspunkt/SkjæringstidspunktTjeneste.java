@@ -14,7 +14,7 @@ public interface SkjæringstidspunktTjeneste {
     Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId);
 
     Optional<LocalDate> getOpphørsdato(BehandlingReferanse ref);
-    
+
     /**
      * Skjæringstidspunkt som benyttes for registerinnhenting
      */

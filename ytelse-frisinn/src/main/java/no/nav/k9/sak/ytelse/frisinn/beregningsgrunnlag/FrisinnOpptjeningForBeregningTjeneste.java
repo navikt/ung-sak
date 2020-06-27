@@ -11,7 +11,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +27,17 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
 public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
     /** alle må starte et sted. */
     private static final LocalDate THE_FOM = LocalDate.of(2017, 3, 1);
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2020, 3, 1);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -45,20 +47,28 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     private final OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD));
+    private Boolean toggletVilkårsperioder;
 
     protected FrisinnOpptjeningForBeregningTjeneste() {
         // For proxy
     }
 
     @Inject
-    public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+    public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser,
+                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        LocalDate stp = vilkårsperiode.getFomDato();
+        LocalDate stp;
+        if (toggletVilkårsperioder) {
+            stp = SKJÆRINGSTIDSPUNKT;
+        } else {
+            stp = vilkårsperiode.getFomDato();
+        }
         LocalDate fom = THE_FOM;
         OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
 

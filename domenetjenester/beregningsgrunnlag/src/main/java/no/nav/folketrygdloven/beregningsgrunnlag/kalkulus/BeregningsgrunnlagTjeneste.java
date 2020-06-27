@@ -102,7 +102,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
 
-        return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagDto(ref, bgReferanse);
+        return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagDto(ref, bgReferanse, skjæringstidspunkt);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return beregningsgrunnlagPerioderGrunnlag.get()
                 .getGrunnlagPerioder()
                 .stream()
-                .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse()))
+                .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse(), it.getSkjæringstidspunkt()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         }

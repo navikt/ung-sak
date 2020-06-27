@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,19 +15,23 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
 public class FrisinnYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<FrisinnGrunnlag> {
 
     private UttakRepository uttakRepository;
+    private Boolean toggletVilkårsperioder;
 
     FrisinnYtelsesspesifiktGrunnlagMapper() {
     }
 
     @Inject
-    public FrisinnYtelsesspesifiktGrunnlagMapper(UttakRepository uttakRepository) {
+    public FrisinnYtelsesspesifiktGrunnlagMapper(UttakRepository uttakRepository,
+                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
         this.uttakRepository = uttakRepository;
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
@@ -42,7 +47,16 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
                 .anyMatch(p -> p.getPeriode().overlapper(søknadsperiode) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
         //TODO(OJR) fjern mellom todoene
 
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos;
+        if (toggletVilkårsperioder) {
+            periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak)
+                .stream()
+                .filter(p -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom())))
+                .collect(Collectors.toList());
+        } else {
+            periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);
+        }
+
 
         FrisinnGrunnlag frisinnGrunnlag = new FrisinnGrunnlag(søkerYtelseForFrilans, søkerYtelseForNæring);
         frisinnGrunnlag.medPerioderMedSøkerInfo(periodeMedSøkerInfoDtos);

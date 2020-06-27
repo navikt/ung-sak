@@ -9,12 +9,16 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
@@ -23,17 +27,36 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private MaksSøktePeriode maksSøktePeriode;
     private VilkårUtleder vilkårUtleder;
+    private Boolean toggletVilkårsperioder;
 
     FrisinnVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
 
     @Inject
-    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder, UttakRepository uttakRepository) {
+    public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder,
+                                                      UttakRepository uttakRepository,
+                                                      BehandlingRepository behandlingRepository,
+                                                      @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
-        final var beregningPeriode = new BeregningPeriode(uttakRepository);
-        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
         this.vilkårUtleder = vilkårUtleder;
+        this.toggletVilkårsperioder = toggletVilkårsperioder;
+        if (toggletVilkårsperioder) {
+            final var søknadsperioder = new Søknadsperioder(behandlingRepository, uttakRepository);
+            vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søknadsperioder);
+        } else {
+            final var beregningPeriode = new BeregningPeriode(uttakRepository);
+            vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
+        }
+    }
+
+    @Override
+    public KantIKantVurderer getKantIKantVurderer() {
+        if (toggletVilkårsperioder) {
+            return new IkkeKantIKantVurderer();
+        } else {
+            return new DefaultKantIKantVurderer();
+        }
     }
 
     @Override
@@ -53,7 +76,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     @Override
     public int maksMellomliggendePeriodeAvstand() {
-        return 365;
+        return 0;
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
