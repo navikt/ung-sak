@@ -62,6 +62,17 @@ public class BeregningPerioderGrunnlagRepository {
         entityManager.flush();
     }
 
+    public void gjenopprettInitiell(Long behandlingId) {
+        Optional<BeregningsgrunnlagPerioderGrunnlag> aktivtGrunnlag = hentGrunnlag(behandlingId);
+        aktivtGrunnlag.ifPresent(BeregningsgrunnlagPerioderGrunnlag::setIkkeAktivt);
+        aktivtGrunnlag.ifPresent(entityManager::persist);
+        entityManager.flush();
+        Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = getInitiellVersjon(behandlingId);
+        initiellVersjon.map(BeregningsgrunnlagPerioderGrunnlagBuilder::new)
+            .ifPresent(builder -> lagre(builder, behandlingId, false));
+        entityManager.flush();
+    }
+
     public void deaktiver(Long behandlingId, LocalDate skjæringstidspunkt) {
         var aktivtGrunnlag = hentGrunnlag(behandlingId);
         if (aktivtGrunnlag.isPresent()) {
@@ -76,7 +87,7 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
-    public Optional<BeregningsgrunnlagPerioderGrunnlag> getInitilVersjon(Long behandlingId) {
+    public Optional<BeregningsgrunnlagPerioderGrunnlag> getInitiellVersjon(Long behandlingId) {
         // må også sortere på id da opprettetTidspunkt kun er til nærmeste millisekund og ikke satt fra db.
         TypedQuery<BeregningsgrunnlagPerioderGrunnlag> query = entityManager.createQuery(
             "SELECT mbg FROM BeregningsgrunnlagPerioderGrunnlag mbg WHERE mbg.behandlingId = :behandling_id ORDER BY mbg.opprettetTidspunkt, mbg.id", //$NON-NLS-1$

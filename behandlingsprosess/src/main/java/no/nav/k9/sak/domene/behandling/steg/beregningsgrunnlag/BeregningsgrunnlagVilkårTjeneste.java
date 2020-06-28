@@ -126,12 +126,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
         Optional<VedtakVarsel> behandlingresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        ryddOppVilkårsvurdering(kontekst, behandlingresultatOpt, vilkårsPeriode);
+        settVilkårutfallTilIkkeVurdert(kontekst.getBehandlingId(), vilkårsPeriode);
         nullstillVedtaksresultat(kontekst, behandlingresultatOpt);
     }
 
-    private void ryddOppVilkårsvurdering(BehandlingskontrollKontekst kontekst, Optional<VedtakVarsel> behandlingresultatOpt, DatoIntervallEntitet vilkårsPeriode) {
-        Optional<Vilkårene> vilkårResultatOpt = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
+    public void settVilkårutfallTilIkkeVurdert(Long behandlingId, DatoIntervallEntitet vilkårsPeriode) {
+        Optional<Vilkårene> vilkårResultatOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårResultatOpt.isEmpty()) {
             return;
         }
@@ -142,7 +142,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         if (beregningsvilkåret.isEmpty()) {
             return;
         }
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .medKantIKantVurderer(getVilkårsPerioderTilVurderingTjeneste(behandling).getKantIKantVurderer());
@@ -150,8 +150,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         vilkårBuilder.leggTil(vilkårPeriodeBuilder.medUtfall(IKKE_VURDERT));
         builder.leggTil(vilkårBuilder);
         var nyttResultat = builder.build();
-        behandlingresultatOpt.ifPresent(br -> behandlingsresultatRepository.lagre(kontekst.getBehandlingId(), br));
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), nyttResultat);
+        vilkårResultatRepository.lagre(behandlingId, nyttResultat);
     }
 
     private void nullstillVedtaksresultat(BehandlingskontrollKontekst kontekst, Optional<VedtakVarsel> behandlingresultatOpt) {

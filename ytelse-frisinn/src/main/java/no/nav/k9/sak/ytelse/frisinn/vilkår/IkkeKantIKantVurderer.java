@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
+import java.time.Month;
+
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -13,7 +15,11 @@ public class IkkeKantIKantVurderer implements KantIKantVurderer {
 
     @Override
     public boolean erKantIKant(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
-        return false;
+        return slutterIAprilEllerMai(periode1) && slutterIAprilEllerMai(periode2);
+    }
+
+    private boolean slutterIAprilEllerMai(DatoIntervallEntitet periode1) {
+        return periode1.getTomDato().getMonth().equals(Month.APRIL) || periode1.getTomDato().getMonth().equals(Month.MAY);
     }
 
     @Override

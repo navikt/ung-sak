@@ -37,12 +37,13 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
     public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder,
                                                       UttakRepository uttakRepository,
                                                       BehandlingRepository behandlingRepository,
+                                                      UtledPerioderMedEndringTjeneste utledPerioderMedEndringTjeneste,
                                                       @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         this.vilkårUtleder = vilkårUtleder;
         this.toggletVilkårsperioder = toggletVilkårsperioder;
         if (toggletVilkårsperioder) {
-            final var søknadsperioder = new Søknadsperioder(behandlingRepository, uttakRepository);
+            final var søknadsperioder = new Søknadsperioder(behandlingRepository, uttakRepository, utledPerioderMedEndringTjeneste);
             vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søknadsperioder);
         } else {
             final var beregningPeriode = new BeregningPeriode(uttakRepository);
