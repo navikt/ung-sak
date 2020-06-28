@@ -81,7 +81,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         if (toggletVilkårsperioder) {
-            var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling));
+            var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
 
             if (!beregningsgrunnlag.isEmpty()) {
                 UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);

@@ -31,6 +31,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
      * diff i vilkårsperioder må håndteres.
      */
     public static final LocalDate APRIL_VILKÅRSPERIODE_FOM = LocalDate.of(2020, 3, 1);
+    public static final LocalDate APRIL_VILKÅRSPERIODE_TOM = LocalDate.of(2020, 4, 30);
     public static final LocalDate MAI_VILKÅRSPERIODE_TOM = LocalDate.of(2020, 5, 31);
     private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
@@ -94,7 +95,11 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
 
     private DatoIntervallEntitet mapTilFullSøknadsmåned(Periode periode) {
         LocalDate fomDato = periode.getFom();
-        return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
+        if (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, APRIL_VILKÅRSPERIODE_TOM);
+        } else {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
+        }
     }
 
     private Optional<Periode> finnNySøknadsperiode(List<Periode> perioderOrig, List<Periode> perioder) {
