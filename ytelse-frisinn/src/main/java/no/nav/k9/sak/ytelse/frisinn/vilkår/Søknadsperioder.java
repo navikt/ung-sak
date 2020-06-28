@@ -66,7 +66,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
             var endredeSøknadsmåneder = søknadsmåneder.stream()
                 .filter(it -> endredeMånederIRevurdering.stream().anyMatch(endret -> endret.overlapper(it)))
                 .collect(Collectors.toSet());
-            leggTilAprilEllerMaiOmNødvendig(endredeSøknadsmåneder);
+            leggTilAprilEllerMaiOmNødvendig(endredeSøknadsmåneder, søknadsmåneder);
             return Collections.unmodifiableNavigableSet(new TreeSet<>(endredeSøknadsmåneder));
         }
 
@@ -78,12 +78,13 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
      * På grunn av dette legges det til en av disse månedene om den andre er endret.
      *
      * @param endredeSøknadsmåneder Perioder/Måneder som er endret i overstyring av frisinn
+     * @param søknadsmåneder Perioder som er søkt for
      */
-    private void leggTilAprilEllerMaiOmNødvendig(Set<DatoIntervallEntitet> endredeSøknadsmåneder) {
-        if (inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && !inkludererMåned(endredeSøknadsmåneder, Month.MAY)) {
+    private void leggTilAprilEllerMaiOmNødvendig(Set<DatoIntervallEntitet> endredeSøknadsmåneder, Set<DatoIntervallEntitet> søknadsmåneder) {
+        if (inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && !inkludererMåned(endredeSøknadsmåneder, Month.MAY) && inkludererMåned(søknadsmåneder, Month.MAY)) {
             var mai = DatoIntervallEntitet.fraOgMedTilOgMed(MAI_VILKÅRSPERIODE_FOM, MAI_VILKÅRSPERIODE_TOM);
             endredeSøknadsmåneder.add(mai);
-        } else if (inkludererMåned(endredeSøknadsmåneder, Month.MAY) && !inkludererMåned(endredeSøknadsmåneder, Month.APRIL)) {
+        } else if (inkludererMåned(endredeSøknadsmåneder, Month.MAY) && !inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && inkludererMåned(søknadsmåneder, Month.APRIL)) {
             var april = DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, APRIL_VILKÅRSPERIODE_TOM);
             endredeSøknadsmåneder.add(april);
         }
