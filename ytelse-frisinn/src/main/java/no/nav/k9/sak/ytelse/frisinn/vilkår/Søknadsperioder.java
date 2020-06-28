@@ -56,7 +56,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
         Optional<Periode> nySøknadsperiode = finnNySøknadsperiode(origSøknadsperioder, søknadsperioder);
 
         if (nySøknadsperiode.isPresent()) {
-            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(mapTilFullSøknadsmåned(nySøknadsperiode.get()))));
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(mapTilHelePerioder(List.of(nySøknadsperiode.get()))));
         } else {
             // Revurdering
             var søknadsmåneder = mapTilHelePerioder(søknadsperioder);
@@ -76,17 +76,18 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
 
     /**
      *
-     * Perioder for april og mai må vurderes samlet fordi disse har felles vilkårsperiode fra originalbehandling i alle søknader for april og mai.
-     * På grunn av dette slås april og mai sammen til en periode (vilkårsperiode).
+     * Perioder for april og mai må vurderes samlet fordi disse har felles vilkårsperiode fra originalbehandling i alle søknader som inkluderer både april og mai.
+     * På grunn av dette slås april og mai sammen til en periode (vilkårsperiode). Se også {@link IkkeKantIKantVurderer#erKantIKant}
      *
      * @param fulleMåneder Søknadsperioder konvertert til fulle søknadsmåneder
      * @return Perioder der april og mai er slått sammen
      */
     private Set<DatoIntervallEntitet> slåSammenAprilOgMai(Set<DatoIntervallEntitet> fulleMåneder) {
         if (fulleMåneder.stream().anyMatch(periode -> periode.getTomDato().getMonth().equals(Month.APRIL) || periode.getTomDato().getMonth().equals(Month.MAY))) {
-            Set<DatoIntervallEntitet> månederUtenAprilOgMai = fulleMåneder.stream().filter(periode -> !(periode.getTomDato().getMonth().equals(Month.APRIL) || periode.getTomDato().getMonth().equals(Month.MAY))).collect(Collectors.toSet());
-            månederUtenAprilOgMai.add(DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, MAI_VILKÅRSPERIODE_TOM));
-            return månederUtenAprilOgMai;
+            Set<DatoIntervallEntitet> perioder = fulleMåneder.stream().filter(periode -> !(periode.getTomDato().getMonth().equals(Month.APRIL) || periode.getTomDato().getMonth().equals(Month.MAY))).collect(Collectors.toSet());
+            // Håndterer april og mai som en periode (i samsvar med logikk i IkkeKantIKantVurderer)
+            perioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, MAI_VILKÅRSPERIODE_TOM));
+            return perioder;
         }
         return fulleMåneder;
     }
