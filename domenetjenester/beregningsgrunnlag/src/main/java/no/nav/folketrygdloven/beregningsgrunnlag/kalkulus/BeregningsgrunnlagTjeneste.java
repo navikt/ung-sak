@@ -83,6 +83,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
+    public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref) {
+        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+
+        return vilkår.getPerioder()
+            .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()) || Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .map(it -> hentEksaktFastsatt(ref, it)) // TODO:
+            .flatMap(Optional::stream)
+            .filter(Objects::nonNull)
+            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
