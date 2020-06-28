@@ -31,8 +31,6 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
      * diff i vilkårsperioder må håndteres.
      */
     public static final LocalDate APRIL_VILKÅRSPERIODE_FOM = LocalDate.of(2020, 3, 1);
-    public static final LocalDate APRIL_VILKÅRSPERIODE_TOM = LocalDate.of(2020, 4, 30);
-    public static final LocalDate MAI_VILKÅRSPERIODE_FOM = LocalDate.of(2020, 5, 1);
     public static final LocalDate MAI_VILKÅRSPERIODE_TOM = LocalDate.of(2020, 5, 31);
     private BehandlingRepository behandlingRepository;
     private UttakRepository uttakRepository;
@@ -66,45 +64,36 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
             var endredeSøknadsmåneder = søknadsmåneder.stream()
                 .filter(it -> endredeMånederIRevurdering.stream().anyMatch(endret -> endret.overlapper(it)))
                 .collect(Collectors.toSet());
-            leggTilAprilEllerMaiOmNødvendig(endredeSøknadsmåneder, søknadsmåneder);
             return Collections.unmodifiableNavigableSet(new TreeSet<>(endredeSøknadsmåneder));
         }
 
     }
 
+    private Set<DatoIntervallEntitet> mapTilHelePerioder(List<Periode> søknadsperioder) {
+        Set<DatoIntervallEntitet> fulleMåneder = søknadsperioder.stream().map(this::mapTilFullSøknadsmåned).collect(Collectors.toSet());
+        return slåSammenAprilOgMai(fulleMåneder);
+    }
+
     /**
      *
-     * Perioder for april og mai må vurderes samlet fordi disse har felles vilkårsperiode fra originalbehandling i tilnærmet alle søknader for april og mai.
-     * På grunn av dette legges det til en av disse månedene om den andre er endret.
+     * Perioder for april og mai må vurderes samlet fordi disse har felles vilkårsperiode fra originalbehandling i alle søknader for april og mai.
+     * På grunn av dette slås april og mai sammen til en periode (vilkårsperiode).
      *
-     * @param endredeSøknadsmåneder Perioder/Måneder som er endret i overstyring av frisinn
-     * @param søknadsmåneder Perioder som er søkt for
+     * @param fulleMåneder Søknadsperioder konvertert til fulle søknadsmåneder
+     * @return Perioder der april og mai er slått sammen
      */
-    private void leggTilAprilEllerMaiOmNødvendig(Set<DatoIntervallEntitet> endredeSøknadsmåneder, Set<DatoIntervallEntitet> søknadsmåneder) {
-        if (inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && !inkludererMåned(endredeSøknadsmåneder, Month.MAY) && inkludererMåned(søknadsmåneder, Month.MAY)) {
-            var mai = DatoIntervallEntitet.fraOgMedTilOgMed(MAI_VILKÅRSPERIODE_FOM, MAI_VILKÅRSPERIODE_TOM);
-            endredeSøknadsmåneder.add(mai);
-        } else if (inkludererMåned(endredeSøknadsmåneder, Month.MAY) && !inkludererMåned(endredeSøknadsmåneder, Month.APRIL) && inkludererMåned(søknadsmåneder, Month.APRIL)) {
-            var april = DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, APRIL_VILKÅRSPERIODE_TOM);
-            endredeSøknadsmåneder.add(april);
+    private Set<DatoIntervallEntitet> slåSammenAprilOgMai(Set<DatoIntervallEntitet> fulleMåneder) {
+        if (fulleMåneder.stream().anyMatch(periode -> periode.getTomDato().getMonth().equals(Month.APRIL) || periode.getTomDato().getMonth().equals(Month.MAY))) {
+            Set<DatoIntervallEntitet> månederUtenAprilOgMai = fulleMåneder.stream().filter(periode -> !(periode.getTomDato().getMonth().equals(Month.APRIL) || periode.getTomDato().getMonth().equals(Month.MAY))).collect(Collectors.toSet());
+            månederUtenAprilOgMai.add(DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, MAI_VILKÅRSPERIODE_TOM));
+            return månederUtenAprilOgMai;
         }
-    }
-
-    private boolean inkludererMåned(Set<DatoIntervallEntitet> endredeSøknadsmåneder, Month måned) {
-        return endredeSøknadsmåneder.stream().anyMatch(p -> YearMonth.from(p.getTomDato()).equals(YearMonth.of(2020, måned)));
-    }
-
-    private Set<DatoIntervallEntitet> mapTilHelePerioder(List<Periode> søknadsperioder) {
-        return søknadsperioder.stream().map(this::mapTilFullSøknadsmåned).collect(Collectors.toSet());
+        return fulleMåneder;
     }
 
     private DatoIntervallEntitet mapTilFullSøknadsmåned(Periode periode) {
         LocalDate fomDato = periode.getFom();
-        if (fomDato.getYear() == 2020 && (fomDato.getMonth().equals(Month.APRIL) || fomDato.getMonth().equals(Month.MARCH))) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(APRIL_VILKÅRSPERIODE_FOM, APRIL_VILKÅRSPERIODE_TOM);
-        } else {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
-        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fomDato.withDayOfMonth(1), fomDato.with(TemporalAdjusters.lastDayOfMonth()));
     }
 
     private Optional<Periode> finnNySøknadsperiode(List<Periode> perioderOrig, List<Periode> perioder) {
