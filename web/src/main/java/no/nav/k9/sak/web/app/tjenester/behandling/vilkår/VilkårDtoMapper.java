@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -45,7 +46,11 @@ class VilkårDtoMapper {
 
     static List<VilkårMedPerioderDto> lagVilkarMedPeriodeDto(Behandling behandling, boolean medVilkårkjøring, Vilkårene vilkårene) {
         if (vilkårene != null) {
-            return vilkårene.getVilkårene().stream().map(vilkår -> mapVilkår(vilkår, medVilkårkjøring, behandling)).collect(Collectors.toList());
+            return vilkårene.getVilkårene()
+                .stream()
+                .filter(it -> !VilkårType.OPPTJENINGSPERIODEVILKÅR.equals(it.getVilkårType()))
+                .map(vilkår -> mapVilkår(vilkår, medVilkårkjøring, behandling))
+                .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
