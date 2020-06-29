@@ -186,7 +186,7 @@ spec:
 
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
-      value: "true"
+      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: FRISINN_VILKARSPERIODER
