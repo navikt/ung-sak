@@ -30,4 +30,11 @@ public class UttakResultat {
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(uttaksPerioder);
     }
+
+    public LocalDateTimeline<List<UttakResultatPeriode>> getUttakPeriodeTimelineMedOverlapp() {
+        List<LocalDateSegment<UttakResultatPeriode>> uttaksPerioder = uttakResultatPerioder.stream()
+            .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), periode))
+            .collect(Collectors.toList());
+        return LocalDateTimeline.buildGroupOverlappingSegments(uttaksPerioder);
+    }
 }

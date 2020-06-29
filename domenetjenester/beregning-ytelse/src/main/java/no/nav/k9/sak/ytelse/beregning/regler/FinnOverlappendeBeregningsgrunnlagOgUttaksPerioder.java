@@ -64,13 +64,13 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     private List<BeregningsresultatPeriode> mapPerioder(List<Beregningsgrunnlag> grunnlag, UttakResultat uttakResultat, Map<String, Object> resultater) {
         LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline = mapGrunnlagTimeline(grunnlag);
-        LocalDateTimeline<UttakResultatPeriode> uttakTimeline = uttakResultat.getUttakPeriodeTimeline();
+        LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline = uttakResultat.getUttakPeriodeTimelineMedOverlapp();
         LocalDateTimeline<BeregningsresultatPeriode> resultatTimeline = intersectTimelines(grunnlagTimeline, uttakTimeline, resultater)
             .compress();
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<UttakResultatPeriode> uttakTimeline,
+    private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater) {
         final int[] i = {0}; // Periode-teller til regelsporing
         return grunnlagTimeline.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
@@ -83,16 +83,16 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             resultater.put(periodeNavn + ".tom", dateInterval.getTomDato());
 
             BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
-            UttakResultatPeriode uttakResultatPeriode = uttakSegment.getValue();
+            List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
 
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel
                 List<BeregningsgrunnlagPrArbeidsforhold> arbeidsforholdList = gbps.getArbeidsforhold();
-                arbeidsforholdList.forEach(a -> opprettBeregningsresultatAndelerATFL(a, resultatPeriode, resultater, periodeNavn, uttakResultatPeriode));
+                arbeidsforholdList.forEach(a -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerATFL(a, resultatPeriode, resultater, periodeNavn, up)));
             });
             grunnlag.getBeregningsgrunnlagPrStatus().stream()
                 .filter(bgps -> !AktivitetStatus.ATFL.equals(bgps.getAktivitetStatus()))
-                .forEach(bgps -> opprettBeregningsresultatAndelerGenerell(bgps, resultatPeriode, resultater, periodeNavn, uttakResultatPeriode));
+                .forEach(bgps -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerGenerell(bgps, resultatPeriode, resultater, periodeNavn, up)));
 
             i[0]++;
             return new LocalDateSegment<>(dateInterval, resultatPeriode);
