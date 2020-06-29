@@ -192,9 +192,9 @@ spec:
     - name: FRISINN_VILKARSPERIODER
       value: "false"
     - name: UGUNST_VURDERES_MED_BEREGNINGSRESULTAT
-      value: "false"
+      value: "true"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
-      value: "false"
+      value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
 
