@@ -186,15 +186,15 @@ spec:
 
     # Feature-flag
     - name: FRISINN_VARIANT_FILTER_AKTIVERT
-      value: "true"
+      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: FRISINN_VILKARSPERIODER
       value: "false"
     - name: UGUNST_VURDERES_MED_BEREGNINGSRESULTAT
-      value: "false"
+      value: "true"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
-      value: "false"
+      value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
 
