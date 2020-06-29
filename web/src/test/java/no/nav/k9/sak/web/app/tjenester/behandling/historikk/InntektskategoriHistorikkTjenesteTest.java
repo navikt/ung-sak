@@ -1,11 +1,13 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.InntektskategoriEndring;
@@ -14,10 +16,9 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -27,18 +28,16 @@ public class InntektskategoriHistorikkTjenesteTest {
 
     public static final String ORGNR = "123456789";
     public static final String ORGANISASJONEN = "Organisasjonen";
-    private final VirksomhetRepository virksomhetRepository = new VirksomhetRepository();
+    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
     private InntektskategoriHistorikkTjeneste inntektskategoriHistorikkTjeneste = new InntektskategoriHistorikkTjeneste(
-        new ArbeidsgiverHistorikkinnslag(
-            new ArbeidsgiverTjenesteImpl(null,
-                new VirksomhetTjeneste(null, virksomhetRepository))));
+        new ArbeidsgiverHistorikkinnslag(new ArbeidsgiverTjeneste(null, virksomhetTjeneste)));
 
     @Before
     public void setUp() {
-        VirksomhetEntitet.Builder virksomhetBuilder = new VirksomhetEntitet.Builder();
+        Virksomhet.Builder virksomhetBuilder = new Virksomhet.Builder();
         virksomhetBuilder.medOrgnr(ORGNR);
         virksomhetBuilder.medNavn(ORGANISASJONEN);
-        virksomhetRepository.lagre(virksomhetBuilder.build());
+        when(virksomhetTjeneste.hentOrganisasjon(ORGNR)).thenReturn(virksomhetBuilder.build());
     }
 
     @Test
@@ -53,8 +52,7 @@ public class InntektskategoriHistorikkTjenesteTest {
             AktivitetStatus.ARBEIDSTAKER,
             OpptjeningAktivitetType.ARBEID,
             Arbeidsgiver.virksomhet(ORGNR),
-            InternArbeidsforholdRef.nullRef()
-        );
+            InternArbeidsforholdRef.nullRef());
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder();
 
         // Act
@@ -83,8 +81,7 @@ public class InntektskategoriHistorikkTjenesteTest {
             AktivitetStatus.ARBEIDSTAKER,
             OpptjeningAktivitetType.ARBEID,
             Arbeidsgiver.virksomhet(ORGNR),
-            InternArbeidsforholdRef.nullRef()
-        );
+            InternArbeidsforholdRef.nullRef());
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder();
 
         // Act
@@ -114,8 +111,7 @@ public class InntektskategoriHistorikkTjenesteTest {
             AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE,
             null,
             null,
-            InternArbeidsforholdRef.nullRef()
-        );
+            InternArbeidsforholdRef.nullRef());
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder();
 
         // Act

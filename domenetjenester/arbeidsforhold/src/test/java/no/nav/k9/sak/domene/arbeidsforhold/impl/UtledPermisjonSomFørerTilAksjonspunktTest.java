@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

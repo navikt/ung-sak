@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
-import javax.enterprise.inject.Instance;
 import javax.persistence.EntityManager;
 
 import org.junit.Before;
@@ -35,14 +34,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class SimulerOppdragStegTest {
 

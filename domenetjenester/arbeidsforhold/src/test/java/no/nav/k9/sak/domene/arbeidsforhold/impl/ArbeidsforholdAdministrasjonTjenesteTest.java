@@ -40,7 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSu
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
@@ -51,7 +51,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjen
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -101,19 +100,15 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     @Before
     public void setUp() {
-        VirksomhetEntitet virksomhet1 = lagVirksomhet();
-        VirksomhetEntitet virksomhet2 = lagAndreVirksomheten();
-
-        var virksomhetRepository = repositoryProvider.getVirksomhetRepository();
-        virksomhetRepository.lagre(virksomhet1);
-        virksomhetRepository.lagre(virksomhet2);
+        Virksomhet virksomhet1 = lagVirksomhet();
+        Virksomhet virksomhet2 = lagAndreVirksomheten();
 
         arbeidsgiver = Arbeidsgiver.virksomhet(virksomhet1.getOrgnr());
 
         PersonIdentTjeneste tpsTjeneste = mock(PersonIdentTjeneste.class);
-        final PersonIdent t = new PersonIdent("12345678901");
-        when(tpsTjeneste.hentFnrForAktør(Mockito.any(AktørId.class))).thenReturn(t);
-        var virksomhetTjeneste = new VirksomhetTjeneste(null, virksomhetRepository);
+        var virksomhetTjeneste = mock(VirksomhetTjeneste.class);
+        when(virksomhetTjeneste.hentOrganisasjon(virksomhet1.getOrgnr())).thenReturn(virksomhet1);
+        when(virksomhetTjeneste.hentOrganisasjon(virksomhet2.getOrgnr())).thenReturn(virksomhet2);
 
         VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste = mock(VurderArbeidsforholdTjeneste.class);
 
@@ -124,7 +119,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         arbeidsgiverSetMap.put(arbeidsgiver, arbeidsforholdRefSet);
         when(vurderArbeidsforholdTjeneste.vurder(any(), any(), any(), Mockito.anyBoolean())).thenReturn(arbeidsgiverSetMap);
 
-        ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjenesteImpl(tpsTjeneste, virksomhetTjeneste);
+        ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         arbeidsforholdTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste,
             arbeidsgiverTjeneste, inntektsmeldingTjeneste, iayTjeneste);
     }
@@ -551,23 +546,21 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         return builder.leggTilYrkesaktivitet(yrkesaktivitetBuilder);
     }
 
-    private VirksomhetEntitet lagVirksomhet() {
-        return new VirksomhetEntitet.Builder()
+    private Virksomhet lagVirksomhet() {
+        return new Virksomhet.Builder()
         .medOrgnr(ORG1)
         .medNavn("Virksomheten")
         .medRegistrert(I_DAG.minusYears(2L))
         .medOppstart(I_DAG.minusYears(1L))
-        .oppdatertOpplysningerNå()
         .build();
     }
 
-    private VirksomhetEntitet lagAndreVirksomheten() {
-        return new VirksomhetEntitet.Builder()
+    private Virksomhet lagAndreVirksomheten() {
+        return new Virksomhet.Builder()
         .medOrgnr(ORG2)
         .medNavn("OrgA")
         .medRegistrert(I_DAG.minusYears(2L))
         .medOppstart(I_DAG.minusYears(1L))
-        .oppdatertOpplysningerNå()
         .build();
     }
 

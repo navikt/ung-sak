@@ -1,5 +1,12 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.Test;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -9,12 +16,6 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
-import org.junit.Test;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Java6Assertions.assertThat;
 
 public class MapUttakFrisinnTilRegelTest {
     private static final LocalDate STP = LocalDate.of(2020,4,1);

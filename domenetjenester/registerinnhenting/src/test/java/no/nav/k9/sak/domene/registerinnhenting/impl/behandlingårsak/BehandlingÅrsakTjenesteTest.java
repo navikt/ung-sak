@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 

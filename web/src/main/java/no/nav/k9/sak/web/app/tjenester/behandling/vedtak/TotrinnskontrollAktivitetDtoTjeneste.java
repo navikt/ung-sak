@@ -115,7 +115,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
         }
         Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(orgnr);
         if (!virksomhet.isPresent()) {
-            virksomhet = virksomhetTjeneste.hentVirksomhet(orgnr);
+            virksomhet = virksomhetTjeneste.finnOrganisasjon(orgnr);
         }
         return virksomhet.map(Virksomhet::getNavn)
             .orElseThrow(() -> new IllegalStateException("Finner ikke virksomhet med orgnr " + orgnr));

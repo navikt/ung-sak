@@ -3,7 +3,6 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import static no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType.AKSJER_GRUNNFONDSBEVIS_TIL_UNDERKURS;
 import static no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType.ELEKTRISK_KOMMUNIKASJON;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,14 +11,9 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,7 +22,7 @@ import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -47,26 +41,15 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.Organisasjon;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.OrganisasjonsDetaljer;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.informasjon.UstrukturertNavn;
-import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
-import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonConsumer;
+import no.nav.k9.sak.typer.OrgNummer;
 
 public class MottattDokumentOversetterInntektsmeldingTest {
-    private static final DatatypeFactory DATATYPE_FACTORY;
-    static {
-        try {
-            DATATYPE_FACTORY = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+    private static final String ORGNR = OrgNummer.KUNSTIG_ORG;
 
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private final OrganisasjonConsumer organisasjonConsumer = mock(OrganisasjonConsumer.class);
+    private final VirksomhetTjeneste virksomhetTjeneste = mock(VirksomhetTjeneste.class);
     private final FileToStringUtil fileToStringUtil = new FileToStringUtil();
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
 
@@ -77,21 +60,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
     @Before
     public void setUp() throws Exception {
-        final HentOrganisasjonResponse hentOrganisasjonResponse = new HentOrganisasjonResponse();
-        final Organisasjon value = new Organisasjon();
-        final UstrukturertNavn navn = new UstrukturertNavn();
-        navn.getNavnelinje().add("Color Line");
-        value.setNavn(navn);
-        value.setOrgnummer("119999996");
-        final OrganisasjonsDetaljer detaljer = new OrganisasjonsDetaljer();
-        GregorianCalendar c = new GregorianCalendar();
-        c.setTime(new Date());
-        detaljer.setRegistreringsDato(DATATYPE_FACTORY.newXMLGregorianCalendar(c));
-        value.setOrganisasjonDetaljer(detaljer);
-        hentOrganisasjonResponse.setOrganisasjon(value);
-        when(organisasjonConsumer.hentOrganisasjon(any())).thenReturn(hentOrganisasjonResponse);
-        VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(organisasjonConsumer, new VirksomhetRepository());
-
+        when(virksomhetTjeneste.finnOrganisasjon(ORGNR))
+            .thenReturn(Optional.of(Virksomhet.getBuilder().medOrgnr(ORGNR).medNavn("Ukjent Firma").medRegistrert(LocalDate.now().minusDays(1)).build()));
         oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
     }
 

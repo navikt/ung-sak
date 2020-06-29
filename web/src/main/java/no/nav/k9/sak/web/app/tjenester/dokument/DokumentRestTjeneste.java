@@ -184,7 +184,7 @@ public class DokumentRestTjeneste {
                 .map((Inntektsmelding inn) -> {
                     var t = inn.getArbeidsgiver();
                     if (t.getErVirksomhet()) {
-                        Optional<Virksomhet> virksomhet = virksomhetTjeneste.hentVirksomhet(t.getOrgnr());
+                        Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(t.getOrgnr());
                         return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr()))
                             .getNavn();
                     } else {

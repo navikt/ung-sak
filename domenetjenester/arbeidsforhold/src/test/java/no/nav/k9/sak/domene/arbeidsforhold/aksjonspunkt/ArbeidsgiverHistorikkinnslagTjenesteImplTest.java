@@ -19,10 +19,8 @@ import org.mockito.junit.MockitoRule;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjenesteImpl;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -52,9 +50,8 @@ public class ArbeidsgiverHistorikkinnslagTjenesteImplTest {
         when(tpsTjeneste.hentBrukerForAktør(any(AktørId.class))).thenReturn(Optional.of(lagPersoninfo()));
 
         var virksomhetTjeneste = mock(VirksomhetTjeneste.class);
-       // when(virksomhetTjeneste.hentVirksomhet(any())).thenReturn(Optional.of(VIRKSOMHET));
-        when(virksomhetTjeneste.hentOgLagreOrganisasjon(any())).thenReturn(VIRKSOMHET);
-        ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjenesteImpl(tpsTjeneste, virksomhetTjeneste);
+        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(VIRKSOMHET);
+        ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
     }
 
@@ -117,7 +114,7 @@ public class ArbeidsgiverHistorikkinnslagTjenesteImplTest {
     }
 
     private static Virksomhet lagVirksomhet(String orgnr) {
-        VirksomhetEntitet.Builder b = new VirksomhetEntitet.Builder();
+        Virksomhet.Builder b = new Virksomhet.Builder();
         b.medOrgnr(orgnr).medNavn(ORG_NAVN);
         return b.build();
     }

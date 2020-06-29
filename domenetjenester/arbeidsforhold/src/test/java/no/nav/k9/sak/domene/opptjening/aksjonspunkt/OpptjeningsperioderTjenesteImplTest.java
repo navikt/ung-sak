@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
@@ -30,7 +32,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -72,7 +73,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     private final LocalDate skjæringstidspunkt = LocalDate.now();
     private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(null, repositoryProvider.getVirksomhetRepository());
+    private final VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
     private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
     private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
     private final AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(
@@ -87,13 +88,12 @@ public class OpptjeningsperioderTjenesteImplTest {
 
     @Before
     public void setUp() throws Exception {
-        Virksomhet virksomhet = new VirksomhetEntitet.Builder().medOrgnr(ORG_NUMMER)
+        Virksomhet virksomhet = new Virksomhet.Builder().medOrgnr(ORG_NUMMER)
             .medOppstart(LocalDate.now())
-            .oppdatertOpplysningerNå()
             .medOrganisasjonstype(Organisasjonstype.VIRKSOMHET)
             .medRegistrert(LocalDate.now())
             .build();
-        repositoryProvider.getVirksomhetRepository().lagre(virksomhet);
+        when(virksomhetTjeneste.hentOrganisasjon(ORG_NUMMER)).thenReturn(virksomhet);
     }
 
     @Test

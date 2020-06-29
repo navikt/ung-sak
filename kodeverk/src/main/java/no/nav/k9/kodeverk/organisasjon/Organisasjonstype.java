@@ -13,12 +13,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.sak.typer.OrgNummer;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Organisasjonstype implements Kodeverdi {
 
     JURIDISK_ENHET("JURIDISK_ENHET", "Juridisk enhet"),
+    ORGLEDD("ORGANISASJONSLEDD", "Organisasjonsledd"),
     VIRKSOMHET("VIRKSOMHET", "Virksomhet"),
     KUNSTIG("KUNSTIG", "Kunstig arbeidsforhold lagt til av saksbehandler"),
     UDEFINERT("-", "Udefinert"),
@@ -72,6 +74,10 @@ public enum Organisasjonstype implements Kodeverdi {
     @Override
     public String getNavn() {
         return navn;
+    }
+    
+    public static boolean erKunstig(String orgNr) {
+        return OrgNummer.KUNSTIG_ORG.equals(orgNr);
     }
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
