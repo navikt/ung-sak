@@ -58,10 +58,13 @@ public class MapFraÅrskvantumResultatTest {
         List<Aktivitet> aktiviteter = new ArrayList<>();
 
         var arbeidsforhold1 = new Arbeidsforhold("ARBEIDSTAKER", "12434422323", "12345555", null);
+        var arbeidsforhold2 = new Arbeidsforhold("ARBEIDSTAKER", "12434422324", "12345554", null);
 
         Aktivitet uttaksPlanOmsorgspengerAktivitet = new Aktivitet(arbeidsforhold1, lagUttaksperioder());
+        Aktivitet uttaksPlanOmsorgspengerAktivitet2 = new Aktivitet(arbeidsforhold2, lagUttaksperioder());
 
         aktiviteter.add(uttaksPlanOmsorgspengerAktivitet);
+        aktiviteter.add(uttaksPlanOmsorgspengerAktivitet2);
 
         return aktiviteter;
     }
