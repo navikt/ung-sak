@@ -96,7 +96,7 @@ public class InntektArbeidYtelseRestTjeneste {
     @Path(INNTEKT_ARBEID_YTELSE_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Deprecated
@@ -104,15 +104,15 @@ public class InntektArbeidYtelseRestTjeneste {
     public InntektArbeidYtelseDto getInntektArbeidYtelser(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Long behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingId != null
-                ? behandlingRepository.hentBehandling(behandlingId)
-                : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+            ? behandlingRepository.hentBehandling(behandlingId)
+            : behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         return getInntektArbeidYtelserFraBehandling(behandling);
     }
 
     @GET
     @Path(INNTEKT_ARBEID_YTELSE_PATH)
     @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -124,7 +124,7 @@ public class InntektArbeidYtelseRestTjeneste {
     @GET
     @Path(OPPGITT_OPPTJENING_PATH)
     @Operation(description = "Hent informasjon om oppgitt opptjening og søknadsperiode", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -152,10 +152,10 @@ public class InntektArbeidYtelseRestTjeneste {
 
             var fastsattUttak = uttakRepository.hentFastsattUttak(behandling.getId());
             boolean søkerYtelseForFrilans = fastsattUttak.getPerioder().stream()
-                    .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.FRILANSER);
+                .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.FRILANSER);
 
             boolean søkerYtelseForNæring = fastsattUttak.getPerioder().stream()
-                    .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+                .anyMatch(p -> p.getPeriode().overlapper(søknadsperioder.getMaksPeriode()) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
             dto.setSøkerYtelseForNæring(søkerYtelseForNæring);
             dto.setSøkerYtelseForFrilans(søkerYtelseForFrilans);
@@ -195,8 +195,10 @@ public class InntektArbeidYtelseRestTjeneste {
                 .map(periode -> FrisinnMapper.map(periode, InntektArbeidYtelseDtoMapper.mapTilPeriode(oppgittOpptjeningDto, periode), fastsattUttak))
                 .collect(Collectors.toList());
 
-            OppgittOpptjeningDto førSøknad = InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, new PeriodeDto(fastsattUttak.getMaksPeriode().getFomDato(), fastsattUttak.getMaksPeriode().getTomDato()));
-            dto.setFørSøkerPerioden(førSøknad);
+            if (!fastsattUttak.getPerioder().isEmpty()) {
+                OppgittOpptjeningDto førSøknad = InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, new PeriodeDto(fastsattUttak.getMaksPeriode().getFomDato(), fastsattUttak.getMaksPeriode().getTomDato()));
+                dto.setFørSøkerPerioden(førSøknad);
+            }
             dto.setMåneder(iSøknad);
             return dto;
         }
@@ -219,7 +221,7 @@ public class InntektArbeidYtelseRestTjeneste {
 
         // finn annen part
         UtledArbeidsforholdParametere param = new UtledArbeidsforholdParametere(
-                behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
+            behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
 
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 
