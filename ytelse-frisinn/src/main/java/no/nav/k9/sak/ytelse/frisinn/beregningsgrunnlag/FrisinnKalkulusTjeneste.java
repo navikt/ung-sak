@@ -31,9 +31,6 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @FagsakYtelseTypeRef("FRISINN")
 public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
-
-    private Boolean toggletVilkårsperioder;
-
     public FrisinnKalkulusTjeneste() {
     }
 
@@ -43,18 +40,12 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                   VilkårResultatRepository vilkårResultatRepository,
-                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                   VilkårResultatRepository vilkårResultatRepository) {
         super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
-        if (!toggletVilkårsperioder) {
-            return super.startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
-        }
-
         FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
         if (frisinnGrunnlag.getPerioderMedSøkerInfo().isEmpty()) {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN);

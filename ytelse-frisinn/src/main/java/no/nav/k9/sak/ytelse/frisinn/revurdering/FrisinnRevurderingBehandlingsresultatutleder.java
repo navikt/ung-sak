@@ -41,7 +41,7 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     public FrisinnRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
                                                         BeregningTjeneste beregningsgrunnlagTjeneste,
                                                         UttakRepository uttakRepository,
-                                                        @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                        @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
 
         this.kalkulusTjeneste = beregningsgrunnlagTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

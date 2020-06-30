@@ -55,7 +55,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     @Inject
     public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser,
-                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }

@@ -65,7 +65,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                                     UttakRepository uttakRepository,
                                     @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste,
                                     @KonfigVerdi(value = "SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING", defaultVerdi = "false") Boolean skalBenytteTidligereResultat,
-                                    @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                    @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();

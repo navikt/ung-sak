@@ -38,7 +38,7 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
                                                       UttakRepository uttakRepository,
                                                       BehandlingRepository behandlingRepository,
                                                       UtledPerioderMedEndringTjeneste utledPerioderMedEndringTjeneste,
-                                                      @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                      @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         this.vilkårUtleder = vilkårUtleder;
         this.toggletVilkårsperioder = toggletVilkårsperioder;

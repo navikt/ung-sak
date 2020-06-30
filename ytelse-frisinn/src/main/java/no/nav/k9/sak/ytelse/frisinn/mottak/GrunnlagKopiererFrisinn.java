@@ -39,7 +39,7 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
                                    UttakRepository uttakRepository,
                                    InntektArbeidYtelseTjeneste iayTjeneste,
                                    BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();

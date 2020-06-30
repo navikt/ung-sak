@@ -63,7 +63,7 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
                                                   BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   @FagsakYtelseTypeRef("FRISINN") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                  @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                  @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;

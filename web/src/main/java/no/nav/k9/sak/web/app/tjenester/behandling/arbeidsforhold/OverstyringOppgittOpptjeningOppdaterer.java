@@ -69,7 +69,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
                                                   HistorikkTjenesteAdapter historikkAdapter,
                                                   BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                                   @FagsakYtelseTypeRef("FRISINN") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                  @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                  @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.uttakRepository = uttakRepository;
         this.historikkAdapter = historikkAdapter;
