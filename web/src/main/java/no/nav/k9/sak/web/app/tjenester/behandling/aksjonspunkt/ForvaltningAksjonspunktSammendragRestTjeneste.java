@@ -83,6 +83,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
         cc.setNoCache(true);
         cc.setNoStore(true);
         cc.setMaxAge(0);
+        cc.setPrivate(true);
 
         List<BehandlingAksjonspunktDto> dtos = mapFra(map);
 
