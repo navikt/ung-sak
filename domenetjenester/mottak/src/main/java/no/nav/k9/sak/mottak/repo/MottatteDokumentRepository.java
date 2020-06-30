@@ -65,43 +65,36 @@ public class MottatteDokumentRepository {
 
     @SuppressWarnings("unchecked")
     public List<MottattDokument899> hentTSF_899() {
-        String strQueryTemplate = "with data as (select " +
-            "        m.id," +
-            "        m.journalpost_id," +
-            "        m.opprettet_tid," +
-            "        m.status," +
-            "        m.type," +
-            "        m.behandling_id," +
-            "        m.mottatt_dato," +
-            "        m.mottatt_tidspunkt," +
-            "        m.kanalreferanse," +
-            "        m.arbeidsgiver," +
-            "        m.feilmelding," +
-            "        convert_from(lo_get(payload), 'UTF8')  as im" +
-            "        from mottatt_dokument m where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')" +
-            "      )," +
-            " data2 as (" +
-            "        select " +
-            "        substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
-            "        substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
-            "        substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
-            "        d.* from data d)" +
-            " select distinct"
+        String sql = "select distinct "
             + " d2.journalpost_id,"
-            + " '' saksnummer, "
+            + " f.saksnummer, "
             + " d2.periode_fom, "
             + " d2.periode_tom, "
             + " d2.delvis_dato, "
             + " d2.im, "
             + " d2.opprettet_tid "
-            + " from data2 d2 "
+            + " from (" +
+            "       select " +
+            "         substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
+            "         substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
+            "         substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
+            "         d.* " +
+            "       from (" +
+            "        select " +
+            "          m.journalpost_id," +
+            "          m.opprettet_tid," +
+            "          m.behandling_id," +
+            "          cast(lo_get(payload) as TEXT) as im" +
+            "         from mottatt_dokument m " +
+            "         where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')) d" +
+            "  ) d2 "
             + " inner join behandling b on b.id = d2.behandling_id"
             + " inner join fagsak f on f.id = b.fagsak_id"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
             + " where (periode_fom is not null or delvis_dato is not null) AND a.aksjonspunkt_status='OPPR' AND b.behandling_status IN ('OPPRE', 'UTRED') "
             + " order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
 
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(strQueryTemplate, Tuple.class)
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setHint(org.hibernate.annotations.QueryHints.READ_ONLY, true)
             .setHint(org.hibernate.annotations.QueryHints.CACHEABLE, false);
 
