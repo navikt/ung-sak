@@ -33,7 +33,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
     private MottatteDokumentRepository dokumentRepository;
 
-    ForvaltningMottattDokumentRestTjeneste() {
+    public ForvaltningMottattDokumentRestTjeneste() {
     }
 
     @Inject
