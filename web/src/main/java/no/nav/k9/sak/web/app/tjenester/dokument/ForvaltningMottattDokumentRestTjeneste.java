@@ -43,7 +43,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
     @GET
     @Produces({ MediaType.TEXT_PLAIN })
-    @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
+    @Operation(description = "Hent ugyldig inntektsmeldinger", tags = "dokument", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer saksnummer med ugyldig innkommende meldinger", content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -54,6 +54,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         cc.setNoCache(true);
         cc.setNoStore(true);
         cc.setMaxAge(0);
+        cc.setPrivate(true);
 
         var dtos = dokumentRepository.hentTSF_899();
         String csv = mapToCsv(dtos);

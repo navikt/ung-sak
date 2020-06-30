@@ -91,7 +91,7 @@ public class MottatteDokumentRepository {
             + " inner join behandling b on b.id = d2.behandling_id"
             + " inner join fagsak f on f.id = b.fagsak_id"
             + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where (periode_fom is not null or delvis_dato is not null) AND a.aksjonspunkt_status='OPPR' AND b.behandling_status IN ('OPPRE', 'UTRED') "
+            + " where (d2.periode_fom is not null or d2.delvis_dato is not null) AND a.aksjonspunkt_status='OPPR' AND b.behandling_status IN ('OPPRE', 'UTRED') "
             + " order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
