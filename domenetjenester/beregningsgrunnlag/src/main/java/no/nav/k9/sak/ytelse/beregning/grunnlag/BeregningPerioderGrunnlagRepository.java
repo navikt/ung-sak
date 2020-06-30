@@ -121,14 +121,18 @@ public class BeregningPerioderGrunnlagRepository {
         entityManager.flush();
     }
 
-    public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
+    public void kopier(Long fraBehandlingId, Long tilBehandlingId, boolean ryddMotVilkår) {
         var aktivtGrunnlag = hentGrunnlag(fraBehandlingId);
         if (aktivtGrunnlag.isPresent()) {
             var grunnlag = aktivtGrunnlag.get();
             var builder = new BeregningsgrunnlagPerioderGrunnlagBuilder(grunnlag);
 
-            lagre(builder, tilBehandlingId, false);
+            lagre(builder, tilBehandlingId, ryddMotVilkår);
         }
+    }
+
+    public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
+        kopier(fraBehandlingId, tilBehandlingId, false);
     }
 
     private void validerMotVilkårsPerioder(Long behandlingId, BeregningsgrunnlagPerioderGrunnlagBuilder builder, boolean ryddMotVilkår) {
