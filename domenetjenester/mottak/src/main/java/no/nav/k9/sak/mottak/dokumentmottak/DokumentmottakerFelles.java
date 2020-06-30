@@ -112,11 +112,4 @@ public class DokumentmottakerFelles {
         opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
-    public boolean skalOppretteNyFørstegangsbehandling(Fagsak fagsak) {
-        if (mottatteDokumentTjeneste.erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(fagsak)) {
-            return !mottatteDokumentTjeneste.harFristForInnsendingAvDokGåttUt(fagsak);
-        }
-        return false;
-    }
-
 }

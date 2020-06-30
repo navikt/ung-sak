@@ -20,6 +20,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.BeregningsgrunnlagPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -126,11 +127,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-            return beregningsgrunnlagPerioderGrunnlag.get()
+            var bgReferanser = beregningsgrunnlagPerioderGrunnlag.get()
                 .getGrunnlagPerioder()
                 .stream()
-                .map(it -> tjeneste.hentBeregningsgrunnlagDto(ref, it.getEksternReferanse(), it.getSkjæringstidspunkt()))
-                .filter(Objects::nonNull)
+                .map(it -> new BeregningsgrunnlagReferanse(it.getEksternReferanse(), it.getSkjæringstidspunkt()))
+                .collect(Collectors.toSet());
+            return tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
+                .stream()
+                .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
                 .collect(Collectors.toList());
         }
         return List.of();
