@@ -48,7 +48,9 @@ jobs:
           java-version: 1.11
 
       - name: Set cache key
-        run: echo "::set-env name=CACHE_KEY::$(date +%U)"
+        run: |
+          echo "::set-env name=CACHE_KEY::$(date +%U)"
+          echo "::set-env name=TIMESTAMP::$(date +%Y%m%d%H%M%S)"
 
       - uses: actions/cache@v2.0.0
         with:
@@ -59,12 +61,12 @@ jobs:
         shell: bash
         run: |
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
-          mvn jacoco:prepare-agent deploy -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$(date +%Y%m%d%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -Djacoco.destFile=$(pwd)/target/jacoco.exec
+          mvn jacoco:prepare-agent deploy -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8 -Djacoco.destFile=$(pwd)/target/jacoco.exec
           # har ikke tilgang til sonarcloud sålenge dette er private repo, kommenterer derfor ut neste linje
           # mvn jacoco:report sonar:sonar -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Djacoco.dataFile=$(pwd)/target/jacoco.exec -Dsonar.projectKey="navikt_k9-sak" -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization=navit -Dsonar.login=${SONAR_TOKEN}
           echo "Deployed artifacts"
-          echo "::set-env name=TAG::$(date +%Y%m%d%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)"
-          echo "::set-env name=IMAGE::$IMAGE_BASE:$(date +%Y%m%d%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)"
+          echo "::set-env name=TAG::$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)"
+          echo "::set-env name=IMAGE::$IMAGE_BASE:$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)"
           echo "::set-env name=MVN_VERSION::$(mvn help:evaluate -e --batch-mode --settings ./.github/.m2/settings.xml --file .flattened -Dexpression=project.version -q -DforceStdout)"
         env:
           GITHUB_USERNAME: x-access-token
