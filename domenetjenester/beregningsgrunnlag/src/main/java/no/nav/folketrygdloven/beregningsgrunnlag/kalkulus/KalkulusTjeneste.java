@@ -170,8 +170,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse);
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse, inntektArbeidYtelseGrunnlag);
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
             .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
@@ -272,8 +272,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse, LocalDate skjæringstidspunkt) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse);
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse, inntektArbeidYtelseGrunnlag);
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
             .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
@@ -332,8 +332,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return Avslagsårsak.UDEFINERT;
     }
 
-    private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(BehandlingReferanse referanse) {
-        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+    private List<ArbeidsgiverOpplysningerDto> lagArbeidsgiverOpplysningListe(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag) {
 
         Map<Arbeidsgiver, ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = iayGrunnlag.getAktørArbeidFraRegister(referanse.getAktørId())
             .map(AktørArbeid::hentAlleYrkesaktiviteter)
