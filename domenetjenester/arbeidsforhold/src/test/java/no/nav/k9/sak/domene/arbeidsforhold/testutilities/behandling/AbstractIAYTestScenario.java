@@ -22,7 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
@@ -68,14 +67,12 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
         FagsakRepository mockFagsakRepository = mockFagsakRepository();
-        VirksomhetRepository virksomhetRepository = mock(VirksomhetRepository.class);
         OpptjeningRepository opptjeningRepository = Mockito.mock(OpptjeningRepository.class);
         // ikke ideelt å la mocks returnere mocks, men forenkler enormt mye test kode, forhindrer feil oppsett, så det
         // blir enklere å refactorere
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
-        when(repositoryProvider.getVirksomhetRepository()).thenReturn(virksomhetRepository);
         when(repositoryProvider.getOpptjeningRepository()).thenReturn(opptjeningRepository);
 
         return behandlingRepository;

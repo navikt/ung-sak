@@ -46,7 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.abakus.ArbeidsforholdTjenesteMock;
@@ -116,7 +116,7 @@ public class InntektsmeldingTjenesteImplTest {
         when(tpsTjeneste.hentFnrForAktør(Mockito.any(AktørId.class))).thenReturn(t);
 
         var virksomhetTjeneste = mock(VirksomhetTjeneste.class);
-        when(virksomhetTjeneste.hentOgLagreOrganisasjon(any())).thenReturn(virksomhet1);
+        when(virksomhetTjeneste.hentOrganisasjon(virksomhet1.getOrgnr())).thenReturn(virksomhet1);
         arbeidsforholdTjenesteMock = new ArbeidsforholdTjenesteMock();
         var vurderArbeidsforholdTjeneste = mock(VurderArbeidsforholdTjeneste.class);
         var arbeidsgiver2 = Arbeidsgiver.virksomhet(virksomhet2.getOrgnr());
@@ -434,23 +434,21 @@ public class InntektsmeldingTjenesteImplTest {
         return aktørInntekt;
     }
 
-    private VirksomhetEntitet lagVirksomhet() {
-        return new VirksomhetEntitet.Builder()
+    private Virksomhet lagVirksomhet() {
+        return new Virksomhet.Builder()
             .medOrgnr("973093681")
             .medNavn("Virksomheten")
             .medRegistrert(I_DAG.minusYears(2L))
             .medOppstart(I_DAG.minusYears(1L))
-            .oppdatertOpplysningerNå()
             .build();
     }
 
-    private VirksomhetEntitet lagAndreVirksomhet() {
-        return new VirksomhetEntitet.Builder()
+    private Virksomhet lagAndreVirksomhet() {
+        return new Virksomhet.Builder()
             .medOrgnr("52")
             .medNavn("OrgA")
             .medRegistrert(I_DAG.minusYears(2L))
             .medOppstart(I_DAG.minusYears(1L))
-            .oppdatertOpplysningerNå()
             .build();
     }
 

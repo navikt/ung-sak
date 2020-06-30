@@ -27,8 +27,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegUtfall;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.StegProsesseringResultat;
-import no.nav.k9.sak.behandlingskontroll.impl.TekniskBehandlingStegVenterVisitor;
-import no.nav.k9.sak.behandlingskontroll.impl.TekniskBehandlingStegVisitor;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.testutilities.TestScenario;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

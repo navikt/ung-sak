@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.codahale.metrics.health.HealthCheck;
 
-import no.nav.k9.sak.web.app.healthchecks.checks.ExtHealthCheck;
 import no.nav.k9.sak.web.app.healthchecks.checks.ExtHealthCheck.InternalResult;
 
 public class ExtHealthCheckTest {

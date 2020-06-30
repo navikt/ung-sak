@@ -21,7 +21,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegUtfall;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollEventPubliserer;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.testutilities.TestScenario;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;

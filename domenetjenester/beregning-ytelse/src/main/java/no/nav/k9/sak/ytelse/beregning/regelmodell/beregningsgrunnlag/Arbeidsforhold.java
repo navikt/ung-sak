@@ -52,9 +52,10 @@ public class Arbeidsforhold {
     @Override
     public String toString() {
         return "<Arbeidsforhold "
-                + "orgnr " + orgnr + ", "
-                + "arbeidsforholdId " + arbeidsforholdId + ", "
-                + "frilanser " + frilanser + ", "
+                + "orgnr=" + orgnr + ", "
+                + "referanseType=" + referanseType + ", "
+                + "arbeidsforholdId=" + arbeidsforholdId + ", "
+                + "frilanser=" + frilanser 
                 + ">";
     }
 

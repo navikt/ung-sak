@@ -121,7 +121,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         if (wrapper.getArbeidsgiver().isPresent()) {
             String orgNummer = wrapper.getArbeidsgiver().get().getVirksomhetsnummer();
             @SuppressWarnings("unused")
-            Virksomhet virksomhet = virksomhetTjeneste.hentOgLagreOrganisasjon(orgNummer);
+            Virksomhet virksomhet = virksomhetTjeneste.hentOrganisasjon(orgNummer);
             builder.medArbeidsgiver(Arbeidsgiver.virksomhet(orgNummer));
         } else if (wrapper.getArbeidsgiverPrivat().isPresent()) {
             Optional<String> aktørIdArbeidsgiver = aktørConsumer.hentAktørIdForPersonIdent(wrapper.getArbeidsgiverPrivat().get().getArbeidsgiverFnr());

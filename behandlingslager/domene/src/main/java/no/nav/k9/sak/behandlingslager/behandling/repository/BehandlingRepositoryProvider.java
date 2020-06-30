@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 
 /**
  * Provider for å enklere å kunne hente ut ulike repository uten for mange injection points.
@@ -31,7 +30,6 @@ public class BehandlingRepositoryProvider {
     private MedlemskapRepository medlemskapRepository;
     private HistorikkRepository historikkRepository;
     private SøknadRepository søknadRepository;
-    private VirksomhetRepository virksomhetRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OpptjeningRepository opptjeningRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
@@ -62,9 +60,6 @@ public class BehandlingRepositoryProvider {
         this.medlemskapRepository = new MedlemskapRepository(entityManager);
         this.personopplysningRepository = new PersonopplysningRepository(entityManager);
         this.søknadRepository = new SøknadRepository(entityManager);
-
-        // inntekt arbeid ytelser
-        this.virksomhetRepository = new VirksomhetRepository();
 
         // behandling resultat aggregater
         this.vilkårResultatRepository = new VilkårResultatRepository(entityManager);
@@ -117,10 +112,6 @@ public class BehandlingRepositoryProvider {
 
     public SøknadRepository getSøknadRepository() {
         return søknadRepository;
-    }
-
-    public VirksomhetRepository getVirksomhetRepository() {
-        return virksomhetRepository;
     }
 
     public BehandlingVedtakRepository getBehandlingVedtakRepository() {

@@ -19,7 +19,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 public class InntektsmeldingAggregat {
 
     private static final Logger logger = LoggerFactory.getLogger(InntektsmeldingAggregat.class);
-    private static final String ALTINN_SYSTEM_NAVN = "AltinnPortal";
 
     @ChangeTracked
     private List<Inntektsmelding> inntektsmeldinger = new ArrayList<>();

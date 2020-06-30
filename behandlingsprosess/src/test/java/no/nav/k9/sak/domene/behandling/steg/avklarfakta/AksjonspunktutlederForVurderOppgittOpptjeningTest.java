@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
@@ -27,8 +28,6 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -57,7 +56,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
 
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
-    private VirksomhetTjeneste virksomhetTjeneste = new VirksomhetTjeneste(null, repositoryProvider.getVirksomhetRepository());
+    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
 
     @Spy
     private AksjonspunktutlederForVurderOppgittOpptjening utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
@@ -198,14 +197,6 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed);
 
         String orgnr = "974760673";
-        Virksomhet virksomhet = new VirksomhetEntitet.Builder()
-            .medOrgnr(orgnr)
-            .medNavn("Virksomhet")
-            .medRegistrert(LocalDate.now())
-            .medOppstart(LocalDate.now())
-            .oppdatertOpplysningerNå()
-            .build();
-        repositoryProvider.getVirksomhetRepository().lagre(virksomhet);
 
         Behandling behandling = lagre(scenario);
         

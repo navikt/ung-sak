@@ -203,7 +203,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
             return lagretVirksomhet.get().getRegistrert().getYear() > sistFerdiglignetÅr;
         } else {
             // Virksomhetsinformasjonen er ikke hentet, henter vi den fra ereg. Innført etter feil som oppstod i https://jira.adeo.no/browse/TFP-1484
-            Virksomhet hentetVirksomhet = virksomhetTjeneste.hentOgLagreOrganisasjon(eg.getOrgnr());
+            Virksomhet hentetVirksomhet = virksomhetTjeneste.hentOrganisasjon(eg.getOrgnr());
             return hentetVirksomhet.getRegistrert().getYear() > sistFerdiglignetÅr;
         }
     }

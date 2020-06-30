@@ -113,7 +113,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     private void mapArbeidsgiver(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         String orgNummer = wrapper.getArbeidsgiver().getVirksomhetsnummer();
         @SuppressWarnings("unused")
-        Virksomhet virksomhet = virksomhetTjeneste.hentOgLagreOrganisasjon(orgNummer);
+        Virksomhet virksomhet = virksomhetTjeneste.hentOrganisasjon(orgNummer);
         builder.medArbeidsgiver(Arbeidsgiver.virksomhet(orgNummer));
     }
 

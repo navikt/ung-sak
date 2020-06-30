@@ -24,8 +24,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
@@ -55,7 +53,6 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
     public final RepositoryRule repoRule = new UnittestRepositoryRule();
     private final EntityManager entityManager = repoRule.getEntityManager();
     private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-    private final VirksomhetRepository virksomhetRepository = repositoryProvider.getVirksomhetRepository();
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -77,10 +74,10 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
         totrinnArbeidsforholdDtoTjeneste = new TotrinnArbeidsforholdDtoTjeneste(iayTjeneste, arbeidsgiverTjeneste);
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = lagre(scenario);
-        virksomhetRepository.lagre(virksomhet);
         Totrinnsvurdering.Builder vurderingBuilder = new Totrinnsvurdering.Builder(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
         vurdering = vurderingBuilder.medGodkjent(true).medBegrunnelse("").build();
     }
+    
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);
     }
@@ -147,13 +144,12 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
         arbeidsforholdTjeneste.lagre(behandling.getId(), behandling.getAktørId(), informasjonBuilder);
     }
 
-    private VirksomhetEntitet getVirksomheten() {
-        return new VirksomhetEntitet.Builder()
+    private Virksomhet getVirksomheten() {
+        return new Virksomhet.Builder()
             .medOrgnr(ORGNR)
             .medNavn("Virksomheten")
             .medRegistrert(LocalDate.now().minusYears(2L))
             .medOppstart(LocalDate.now().minusYears(1L))
-            .oppdatertOpplysningerNå()
             .build();
     }
 }

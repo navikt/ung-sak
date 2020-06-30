@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import static no.nav.k9.sak.typer.OrgNummer.KUNSTIG_ORG;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,8 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetRepository;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -61,7 +61,6 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
 
     private BehandlingRepository behandlingRepository = new BehandlingRepository(repoRule.getEntityManager());
     private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-    private VirksomhetRepository virksomhetRepository = new VirksomhetRepository();
     private VirksomhetTjeneste tjeneste;
 
     private BekreftOpptjeningPeriodeAksjonspunkt bekreftOpptjeningPeriodeAksjonspunkt;
@@ -73,12 +72,10 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
     @Before
     public void oppsett() {
         tjeneste = mock(VirksomhetTjeneste.class);
-        VirksomhetEntitet.Builder builder = new VirksomhetEntitet.Builder();
-        VirksomhetEntitet børreAs = builder.medOrgnr("23948923849283")
-            .oppdatertOpplysningerNå()
+        Virksomhet.Builder builder = new Virksomhet.Builder();
+        Virksomhet børreAs = builder.medOrgnr(KUNSTIG_ORG)
             .medNavn("Børre AS")
             .build();
-        virksomhetRepository.lagre(børreAs);
         Mockito.when(tjeneste.finnOrganisasjon(Mockito.any())).thenReturn(Optional.of(børreAs));
         bekreftOpptjeningPeriodeAksjonspunkt = new BekreftOpptjeningPeriodeAksjonspunkt(iayTjeneste, vurderOpptjening);
     }

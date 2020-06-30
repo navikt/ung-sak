@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.virksomhet.VirksomhetEntitet;
+import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 
 //TODO(OJR) erstatt med -> Design Patterns: The Builder Pattern
 @Deprecated(forRemoval = true, since = "IDAG")
@@ -39,7 +39,7 @@ public class Kopimaskin {
             Map map = (Map) object;
             return deepCopyMap(map, parent);
         }
-        if (!(object instanceof BaseEntitet) || object instanceof VirksomhetEntitet) {
+        if (!(object instanceof BaseEntitet) || object instanceof Virksomhet) {
             return object;
         }
         try {
