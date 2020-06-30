@@ -1,13 +1,19 @@
 package no.nav.k9.sak.mottak.repo;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
+
+import org.hibernate.query.NativeQuery;
 
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
@@ -55,6 +61,97 @@ public class MottatteDokumentRepository {
             .setParameter(PARAM_KEY, fagsakId)
             .setParameter("gyldig", DokumentStatus.GYLDIG)
             .getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<MottattDokument899> hentTSF_899() {
+        String sql = "select distinct "
+            + " d2.journalpost_id,"
+            + " f.saksnummer, "
+            + " d2.periode_fom, "
+            + " d2.periode_tom, "
+            + " d2.delvis_dato, "
+            + " d2.im, "
+            + " d2.opprettet_tid "
+            + " from (" +
+            "       select " +
+            "         substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
+            "         substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
+            "         substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
+            "         d.* " +
+            "       from (" +
+            "        select " +
+            "          m.journalpost_id," +
+            "          m.opprettet_tid," +
+            "          m.behandling_id," +
+            "          cast(lo_get(payload) as TEXT) as im" +
+            "         from mottatt_dokument m " +
+            "         where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')) d" +
+            "  ) d2 "
+            + " inner join behandling b on b.id = d2.behandling_id"
+            + " inner join fagsak f on f.id = b.fagsak_id"
+            + " inner join aksjonspunkt a on a.behandling_id=b.id"
+            + " where (periode_fom is not null or delvis_dato is not null) AND a.aksjonspunkt_status='OPPR' AND b.behandling_status IN ('OPPRE', 'UTRED') "
+            + " order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setHint(org.hibernate.annotations.QueryHints.READ_ONLY, true)
+            .setHint(org.hibernate.annotations.QueryHints.CACHEABLE, false);
+
+        Stream<Tuple> stream = query.getResultStream();
+        return stream.map(t -> new MottattDokument899(
+            t.get(0, String.class),
+            t.get(1, String.class),
+            t.get(2, String.class),
+            t.get(3, String.class),
+            t.get(4, String.class),
+            t.get(5, String.class)))
+            .collect(Collectors.toList());
+    }
+
+    /** @deprecated fjernes når TSF-899 er løst. */
+    @Deprecated(forRemoval = true)
+    public static class MottattDokument899 {
+        private Long journalpostId;
+        private String saksnummer;
+        private LocalDate fraværFom;
+        private LocalDate fraværTom;
+        private LocalDate delvisFraværDato;
+        private String payload;
+
+        MottattDokument899(String journalpostId, String saksnummer, String fraværFom, String fraværTom, String delvisFraværDato, String payload) {
+            this.journalpostId = journalpostId == null ? null : Long.parseLong(journalpostId);
+            this.saksnummer = saksnummer;
+            this.fraværFom = fraværFom == null ? null : LocalDate.parse(fraværFom);
+            this.fraværTom = fraværTom == null ? null : LocalDate.parse(fraværTom);
+            this.delvisFraværDato = delvisFraværDato == null ? null : LocalDate.parse(delvisFraværDato);
+            this.payload = payload;
+        }
+
+        public String getSaksnummer() {
+            return saksnummer;
+        }
+
+        public LocalDate getFraværFom() {
+            return fraværFom;
+        }
+
+        public LocalDate getFraværTom() {
+            return fraværTom;
+        }
+
+        public LocalDate getDelvisFraværDato() {
+            return delvisFraværDato;
+        }
+
+        public String getPayload() {
+            return payload;
+        }
+
+        public Long getJournalpostId() {
+            return journalpostId;
+        }
+
     }
 
 }

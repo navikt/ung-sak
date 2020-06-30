@@ -44,7 +44,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Transactional
 @Path("/aksjonspunkt")
 @Produces(MediaType.APPLICATION_JSON)
-public class AksjonspunktSammendragRestTjeneste {
+public class ForvaltningAksjonspunktSammendragRestTjeneste {
 
     private static final MediaType TEXT = MediaType.TEXT_PLAIN_TYPE;
     private static final MediaType JSON = MediaType.APPLICATION_JSON_TYPE;
@@ -52,11 +52,11 @@ public class AksjonspunktSammendragRestTjeneste {
     private final List<Variant> reqVariants = Variant.mediaTypes(TEXT, JSON).build();
     private AksjonspunktRepository aksjonspunktRepository;
 
-    public AksjonspunktSammendragRestTjeneste() {
+    public ForvaltningAksjonspunktSammendragRestTjeneste() {
     }
 
     @Inject
-    public AksjonspunktSammendragRestTjeneste(AksjonspunktRepository aksjonspunktRepository) {
+    public ForvaltningAksjonspunktSammendragRestTjeneste(AksjonspunktRepository aksjonspunktRepository) {
         this.aksjonspunktRepository = aksjonspunktRepository;
     }
 
@@ -83,6 +83,7 @@ public class AksjonspunktSammendragRestTjeneste {
         cc.setNoCache(true);
         cc.setNoStore(true);
         cc.setMaxAge(0);
+        cc.setPrivate(true);
 
         List<BehandlingAksjonspunktDto> dtos = mapFra(map);
 
