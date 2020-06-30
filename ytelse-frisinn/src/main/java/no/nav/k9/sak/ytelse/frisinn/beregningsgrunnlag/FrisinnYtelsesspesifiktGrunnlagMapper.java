@@ -29,7 +29,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
 
     @Inject
     public FrisinnYtelsesspesifiktGrunnlagMapper(UttakRepository uttakRepository,
-                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.uttakRepository = uttakRepository;
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }

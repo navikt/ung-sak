@@ -29,7 +29,7 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     public FrisinnKalkulatorInputTjeneste(InntektArbeidYtelseTjeneste iayTjeneste,
                                           @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                           GrunnbeløpTjeneste grunnbeløpTjeneste,
-                                          @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "true") Boolean toggletVilkårsperioder) {
+                                          @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         super(iayTjeneste, opptjeningForBeregningTjeneste, grunnbeløpTjeneste);
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
