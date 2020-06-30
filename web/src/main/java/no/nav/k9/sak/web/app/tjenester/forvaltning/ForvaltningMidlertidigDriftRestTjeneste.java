@@ -66,7 +66,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Path("")
 @ApplicationScoped
 @Transactional
-public class MidlertidigDriftRestTjeneste {
+public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
@@ -74,13 +74,13 @@ public class MidlertidigDriftRestTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private FagsakTjeneste fagsakTjeneste;
 
-    public MidlertidigDriftRestTjeneste() {
+    public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
 
 
     @Inject
-    public MidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
+    public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                         TpsTjeneste tpsTjeneste,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste, FagsakTjeneste fagsakTjeneste) {
 
