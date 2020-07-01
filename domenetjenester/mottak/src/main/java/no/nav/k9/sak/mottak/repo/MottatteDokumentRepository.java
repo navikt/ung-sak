@@ -78,9 +78,9 @@ public class MottatteDokumentRepository {
             "             d2.opprettet_tid " +
             "             from (" +
             "                   select " +
-            "                     substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
-            "                     substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
-            "                     substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
+            "                       substring(im from '.*<fom>[^12]*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</fom>.*') as periode_fom," + 
+            "                       substring(im from '.*<tom>[^12]*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</tom>.*') as periode_tom," + 
+            "                       substring(im from '.*<dato>[^12]*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</dato>.*') as delvis_dato," +
             "                     d.* " +
             "                   from (" +
             "                    select " +
