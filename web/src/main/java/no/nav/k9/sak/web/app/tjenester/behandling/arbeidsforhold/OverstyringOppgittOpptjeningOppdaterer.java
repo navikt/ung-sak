@@ -46,7 +46,6 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
 import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.frisinn.vilkår.UtledPerioderMedEndringTjeneste;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -104,7 +103,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         return OppdateringResultat.utenOveropp();
     }
 
-    private Optional<List<OppgittArbeidsforholdBuilder>>leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
+    private Optional<List<OppgittArbeidsforholdBuilder>> leggerTilArbeidsforhold(SøknadsperiodeOgOppgittOpptjeningV2Dto dto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
         List<OppgittArbeidsforholdBuilder> builders = new ArrayList<>();
 
         List<PeriodeMedSNOgFLDto> måneder = dto.getMåneder();
@@ -140,7 +139,7 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         if (!oppdragI.isEmpty()) {
             return mapTilFrilans(builder, oppdragI);
         }
-        return Optional.empty();
+        return Optional.of(new OppgittFrilans());
     }
 
     private List<OppgittArbeidsforholdBuilder> mapArbeidsforhold(PeriodeMedSNOgFLDto periodeMedSNOgFLDto, HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder) {
