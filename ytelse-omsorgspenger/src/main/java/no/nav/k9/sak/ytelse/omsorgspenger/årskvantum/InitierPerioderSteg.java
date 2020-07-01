@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.InntektsmeldingFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
@@ -75,19 +78,22 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fraværFraInntektsmeldinger = fraværFraInntektsmeldinger(behandling);
-        log.info("Legger til {} perioder fra inntektsmeldinger", fraværFraInntektsmeldinger.size());
-        Set<OppgittFraværPeriode> fravær = fraværFraInntektsmeldinger.isEmpty() ? new LinkedHashSet<>() : new LinkedHashSet<>(fraværFraInntektsmeldinger); // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
+
+        List<OppgittFraværPeriode> fravær; // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         if (behandling.erManueltOpprettet()) {
             var oppgittOpt = annetOppgittFravær(behandlingId);
             var perioder = oppgittOpt.orElseThrow().getPerioder();
             log.info("Legger til {} perioder fra kopiert grunnlag", perioder.size());
-            fravær.addAll(perioder);
+            fravær = fraværFraInntektsmeldingerPåFagsak(behandling);
         } else {
+            var fraværFraInntektsmeldinger = fraværFraInntektsmeldingerPåBehandling(behandling);
+            log.info("Legger til {} perioder fra inntektsmeldinger", fraværFraInntektsmeldinger.size());
             if (fraværFraInntektsmeldinger.isEmpty()) {
                 // Dette bør da være manuelle "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
                 var oppgittOpt = annetOppgittFravær(behandlingId);
-                fravær.addAll(oppgittOpt.orElseThrow().getPerioder());
+                fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
+            } else {
+                fravær = fraværFraInntektsmeldinger;
             }
         }
         log.info("Fravær har totalt {} perioder", fravær.size());
@@ -101,7 +107,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
         return grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
     }
 
-    private List<OppgittFraværPeriode> fraværFraInntektsmeldinger(Behandling behandling) {
+    private List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåBehandling(Behandling behandling) {
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
@@ -112,6 +118,23 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
         log.info("Fant inntektsmeldinger knyttet til behandlingen: {}", inntektsmeldingerJournalposter);
 
+        return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
+    }
+
+    private List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .filter(it -> it.getBehandlingId() != null)
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+
+        log.info("Fant inntektsmeldinger knyttet til fagsaken: {}", inntektsmeldingerJournalposter);
+
+        return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
+    }
+
+    private List<OppgittFraværPeriode> trekkUtPerioderFraInntektsmeldinger(Behandling behandling, Set<JournalpostId> inntektsmeldingerJournalposter) {
         if (inntektsmeldingerJournalposter.isEmpty()) {
             return List.of();
         }
@@ -124,7 +147,8 @@ public class InitierPerioderSteg implements BehandlingSteg {
         }
         var inntektsmeldinger = sakInntektsmeldinger.stream()
             .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
-            .collect(Collectors.toSet());
+            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.naturalOrder()))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (inntektsmeldinger.size() != inntektsmeldingerJournalposter.size()) {
             var journalposterSomMangler = inntektsmeldingerJournalposter.stream()
