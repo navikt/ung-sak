@@ -85,7 +85,7 @@ public class SakInntektsmeldinger {
         }
         var sorted = inntektsmeldinger.stream()
             .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.nullsLast(Comparator.naturalOrder())))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
         return sorted;
     }
 
