@@ -134,6 +134,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .collect(Collectors.toSet());
             return tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
                 .stream()
+                .filter(bg -> bg.getBeregningsgrunnlag() != null)
                 .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
                 .collect(Collectors.toList());
         }
