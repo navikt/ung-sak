@@ -17,44 +17,15 @@ class MapTilBeregningsgrunnlag {
         // Skjul
     }
 
-
-    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
+    static List<Beregningsgrunnlag> mapBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
         Set<BeregningsgrunnlagPeriode.Builder> perioder = new HashSet<>(finnPerioderFraListeMedDagsats(beregningsgrunnlag));
         if (perioder.isEmpty()) {
-            return Optional.empty();
+            return List.of();
         }
         Beregningsgrunnlag.Builder bgBuilder = Beregningsgrunnlag.builder(beregningsgrunnlag.get(0))
             .fjernAllePerioder();
         perioder.forEach(bgBuilder::leggTilBeregningsgrunnlagPeriode);
-        return Optional.of(bgBuilder.build());
-    }
-
-    static Optional<Beregningsgrunnlag> mapBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag,
-                                                              Optional<Beregningsgrunnlag> beregningsgrunnlagOriginalBehandling,
-                                                              DatoIntervallEntitet sisteSøknadsperiode,
-                                                              Boolean skalBenytteTidligereResultat) {
-        Set<BeregningsgrunnlagPeriode.Builder> perioder = new HashSet<>();
-        if (skalBenytteTidligereResultat) {
-            perioder.addAll(finnPerioderForNySøknad(beregningsgrunnlag, sisteSøknadsperiode));
-            perioder.addAll(finnOriginalBehandlingPerioder(beregningsgrunnlagOriginalBehandling, sisteSøknadsperiode));
-        } else {
-            perioder.addAll(beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
-                .filter(p -> p.getDagsats() != null && p.getDagsats() > 0)
-                .map(BeregningsgrunnlagPeriode::builder)
-                .collect(Collectors.toSet()));
-        }
-
-
-        if (perioder.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Beregningsgrunnlag.Builder bgBuilder = Beregningsgrunnlag.builder(beregningsgrunnlag)
-            .fjernAllePerioder();
-
-        perioder.forEach(bgBuilder::leggTilBeregningsgrunnlagPeriode);
-
-        return Optional.of(bgBuilder.build());
+        return List.of(bgBuilder.build());
     }
 
     static Optional<Beregningsgrunnlag> mapBeregningsgrunnlagForNyeSøknadsperioder(Beregningsgrunnlag beregningsgrunnlag,
