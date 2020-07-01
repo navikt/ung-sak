@@ -64,7 +64,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                                     FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                     UttakRepository uttakRepository,
                                     @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste,
-                                    @KonfigVerdi(value = "SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING", defaultVerdi = "false") Boolean skalBenytteTidligereResultat,
+                                    @KonfigVerdi(value = "SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING", defaultVerdi = "true") Boolean skalBenytteTidligereResultat,
                                     @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -169,11 +169,11 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
     private Stream<Behandling> flatten(Behandling behandling) {
         Boolean erNySøknadsperiode = behandling.getOriginalBehandling().map(b -> erNySøknadperiode(behandling, b)).orElse(false);
-        Stream<Behandling> flattened = behandling.getOriginalBehandling().stream().flatMap(this::flatten);
         if (erNySøknadsperiode) {
+            Stream<Behandling> flattened = behandling.getOriginalBehandling().stream().flatMap(this::flatten);
             return Stream.concat(Stream.of(behandling), flattened);
         } else {
-            return Stream.concat(Stream.of(behandling), flattened.skip(1));
+            return Stream.of(behandling);
         }
     }
 
