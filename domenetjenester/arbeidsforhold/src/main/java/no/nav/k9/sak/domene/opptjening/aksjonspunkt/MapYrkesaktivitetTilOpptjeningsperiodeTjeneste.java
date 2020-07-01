@@ -63,7 +63,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                 .medOpptjeningAktivitetType(type)
                 .medPeriode(avtale.getPeriode())
                 .medBegrunnelse(avtale.getBeskrivelse())
-                .medStillingsandel(finnStillingsprosent(registerAktivitet));
+                .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
             harSaksbehandlerVurdert(builder, type, behandlingReferanse, registerAktivitet, vurderForSaksbehandling, grunnlag, opptjeningPeriode);
             settArbeidsgiverInformasjon(gjeldendeAktivitet(registerAktivitet, overstyrtAktivitet), builder);
             builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, registerAktivitet, overstyrtAktivitet, grunnlag, grunnlag.harBlittSaksbehandlet(), opptjeningPeriode));
@@ -94,13 +94,14 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
         return new YrkesaktivitetFilter(null, List.of(overstyrtAktivitet)).getAktivitetsAvtalerForArbeid().stream().map(AktivitetsAvtale::getPeriode).noneMatch(p -> p.equals(periode));
     }
 
-    private static Stillingsprosent finnStillingsprosent(Yrkesaktivitet registerAktivitet) {
+    private static Stillingsprosent finnStillingsprosent(Yrkesaktivitet registerAktivitet, LocalDate skjæringstidspunkt) {
         final Stillingsprosent defaultStillingsprosent = new Stillingsprosent(0);
         if (registerAktivitet.erArbeidsforhold()) {
             var filter = new YrkesaktivitetFilter(null, List.of(registerAktivitet));
             return filter.getAktivitetsAvtalerForArbeid()
                 .stream()
                 .filter(aa -> aa.getProsentsats() != null)
+                .filter(aa -> aa.getPeriode().inkluderer(skjæringstidspunkt))
                 .map(AktivitetsAvtale::getProsentsats)
                 .filter(Objects::nonNull)
                 .max(Comparator.comparing(Stillingsprosent::getVerdi))
