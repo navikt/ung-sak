@@ -47,7 +47,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAksjonspunkter(@SuppressWarnings("unused") @Context Request request) { // NOSONAR
+    public Response getInntektsmeldinger899(@SuppressWarnings("unused") @Context Request request) { // NOSONAR
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
