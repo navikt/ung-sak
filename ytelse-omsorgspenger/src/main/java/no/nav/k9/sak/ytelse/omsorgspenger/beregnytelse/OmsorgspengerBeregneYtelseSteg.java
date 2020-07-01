@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 
 @FagsakYtelseTypeRef("OMP")
@@ -40,6 +42,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
+    private boolean brukerutbetalingEnabled;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -51,7 +54,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                          @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+                                          @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
+                                          @KonfigVerdi(value = "brukerutbetaling.enabled", required = false) boolean brukerutbetalingEnabled) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -59,6 +63,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
+        this.brukerutbetalingEnabled = brukerutbetalingEnabled;
     }
 
     @Override
@@ -80,6 +85,10 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
+        if (!brukerutbetalingEnabled && harUtbetalingTilBruker(beregningsresultat)) {
+            throw new IllegalStateException("Utbetaling til bruker er midlertidig deaktivert.");
+        }
+        
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
@@ -88,6 +97,14 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+    
+    private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat) {
+        return beregningsresultat.getBeregningsresultatPerioder().stream().anyMatch(p -> {
+                    return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {
+                        return a.erBrukerMottaker() && a.getDagsats() > 0;
+                    });
+                });
     }
 
     @Override
