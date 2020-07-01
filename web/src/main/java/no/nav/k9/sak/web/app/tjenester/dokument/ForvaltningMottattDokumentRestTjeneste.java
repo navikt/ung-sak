@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.dokument;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -67,7 +66,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         // quick and dirt til csv. Kan godt forbedres. Ingen av feltene trenger escaping
 
         // headere, pass på rekkefølge her!
-        sb.append("journalpostId,saksnummer,fraværFom,fraværTom,delvisFraværDato\n");
+        sb.append("journalpostId,saksnummer,fraværFom,fraværTom,delvisFraværDato,behandling,aksjonspunkt\n");
 
         for (var d : dtos) {
             // ingen av feltene trenger escaping så langt - kun id og kodeverdier
@@ -76,8 +75,9 @@ public class ForvaltningMottattDokumentRestTjeneste {
             var ffom = toString(d.getFraværFom());
             var ftom = toString(d.getFraværTom());
             var ddato = toString(d.getDelvisFraværDato());
-
-            Object[] args = new Object[] { jid, sn, ffom, ftom, ddato };
+            var bid = toString(d.getBehandlingId());
+            var adef = toString(d.getAksjonspunktKode());
+            Object[] args = new Object[] { jid, sn, ffom, ftom, ddato, bid, adef };
             String fmt = "%s,".repeat(args.length);
             var s = String.format(fmt.substring(0, fmt.length() - 1), args);
             sb.append(s).append('\n');
@@ -86,7 +86,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         return sb.toString();
     }
 
-    private String toString(LocalDate dato) {
-        return dato == null ? "" : dato.toString();
+    private String toString(Object v) {
+        return v == null ? "" : v.toString();
     }
 }

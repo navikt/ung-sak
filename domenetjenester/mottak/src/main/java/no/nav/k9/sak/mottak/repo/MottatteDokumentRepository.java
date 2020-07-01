@@ -65,34 +65,38 @@ public class MottatteDokumentRepository {
 
     @SuppressWarnings("unchecked")
     public List<MottattDokument899> hentTSF_899() {
-        String sql = "select distinct "
-            + " d2.journalpost_id,"
-            + " f.saksnummer, "
-            + " d2.periode_fom, "
-            + " d2.periode_tom, "
-            + " d2.delvis_dato, "
-            + " d2.im, "
-            + " d2.opprettet_tid "
-            + " from (" +
-            "       select " +
-            "         substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
-            "         substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
-            "         substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
-            "         d.* " +
-            "       from (" +
-            "        select " +
-            "          m.journalpost_id," +
-            "          m.opprettet_tid," +
-            "          m.behandling_id," +
-            "          cast(lo_get(payload) as TEXT) as im" +
-            "         from mottatt_dokument m " +
-            "         where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')) d" +
-            "  ) d2 "
-            + " inner join behandling b on b.id = d2.behandling_id"
-            + " inner join fagsak f on f.id = b.fagsak_id"
-            + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where (d2.periode_fom is not null or d2.delvis_dato is not null) AND a.aksjonspunkt_status='OPPR' AND b.behandling_status IN ('OPPRE', 'UTRED') "
-            + " order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
+        String sql = "select distinct " +
+            "             d2.journalpost_id," +
+            "             f.saksnummer, " +
+            "             d2.periode_fom, " +
+            "             d2.periode_tom, " +
+            "             d2.delvis_dato, " +
+            "             d2.im, " +
+            "             d2.behandling_id," +
+            "             a.aksjonspunkt_def," +
+            "             d2.fagsak_id," +
+            "             d2.opprettet_tid " +
+            "             from (" +
+            "                   select " +
+            "                     substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
+            "                     substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
+            "                     substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
+            "                     d.* " +
+            "                   from (" +
+            "                    select " +
+            "                      m.journalpost_id," +
+            "                      m.opprettet_tid," +
+            "                      m.behandling_id," +
+            "                                          m.fagsak_id," +
+            "                      cast(lo_get(payload) as TEXT) as im" +
+            "                     from mottatt_dokument m " +
+            "                     where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')) d" +
+            "              ) d2 " +
+            "             inner join fagsak f on f.id = d2.fagsak_id" +
+            "             left outer join behandling b on b.id = d2.behandling_id AND b.behandling_status IN ('OPPRE', 'UTRED') " +
+            "             left outer join aksjonspunkt a on a.behandling_id=d2.behandling_id  AND a.aksjonspunkt_status='OPPR' " +
+            "             where (d2.periode_fom is not null or d2.delvis_dato is not null)" +
+            "             order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setHint(org.hibernate.annotations.QueryHints.READ_ONLY, true)
@@ -105,7 +109,9 @@ public class MottatteDokumentRepository {
             t.get(2, String.class),
             t.get(3, String.class),
             t.get(4, String.class),
-            t.get(5, String.class)))
+            t.get(5, String.class),
+            t.get(6, Long.class),
+            t.get(7, String.class)))
             .collect(Collectors.toList());
     }
 
@@ -118,8 +124,12 @@ public class MottatteDokumentRepository {
         private LocalDate fraværTom;
         private LocalDate delvisFraværDato;
         private String payload;
+        private String aksjonspunktKode;
+        private Long behandlingId;
 
-        MottattDokument899(String journalpostId, String saksnummer, String fraværFom, String fraværTom, String delvisFraværDato, String payload) {
+        MottattDokument899(String journalpostId, String saksnummer, String fraværFom, String fraværTom, String delvisFraværDato, String payload, Long behandlingId, String aksjonspunktKode) {
+            this.behandlingId = behandlingId;
+            this.aksjonspunktKode = aksjonspunktKode;
             this.journalpostId = journalpostId == null ? null : Long.parseLong(journalpostId);
             this.saksnummer = saksnummer;
             this.fraværFom = fraværFom == null ? null : LocalDate.parse(fraværFom);
@@ -152,6 +162,13 @@ public class MottatteDokumentRepository {
             return journalpostId;
         }
 
+        public Long getBehandlingId() {
+            return behandlingId;
+        }
+
+        public String getAksjonspunktKode() {
+            return aksjonspunktKode;
+        }
     }
 
 }
