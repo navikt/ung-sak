@@ -116,6 +116,14 @@ public class MottatteDokumentRepositoryTest {
         assertThat(dokument2).isEqualTo(mottattDokument2.get());
     }
 
+    @Test
+    public void skal_hente_TSF_899_feil() {
+        var res = mottatteDokumentRepository.hentTSF_899();
+        assertThat(res).isNotEmpty();
+        
+        assertThat(res).allMatch(p -> p.getFraværFom() != null);
+    }
+
     private void lagreBehandling(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.mottak.repo;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -63,44 +64,42 @@ public class MottatteDokumentRepository {
             .getResultList();
     }
 
-    @SuppressWarnings("unchecked")
     public List<MottattDokument899> hentTSF_899() {
         String sql = "select distinct " +
             "             d2.journalpost_id," +
-            "             f.saksnummer, " +
+            "             null as saksnummer, " +
             "             d2.periode_fom, " +
             "             d2.periode_tom, " +
             "             d2.delvis_dato, " +
             "             d2.im, " +
             "             d2.behandling_id," +
-            "             a.aksjonspunkt_def," +
+            "             null as aksjonspunkt_def," +
             "             d2.fagsak_id," +
             "             d2.opprettet_tid " +
             "             from (" +
             "                   select " +
-            "                       substring(im from '.*<fom>[^12]*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</fom>.*') as periode_fom," + 
-            "                       substring(im from '.*<tom>[^12]*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</tom>.*') as periode_tom," + 
-            "                       substring(im from '.*<dato>[^12]*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])[^<]*</dato>.*') as delvis_dato," +
+            "                       substring(im from '.*<fom>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</fom>.*') as periode_fom," +
+            "                       substring(im from '.*<tom>\\s*(20[0-2][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</tom>.*') as periode_tom," +
+            "                       substring(im from '.*<dato>\\s*(20[01][0-9]-[0-1][0-9]-[0-3][0-9])\\s*</dato>.*') as delvis_dato," +
             "                     d.* " +
             "                   from (" +
             "                    select " +
             "                      m.journalpost_id," +
             "                      m.opprettet_tid," +
             "                      m.behandling_id," +
-            "                                          m.fagsak_id," +
-            "                      cast(lo_get(payload) as TEXT) as im" +
+            "                      m.fagsak_id," +
+            "                      convert_from(lo_get(payload), 'UTF8')  as im" +
             "                     from mottatt_dokument m " +
             "                     where type='INNTEKTSMELDING' AND payload IS NOT NULL AND (status IS NULL OR status='GYLDIG')) d" +
             "              ) d2 " +
-            "             inner join fagsak f on f.id = d2.fagsak_id" +
-            "             left outer join behandling b on b.id = d2.behandling_id AND b.behandling_status IN ('OPPRE', 'UTRED') " +
-            "             left outer join aksjonspunkt a on a.behandling_id=d2.behandling_id  AND a.aksjonspunkt_status='OPPR' " +
-            "             where (d2.periode_fom is not null or d2.delvis_dato is not null)" +
-            "             order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
+            "             inner join fagsak f on f.id = d2.fagsak_id"
+            + " left outer join behandling b on b.id = d2.behandling_id AND b.behandling_status IN ('OPPRE', 'UTRED') "
+            + " left outer join aksjonspunkt a on a.behandling_id=b.id AND a.aksjonspunkt_status='OPPR' "
+            + " where (d2.periode_fom is not null or d2.delvis_dato is not null)"
+            + " order by d2.periode_fom desc nulls last, d2.periode_tom desc nulls last, d2.delvis_dato desc nulls last, d2.opprettet_tid desc";
 
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setHint(org.hibernate.annotations.QueryHints.READ_ONLY, true)
-            .setHint(org.hibernate.annotations.QueryHints.CACHEABLE, false);
+        @SuppressWarnings("unchecked")
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
 
         Stream<Tuple> stream = query.getResultStream();
         return stream.map(t -> new MottattDokument899(
@@ -110,7 +109,7 @@ public class MottatteDokumentRepository {
             t.get(3, String.class),
             t.get(4, String.class),
             t.get(5, String.class),
-            t.get(6, Long.class),
+            t.get(6, BigInteger.class),
             t.get(7, String.class)))
             .collect(Collectors.toList());
     }
@@ -127,8 +126,8 @@ public class MottatteDokumentRepository {
         private String aksjonspunktKode;
         private Long behandlingId;
 
-        MottattDokument899(String journalpostId, String saksnummer, String fraværFom, String fraværTom, String delvisFraværDato, String payload, Long behandlingId, String aksjonspunktKode) {
-            this.behandlingId = behandlingId;
+        MottattDokument899(String journalpostId, String saksnummer, String fraværFom, String fraværTom, String delvisFraværDato, String payload, BigInteger behandlingId, String aksjonspunktKode) {
+            this.behandlingId = behandlingId == null ? null : behandlingId.longValue();
             this.aksjonspunktKode = aksjonspunktKode;
             this.journalpostId = journalpostId == null ? null : Long.parseLong(journalpostId);
             this.saksnummer = saksnummer;
