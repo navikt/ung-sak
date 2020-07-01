@@ -198,6 +198,8 @@ spec:
       value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
+    - name: "BRUKERUTBETALING_ENABLED"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
