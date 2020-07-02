@@ -146,6 +146,22 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         assertThat(erUgunst).isFalse();
     }
 
+    @Test
+    public void skal_kunne_vurdere_perioder_når_revurdering_starer_før_orginal() {
+        // Arrange
+        UttakAktivitetPeriode uttak = lagUttakPeriode(LocalDate.of(2020,6,10), LocalDate.of(2020,6,30));
+
+        lagOrginalPeriode(LocalDate.of(2020,6,10), LocalDate.of(2020,6,30), 1257);
+
+        lagRevurderingPeriode(LocalDate.of(2020,6,8), LocalDate.of(2020,6,30), 1326);
+
+        // Act
+        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+
+        // Assert
+        assertThat(erUgunst).isFalse();
+    }
+
 
 
     private boolean vurder(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> orginaltResultat, UttakAktivitetPeriode... perioder) {
