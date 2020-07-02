@@ -113,7 +113,11 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
-        var startDato = opprettSakDto.getPeriodeStart() != null ? opprettSakDto.getPeriodeStart() : LocalDate.now();
+        if(opprettSakDto.getPeriodeStart() == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
+        }
+        
+        var startDato = opprettSakDto.getPeriodeStart();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
 
         var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, startDato);

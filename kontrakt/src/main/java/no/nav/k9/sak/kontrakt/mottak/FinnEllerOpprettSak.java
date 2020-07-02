@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.mottak;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
@@ -41,7 +42,7 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
-    @JsonProperty(value = "periodeStart")
+    @JsonProperty(value = "periodeStart", required = true)
     private LocalDate periodeStart;
 
     @JsonCreator
@@ -49,21 +50,21 @@ public class FinnEllerOpprettSak {
                                @JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
                                @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
                                @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
-                               @JsonProperty(value = "periodeStart") LocalDate periodeStart) {
-        if(behandlingstemaOffisiellKode==null && ytelseType==null) {
+                               @JsonProperty(value = "periodeStart", required = true) @NotNull LocalDate periodeStart) {
+        if (behandlingstemaOffisiellKode == null && ytelseType == null) {
             throw new IllegalArgumentException("Må oppgi enten behandlinstema eller ytelseType");
         }
         this.behandlingstemaOffisiellKode = behandlingstemaOffisiellKode;
         this.ytelseType = ytelseType;
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.periodeStart = periodeStart;
+        this.periodeStart = Objects.requireNonNull(periodeStart, "periodeStart");
     }
 
     public String getBehandlingstemaOffisiellKode() {
         return behandlingstemaOffisiellKode;
     }
-    
+
     public String getYtelseType() {
         return ytelseType;
     }
@@ -79,6 +80,14 @@ public class FinnEllerOpprettSak {
 
     public String getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + "<ytelseType=" + ytelseType
+            + ", periodeStart=" + periodeStart
+            + ">";
     }
 
 }
