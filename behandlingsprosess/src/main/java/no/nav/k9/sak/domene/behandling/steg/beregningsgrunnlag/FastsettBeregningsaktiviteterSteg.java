@@ -71,10 +71,18 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode));
+            if (periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode())) {
+                avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode);
+            } else {
+                aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode));
+            }
         }
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
+    }
+
+    private boolean periodeErUtenforFagsaksIntervall(DatoIntervallEntitet vilkårPeriode, DatoIntervallEntitet fagsakPeriode) {
+        return !vilkårPeriode.overlapper(fagsakPeriode);
     }
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
