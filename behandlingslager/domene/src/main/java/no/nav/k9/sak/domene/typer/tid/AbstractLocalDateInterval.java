@@ -303,7 +303,7 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
     @Override
     public String toString() {
         if (getFomDato().equals(TIDENES_BEGYNNELSE) && getTomDato().equals(TIDENES_ENDE)) {
-            return String.format("Periode: (,)", getTomDato().format(FORMATTER));
+            return "Periode: (,)";
         } else if (getFomDato().equals(TIDENES_BEGYNNELSE)) {
             return String.format("Periode: [%s,)", getFomDato().format(FORMATTER));
         } else if (getTomDato().equals(TIDENES_ENDE)) {
