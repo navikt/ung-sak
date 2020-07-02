@@ -1,5 +1,29 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -19,28 +43,11 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("")
 @ApplicationScoped
@@ -62,6 +69,7 @@ public class FagsakRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Path(STATUS_PATH)
     @Operation(description = "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.", tags = "fagsak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
@@ -80,6 +88,7 @@ public class FagsakRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Produces(MediaType.APPLICATION_JSON)
     @Path(PATH)
     @Operation(description = "Hent fagsak for saksnummer", tags = "fagsak", responses = {

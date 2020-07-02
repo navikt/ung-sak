@@ -1,5 +1,24 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,21 +32,9 @@ import no.nav.k9.sak.kontrakt.medlem.MedlemV2Dto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.medlem.MedlemDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("")
 @ApplicationScoped
@@ -96,6 +103,7 @@ public class PersonRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Path(PERSONOPPLYSNINGER_PATH)
     @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))
@@ -116,6 +124,7 @@ public class PersonRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Path(MEDLEMSKAP_V2_PATH)
     @Operation(description = "Hent informasjon om medlemskap i Folketrygden for søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))

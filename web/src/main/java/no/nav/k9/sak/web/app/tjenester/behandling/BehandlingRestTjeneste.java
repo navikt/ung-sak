@@ -69,6 +69,7 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.jpa.TomtResultatException;
+import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -184,6 +185,7 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Path(BEHANDLINGER_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
@@ -202,6 +204,7 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Path(BEHANDLING_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
@@ -438,7 +441,7 @@ public class BehandlingRestTjeneste {
 
         @FunksjonellFeil(feilkode = "K9-722321", feilmelding = "Behandling er berørt må gjennomføres", løsningsforslag = "Behandle ferdig berørt og opprett revurdering")
         Feil erBerørtBehandling(Long behandlingId);
-        
+
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
