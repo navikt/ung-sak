@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandling.hendelse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 
 public class BehandlingProsessEventDto {
     /**
@@ -38,6 +40,10 @@ public class BehandlingProsessEventDto {
     private String behandlendeEnhet;
     private String ansvarligBeslutterForTotrinn;
     private String ansvarligSaksbehandlerForTotrinn;
+    /**
+     * @see BehandlingResultatType
+     */
+    private String resultatType;
 
     /**
      * Ytelsestype i kodeform. Eksempel: FP
@@ -62,6 +68,31 @@ public class BehandlingProsessEventDto {
     private Map<String, String> aksjonspunktKoderMedStatusListe;
 
     public BehandlingProsessEventDto() {
+    }
+
+    protected BehandlingProsessEventDto(Builder<?> builder) {
+        this.eksternId = builder.eksternId;
+        this.fagsystem = builder.fagsystem;
+        this.saksnummer = builder.saksnummer;
+        this.aktørId = builder.aktørId;
+        this.behandlingId = builder.behandlingId;
+        this.eventTid = builder.eventTid;
+        this.fagsystem = builder.fagsystem;
+        this.behandlingstidFrist = builder.behandlingstidFrist;
+        this.eventHendelse = builder.eventHendelse;
+        this.behandlinStatus = builder.behandlingStatus;
+        this.behandlingStatus = builder.behandlingStatus;
+        this.behandlingSteg = builder.behandlingSteg;
+        this.behandlendeEnhet = builder.behandlendeEnhet;
+        this.ytelseTypeKode = builder.ytelseTypeKode;
+        this.resultatType = builder.resultatType;
+        this.behandlingTypeKode = builder.behandlingTypeKode;
+        this.opprettetBehandling = builder.opprettetBehandling;
+        this.aksjonspunktKoderMedStatusListe = builder.aksjonspunktKoderMedStatusListe;
+    }
+
+    public static Builder<?> builder() {
+        return new BuilderImpl();
     }
 
     public UUID getEksternId() {
@@ -136,26 +167,6 @@ public class BehandlingProsessEventDto {
         return behandlingstidFrist;
     }
 
-    protected BehandlingProsessEventDto(Builder<?> builder) {
-        this.eksternId = builder.eksternId;
-        this.fagsystem = builder.fagsystem;
-        this.saksnummer = builder.saksnummer;
-        this.aktørId = builder.aktørId;
-        this.behandlingId = builder.behandlingId;
-        this.eventTid = builder.eventTid;
-        this.fagsystem = builder.fagsystem;
-        this.behandlingstidFrist = builder.behandlingstidFrist;
-        this.eventHendelse = builder.eventHendelse;
-        this.behandlinStatus = builder.behandlingStatus;
-        this.behandlingStatus = builder.behandlingStatus;
-        this.behandlingSteg = builder.behandlingSteg;
-        this.behandlendeEnhet = builder.behandlendeEnhet;
-        this.ytelseTypeKode = builder.ytelseTypeKode;
-        this.behandlingTypeKode = builder.behandlingTypeKode;
-        this.opprettetBehandling = builder.opprettetBehandling;
-        this.aksjonspunktKoderMedStatusListe = builder.aksjonspunktKoderMedStatusListe;
-    }
-
     public static abstract class Builder<T extends Builder<T>> {
         private UUID eksternId;
         private Fagsystem fagsystem;
@@ -172,6 +183,7 @@ public class BehandlingProsessEventDto {
         private String behandlingTypeKode;
         private LocalDateTime opprettetBehandling;
         private Map<String, String> aksjonspunktKoderMedStatusListe;
+        private String resultatType;
 
         protected abstract T self();
 
@@ -182,7 +194,7 @@ public class BehandlingProsessEventDto {
 
 
         public T medFagsystem(Fagsystem fagsystem) {
-           this.fagsystem = fagsystem;
+            this.fagsystem = fagsystem;
             return self();
         }
 
@@ -246,6 +258,12 @@ public class BehandlingProsessEventDto {
             return self();
         }
 
+        public T medBehandlingResultat(BehandlingResultatType resultatType) {
+            Objects.requireNonNull(resultatType);
+            this.resultatType = Objects.requireNonNull(resultatType).getKode();
+            return self();
+        }
+
         public T medAksjonspunktKoderMedStatusListe(Map<String, String> aksjonspunktKoderMedStatusListe) {
             this.aksjonspunktKoderMedStatusListe = aksjonspunktKoderMedStatusListe;
             return self();
@@ -261,9 +279,5 @@ public class BehandlingProsessEventDto {
         protected BuilderImpl self() {
             return this;
         }
-    }
-
-    public static Builder<?> builder() {
-        return new BuilderImpl();
     }
 }
