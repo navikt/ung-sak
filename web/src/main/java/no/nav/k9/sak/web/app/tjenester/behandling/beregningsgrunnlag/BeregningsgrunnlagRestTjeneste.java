@@ -32,6 +32,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagKoblingDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -84,6 +85,7 @@ public class BeregningsgrunnlagRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Operation(description = "Hent beregningsgrunnlag for angitt behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "beregningsgrunnlag")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(PATH)
@@ -102,6 +104,7 @@ public class BeregningsgrunnlagRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Operation(description = "Henter alle beregningsgrunnlag for angitt behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "beregningsgrunnlag")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(PATH_ALLE)
@@ -120,6 +123,7 @@ public class BeregningsgrunnlagRestTjeneste {
     }
 
     @GET
+    @DoNotCache
     @Operation(description = "Henter alle koblingene for angitt behandling", summary = ("Henter alle koblingene for angitt behandling"), tags = "beregningsgrunnlag")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path(PATH_KOBLINGER)
