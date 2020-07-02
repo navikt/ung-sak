@@ -118,6 +118,7 @@ public class BehandlingskontrollEventObserver {
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
+            .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .build();
     }
