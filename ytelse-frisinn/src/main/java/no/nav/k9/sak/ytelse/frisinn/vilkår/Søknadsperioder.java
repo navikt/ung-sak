@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.frisinn.vilkår;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.Comparator;

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;

@@ -1,14 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
