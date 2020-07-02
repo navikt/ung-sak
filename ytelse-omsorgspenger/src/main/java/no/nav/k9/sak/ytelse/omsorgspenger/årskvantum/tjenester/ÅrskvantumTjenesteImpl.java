@@ -168,8 +168,9 @@ public class ÅrskvantumTjenesteImpl implements ÅrskvantumTjeneste {
 
     @NotNull
     private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, OppgittFravær grunnlag, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger) {
+        var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         var fraværPerioder = new ArrayList<FraværPeriode>();
-        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, grunnlag, iayGrunnlag, vilkårene)
+        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, grunnlag, iayGrunnlag, vilkårene, behandling.getFagsak().getPeriode())
             .values()
             .stream()
             .flatMap(Collection::stream)
