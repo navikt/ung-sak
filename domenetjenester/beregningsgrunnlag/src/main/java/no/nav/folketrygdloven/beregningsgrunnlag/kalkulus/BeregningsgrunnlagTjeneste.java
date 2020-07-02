@@ -127,11 +127,16 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-            var bgReferanser = beregningsgrunnlagPerioderGrunnlag.get()
-                .getGrunnlagPerioder()
+            var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+            var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+            var grunnlag = beregningsgrunnlagPerioderGrunnlag.get();
+
+            var bgReferanser = vilkår.getPerioder()
                 .stream()
-                .map(it -> new BeregningsgrunnlagReferanse(it.getEksternReferanse(), it.getSkjæringstidspunkt()))
+                .map(VilkårPeriode::getSkjæringstidspunkt)
+                .map(it -> new BeregningsgrunnlagReferanse(grunnlag.finnFor(it).orElseThrow().getEksternReferanse(), it))
                 .collect(Collectors.toSet());
+
             return tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
                 .stream()
                 .filter(bg -> bg.getBeregningsgrunnlag() != null)
