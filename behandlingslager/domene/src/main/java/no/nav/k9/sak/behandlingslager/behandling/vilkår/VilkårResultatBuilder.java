@@ -1,12 +1,19 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
@@ -14,10 +21,13 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
  */
 public class VilkårResultatBuilder {
 
+    private static final Logger log = LoggerFactory.getLogger(VilkårResultatBuilder.class);
+
     private Vilkårene kladd = new Vilkårene();
     private int mellomliggendePeriodeAvstand = 0;
     private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
     private boolean built;
+    private DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
 
     public VilkårResultatBuilder() {
         super();
@@ -65,8 +75,26 @@ public class VilkårResultatBuilder {
      */
     public Vilkårene build() {
         if (built) throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
+        validerPerioder();
         built = true;
         return kladd;
+    }
+
+    private void validerPerioder() {
+        var invalidVilkårMap = new HashMap<VilkårType, List<VilkårPeriode>>();
+        kladd.getVilkårene().forEach(v -> invalidVilkårMap.put(v.getVilkårType(), v.getPerioder().stream().filter(it -> gårUtenforBoundry(it.getPeriode())).collect(Collectors.toList())));
+        var harPerioderSomGårUtoverGrensen = invalidVilkårMap.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty());
+        if (harPerioderSomGårUtoverGrensen) {
+            log.warn("Behandligen har vilkår med perioder[{}] som strekker seg utover maks({}) for fagsaken", invalidVilkårMap, boundry);
+            throw new IllegalStateException("Behandligen har perioder som strekker seg utover maks(" + boundry + ") for fagsaken");
+        }
+    }
+
+    private boolean gårUtenforBoundry(DatoIntervallEntitet periode) {
+        if (boundry.getFomDato().isAfter(periode.getFomDato())) {
+            return true;
+        }
+        return boundry.getTomDato().isBefore(periode.getTomDato());
     }
 
     public VilkårResultatBuilder fjernVilkår(VilkårType vilkårType) {
@@ -95,6 +123,11 @@ public class VilkårResultatBuilder {
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
             kladd.leggTilVilkår(builder.build());
         });
+        return this;
+    }
+
+    public VilkårResultatBuilder medBoundry(DatoIntervallEntitet periode) {
+        this.boundry = periode;
         return this;
     }
 }

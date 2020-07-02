@@ -57,15 +57,19 @@ public class InitierVilkårSteg implements BehandlingSteg {
     private void opprettVilkår(Behandling behandling) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
         var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
-        VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
+        VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null))
+            .medBoundry(behandling.getFagsak().getPeriode());
+
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
+
         vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
+
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
     }
 }
