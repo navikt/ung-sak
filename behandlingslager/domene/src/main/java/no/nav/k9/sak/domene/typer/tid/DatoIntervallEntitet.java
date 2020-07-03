@@ -70,8 +70,8 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
 
     public static DatoIntervallEntitet fra(Range<LocalDate> periode) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(
-            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.lower(),
-            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.upper());
+            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.hasMask(Range.LOWER_EXCLUSIVE) ? periode.lower().plusDays(1) : periode.lower(),
+            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.hasMask(Range.UPPER_EXCLUSIVE) ? periode.upper().minusDays(1) : periode.upper());
     }
 
     public Range<LocalDate> toRange() {
