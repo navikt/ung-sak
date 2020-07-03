@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @BehandlingStegRef(kode = "INIT_VILKÅR")
 @BehandlingTypeRef
@@ -27,6 +28,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private boolean valideringDeaktivert;
 
     InitierVilkårSteg() {
         // for CDI proxy
@@ -35,10 +37,12 @@ public class InitierVilkårSteg implements BehandlingSteg {
     @Inject
     public InitierVilkårSteg(BehandlingRepository behandlingRepository,
                              VilkårResultatRepository vilkårResultatRepository,
-                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                             @KonfigVerdi(value = "VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT", required = false) boolean valideringDeaktivert) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.valideringDeaktivert = valideringDeaktivert;
     }
 
     @Override
@@ -57,8 +61,10 @@ public class InitierVilkårSteg implements BehandlingSteg {
     private void opprettVilkår(Behandling behandling) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
         var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
-        VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null))
-            .medBoundry(behandling.getFagsak().getPeriode());
+        VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
+        if (!valideringDeaktivert) {
+            vilkårBuilder.medBoundry(behandling.getFagsak().getPeriode());
+        }
 
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
