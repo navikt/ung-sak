@@ -134,7 +134,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             var bgReferanser = vilkår.getPerioder()
                 .stream()
                 .map(VilkårPeriode::getSkjæringstidspunkt)
-                .map(it -> new BeregningsgrunnlagReferanse(grunnlag.finnFor(it).orElseThrow().getEksternReferanse(), it))
+                .map(it -> new BeregningsgrunnlagReferanse(grunnlag.finnFor(it).map(BeregningsgrunnlagPeriode::getEksternReferanse).orElse(null), it))
+                .filter(it -> Objects.nonNull(it.getReferanse()))
                 .collect(Collectors.toSet());
 
             return tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
