@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -50,6 +51,7 @@ import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste.AbacDataSupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
@@ -62,6 +64,7 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -153,8 +156,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     })
     @Produces(MediaType.TEXT_PLAIN)
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public Response personerMedAksjonspunkt9003(@Parameter(description = "Sidenummer (starter på 0)") @QueryParam("side") int side,
-            @Parameter(description = "Antall per side") @QueryParam("antall") int antall) {
+    public Response personerMedAksjonspunkt9003(@TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid @Parameter(description = "Sidenummer (starter på 0)") @QueryParam("side") int side,
+            @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid @Parameter(description = "Antall per side") @QueryParam("antall") int antall) {
         final List<AktørId> aktører = new ArrayList<>(aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE));
         Collections.sort(aktører);
         
@@ -174,6 +177,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .toArray(String[]::new);
         
         return Response.ok(String.join("\n", result)).build();
+    }
+    
+    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
     }
 
     @NotNull
