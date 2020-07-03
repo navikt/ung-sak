@@ -151,7 +151,7 @@ class BehandlingStegVisitor {
 
         // Publiser transisjonsevent
         StegTransisjon transisjon = behandlingModell.finnTransisjon(stegResultat.getTransisjon());
-        
+
         // FIXME K9:Suspekt støtter bare fremoverhopp her? returnerer null tilSteg om ikke finner (eks. hvis tilbakeføring)
         BehandlingStegType tilSteg = finnFremoverhoppSteg(stegType, transisjon);
         eventPubliserer.fireEvent(opprettEvent(stegResultat, transisjon, stegTilstandFør.orElse(null), tilSteg));
@@ -267,7 +267,14 @@ class BehandlingStegVisitor {
         if (FellesTransisjoner.TILBAKEFØRT_TIL_AKSJONSPUNKT.getId().equals(transisjon.getId())) {
             // tilbakefør til tidligere steg basert på hvilke aksjonspunkter er åpne.
             Optional<BehandlingStegTilstand> forrige = behandling.getSisteBehandlingStegTilstand();
-            BehandlingStegStatus behandlingStegStatus = håndterTilbakeføringTilTidligereSteg(behandling, stegModell.getBehandlingStegType());
+            BehandlingStegStatus behandlingStegStatus = håndterTilbakeføringTilTidligereStegBasertPåAksjonspunkt(behandling, stegModell.getBehandlingStegType());
+            fyrEventBehandlingStegTilbakeføring(forrige, behandling.getSisteBehandlingStegTilstand());
+            return behandlingStegStatus;
+        }
+
+        if (FellesTransisjoner.TILBAKEFØRT_TIL_STEG.getId().equals(transisjon.getId())) {
+            Optional<BehandlingStegTilstand> forrige = behandling.getSisteBehandlingStegTilstand();
+            BehandlingStegStatus behandlingStegStatus = håndterTilbakeføringTilTidligereSteg(behandling, stegModell.getBehandlingStegType(), resultat.getStegType());
             fyrEventBehandlingStegTilbakeføring(forrige, behandling.getSisteBehandlingStegTilstand());
             return behandlingStegStatus;
         }
@@ -308,7 +315,7 @@ class BehandlingStegVisitor {
         return måHåndereAksjonspunktHer;
     }
 
-    private BehandlingStegStatus håndterTilbakeføringTilTidligereSteg(Behandling behandling, BehandlingStegType inneværendeBehandlingStegType) {
+    private BehandlingStegStatus håndterTilbakeføringTilTidligereStegBasertPåAksjonspunkt(Behandling behandling, BehandlingStegType inneværendeBehandlingStegType) {
         BehandlingStegStatus tilbakeførtStegStatus = behandlingStegKonfigurasjon.mapTilStatus(BehandlingStegResultat.TILBAKEFØRT);
         BehandlingStegStatus inneværendeBehandlingStegStatus = behandling.getBehandlingStegStatus();
 
@@ -323,8 +330,21 @@ class BehandlingStegVisitor {
 
             // oppdater nytt steg
             BehandlingStegType nesteStegtype = nesteBehandlingStegModell.getBehandlingStegType();
-            oppdaterBehandlingStegType(nesteStegtype, nesteStegStatus.isPresent() ? nesteStegStatus.get() : null, tilbakeførtStegStatus);
+            oppdaterBehandlingStegType(nesteStegtype, nesteStegStatus.orElse(null), tilbakeførtStegStatus);
         }
+        return tilbakeførtStegStatus;
+    }
+
+
+    private BehandlingStegStatus håndterTilbakeføringTilTidligereSteg(Behandling behandling, BehandlingStegType inneværendeBehandlingStegType, BehandlingStegType nesteStegtype) {
+        BehandlingStegStatus tilbakeførtStegStatus = behandlingStegKonfigurasjon.mapTilStatus(BehandlingStegResultat.TILBAKEFØRT);
+        BehandlingStegStatus inneværendeBehandlingStegStatus = behandling.getBehandlingStegStatus();
+
+        // oppdater inneværende steg
+        oppdaterBehandlingStegStatus(behandling, inneværendeBehandlingStegType, inneværendeBehandlingStegStatus, tilbakeførtStegStatus);
+
+        // oppdater nytt steg
+        oppdaterBehandlingStegType(nesteStegtype, null, tilbakeførtStegStatus);
         return tilbakeførtStegStatus;
     }
 

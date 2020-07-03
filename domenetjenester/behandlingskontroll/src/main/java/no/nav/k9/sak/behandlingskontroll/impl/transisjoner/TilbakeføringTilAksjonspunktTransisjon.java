@@ -4,7 +4,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.StegTransisjon;
 
-class TilbakeføringTransisjon implements StegTransisjon {
+class TilbakeføringTilAksjonspunktTransisjon implements StegTransisjon {
 
     @Override
     public String getId() {
@@ -18,6 +18,6 @@ class TilbakeføringTransisjon implements StegTransisjon {
 
     @Override
     public String toString() {
-        return "TilbakeføringTransisjon";
+        return "TilbakeføringTilAksjonspunktTransisjon";
     }
 }

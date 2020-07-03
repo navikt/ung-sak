@@ -5,30 +5,28 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 
 public class BehandleStegResultat {
     private final List<AksjonspunktResultat> aksjonspunktListe;
+    private final BehandlingStegType stegType;
     private final TransisjonIdentifikator transisjon;
 
     private BehandleStegResultat(TransisjonIdentifikator transisjon, List<AksjonspunktResultat> aksjonspunktListe) {
         this.aksjonspunktListe = aksjonspunktListe;
+        this.stegType = null;
         this.transisjon = transisjon;
     }
 
-    public List<AksjonspunktDefinisjon> getAksjonspunktListe() {
-        return aksjonspunktListe.stream().map(AksjonspunktResultat::getAksjonspunktDefinisjon).collect(toList());
-    }
-
-    public List<AksjonspunktResultat> getAksjonspunktResultater() {
-        return aksjonspunktListe;
-    }
-
-    public TransisjonIdentifikator getTransisjon() {
-        return transisjon;
+    private BehandleStegResultat(TransisjonIdentifikator transisjon, BehandlingStegType tilSteg) {
+        this.aksjonspunktListe = List.of();
+        this.stegType = tilSteg;
+        this.transisjon = transisjon;
     }
 
     /**
@@ -37,6 +35,18 @@ public class BehandleStegResultat {
      */
     public static BehandleStegResultat utførtMedAksjonspunktResultater(List<AksjonspunktResultat> aksjonspunktResultater) {
         return new BehandleStegResultat(FellesTransisjoner.UTFØRT, aksjonspunktResultater);
+    }
+
+    /**
+     * Factory-metode basert steg
+     * {@link BehandlingStegType}
+     *
+     * @param tilSteg steg
+     * @deprecated Kun lagt til for feilretting
+     */
+    @Deprecated
+    public static BehandleStegResultat tilbakeførtTilSteg(BehandlingStegType tilSteg) {
+        return new BehandleStegResultat(FellesTransisjoner.TILBAKEFØRT_TIL_STEG, Objects.requireNonNull(tilSteg));
     }
 
     /**
@@ -85,7 +95,26 @@ public class BehandleStegResultat {
         return new BehandleStegResultat(FellesTransisjoner.STARTET, Collections.emptyList());
     }
 
-    /** sett nytt aksjonspunkt spesifikt. returner kopi av denne instansen. */
+    // Må selv lage historikkinnslag i steget
+    public static BehandleStegResultat henlagtBehandling() {
+        return new BehandleStegResultat(FellesTransisjoner.HENLAGT, Collections.emptyList());
+    }
+
+    public List<AksjonspunktDefinisjon> getAksjonspunktListe() {
+        return aksjonspunktListe.stream().map(AksjonspunktResultat::getAksjonspunktDefinisjon).collect(toList());
+    }
+
+    public List<AksjonspunktResultat> getAksjonspunktResultater() {
+        return aksjonspunktListe;
+    }
+
+    public TransisjonIdentifikator getTransisjon() {
+        return transisjon;
+    }
+
+    /**
+     * sett nytt aksjonspunkt spesifikt. returner kopi av denne instansen.
+     */
     public BehandleStegResultat medAksjonspunktResultat(AksjonspunktResultat aksResultat) {
         List<AksjonspunktResultat> liste = new ArrayList<>(this.aksjonspunktListe);
         liste.remove(aksResultat);
@@ -94,8 +123,7 @@ public class BehandleStegResultat {
         return new BehandleStegResultat(this.transisjon, liste);
     }
 
-    // Må selv lage historikkinnslag i steget
-    public static BehandleStegResultat henlagtBehandling() {
-        return new BehandleStegResultat(FellesTransisjoner.HENLAGT, Collections.emptyList());
+    public BehandlingStegType getStegType() {
+        return stegType;
     }
 }
