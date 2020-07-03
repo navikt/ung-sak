@@ -17,10 +17,11 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Fagsystem implements Kodeverdi {
-    
+
     K9SAK("K9SAK", "Vedtaksløsning K9 - Pleiepenger", "K9"),
     FPSAK("FPSAK", "Vedtaksløsning Foreldrepenger", "FS36"),
     TPS("TPS", "TPS", "FS03"),
+    VLSP("VLSP", "Vedtaksløsning Sykepenger", "VLSP"),
     JOARK("JOARK", "Joark", "AS36"),
     INFOTRYGD("INFOTRYGD", "Infotrygd", "IT01"),
     ARENA("ARENA", "Arena", "AO01"),
@@ -29,7 +30,7 @@ public enum Fagsystem implements Kodeverdi {
     GOSYS("GOSYS", "Gosys", "FS22"),
     ENHETSREGISTERET("ENHETSREGISTERET", "Enhetsregisteret", "ER01"),
     AAREGISTERET("AAREGISTERET", "AAregisteret", "AR01"),
-   
+
     /**
      * Alle kodeverk må ha en verdi, det kan ikke være null i databasen. Denne koden gjør samme nytten.
      */
@@ -87,7 +88,7 @@ public enum Fagsystem implements Kodeverdi {
     public String getOffisiellKode() {
         return offisiellKode;
     }
-    
+
     public static void main(String[] args) {
         System.out.println(KODER.keySet());
     }
