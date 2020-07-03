@@ -28,6 +28,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
@@ -102,7 +103,13 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             for (Aktivitet uttaksPlanOmsorgspengerAktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
                 for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
                     for (Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
-                        if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår)) &&
+                        // Spesialbehandling for de som ryker ut på omsorgsvilkåret og har dnr.
+                        // https://jira.adeo.no/browse/TSF-946
+                        if ((Vilkår.OMSORGSVILKÅRET.equals(vilkår) &&
+                            new PersonIdent(årskvantumResultat.getårskvantum().getPersonIdent()).erDnr() &&
+                            uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT))) {
+                            return true;
+                        } else if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår)) &&
                             (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
                                 uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
                             return true;
