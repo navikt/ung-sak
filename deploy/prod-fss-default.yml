@@ -197,6 +197,8 @@ spec:
       value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
+    - name: VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT
+      value: "true"
 
 
     # Audit logging
