@@ -33,5 +33,9 @@ public class DatoIntervallEntitetTest {
 
         assertThat(entitet).isNotEqualTo(rangeEntiet);
         assertThat(entitet1).isEqualTo(rangeEntiet);
+
+        var localDateRange = Range.ofString("[2020-01-01,2021-01-01)", LocalDate::parse, LocalDate.class);
+        var rangeEntiet1 = DatoIntervallEntitet.fra(localDateRange);
+        assertThat(entitet).isEqualTo(rangeEntiet1);
     }
 }
