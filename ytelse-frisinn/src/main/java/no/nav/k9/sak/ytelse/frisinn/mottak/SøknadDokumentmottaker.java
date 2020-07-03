@@ -114,6 +114,7 @@ public class SøknadDokumentmottaker {
 
     private void validerSøknadErForNyPeriode(Fagsak fagsak, LocalDate fraOgMed) {
         søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), fraOgMed, LocalDate.now().plusYears(100)).stream()
+            .filter(beh -> !beh.isBehandlingHenlagt())
             .findAny()
             .ifPresent(behandling -> { throw new IllegalStateException("Fant tidligere Frisinn-søknad som overlapper samme periode " +
                 "for saksnummer " + fagsak.getSaksnummer() + " fra og med " + fraOgMed); });
