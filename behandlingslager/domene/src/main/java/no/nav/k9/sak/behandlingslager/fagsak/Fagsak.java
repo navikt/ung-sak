@@ -21,7 +21,6 @@ import org.hibernate.annotations.TypeDef;
 import com.vladmihalcea.hibernate.type.range.PostgreSQLRangeType;
 import com.vladmihalcea.hibernate.type.range.Range;
 
-import no.nav.k9.kodeverk.behandling.BehandlingTema;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -241,11 +240,6 @@ public class Fagsak extends BaseEntitet {
     protected void onDelete() {
         // FIXME: FPFEIL-2799 (FrodeC): Fjern denne når FPFEIL-2799 er godkjent
         throw new IllegalStateException("Skal aldri kunne slette fagsak. [id=" + id + ", status=" + getFagsakStatus() + ", type=" + ytelseType + "]");
-    }
-
-    public BehandlingTema getBehandlingTema() {
-        // FIXME K9 kodeverk/logikk
-        return BehandlingTema.finnForFagsakYtelseType(this.getYtelseType());
     }
 
     public void setPeriode(LocalDate fom, LocalDate tom) {
