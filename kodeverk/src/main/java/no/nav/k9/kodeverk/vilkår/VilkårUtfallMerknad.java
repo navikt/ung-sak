@@ -40,6 +40,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1027("1027", "ingen barn dokumentert på far/medmor"),
     VM_1028("1028", "mor fyller ikke vilkåret for sykdom"),
     VM_1029("1029", "bruker er ikke registrert som far/medmor til barnet"),
+    VM_1099("1099", "Ingen beregningsregler tilgjengelig i løsningen (periode utenfor periode på fagsak)"),
 
     VM_1035("1035", "Ikke tilstrekkelig opptjening"),
 
