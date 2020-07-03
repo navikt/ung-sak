@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +25,14 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jetbrains.annotations.NotNull;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -149,9 +153,19 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     })
     @Produces(MediaType.TEXT_PLAIN)
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public Response personerMedAksjonspunkt9003() {
-        final List<AktørId> aktører = aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
-        final String[] result = aktører.stream()
+    public Response personerMedAksjonspunkt9003(@Parameter(description = "Sidenummer (starter på 0)") @QueryParam("side") int side,
+            @Parameter(description = "Antall per side") @QueryParam("antall") int antall) {
+        final List<AktørId> aktører = new ArrayList<>(aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE));
+        Collections.sort(aktører);
+        
+        final int begin = side * antall;
+        if (begin >= aktører.size()) {
+            return Response.ok("").build();
+        }
+        
+        final int end = Math.min(begin + antall, aktører.size());
+        
+        final String[] result = aktører.subList(begin, end).stream()
             .map(a -> tpsAdapter.hentIdentForAktørId(a)
                 .map(v -> v.getIdent())
                 .orElseGet(() -> "UKJENT AKTØRID")
