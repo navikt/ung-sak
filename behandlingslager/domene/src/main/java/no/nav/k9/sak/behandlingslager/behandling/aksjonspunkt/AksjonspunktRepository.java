@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -112,7 +113,15 @@ public class AksjonspunktRepository {
 
         return map;
     }
-
+    
+    @SuppressWarnings("unchecked")
+    public List<AktørId> hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        return em.createQuery("Select f.brukerAktørId from Aksjonspunkt a JOIN a.behandling b JOIN b.fagsak f where a.status = :status AND a.aksjonspunktDefinisjon = :definisjon")
+            .setParameter("status", AksjonspunktStatus.OPPRETTET)
+            .setParameter("definisjon", aksjonspunktDefinisjon)
+            .getResultList();
+    }
+    
     private boolean skipBehandling(Behandling beh) {
         return beh.getFagsakYtelseType() == FagsakYtelseType.OBSOLETE;
     }

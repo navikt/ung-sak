@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -32,11 +33,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.person.tps.TpsAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -73,6 +77,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private FagsakTjeneste fagsakTjeneste;
+    
+    private AksjonspunktRepository aksjonspunktRepository;
+    private TpsAdapter tpsAdapter;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -82,12 +89,15 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Inject
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                         TpsTjeneste tpsTjeneste,
-                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste, FagsakTjeneste fagsakTjeneste) {
+                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste, FagsakTjeneste fagsakTjeneste,
+                                        AksjonspunktRepository aksjonspunktRepository, TpsAdapter tpsAdapter) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.aksjonspunktRepository = aksjonspunktRepository;
+        this.tpsAdapter = tpsAdapter;
     }
 
 
@@ -130,6 +140,26 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
 
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
+    }
+    
+    @GET
+    @Path("/uttrekk-aksjonspunkt-9003")
+    @Operation(description = "Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt.", summary = ("Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt."), tags = "forvaltning", responses = {
+        @ApiResponse(responseCode = "200", description = "Gir linjeskiftseparerte fødselsnummere,", content = @Content(mediaType = MediaType.TEXT_PLAIN))
+    })
+    @Produces(MediaType.TEXT_PLAIN)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public Response personerMedAksjonspunkt9003() {
+        final List<AktørId> aktører = aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
+        final String[] result = aktører.stream()
+            .map(a -> tpsAdapter.hentIdentForAktørId(a)
+                .map(v -> v.getIdent())
+                .orElseGet(() -> "UKJENT AKTØRID")
+            )
+            .distinct()
+            .toArray(String[]::new);
+        
+        return Response.ok(String.join("\n", result)).build();
     }
 
     @NotNull
