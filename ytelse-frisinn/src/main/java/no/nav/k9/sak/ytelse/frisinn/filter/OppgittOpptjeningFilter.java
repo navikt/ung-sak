@@ -78,7 +78,7 @@ public class OppgittOpptjeningFilter {
         var historiskPeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
         var historiskOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
 
-        finnHistoriskSNPeriodeSomSkalLeggesTil(historiskPeriodeSN, senestePeriode, historiskOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL)
+        finnHistoriskSNPeriodeSomSkalLeggesTil(historiskPeriodeSN, historiskOverstyrtPeriodeSN)
             .ifPresent(builder::leggTilEgneNæringer);
 
         return builder.build();
@@ -123,8 +123,8 @@ public class OppgittOpptjeningFilter {
         return Optional.empty();
     }
 
-    private Optional<List<EgenNæringBuilder>> finnHistoriskSNPeriodeSomSkalLeggesTil(Optional<DatoIntervallEntitet> historiskPeriodeSN, DatoIntervallEntitet senestePeriode,
-                                                                            Optional<DatoIntervallEntitet> historiskOverstyrtPeriodeSN, Optional<DatoIntervallEntitet> senesteOverstyrtPeriodeFL) {
+    private Optional<List<EgenNæringBuilder>> finnHistoriskSNPeriodeSomSkalLeggesTil(Optional<DatoIntervallEntitet> historiskPeriodeSN,
+                                                                                     Optional<DatoIntervallEntitet> historiskOverstyrtPeriodeSN) {
         if (historiskOverstyrtPeriodeSN.isPresent()) {
             return Optional.empty();
         }
