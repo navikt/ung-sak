@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.filter;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class OppgittOpptjeningFilter {
 
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2020, 3, 1);
 
     private OppgittOpptjening oppgittOpptjening;
     private OppgittOpptjening overstyrtOppgittOpptjening;
@@ -40,7 +42,7 @@ public class OppgittOpptjeningFilter {
         if (overstyrtOppgittOpptjening == null) {
             return oppgittOpptjening;
         }
-        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyPeriodeHvisTilkommet();
+        OppgittOpptjening slåttSammenGammelOverstyrtMedNytilkommet = leggTilNyeOpptjeningerHvisTilkommet();
         return slåttSammenGammelOverstyrtMedNytilkommet;
     }
 
@@ -56,8 +58,10 @@ public class OppgittOpptjeningFilter {
         return Optional.ofNullable(oppgittOpptjening);
     }
 
-    private OppgittOpptjening leggTilNyPeriodeHvisTilkommet() {
+    private OppgittOpptjening leggTilNyeOpptjeningerHvisTilkommet() {
         var builder = OppgittOpptjeningBuilder.nyFraEksisterende(overstyrtOppgittOpptjening, overstyrtOppgittOpptjening.getEksternReferanse(), overstyrtOppgittOpptjening.getOpprettetTidspunkt());
+
+        // Opptjening for ny søknadsperiode
         var senestePeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
         var senestePeriodeFL = oppgittOpptjening.getFrilans().flatMap(oppgittFrilans -> oppgittFrilans.getFrilansoppdrag().stream().map(OppgittFrilansoppdrag::getPeriode).max(Comparator.comparing(DatoIntervallEntitet::getTomDato)));
         var senestePeriode = senestePeriode(senestePeriodeSN, senestePeriodeFL);
@@ -65,8 +69,17 @@ public class OppgittOpptjeningFilter {
         var senesteOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
         var senesteOverstyrtPeriodeFL = overstyrtOppgittOpptjening.getFrilans().flatMap(oppgittFrilans -> oppgittFrilans.getFrilansoppdrag().stream().map(OppgittFrilansoppdrag::getPeriode).max(Comparator.comparing(DatoIntervallEntitet::getTomDato)));
 
-        finnSNPeriodeSomSkalLeggesTil(senestePeriodeSN, senestePeriode, senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL).ifPresent(builder::leggTilEgneNæringer);
-        finnFLPeriodeSomSkalLeggesTil(senestePeriodeFL, senestePeriode, senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL).ifPresent(builder::leggTilFrilansOpplysninger);
+        finnSNPeriodeSomSkalLeggesTil(senestePeriodeSN, senestePeriode, senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL)
+            .ifPresent(builder::leggTilEgneNæringer);
+        finnFLPeriodeSomSkalLeggesTil(senestePeriodeFL, senestePeriode, senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL)
+            .ifPresent(builder::leggTilFrilansOpplysninger);
+
+        // Historiske opptjening
+        var historiskPeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
+        var historiskOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
+
+        finnHistoriskSNPeriodeSomSkalLeggesTil(historiskPeriodeSN, senestePeriode, historiskOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL)
+            .ifPresent(builder::leggTilEgneNæringer);
 
         return builder.build();
     }
@@ -106,6 +119,17 @@ public class OppgittOpptjeningFilter {
             if (senestePeriodeSN.get().getTomDato().isAfter(senesteOverstyrtPeriodeFL.get().getTomDato())) {
                 return leggTilSN(senestePeriodeSN.get());
             }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<EgenNæringBuilder>> finnHistoriskSNPeriodeSomSkalLeggesTil(Optional<DatoIntervallEntitet> historiskPeriodeSN, DatoIntervallEntitet senestePeriode,
+                                                                            Optional<DatoIntervallEntitet> historiskOverstyrtPeriodeSN, Optional<DatoIntervallEntitet> senesteOverstyrtPeriodeFL) {
+        if (historiskOverstyrtPeriodeSN.isPresent()) {
+            return Optional.empty();
+        }
+        if (historiskPeriodeSN.isPresent()) {
+            return leggTilSN(historiskPeriodeSN.get());
         }
         return Optional.empty();
     }
