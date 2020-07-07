@@ -199,7 +199,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
         YtelseTyperKalkulusStøtterKontrakt ytelse = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
 
-        HentBeregningsgrunnlagRequest hentBeregningsgrunnlagRequest = new HentBeregningsgrunnlagRequest(bgReferanse, ytelse);
+        HentBeregningsgrunnlagRequest hentBeregningsgrunnlagRequest = new HentBeregningsgrunnlagRequest(bgReferanse, ytelse, false);
         no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto beregningsgrunnlagDto = restTjeneste.hentFastsatt(hentBeregningsgrunnlagRequest);
         if (beregningsgrunnlagDto == null) {
             return Optional.empty();
@@ -212,7 +212,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
             bgReferanse,
-            ytelseSomSkalBeregnes
+            ytelseSomSkalBeregnes,
+            false
         );
         BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlag(request);
         if (beregningsgrunnlagGrunnlagDto == null) {
@@ -232,7 +233,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         HentBeregningsgrunnlagGrunnlagForReferanseRequest request = new HentBeregningsgrunnlagGrunnlagForReferanseRequest(
             bgReferanse,
             ytelseSomSkalBeregnes,
-            bgGrunnlagsVersjon
+            bgGrunnlagsVersjon,
+            false
         );
         BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlagForReferanse(request);
         if (beregningsgrunnlagGrunnlagDto == null) {
@@ -247,7 +249,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
             bgReferanse,
-            ytelseSomSkalBeregnes
+            ytelseSomSkalBeregnes,
+            false
         );
         restTjeneste.deaktiverBeregningsgrunnlag(request);
     }
