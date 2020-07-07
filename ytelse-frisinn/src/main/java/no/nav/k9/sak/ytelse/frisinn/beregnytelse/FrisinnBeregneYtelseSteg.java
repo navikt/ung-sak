@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -27,10 +28,12 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FinnEndringsdatoBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
+import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
@@ -143,7 +146,10 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         var nyttUttak = uttakRepository.hentFastsattUttak(revurdering.getId());
         var origUttak = uttakRepository.hentFastsattUttak(origBehandling.getId());
 
-        return nyttUttak.getPerioder().size() > origUttak.getPerioder().size();
+        List<Periode> nyeSøknadsperioder = FrisinnSøknadsperiodeMapper.map(nyttUttak);
+        List<Periode> origSøknadsperioder = FrisinnSøknadsperiodeMapper.map(origUttak);
+
+        return nyeSøknadsperioder.size() > origSøknadsperioder.size();
     }
 
 }
