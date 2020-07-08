@@ -31,7 +31,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     DAGPENGER("DAG", "Dagpenger"),
 
     /** Ny ytelse for kompenasasjon for koronatiltak for Selvstendig næringsdrivende og Frilansere (Anmodning 10). */
-    FRISINN("FRISINN", "FRIlansere og Selstendig næringsdrivendes INNtektskompensasjon"),
+    FRISINN("FRISINN", "FRIlansere og Selvstendig næringsdrivendes INNtektskompensasjon"),
 
     /** Folketrygdloven K8 ytelser. */
     SYKEPENGER("SP", "Sykepenger"),
