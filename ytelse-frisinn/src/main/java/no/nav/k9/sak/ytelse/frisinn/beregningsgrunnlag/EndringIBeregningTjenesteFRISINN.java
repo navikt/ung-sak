@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -16,15 +15,12 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ErEndringIBeregningVu
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
 public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurderer {
 
-    private BeregningTjeneste kalkulusTjeneste;
     private UttakRepository uttakRepository;
-    private Boolean ugunstVurderesMedBeregningsresultat;
     private BeregningsresultatRepository beregningsresultatRepository;
 
     EndringIBeregningTjenesteFRISINN() {
@@ -32,31 +28,30 @@ public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurd
     }
 
     @Inject
-    public EndringIBeregningTjenesteFRISINN(BeregningTjeneste kalkulusTjeneste,
-                                            UttakRepository uttakRepository,
-                                            @KonfigVerdi(value = "UGUNST_VURDERES_MED_BEREGNINGSRESULTAT", defaultVerdi = "true") Boolean ugunstVurderesMedBeregningsresultat,
+    public EndringIBeregningTjenesteFRISINN(UttakRepository uttakRepository,
                                             BeregningsresultatRepository beregningsresultatRepository) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
         this.uttakRepository = uttakRepository;
-        this.ugunstVurderesMedBeregningsresultat = ugunstVurderesMedBeregningsresultat;
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
+    /**
+     * Frisinn vurderer om behandlingens {@link BeregningsresultatEntitet} er endret, og ikke {@link Beregningsgrunnlag}
+     * Dette fordi kun siste del av beregningsgrunnlaget brukes i beregningsresultatet ved ny søknadsperiode. Resten
+     * av beregningsresultatet kopieres fra forrige beregningsresultat.
+     *
+     * @param orginalbehandling revurderingens orginalbehandling
+     * @param revurdering gjeldende behandling
+     * @param skjæringstidspunkt skjæringstidspunkt for Frisinn
+     * @return revurdering er til ugunst (redusert tilkjent ytelse)
+     */
     @Override
-    public boolean vurderUgunst(BehandlingReferanse orginalbehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
+    public boolean vurderUgunst(BehandlingReferanse orginalbehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspunkt) {
         UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(orginalbehandling.getBehandlingId());
-
-        Optional<Beregningsgrunnlag> originaltGrunnlag = kalkulusTjeneste.hentFastsatt(orginalbehandling, skjæringstidspuntk);
-        Optional<Beregningsgrunnlag> revurderingsGrunnlag = kalkulusTjeneste.hentFastsatt(revurdering, skjæringstidspuntk);
 
         Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(orginalbehandling.getId());
         Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBeregningsresultat(revurdering.getId());
 
-        if (ugunstVurderesMedBeregningsresultat) {
-            return ErEndringIBeregningsresultatFRISINN.erUgunst(revurderingResultat, orginaltResultat, orginaltUttak);
-        } else {
-            return ErEndringIBeregningFRISINN.erUgunst(revurderingsGrunnlag, originaltGrunnlag, orginaltUttak);
-        }
+        return ErEndringIBeregningsresultatFRISINN.erUgunst(revurderingResultat, orginaltResultat, orginaltUttak);
     }
 
 }
