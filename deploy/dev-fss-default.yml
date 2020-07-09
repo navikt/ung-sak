@@ -188,8 +188,6 @@ spec:
       value: "true"
     - name: FRISINN_VILKARSPERIODER
       value: "false"
-    - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
-      value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
     - name: "BRUKERUTBETALING_ENABLED"

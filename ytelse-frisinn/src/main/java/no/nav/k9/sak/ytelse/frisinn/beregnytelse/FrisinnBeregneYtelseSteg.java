@@ -47,7 +47,6 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private UttakRepository uttakRepository;
-    private Boolean skalBenytteTidligereResultat;
     private Boolean toggletVilkårsperioder;
 
     protected FrisinnBeregneYtelseSteg() {
@@ -60,14 +59,12 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                                     FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                     UttakRepository uttakRepository,
                                     @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjeneste,
-                                    @KonfigVerdi(value = "SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING", defaultVerdi = "true") Boolean skalBenytteTidligereResultat,
                                     @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.uttakRepository = uttakRepository;
-        this.skalBenytteTidligereResultat = skalBenytteTidligereResultat;
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
@@ -115,7 +112,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
                 var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
-                if (skalBenytteTidligereResultat && erNySøknadsperiode) {
+                if (erNySøknadsperiode) {
                     Behandling origBehandling = originalBehandling.get();
                     Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(origBehandling.getId());
                     beregningsresultat = MapBeregningsresultat.mapResultatFraForrige(beregningsresultat, origBeregningsresultat, sisteSøknadsperiode);
