@@ -188,8 +188,6 @@ spec:
       value: "true"
     - name: FRISINN_VILKARSPERIODER
       value: "false"
-    - name: KAN_HA_UGUNST_OPPTIL_RETTSGEBYR
-      value: "false"
     - name: UGUNST_VURDERES_MED_BEREGNINGSRESULTAT
       value: "true"
     - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
