@@ -185,16 +185,10 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: FRISINN_VARIANT_FILTER_AKTIVERT
-      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: FRISINN_VILKARSPERIODER
       value: "false"
-    - name: UGUNST_VURDERES_MED_BEREGNINGSRESULTAT
-      value: "true"
-    - name: SKAL_BENYTTE_RESULTAT_FRA_TIDLIGERE_BEHANDLING
-      value: "true"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
     - name: VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT
