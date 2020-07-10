@@ -36,7 +36,7 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
+import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
@@ -52,7 +52,7 @@ public class SimulerOppdragStegTest {
 
     private SimulerOppdragSteg steg;
     private K9OppdragRestKlient k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
-    private FptilbakeRestKlient fptilbakeRestKlientMock = mock(FptilbakeRestKlient.class);
+    private K9TilbakeRestKlient k9TilbakeRestKlientMock = mock(K9TilbakeRestKlient.class);
     private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
 
@@ -96,7 +96,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -108,7 +108,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -119,7 +119,7 @@ public class SimulerOppdragStegTest {
 
     @Test
     public void utførSteg_lagrer_tilbakekrevingoppdater_hvis_det_er_en_åpen_tilbakekreving() {
-        when(fptilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(true);
+        when(k9TilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(true);
 
         steg = opprettSteg();
 
@@ -136,6 +136,6 @@ public class SimulerOppdragStegTest {
     }
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, fptilbakeRestKlientMock);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
     }
 }
