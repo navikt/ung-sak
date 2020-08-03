@@ -8,7 +8,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -17,7 +16,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -59,22 +57,12 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .orElseThrow();
         var vurdertePerioder = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, behandling);
 
-        var altAvslått = !vilkåret.getPerioder().isEmpty() && vilkåret.getPerioder()
-            .stream()
-            .filter(it -> vurdertePerioder.contains(it.getPeriode()))
-            .allMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
-
         var noeAvslått = !vilkåret.getPerioder().isEmpty() && vilkåret.getPerioder()
             .stream()
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
             .anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()));
 
-        if (!vurdertePerioder.isEmpty() && altAvslått) {
-            avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
-            behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-            return BehandleStegResultat.fremoverført(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT);
-        } else if (noeAvslått) {
+        if (noeAvslått) {
             avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
