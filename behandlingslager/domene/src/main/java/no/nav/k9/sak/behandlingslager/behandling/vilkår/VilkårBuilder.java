@@ -26,7 +26,7 @@ public class VilkårBuilder {
 
     private final Vilkår vilkåret;
     private final NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
-    private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
+    private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;

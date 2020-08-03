@@ -25,7 +25,7 @@ public class VilkårResultatBuilder {
 
     private Vilkårene kladd = new Vilkårene();
     private int mellomliggendePeriodeAvstand = 0;
-    private KantIKantVurderer kantIKantVurderer = new DefaultKantIKantVurderer();
+    private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private boolean built;
     private DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
 
