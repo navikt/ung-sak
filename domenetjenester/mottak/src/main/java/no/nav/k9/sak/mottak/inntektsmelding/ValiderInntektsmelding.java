@@ -27,7 +27,7 @@ public class ValiderInntektsmelding {
         return value;
     }
 
-    public List<PeriodeAndel> validerOmsorgspengerFravær(List<PeriodeAndel> perioder) {
+    public List<PeriodeAndel> validerOppgittFravær(List<PeriodeAndel> perioder) {
         if (perioder == null || perioder.isEmpty()) {
             return perioder;
         }
@@ -35,10 +35,14 @@ public class ValiderInntektsmelding {
         var segmenter = perioder.stream().map(p -> new LocalDateSegment<PeriodeAndel>(p.getFom(), p.getTom(), p)).collect(Collectors.toList());
         var timeline = new LocalDateTimeline<PeriodeAndel>(segmenter);
 
+        var idag = LocalDate.now();
         var maksDato = timeline.getMaxLocalDate();
         var minDato = timeline.getMinLocalDate();
+
         if (maksDato.getYear() != minDato.getYear()) {
             throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding dekker ulike år: [%s, %s]", minDato, maksDato)).toException();
+        } else if (maksDato.isAfter(idag)) {
+            throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding oppgitt fravær frem i tid: %s vs. [%s, %s]", idag, minDato, maksDato)).toException();
         }
 
         return perioder;
