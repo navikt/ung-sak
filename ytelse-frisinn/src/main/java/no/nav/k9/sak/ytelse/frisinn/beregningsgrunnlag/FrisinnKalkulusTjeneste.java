@@ -2,6 +2,9 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,6 +15,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
@@ -49,10 +53,9 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         if (frisinnGrunnlag.getPerioderMedSøkerInfo().isEmpty()) {
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN);
         }
-
         StartBeregningRequest startBeregningRequest = initStartRequest(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
         if (startBeregningRequest.getKalkulatorInput().getOpptjeningAktiviteter().getPerioder().isEmpty()) {
-            if (frisinnGrunnlag.getSøkerYtelseForFrilans()) {
+            if (erSøktFrilansISistePeriode(frisinnGrunnlag.getPerioderMedSøkerInfo())) {
                 return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT);
             }
             return new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG);
@@ -60,6 +63,11 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         TilstandResponse tilstandResponse = getKalkulusRestTjeneste().startBeregning(startBeregningRequest);
         return mapFraTilstand(tilstandResponse);
+    }
+
+    private boolean erSøktFrilansISistePeriode(List<PeriodeMedSøkerInfoDto> perioderMedSøkerInfo) {
+        Optional<PeriodeMedSøkerInfoDto> sistePeriode = perioderMedSøkerInfo.stream().max(Comparator.comparing(o -> o.getPeriode().getTom()));
+        return sistePeriode.map(PeriodeMedSøkerInfoDto::getSøkerFrilansIPeriode).orElse(false);
     }
 
 }
