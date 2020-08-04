@@ -99,21 +99,22 @@ public class Behandlingsoppretter {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
             return opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
+        } else {
+            Behandling revurdering = opprettRevurdering(sisteYtelseBehandling, revurderingsÅrsak);
+
+            opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, revurdering);
+
+            // Kopier behandlingsårsaker fra forrige behandling
+            new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
+                .map(BehandlingÅrsak::getBehandlingÅrsakType)
+                .collect(toList()))
+                    .buildFor(revurdering);
+
+            BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
+            behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
+
+            return revurdering;
         }
-        Behandling revurdering = opprettRevurdering(sisteYtelseBehandling, revurderingsÅrsak);
-
-        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, revurdering);
-
-        // Kopier behandlingsårsaker fra forrige behandling
-        new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
-            .map(BehandlingÅrsak::getBehandlingÅrsakType)
-            .collect(toList()))
-                .buildFor(revurdering);
-
-        BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
-        behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
-
-        return revurdering;
     }
 
     public void henleggBehandling(Behandling behandling) {
@@ -135,11 +136,9 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettNyFørstegangsbehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
-        Behandling behandling;
-        behandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
-        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
-        return behandling;
+        var nyFørstegangsbehandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyFørstegangsbehandling, mottattDokument);
+        return nyFørstegangsbehandling;
     }
 
     public Behandling opprettNyFørstegangsbehandlingFraTidligereSøknad(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Behandling behandlingMedSøknad) {
@@ -157,7 +156,7 @@ public class Behandlingsoppretter {
         return behandling;
     }
 
-    public boolean erSisteFørstegangsbehandlingHenlagt(Fagsak fagsak) {
+    public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
             && behandling.get().erStatusFerdigbehandlet()
@@ -165,9 +164,10 @@ public class Behandlingsoppretter {
 
             return behandlingRepository
                 .hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
-                .map(v -> v.getBehandlingResultatType().isBehandlingsresultatHenlagt()).orElse(false);
+                .filter(v -> v.getBehandlingResultatType().isBehandlingsresultatHenlagt())
+                ;
         }
 
-        return false;
+        return Optional.empty();
     }
 }

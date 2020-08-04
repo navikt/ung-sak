@@ -39,7 +39,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -51,7 +50,6 @@ import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste.AbacDataSupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
@@ -83,7 +81,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private FagsakTjeneste fagsakTjeneste;
     
     private AksjonspunktRepository aksjonspunktRepository;
     private TpsAdapter tpsAdapter;
@@ -96,13 +93,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Inject
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                         TpsTjeneste tpsTjeneste,
-                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste, FagsakTjeneste fagsakTjeneste,
-                                        AksjonspunktRepository aksjonspunktRepository, TpsAdapter tpsAdapter) {
+                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                        AksjonspunktRepository aksjonspunktRepository, 
+                                        TpsAdapter tpsAdapter) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.fagsakTjeneste = fagsakTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.tpsAdapter = tpsAdapter;
     }

@@ -33,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.BehandlingÅrsakTjeneste;
-import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
@@ -42,13 +41,11 @@ public class BehandlingÅrsakTjenesteTest {
 
     @Rule
     public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    
+
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
 
     private BehandlingÅrsakTjeneste tjeneste;
 
-    @Inject
-    private EndringsresultatSjekker endringsresultatSjekker;
     private Behandling behandling;
 
     @Inject
@@ -64,7 +61,7 @@ public class BehandlingÅrsakTjenesteTest {
     public void setup() {
         initMocks(this);
 
-        tjeneste = new BehandlingÅrsakTjeneste(utledere, endringsresultatSjekker);
+        tjeneste = new BehandlingÅrsakTjeneste(utledere);
         var scenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD);
         behandling = scenario.lagre(repositoryProvider);
