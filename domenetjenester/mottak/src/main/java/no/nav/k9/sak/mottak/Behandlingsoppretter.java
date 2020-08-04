@@ -160,8 +160,8 @@ public class Behandlingsoppretter {
     public boolean erSisteFørstegangsbehandlingHenlagt(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
-            && behandling.get().getBehandlingResultatType().isBehandlingsresultatHenlagt()
-            && behandling.get().getStatus().erFerdigbehandletStatus()) {
+            && behandling.get().erStatusFerdigbehandlet()
+            && behandling.get().erHenlagt()) {
 
             return behandlingRepository
                 .hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
