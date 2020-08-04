@@ -96,8 +96,8 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling revurdering = behandlingsoppretter.opprettRevurdering(behandling, behandlingÅrsakType);
+    public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
+        Behandling revurdering = behandlingsoppretter.opprettRevurdering(tidligereBehandling, behandlingÅrsakType);
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
         return revurdering;

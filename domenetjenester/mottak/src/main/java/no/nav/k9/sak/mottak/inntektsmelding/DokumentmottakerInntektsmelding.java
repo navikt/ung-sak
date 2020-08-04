@@ -26,9 +26,6 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.Kompletthetskontroller;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderDokumentTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -36,7 +33,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private Behandlingsoppretter behandlingsoppretter;
-    private ProsessTaskRepository prosessTaskRepository;
     private Kompletthetskontroller kompletthetskontroller;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentmottakerFelles dokumentMottakerFelles;
@@ -48,60 +44,26 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
+    DokumentmottakerInntektsmelding() {
+        // for CDI
+    }
+
     @Inject
     public DokumentmottakerInntektsmelding(DokumentmottakerFelles dokumentMottakerFelles,
                                            MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                            Behandlingsoppretter behandlingsoppretter,
                                            Kompletthetskontroller kompletthetskontroller,
-                                           ProsessTaskRepository prosessTaskRepository,
                                            BehandlingRepositoryProvider repositoryProvider,
                                            BeanManager beanManager) {
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlingsoppretter = behandlingsoppretter;
         this.kompletthetskontroller = kompletthetskontroller;
-        this.prosessTaskRepository = prosessTaskRepository;
         this.beanManager = beanManager;
 
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
-    }
-
-    void håndterIngenTidligereBehandling(Fagsak fagsak, MottattDokument mottattDokument) { // #I1
-        // Opprett ny førstegangsbehandling
-        Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
-        dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
-    }
-
-    void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Behandling behandling) {
-        if (behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(behandling.getFagsak())) { // #I6
-            opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), null, mottattDokument);
-        } else {
-            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, behandling, getBehandlingÅrsakType());
-        }
-    }
-
-    void oppdaterÅpenBehandlingMedDokument(Behandling behandling, MottattDokument mottattDokument) { // #I2
-        dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
-        dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, getBehandlingÅrsakType());
-        dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT);
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
-    }
-
-    protected BehandlingÅrsakType getBehandlingÅrsakType() {
-        return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
-    }
-
-    void opprettTaskForÅVurdereInntektsmelding(Fagsak fagsak, Behandling behandling, MottattDokument mottattDokument) {
-        String behandlendeEnhetsId = dokumentMottakerFelles.hentBehandlendeEnhetTilVurderDokumentOppgave(fagsak, behandling);
-        ProsessTaskData prosessTaskData = new ProsessTaskData(OpprettOppgaveVurderDokumentTask.TASKTYPE);
-        prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_BEHANDLENDE_ENHET, behandlendeEnhetsId);
-        prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_DOKUMENT_TYPE, mottattDokument.getType().getKode());
-        prosessTaskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId()); // tar ikke med behandling her siden det evt. gjelder ny
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
     }
 
     @Override
@@ -115,6 +77,17 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
 
+    void oppdaterÅpenBehandlingMedDokument(Behandling behandling, MottattDokument mottattDokument) { // #I2
+        dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, getBehandlingÅrsakType());
+        dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT);
+        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
+    }
+
+    protected BehandlingÅrsakType getBehandlingÅrsakType() {
+        return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
+    }
+
     /**
      * Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt.
      */
@@ -122,7 +95,25 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         if (beanManager == null) {
             return;
         }
-        beanManager.fireEvent(event, new Annotation[]{});
+        beanManager.fireEvent(event, new Annotation[] {});
+    }
+
+    private void håndterIngenTidligereBehandling(Fagsak fagsak, MottattDokument mottattDokument) { // #I1
+        // Opprett ny førstegangsbehandling
+        Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
+        dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
+    }
+
+    private void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Behandling tidligereAvsluttetBehandling) {
+        var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(tidligereAvsluttetBehandling.getFagsak());
+        if (sisteHenlagteFørstegangsbehandling.isPresent()) { // #I6
+            var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, sisteHenlagteFørstegangsbehandling.get().getFagsak(),
+                sisteHenlagteFørstegangsbehandling.get());
+            dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
+        } else {
+            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
+        }
     }
 
     private void doMottaDokument(MottattDokument mottattDokument, Fagsak fagsak) {
@@ -133,17 +124,17 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
             return;
         }
 
-        Behandling behandling = sisteYtelsesbehandling.get();
-        sjekkBehandlingKanLåses(behandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
+        Behandling sisteBehandling = sisteYtelsesbehandling.get();
+        sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
 
         boolean sisteYtelseErFerdigbehandlet = sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.FALSE);
         if (sisteYtelseErFerdigbehandlet) {
             Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
-            behandling = sisteAvsluttetBehandling.orElse(behandling);
+            sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
             // Håndter avsluttet behandling
-            håndterAvsluttetTidligereBehandling(mottattDokument, behandling);
+            håndterAvsluttetTidligereBehandling(mottattDokument, sisteBehandling);
         } else {
-            oppdaterÅpenBehandlingMedDokument(behandling, mottattDokument);
+            oppdaterÅpenBehandlingMedDokument(sisteBehandling, mottattDokument);
         }
     }
 

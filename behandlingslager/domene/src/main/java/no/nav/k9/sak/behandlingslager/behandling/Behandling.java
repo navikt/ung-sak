@@ -677,7 +677,7 @@ public class Behandling extends BaseEntitet {
         return (erStatusFerdigbehandlet() || erHenlagt());
     }
 
-    private boolean erHenlagt() {
+    public boolean erHenlagt() {
         return getBehandlingResultatType().isBehandlingHenlagt();
     }
 

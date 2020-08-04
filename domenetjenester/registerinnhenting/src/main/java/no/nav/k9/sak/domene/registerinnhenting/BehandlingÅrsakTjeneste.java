@@ -19,15 +19,13 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.Behandling�
 public class BehandlingÅrsakTjeneste {
 
     private Instance<BehandlingÅrsakUtleder> utledere;
-    private EndringsresultatSjekker endringsresultatSjekker;
 
     public BehandlingÅrsakTjeneste() {
     }
 
     @Inject
-    public BehandlingÅrsakTjeneste(@Any Instance<BehandlingÅrsakUtleder> utledere, EndringsresultatSjekker endringsresultatSjekker) {
+    public BehandlingÅrsakTjeneste(@Any Instance<BehandlingÅrsakUtleder> utledere) {
         this.utledere = utledere;
-        this.endringsresultatSjekker = endringsresultatSjekker;
     }
 
     public Set<BehandlingÅrsakType> utledBehandlingÅrsakerBasertPåDiff(BehandlingReferanse behandling, EndringsresultatDiff endringsresultatDiff) {

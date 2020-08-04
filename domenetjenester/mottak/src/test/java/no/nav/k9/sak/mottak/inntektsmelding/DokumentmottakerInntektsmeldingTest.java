@@ -97,7 +97,6 @@ public class DokumentmottakerInntektsmeldingTest {
             mottatteDokumentTjeneste,
             behandlingsoppretter,
             kompletthetskontroller,
-            prosessTaskRepository,
             repositoryProvider,
             null));
 
