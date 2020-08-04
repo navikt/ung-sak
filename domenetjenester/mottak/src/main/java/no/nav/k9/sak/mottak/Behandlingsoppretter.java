@@ -166,14 +166,17 @@ public class Behandlingsoppretter {
         return behandling;
     }
 
-    public boolean erBehandlingOgFørstegangsbehandlingHenlagt(Fagsak fagsak) {
+    public boolean erSisteFørstegangsbehandlingHenlagt(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-        Optional<VedtakVarsel> behandlingsresultat = behandling.flatMap(b -> vedtakVarselRepository.hentHvisEksisterer(b.getId()));
-        if (behandlingsresultat.isPresent() && behandling.get().getBehandlingResultatType().isBehandlingsresultatHenlagt()) {
-            Optional<Behandling> førstegangsbehandling = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD);
-            Optional<VedtakVarsel> førstegangsbehandlingBehandlingsresultat = førstegangsbehandling.flatMap(b -> vedtakVarselRepository.hentHvisEksisterer(b.getId()));
-            return førstegangsbehandlingBehandlingsresultat.isPresent() && førstegangsbehandling.get().getBehandlingResultatType().isBehandlingsresultatHenlagt();
+        if (behandling.isPresent()
+            && behandling.get().getBehandlingResultatType().isBehandlingsresultatHenlagt()
+            && behandling.get().getStatus().erFerdigbehandletStatus()) {
+
+            return behandlingRepository
+                .hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
+                .map(v -> v.getBehandlingResultatType().isBehandlingsresultatHenlagt()).orElse(false);
         }
+        
         return false;
     }
 }

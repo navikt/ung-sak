@@ -76,7 +76,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     void håndterAvsluttetTidligereBehandling(MottattDokument mottattDokument, Behandling behandling) {
-        if (behandlingsoppretter.erBehandlingOgFørstegangsbehandlingHenlagt(behandling.getFagsak())) { // #I6
+        if (behandlingsoppretter.erSisteFørstegangsbehandlingHenlagt(behandling.getFagsak())) { // #I6
             opprettTaskForÅVurdereInntektsmelding(behandling.getFagsak(), null, mottattDokument);
         } else {
             dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, behandling, getBehandlingÅrsakType());
