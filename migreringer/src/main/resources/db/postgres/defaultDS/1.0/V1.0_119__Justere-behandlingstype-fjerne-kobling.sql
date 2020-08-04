@@ -1,6 +1,9 @@
 ALTER TABLE behandling
     add column original_behandling_id bigint references behandling;
 
+create index idx_behandling_7
+    on behandling (original_behandling_id);
+
 update behandling b
 set original_behandling_id = (select DISTINCT original_behandling_id
                               from behandling_arsak ba
