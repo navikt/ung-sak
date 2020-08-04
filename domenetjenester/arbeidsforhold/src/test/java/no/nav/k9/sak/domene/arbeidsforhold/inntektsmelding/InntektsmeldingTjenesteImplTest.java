@@ -489,8 +489,7 @@ public class InntektsmeldingTjenesteImplTest {
 
     private Behandling opprettRevurderingsbehandling(Behandling opprinneligBehandling) {
         BehandlingType behandlingType = BehandlingType.REVURDERING;
-        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
-            .medOriginalBehandling(opprinneligBehandling);
+        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
         Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlingÅrsak(revurderingÅrsak).build();
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));

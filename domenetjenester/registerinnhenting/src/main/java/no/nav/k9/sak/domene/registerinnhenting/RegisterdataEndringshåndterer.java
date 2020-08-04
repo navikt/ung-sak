@@ -141,7 +141,6 @@ public class RegisterdataEndringshåndterer {
 
     private void leggTilBehandlingsårsaker(Behandling behandling, Set<BehandlingÅrsakType> årsakTyper) {
         BehandlingÅrsak.Builder builder = BehandlingÅrsak.builder(new ArrayList<>(årsakTyper));
-        behandling.getOriginalBehandling().ifPresent(builder::medOriginalBehandling);
         builder.buildFor(behandling);
     }
 

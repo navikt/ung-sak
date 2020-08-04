@@ -56,7 +56,6 @@ public class DokumentmottakerFelles {
 
     public void leggTilBehandlingsårsak(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         BehandlingÅrsak.Builder builder = BehandlingÅrsak.builder(behandlingÅrsak);
-        behandling.getOriginalBehandling().ifPresent(builder::medOriginalBehandling);
         builder.buildFor(behandling);
 
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);

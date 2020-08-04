@@ -651,7 +651,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         } else {
             behandlingBuilder = Behandling.fraTidligereBehandling(originalBehandling, behandlingType)
                 .medBehandlingÅrsak(
-                    BehandlingÅrsak.builder(behandlingÅrsakType).medManueltOpprettet(manueltOpprettet).medOriginalBehandling(originalBehandling));
+                    BehandlingÅrsak.builder(behandlingÅrsakType).medManueltOpprettet(manueltOpprettet));
         }
 
         if (behandlingstidFrist != null) {
