@@ -69,14 +69,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.vedtak.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {
-        @SqlResultSetMapping(name = "PipDataResult", classes = {
-                @ConstructorResult(targetClass = PipBehandlingsData.class, columns = {
-                        @ColumnResult(name = "behandligStatus"),
-                        @ColumnResult(name = "ansvarligSaksbehandler"),
-                        @ColumnResult(name = "fagsakId"),
-                        @ColumnResult(name = "fagsakStatus")
-                })
+    @SqlResultSetMapping(name = "PipDataResult", classes = {
+        @ConstructorResult(targetClass = PipBehandlingsData.class, columns = {
+            @ColumnResult(name = "behandligStatus"),
+            @ColumnResult(name = "ansvarligSaksbehandler"),
+            @ColumnResult(name = "fagsakId"),
+            @ColumnResult(name = "fagsakStatus")
         })
+    })
 })
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
@@ -123,11 +123,15 @@ public class Behandling extends BaseEntitet {
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
+    @ManyToOne
+    @JoinColumn(name = "original_behandling_id", updatable = false)
+    private Behandling originalBehandling;
+
     @Convert(converter = BehandlingStatusKodeverdiConverter.class)
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "behandling")
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "behandling")
     @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
     @Where(clause = "aktiv=true")
     private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
@@ -273,18 +277,7 @@ public class Behandling extends BaseEntitet {
     }
 
     public Optional<Behandling> getOriginalBehandling() {
-        Set<Behandling> behandlinger = getBehandlingÅrsaker()
-            .stream()
-            .map(bå -> bå.getOriginalBehandling().orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-
-        // invariant kan ikke ha forskjellige behandlinger her
-        // TODO (my future self): flytt original behandling som felt til Behandling
-        if (behandlinger.size() > 1) {
-            throw new IllegalStateException("Datakonsistens feil: Har ulike originalbehandlinger knyttet til " + this.getId() + ": " + behandlinger);
-        }
-        return behandlinger.stream().findFirst();
+        return Optional.ofNullable(originalBehandling);
     }
 
     public boolean erManueltOpprettet() {
@@ -292,10 +285,6 @@ public class Behandling extends BaseEntitet {
             .map(BehandlingÅrsak::erManueltOpprettet)
             .collect(Collectors.toList())
             .contains(true);
-    }
-
-    public boolean erManueltOpprettetOgHarÅrsak(BehandlingÅrsakType behandlingÅrsak) {
-        return erManueltOpprettet() && harBehandlingÅrsak(behandlingÅrsak);
     }
 
     public Long getId() {
@@ -413,7 +402,7 @@ public class Behandling extends BaseEntitet {
 
     /**
      * @deprecated bygg fortrinnsvis logikk rundt eksistens av stegresultater (fx vedtaksdato). Slik at man evt kan dekoble tabeller (evt behold
-     *             en current her)
+     * en current her)
      */
     @Deprecated
     public Stream<BehandlingStegTilstand> getBehandlingStegTilstandHistorikk() {
@@ -714,11 +703,6 @@ public class Behandling extends BaseEntitet {
         this.startpunkt = startpunkt;
     }
 
-    public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
-        guardTilstandPåBehandling();
-        this.behandlingResultatType = behandlingResultatType;
-    }
-
     public boolean erÅpnetForEndring() {
         return åpnetForEndring;
     }
@@ -747,6 +731,19 @@ public class Behandling extends BaseEntitet {
     protected void onDelete() {
         // FIXME: FPFEIL-2799 (FrodeC): Fjern denne når FPFEIL-2799 er godkjent
         throw new IllegalStateException("Skal aldri kunne slette behandling. [id=" + id + ", status=" + getStatus() + ", type=" + getType() + "]");
+    }
+
+    public BehandlingResultatType getBehandlingResultatType() {
+        return behandlingResultatType;
+    }
+
+    public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
+        guardTilstandPåBehandling();
+        this.behandlingResultatType = behandlingResultatType;
+    }
+
+    public List<BehandlingÅrsakType> getBehandlingÅrsakerTyper() {
+        return getBehandlingÅrsaker().stream().map(BehandlingÅrsak::getBehandlingÅrsakType).collect(Collectors.toList());
     }
 
     public static class Builder {
@@ -785,9 +782,6 @@ public class Behandling extends BaseEntitet {
         }
 
         public Builder medBehandlingÅrsak(BehandlingÅrsak.Builder årsakBuilder) {
-            if(forrigeBehandling!=null && årsakBuilder.getOriginalBehandling()==null) {
-                årsakBuilder.medOriginalBehandling(forrigeBehandling);
-            }
             this.behandlingÅrsakBuilder = årsakBuilder;
             return this;
         }
@@ -849,6 +843,7 @@ public class Behandling extends BaseEntitet {
 
             if (forrigeBehandling != null) {
                 behandling = new Behandling(forrigeBehandling.getFagsak(), behandlingType);
+                behandling.originalBehandling = forrigeBehandling;
                 behandling.behandlendeEnhet = forrigeBehandling.behandlendeEnhet;
                 behandling.behandlendeEnhetNavn = forrigeBehandling.behandlendeEnhetNavn;
                 behandling.behandlendeEnhetÅrsak = forrigeBehandling.behandlendeEnhetÅrsak;
@@ -887,14 +882,6 @@ public class Behandling extends BaseEntitet {
             return behandling;
         }
 
-    }
-
-    public BehandlingResultatType getBehandlingResultatType() {
-        return behandlingResultatType;
-    }
-
-    public List<BehandlingÅrsakType> getBehandlingÅrsakerTyper() {
-        return getBehandlingÅrsaker().stream().map(BehandlingÅrsak::getBehandlingÅrsakType).collect(Collectors.toList());
     }
 
 }

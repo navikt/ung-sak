@@ -45,7 +45,6 @@ public class RevurderingTjenesteFelles {
                                                     OrganisasjonsEnhet enhet) {
         BehandlingType behandlingType = BehandlingType.REVURDERING;
         BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(revurderingÅrsakType)
-            .medOriginalBehandling(opprinneligBehandling)
             .medManueltOpprettet(manueltOpprettet);
         Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlendeEnhet(enhet)

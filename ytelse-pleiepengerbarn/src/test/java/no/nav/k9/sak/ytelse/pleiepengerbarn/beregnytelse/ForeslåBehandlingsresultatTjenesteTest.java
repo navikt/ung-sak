@@ -215,8 +215,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         Behandling revurdering = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(
                 BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
-                    .medManueltOpprettet(true)
-                    .medOriginalBehandling(originalBehandling))
+                    .medManueltOpprettet(true))
             .build();
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
         return revurdering;

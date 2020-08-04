@@ -135,8 +135,7 @@ public class VurderLøpendeMedlemskapStegTest {
     }
 
     private Behandling opprettRevudering(Behandling behandling) {
-        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_FEIL_ELLER_ENDRET_FAKTA)
-            .medOriginalBehandling(behandling);
+        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_FEIL_ELLER_ENDRET_FAKTA);
 
         Behandling revudering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(revurderingÅrsak).build();

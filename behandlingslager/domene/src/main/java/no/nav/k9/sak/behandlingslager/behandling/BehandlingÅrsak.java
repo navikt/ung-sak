@@ -41,11 +41,6 @@ public class BehandlingÅrsak extends BaseEntitet {
     @Column(name="behandling_arsak_type", nullable = false)
     private BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
 
-    @ManyToOne
-    @JoinColumn(name = "original_behandling_id", updatable = false)
-    private Behandling originalBehandling;
-
-    
     @Column(name = "manuelt_opprettet", nullable = false)
     private boolean manueltOpprettet = false;
 
@@ -63,10 +58,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
     public BehandlingÅrsakType getBehandlingÅrsakType() {
         return behandlingÅrsakType;
-    }
-
-    public Optional<Behandling> getOriginalBehandling() {
-        return Optional.ofNullable(originalBehandling);
     }
 
     public boolean erManueltOpprettet() {
@@ -88,21 +79,11 @@ public class BehandlingÅrsak extends BaseEntitet {
     public static class Builder {
 
         private List<BehandlingÅrsakType> behandlingÅrsakTyper;
-        private Behandling originalBehandling;
         private boolean manueltOpprettet;
 
         public Builder(List<BehandlingÅrsakType> behandlingÅrsakTyper) {
             Objects.requireNonNull(behandlingÅrsakTyper, "behandlingÅrsakTyper");
             this.behandlingÅrsakTyper = behandlingÅrsakTyper;
-        }
-        
-        public Behandling getOriginalBehandling() {
-            return originalBehandling;
-        }
-
-        public Builder medOriginalBehandling(Behandling originalBehandling) {
-            this.originalBehandling = originalBehandling;
-            return this;
         }
 
         public Builder medManueltOpprettet(boolean manueltOpprettet) {
@@ -121,16 +102,12 @@ public class BehandlingÅrsak extends BaseEntitet {
                 if (eksisterende.isPresent()) {
                     // Oppdater eksisterende (UPDATE)
                     BehandlingÅrsak årsak = eksisterende.get();
-                    if (this.originalBehandling != null) {
-                        årsak.originalBehandling = this.originalBehandling;
-                    }
                     årsak.manueltOpprettet = this.manueltOpprettet;
                 } else {
                     // Opprett ny (INSERT)
                     BehandlingÅrsak behandlingÅrsak = new BehandlingÅrsak();
                     behandlingÅrsak.behandling = behandling;
                     behandlingÅrsak.behandlingÅrsakType = årsakType;
-                    behandlingÅrsak.originalBehandling = this.originalBehandling;
                     behandlingÅrsak.manueltOpprettet = this.manueltOpprettet;
                     nyeÅrsaker.add(behandlingÅrsak);
                 }
