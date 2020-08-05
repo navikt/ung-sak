@@ -21,7 +21,7 @@ public class K9TilbakeRestKlient {
 
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
-    private boolean fptilbakeAktivert;
+    private boolean k9tilbakeAktivert;
 
     K9TilbakeRestKlient() {
         // for CDI proxy
@@ -30,18 +30,18 @@ public class K9TilbakeRestKlient {
     @Inject
     public K9TilbakeRestKlient(OidcRestClient restClient,
                                @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake,
-                               @KonfigVerdi(value = "K9TILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean fptilbakeAktivert) {
+                               @KonfigVerdi(value = "K9TILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean k9tilbakeAktivert) {
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
-        this.fptilbakeAktivert = fptilbakeAktivert;
+        this.k9tilbakeAktivert = k9tilbakeAktivert;
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
-        if(fptilbakeAktivert){
+        if(k9tilbakeAktivert){
             return restClient.get(uri, Boolean.class);
         } else {
-            log.info("Fptilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
+            log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return false;
         }
     }
