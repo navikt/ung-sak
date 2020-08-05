@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.k9.sak.økonomi.tilbakekreving.klient.FptilbakeRestKlient;
+import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.vedtak.exception.IntegrasjonException;
@@ -44,7 +44,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private FptilbakeRestKlient fptilbakeRestKlient;
+    private K9TilbakeRestKlient k9TilbakeRestKlient;
 
     SimulerOppdragSteg() {
         // for CDI proxy
@@ -55,12 +55,12 @@ public class SimulerOppdragSteg implements BehandlingSteg {
                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                               SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                               TilbakekrevingRepository tilbakekrevingRepository,
-                              FptilbakeRestKlient fptilbakeRestKlient) {
+                              K9TilbakeRestKlient k9TilbakeRestKlient) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.fptilbakeRestKlient = fptilbakeRestKlient;
+        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
     }
 
     @Override
@@ -144,7 +144,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     }
 
     private boolean harÅpenTilbakekreving(Behandling behandling) {
-        return fptilbakeRestKlient.harÅpenTilbakekrevingsbehandling(behandling.getFagsak().getSaksnummer());
+        return k9TilbakeRestKlient.harÅpenTilbakekrevingsbehandling(behandling.getFagsak().getSaksnummer());
     }
 
     private void lagreTilbakekrevingValg(Behandling behandling, TilbakekrevingValg tilbakekrevingValg) {

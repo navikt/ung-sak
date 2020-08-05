@@ -15,34 +15,33 @@ import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
-public class FptilbakeRestKlientImpl implements FptilbakeRestKlient {
+public class K9TilbakeRestKlient {
 
-    private static final Logger log = LoggerFactory.getLogger(FptilbakeRestKlientImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(K9TilbakeRestKlient.class);
 
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
-    private boolean fptilbakeAktivert;
+    private boolean k9tilbakeAktivert;
 
-    public FptilbakeRestKlientImpl() {
+    K9TilbakeRestKlient() {
         // for CDI proxy
     }
 
     @Inject
-    public FptilbakeRestKlientImpl(OidcRestClient restClient,
-                                   @KonfigVerdi(value = "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING", defaultVerdi = "http://fptilbake/fptilbake/api/behandlinger/tilbakekreving/aapen") String urlSjekkÅpenBehandling,
-                                   @KonfigVerdi(value = "FPTILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean fptilbakeAktivert) {
+    public K9TilbakeRestKlient(OidcRestClient restClient,
+                               @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake,
+                               @KonfigVerdi(value = "K9TILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean k9tilbakeAktivert) {
         this.restClient = restClient;
-        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlSjekkÅpenBehandling, "URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING");
-        this.fptilbakeAktivert = fptilbakeAktivert;
+        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
+        this.k9tilbakeAktivert = k9tilbakeAktivert;
     }
 
-    @Override
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
-        if(fptilbakeAktivert){
+        if(k9tilbakeAktivert){
             return restClient.get(uri, Boolean.class);
         } else {
-            log.info("Fptilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
+            log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return false;
         }
     }
@@ -55,11 +54,11 @@ public class FptilbakeRestKlientImpl implements FptilbakeRestKlient {
         }
     }
 
-    private static URI tilUri(String url, String konfigurertNavn) {
+    private static URI tilUri(String baseUrl, String path) {
         try {
-            return new URIBuilder(url).build();
+            return new URI(baseUrl + "/" + path);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for " + konfigurertNavn, e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9TILBAKE", e);
         }
     }
 

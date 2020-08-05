@@ -139,8 +139,6 @@ spec:
       value: http://abac-k9/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: https://app.adeo.no/k9/oppdrag/api
-    - name: URL_FPTILBAKE_SJEKK_AAPEN_BEHANDLING
-      value: http://fptilbake.default/fptilbake/api/behandlinger/tilbakekreving/aapen
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
