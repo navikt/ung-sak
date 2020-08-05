@@ -61,7 +61,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingProsessTask.logContext(behandling);
+        logContext(behandling);
         
         var targetSteg = BehandlingStegType.START_STEG;
         var forventetPassertSteg = BehandlingStegType.START_STEG;
