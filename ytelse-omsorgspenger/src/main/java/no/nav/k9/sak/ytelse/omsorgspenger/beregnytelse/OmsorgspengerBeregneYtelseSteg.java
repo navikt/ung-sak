@@ -70,8 +70,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 
@@ -88,7 +87,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         if (!brukerutbetalingEnabled && harUtbetalingTilBruker(beregningsresultat)) {
             throw new IllegalStateException("Utbetaling til bruker er midlertidig deaktivert.");
         }
-        
+
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
@@ -98,7 +97,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
-    
+
     private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat) {
         return beregningsresultat.getBeregningsresultatPerioder().stream().anyMatch(p -> {
                     return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {

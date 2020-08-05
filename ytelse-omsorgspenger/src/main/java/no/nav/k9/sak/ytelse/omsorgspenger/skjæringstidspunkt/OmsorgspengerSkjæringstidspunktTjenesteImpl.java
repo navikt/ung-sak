@@ -97,12 +97,13 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
 
         if (søknadsperioder.isPresent()) {
-            final var oppgittFordeling = søknadsperioder.get();
-            final var førstePeriode = oppgittFordeling.getPerioder()
+            var oppgittFordeling = søknadsperioder.get();
+            var førstePeriode = oppgittFordeling.getPerioder()
                 .stream()
                 .map(OppgittFraværPeriode::getPeriode)
                 .min(DatoIntervallEntitet::compareTo);
-            final var førsteDagIUttaket = oppgittFordeling.getPerioder()
+
+            var førsteDagIUttaket = oppgittFordeling.getPerioder()
                 .stream()
                 .map(OppgittFraværPeriode::getPeriode)
                 .map(DatoIntervallEntitet::getFomDato)
@@ -110,17 +111,15 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
                 .orElse(LocalDate.now());
 
             if (vilkårene.isPresent()) {
-                final var spesifiktVilkår = vilkårene.get().getVilkårene().stream().filter(it -> VilkårType.OPPTJENINGSVILKÅRET.equals(it.getVilkårType())).findFirst();
+                var spesifiktVilkår = vilkårene.get().getVilkårene().stream().filter(it -> VilkårType.OPPTJENINGSVILKÅRET.equals(it.getVilkårType())).findFirst();
                 if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
-                    final var vilkårPeriode = spesifiktVilkår.get().getPerioder()
+                    var vilkårPeriode = spesifiktVilkår.get().getPerioder()
                         .stream()
                         .map(VilkårPeriode::getPeriode)
                         .min(DatoIntervallEntitet::compareTo);
 
-                    if (vilkårPeriode.isEmpty()) {
-                        throw new IllegalStateException("Utvikler feil: Fant ingen gyldig vilkårsperiode for dato=" + førsteDagIUttaket + ". Skal ikke forekomme!");
-                    } else {
-                        final var periode = vilkårPeriode.get();
+                    if (vilkårPeriode.isPresent()) {
+                        var periode = vilkårPeriode.get();
                         if (periode.getFomDato().isBefore(førsteDagIUttaket)) {
                             return periode.getFomDato();
                         }
