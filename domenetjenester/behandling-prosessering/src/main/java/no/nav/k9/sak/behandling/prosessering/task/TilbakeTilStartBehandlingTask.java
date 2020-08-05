@@ -1,8 +1,10 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -22,32 +24,32 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 /**
- * Kjører tilbakehopp til starten av beregning
+ * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
  */
 @ApplicationScoped
-@ProsessTask(TilbakeTilStartBeregningTask.TASKNAME)
+@ProsessTask(TilbakeTilStartBehandlingTask.TASKNAME)
 // gruppeSekvens = false for å kunne hoppe tilbake ved feilende fortsettBehandling task
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class TilbakeTilStartBeregningTask extends BehandlingProsessTask {
+public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
-    public static final String TASKNAME = "beregning.tilbakeTilStart";
-
+    private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
+    public static final String TASKNAME = "behandlingskontroll.tilbakeTilStart";
     private BehandlingRepository behandlingRepository;
     private HistorikkRepository historikkRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
     private FagsakProsessTaskRepository prosessTaskRepository;
 
-    TilbakeTilStartBeregningTask() {
+    TilbakeTilStartBehandlingTask() {
         // for CDI proxy
     }
 
     @Inject
-    public TilbakeTilStartBeregningTask(BehandlingRepository behandlingRepository,
-                                        HistorikkRepository historikkRepository,
-                                        ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                        FagsakProsessTaskRepository prosessTaskRepository) {
+    public TilbakeTilStartBehandlingTask(BehandlingRepository behandlingRepository,
+                               HistorikkRepository historikkRepository,
+                               ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
+                               BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                               FagsakProsessTaskRepository prosessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkRepository = historikkRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
@@ -56,15 +58,23 @@ public class TilbakeTilStartBeregningTask extends BehandlingProsessTask {
     }
 
     @Override
-    public void prosesser(ProsessTaskData prosessTaskData) {
+    protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        if(!behandling.erSaksbehandlingAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)) {
+        BehandlingProsessTask.logContext(behandling);
+        
+        var targetSteg = BehandlingStegType.START_STEG;
+        var forventetPassertSteg = BehandlingStegType.START_STEG;
+        
+        if (!behandling.erSaksbehandlingAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), forventetPassertSteg)) {
+            log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);
             Long fagsakId = prosessTaskData.getFagsakId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-            hoppTilbake(behandling, BehandlingStegType.PRECONDITION_BEREGNING, kontekst);
+            hoppTilbake(behandling, targetSteg, kontekst);
 
+        } else {
+            log.warn("Kan ikke resette behandling. Behandling er avsluttet eller ikke kommet forbi {}, kan ikke hoppe tilbake til {}, så gjør ingenting.", forventetPassertSteg, targetSteg);
         }
     }
 
@@ -82,7 +92,6 @@ public class TilbakeTilStartBeregningTask extends BehandlingProsessTask {
 
         behandlingskontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, tilSteg);
     }
-
 
     private void lagHistorikkinnslag(Behandling behandling, String tilStegNavn) {
         Historikkinnslag historikkinnslag = new Historikkinnslag();
