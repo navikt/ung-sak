@@ -69,7 +69,7 @@ public class InfotrygdFeedService {
         String gruppe = tasktype + "-" + saksnummer;
         pd.setGruppe(gruppe);
         pd.setSekvens(lagSekvensnummer(behandling));
-        pd.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        pd.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
         pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, saksnummer);
 
         pd.setCallIdFraEksisterende();
