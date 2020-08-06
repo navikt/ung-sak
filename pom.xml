@@ -170,17 +170,11 @@
 			</dependency>
 
 			<!-- Prosjektets egne biblioteker -->
-
-			<dependency>
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-servlets</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.dropwizard.metrics</groupId>
-				<artifactId>metrics-healthchecks</artifactId>
-				<version>${metrics.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-healthchecks</artifactId>
+                <version>${metrics.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>migreringer</artifactId>
