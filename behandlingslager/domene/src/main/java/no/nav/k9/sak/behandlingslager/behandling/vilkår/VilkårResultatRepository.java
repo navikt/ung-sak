@@ -36,7 +36,7 @@ public class VilkårResultatRepository {
     }
 
     private Optional<VilkårsResultat> hentVilkårsResultat(Long behandlingId) {
-        final var query = entityManager.createQuery("SELECT vr " +
+        var query = entityManager.createQuery("SELECT vr " +
             "FROM ResultatVilkårResultat vr " +
             "WHERE vr.behandlingId = :behandlingId " +
             "AND vr.aktiv = true", VilkårsResultat.class);
@@ -52,18 +52,15 @@ public class VilkårResultatRepository {
     public void lagre(Long behandlingId, Vilkårene resultat) {
         Objects.requireNonNull(resultat, "Vilkårsresultat");
 
-        final var vilkårsResultat = hentVilkårsResultat(behandlingId);
-        final var differ = vilkårsDiffer();
+        var vilkårsResultat = hentVilkårsResultat(behandlingId);
+        var differ = vilkårsDiffer();
 
         if (differ.areDifferent(vilkårsResultat.map(VilkårsResultat::getVilkårene).orElse(null), resultat)) {
             if (vilkårsResultat.isPresent()) {
-                final var vilkårsResultatet = vilkårsResultat.get();
-                vilkårsResultatet.setAktiv(false);
-                entityManager.persist(vilkårsResultatet);
-                entityManager.flush();
+                deaktiverVilkårsResultat(vilkårsResultat.get());
             }
 
-            final var nyttVilkårsResultat = new VilkårsResultat(behandlingId, resultat);
+            var nyttVilkårsResultat = new VilkårsResultat(behandlingId, resultat);
             entityManager.persist(resultat);
             entityManager.persist(nyttVilkårsResultat);
             entityManager.flush();
@@ -71,6 +68,12 @@ public class VilkårResultatRepository {
             // Forkaster resultat da ingen diff på vilkårene
             log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
+    }
+
+    public void deaktiverVilkårsResultat(VilkårsResultat vilkårsResultat) {
+        vilkårsResultat.setAktiv(false);
+        entityManager.persist(vilkårsResultat);
+        entityManager.flush();
     }
 
     public void kopier(Long fraBehandlingId, Long tilBehandlingId) {
@@ -98,5 +101,9 @@ public class VilkårResultatRepository {
     private DiffEntity vilkårsDiffer() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);
+    }
+
+    public void deaktiverVilkårsResultat(Long behandlingId) {
+        hentVilkårsResultat(behandlingId).ifPresent(v -> deaktiverVilkårsResultat(v));
     }
 }

@@ -40,10 +40,13 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData pd) {
         Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(pd.getBehandlingId());
-        
+
         precondition(behandling);
 
-        if (BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())) {
+        var deaktiver = BehandlingResultatType.AVSLÅTT.equals(behandling.getBehandlingResultatType())
+            || BehandlingResultatType.getAlleHenleggelseskoder().contains(behandling.getBehandlingResultatType());
+
+        if (deaktiver) {
             logger.info("Setter uttak til inaktivt. behandlingUUID: '{}'", behandling.getUuid());
             this.årskvantumRestKlient.deaktiverUttakForBehandling(behandling.getUuid());
         }
