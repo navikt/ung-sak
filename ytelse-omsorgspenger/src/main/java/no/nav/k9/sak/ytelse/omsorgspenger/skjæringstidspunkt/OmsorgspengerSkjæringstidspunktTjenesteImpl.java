@@ -111,7 +111,12 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
                 .orElse(LocalDate.now());
 
             if (vilkårene.isPresent()) {
-                var spesifiktVilkår = vilkårene.get().getVilkårene().stream().filter(it -> VilkårType.OPPTJENINGSVILKÅRET.equals(it.getVilkårType())).findFirst();
+                var spesifiktVilkår = vilkårene.get()
+                    .getVilkårene()
+                    .stream()
+                    .filter(it -> VilkårType.OPPTJENINGSVILKÅRET.equals(it.getVilkårType()))
+                    .findFirst();
+
                 if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
                     var vilkårPeriode = spesifiktVilkår.get().getPerioder()
                         .stream()
