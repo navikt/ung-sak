@@ -202,7 +202,7 @@ public class OpptjeningRepository {
         return finnOpptjening(behandlingId).map(OpptjeningResultat::getId);
     }
 
-    //Denne metoden bør legges i Tjeneste
+    // Denne metoden bør legges i Tjeneste
     public EndringsresultatSnapshot finnAktivGrunnlagId(Behandling behandling) {
         Optional<Long> funnetId = finnAktivOptjeningId(behandling.getId());
         return funnetId
@@ -218,5 +218,9 @@ public class OpptjeningRepository {
         };
 
         lagre(behandling, oppdateringsfunksjon, false);
+    }
+
+    public void deaktiverOpptjening(Long behandlingId) {
+        hentTidligereOpptjening(behandlingId, false).ifPresent(v -> deaktiverTidligereOpptjening(v));
     }
 }

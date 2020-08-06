@@ -15,7 +15,9 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
@@ -39,6 +41,8 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
     private FagsakProsessTaskRepository prosessTaskRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private OpptjeningRepository opptjeningRepository;
 
     TilbakeTilStartBehandlingTask() {
         // for CDI proxy
@@ -46,15 +50,19 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
     @Inject
     public TilbakeTilStartBehandlingTask(BehandlingRepository behandlingRepository,
-                               HistorikkRepository historikkRepository,
-                               ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                               BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                               FagsakProsessTaskRepository prosessTaskRepository) {
+                                         HistorikkRepository historikkRepository,
+                                         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
+                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                         FagsakProsessTaskRepository prosessTaskRepository,
+                                         VilkårResultatRepository vilkårResultatRepository,
+                                         OpptjeningRepository opptjeningRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkRepository = historikkRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.opptjeningRepository = opptjeningRepository;
     }
 
     @Override
@@ -62,20 +70,34 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         String behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
-        
+
         var targetSteg = BehandlingStegType.START_STEG;
         var forventetPassertSteg = BehandlingStegType.START_STEG;
-        
+
         if (!behandling.erSaksbehandlingAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), forventetPassertSteg)) {
             log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);
             Long fagsakId = prosessTaskData.getFagsakId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
+            resetGrunnlag(behandling);
             hoppTilbake(behandling, targetSteg, kontekst);
 
         } else {
             log.warn("Kan ikke resette behandling. Behandling er avsluttet eller ikke kommet forbi {}, kan ikke hoppe tilbake til {}, så gjør ingenting.", forventetPassertSteg, targetSteg);
         }
+    }
+
+    private void resetGrunnlag(Behandling behandling) {
+        var behandlingId = behandling.getId();
+        vilkårResultatRepository.deaktiverVilkårsResultat(behandlingId);
+        opptjeningRepository.deaktiverOpptjening(behandlingId);
+
+        behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
+            Long originalId = originalBehandling.getId();
+            opptjeningRepository.finnOpptjening(originalId).ifPresent(o -> opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling, behandling));
+            vilkårResultatRepository.kopier(originalId, behandlingId);
+        });
+
     }
 
     private void hoppTilbake(Behandling behandling, BehandlingStegType tilSteg, BehandlingskontrollKontekst kontekst) {
