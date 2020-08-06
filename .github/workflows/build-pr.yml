@@ -1,6 +1,6 @@
 name: Bygg pull request
 
-on: 
+on:
   pull_request:
     paths-ignore:
       - '**.md'
@@ -39,20 +39,20 @@ jobs:
       - uses: actions/setup-java@v1.4.0
         with:
           java-version: 1.11
-      - name: Set cache key 
+      - name: Set cache key
         run: |
           echo "::set-env name=CACHE_KEY::$(expr $(date +%V) - 1 + 1)"
           echo "::set-env name=PREVIOUS_CACHE_KEY::$(expr $(date +%V) - 1)"
-      - uses: actions/cache@v2.1.0
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
-          restore-keys: |
-            ${{ runner.os }}-maven-${{ env.PREVIOUS_CACHE_KEY }}
+#      - uses: actions/cache@v2.1.0
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-${{ env.PREVIOUS_CACHE_KEY }}
       - name: Build
         shell: bash
         run: |
-          mvn package --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -DtrimStackTrace=false
+          mvn package --batch-mode --file pom.xml -DtrimStackTrace=false
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
