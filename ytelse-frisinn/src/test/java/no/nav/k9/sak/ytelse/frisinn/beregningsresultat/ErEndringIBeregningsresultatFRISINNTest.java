@@ -1,5 +1,16 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsresultat;
 
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Optional;
+
+import org.junit.Test;
+
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -8,14 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import org.junit.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ErEndringIBeregningsresultatFRISINNTest {
 
@@ -32,14 +35,14 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(fom, tom, 100);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isFalse();
     }
 
     @Test
-    public void like_perioder_og_ulik_dagsats_gir_ugunst() {
+    public void like_perioder_og_ny_lavere_dagsats_gir_ugunst() {
         // Arrange
         LocalDate fom = LocalDate.of(2020,4,1);
         LocalDate tom = LocalDate.of(2020,4,30);
@@ -48,10 +51,26 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(fom, tom, 99);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isTrue();
+    }
+
+    @Test
+    public void like_perioder_og_ny_høyere_dagsats_gir_gunst() {
+        // Arrange
+        LocalDate fom = LocalDate.of(2020,4,1);
+        LocalDate tom = LocalDate.of(2020,4,30);
+        UttakAktivitetPeriode uttak = lagUttakPeriode(fom, tom);
+        lagOrginalPeriode(fom, tom, 100);
+        lagRevurderingPeriode(fom, tom, 101);
+
+        // Act
+        boolean erGunst = erGunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+
+        // Assert
+        assertThat(erGunst).isTrue();
     }
 
     @Test
@@ -66,7 +85,7 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(LocalDate.of(2020,5,1), LocalDate.of(2020,5,30), 0);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isFalse();
@@ -83,7 +102,7 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(LocalDate.of(2020,4,17), LocalDate.of(2020,4,30), 100);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isFalse();
@@ -100,7 +119,7 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(LocalDate.of(2020,4,17), LocalDate.of(2020,4,30), 70);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isTrue();
@@ -114,24 +133,24 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagOrginalPeriode(LocalDate.of(2020,4,1), LocalDate.of(2020,4,30), 100);
 
         // Act
-        boolean erUgunst = vurder(Optional.empty(), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.empty(), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isTrue();
     }
 
     @Test
-    public void revurdering_med_resultat_orginal_uten_skal_ikke_gi_ugunst() {
+    public void revurdering_med_resultat_orginal_uten_skal_gi_gunst() {
         // Arrange
         UttakAktivitetPeriode uttak = lagUttakPeriode(LocalDate.of(2020,4,1), LocalDate.of(2020,4,30));
 
         lagRevurderingPeriode(LocalDate.of(2020,4,1), LocalDate.of(2020,4,30), 100);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.empty(), uttak);
+        boolean erGunst = erGunst(Optional.of(revurderingResultat), Optional.empty(), uttak);
 
         // Assert
-        assertThat(erUgunst).isFalse();
+        assertThat(erGunst).isTrue();
     }
 
     @Test
@@ -140,7 +159,7 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         UttakAktivitetPeriode uttak = lagUttakPeriode(LocalDate.of(2020,4,1), LocalDate.of(2020,4,30));
 
         // Act
-        boolean erUgunst = vurder(Optional.empty(), Optional.empty(), uttak);
+        boolean erUgunst = erUgunst(Optional.empty(), Optional.empty(), uttak);
 
         // Assert
         assertThat(erUgunst).isFalse();
@@ -156,17 +175,24 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         lagRevurderingPeriode(LocalDate.of(2020,6,8), LocalDate.of(2020,6,30), 1326);
 
         // Act
-        boolean erUgunst = vurder(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
+        boolean erUgunst = erUgunst(Optional.of(revurderingResultat), Optional.of(orginaltResultat), uttak);
 
         // Assert
         assertThat(erUgunst).isFalse();
     }
 
-
-
-    private boolean vurder(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> orginaltResultat, UttakAktivitetPeriode... perioder) {
+    private boolean erGunst(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> orginaltResultat, UttakAktivitetPeriode... perioder) {
         UttakAktivitet uttak = new UttakAktivitet(Arrays.asList(perioder));
-        return ErEndringIBeregningsresultatFRISINN.erUgunst(revurderingResultat, orginaltResultat, uttak);
+        return finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, uttak)
+            .stream()
+            .anyMatch(endring -> endring.equals(BeregningsresultatEndring.GUNST));
+    }
+
+    private boolean erUgunst(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> orginaltResultat, UttakAktivitetPeriode... perioder) {
+        UttakAktivitet uttak = new UttakAktivitet(Arrays.asList(perioder));
+        return finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, uttak)
+            .stream()
+            .anyMatch(endring -> endring.equals(BeregningsresultatEndring.UGUNST));
     }
 
     private UttakAktivitetPeriode lagUttakPeriode(LocalDate fom, LocalDate tom) {

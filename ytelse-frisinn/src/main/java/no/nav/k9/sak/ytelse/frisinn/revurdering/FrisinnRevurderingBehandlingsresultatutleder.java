@@ -1,13 +1,14 @@
 package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
-import java.time.LocalDate;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
+
 import java.util.Comparator;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -17,13 +18,16 @@ import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresulta
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -31,7 +35,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @BehandlingTypeRef("BT-004")
 public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsresultatRepository beregningsresultatRepository;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
@@ -39,13 +43,13 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
 
     @Inject
     public FrisinnRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
-                                                        BeregningTjeneste beregningsgrunnlagTjeneste,
+                                                        BeregningsresultatRepository beregningsresultatRepository,
                                                         UttakRepository uttakRepository,
                                                         @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
 
-        this.kalkulusTjeneste = beregningsgrunnlagTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.beregningsresultatRepository = beregningsresultatRepository;
         this.uttakRepository = uttakRepository;
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
@@ -63,7 +67,7 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
         var beregningsvilkår = vilkårResultatRepository.hent(revurdering.getId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var erNySøknadsperiode = erNySøknadperiode(revurdering, originalBehandling);
-        var erEndringIBeregning = erEndringIBeregning(revurdering, originalBehandling, beregningsvilkår);
+        var erEndringIBeregning = erEndringIBeregning(revurdering, originalBehandling);
         var erHeltEllerDelvisInnvilget = erHeltEllerDelvisInnvilget(beregningsvilkår);
 
         // Oppdatering av Behandlingsresultat dersom betingelsene nedenfor inntreffer (ikke heldig å oppdatere verdi i ettertid)
@@ -95,17 +99,15 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
             .anyMatch(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
     }
 
-    private boolean erEndringIBeregning(Behandling revurdering, Behandling originalBehandling, Vilkår beregningsvilkår) {
-        boolean erEndringIBeregning = false;
-        var skjæringstidspunkter = beregningsvilkår.getPerioder().stream().map(VilkårPeriode::getSkjæringstidspunkt).collect(Collectors.toList());
-        for (LocalDate skjæringstidspunkt : skjæringstidspunkter) {
-            var erEndring = kalkulusTjeneste.erEndringIBeregning(revurdering.getId(), originalBehandling.getId(), skjæringstidspunkt);
-            if (erEndring) {
-                erEndringIBeregning = erEndring;
-                break;
-            }
-        }
-        return erEndringIBeregning;
+    private boolean erEndringIBeregning(Behandling revurdering, Behandling originalBehandling) {
+        UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(originalBehandling.getId());
+
+        Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(originalBehandling.getId());
+        Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBeregningsresultat(revurdering.getId());
+
+        return ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, orginaltUttak)
+            .stream()
+            .anyMatch(endring -> endring.equals(UGUNST) || endring.equals(GUNST));
     }
 
     private boolean erNySøknadperiode(Behandling revurdering, Behandling origBehandling) {
