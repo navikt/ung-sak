@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.UGUNST;
+
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -51,7 +53,9 @@ public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurd
         Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(orginalbehandling.getId());
         Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBeregningsresultat(revurdering.getId());
 
-        return ErEndringIBeregningsresultatFRISINN.erUgunst(revurderingResultat, orginaltResultat, orginaltUttak);
+        return ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, orginaltUttak)
+            .stream()
+            .anyMatch(endring -> endring.equals(UGUNST));
     }
 
 }
