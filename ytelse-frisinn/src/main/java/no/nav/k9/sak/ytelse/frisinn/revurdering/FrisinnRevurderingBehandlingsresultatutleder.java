@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.revurdering;
 
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.GUNST;
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.UGUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
 import java.util.Comparator;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsresultat;
 
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -185,14 +185,14 @@ public class ErEndringIBeregningsresultatFRISINNTest {
         UttakAktivitet uttak = new UttakAktivitet(Arrays.asList(perioder));
         return finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, uttak)
             .stream()
-            .anyMatch(endring -> endring.equals(Utbetalingsendring.GUNST));
+            .anyMatch(endring -> endring.equals(BeregningsresultatEndring.GUNST));
     }
 
     private boolean erUgunst(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> orginaltResultat, UttakAktivitetPeriode... perioder) {
         UttakAktivitet uttak = new UttakAktivitet(Arrays.asList(perioder));
         return finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, uttak)
             .stream()
-            .anyMatch(endring -> endring.equals(Utbetalingsendring.UGUNST));
+            .anyMatch(endring -> endring.equals(BeregningsresultatEndring.UGUNST));
     }
 
     private UttakAktivitetPeriode lagUttakPeriode(LocalDate fom, LocalDate tom) {

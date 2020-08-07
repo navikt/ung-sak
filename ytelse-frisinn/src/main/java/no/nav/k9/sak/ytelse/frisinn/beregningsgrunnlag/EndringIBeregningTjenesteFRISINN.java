@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.UGUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
 import java.time.LocalDate;
 import java.util.Optional;

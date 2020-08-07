@@ -1,8 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsresultat;
 
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.GUNST;
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.INGEN_ENDRING;
-import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.Utbetalingsendring.UGUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.INGEN_ENDRING;
+import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
 
 public class ErEndringIBeregningsresultatFRISINN {
 
-    public enum Utbetalingsendring {
+    public enum BeregningsresultatEndring {
         GUNST,
         UGUNST,
         INGEN_ENDRING
@@ -29,7 +29,7 @@ public class ErEndringIBeregningsresultatFRISINN {
         // Skjuler default
     }
 
-    public static List<Utbetalingsendring> finnEndringerIUtbetalinger(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> originaltResultat, UttakAktivitet orginaltUttak) {
+    public static List<BeregningsresultatEndring> finnEndringerIUtbetalinger(Optional<BeregningsresultatEntitet> revurderingResultat, Optional<BeregningsresultatEntitet> originaltResultat, UttakAktivitet orginaltUttak) {
         if (revurderingResultat.isEmpty()) {
             var endring = originaltResultat.isPresent() ? UGUNST : INGEN_ENDRING;
             return List.of(endring);
