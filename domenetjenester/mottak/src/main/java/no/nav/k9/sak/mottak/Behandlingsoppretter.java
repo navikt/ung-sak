@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
@@ -38,7 +37,6 @@ public class Behandlingsoppretter {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
-    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -47,15 +45,13 @@ public class Behandlingsoppretter {
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                HistorikkinnslagTjeneste historikkinnslagTjeneste) { // NOSONAR
+                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) { // NOSONAR
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
-        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
     }
 
@@ -164,8 +160,7 @@ public class Behandlingsoppretter {
 
             return behandlingRepository
                 .hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
-                .filter(v -> v.getBehandlingResultatType().isBehandlingsresultatHenlagt())
-                ;
+                .filter(v -> v.getBehandlingResultatType().isBehandlingsresultatHenlagt());
         }
 
         return Optional.empty();
