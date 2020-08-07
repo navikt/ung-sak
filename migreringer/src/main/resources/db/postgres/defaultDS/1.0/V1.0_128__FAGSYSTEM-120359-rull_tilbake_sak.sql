@@ -7,7 +7,7 @@ select nextval('seq_prosess_task'), 'beregning.tilbakeTilStart',
 inner join behandling b on f.id = b.fagsak_id
 where f.saksnummer in ('6BQF2')
   and b.behandling_status = 'UTRED'
-  and (select count(*) from behandling_steg_tilstand bst
+  and exists (select 1 from behandling_steg_tilstand bst
        where bst.behandling_id = b.id
          and bst.behandling_steg = 'KOFAKBER'
-         and bst.aktiv = true) > 0;
+         and bst.aktiv = true);
