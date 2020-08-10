@@ -1,5 +1,14 @@
 package no.nav.k9.sak.infotrygdfeed.ytelser;
 
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.mockito.Mock;
+
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -9,14 +18,6 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.OmsorgspengerInfotrygdFeedPeriodeberegner;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import org.mockito.Mock;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.mockito.Mockito.when;
 
 public class OmsorgspengerParametere implements InfotrygdFeedPeriodeberegnerTestParametere {
     @Mock
