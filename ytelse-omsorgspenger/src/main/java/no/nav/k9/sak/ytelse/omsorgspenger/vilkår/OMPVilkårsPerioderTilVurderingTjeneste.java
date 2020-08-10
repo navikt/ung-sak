@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -32,6 +34,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private NulledePerioder nulledePerioder;
+    private BehandlingRepository behandlingRepository;
+    private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     OMPVilkårsPerioderTilVurderingTjeneste() {
@@ -39,11 +43,16 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Inject
-    public OMPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("OMP") VilkårUtleder vilkårUtleder, OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+    public OMPVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("OMP") VilkårUtleder vilkårUtleder,
+                                                  OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                                  BehandlingRepository behandlingRepository,
+                                                  TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
+        this.behandlingRepository = behandlingRepository;
+        this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
 
         var maksSøktePeriode = new MaksSøktePeriode(omsorgspengerGrunnlagRepository);
@@ -54,13 +63,15 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
-        return nulledePerioder.utledPeriode(behandlingId);
+        var fraværPåSak = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandlingRepository.hentBehandling(behandlingId));
+        // filtrer bort perioder som ikke kan tilbakestilles pga andre krav fra andre arbeidsgivere på samme dato
+        return nulledePerioder.utledPeriode(behandlingId, fraværPåSak);
     }
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
-        var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(perioderSomSkalTilbakestilles(behandlingId)
+        var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(nulledePerioder.utledPeriode(behandlingId)
             .stream()
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1)))
             .collect(Collectors.toCollection(TreeSet::new)));
