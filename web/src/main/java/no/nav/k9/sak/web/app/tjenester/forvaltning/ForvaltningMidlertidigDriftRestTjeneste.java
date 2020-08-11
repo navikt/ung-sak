@@ -21,6 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -50,6 +51,7 @@ import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
@@ -62,7 +64,10 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
+import no.nav.vedtak.sikkerhet.abac.AbacDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -84,6 +89,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     
     private AksjonspunktRepository aksjonspunktRepository;
     private TpsAdapter tpsAdapter;
+    
+    private ProsessTaskRepository prosessTaskRepository;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -95,13 +102,15 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                         TpsTjeneste tpsTjeneste,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         AksjonspunktRepository aksjonspunktRepository, 
-                                        TpsAdapter tpsAdapter) {
+                                        TpsAdapter tpsAdapter,
+                                        ProsessTaskRepository prosessTaskRepository) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.tpsAdapter = tpsAdapter;
+        this.prosessTaskRepository = prosessTaskRepository;
     }
 
 
@@ -176,6 +185,19 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok(String.join("\n", result)).build();
     }
     
+    @POST
+    @Path("/manuell-revurdering")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(description = "Oppretter manuell revurdering med prosessfeil som årsak.",
+               summary = ("Oppretter manuell revurdering med prosessfeil som årsak."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void revurderAlleSomProsessFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
+        final ProsessTaskData taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPayload(opprettManuellRevurdering.getSaksnumre());
+        prosessTaskRepository.lagre(taskData);
+    }
+    
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {
@@ -205,5 +227,25 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .build();
 
         return new Inntekter(null, selvstendigNæringsdrivende, null);
+    }
+    
+    public static class OpprettManuellRevurdering implements AbacDto {
+        
+        @NotNull
+        @Pattern(regexp = "^[\\p{Alnum} ]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+        private String saksnumre;
+        
+        public OpprettManuellRevurdering(String saksnumre) {
+            this.saksnumre = saksnumre;
+        }
+        
+        public String getSaksnumre() {
+            return saksnumre;
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            return AbacDataAttributter.opprett();
+        }
     }
 }
