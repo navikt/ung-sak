@@ -85,6 +85,8 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
 
     @JsonIgnore
     private boolean skalGodkjenneBasertPåAntatt = false;
+    @JsonIgnore
+    private boolean skalValidereMotInntekt = true;
 
     @JsonCreator
     protected Opptjeningsgrunnlag() {
@@ -201,5 +203,13 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
 
     public void setPeriodeAntattGodkjentFørBehandlingstidspunkt(Period periodeAntattGodkjentFørBehandlingstidspunkt) {
         this.periodeAntattGodkjentFørBehandlingstidspunkt = periodeAntattGodkjentFørBehandlingstidspunkt;
+    }
+
+    public boolean getSkalValidereMotInntekt() {
+        return skalValidereMotInntekt;
+    }
+
+    public void setSkalValidereMotInntekt(boolean skalValidereMotInntekt) {
+        this.skalValidereMotInntekt = skalValidereMotInntekt;
     }
 }
