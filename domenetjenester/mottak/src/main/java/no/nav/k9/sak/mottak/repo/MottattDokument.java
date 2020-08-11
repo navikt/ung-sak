@@ -67,6 +67,14 @@ public class MottattDokument extends BaseEntitet {
     @Column(name = "mottatt_tidspunkt", updatable = false)
     private LocalDateTime mottattTidspunkt;
 
+    /** avsender innsendingstidpunkt. */
+    @Column(name = "innsendingstidspunkt")
+    private LocalDateTime innsendingstidspunkt;
+
+    /** avsenders kildesystem. */
+    @Column(name = "kildesystem")
+    private String kildesystem;
+
     @Column(name = "kanalreferanse", updatable = false)
     private String kanalreferanse;
 
@@ -125,6 +133,14 @@ public class MottattDokument extends BaseEntitet {
 
     public LocalDateTime getMottattTidspunkt() {
         return mottattTidspunkt;
+    }
+
+    public LocalDateTime getInnsendingstidspunkt() {
+        return innsendingstidspunkt;
+    }
+
+    public String getKildesystem() {
+        return kildesystem;
     }
 
     public String getKanalreferanse() {
@@ -200,6 +216,14 @@ public class MottattDokument extends BaseEntitet {
         this.mottattTidspunkt = mottattTidspunkt;
     }
 
+    public void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
+        this.innsendingstidspunkt = innsendingstidspunkt;
+    }
+
+    public void setKildesystem(String systemnavn) {
+        this.kildesystem = systemnavn;
+    }
+
     public void setKanalreferanse(String kanalreferanse) {
         this.kanalreferanse = kanalreferanse;
     }
@@ -256,12 +280,12 @@ public class MottattDokument extends BaseEntitet {
             mottatteDokumentMal.kanalreferanse = kanalreferanse;
             return this;
         }
-        
+
         public Builder medStatus(DokumentStatus status) {
             mottatteDokumentMal.setStatus(status);
             return this;
         }
-        
+
         public Builder medFeilmelding(String feilmelding) {
             mottatteDokumentMal.setFeilmelding(feilmelding);
             return this;
@@ -289,6 +313,16 @@ public class MottattDokument extends BaseEntitet {
 
         public Builder medType(Brevkode type) {
             mottatteDokumentMal.type = type;
+            return this;
+        }
+        
+        public Builder medSystemnavn(String systemnavn) {
+            mottatteDokumentMal.kildesystem=systemnavn;
+            return this;
+        }
+        
+        public Builder medSystemnavn(LocalDateTime innsendingstidspunkt) {
+            mottatteDokumentMal.innsendingstidspunkt=innsendingstidspunkt;
             return this;
         }
 
@@ -323,6 +357,7 @@ public class MottattDokument extends BaseEntitet {
             + ", arbeidsgiver=" + arbeidsgiver
             + ", type=" + type
             + ", journalpostId=" + journalpostId
+            + ", innsendingstidspunkt=" + innsendingstidspunkt
             + ", mottattDato" + mottattDato + "[" + mottattTidspunkt + "]";
     }
 }

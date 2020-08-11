@@ -55,7 +55,15 @@ public class InntektsmeldingBuilder {
     public Arbeidsgiver getArbeidsgiver() {
         return kladd.getArbeidsgiver();
     }
+    
+    public LocalDateTime getInnsendingstidspunkt() {
+        return kladd.getInnsendingstidspunkt();
+    }
 
+    public String getKildesystem() {
+        return kladd.getKildesystem();
+    }
+    
     public Optional<EksternArbeidsforholdRef> getEksternArbeidsforholdRef() {
         return Optional.ofNullable(eksternArbeidsforholdId);
     }
@@ -141,7 +149,7 @@ public class InntektsmeldingBuilder {
         kladd.setInnsendingstidspunkt(innsendingstidspunkt);
         return this;
     }
-
+    
     public InntektsmeldingBuilder medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak inntektsmeldingInnsendingsårsak) {
         precondition();
         kladd.setInntektsmeldingInnsendingsårsak(inntektsmeldingInnsendingsårsak);

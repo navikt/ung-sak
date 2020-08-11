@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -38,7 +39,8 @@ public class JournalpostMottakDto {
     @JsonProperty(value = "forsendelseMottatt")
     private LocalDate forsendelseMottatt;
 
-    @JsonProperty(value = "forsendelseMottattTidspunkt")
+    @JsonProperty(value = "forsendelseMottattTidspunkt", required = true)
+    @NotNull
     private LocalDateTime forsendelseMottattTidspunkt;
 
     @JsonProperty(value = "journalpostId", required = true)
@@ -78,8 +80,8 @@ public class JournalpostMottakDto {
         this.journalpostId = journalpostId;
         this.kanalReferanse = kanalReferanse;
         this.type = type;
-        this.forsendelseMottatt = forsendelseMottattTidspunkt.toLocalDate();
-        this.forsendelseMottattTidspunkt = forsendelseMottattTidspunkt;
+        this.forsendelseMottattTidspunkt = Objects.requireNonNull(forsendelseMottattTidspunkt, "forsendelseMottattTidspunkt");
+        this.forsendelseMottatt = this.forsendelseMottattTidspunkt.toLocalDate();
         this.ytelseType = ytelseType;
         String payload = null;
         if (payloadRawString != null && !(payload = payloadRawString.trim()).isEmpty()) {

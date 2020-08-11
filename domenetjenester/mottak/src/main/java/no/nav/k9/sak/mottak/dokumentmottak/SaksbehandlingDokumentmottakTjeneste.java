@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -48,17 +49,15 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     public void dokumentAnkommet(InngåendeSaksdokument saksdokument) {
 
+        LocalDateTime mottattTidspunkt = Objects.requireNonNull(saksdokument.getForsendelseMottattTidspunkt(), "forsendelseMottattTidspunkt");
+        LocalDate forsendelseMottatt = Objects.requireNonNull(saksdokument.getForsendelseMottatt(), "forsendelseMottattDato");
         var builder = new MottattDokument.Builder()
-            .medMottattDato(LocalDate.parse(saksdokument.getForsendelseMottatt().toString()))
+            .medMottattDato(LocalDate.parse(forsendelseMottatt.toString()))
             .medPayload(saksdokument.getPayload())
             .medType(saksdokument.getType())
             .medFagsakId(saksdokument.getFagsakId());
 
-        if (saksdokument.getForsendelseMottattTidspunkt() == null) {
-            builder.medMottattTidspunkt(LocalDateTime.now());
-        } else {
-            builder.medMottattTidspunkt(LocalDateTime.parse(saksdokument.getForsendelseMottattTidspunkt().toString()));
-        }
+        builder.medMottattTidspunkt(mottattTidspunkt);
         builder.medKanalreferanse(saksdokument.getKanalreferanse());
 
         if (saksdokument.getJournalpostId() != null) {
@@ -67,7 +66,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         MottattDokument mottattDokument = builder.build();
 
         boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
-
+        
         Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
         if (ok) {

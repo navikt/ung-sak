@@ -230,8 +230,9 @@ public class FordelRestTjeneste {
             builder.medPayload(payload.get()); // NOSONAR
         }
 
-        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(LocalDate.now())); // NOSONAR
-        builder.medForsendelseMottatt(Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt()).orElse(LocalDateTime.now())); // NOSONAR
+        LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt()).orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
+        builder.medForsendelseMottatt(mottattTidspunkt); // NOSONAR
+        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
 
         return builder.build();
     }

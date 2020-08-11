@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -62,9 +63,12 @@ public class MottatteDokumentTjeneste {
         if (dokument.harPayload()) {
             var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokument);
             // sendte bare ett dokument her, så forventer kun et svar:
-            var arbeidsgiver = inntektsmeldinger.get(0).getArbeidsgiver(); // NOSONAR
+            InntektsmeldingBuilder im = inntektsmeldinger.get(0);
+            var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
             dokument.setBehandlingId(behandling.getId());
+            dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
+            dokument.setKildesystem(im.getKildesystem());
             mottatteDokumentRepository.lagre(dokument);// oppdaterer
 
             // gjør etter alle andre lagringer i db da dette medfører remote kall til abakus (bør egentlig flyttes til egen task)
