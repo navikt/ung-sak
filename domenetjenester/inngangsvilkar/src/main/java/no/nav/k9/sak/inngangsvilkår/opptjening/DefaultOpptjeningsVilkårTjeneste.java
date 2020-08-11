@@ -57,6 +57,8 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         grunnlag.setMinsteAntallDagerForVent(0);
         grunnlag.setMinsteAntallMånederForVent(0);
         grunnlag.setSkalGodkjenneBasertPåAntatt(false);
+        // Skrur av sjekk mot inntekt midlertidig
+        grunnlag.setSkalValidereMotInntekt(false);
 
         // returner egen output i tillegg for senere lagring
         OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
