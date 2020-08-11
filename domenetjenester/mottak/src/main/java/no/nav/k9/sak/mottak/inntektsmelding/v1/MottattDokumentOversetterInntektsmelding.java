@@ -74,7 +74,6 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         builder.medYtelse(wrapper.getYtelse());
 
         mapInnsendingstidspunkt(wrapper, mottattDokument, builder);
-
         builder.medMottattDato(mottattDokument.getMottattDato());
         builder.medKildesystem(wrapper.getAvsendersystem());
         builder.medKanalreferanse(mottattDokument.getKanalreferanse());
@@ -123,7 +122,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         } else if (mottattDokument.getMottattTidspunkt() != null) { // Altinn
             builder.medInnsendingstidspunkt(mottattDokument.getMottattTidspunkt());
         } else {
-            builder.medInnsendingstidspunkt(LocalDateTime.now());
+            throw new IllegalArgumentException("Innsendingstidspunkt må være satt");
         }
     }
 

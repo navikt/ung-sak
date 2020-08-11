@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.inntektsmelding.v2;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -140,7 +139,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         } else if (mottattDokument.getMottattTidspunkt() != null) { // Altinn
             builder.medInnsendingstidspunkt(mottattDokument.getMottattTidspunkt());
         } else {
-            builder.medInnsendingstidspunkt(LocalDateTime.now());
+            throw new IllegalArgumentException("Innsendingstidspunkt må være satt");
         }
     }
 

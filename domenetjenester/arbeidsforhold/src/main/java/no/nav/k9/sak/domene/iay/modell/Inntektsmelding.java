@@ -64,7 +64,7 @@ public class Inntektsmelding implements IndexKey {
     private LocalDate refusjonOpphører;
 
     private LocalDateTime innsendingstidspunkt;
-
+    
     private String kanalreferanse;
 
     private String kildesystem;
@@ -146,7 +146,7 @@ public class Inntektsmelding implements IndexKey {
     public LocalDateTime getInnsendingstidspunkt() {
         return innsendingstidspunkt;
     }
-
+    
     void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
         this.innsendingstidspunkt = innsendingstidspunkt;
     }
@@ -386,4 +386,6 @@ public class Inntektsmelding implements IndexKey {
     void setFagsakYtelseType(FagsakYtelseType fagsakYtelseType) {
         this.ytelseType = fagsakYtelseType;
     }
+
+    
 }
