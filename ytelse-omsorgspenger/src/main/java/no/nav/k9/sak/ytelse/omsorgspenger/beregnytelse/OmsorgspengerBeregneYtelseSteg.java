@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.util.NavigableSet;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -7,6 +9,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -20,11 +23,14 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
+import no.nav.k9.sak.ytelse.omsorgspenger.vilkår.OMPVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
@@ -43,6 +49,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private boolean brukerutbetalingEnabled;
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -55,7 +62,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @KonfigVerdi(value = "brukerutbetaling.enabled", required = false) boolean brukerutbetalingEnabled) {
+                                          @KonfigVerdi(value = "brukerutbetaling.enabled", required = false) boolean brukerutbetalingEnabled,
+                                          @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -64,6 +72,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.brukerutbetalingEnabled = brukerutbetalingEnabled;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -84,7 +93,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-        if (!brukerutbetalingEnabled && harUtbetalingTilBruker(beregningsresultat)) {
+        if (!brukerutbetalingEnabled && harUtbetalingTilBruker(behandlingId, beregningsresultat)) {
             throw new IllegalStateException("Utbetaling til bruker er midlertidig deaktivert.");
         }
 
@@ -98,8 +107,11 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat) {
-        return beregningsresultat.getBeregningsresultatPerioder().stream().anyMatch(p -> {
+    private boolean harUtbetalingTilBruker(Long behandlingId, BeregningsresultatEntitet beregningsresultat) {
+        NavigableSet<DatoIntervallEntitet> vurdertePerioder = vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        return beregningsresultat.getBeregningsresultatPerioder().stream()
+            .filter(p -> vurdertePerioder.stream().anyMatch(vp -> vp.overlapper(p.getPeriode())))
+            .anyMatch(p -> {
                     return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {
                         return a.erBrukerMottaker() && a.getDagsats() > 0;
                     });
