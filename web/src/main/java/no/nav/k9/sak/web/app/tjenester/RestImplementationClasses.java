@@ -31,6 +31,7 @@ import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.FeatureToggleRestTjeneste;
@@ -72,11 +73,12 @@ public class RestImplementationClasses {
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);
-        
+
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
+        classes.add(ForvaltningOppdragRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 
