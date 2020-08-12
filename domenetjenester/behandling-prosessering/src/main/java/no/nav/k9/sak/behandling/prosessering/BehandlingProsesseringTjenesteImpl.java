@@ -180,7 +180,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     @Override
     public void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId) {
         BehandlingProsessTask.logContext(behandling);
-        
+
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
         if (behandling.erSaksbehandlingAvsluttet()) {
@@ -190,7 +190,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         String gjenopptaTaskType = GjenopptaBehandlingTask.TASKTYPE;
         var gjenopptaBehandlingTask = new ProsessTaskData(gjenopptaTaskType);
-        var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
 
         var eksisterendeGjenopptaTask = getEksisterendeTaskAvType(fagsakId, behandlingId, gjenopptaTaskType);
         if (eksisterendeGjenopptaTask.isPresent()) {
@@ -203,9 +202,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         if (skalHenteInnRegisterData(behandling)) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, fagsakId, behandlingId, gruppe, diffOgReposisjoner);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, fagsakId, behandlingId, gruppe);
         } else {
-            log.info("Gjenopptar behandling {}, innhenter ikke registerdata på nytt", behandlingId);
+            log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
+            leggTilTaskForDiffOgReposisjoner(behandling, fagsakId, behandlingId, gruppe);
         }
 
         var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
@@ -221,8 +221,13 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     }
 
-    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe, ProsessTaskData diffOgReposisjoner) {
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
+        leggTilTaskForDiffOgReposisjoner(behandling, fagsakId, behandlingId, gruppe);
+    }
+
+    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
+        var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
         diffOgReposisjoner.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         try {
             var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
