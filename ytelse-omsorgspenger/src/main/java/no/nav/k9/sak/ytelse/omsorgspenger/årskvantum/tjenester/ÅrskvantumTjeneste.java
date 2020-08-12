@@ -169,7 +169,7 @@ public class ÅrskvantumTjeneste {
 
     Set<OppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder, List<OppgittFraværPeriode> fagsakFravær, Set<OppgittFraværPeriode> behandlingFravær) {
         return fagsakFravær.stream()
-            .filter(it -> Duration.ZERO.equals(it.getFraværPerDag()) && behandlingFravær.contains(it) ||
+            .filter(it -> Duration.ZERO.equals(it.getFraværPerDag()) && behandlingFravær.stream().anyMatch(at -> at.getPeriode().equals(it.getPeriode()) && Duration.ZERO.equals(it.getFraværPerDag())) ||
                 vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
             .collect(Collectors.toSet());
     }
