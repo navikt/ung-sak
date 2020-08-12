@@ -83,31 +83,7 @@ public class InntektsmeldingAggregatEntitetTest {
     }
 
     @Test
-    public void skal_tolke_null_i_kanalreferanse_som_gammel_ved_like_innsendingstidspunkt() {
-        LocalDateTime nå = LocalDateTime.now();
-        Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(ORGNR);
-
-        InntektsmeldingBuilder sisteInntektsmeldingBuilder = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(arbeidsgiver)
-            .medInnsendingstidspunkt(nå);
-
-        InntektsmeldingBuilder førsteInntektsmeldingBuilder = InntektsmeldingBuilder.builder()
-            .medKanalreferanse("AR124")
-            .medArbeidsgiver(arbeidsgiver)
-            .medInnsendingstidspunkt(nå);
-
-        InntektsmeldingAggregat inntektsmeldingAggregat = new InntektsmeldingAggregat();
-        inntektsmeldingAggregat.leggTil(sisteInntektsmeldingBuilder.build());
-        inntektsmeldingAggregat.leggTil(førsteInntektsmeldingBuilder.build());
-
-
-        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes();
-        assertThat(inntektsmeldinger).hasSize(1);
-        assertThat(inntektsmeldinger.get(0).getKanalreferanse()).isEqualTo("AR124");
-    }
-
-    @Test
-    public void skal_benytte_innsendingstidpunkt_hvis_de_er_ulike() {
+    public void skal_benytte_kanalreferanse_i_sortering() {
         LocalDateTime nå = LocalDateTime.now();
         LocalDateTime omTi = LocalDateTime.now().plusMinutes(10);
         Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(ORGNR);
@@ -130,6 +106,6 @@ public class InntektsmeldingAggregatEntitetTest {
 
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes();
         assertThat(inntektsmeldinger).hasSize(1);
-        assertThat(inntektsmeldinger.get(0).getKanalreferanse()).isEqualTo("AR124");
+        assertThat(inntektsmeldinger.get(0).getKanalreferanse()).isEqualTo("AR125");
     }
 }

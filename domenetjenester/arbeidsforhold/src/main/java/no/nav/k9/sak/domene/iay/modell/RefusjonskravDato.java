@@ -18,7 +18,7 @@ public class RefusjonskravDato {
     RefusjonskravDato() {
     }
 
-    public RefusjonskravDato(Arbeidsgiver arbeidsgiver, LocalDate førsteDagMedRefusjonskrav, LocalDate førsteInnsendingAvRefusjonskrav, boolean harRefusjonFraStart) {
+    public RefusjonskravDato(Arbeidsgiver arbeidsgiver, LocalDate førsteDagMedRefusjonskrav, /** @deprecated kan ikke bruke førsteinnsendingskrav.  TSF-1102. */ @Deprecated LocalDate førsteInnsendingAvRefusjonskrav, boolean harRefusjonFraStart) {
         this.arbeidsgiver = arbeidsgiver;
         this.førsteDagMedRefusjonskrav = førsteDagMedRefusjonskrav;
         this.førsteInnsendingAvRefusjonskrav = førsteInnsendingAvRefusjonskrav;

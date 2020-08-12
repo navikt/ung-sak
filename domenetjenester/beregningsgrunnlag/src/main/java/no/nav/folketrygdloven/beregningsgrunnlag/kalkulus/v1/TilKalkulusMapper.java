@@ -226,15 +226,13 @@ public class TilKalkulusMapper {
     }
 
     private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        Comparator<Inntektsmelding> comp = Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt)
-            .thenComparing(Comparator.comparing(im -> im.getJournalpostId().getVerdi(), Comparator.nullsFirst(Comparator.naturalOrder())));
 
         return sakInntektsmeldinger.getAlleInntektsmeldinger()
             .stream()
             .filter(it -> it.getOppgittFravær()
                 .stream()
                 .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
-            .sorted(comp)
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toList());
     }
 
@@ -349,6 +347,9 @@ public class TilKalkulusMapper {
     }
 
     public static List<RefusjonskravDatoDto> mapTilDto(List<RefusjonskravDato> refusjonskravDatoes) {
+        // FIXME TSF-1102 (Espen Velsvik): førsteInnsendingAvRefusjonskrav dato blir feil for inntektsmeldinger mottatt april-august 2020. 
+        // Kalkulus bruker dette til å avlede et aksjonspunkt hvorvidt refusjonskravet har kommet for sent.  Men logikken her er uansett feil da refusjonskrav for omsorgspenger / pleiepenger må knyttes tli 
+        // dato refusjonskravet for en gitt periode ble fremsatt, og ikke første dato blant alle refusjonskrav.  Må fikses for 2021 og når frist reduseres fra 9mnd -> 3mnd.
         return refusjonskravDatoes.stream().map(refusjonskravDato -> new RefusjonskravDatoDto(mapTilAktør(
             refusjonskravDato.getArbeidsgiver()),
             refusjonskravDato.getFørsteDagMedRefusjonskrav(),

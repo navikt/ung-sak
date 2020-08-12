@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.inntektsmelding.v1;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Collections;
 import java.util.EnumMap;

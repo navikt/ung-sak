@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,9 +22,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 public class InntektsmeldingFravær {
 
     public List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Set<Inntektsmelding> inntektsmeldinger) {
-        var sortedIm = inntektsmeldinger.stream()
-            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.naturalOrder()))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        var sortedIm = inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
+        
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
         Map<Object, List<OppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var im : sortedIm) {

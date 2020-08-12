@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,6 +21,8 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class Inntektsmelding implements IndexKey {
+
+    public static final Comparator<? super Inntektsmelding> COMP_REKKEFØLGE = Comparator.comparing(Inntektsmelding::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
 
     @ChangeTracked
     private List<Gradering> graderinger = new ArrayList<>();
@@ -354,6 +357,7 @@ public class Inntektsmelding implements IndexKey {
         Inntektsmelding entitet = (Inntektsmelding) o;
         return Objects.equals(getArbeidsgiver(), entitet.getArbeidsgiver())
             && Objects.equals(getArbeidsforholdRef(), entitet.getArbeidsforholdRef())
+            && Objects.equals(getKanalreferanse(), entitet.getKanalreferanse())
             && Objects.equals(getJournalpostId(), entitet.getJournalpostId());
     }
 

@@ -1,6 +1,8 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 
@@ -37,6 +39,7 @@ public class InntektsmeldingParser {
             var im = oversetter.trekkUtData(wrapper, m);
             inntektsmeldinger.add(im);
         }
+        Collections.sort(inntektsmeldinger, Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())));
         return inntektsmeldinger;
     }
 

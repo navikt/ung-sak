@@ -175,22 +175,24 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Act
         // Motta eldre inntektsmelding først
         Mockito.doReturn(Optional.of(eldreDato)).when(wrapperSpied).getInnsendingstidspunkt();
+        mottattDokument.setKanalreferanse("AR1");
         persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Så motta nyere inntektsmelding
         Mockito.doReturn(Optional.of(nyereDato)).when(wrapperSpied).getInnsendingstidspunkt();
+        mottattDokument.setKanalreferanse("AR2");
         persisterInntektsmelding(behandling, mottattDokument, wrapperSpied);
 
         // Assert
         final InntektArbeidYtelseGrunnlag grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
-        Optional<LocalDateTime> innsendingstidspunkt = grunnlag.getInntektsmeldinger()
+        Optional<String> innsendingstidspunkt = grunnlag.getInntektsmeldinger()
             .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes)
-            .stream().flatMap(e -> e.stream().map(it -> it.getInnsendingstidspunkt()))
+            .stream().flatMap(e -> e.stream().map(it -> it.getKanalreferanse()))
             .collect(Collectors.toList()).stream().findFirst();
 
         assertThat(innsendingstidspunkt).isPresent();
-        assertThat(innsendingstidspunkt).hasValue(nyereDato);
+        assertThat(innsendingstidspunkt).hasValue("AR2");
         assertThat(grunnlag.getInntektsmeldinger().map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).get()).hasSize(1);
     }
 
@@ -230,6 +232,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         MottattDokument mottattDokument = builder
             .medFagsakId(behandling.getFagsakId())
             .medMottattDato(LocalDate.now())
+            .medKanalreferanse("AR"+inntektsmeldingFilnavn)
             .medJournalPostId(new JournalpostId("123123123"))
             .medPayload(xml)
             .build();

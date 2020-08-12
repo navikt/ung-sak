@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -40,6 +41,14 @@ public class InntektsmeldingDto {
     @Valid
     private Beløp getRefusjonBeløpPerMnd;
 
+    /** Strengt stigende kanalreferanse angitt av Altinn ved mottak der av Inntektsmelding. */
+    @JsonProperty(value = "kanalreferanse", required = true)
+    @Valid
+    @NotNull
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String kanalreferanse;
+
     @JsonProperty(value = "graderingPerioder")
     @Size(max = 100)
     @Valid
@@ -52,6 +61,12 @@ public class InntektsmeldingDto {
     @Size(max = 100)
     @Valid
     private List<UtsettelsePeriodeDto> utsettelsePerioder = new ArrayList<>();
+
+    @JsonProperty(value = "kildesystem")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String kildesystem;
 
     public InntektsmeldingDto() {
         //
@@ -89,6 +104,14 @@ public class InntektsmeldingDto {
         this.arbeidsgiver = arbeidsgiver;
     }
 
+    public void setKanalreferanse(String kanalreferanse) {
+        this.kanalreferanse = kanalreferanse;
+    }
+
+    public String getKanalreferanse() {
+        return kanalreferanse;
+    }
+
     public void setArbeidsgiverOrgnr(String arbeidsgiverOrgnr) {
         this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
     }
@@ -111,5 +134,13 @@ public class InntektsmeldingDto {
 
     public void setUtsettelsePerioder(List<UtsettelsePeriodeDto> perioder) {
         this.utsettelsePerioder = List.copyOf(perioder);
+    }
+
+    public void setKildesystem(String kildesystem) {
+        this.kildesystem = kildesystem;
+    }
+
+    public String getKildesystem() {
+        return kildesystem;
     }
 }

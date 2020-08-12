@@ -346,6 +346,7 @@ public class InntektsmeldingTjenesteImplTest {
             .medNærRelasjon(false)
             .medArbeidsforholdId(arbeidsforholdId)
             .medArbeidsforholdId(arbeidsforholdIdIntern)
+            .medKanalreferanse("AR" + mottattDato)
             .medInnsendingstidspunkt(LocalDateTime.of(mottattDato, LocalTime.MIN))
             .medJournalpostId(journalPostId);
 

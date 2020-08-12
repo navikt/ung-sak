@@ -156,6 +156,8 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             .filter(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || !im.getEndringerRefusjon().isEmpty())
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver)).entrySet().stream()
             .map(entry -> {
+                // FIXME (Espen Velsvik) TSF-1102:  innsendingstidspunktet her blir feil for april-august 2020. Kan ikke brukes til å vurdere dato krav ble fremstatt vs. refusjonsdato for omsorgspenger/pleiepenger.
+                // for OMP/PSB må innsending av refusjon dato knyttes til perioden det bes om refusjon for, ikke kun første tidspunkte.  Må løses i k9-sak istdf. kalkulus antagelig.
                 LocalDate førsteInnsendingAvRefusjon = entry.getValue().stream().map(Inntektsmelding::getInnsendingstidspunkt).min(Comparator.naturalOrder()).map(LocalDateTime::toLocalDate)
                     .orElse(TIDENES_ENDE);
                 LocalDate førsteDatoForRefusjon = entry.getValue().stream()
