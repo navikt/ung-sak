@@ -331,6 +331,11 @@ public class MottattDokument extends BaseEntitet {
             return mottatteDokumentMal;
         }
 
+        public Builder medInnsendingstidspunkt(LocalDateTime tid) {
+            mottatteDokumentMal.setInnsendingstidspunkt(tid);
+            return this;
+        }
+
     }
 
     @Override

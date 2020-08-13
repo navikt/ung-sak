@@ -46,6 +46,8 @@ public class Innsending {
     @NotNull
     private Brevkode type = Brevkode.INNTEKTKOMP_FRILANS; // FIXME K9: kan defaulte så lenge det er kun FRISINN som mottas i k9-sak
 
+    /** @deprecated bruker {@link #forsendelseMottattTidspunkt}*/
+    @Deprecated
     @JsonProperty(value = "mottattDato")
     @Valid
     private LocalDate forsendelseMottattDato;
@@ -53,6 +55,7 @@ public class Innsending {
     @JsonProperty(value = "mottattTidspunkt")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     @Valid
+    @NotNull
     private ZonedDateTime forsendelseMottattTidspunkt;
 
     @JsonProperty(value = "kanalReferanse")
