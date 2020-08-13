@@ -142,7 +142,9 @@ public class ÅrskvantumTjeneste {
         var perioder = utledPerioderRelevantForBehandling(behandling, grunnlag);
 
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
-
+        
+        /** @deprecated FIXME TSF-1101 Frode Lindås: innsendingstidpsunktet er ikke nødvendigvis satt korrekt.  Årskvantum etablerer ny måte å sortere uttaksplaner på. */
+        @Deprecated
         var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
             .stream()
             .map(Inntektsmelding::getInnsendingstidspunkt)
@@ -281,7 +283,7 @@ public class ÅrskvantumTjeneste {
                 .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
                 .filter(it -> it.getOppgittFravær().stream()
                     .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
-                .max(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt))
+                .max(Inntektsmelding.COMP_REKKEFØLGE)
                 .map(Inntektsmelding::getRefusjonBeløpPerMnd)
                 .map(Beløp::getVerdi)
                 .orElse(BigDecimal.ZERO);

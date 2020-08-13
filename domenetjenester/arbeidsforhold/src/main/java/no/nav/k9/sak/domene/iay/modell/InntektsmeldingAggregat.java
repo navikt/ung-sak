@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅT
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,8 +44,8 @@ public class InntektsmeldingAggregat {
      * Alle gjeldende inntektsmeldinger i behandlingen (de som skal brukes)
      *
      * @return Liste med {@link Inntektsmelding}
-     * <p>
-     * Merk denne filtrerer inntektsmeldinger ifht hva som skal brukes.
+     *         <p>
+     *         Merk denne filtrerer inntektsmeldinger ifht hva som skal brukes.
      */
     public List<Inntektsmelding> getInntektsmeldingerSomSkalBrukes() {
         return inntektsmeldinger.stream().filter(this::skalBrukes).collect(Collectors.toUnmodifiableList());
@@ -54,7 +55,9 @@ public class InntektsmeldingAggregat {
      * Get alle inntetksmeldinger (både de som skal brukes og ikke brukes).
      */
     public List<Inntektsmelding> getAlleInntektsmeldinger() {
-        return List.copyOf(inntektsmeldinger);
+        var ims = new ArrayList<>(inntektsmeldinger);
+        Collections.sort(ims, Inntektsmelding.COMP_REKKEFØLGE);
+        return Collections.unmodifiableList(ims);
     }
 
     private boolean skalBrukes(Inntektsmelding im) {
@@ -67,8 +70,8 @@ public class InntektsmeldingAggregat {
         return (ov.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
             && ov.getArbeidsgiver().equals(im.getArbeidsgiver())
             && (Objects.equals(IKKE_BRUK, ov.getHandling())
-            || Objects.equals(SLÅTT_SAMMEN_MED_ANNET, ov.getHandling())
-            || ov.kreverIkkeInntektsmelding());
+                || Objects.equals(SLÅTT_SAMMEN_MED_ANNET, ov.getHandling())
+                || ov.kreverIkkeInntektsmelding());
     }
 
     /**
@@ -93,8 +96,8 @@ public class InntektsmeldingAggregat {
             inntektsmeldinger.add(entitet);
         }
 
-        inntektsmeldinger.stream().filter(it -> it.gjelderSammeArbeidsforhold(inntektsmelding) && !fjernet).findFirst().ifPresent(e ->
-            logger.info("Persistert inntektsmelding med journalpostid {} er nyere enn den mottatte med journalpostid {}. Ignoreres", e.getJournalpostId(), inntektsmelding.getJournalpostId()));
+        inntektsmeldinger.stream().filter(it -> it.gjelderSammeArbeidsforhold(inntektsmelding) && !fjernet).findFirst().ifPresent(
+            e -> logger.info("Persistert inntektsmelding med journalpostid {} er nyere enn den mottatte med journalpostid {}. Ignoreres", e.getJournalpostId(), inntektsmelding.getJournalpostId()));
     }
 
     public void fjern(Inntektsmelding inntektsmelding) {
@@ -111,8 +114,10 @@ public class InntektsmeldingAggregat {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof InntektsmeldingAggregat)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof InntektsmeldingAggregat))
+            return false;
         InntektsmeldingAggregat that = (InntektsmeldingAggregat) o;
         return Objects.equals(inntektsmeldinger, that.inntektsmeldinger);
     }

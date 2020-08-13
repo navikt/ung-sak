@@ -84,7 +84,7 @@ public class SakInntektsmeldinger {
             inntektsmeldinger.addAll(entry.getValue());
         }
         var sorted = inntektsmeldinger.stream()
-            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.nullsLast(Comparator.naturalOrder())))
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
         return sorted;
     }
@@ -101,20 +101,20 @@ public class SakInntektsmeldinger {
             .collect(Collectors.toList());
 
         var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
-        var senesteInnsendingstidspunkt = orignInntektsmeldinger.stream().map(Inntektsmelding::getInnsendingstidspunkt).max(LocalDateTime::compareTo).orElse(null);
+        var senesteInntektsmelding = orignInntektsmeldinger.stream().max(Inntektsmelding.COMP_REKKEFØLGE).orElse(null);
 
         relevanteKeys.stream()
             .map(data::get)
             .forEach(it -> it.stream()
-                .filter(im -> senesteInnsendingstidspunkt == null || erLiktEllerSenere(senesteInnsendingstidspunkt, im.getInnsendingstidspunkt()))
+                .filter(im -> senesteInntektsmelding == null || erLiktEllerSenere(senesteInntektsmelding, im))
                 .filter(at -> !orignInntektsmeldinger.contains(at))
                 .forEach(nyeInntektsmeldinger::add));
 
         return nyeInntektsmeldinger;
     }
 
-    private boolean erLiktEllerSenere(LocalDateTime senesteInnsendingstidspunkt, LocalDateTime innsendingstidspunkt) {
-        return senesteInnsendingstidspunkt.equals(innsendingstidspunkt) || senesteInnsendingstidspunkt.isBefore(innsendingstidspunkt);
+    private boolean erLiktEllerSenere(Inntektsmelding siste, Inntektsmelding denne) {
+        return siste==null || siste.equals(denne) || denne.getKanalreferanse().compareTo(siste.getKanalreferanse()) >= 0;
     }
 
     static class Key {

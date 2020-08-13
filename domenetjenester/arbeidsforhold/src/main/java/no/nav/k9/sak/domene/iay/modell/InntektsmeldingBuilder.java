@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +20,9 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {
+    
+    public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
+    
     private final Inntektsmelding kladd;
     private EksternArbeidsforholdRef eksternArbeidsforholdId;
     private boolean erBygget;
@@ -41,6 +45,7 @@ public class InntektsmeldingBuilder {
 
     public Inntektsmelding build(boolean ignore) {
         var internRef = getInternArbeidsforholdRef();
+        Objects.requireNonNull(kladd.getKanalreferanse(), "kanalreferanse er ikke satt");
         if (internRef.isPresent() && !ignore) {
             // magic - hvis har ekstern referanse må også intern referanse være spesifikk
             if ((eksternArbeidsforholdId != null && eksternArbeidsforholdId.gjelderForSpesifiktArbeidsforhold()) && internRef.get().getReferanse() == null) {
@@ -62,6 +67,10 @@ public class InntektsmeldingBuilder {
 
     public String getKildesystem() {
         return kladd.getKildesystem();
+    }
+    
+    public String getKanalreferanse() {
+        return kladd.getKanalreferanse();
     }
     
     public Optional<EksternArbeidsforholdRef> getEksternArbeidsforholdRef() {

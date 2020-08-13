@@ -433,6 +433,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         .medArbeidsforholdId(arbeidsforholdId)
         .medArbeidsforholdId(eksternArbeidsforholdRef)
         .medMottattDato(mottattDato)
+        .medKanalreferanse("AR" + LocalDateTime.now())
         .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));

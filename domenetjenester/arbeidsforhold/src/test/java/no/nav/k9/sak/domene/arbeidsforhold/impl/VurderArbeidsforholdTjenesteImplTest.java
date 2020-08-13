@@ -59,8 +59,10 @@ public class VurderArbeidsforholdTjenesteImplTest {
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
     private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
-    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
-    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
+    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null,
+        new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
+    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(
+        new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
     private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
 
     @Before
@@ -170,7 +172,8 @@ public class VurderArbeidsforholdTjenesteImplTest {
         var ref = EksternArbeidsforholdRef.ref("ref");
         var internRef = builder.medNyInternArbeidsforholdRef(virksomhet, ref);
 
-        final YrkesaktivitetBuilder yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef, virksomhet), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        final YrkesaktivitetBuilder yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef, virksomhet),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesBuilder.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef);
         final AktivitetsAvtaleBuilder avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
@@ -182,7 +185,8 @@ public class VurderArbeidsforholdTjenesteImplTest {
         arbeidBuilder.leggTilYrkesaktivitet(yrkesBuilder);
         var ref1 = EksternArbeidsforholdRef.ref("ref1");
         var internRef1 = builder.medNyInternArbeidsforholdRef(virksomhet, ref1);
-        final YrkesaktivitetBuilder yrkesBuilder1 = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef1, virksomhet), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        final YrkesaktivitetBuilder yrkesBuilder1 = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef1, virksomhet),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesBuilder1.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef1);
         final AktivitetsAvtaleBuilder avtaleBuilder1 = yrkesBuilder1.getAktivitetsAvtaleBuilder();
@@ -206,7 +210,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_og_aareg_matcher() {
-        //Arrange
+        // Arrange
         final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
         final Behandling behandling = scenario.lagre(repositoryProvider);
@@ -215,15 +219,15 @@ public class VurderArbeidsforholdTjenesteImplTest {
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ref);
 
-        //Act
+        // Act
         boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_uten_arbeidsforholdId() {
-        //Arrange
+        // Arrange
         final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
@@ -231,15 +235,15 @@ public class VurderArbeidsforholdTjenesteImplTest {
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, null);
 
-        //Act
+        // Act
         boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
     public void skal_ikke_gi_autopunkt_når_arbeidforholdId_mangler_fra_aareg() {
-        //Arrange
+        // Arrange
         final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
@@ -247,15 +251,15 @@ public class VurderArbeidsforholdTjenesteImplTest {
         opprettAktørArbeidMedYrkesaktivitet(behandling, null, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ref);
 
-        //Act
+        // Act
         boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat).isFalse();
     }
 
     @Test
     public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding_uten_arbId() {
-        //Arrange
+        // Arrange
         final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         final Behandling behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
@@ -263,21 +267,21 @@ public class VurderArbeidsforholdTjenesteImplTest {
         final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
-        //Act
+        // Act
         boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat).isTrue();
-        //Arrange
+        // Arrange
         sendNyInntektsmelding(behandling, virksomhet, null);
-        //Act
+        // Act
         boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat2).isFalse();
     }
 
     @Test
     public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding() {
-        //Arrange
+        // Arrange
         var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         var behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
@@ -285,15 +289,15 @@ public class VurderArbeidsforholdTjenesteImplTest {
         var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
-        //Act
+        // Act
         boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat).isTrue();
-        //Arrange
+        // Arrange
         sendNyInntektsmelding(behandling, virksomhet, ref);
-        //Act
+        // Act
         boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
-        //Assert
+        // Assert
         assertThat(resultat2).isFalse();
     }
 
@@ -329,9 +333,14 @@ public class VurderArbeidsforholdTjenesteImplTest {
             .medBeløp(BigDecimal.TEN)
             .medStartDatoPermisjon(skjæringstidspunkt)
             .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.NY)
+            .medKanalreferanse(nyKanalreferanse())
             .medInnsendingstidspunkt(nyTid()).medJournalpostId(journalpostId);
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
+    }
+
+    private String nyKanalreferanse() {
+        return "AR" + LocalDateTime.now();
     }
 
     private LocalDateTime nyTid() {
@@ -345,6 +354,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
             .medBeløp(BigDecimal.TEN)
             .medStartDatoPermisjon(skjæringstidspunkt)
             .medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak.ENDRING)
+            .medKanalreferanse(nyKanalreferanse())
             .medInnsendingstidspunkt(nyTid()).medJournalpostId(new JournalpostId("123"));
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));

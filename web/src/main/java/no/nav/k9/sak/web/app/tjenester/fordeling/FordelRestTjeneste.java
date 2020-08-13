@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -179,7 +180,7 @@ public class FordelRestTjeneste {
             .medType(innsending.getType())
             .medArbeidsgiver(null) // sender ikke inn fra arbeidsgiver på dette endepunktet ennå
             .medPayload(payload)
-            .medKanalreferanse(mapTilKanalreferanse(innsending.getKanalReferanse(), journalpostId));
+            .medKanalreferanse(Objects.requireNonNull(innsending.getKanalReferanse(), "kanalreferanse"));
 
         builder.medMottattTidspunkt(Optional.ofNullable(innsending.getForsendelseMottattTidspunkt()).orElse(ZonedDateTime.now()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
         builder.medMottattDato(Optional.ofNullable(innsending.getForsendelseMottattDato()).orElse(LocalDate.now()));

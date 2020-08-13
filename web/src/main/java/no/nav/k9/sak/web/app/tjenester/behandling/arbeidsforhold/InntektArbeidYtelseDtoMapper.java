@@ -187,7 +187,9 @@ public class InntektArbeidYtelseDtoMapper {
         dto.setArbeidsgiverOrgnr(arb.getIdentifikator());
         dto.setArbeidsgiverStartdato(inntektsmelding.getStartDatoPermisjon().orElse(null));
         dto.setInnsendingstidspunkt(inntektsmelding.getInnsendingstidspunkt());
-
+        dto.setKanalreferanse(inntektsmelding.getKanalreferanse());
+        dto.setKildesystem(inntektsmelding.getKildesystem());
+        
         List<UtsettelsePeriode> utsettelser = inntektsmelding.getUtsettelsePerioder();
         if (utsettelser != null) {
             dto.setUtsettelsePerioder(utsettelser

@@ -306,6 +306,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
         JournalpostId journalpostId = new JournalpostId(1L);
         InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet(virksomhetOrgnr))
+            .medKanalreferanse("AR" + LocalDateTime.now())
             .medInnsendingstidspunkt(LocalDateTime.now())
             .medArbeidsforholdId(arbeidsforholdId)
             .medJournalpostId(journalpostId)

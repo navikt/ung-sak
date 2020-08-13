@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -118,7 +117,7 @@ public class TrekkUtFraværTjeneste {
         }
         var inntektsmeldinger = sakInntektsmeldinger.stream()
             .filter(it -> inntektsmeldingerJournalposter.contains(it.getJournalpostId()))
-            .sorted(Comparator.comparing(Inntektsmelding::getInnsendingstidspunkt, Comparator.naturalOrder()))
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (inntektsmeldinger.size() != inntektsmeldingerJournalposter.size()) {

@@ -62,7 +62,7 @@ public class MapInntektsmeldinger {
 
     private static final Comparator<InntektsmeldingDto> COMP_INNTEKTSMELDING = Comparator
         .comparing((InntektsmeldingDto im) -> im.getArbeidsgiver().getIdent())
-        .thenComparing(im -> im.getInnsendingstidspunkt())
+        .thenComparing(im -> im.getKanalreferanse())
         .thenComparing(im -> im.getArbeidsforholdRef() == null ? null : im.getArbeidsforholdRef().getAbakusReferanse(),
             Comparator.nullsLast(Comparator.naturalOrder()));
 
