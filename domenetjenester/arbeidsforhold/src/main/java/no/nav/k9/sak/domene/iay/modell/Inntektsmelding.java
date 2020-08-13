@@ -68,6 +68,7 @@ public class Inntektsmelding implements IndexKey {
 
     private LocalDateTime innsendingstidspunkt;
     
+    @ChangeTracked
     private String kanalreferanse;
 
     private String kildesystem;
