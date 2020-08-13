@@ -4,10 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.feil.LogLevel.WARN;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
@@ -114,10 +111,10 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
-        if(opprettSakDto.getPeriodeStart() == null) {
+        if (opprettSakDto.getPeriodeStart() == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
-        
+
         var startDato = opprettSakDto.getPeriodeStart();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
 
@@ -180,10 +177,11 @@ public class FordelRestTjeneste {
             .medType(innsending.getType())
             .medArbeidsgiver(null) // sender ikke inn fra arbeidsgiver på dette endepunktet ennå
             .medPayload(payload)
-            .medKanalreferanse(Objects.requireNonNull(innsending.getKanalReferanse(), "kanalreferanse"));
+            .medKanalreferanse(innsending.getKanalReferanse());
 
-        builder.medMottattTidspunkt(Optional.ofNullable(innsending.getForsendelseMottattTidspunkt()).orElse(ZonedDateTime.now()).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime());
-        builder.medMottattDato(Optional.ofNullable(innsending.getForsendelseMottattDato()).orElse(LocalDate.now()));
+        LocalDateTime mottattTidspunkt = Objects.requireNonNull(innsending.getForsendelseMottattTidspunkt(), "forsendelseMottattTidspunkt").toLocalDateTime();
+        builder.medMottattTidspunkt(mottattTidspunkt);
+        builder.medMottattDato(mottattTidspunkt.toLocalDate());
 
         MottattDokument mottattDokument = builder.build();
         mottatteDokumentRepository.lagre(mottattDokument);
@@ -231,7 +229,8 @@ public class FordelRestTjeneste {
             builder.medPayload(payload.get()); // NOSONAR
         }
 
-        LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt()).orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
+        LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())
+            .orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
         builder.medForsendelseMottatt(mottattTidspunkt); // NOSONAR
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
 
