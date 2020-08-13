@@ -8,8 +8,6 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.typer.Periode;
-
 public class PeriodeAndelTest {
     @Test
     public void skal_konvertere_BigDecimal_timer_til_Duration() throws Exception {
