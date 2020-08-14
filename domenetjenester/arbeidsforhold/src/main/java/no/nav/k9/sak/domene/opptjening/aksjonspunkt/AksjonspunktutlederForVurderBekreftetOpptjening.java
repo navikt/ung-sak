@@ -68,7 +68,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
         for (Opptjening opptjening : opptjeningPerioder) {
             DatoIntervallEntitet opptjeningPeriode = opptjening.getOpptjeningPeriode();
 
-            LocalDate skjæringstidspunkt = param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
+            LocalDate skjæringstidspunkt = opptjening.getSkjæringstidspunkt();
             if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
                 logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}", behandlingId);
                 return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
