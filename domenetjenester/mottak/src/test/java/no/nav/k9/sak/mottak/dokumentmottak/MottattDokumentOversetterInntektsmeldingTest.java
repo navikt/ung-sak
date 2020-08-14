@@ -106,7 +106,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     public void skalMappeOgPersistereKorrektInnsendingsdato() throws IOException, URISyntaxException {
         // Arrange
         final Behandling behandling = opprettBehandling();
-        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
+        var mottattTidspunkt = LocalDateTime.now();
+        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", mottattTidspunkt);
 
         final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
@@ -121,7 +122,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
             .collect(Collectors.toList()).stream().findFirst();
 
         assertThat(innsendingstidspunkt).isPresent();
-        assertThat(innsendingstidspunkt).hasValue(wrapper.getInnsendingstidspunkt().get());
+        assertThat(innsendingstidspunkt).hasValueSatisfying(it -> assertThat(it).isEqualTo(mottattTidspunkt));
 
     }
 
@@ -129,7 +130,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     public void skalVedMottakAvNyInntektsmeldingPåSammeArbeidsforholdIkkeOverskriveHvisPersistertErNyereEnnMottatt() throws IOException, URISyntaxException {
         // Arrange
         final Behandling behandling = opprettBehandling();
-        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
+        var mottattTidspunkt = LocalDateTime.now();
+        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", mottattTidspunkt);
         MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
@@ -155,7 +157,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
             .collect(Collectors.toList()).stream().findFirst();
 
         assertThat(innsendingstidspunkt).isPresent();
-        assertThat(innsendingstidspunkt).hasValue(nyereDato);
+        assertThat(innsendingstidspunkt).hasValueSatisfying(it -> assertThat(it).isEqualTo(mottattTidspunkt));
         assertThat(grunnlag.getInntektsmeldinger().map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).get()).hasSize(1);
 
     }
@@ -164,7 +166,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     public void skalVedMottakAvNyInntektsmeldingPåSammeArbeidsforholdOverskriveHvisPersistertErEldreEnnMottatt() throws IOException, URISyntaxException {
         // Arrange
         final Behandling behandling = opprettBehandling();
-        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml");
+        MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", LocalDateTime.now());
         MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
@@ -198,7 +200,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
     private void persisterInntektsmelding(final Behandling behandling, MottattDokument mottattDokument, MottattDokumentWrapperInntektsmelding wrapperSpied) {
         var innhold = oversetter.trekkUtData(wrapperSpied, mottattDokument);
-        
+
         Long behandlingId = behandling.getId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
         inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(innhold));
@@ -206,12 +208,12 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
     private Behandling opprettScenarioOgLagreInntektsmelding(String inntektsmeldingFilnavn) throws URISyntaxException, IOException {
         Behandling behandling = opprettBehandling();
-        MottattDokument mottattDokument = opprettDokument(behandling, inntektsmeldingFilnavn);
+        MottattDokument mottattDokument = opprettDokument(behandling, inntektsmeldingFilnavn, LocalDateTime.now());
 
         var wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
 
         var innhold = oversetter.trekkUtData(wrapper, mottattDokument);
-        
+
         Long behandlingId = behandling.getId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
         inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, List.of(innhold));
@@ -223,7 +225,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         return scenario.lagre(repositoryProvider);
     }
 
-    private MottattDokument opprettDokument(Behandling behandling, String inntektsmeldingFilnavn) throws IOException, URISyntaxException {
+    private MottattDokument opprettDokument(Behandling behandling, String inntektsmeldingFilnavn, LocalDateTime mottattTidspunkt) throws IOException, URISyntaxException {
         final InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
         iayTjeneste.lagreIayAggregat(behandling.getId(), inntektArbeidYtelseAggregatBuilder);
         final String xml = fileToStringUtil.readFile(inntektsmeldingFilnavn);
@@ -231,7 +233,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
 
         MottattDokument mottattDokument = builder
             .medFagsakId(behandling.getFagsakId())
-            .medMottattDato(LocalDate.now())
+            .medMottattTidspunkt(mottattTidspunkt)
+            .medMottattDato(mottattTidspunkt.toLocalDate())
             .medKanalreferanse("AR"+inntektsmeldingFilnavn)
             .medJournalPostId(new JournalpostId("123123123"))
             .medPayload(xml)
