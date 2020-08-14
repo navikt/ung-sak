@@ -44,7 +44,7 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.Periode;
 public class MottattDokumentOversetterInntektsmelding implements MottattInntektsmeldingOversetter<MottattDokumentWrapperInntektsmelding> {
 
     private static final LocalDate TIDENES_BEGYNNELSE = LocalDate.of(1, Month.JANUARY, 1);
-    
+
     private static Map<ÅrsakInnsendingKodeliste, InntektsmeldingInnsendingsårsak> innsendingsårsakMap;
 
     static {
@@ -55,7 +55,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     private VirksomhetTjeneste virksomhetTjeneste;
     private AktørConsumer aktørConsumer;
-    
+
     private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
     MottattDokumentOversetterInntektsmelding() {
@@ -79,7 +79,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
         builder.medYtelse(wrapper.getYtelse());
 
-        mapInnsendingstidspunkt(wrapper, mottattDokument, builder);
+        mapInnsendingstidspunkt(mottattDokument, builder);
 
         builder.medMottattDato(mottattDokument.getMottattDato());
         builder.medKildesystem(wrapper.getAvsendersystem());
@@ -133,10 +133,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         }
     }
 
-    private void mapInnsendingstidspunkt(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, InntektsmeldingBuilder builder) {
-        if (wrapper.getInnsendingstidspunkt().isPresent()) { // LPS
-            builder.medInnsendingstidspunkt(wrapper.getInnsendingstidspunkt().get());
-        } else if (mottattDokument.getMottattTidspunkt() != null) { // Altinn
+    private void mapInnsendingstidspunkt(MottattDokument mottattDokument, InntektsmeldingBuilder builder) {
+        if (mottattDokument.getMottattTidspunkt() != null) { // Altinn mottatt
             builder.medInnsendingstidspunkt(mottattDokument.getMottattTidspunkt());
         } else {
             throw new IllegalArgumentException("Innsendingstidspunkt må være satt");

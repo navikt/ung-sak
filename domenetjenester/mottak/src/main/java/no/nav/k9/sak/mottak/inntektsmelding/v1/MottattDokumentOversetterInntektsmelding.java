@@ -72,7 +72,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
         builder.medYtelse(wrapper.getYtelse());
 
-        mapInnsendingstidspunkt(wrapper, mottattDokument, builder);
+        mapInnsendingstidspunkt(mottattDokument, builder);
         builder.medMottattDato(mottattDokument.getMottattDato());
         builder.medKildesystem(wrapper.getAvsendersystem());
         builder.medKanalreferanse(mottattDokument.getKanalreferanse());
@@ -87,11 +87,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapNaturalYtelser(wrapper, builder);
         mapFerie(wrapper, builder);
         mapRefusjon(wrapper, builder);
-        
+
         builder.medOppgittFravær(validator.validerOppgittFravær(mottattDokument.getMottattDato(), wrapper.getOppgittFravær()));
         return builder;
     }
-    
+
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         final Optional<Arbeidsforhold> arbeidsforhold = wrapper.getArbeidsforhold();
         if (arbeidsforhold.isPresent()) {
@@ -115,10 +115,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         builder.medArbeidsgiver(Arbeidsgiver.virksomhet(orgNummer));
     }
 
-    private void mapInnsendingstidspunkt(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument, InntektsmeldingBuilder builder) {
-        if (wrapper.getInnsendingstidspunkt().isPresent()) { // LPS
-            builder.medInnsendingstidspunkt(wrapper.getInnsendingstidspunkt().get());
-        } else if (mottattDokument.getMottattTidspunkt() != null) { // Altinn
+    private void mapInnsendingstidspunkt(MottattDokument mottattDokument, InntektsmeldingBuilder builder) {
+        if (mottattDokument.getMottattTidspunkt() != null) { // Altinn mottatt
             builder.medInnsendingstidspunkt(mottattDokument.getMottattTidspunkt());
         } else {
             throw new IllegalArgumentException("Innsendingstidspunkt må være satt");
@@ -146,7 +144,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
         }
     }
-    
+
     private void mapFerie(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
         for (Periode periode : wrapper.getAvtaltFerie()) {
             builder.leggTil(UtsettelsePeriode.ferie(periode.getFom().getValue(), periode.getTom().getValue()));
