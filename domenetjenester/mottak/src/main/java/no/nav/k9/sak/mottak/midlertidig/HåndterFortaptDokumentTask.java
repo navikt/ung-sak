@@ -46,7 +46,7 @@ public class HåndterFortaptDokumentTask implements ProsessTaskHandler {
         var mottattDokument = mottatteDokumentRepository.hentMottattDokument(dokumentId)
             .orElseThrow(() -> new IllegalStateException(feilmelding));
 
-        var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(mottattDokument.getFagsakId()).orElseThrow();
+        var behandling = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId());
         log.info("Lagrer fortapt dokument='{}' på behandling='{}'", mottattDokument, behandling);
 
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
