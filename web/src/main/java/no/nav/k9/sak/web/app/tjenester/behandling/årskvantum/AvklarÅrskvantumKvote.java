@@ -5,6 +5,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.uttak.AvklarÅrskvantumDto;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
@@ -38,7 +39,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
         if (fortsettBehandling) {
             Long behandlingId = param.getBehandlingId();
 
-            historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.OVST_UTTAK);
+            opprettHistorikkInnslag(dto, behandlingId);
 
             //Bekreft uttaksplan og fortsett behandling
 
@@ -46,5 +47,11 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
         }
 
         return OppdateringResultat.utenOveropp();
+    }
+
+    private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId) {
+        HistorikkInnslagTekstBuilder builder = historikkTjenesteAdapter.tekstBuilder();
+        builder.medBegrunnelse(dto.getBegrunnelse());
+        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.OVST_UTTAK);
     }
 }
