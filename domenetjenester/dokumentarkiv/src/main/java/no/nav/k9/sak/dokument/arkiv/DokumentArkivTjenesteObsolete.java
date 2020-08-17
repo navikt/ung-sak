@@ -24,30 +24,29 @@ import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
+import no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.DokumentoversiktFagsakQuery;
+import no.nav.k9.sak.dokument.arkiv.saf.graphql.HentDokumentQuery;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Datotype;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
+import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentoversiktFagsak;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.DokumentoversiktFagsakQuery;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.HentDokumentQuery;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Datotype;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentoversiktFagsak;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
 
 @ApplicationScoped
-public class DokumentArkivTjeneste {
-    private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
+public class DokumentArkivTjenesteObsolete {
+    private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjenesteObsolete.class);
     // Variantformat ARKIV er den eneste varianten som benyttes for denne tjenesten
     private static final VariantFormat VARIANT_FORMAT_ARKIV = VariantFormat.ARKIV;
     private final Set<ArkivFilType> filTyperPdf = byggArkivFilTypeSet();
-    private SafTjeneste safTjeneste;
+    private SafTjenesteObsolete safTjeneste;
 
-    DokumentArkivTjeneste() {
+    DokumentArkivTjenesteObsolete() {
         // for CDI proxy
     }
 
     @Inject
-    public DokumentArkivTjeneste(SafTjeneste safTjeneste) {
+    public DokumentArkivTjenesteObsolete(SafTjenesteObsolete safTjeneste) {
         this.safTjeneste = safTjeneste;
     }
 
@@ -67,7 +66,7 @@ public class DokumentArkivTjeneste {
 
         byte[] pdfDokument = safTjeneste.hentDokument(query);
         if (pdfDokument == null) {
-            throw DokumentArkivTjenesteFeil.FACTORY.hentDokumentIkkeFunnet(query).toException();
+            throw DokumentArkivTjenesteFeilObsolete.FACTORY.hentDokumentIkkeFunnet(query).toException();
         }
         return pdfDokument;
     }
@@ -145,7 +144,7 @@ public class DokumentArkivTjeneste {
         }
     }
 
-    private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, Journalpost journalpost) {
+    private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpost) {
         Optional<LocalDateTime> datoRegistrert = hentRelevantDato(journalpost, Datotype.DATO_REGISTRERT);
         Optional<LocalDateTime> datoJournalFørt = hentRelevantDato(journalpost, Datotype.DATO_JOURNALFOERT);
         LocalDateTime tidspunkt = datoJournalFørt.orElse(datoRegistrert.orElse(null));
@@ -157,7 +156,7 @@ public class DokumentArkivTjeneste {
             .medTidspunkt(tidspunkt)
             .medKommunikasjonsretning(Kommunikasjonsretning.fromKommunikasjonsretningCode(journalpost.getJournalposttype()));
 
-        var dokumenter = journalpost.getDokumenter();
+        List<DokumentInfo> dokumenter = journalpost.getDokumenter();
         for (int i = 0; i < dokumenter.size(); i++) {
             var dokumentInfo = dokumenter.get(i);
             if (i == 0) {
@@ -225,7 +224,7 @@ public class DokumentArkivTjeneste {
         return dokumentKategori;
     }
 
-    private Optional<LocalDateTime> hentRelevantDato(Journalpost journalpost, Datotype datotype) {
+    private Optional<LocalDateTime> hentRelevantDato(no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpost, Datotype datotype) {
         return Optional.ofNullable(journalpost.getRelevanteDatoer()).orElse(List.of()).stream()
             .filter(it -> it.getDatotype().equals(datotype))
             .map(it -> it.getDato())

@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSu
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;
@@ -33,6 +32,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
@@ -59,7 +59,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
 
     @Before
     public void setup() {
-        historikkAdapter = new HistorikkTjenesteAdapter(historikkRepository, historikkInnslagKonverter, dokumentApplikasjonTjeneste);
+        historikkAdapter = new HistorikkTjenesteAdapter(historikkRepository, historikkInnslagKonverter, dokumentApplikasjonTjeneste, null, true);
         arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         behandling = scenario.lagre(provider);
