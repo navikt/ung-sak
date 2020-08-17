@@ -12,7 +12,7 @@ public interface DokumentArkivTjenesteFeil extends DeklarerteFeil {
 
     DokumentArkivTjenesteFeil FACTORY = FeilFactory.create(DokumentArkivTjenesteFeil.class);
 
-    @IntegrasjonFeil(feilkode = "FP-249790", feilmelding = "Fant ikke journal dokument: %s", logLevel = LogLevel.WARN)
+    @IntegrasjonFeil(feilkode = "FP-249791", feilmelding = "Fant ikke journal dokument: %s", logLevel = LogLevel.WARN)
     Feil hentDokumentIkkeFunnet(HentDokumentQuery query);
 
 }

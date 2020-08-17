@@ -179,22 +179,22 @@ public class SafTjenesteObsolete {
     interface SafTjenesteFeil extends DeklarerteFeil { // NOSONAR - internt interface er ok her
         SafTjenesteFeil FEILFACTORY = FeilFactory.create(SafTjenesteFeil.class); // NOSONAR ok med konstant
 
-        @TekniskFeil(feilkode = "K9-240613", feilmelding = "Feil ved request dokumentoversiktFagsak: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-240615", feilmelding = "Feil ved request dokumentoversiktFagsak: %s", logLevel = LogLevel.WARN)
         Feil dokumentoversiktFagsakRequestFeilet(DokumentoversiktFagsakQuery query, Throwable t);
 
-        @TekniskFeil(feilkode = "K9-240614", feilmelding = "Feil ved respons dokumentoversiktFagsak: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-240616", feilmelding = "Feil ved respons dokumentoversiktFagsak: %s", logLevel = LogLevel.WARN)
         Feil dokumentoversiktFagsakResponseFeilet(DokumentoversiktFagsakQuery query);
 
-        @TekniskFeil(feilkode = "K9-969997", feilmelding = "Feil ved request hentJournalpost: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-979997", feilmelding = "Feil ved request hentJournalpost: %s", logLevel = LogLevel.WARN)
         Feil hentJournalpostRequestFeilet(JournalpostQuery query, Throwable t);
 
-        @TekniskFeil(feilkode = "K9-969998", feilmelding = "Feil ved respons hentJournalpost: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-979998", feilmelding = "Feil ved respons hentJournalpost: %s", logLevel = LogLevel.WARN)
         Feil hentJournalpostResponseFeilet(JournalpostQuery query);
 
-        @TekniskFeil(feilkode = "K9-588730", feilmelding = "Feil fra SAF ved utført query: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-598730", feilmelding = "Feil fra SAF ved utført query: %s", logLevel = LogLevel.WARN)
         Feil queryReturnerteFeil(GraphQlResponse response);
 
-        @TekniskFeil(feilkode = "K9-969999", feilmelding = "Feil ved request hentDokument: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-979999", feilmelding = "Feil ved request hentDokument: %s", logLevel = LogLevel.WARN)
         Feil hentDokumentRequestFeilet(HentDokumentQuery query, Throwable t);
     }
 }
