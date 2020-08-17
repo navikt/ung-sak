@@ -19,6 +19,5 @@
     <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr"/>
     <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet"/>
     <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet"/>
-    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats"/>
 
 </entity-mappings>

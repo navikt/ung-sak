@@ -28,15 +28,12 @@ public class KalkulatorInputTjeneste {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
-    private GrunnbeløpTjeneste grunnbeløpTjeneste;
 
     @Inject
     public KalkulatorInputTjeneste(InntektArbeidYtelseTjeneste iayTjeneste,
-                                   @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                   GrunnbeløpTjeneste grunnbeløpTjeneste) {
+                                   @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
         this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
-        this.grunnbeløpTjeneste = grunnbeløpTjeneste;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -46,7 +43,6 @@ public class KalkulatorInputTjeneste {
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
         var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var grunnbeløpsatser = TilKalkulusMapper.mapGrunnbeløp(grunnbeløpTjeneste.mapGrunnbeløpSatser());
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
 
@@ -54,7 +50,7 @@ public class KalkulatorInputTjeneste {
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
-        KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnbeløpsatser, grunnlagDto, opptjeningAktiviteterDto, stp);
+        KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
         List<RefusjonskravDato> refusjonskravDatoes = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
         if (!refusjonskravDatoes.isEmpty()) {

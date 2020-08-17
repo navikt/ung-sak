@@ -9,8 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningSatsType;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningSats;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.typer.AktørId;
@@ -36,14 +35,17 @@ public class AutomatiskGrunnbelopReguleringBatchTask implements ProsessTaskHandl
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     private ProsessTaskRepository prosessTaskRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
+    private KalkulusTjeneste kalkulusTjeneste;
 
     @Inject
     public AutomatiskGrunnbelopReguleringBatchTask(BehandlingRevurderingRepository behandlingRevurderingRepository,
                                                    BeregningsresultatRepository beregningsresultatRepository,
-                                                   ProsessTaskRepository prosessTaskRepository) {
+                                                   ProsessTaskRepository prosessTaskRepository,
+                                                   KalkulusTjeneste kalkulusTjeneste) {
         this.behandlingRevurderingRepository = behandlingRevurderingRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     @Override
@@ -51,8 +53,8 @@ public class AutomatiskGrunnbelopReguleringBatchTask implements ProsessTaskHandl
         final var dryRunProperty = prosessTaskData.getPropertyValue(KEY_DRY_RUN);
         final boolean dryRun = dryRunProperty != null && Boolean.parseBoolean(dryRunProperty);
 
-        BeregningSats gjeldende = beregningsresultatRepository.finnEksaktSats(BeregningSatsType.GRUNNBELØP, LocalDate.now());
-        BeregningSats forrige = beregningsresultatRepository.finnEksaktSats(BeregningSatsType.GRUNNBELØP, gjeldende.getPeriode().getFomDato().minusDays(1));
+        var gjeldende = kalkulusTjeneste.hentGrunnbeløp(LocalDate.now());
+        var forrige = kalkulusTjeneste.hentGrunnbeløp(gjeldende.getPeriode().getFomDato().minusDays(1));
         long avkortingAntallG = beregningsresultatRepository.avkortingMultiplikatorG(gjeldende.getPeriode().getFomDato().minusDays(1));
         List<Tuple<Long, AktørId>> tilVurdering = behandlingRevurderingRepository.finnSakerMedBehovForGrunnbeløpRegulering(gjeldende.getVerdi(), forrige.getVerdi(), avkortingAntallG, gjeldende.getPeriode().getFomDato());
         if (dryRun) {

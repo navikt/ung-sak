@@ -44,8 +44,10 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGU
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagGrunnlagForReferanseRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
@@ -73,6 +75,7 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 /**
@@ -270,6 +273,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         );
         return restTjeneste.erEndringIBeregning(request);
     }
+
+    @Override
+    public no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp hentGrunnbeløp(LocalDate dato) {
+        HentGrunnbeløpRequest request = new HentGrunnbeløpRequest(dato);
+        Grunnbeløp grunnbeløp = restTjeneste.hentGrunnbeløp(request);
+        return new no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp(
+            grunnbeløp.getVerdi().longValue(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(grunnbeløp.getPeriode().getFom(), grunnbeløp.getPeriode().getTom()));
+    }
+
 
     protected KalkulusRestTjeneste getKalkulusRestTjeneste() {
         return restTjeneste;

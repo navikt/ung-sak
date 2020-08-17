@@ -140,18 +140,6 @@ public class BeregningsresultatRepository {
         behandlingLåsRepository.oppdaterLåsVersjon(lås);
     }
 
-    public BeregningSats finnEksaktSats(BeregningSatsType satsType, LocalDate dato) {
-        TypedQuery<BeregningSats> query = entityManager.createQuery("from BeregningSats where satsType=:satsType" + //$NON-NLS-1$
-                " and periode.fomDato<=:dato" + //$NON-NLS-1$
-                " and periode.tomDato>=:dato", BeregningSats.class); //$NON-NLS-1$
-
-        query.setParameter("satsType", satsType); //$NON-NLS-1$
-        query.setParameter("dato", dato); //$NON-NLS-1$
-        query.setHint(QueryHints.HINT_READONLY, "true");//$NON-NLS-1$
-        query.getResultList();
-        return hentEksaktResultat(query);
-    }
-
     public long avkortingMultiplikatorG(@SuppressWarnings("unused") LocalDate dato) {
         return G_MULTIPLIKATOR;
     }

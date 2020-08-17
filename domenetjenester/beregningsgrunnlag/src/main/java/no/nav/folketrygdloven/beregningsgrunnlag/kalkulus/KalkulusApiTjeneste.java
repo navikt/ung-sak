@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -78,4 +79,11 @@ public interface KalkulusApiTjeneste {
 
     Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2);
 
+    /**
+     * Henter grunnbeløp (GVERDI)
+     *
+     * @param dato Aktuell dato for grunnbeløp
+     * @return Sats-objekt med verdi og periode for grunnbeløp
+     */
+    Grunnbeløp hentGrunnbeløp(LocalDate dato);
 }
