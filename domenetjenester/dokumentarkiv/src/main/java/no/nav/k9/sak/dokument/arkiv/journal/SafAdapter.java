@@ -4,32 +4,45 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
-import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
-import no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost;
+import no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class SafAdapter {
 
     private SafTjeneste safTjeneste;
+    private SafTjenesteObsolete safTjenesteObsolete;
+    private Boolean toggletNySafKlient;
 
     SafAdapter() {
         // for CDI proxy
     }
 
     @Inject
-    public SafAdapter(SafTjeneste safTjeneste) {
+    public SafAdapter(SafTjeneste safTjeneste,
+                      SafTjenesteObsolete safTjenesteObsolete,
+                      @KonfigVerdi(value = "SAF_NY_FELLESKLIENT", defaultVerdi = "false") Boolean toggletNySafKlient) {
         this.safTjeneste = safTjeneste;
+        this.safTjenesteObsolete = safTjenesteObsolete;
+        this.toggletNySafKlient = toggletNySafKlient;
     }
 
     public ArkivJournalPost hentInngåendeJournalpostHoveddokument(JournalpostId journalpostId) {
-        JournalpostQuery query = new JournalpostQuery(journalpostId.getVerdi());
-
-        Journalpost journalpost = safTjeneste.hentJournalpostInfo(query);
+        String kanal;
+        if (toggletNySafKlient) {
+            no.nav.vedtak.felles.integrasjon.saf.graphql.JournalpostQuery query = new no.nav.vedtak.felles.integrasjon.saf.graphql.JournalpostQuery(journalpostId.getVerdi());
+            var journalpost = safTjeneste.hentJournalpostInfo(query);
+            kanal = journalpost.getKanal();
+        } else {
+            no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery query = new no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery(journalpostId.getVerdi());
+            var journalpost = safTjenesteObsolete.hentJournalpostInfo(query);
+            kanal = journalpost.getKanal();
+        }
 
         ArkivJournalPost arkivJournalPost = ArkivJournalPost.Builder.ny()
-            .medKanalreferanse(journalpost.getKanal()) // Eneste feltet som er i bruk - kunne vært forenklet en del
+            .medKanalreferanse(kanal) // Eneste feltet som er i bruk - kunne vært forenklet en del
             .build();
 
         return arkivJournalPost;

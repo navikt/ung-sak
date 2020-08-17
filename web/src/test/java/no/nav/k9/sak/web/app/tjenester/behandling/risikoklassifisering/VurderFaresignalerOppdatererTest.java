@@ -49,7 +49,7 @@ public class VurderFaresignalerOppdatererTest {
     public void setup() {
         behandlingRepositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
         HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
-        historikkAdapter = new HistorikkTjenesteAdapter(behandlingRepositoryProvider.getHistorikkRepository(), historikkInnslagKonverter, null);
+        historikkAdapter = new HistorikkTjenesteAdapter(behandlingRepositoryProvider.getHistorikkRepository(), historikkInnslagKonverter, null, null, true);
         behandlingRepository = new BehandlingRepository(repositoryRule.getEntityManager());
         risikoklassifiseringRepository = new RisikoklassifiseringRepository(repositoryRule.getEntityManager());
         risikovurderingTjeneste = new RisikovurderingTjeneste(risikoklassifiseringRepository, behandlingRepository, null, null, null);

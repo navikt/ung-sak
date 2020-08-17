@@ -23,22 +23,25 @@ import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
-import no.nav.k9.sak.dokument.arkiv.saf.graphql.DokumentoversiktFagsakQuery;
-import no.nav.k9.sak.dokument.arkiv.saf.graphql.HentDokumentQuery;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Bruker;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.BrukerIdType;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Datotype;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentoversiktFagsak;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Dokumentvariant;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.RelevantDato;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Sak;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Sakstype;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.vedtak.felles.integrasjon.saf.graphql.DokumentoversiktFagsakQuery;
+import no.nav.vedtak.felles.integrasjon.saf.graphql.HentDokumentQuery;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.AvsenderMottaker;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.AvsenderMottakerIdType;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Bruker;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.BrukerIdType;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Datotype;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentoversiktFagsak;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Dokumentvariant;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.LogiskVedlegg;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.RelevantDato;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Sak;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Sakstype;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.VariantFormat;
 
 public class DokumentArkivTjenesteImplTest {
 
@@ -227,16 +230,20 @@ public class DokumentArkivTjenesteImplTest {
                 "behandlingstema",
                 new Sak("arkivsaksystem", "arkivsaksnummer", "fagsaksystem", "fagsakId", Sakstype.GENERELL_SAK),
                 new Bruker("id", BrukerIdType.AKTOERID),
+                new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn"),
                 "journalforendeEnhet",
                 dokumentInfoer,
+                LocalDateTime.now(),
                 List.of(
                     new RelevantDato(journalførtTid, Datotype.DATO_JOURNALFOERT),
-                    new RelevantDato(registrertTid, Datotype.DATO_REGISTRERT)));
+                    new RelevantDato(registrertTid, Datotype.DATO_REGISTRERT)),
+        "eksternReferanseId");
     }
 
     private DokumentInfo byggDokumentInfo(ArkivFilType arkivFilType, VariantFormat variantFormat, Brevkode brevkode) {
         return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(),
-            List.of(new Dokumentvariant(variantFormat, "filnavn", arkivFilType.name(), true)));
+            List.of(new Dokumentvariant(variantFormat, "filnavn", arkivFilType.name(), true)),
+            List.of(new LogiskVedlegg("id", "tittel")));
     }
 
     // Hjelpebyggere

@@ -12,8 +12,10 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjenesteObsolete;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDto;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 /** RequestScoped fordi HistorikkInnslagTekstBuilder inneholder state og denne deles på tvers av AksjonspunktOppdaterere. */
 @RequestScoped
@@ -22,6 +24,8 @@ public class HistorikkTjenesteAdapter {
     private HistorikkInnslagTekstBuilder builder;
     private HistorikkInnslagKonverter historikkinnslagKonverter;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
+    private DokumentArkivTjenesteObsolete dokumentArkivTjenesteObsolete;
+    private Boolean toggletNySafKlient;
 
     HistorikkTjenesteAdapter() {
         // for CDI proxy
@@ -29,17 +33,26 @@ public class HistorikkTjenesteAdapter {
 
     @Inject
     public HistorikkTjenesteAdapter(HistorikkRepository historikkRepository,
-                                        HistorikkInnslagKonverter historikkinnslagKonverter,
-                                        DokumentArkivTjeneste dokumentArkivTjeneste) {
+                                    HistorikkInnslagKonverter historikkinnslagKonverter,
+                                    DokumentArkivTjeneste dokumentArkivTjeneste,
+                                    DokumentArkivTjenesteObsolete dokumentArkivTjenesteObsolete,
+                                    @KonfigVerdi(value = "SAF_NY_FELLESKLIENT", defaultVerdi = "false") Boolean toggletNySafKlient) {
         this.historikkRepository = historikkRepository;
         this.historikkinnslagKonverter = historikkinnslagKonverter;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
+        this.dokumentArkivTjenesteObsolete = dokumentArkivTjenesteObsolete;
+        this.toggletNySafKlient = toggletNySafKlient;
         this.builder = new HistorikkInnslagTekstBuilder();
     }
 
     public List<HistorikkinnslagDto> hentAlleHistorikkInnslagForSak(Saksnummer saksnummer) {
         List<Historikkinnslag> historikkinnslagList = historikkRepository.hentHistorikkForSaksnummer(saksnummer);
-        List<ArkivJournalPost> journalPosterForSak = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer);
+        List<ArkivJournalPost> journalPosterForSak;
+        if (toggletNySafKlient) {
+            journalPosterForSak = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer);
+        } else {
+            journalPosterForSak = dokumentArkivTjenesteObsolete.hentAlleJournalposterForSak(saksnummer);
+        }
         return historikkinnslagList.stream()
             .map(historikkinnslag -> historikkinnslagKonverter.mapFra(historikkinnslag, journalPosterForSak))
             .sorted()

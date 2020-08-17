@@ -1,7 +1,7 @@
 package no.nav.k9.sak.dokument.arkiv.saf;
 
 
-import static no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste.SafTjenesteFeil.FEILFACTORY;
+import static no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete.SafTjenesteFeil.FEILFACTORY;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,7 +39,7 @@ import no.nav.vedtak.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
-public class SafTjeneste {
+public class SafTjenesteObsolete {
 
     private URI graphqlEndpoint;
     private URI hentDokumentEndpoint;
@@ -50,13 +50,13 @@ public class SafTjeneste {
 
     private ObjectReader objectReader = JsonUtils.getObjectMapper().readerFor(GraphQlResponse.class);
 
-    SafTjeneste() {
+    SafTjenesteObsolete() {
         // CDI
     }
 
     @Inject
-    public SafTjeneste(@KonfigVerdi(value = "saf.base.url", defaultVerdi = "https://localhost:8063/rest/api/saf") URI endpoint,
-                       OidcRestClient restKlient) {
+    public SafTjenesteObsolete(@KonfigVerdi(value = "saf.base.url", defaultVerdi = "https://localhost:8063/rest/api/saf") URI endpoint,
+                               OidcRestClient restKlient) {
         this.graphqlEndpoint = URI.create(endpoint.toString() + "/graphql");
         this.hentDokumentEndpoint = URI.create(endpoint.toString() + "/rest/hentdokument");
         this.restKlient = restKlient;

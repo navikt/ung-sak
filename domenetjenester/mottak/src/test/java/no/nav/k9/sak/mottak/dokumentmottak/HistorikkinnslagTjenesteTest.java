@@ -24,13 +24,13 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.k9.sak.dokument.arkiv.saf.SafTjeneste;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Dokumentvariant;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost;
-import no.nav.k9.sak.dokument.arkiv.saf.rest.model.VariantFormat;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Dokumentvariant;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
+import no.nav.vedtak.felles.integrasjon.saf.rest.model.VariantFormat;
 
 public class HistorikkinnslagTjenesteTest {
 
@@ -46,7 +46,7 @@ public class HistorikkinnslagTjenesteTest {
     public void before() {
         historikkRepository = mock(HistorikkRepository.class);
         journalTjeneste = mock(SafTjeneste.class);
-        historikkinnslagTjeneste = new HistorikkinnslagTjeneste(historikkRepository, journalTjeneste);
+        historikkinnslagTjeneste = new HistorikkinnslagTjeneste(historikkRepository, journalTjeneste, null, true);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class HistorikkinnslagTjenesteTest {
 
         var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, VariantFormat.ORIGINAL, VariantFormat.ARKIV);
         var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, VariantFormat.ORIGINAL);
-        var respons = new Journalpost(JOURNALPOST_ID.getVerdi(), "", "", "", "", "", "", null, null, null, List.of(hoveddokument, vedlegg), List.of());
+        var respons = new Journalpost(JOURNALPOST_ID.getVerdi(), null, null, null, null, null, null, null, null, null, null, List.of(hoveddokument, vedlegg), null, null, null);
 
         when(journalTjeneste.hentJournalpostInfo(any())).thenReturn(respons);
 
@@ -104,6 +104,6 @@ public class HistorikkinnslagTjenesteTest {
         var varianter = Arrays.stream(variantFormater)
             .map(variantFormat -> new Dokumentvariant(variantFormat, "asdf", VariantFormat.ORIGINAL.equals(variantFormat) ? ArkivFilType.XML.getKode() : ArkivFilType.PDF.getKode(), true))
             .collect(Collectors.toList());
-        return new DokumentInfo(dokumentId, "asdf", DokumentTypeId.LEGEERKLÆRING.getOffisiellKode(), varianter);
+        return new DokumentInfo(dokumentId, "asdf", DokumentTypeId.LEGEERKLÆRING.getOffisiellKode(), varianter, List.of());
     }
 }
