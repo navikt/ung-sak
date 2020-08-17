@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.medlemskap;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
+import no.nav.vedtak.konfig.Tid;
 
 @BehandlingStegRef(kode = "VURDERMV")
 @BehandlingTypeRef
@@ -73,12 +75,16 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
     private VilkårBuilder mapPerioderTilVilkårsPerioder(VilkårBuilder vilkårBuilder,
                                                         Map<LocalDate, VilkårData> vurderingsTilDataMap) {
-        LocalDate forrigedato = vilkårBuilder.getMaxDatoTilVurdering();
-        final var datoer = vurderingsTilDataMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        var datoer = vurderingsTilDataMap.keySet()
+            .stream()
+            .sorted(Comparator.reverseOrder())
+            .collect(Collectors.toList());
+
+        var forrigedato = utledForrigeDato(vilkårBuilder, datoer);
         for (LocalDate vurderingsdato : datoer) {
             final var vilkårData = vurderingsTilDataMap.get(vurderingsdato);
 
-            final var periodeBuilder = vilkårBuilder.hentBuilderFor(vurderingsdato, forrigedato)
+            var periodeBuilder = vilkårBuilder.hentBuilderFor(vurderingsdato, forrigedato)
                 .medUtfall(vilkårData.getUtfallType())
                 .medAvslagsårsak(vilkårData.getAvslagsårsak())
                 .medMerknadParametere(vilkårData.getMerknadParametere())
@@ -89,5 +95,18 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
             vilkårBuilder.leggTil(periodeBuilder);
         }
         return vilkårBuilder;
+    }
+
+    private LocalDate utledForrigeDato(VilkårBuilder vilkårBuilder, List<LocalDate> datoer) {
+        var forrigedato = vilkårBuilder.getMaxDatoTilVurdering();
+        if (datoer.isEmpty()) {
+            return forrigedato;
+        }
+        var størstedato = datoer.get(0);
+
+        if (størstedato != null && forrigedato.isBefore(størstedato)) {
+            return Tid.TIDENES_ENDE;
+        }
+        return forrigedato;
     }
 }
