@@ -35,23 +35,23 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     @Override
     public OppdateringResultat oppdater(AvklarÅrskvantumDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
+        Long behandlingId = param.getBehandlingId();
 
         if (fortsettBehandling) {
-            Long behandlingId = param.getBehandlingId();
-
-            opprettHistorikkInnslag(dto, behandlingId);
-
             //Bekreft uttaksplan og fortsett behandling
-
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK);
             årskvantumTjeneste.bekreftUttaksplan(behandlingId);
+        } else {
+            // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
         }
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId) {
+    private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType) {
         HistorikkInnslagTekstBuilder builder = historikkTjenesteAdapter.tekstBuilder();
         builder.medBegrunnelse(dto.getBegrunnelse());
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, HistorikkinnslagType.OVST_UTTAK);
+        historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, historikkinnslagType);
     }
 }
