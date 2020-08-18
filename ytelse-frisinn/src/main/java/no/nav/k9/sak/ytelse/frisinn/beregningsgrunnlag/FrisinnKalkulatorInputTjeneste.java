@@ -7,7 +7,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.GrunnbeløpTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
@@ -28,9 +27,8 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     @Inject
     public FrisinnKalkulatorInputTjeneste(InntektArbeidYtelseTjeneste iayTjeneste,
                                           @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                          GrunnbeløpTjeneste grunnbeløpTjeneste,
                                           @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
-        super(iayTjeneste, opptjeningForBeregningTjeneste, grunnbeløpTjeneste);
+        super(iayTjeneste, opptjeningForBeregningTjeneste);
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 

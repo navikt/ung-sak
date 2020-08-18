@@ -18,6 +18,7 @@ import javax.enterprise.inject.Alternative;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
@@ -141,6 +142,11 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     @Override
     public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2) {
         return false;
+    }
+
+    @Override
+    public Grunnbeløp hentGrunnbeløp(LocalDate dato) {
+        return null;
     }
 
 
