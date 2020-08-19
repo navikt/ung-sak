@@ -110,7 +110,6 @@ class MapSøknadUttak {
         var mappedPerioder = input.perioder.entrySet().stream()
             .map(entry -> {
                 Periode k = entry.getKey();
-                var v = entry.getValue();
                 // TODO prosent, normal uke:
                 var skalJobbeProsent = BigDecimal.valueOf(100L);
                 var jobberNormaltPerUke = Duration.parse("PT37H30M");
@@ -128,7 +127,6 @@ class MapSøknadUttak {
         var mappedPerioder = input.perioder.entrySet().stream()
             .map(entry -> {
                 Periode k = entry.getKey();
-                var v = entry.getValue();
              // TODO prosent, normal uke:
                 var skalJobbeProsent = BigDecimal.valueOf(100L);
                 var jobberNormaltPerUke = Duration.parse("PT37H30M");

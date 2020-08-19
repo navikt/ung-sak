@@ -262,8 +262,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
         var saksnummer = behandling.getFagsak().getSaksnummer();
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, oppgittOpptjening);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
 
         try {
             abakusTjeneste.lagreOppgittOpptjening(request);
@@ -280,8 +281,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
         var saksnummer = behandling.getFagsak().getSaksnummer();
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, oppgittOpptjening);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
 
         try {
             abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
@@ -321,7 +323,8 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             return;
         }
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        final InntektsmeldingerMottattRequest inntektsmeldingerMottattRequest = new InntektsmeldingerMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, inntektsmeldingerDto);
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
+        var inntektsmeldingerMottattRequest = new InntektsmeldingerMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, inntektsmeldingerDto);
         try {
             abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
         } catch (IOException e) {
@@ -546,7 +549,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         InntektArbeidYtelseGrunnlagDto grunnlagDto;
         try {
             var tilDto = new IAYTilDtoMapper(behandling.getAktørId(), gr.getEksternReferanse(), behandling.getUuid());
-            grunnlagDto = tilDto.mapTilDto(gr);
+            grunnlagDto = tilDto.mapTilDto(behandling.getFagsakYtelseType(), gr);
         } catch (RuntimeException t) {
             log.warn("Kunne ikke transformere til Dto: grunnlag=" + gr.getEksternReferanse() + ", behandling=" + behandling.getId(), t);
             throw t;

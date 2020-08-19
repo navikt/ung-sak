@@ -39,6 +39,7 @@ public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOpp
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         for (FastsettBeregningsgrunnlagATFLDto dto : dtoer.getGrunnlag()) {
             HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            @SuppressWarnings("unused")
             var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
             // TODO FIKS HISTORIKK
 
