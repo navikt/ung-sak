@@ -36,8 +36,6 @@ import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
 import org.slf4j.MDC;
 
-import no.nav.vedtak.sikkerhetsfilter.SecurityFilter;
-
 abstract class AbstractJettyServer {
 
     /** Legges først slik at alltid resetter context før prosesserer nye requests. Kjøres først så ikke risikerer andre har satt Request#setHandled(true). */
@@ -92,15 +90,8 @@ abstract class AbstractJettyServer {
         }
         System.setProperty("org.apache.geronimo.jaspic.configurationFile", jaspiConf.getAbsolutePath());
 
-        konfigurerSwaggerHash();
     }
 
-    /**
-     * @see SecurityFilter#getSwaggerHash()
-     */
-    protected void konfigurerSwaggerHash() {
-        System.setProperty(SecurityFilter.SWAGGER_HASH_KEY, appKonfigurasjon.getSwaggerHash());
-    }
 
     protected abstract void konfigurerJndi() throws Exception; // NOSONAR
 
@@ -141,7 +132,7 @@ abstract class AbstractJettyServer {
         webAppContext.setBaseResource(createResourceCollection());
         webAppContext.setContextPath(appKonfigurasjon.getContextPath());
         webAppContext.setConfigurations(CONFIGURATIONS);
-        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*resteasy-.*.jar$|^.*felles-.*.jar$");
+        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*resteasy-.*.jar$|^.*felles-sikkerhet-.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
         return webAppContext;
 

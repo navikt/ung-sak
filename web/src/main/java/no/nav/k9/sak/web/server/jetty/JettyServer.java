@@ -82,8 +82,6 @@ public class JettyServer extends AbstractJettyServer {
         if (System.getenv("OIDC_OPENAM_PASSWORD") != null) {
             System.setProperty("OpenIdConnect.password", System.getenv("OIDC_OPENAM_PASSWORD"));
         }
-        // FIXME K9 Fjern nå behandle sak v2 er fjernet ..
-        System.setProperty("Sak_v1.url", "https://vtp:8063/soap/sak");
     }
 
     @Override

@@ -31,7 +31,6 @@ import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningerDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -83,7 +82,6 @@ public class OpptjeningRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(PATH)
     @Operation(description = "Hent informasjon om opptjening", tags = "opptjening", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
@@ -96,7 +94,6 @@ public class OpptjeningRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(INNTEKT_PATH)
     @Operation(description = "Hent informasjon om inntekt", tags = "opptjening", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer inntekter, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningDto.class)))
@@ -111,7 +108,6 @@ public class OpptjeningRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(PATH_V2)
     @Operation(description = "Hent informasjon om opptjening", tags = "opptjening", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Opptjening, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OpptjeningerDto.class)))

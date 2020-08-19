@@ -43,7 +43,6 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
@@ -69,7 +68,6 @@ public class FagsakRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(STATUS_PATH)
     @Operation(description = "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)", summary = "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.", tags = "fagsak", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Status", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class))),
@@ -88,7 +86,6 @@ public class FagsakRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Produces(MediaType.APPLICATION_JSON)
     @Path(PATH)
     @Operation(description = "Hent fagsak for saksnummer", tags = "fagsak", responses = {
