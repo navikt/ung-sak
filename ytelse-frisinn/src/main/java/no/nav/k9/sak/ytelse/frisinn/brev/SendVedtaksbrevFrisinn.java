@@ -22,8 +22,6 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
 
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrev.class);
 
-    private BehandlingVedtakRepository behandlingVedtakRepository;
-
     private VedtakVarselRepository vedtakvarselRepository;
 
     public SendVedtaksbrevFrisinn() {
@@ -36,7 +34,6 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
                            VedtakVarselRepository vedtakvarselRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         super(behandlingRepository, behandlingVedtakRepository, vedtakvarselRepository, dokumentBestillerApplikasjonTjeneste);
-        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.vedtakvarselRepository = vedtakvarselRepository;
     }
 

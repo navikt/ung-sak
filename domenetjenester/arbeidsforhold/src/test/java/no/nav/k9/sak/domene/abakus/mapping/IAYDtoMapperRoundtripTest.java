@@ -86,9 +86,9 @@ public class IAYDtoMapperRoundtripTest {
         InntektArbeidYtelseGrunnlagDto dto = lagIAYGrunnlag();
 
         // Act
-        InntektArbeidYtelseGrunnlag fpsakGrunnlag = fraDtoMapper.mapTilGrunnlagInklusivRegisterdata(dto, true);
+        InntektArbeidYtelseGrunnlag iayGrunnlag = fraDtoMapper.mapTilGrunnlagInklusivRegisterdata(dto, true);
         IAYTilDtoMapper dtoMapper = new IAYTilDtoMapper(aktørId, uuid, uuid);
-        InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(fpsakGrunnlag, true);
+        InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(ytelseType, iayGrunnlag, true);
 
         // Assert
         assertThat(dtoIgjen.getGrunnlagTidspunkt()).isEqualTo(dto.getGrunnlagTidspunkt());
@@ -112,7 +112,7 @@ public class IAYDtoMapperRoundtripTest {
     }
 
     private InntektArbeidYtelseGrunnlagDto lagIAYGrunnlag() {
-        InntektArbeidYtelseGrunnlagDto grunnlag = new InntektArbeidYtelseGrunnlagDto(aktørIdent, offTidspunkt, uuid, uuid);
+        InntektArbeidYtelseGrunnlagDto grunnlag = new InntektArbeidYtelseGrunnlagDto(aktørIdent, offTidspunkt, uuid, uuid, ytelseType);
 
         grunnlag.medRegister(
             new InntektArbeidYtelseAggregatRegisterDto(tidspunkt, uuid)

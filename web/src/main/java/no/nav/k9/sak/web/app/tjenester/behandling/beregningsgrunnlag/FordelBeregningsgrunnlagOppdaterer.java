@@ -32,6 +32,7 @@ public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdatere
     public OppdateringResultat oppdater(FordelBeregningsgrunnlagDtoer dtoer, AksjonspunktOppdaterParameter param) {
         for (FordelBeregningsgrunnlagDto dto : dtoer.getGrunnlag()) {
             HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            @SuppressWarnings("unused")
             var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
         }
         return OppdateringResultat.utenOveropp();

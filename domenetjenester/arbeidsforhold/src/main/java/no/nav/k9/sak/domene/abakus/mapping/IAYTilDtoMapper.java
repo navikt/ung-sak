@@ -6,18 +6,20 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatRegisterDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatRegisterDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 
 public class IAYTilDtoMapper {
 
@@ -32,20 +34,24 @@ public class IAYTilDtoMapper {
         this.grunnlagReferanse = grunnlagReferanse;
         this.behandlingReferanse = behandlingReferanse;
     }
-
-    public InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag) {
-        return mapTilDto(grunnlag, true);
+    
+    public InntektArbeidYtelseGrunnlagDto mapTilDto(FagsakYtelseType ytelseType, InntektArbeidYtelseGrunnlag grunnlag) {
+        return mapTilDto(YtelseType.fraKode(ytelseType.getKode()), grunnlag, true);
     }
 
-    public InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag, boolean validerArbeidsforholdId) {
+    public InntektArbeidYtelseGrunnlagDto mapTilDto(YtelseType ytelseType, InntektArbeidYtelseGrunnlag grunnlag, boolean validerArbeidsforholdId) {
         if (grunnlag == null) {
             return null;
         }
 
         var grunnlagTidspunkt = grunnlag.getOpprettetTidspunkt().atZone(ZoneId.systemDefault()).toOffsetDateTime();
 
-        var dto = new InntektArbeidYtelseGrunnlagDto(new AktørIdPersonident(aktørId.getId()),
-            grunnlagTidspunkt, grunnlagReferanse, behandlingReferanse);
+        var dto = new InntektArbeidYtelseGrunnlagDto(
+            new AktørIdPersonident(aktørId.getId()),
+            grunnlagTidspunkt,
+            grunnlagReferanse,
+            behandlingReferanse,
+            ytelseType);
 
         // REGISTEROPPLYSNINGER
         grunnlag.getRegisterVersjon().ifPresent(a -> mapRegisterOpplysninger(getArbeidforholdInfo(grunnlag), a, dto));
@@ -115,4 +121,5 @@ public class IAYTilDtoMapper {
 
         dto.medOverstyrt(overstyrt);
     }
+
 }

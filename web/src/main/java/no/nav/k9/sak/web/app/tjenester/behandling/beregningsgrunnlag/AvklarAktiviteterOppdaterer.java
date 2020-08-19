@@ -32,6 +32,7 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
     public OppdateringResultat oppdater(AvklarteAktiviteterDtoer dtoer, AksjonspunktOppdaterParameter param) {
         for (AvklarteAktiviteterDto dto : dtoer.getGrunnlag()) {
             HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
+            @SuppressWarnings("unused")
             var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
             // TODO Ta i bruk respons for historikk når dette er klart på kalkulus
         }

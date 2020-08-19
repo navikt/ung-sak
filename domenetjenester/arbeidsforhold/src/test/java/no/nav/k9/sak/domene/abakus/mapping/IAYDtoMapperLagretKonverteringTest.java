@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -118,7 +119,7 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         var mapper = new IAYTilDtoMapper(aktørId, grunnlag.getEksternReferanse(), behandlingUuid);
 
-        var dto = mapper.mapTilDto(grunnlag, true);
+        var dto = mapper.mapTilDto(YtelseType.OMSORGSPENGER, grunnlag, true);
 
         IayGrunnlagJsonMapper.getMapper().writerWithDefaultPrettyPrinter().writeValue(System.out, dto);
 
