@@ -32,7 +32,6 @@ import no.nav.k9.sak.kontrakt.medlem.MedlemV2Dto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.medlem.MedlemDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -103,7 +102,6 @@ public class PersonRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(PERSONOPPLYSNINGER_PATH)
     @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))
@@ -124,7 +122,6 @@ public class PersonRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(MEDLEMSKAP_V2_PATH)
     @Operation(description = "Hent informasjon om medlemskap i Folketrygden for søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))

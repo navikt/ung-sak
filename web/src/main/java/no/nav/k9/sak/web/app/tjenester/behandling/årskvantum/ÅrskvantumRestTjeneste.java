@@ -29,7 +29,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -61,11 +60,10 @@ public class ÅrskvantumRestTjeneste {
      * Hent oppgitt uttak for angitt behandling.
      */
     @GET
-    @DoNotCache
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(FORBRUKTEDAGER_PATH)
     @Operation(description = "Hent forbrukte dager", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -77,11 +75,10 @@ public class ÅrskvantumRestTjeneste {
      * Hent den totale uttaksplanen for en sak.
      */
     @GET
-    @DoNotCache
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(FULL_UTTAKSPLAN_PATH)
     @Operation(description = "Hent full uttaksplan", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -96,7 +93,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(INPUT_PATH)
     @Operation(description = "Hent input til beregning av årskvantum", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "input til beregning av årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            @ApiResponse(responseCode = "200", description = "input til beregning av årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -114,7 +111,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(UTBETALINGSGRUNNLAG)
     @Operation(description = "Hent utbetalingsgrunnlag fra årskvantum", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")

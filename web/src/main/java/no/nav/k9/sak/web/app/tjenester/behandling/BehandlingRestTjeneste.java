@@ -69,7 +69,6 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.jpa.TomtResultatException;
-import no.nav.vedtak.filter.DoNotCache;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -185,7 +184,6 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(BEHANDLINGER_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
@@ -204,7 +202,6 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
-    @DoNotCache
     @Path(BEHANDLING_PATH)
     @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
@@ -358,7 +355,7 @@ public class BehandlingRestTjeneste {
             // ved førstegangssønad opprettes egen task for vurdere denne,
             // sender derfor ikke viderer til prosesser behandling (i motsetning til de andre).
             // må også oppfriske hele sakskomplekset, så sender til fagsak poll url
-            //return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
+            // return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + kode);
         }
