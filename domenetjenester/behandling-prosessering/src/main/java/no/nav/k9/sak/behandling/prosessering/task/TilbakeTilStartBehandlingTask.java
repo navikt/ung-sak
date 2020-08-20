@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -7,15 +9,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -36,6 +41,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
     private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     public static final String TASKNAME = "behandlingskontroll.tilbakeTilStart";
+    public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
     private BehandlingRepository behandlingRepository;
     private HistorikkRepository historikkRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -75,9 +81,15 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var forventetPassertSteg = BehandlingStegType.START_STEG;
 
         if (!behandling.erSaksbehandlingAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), forventetPassertSteg)) {
-            log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);
+            log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);            
             Long fagsakId = prosessTaskData.getFagsakId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
+            
+            if (Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_MANUELT_OPPRETTET))) {
+                BehandlingÅrsak.builder(BehandlingÅrsakType.RE_FEIL_PROSESSUELL).medManueltOpprettet(true).buildFor(behandling);
+                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+            }
+            
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
             resetGrunnlag(behandling);
             hoppTilbake(behandling, targetSteg, kontekst);
