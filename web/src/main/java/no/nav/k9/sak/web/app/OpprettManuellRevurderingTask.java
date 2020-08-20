@@ -99,8 +99,8 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     }
     
     private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
-        final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
-        behandlinger.stream()
+        final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
+                .stream()
                 .filter(Behandling::erYtelseBehandling)
                 .filter(b -> !b.erStatusFerdigbehandlet())
                 .collect(Collectors.toList());
