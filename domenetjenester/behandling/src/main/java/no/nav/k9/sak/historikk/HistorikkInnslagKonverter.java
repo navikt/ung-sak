@@ -42,6 +42,7 @@ public class HistorikkInnslagKonverter {
     public HistorikkinnslagDto mapFra(Historikkinnslag historikkinnslag, List<ArkivJournalPost> journalPosterForSak) {
         HistorikkinnslagDto dto = new HistorikkinnslagDto();
         dto.setBehandlingId(historikkinnslag.getBehandlingId());
+        dto.setUuid(historikkinnslag.getUuid());
         List<HistorikkinnslagDelDto> historikkinnslagDeler = mapFra(historikkinnslag.getHistorikkinnslagDeler());
         dto.setHistorikkinnslagDeler(historikkinnslagDeler);
         List<HistorikkInnslagDokumentLinkDto> dokumentLinks = mapLenker(historikkinnslag.getDokumentLinker(), journalPosterForSak);
