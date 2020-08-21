@@ -15,14 +15,14 @@ public class ValiderInntektsmelding {
     private static final int CUTOFF_YEAR = 2020;
 
     public BigDecimal validerRefusjonEndringMaks(String path, BigDecimal value, LocalDate endringsdato) {
-        if (MAX.compareTo(value) <= 0) {
+        if (value != null && MAX.compareTo(value) <= 0) {
             throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato)).toException();
         }
         return value;
     }
 
     public BigDecimal validerRefusjonMaks(String path, BigDecimal value) {
-        if (MAX.compareTo(value) <= 0) {
+        if (value != null && MAX.compareTo(value) <= 0) {
             throw MottattInntektsmeldingFeil.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX)).toException();
         }
         return value;
