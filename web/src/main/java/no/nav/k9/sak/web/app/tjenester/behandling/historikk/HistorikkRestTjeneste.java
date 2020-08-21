@@ -4,7 +4,6 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -61,8 +60,9 @@ public class HistorikkRestTjeneste {
                                     @Context Request req) {
 
         CacheControl cc = new CacheControl();
-        cc.setMaxAge((int) TimeUnit.HOURS.toSeconds(1));
-
+        cc.setMustRevalidate(true);
+        cc.setProxyRevalidate(true);
+        
         // FIXME XSS valider requestURL eller bruk relativ URL
         String requestURL = getRequestPath(request);
         String url = requestURL + "/dokument/hent-dokument";
