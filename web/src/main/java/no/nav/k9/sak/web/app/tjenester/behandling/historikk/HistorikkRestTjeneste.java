@@ -60,6 +60,7 @@ public class HistorikkRestTjeneste {
                                     @Context Request req) {
 
         CacheControl cc = new CacheControl();
+        cc.setMaxAge(0);
         cc.setMustRevalidate(true);
         cc.setProxyRevalidate(true);
         
