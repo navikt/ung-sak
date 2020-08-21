@@ -58,6 +58,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestT
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
@@ -296,8 +297,9 @@ public class BehandlingDtoTjeneste {
         leggTilYtelsespesifikkResourceLinks(behandling, dto);
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
+        dto.leggTil(get(HistorikkRestTjeneste.PATH, "historikk", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
+        
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));
-        dto.leggTil(getFraMap(VilkårRestTjeneste.V2_PATH, "vilkar", uuidQueryParams));
         dto.leggTil(getFraMap(VilkårRestTjeneste.V3_PATH, "vilkar-v3", uuidQueryParams));
 
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidQueryParams));
@@ -306,7 +308,6 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidQueryParams));
 
-        dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH, "opptjening", uuidQueryParams));
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
 

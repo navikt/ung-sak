@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.behandling.historikk;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +15,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
@@ -31,6 +31,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 @DynamicInsert
 @DynamicUpdate
 public class Historikkinnslag extends BaseEntitet {
+
+    public static final Comparator<? super Historikkinnslag> COMP_REKKEFØLGE = Comparator.comparing(Historikkinnslag::getOpprettetTidspunkt, Comparator.nullsLast(Comparator.naturalOrder()));
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_HISTORIKKINNSLAG")
@@ -148,17 +150,6 @@ public class Historikkinnslag extends BaseEntitet {
 
     public LocalDateTime getHistorikkTid() {
         return historikkTid;
-    }
-
-    /**
-     * @deprecated - fjernes når alle historikkinnslag har UUID og denne er satt NOT NULL i db.  Inntil da sikrer denne lagring av UUID
-     */
-    @Deprecated
-    @PreUpdate
-    protected void onUpdateMigrerUuid() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
     }
 
     public static class Builder {

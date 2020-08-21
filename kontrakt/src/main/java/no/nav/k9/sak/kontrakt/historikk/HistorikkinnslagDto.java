@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -45,6 +46,9 @@ public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
     @JsonProperty(value = "type")
     private HistorikkinnslagType type;
 
+    @JsonProperty(value = "uuid")
+    private UUID uuid;
+
     public HistorikkinnslagDto() {
         //
     }
@@ -67,7 +71,8 @@ public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
             return false;
         }
         HistorikkinnslagDto that = (HistorikkinnslagDto) o;
-        return Objects.equals(getBehandlingId(), that.getBehandlingId()) &&
+        return Objects.equals(uuid, that.uuid) &&
+            Objects.equals(getBehandlingId(), that.getBehandlingId()) &&
             Objects.equals(getType(), that.getType()) &&
             Objects.equals(getAktoer(), that.getAktoer()) &&
             Objects.equals(getOpprettetAv(), that.getOpprettetAv()) &&
@@ -105,7 +110,7 @@ public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getBehandlingId(), getType(), getAktoer(), getOpprettetAv(), getOpprettetTidspunkt(), getDokumentLinks());
+        return Objects.hash(getUuid(), getBehandlingId(), getType(), getAktoer(), getOpprettetAv(), getOpprettetTidspunkt(), getDokumentLinks());
     }
 
     public void setAktoer(HistorikkAktør aktoer) {
@@ -134,5 +139,13 @@ public class HistorikkinnslagDto implements Comparable<HistorikkinnslagDto> {
 
     public void setType(HistorikkinnslagType type) {
         this.type = type;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+    
+    public UUID getUuid() {
+        return uuid;
     }
 }

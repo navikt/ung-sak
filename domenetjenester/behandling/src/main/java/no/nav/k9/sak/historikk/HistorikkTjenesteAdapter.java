@@ -1,5 +1,7 @@
 package no.nav.k9.sak.historikk;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +47,8 @@ public class HistorikkTjenesteAdapter {
         this.builder = new HistorikkInnslagTekstBuilder();
     }
 
-    public List<HistorikkinnslagDto> hentAlleHistorikkInnslagForSak(Saksnummer saksnummer) {
-        List<Historikkinnslag> historikkinnslagList = historikkRepository.hentHistorikkForSaksnummer(saksnummer);
+    public List<HistorikkinnslagDto> mapTilDto(List<Historikkinnslag> historikkinnslagList, Saksnummer saksnummer) {
+        
         List<ArkivJournalPost> journalPosterForSak;
         if (toggletNySafKlient) {
             journalPosterForSak = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer);
@@ -57,6 +59,12 @@ public class HistorikkTjenesteAdapter {
             .map(historikkinnslag -> historikkinnslagKonverter.mapFra(historikkinnslag, journalPosterForSak))
             .sorted()
             .collect(Collectors.toList());
+    }
+    
+    public List<Historikkinnslag> finnHistorikkInnslag(Saksnummer saksnummer){
+        var liste = new ArrayList<>(historikkRepository.hentHistorikkForSaksnummer(saksnummer));
+        Collections.sort(liste, Historikkinnslag.COMP_REKKEFØLGE);
+        return liste;
     }
 
     /**
