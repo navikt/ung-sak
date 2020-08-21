@@ -166,6 +166,10 @@ public class BehandlingProsessEventDto {
     public LocalDate getBehandlingstidFrist() {
         return behandlingstidFrist;
     }
+    
+    public String getResultatType() {
+        return resultatType;
+    }
 
     public static abstract class Builder<T extends Builder<T>> {
         private UUID eksternId;
