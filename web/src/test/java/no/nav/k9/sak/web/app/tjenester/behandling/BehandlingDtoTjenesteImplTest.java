@@ -90,6 +90,9 @@ public class BehandlingDtoTjenesteImplTest {
         if (dtoLink.getRel().equals("simuleringResultat")) {
             return true;
         }
+        if (dtoLink.getRel().equals("brev-maler")) {
+            return true;
+        }
         for (ResourceLink routeLink : existingRoutes) {
             if (dtoLink.getHref().getPath().equals(routeLink.getHref().getPath()) && dtoLink.getType().equals(routeLink.getType())) {
                 linkEksists = true;
