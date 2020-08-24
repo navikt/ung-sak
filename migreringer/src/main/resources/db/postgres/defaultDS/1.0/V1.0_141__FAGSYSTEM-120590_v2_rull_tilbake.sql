@@ -13,4 +13,4 @@ where f.saksnummer in ('8F6YW', '7LTEo')
                 and bst.aktiv = true);
 
 -- Behandlingskontroll behandler dette som grensetilfelle hvor ikke aksjonspunkt blir resatt. Må derfor gjøres manuelt i tillegg
-update aksjonspunkt set aksjonspunkt_status='OPPR' where aksjonspunkt_status='UTFO' AND behandling_id IN (1136708, 1169350);
+update aksjonspunkt set aksjonspunkt_status='OPPR' where aksjonspunkt_status='UTFO' and aksjonspunkt_def = '8004' AND behandling_id IN (1136708, 1169350);
