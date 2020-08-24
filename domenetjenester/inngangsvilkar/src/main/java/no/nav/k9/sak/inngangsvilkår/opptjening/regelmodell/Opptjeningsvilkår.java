@@ -36,6 +36,7 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
 
     /** Konstant for Aareg arbeid. */
     public static final String ARBEID = "ARBEID";
+    public static final String MELLOM_ARBEID = "MELLOM_ARBEID";
 
     public static final String UTLAND = "UTENLANDSK_ARBEIDSFORHOLD";
 
@@ -62,6 +63,7 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
 
     /** Evaluation Property: Bekreftet opptjening uttrykt som en Period (ISO 8601). eks. P4M22D = 4 måneder + 22 dager. */
     public static final String EVAL_RESULT_BEKREFTET_OPPTJENING = "bekreftetOpptjening";
+    public static final String EVAL_RESULT_AKSEPTERT_MELLOMLIGGENDE_PERIODE = "mellomLiggendePerioder";
 
     @Override
     public Evaluation evaluer(Opptjeningsgrunnlag grunnlag, Object output) {
@@ -85,6 +87,6 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
 
         return new SequenceSpecification<>("FP_VK 23.1",
             "Sammenstill Arbeid aktivitet med Inntekt",
-            List.of(new SjekkInntektSamsvarerMedArbeidAktivitet(), new BeregnOpptjening(), sjekkOpptjeningsvilkåret));
+            List.of(new SjekkInntektSamsvarerMedArbeidAktivitet(), new SjekkMellomliggendePerioderMellomArbeidsforhold(), new BeregnOpptjening(), sjekkOpptjeningsvilkåret));
     }
 }
