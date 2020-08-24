@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -99,6 +102,7 @@ public class RegisterdataInnhenter {
     private AbakusTjeneste abakusTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
+    private Instance<InformasjonselementerUtleder> utledInformasjonselementer;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -110,7 +114,8 @@ public class RegisterdataInnhenter {
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                 AbakusTjeneste abakusTjeneste) {
+                                 AbakusTjeneste abakusTjeneste,
+                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
@@ -119,6 +124,7 @@ public class RegisterdataInnhenter {
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
+        this.utledInformasjonselementer = utledInformasjonselementer;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -137,11 +143,11 @@ public class RegisterdataInnhenter {
 
         // Innhent øvrige data fra TPS
         var personInformasjonBuilder = byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
-        
+
         // lagre alt
         behandlingLåsRepository.taLås(behandling.getId());
         personopplysningRepository.lagre(behandling.getId(), personInformasjonBuilder);
-        
+
         return søkerInfo;
     }
 
@@ -446,6 +452,7 @@ public class RegisterdataInnhenter {
     }
 
     private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, @SuppressWarnings("unused") FagsakYtelseType fagsakYtelseType) {
-        return FILTER.get(behandlingType);
+        return FagsakYtelseTypeRef.Lookup.find(utledInformasjonselementer, fagsakYtelseType).map(utleder -> utleder.utled(behandlingType))
+            .orElse(FILTER.get(behandlingType));
     }
 }
