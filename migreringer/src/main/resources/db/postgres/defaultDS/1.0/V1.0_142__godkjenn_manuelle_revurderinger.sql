@@ -14,3 +14,8 @@ FROM AKSJONSPUNKT a INNER JOIN BEHANDLING b ON (
   WHERE a.aksjonspunkt_def in ('5028', '5056')
     AND a.aksjonspunkt_status = 'OPPR'
     AND f.ytelse_type = 'OMP';
+    
+UPDATE prosess_task
+SET status = 'KJOERT'
+WHERE status = 'FEILET'
+  AND task_type = 'forvaltning.opprettManuellRevurdering';
