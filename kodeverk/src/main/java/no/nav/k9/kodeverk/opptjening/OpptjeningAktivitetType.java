@@ -103,6 +103,8 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         Set.of()),
     UTDANNINGSPERMISJON("UTDANNINGSPERMISJON", "Utdanningspermisjon",
             Set.of(), Set.of(), Set.of()),
+    MELLOM_ARBEID("MELLOM_ARBEID", "Mellom arbeidsforhold",
+            Set.of(), Set.of(), Set.of()),
     UDEFINERT("-", "UDEFINERT",
             Set.of(),
             Set.of(),

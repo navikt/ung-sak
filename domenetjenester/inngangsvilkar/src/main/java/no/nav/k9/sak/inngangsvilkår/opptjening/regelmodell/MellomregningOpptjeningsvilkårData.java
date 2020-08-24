@@ -47,6 +47,8 @@ public class MellomregningOpptjeningsvilkårData {
         this.grunnlag = grunnlag;
         LocalDateInterval maxIntervall = grunnlag.getOpptjeningPeriode();
 
+        mellomregning.put(new Aktivitet(Opptjeningsvilkår.MELLOM_ARBEID), new MellomregningAktivitetData(new Aktivitet(Opptjeningsvilkår.MELLOM_ARBEID)));
+
         // grupper aktivitet perioder etter aktivitet og avkort i forhold til angitt startDato/skjæringstidspunkt
         splitAktiviter(
             a -> a.getVurderingsStatus() == null)
