@@ -12,4 +12,5 @@ FROM AKSJONSPUNKT a INNER JOIN BEHANDLING b ON (
     f.id = b.fagsak_id
   )
   WHERE a.aksjonspunkt_def in ('5028', '5056')
-    AND aksjonspunkt_status = 'OPPR';
+    AND a.aksjonspunkt_status = 'OPPR'
+    AND f.ytelse_type = 'OMP';
