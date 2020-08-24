@@ -195,6 +195,7 @@ public class BehandlingDtoTjeneste {
         }
 
         // Brev
+        dto.leggTil(getFraMap("/k9/formidling/api/brev/maler", "brev-maler", uuidQueryParams));
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
     }
 
