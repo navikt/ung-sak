@@ -29,7 +29,7 @@ public class FortsettBehandlingTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "behandlingskontroll.fortsettBehandling";
     public static final String MANUELL_FORTSETTELSE = "manuellFortsettelse";
-    public static final String UTFORT_AUTOPUNKT = "autopunktUtfort";
+    public static final String AKSJONSPUNKT_STATUS_TIL_UTFORT = "aksjonspunktStatusTilUtfort";
     public static final String GJENOPPTA_STEG = "gjenopptaSteg";
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
@@ -62,7 +62,7 @@ public class FortsettBehandlingTask extends UnderBehandlingProsessTask {
                 behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
             }
         } else {
-            String utført = data.getPropertyValue(FortsettBehandlingTask.UTFORT_AUTOPUNKT);
+            String utført = data.getPropertyValue(FortsettBehandlingTask.AKSJONSPUNKT_STATUS_TIL_UTFORT);
             if (utført != null) {
                 AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.fraKode(utført);
                 behandlingskontrollTjeneste.settAutopunktTilUtført(behandling, aksjonspunkt, kontekst);
