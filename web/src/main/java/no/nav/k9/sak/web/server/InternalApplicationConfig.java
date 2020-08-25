@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app;
+package no.nav.k9.sak.web.server;
 
 
 import java.util.Collections;
@@ -30,7 +30,7 @@ public class InternalApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
         classes.add(PrometheusRestService.class);
-
+        classes.add(HealthCheckRestService.class);
         return Collections.unmodifiableSet(classes);
     }
 
