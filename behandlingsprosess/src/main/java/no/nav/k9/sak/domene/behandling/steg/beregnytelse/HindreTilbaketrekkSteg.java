@@ -14,23 +14,17 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.ytelse.beregning.FinnEndringsdatoBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BRAndelSammenligning;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BeregningsresultatTidslinjetjeneste;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.HindreTilbaketrekkNårAlleredeUtbetalt;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import java.time.LocalDate;
-import java.util.Optional;
 
 @BehandlingStegRef(kode = "BERYT_OPPDRAG")
 @BehandlingTypeRef("BT-004")
 @FagsakYtelseTypeRef
-
 @ApplicationScoped
 public class HindreTilbaketrekkSteg implements BehandlingSteg {
 
@@ -38,7 +32,6 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private HindreTilbaketrekkNårAlleredeUtbetalt hindreTilbaketrekkNårAlleredeUtbetalt;
     private BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste;
-    private Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjenesteInstances;
 
     HindreTilbaketrekkSteg() {
         // for CDI proxy
@@ -46,14 +39,12 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
 
     @Inject
     public HindreTilbaketrekkSteg(BehandlingRepositoryProvider repositoryProvider,
-                                  @Any Instance<FinnEndringsdatoBeregningsresultatTjeneste> finnEndringsdatoBeregningsresultatTjenesteInstances,
                                   HindreTilbaketrekkNårAlleredeUtbetalt hindreTilbaketrekkNårAlleredeUtbetalt,
                                   BeregningsresultatTidslinjetjeneste beregningsresultatTidslinjetjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.hindreTilbaketrekkNårAlleredeUtbetalt = hindreTilbaketrekkNårAlleredeUtbetalt;
         this.beregningsresultatTidslinjetjeneste = beregningsresultatTidslinjetjeneste;
-        this.finnEndringsdatoBeregningsresultatTjenesteInstances = finnEndringsdatoBeregningsresultatTjenesteInstances;
     }
 
     @Override
@@ -70,12 +61,6 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
             BeregningsresultatEntitet utbetBR = hindreTilbaketrekkNårAlleredeUtbetalt.reberegn(revurderingTY, brAndelTidslinje);
 
             KopierFeriepenger.kopier(behandlingId, revurderingTY, utbetBR);
-
-            FinnEndringsdatoBeregningsresultatTjeneste finnEndringsdatoBeregningsresultatTjeneste = FagsakYtelseTypeRef.Lookup.find(finnEndringsdatoBeregningsresultatTjenesteInstances, behandling.getFagsakYtelseType())
-                .orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for FinnEndringsdatoBeregningsresultatTjeneste for behandling " + behandling.getId()));
-
-            Optional<LocalDate> endringsDato = finnEndringsdatoBeregningsresultatTjeneste.finnEndringsdato(behandling, utbetBR);
-            endringsDato.ifPresent(endringsdato -> BeregningsresultatEntitet.builder(utbetBR).medEndringsdato(endringsdato));
 
             beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBR);
         }
