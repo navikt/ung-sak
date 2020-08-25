@@ -451,7 +451,7 @@ public class RegisterdataInnhenter {
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 
-    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, @SuppressWarnings("unused") FagsakYtelseType fagsakYtelseType) {
+    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
         return FagsakYtelseTypeRef.Lookup.find(utledInformasjonselementer, fagsakYtelseType).map(utleder -> utleder.utled(behandlingType))
             .orElse(FILTER.get(behandlingType));
     }

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.k9.sak.web.app.healthchecks.SensuMetrikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.aktør.AktørRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
@@ -68,7 +67,6 @@ public class RestImplementationClasses {
         classes.add(PipRestTjeneste.class);
         classes.add(TilbakekrevingRestTjeneste.class);
         classes.add(AktørRestTjeneste.class);
-        classes.add(SensuMetrikkRestTjeneste.class);
         classes.add(SykdomRestTjeneste.class);
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
