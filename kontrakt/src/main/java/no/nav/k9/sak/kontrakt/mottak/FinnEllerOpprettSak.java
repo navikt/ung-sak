@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.mottak;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -15,18 +16,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FinnEllerOpprettSak {
-
-    /** @deprecated erstattes av ytelseType. */
-    @Deprecated(forRemoval = true)
-    @JsonProperty(value = "behandlingstemaOffisiellKode")
-    @Size(max = 8)
-    @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$")
-    private String behandlingstemaOffisiellKode;
 
     @JsonProperty(value = "ytelseType")
     @Size(max = 20)
@@ -42,35 +38,34 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
-    @JsonProperty(value = "periodeStart", required = true)
+    /** @deprecated erstattes av #periode. */
+    @Deprecated
+    @JsonProperty(value = "periodeStart")
     private LocalDate periodeStart;
 
+    @JsonProperty(value = "periode")
+    @Valid
+    private Periode periode;
+
     @JsonCreator
-    public FinnEllerOpprettSak(@JsonProperty(value = "behandlingstemaOffisiellKode") @Size(max = 8) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String behandlingstemaOffisiellKode,
-                               @JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
+    public FinnEllerOpprettSak(@JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
                                @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
                                @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
-                               @JsonProperty(value = "periodeStart", required = true) @NotNull LocalDate periodeStart) {
-        if (behandlingstemaOffisiellKode == null && ytelseType == null) {
-            throw new IllegalArgumentException("Må oppgi enten behandlinstema eller ytelseType");
-        }
-        this.behandlingstemaOffisiellKode = behandlingstemaOffisiellKode;
-        this.ytelseType = ytelseType;
+                               @JsonProperty(value = "periodeStart") @NotNull LocalDate periodeStart,
+                               @JsonProperty(value = "periode") Periode periode) {
+        this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.periodeStart = Objects.requireNonNull(periodeStart, "periodeStart");
-    }
-
-    public String getBehandlingstemaOffisiellKode() {
-        return behandlingstemaOffisiellKode;
+        this.periodeStart = periode != null ? periode.getFom() : Objects.requireNonNull(periodeStart, "periodeStart");
+        this.periode = periode;
     }
 
     public String getYtelseType() {
         return ytelseType;
     }
 
-    public LocalDate getPeriodeStart() {
-        return periodeStart;
+    public Periode getPeriode() {
+        return periode == null ? new Periode(periodeStart, Tid.TIDENES_ENDE) : periode;
     }
 
     @AbacAttributt(value = "aktorId", masker = true)
@@ -86,7 +81,7 @@ public class FinnEllerOpprettSak {
     public String toString() {
         return getClass().getSimpleName()
             + "<ytelseType=" + ytelseType
-            + ", periodeStart=" + periodeStart
+            + ", periode=" + getPeriode()
             + ">";
     }
 

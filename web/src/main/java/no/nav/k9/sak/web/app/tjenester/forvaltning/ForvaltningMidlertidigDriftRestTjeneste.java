@@ -129,7 +129,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return Response.serverError().entity(new FeilDto("Oppgitt personummer er ukjent")).build();
         }
 
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now());
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now(), LocalDate.now());
 
         FrisinnSøknad søknad = FrisinnSøknad.builder()
             .språk(Språk.NORSK_BOKMÅL)

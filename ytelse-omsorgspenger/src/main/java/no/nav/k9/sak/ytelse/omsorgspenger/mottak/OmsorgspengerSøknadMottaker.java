@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
@@ -26,6 +28,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @ApplicationScoped
 public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<OmsorgspengerSøknadInnsending> {
 
+    private static final int CUT_OFF_OMP = 2020;
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
     private DokumentmottakerFelles dokumentmottakerFelles;
@@ -80,15 +83,29 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, startDato);
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
-        LocalDate yearFom = startDato.withDayOfYear(1);
-        LocalDate yearTom = startDato.withMonth(12).withDayOfMonth(31);
+
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, yearFom, yearTom);
+
+        LocalDate idag = LocalDate.now();
+        var detteÅret = DatoIntervallEntitet.fraOgMedTilOgMed(idag.withDayOfYear(1), idag.withMonth(12).withDayOfMonth(31));
+        var forrigeÅr = DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusYears(1).withDayOfYear(1), idag.minusYears(1).withMonth(12).withDayOfMonth(31));
+        var angittPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
+
+        for (var p : Arrays.asList(detteÅret, forrigeÅr)) {
+            if (p.overlapper(angittPeriode)) {
+                if (p.getFomDato().getYear() >= CUT_OFF_OMP) {
+                    // ta utgangspunkt i året i år først, sjekk deretter fjoråret. Men ikke tillatt 2019 eller tidligere her
+                    return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, p.getFomDato(), p.getTomDato());
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Kan ikke opprette " + ytelseType + " sak for periode: " + angittPeriode);
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
