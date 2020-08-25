@@ -1,8 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper.SISTE_DAG_I_MARS;
+import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,6 +67,8 @@ public class InntektArbeidYtelseRestTjeneste {
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
     public static final String OPPGITT_OPPTJENING_PATH = "/behandling/oppgitt-opptjening";
     public static final String OPPGITT_OPPTJENING_PATH_V2 = "/behandling/oppgitt-opptjening-v2";
+
+    public static final LocalDate FØRSTE_MULIGE_SØKNADPERIODE_START = SISTE_DAG_I_MARS;
 
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseDtoMapper dtoMapper;
@@ -197,6 +202,9 @@ public class InntektArbeidYtelseRestTjeneste {
 
             if (!fastsattUttak.getPerioder().isEmpty()) {
                 OppgittOpptjeningDto førSøknad = InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, new PeriodeDto(fastsattUttak.getMaksPeriode().getFomDato(), fastsattUttak.getMaksPeriode().getTomDato()));
+                dto.setFørSøkerPerioden(førSøknad);
+            } else {
+                OppgittOpptjeningDto førSøknad = InntektArbeidYtelseDtoMapper.mapUtenomPeriode(oppgittOpptjeningDto, new PeriodeDto(FØRSTE_MULIGE_SØKNADPERIODE_START, TIDENES_ENDE));
                 dto.setFørSøkerPerioden(førSøknad);
             }
             dto.setMåneder(iSøknad);
