@@ -40,7 +40,6 @@
 
 		<felles.version>2.1.0-20200819154501-25f4166</felles.version>
 
-		<metrics.version>4.1.12.1</metrics.version>
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 		<k9format.version>5.0.0-20200518161226-b6cd151</k9format.version>
 	</properties>
@@ -170,11 +169,6 @@
 			</dependency>
 
 			<!-- Prosjektets egne biblioteker -->
-            <dependency>
-                <groupId>io.dropwizard.metrics</groupId>
-                <artifactId>metrics-healthchecks</artifactId>
-                <version>${metrics.version}</version>
-            </dependency>
 			<dependency>
 				<groupId>no.nav.k9.sak</groupId>
 				<artifactId>migreringer</artifactId>

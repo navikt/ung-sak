@@ -10,11 +10,10 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import io.prometheus.client.hotspot.DefaultExports;
-import no.nav.k9.sak.web.app.healthchecks.HealthCheckRestService;
 import no.nav.k9.sak.web.server.metrics.PrometheusRestService;
 
 /**
- * Konfigurer Prometheus og Healthchecks (healthchecks bruker Dropwizards interface)
+ * Konfigurer Prometheus
  */
 @ApplicationScoped
 @ApplicationPath(InternalApplicationConfig.INTERNAL_URI)
@@ -31,7 +30,6 @@ public class InternalApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
         classes.add(PrometheusRestService.class);
-        classes.add(HealthCheckRestService.class);
 
         return Collections.unmodifiableSet(classes);
     }

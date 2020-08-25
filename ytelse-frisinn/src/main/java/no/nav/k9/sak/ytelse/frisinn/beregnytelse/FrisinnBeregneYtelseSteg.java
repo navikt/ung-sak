@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
