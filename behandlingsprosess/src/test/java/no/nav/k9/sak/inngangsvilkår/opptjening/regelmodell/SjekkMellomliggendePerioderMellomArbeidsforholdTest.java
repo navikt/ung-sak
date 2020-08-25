@@ -17,8 +17,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
     public void skal_få_mellomliggendePeriode_mellom_arbeidsforhold_samme_arbeidsgiver_lørdagmandag() {
         var grunnlag = new Opptjeningsgrunnlag();
         var aktivitet = new Aktivitet("ARBEID", "000000000", Aktivitet.ReferanseType.ORGNR);
-        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmeste(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1)).plusDays(1)), aktivitet);
-        grunnlag.leggTil(new LocalDateInterval(finnNærmeste(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmesteFraSammeDag(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1)).plusDays(1)), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet);
 
         var data = new MellomregningOpptjeningsvilkårData(grunnlag);
 
@@ -39,8 +39,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
     public void skal_få_mellomliggendePeriode_mellom_arbeidsforhold_samme_arbeidsgiver() {
         var grunnlag = new Opptjeningsgrunnlag();
         var aktivitet = new Aktivitet("ARBEID", "000000000", Aktivitet.ReferanseType.ORGNR);
-        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmeste(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
-        grunnlag.leggTil(new LocalDateInterval(finnNærmeste(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmesteFraSammeDag(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet);
 
         var data = new MellomregningOpptjeningsvilkårData(grunnlag);
 
@@ -62,8 +62,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
         var grunnlag = new Opptjeningsgrunnlag();
         var aktivitet = new Aktivitet("ARBEID", "000000000", Aktivitet.ReferanseType.ORGNR);
         var aktivitet1 = new Aktivitet("ARBEID", "000000001", Aktivitet.ReferanseType.ORGNR);
-        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmeste(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
-        grunnlag.leggTil(new LocalDateInterval(finnNærmeste(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet1);
+        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmesteFraSammeDag(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet1);
 
         var data = new MellomregningOpptjeningsvilkårData(grunnlag);
 
@@ -85,8 +85,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
         var grunnlag = new Opptjeningsgrunnlag();
         var aktivitet = new Aktivitet("ARBEID", "000000000", Aktivitet.ReferanseType.ORGNR);
         var aktivitet1 = new Aktivitet("FRILANS");
-        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmeste(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
-        grunnlag.leggTil(new LocalDateInterval(finnNærmeste(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet1);
+        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmesteFraSammeDag(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)), LocalDate.now()), aktivitet1);
 
         var data = new MellomregningOpptjeningsvilkårData(grunnlag);
 
@@ -101,8 +101,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
         var grunnlag = new Opptjeningsgrunnlag();
         var aktivitet = new Aktivitet("ARBEID", "000000000", Aktivitet.ReferanseType.ORGNR);
         var aktivitet1 = new Aktivitet("ARBEID", "000000001", Aktivitet.ReferanseType.ORGNR);
-        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmeste(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
-        grunnlag.leggTil(new LocalDateInterval(finnNærmeste(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)).plusDays(1), LocalDate.now()), aktivitet1);
+        grunnlag.leggTil(new LocalDateInterval(LocalDate.now().minusMonths(9), finnNærmesteFraSammeDag(DayOfWeek.FRIDAY, LocalDate.now().minusMonths(1))), aktivitet);
+        grunnlag.leggTil(new LocalDateInterval(finnNærmesteFraSammeDag(DayOfWeek.MONDAY, LocalDate.now().minusMonths(1)).plusDays(1), LocalDate.now()), aktivitet1);
 
         var data = new MellomregningOpptjeningsvilkårData(grunnlag);
 
@@ -110,6 +110,11 @@ public class SjekkMellomliggendePerioderMellomArbeidsforholdTest {
 
         var mellomliggendePerioder = data.getAkseptertMellomliggendePerioder();
         assertThat(mellomliggendePerioder).isEmpty();
+    }
+
+    private LocalDate finnNærmesteFraSammeDag(DayOfWeek target, LocalDate date) {
+        var startdato = finnNærmeste(DayOfWeek.TUESDAY, date);
+        return finnNærmeste(target, startdato);
     }
 
     private LocalDate finnNærmeste(DayOfWeek target, LocalDate date) {
