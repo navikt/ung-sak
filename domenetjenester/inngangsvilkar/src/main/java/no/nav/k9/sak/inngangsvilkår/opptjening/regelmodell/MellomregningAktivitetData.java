@@ -53,7 +53,7 @@ class MellomregningAktivitetData {
 
     public LocalDateTimeline<Boolean> getAktivitetTidslinje(boolean medAntattGodkjentePerioder, boolean medIkkebekreftedeGodkjentePerioder) {
         LocalDateTimeline<Boolean> tidslinje = aktivitetTidslinjer;
-        tidslinje = tidslinje.disjoint(akseptertMellomliggendePerioder, StandardCombinators::coalesceLeftHandSide);
+        tidslinje = tidslinje.crossJoin(akseptertMellomliggendePerioder, StandardCombinators::alwaysTrueForMatch);
 
         if (!medAntattGodkjentePerioder) {
             tidslinje = tidslinje.disjoint(aktivitetAntattGodkjent, StandardCombinators::leftOnly);
