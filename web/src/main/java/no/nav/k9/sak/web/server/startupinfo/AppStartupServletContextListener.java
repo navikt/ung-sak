@@ -13,18 +13,13 @@ public class AppStartupServletContextListener implements ServletContextListener 
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-
-        // start denne async, logg til slutt når ferdig
-        Thread thread = new Thread(this::startupLogging, getClass().getSimpleName() + "-thread");
-        thread.setDaemon(true);
-        thread.start();
+        startupLogging();
     }
 
     private void startupLogging() {
         // Henter dependent instance og destroyer etterpå.
         AppStartupInfoLogger appStartupInfoLogger = null;
         try {
-            Thread.sleep(30L * 1000L); // La verden gå litt videre får vi dumper ut
             appStartupInfoLogger = CDI.current().select(AppStartupInfoLogger.class).get();
             appStartupInfoLogger.logAppStartupInfo();
         } catch (Exception e) {
