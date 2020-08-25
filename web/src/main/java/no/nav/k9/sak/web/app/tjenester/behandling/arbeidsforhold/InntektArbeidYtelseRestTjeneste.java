@@ -67,7 +67,6 @@ public class InntektArbeidYtelseRestTjeneste {
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
     public static final String OPPGITT_OPPTJENING_PATH = "/behandling/oppgitt-opptjening";
     public static final String OPPGITT_OPPTJENING_PATH_V2 = "/behandling/oppgitt-opptjening-v2";
-
     public static final LocalDate FØRSTE_MULIGE_SØKNADPERIODE_START = SISTE_DAG_I_MARS;
 
     private BehandlingRepository behandlingRepository;
