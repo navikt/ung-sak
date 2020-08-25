@@ -36,8 +36,8 @@ public class FrisinnSøknadMottaker implements SøknadMottakTjeneste<FrisinnSøk
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato) {
-        return dokumentMottaker.finnEllerOpprett(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato);
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
+        return dokumentMottaker.finnEllerOpprett(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, sluttDato);
     }
 
     public void validerSøknad(Fagsak fagsak, FrisinnSøknad søknad) {

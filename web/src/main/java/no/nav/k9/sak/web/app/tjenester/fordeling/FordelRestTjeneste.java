@@ -48,6 +48,7 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -111,14 +112,14 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
-        if (opprettSakDto.getPeriodeStart() == null) {
+        Periode periode = opprettSakDto.getPeriode();
+        if (periode == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
-        var startDato = opprettSakDto.getPeriodeStart();
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, startDato);
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, periode.getFom(), periode.getTom());
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
