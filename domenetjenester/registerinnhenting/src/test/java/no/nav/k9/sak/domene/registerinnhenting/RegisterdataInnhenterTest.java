@@ -19,6 +19,8 @@ import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestInstanceImpl;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class RegisterdataInnhenterTest {
 
@@ -161,6 +163,7 @@ public class RegisterdataInnhenterTest {
             medlemTjeneste,
             repositoryProvider,
             null,
-            skjæringstidspunktTjeneste, null);
+            skjæringstidspunktTjeneste, null,
+            new UnitTestInstanceImpl<>(null));
     }
 }
