@@ -1,7 +1,5 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -20,7 +18,6 @@ import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -42,6 +39,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     public static final String TASKNAME = "behandlingskontroll.tilbakeTilStart";
     public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
+    public static final String PROPERTY_START_STEG = "startSteg";
     private BehandlingRepository behandlingRepository;
     private HistorikkRepository historikkRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -77,8 +75,16 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
 
-        var targetSteg = BehandlingStegType.START_STEG;
-        var forventetPassertSteg = BehandlingStegType.START_STEG;
+        var startSteg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(PROPERTY_START_STEG));
+        var targetSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
+        var forventetPassertSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
+        
+        if (startSteg != BehandlingStegType.START_STEG && (
+                        erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
+                        || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
+                   )) {
+            throw new IllegalStateException("Ikke implementert: Det er ikke støtte for å hoppe til steg før eller lik INIT_VILKÅR (med unntak av START_STEG.");
+        }
 
         if (!behandling.erSaksbehandlingAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), forventetPassertSteg)) {
             log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);            
@@ -91,12 +97,19 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             }
             
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-            resetGrunnlag(behandling);
+            
+            if (startSteg == BehandlingStegType.START_STEG) {
+                resetGrunnlag(behandling);
+            }
             hoppTilbake(behandling, targetSteg, kontekst);
 
         } else {
             log.warn("Kan ikke resette behandling. Behandling er avsluttet eller ikke kommet forbi {}, kan ikke hoppe tilbake til {}, så gjør ingenting.", forventetPassertSteg, targetSteg);
         }
+    }
+
+    private boolean erSammeStegEllerTidligere(Behandling behandling, BehandlingStegType steg, BehandlingStegType sjekkMotSteg) {
+        return behandlingskontrollTjeneste.sammenlignRekkefølge(behandling.getFagsakYtelseType(), behandling.getType(), steg, sjekkMotSteg) <= 0;
     }
 
     private void resetGrunnlag(Behandling behandling) {
