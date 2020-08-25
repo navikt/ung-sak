@@ -51,9 +51,6 @@ public class TrekkUtFraværTjeneste {
 
         List<OppgittFraværPeriode> fravær; // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         if (behandling.erManueltOpprettet()) {
-            var oppgittOpt = annetOppgittFravær(behandlingId);
-            var perioder = oppgittOpt.orElseThrow().getPerioder();
-            log.info("Legger til {} perioder fra kopiert grunnlag", perioder.size());
             fravær = fraværFraInntektsmeldingerPåFagsak(behandling);
         } else {
             var fraværFraInntektsmeldinger = fraværFraInntektsmeldingerPåBehandling(behandling);
