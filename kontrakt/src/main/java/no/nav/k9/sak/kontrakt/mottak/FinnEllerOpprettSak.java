@@ -1,6 +1,5 @@
 package no.nav.k9.sak.kontrakt.mottak;
 
-import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,12 +36,8 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
-    /** @deprecated erstattes av #periode. */
-    @Deprecated
-    @JsonProperty(value = "periodeStart")
-    private LocalDate periodeStart;
-
-    @JsonProperty(value = "periode")
+    @JsonProperty(value = "periode", required = true)
+    @NotNull
     @Valid
     private Periode periode;
 
@@ -51,12 +45,10 @@ public class FinnEllerOpprettSak {
     public FinnEllerOpprettSak(@JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
                                @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
                                @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
-                               @JsonProperty(value = "periodeStart") @NotNull LocalDate periodeStart,
-                               @JsonProperty(value = "periode") Periode periode) {
+                               @JsonProperty(value = "periode", required = true) @NotNull @Valid Periode periode) {
         this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.periodeStart = periode != null ? periode.getFom() : Objects.requireNonNull(periodeStart, "periodeStart");
         this.periode = periode;
     }
 
@@ -65,7 +57,7 @@ public class FinnEllerOpprettSak {
     }
 
     public Periode getPeriode() {
-        return periode == null ? new Periode(periodeStart, Tid.TIDENES_ENDE) : periode;
+        return periode;
     }
 
     @AbacAttributt(value = "aktorId", masker = true)
