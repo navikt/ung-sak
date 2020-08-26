@@ -524,7 +524,7 @@ public class StatistikkRepository {
     }
 
     Collection<SensuEvent> prosessTaskFeilStatistikk() {
-        String sql = "select f.ytelse_type, f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere"
+        String sql = "select coalesce(f.ytelse_type, 'NONE'), f.saksnummer, p.id, p.task_type, p.status, p.siste_kjoering_slutt_ts, p.siste_kjoering_feil_tekst, p.task_parametere"
             + " , p.blokkert_av, p.opprettet_tid, fpt.gruppe_sekvensnr"
             + " from prosess_task p " +
             " left outer join fagsak_prosess_task fpt ON fpt.prosess_task_id = p.id" +
