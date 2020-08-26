@@ -9,9 +9,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
-import no.nav.k9.sak.kontrakt.opptjening.InntektDto;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,13 +17,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class MedlemV2Dto {
-
-    /** @deprecated bruk InntekterDto fra inntekt endepunktet. */
-    @Deprecated(forRemoval = true)
-    @JsonProperty(value = "inntekt")
-    @Size(max = 200)
-    @Valid
-    private List<InntektDto> inntekt;
 
     @JsonProperty(value = "medlemskapPerioder")
     @Size(max = 200)
@@ -42,20 +32,12 @@ public class MedlemV2Dto {
         // trengs for deserialisering av JSON
     }
 
-    public List<InntektDto> getInntekt() {
-        return Collections.unmodifiableList(inntekt);
-    }
-
     public List<MedlemskapPerioderDto> getMedlemskapPerioder() {
         return Collections.unmodifiableList(medlemskapPerioder);
     }
 
     public Set<MedlemPeriodeDto> getPerioder() {
         return Collections.unmodifiableSet(perioder);
-    }
-
-    public void setInntekt(List<InntektDto> inntekt) {
-        this.inntekt = List.copyOf(inntekt);
     }
 
     public void setMedlemskapPerioder(List<MedlemskapPerioderDto> medlemskapPerioder) {

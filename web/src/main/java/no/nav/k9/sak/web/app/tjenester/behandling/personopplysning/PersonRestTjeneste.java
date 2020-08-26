@@ -67,21 +67,6 @@ public class PersonRestTjeneste {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path(MEDLEMSKAP_V2_PATH)
-    @Operation(description = "Hent informasjon om medlemskap i Folketrygden for søker i behandling", tags = "behandling - person", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Medlemskap, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MedlemV2Dto.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @Deprecated
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public MedlemV2Dto hentMedlemskap(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        Long behandlingId = getBehandlingsId(behandlingIdDto);
-        Optional<MedlemV2Dto> medlemDto = medlemDtoTjeneste.lagMedlemPeriodisertDto(behandlingId);
-        return medlemDto.orElse(null);
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path(PERSONOPPLYSNINGER_PATH)
     @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))

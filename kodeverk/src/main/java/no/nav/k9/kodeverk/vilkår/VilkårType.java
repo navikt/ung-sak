@@ -30,7 +30,10 @@ public enum VilkårType implements Kodeverdi {
 
     MEDLEMSKAPSVILKÅRET(VilkårTypeKoder.FP_VK_2,
             "Medlemskapsvilkåret",
-            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2", FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2"),
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 2",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§ 2"),
             Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
             Avslagsårsak.SØKER_ER_UTVANDRET,
             Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
@@ -39,7 +42,9 @@ public enum VilkårType implements Kodeverdi {
     MEDLEMSKAPSVILKÅRET_LØPENDE(VilkårTypeKoder.FP_VK_2_L,
             "Løpende medlemskapsvilkår",
             Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
-                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2"),
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 2",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§ 2"),
             Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
             Avslagsårsak.SØKER_ER_UTVANDRET,
             Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
@@ -52,14 +57,14 @@ public enum VilkårType implements Kodeverdi {
             Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
             Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     ÅRSKVANTUM(VilkårTypeKoder.OMS_VK_1,
-               "Årskvantum",
-               Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 9-6"),
-               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_70ÅR,
-               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_IKKE_RETT,
-               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP,
-               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_OPPTJENING,
-               Avslagsårsak.ÅRSKVANTUM_IKKE_FLERE_DAGER,
-               Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK),
+            "Årskvantum",
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 9-6"),
+            Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_70ÅR,
+            Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_IKKE_RETT,
+            Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_MEDLEMSKAP,
+            Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_OPPTJENING,
+            Avslagsårsak.ÅRSKVANTUM_IKKE_FLERE_DAGER,
+            Avslagsårsak.ÅRSKVANTUM_AVSLÅTT_UIDENTIFISERT_RAMMEVEDTAK),
     MEDISINSKEVILKÅR_UNDER_18_ÅR(VilkårTypeKoder.PSB_VK_2a,
             "Medisinskevilkår under 18 år",
             Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
@@ -74,27 +79,37 @@ public enum VilkårType implements Kodeverdi {
             Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     SØKERSOPPLYSNINGSPLIKT(VilkårTypeKoder.FP_VK_34,
             "Søkers opplysningsplikt",
-            Map.of(FagsakYtelseType.ENGANGSTØNAD, "§§ 21-3 og 21-7", FagsakYtelseType.FORELDREPENGER, "§§ 21-3 og 21-7"),
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§§ 21-3 og 21-7",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§§ 21-3 og 21-7",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§§ 21-3 og 21-7",
+                FagsakYtelseType.OMSORGSPENGER, "§§ 21-3 og 21-7"),
             Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     OPPTJENINGSPERIODEVILKÅR(VilkårTypeKoder.FP_VK_21,
             "Opptjeningsperiode",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2", FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
             Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING),
     OPPTJENINGSVILKÅRET(VilkårTypeKoder.FP_VK_23,
             "Opptjeningsvilkåret",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 9-2", FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§ 9-2 jamfør 8-2",
+                FagsakYtelseType.OMP, "§ 9-2 jamfør 8-2"),
             Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING,
             Avslagsårsak.FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER),
     BEREGNINGSGRUNNLAGVILKÅR(VilkårTypeKoder.FP_VK_41,
             "Beregning",
-            Map.of(FagsakYtelseType.FORELDREPENGER, "§ 14-7",
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 8",
+                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 8",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "§ 8",
                 FagsakYtelseType.OMP, "§ 8",
                 FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
             Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
-        Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
-        Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT,
-        Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT
-    ),
+            Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
+            Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT,
+            Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT),
 
     /**
      * Brukes i stedet for null der det er optional.
@@ -171,13 +186,13 @@ public enum VilkårType implements Kodeverdi {
         return INDEKS_AVSLAGSÅRSAK_VILKÅR.get(avslagsårsak);
     }
 
-    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty(value="kode")
+    @JsonProperty(value = "kode")
     @Override
     public String getKode() {
         return kode;
