@@ -48,7 +48,7 @@ public class HistorikkinnslagTjenesteTest {
     public void before() {
         historikkRepository = mock(HistorikkRepository.class);
         journalTjeneste = mock(SafTjeneste.class);
-        historikkinnslagTjeneste = new HistorikkinnslagTjeneste(historikkRepository, journalTjeneste, null, true);
+        historikkinnslagTjeneste = new HistorikkinnslagTjeneste(historikkRepository, journalTjeneste);
     }
 
     @Test

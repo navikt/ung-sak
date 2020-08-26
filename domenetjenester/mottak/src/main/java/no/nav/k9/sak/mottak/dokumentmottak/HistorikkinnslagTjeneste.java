@@ -9,7 +9,6 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.saf.AvsenderMottakerResponseProjection;
@@ -36,7 +34,6 @@ import no.nav.saf.RelevantDatoResponseProjection;
 import no.nav.saf.SakResponseProjection;
 import no.nav.saf.Variantformat;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
 public class HistorikkinnslagTjeneste {
@@ -49,8 +46,6 @@ public class HistorikkinnslagTjeneste {
     private static final String ETTERSENDELSE = "Ettersendelse";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
-    private SafTjenesteObsolete safTjenesteObsolete;
-    private Boolean toggletNySafKlient;
 
     HistorikkinnslagTjeneste() {
         // for CDI proxy
@@ -58,13 +53,9 @@ public class HistorikkinnslagTjeneste {
 
     @Inject
     public HistorikkinnslagTjeneste(HistorikkRepository historikkRepository,
-                                    SafTjeneste safTjeneste,
-                                    SafTjenesteObsolete safTjenesteObsolete,
-                                    @KonfigVerdi(value = "SAF_NY_FELLESKLIENT", defaultVerdi = "false") Boolean toggletNySafKlient) {
+                                    SafTjeneste safTjeneste) {
         this.historikkRepository = historikkRepository;
         this.safTjeneste = safTjeneste;
-        this.safTjenesteObsolete = safTjenesteObsolete;
-        this.toggletNySafKlient = toggletNySafKlient;
     }
 
     public void opprettHistorikkinnslag(Behandling behandling, JournalpostId journalpostId, HistorikkinnslagType historikkinnslagType) {
@@ -101,57 +92,30 @@ public class HistorikkinnslagTjeneste {
     void leggTilHistorikkinnslagDokumentlinker(BehandlingType behandlingType, JournalpostId journalpostId, Historikkinnslag historikkinnslag) {
         List<HistorikkinnslagDokumentLink> dokumentLinker = new ArrayList<>();
         if (journalpostId != null) {
-            if (toggletNySafKlient) {
-                var query = new JournalpostQueryRequest();
-                query.setJournalpostId(journalpostId.getVerdi());
-                JournalpostResponseProjection projection = byggDokumentoversiktResponseProjection();
-                var journalpostIdData = safTjeneste.hentJournalpostInfo(query, projection);
-                if (journalpostIdData == null || journalpostIdData.getDokumenter().isEmpty()) {
-                    return;
-                }
-                var hoveddokumentJournalMetadata = journalpostIdData.getDokumenter().get(0);
-
-                var elektroniskSøknad = Optional.ofNullable(hoveddokumentJournalMetadata)
-                    .stream()
-                    .filter(it -> it.getDokumentvarianter()
-                        .stream()
-                        .anyMatch(ta -> Objects.equals(Variantformat.ORIGINAL, ta.getVariantformat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
-                    .findFirst();
-
-                leggTilSøknadDokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
-                getVedleggsliste(journalpostIdData).forEach(journalMetadata -> dokumentLinker.add(lagHistorikkInnslagDokumentLink(journalMetadata, journalpostId, historikkinnslag, VEDLEGG)));
-
-            } else {
-                var journalpostIdData = safTjenesteObsolete.hentJournalpostInfo(new no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery(journalpostId.getVerdi()));
-                if (journalpostIdData == null || journalpostIdData.getDokumenter().isEmpty()) {
-                    return;
-                }
-                var hoveddokumentJournalMetadata = journalpostIdData.getDokumenter().get(0);
-
-                var elektroniskSøknad = Optional.ofNullable(hoveddokumentJournalMetadata)
-                    .stream()
-                    .filter(it -> it.getDokumentvarianter()
-                        .stream()
-                        .anyMatch(ta -> Objects.equals(Variantformat.ORIGINAL, ta.getVariantFormat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
-                    .findFirst();
-
-                leggTilSøknadDokumentLenkeObsolete(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
-                getVedleggslisteObsolete(journalpostIdData).forEach(journalMetadata -> dokumentLinker.add(lagHistorikkInnslagDokumentLinkObsolete(journalMetadata, journalpostId, historikkinnslag, VEDLEGG)));
+            var query = new JournalpostQueryRequest();
+            query.setJournalpostId(journalpostId.getVerdi());
+            JournalpostResponseProjection projection = byggDokumentoversiktResponseProjection();
+            var journalpostIdData = safTjeneste.hentJournalpostInfo(query, projection);
+            if (journalpostIdData == null || journalpostIdData.getDokumenter().isEmpty()) {
+                return;
             }
+            var hoveddokumentJournalMetadata = journalpostIdData.getDokumenter().get(0);
+
+            var elektroniskSøknad = Optional.ofNullable(hoveddokumentJournalMetadata)
+                .stream()
+                .filter(it -> it.getDokumentvarianter()
+                    .stream()
+                    .anyMatch(ta -> Objects.equals(Variantformat.ORIGINAL, ta.getVariantformat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
+                .findFirst();
+
+            leggTilSøknadDokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
+            getVedleggsliste(journalpostIdData).forEach(journalMetadata -> dokumentLinker.add(lagHistorikkInnslagDokumentLink(journalMetadata, journalpostId, historikkinnslag, VEDLEGG)));
         }
 
         historikkinnslag.setDokumentLinker(dokumentLinker);
     }
 
     private List<DokumentInfo> getVedleggsliste(Journalpost journalpostIdData) {
-        var dokumenter = journalpostIdData.getDokumenter();
-        if (dokumenter.size() > 1) {
-            return dokumenter.subList(1, dokumenter.size());
-        }
-        return List.of();
-    }
-
-    private List<no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo> getVedleggslisteObsolete(no.nav.k9.sak.dokument.arkiv.saf.rest.model.Journalpost journalpostIdData) {
         var dokumenter = journalpostIdData.getDokumenter();
         if (dokumenter.size() > 1) {
             return dokumenter.subList(1, dokumenter.size());
@@ -172,19 +136,6 @@ public class HistorikkinnslagTjeneste {
         }
     }
 
-    private void leggTilSøknadDokumentLenkeObsolete(BehandlingType behandlingType, JournalpostId journalpostId, Historikkinnslag historikkinnslag, List<HistorikkinnslagDokumentLink> dokumentLinker,
-                                                    no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo hoveddokumentJournalMetadata, Optional<no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo> elektroniskSøknad) {
-        if (elektroniskSøknad.isPresent()) {
-            var journalMetadata = elektroniskSøknad.get();
-            String linkTekst = journalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : SØKNAD; // NOSONAR
-            dokumentLinker.add(lagHistorikkInnslagDokumentLinkObsolete(journalMetadata, journalpostId, historikkinnslag, linkTekst));
-        } else {
-            String linkTekst = BehandlingType.UDEFINERT.equals(behandlingType) ? ETTERSENDELSE : PAPIRSØKNAD;
-            var papirSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream().filter(j -> !ArkivFilType.XML.equals(ArkivFilType.fraKode(j.getFiltype()))).findFirst();
-            papirSøknad.ifPresent(journalMetadata -> dokumentLinker.add(lagHistorikkInnslagDokumentLinkObsolete(hoveddokumentJournalMetadata, journalpostId, historikkinnslag, linkTekst)));
-        }
-    }
-
     private HistorikkinnslagDokumentLink lagHistorikkInnslagDokumentLink(DokumentInfo journalMetadata, JournalpostId journalpostId, Historikkinnslag historikkinnslag, String linkTekst) {
         HistorikkinnslagDokumentLink historikkinnslagDokumentLink = new HistorikkinnslagDokumentLink();
         historikkinnslagDokumentLink.setDokumentId(journalMetadata.getDokumentInfoId());
@@ -192,27 +143,6 @@ public class HistorikkinnslagTjeneste {
         historikkinnslagDokumentLink.setLinkTekst(linkTekst);
         historikkinnslagDokumentLink.setHistorikkinnslag(historikkinnslag);
         return historikkinnslagDokumentLink;
-    }
-
-    private HistorikkinnslagDokumentLink lagHistorikkInnslagDokumentLinkObsolete(no.nav.k9.sak.dokument.arkiv.saf.rest.model.DokumentInfo journalMetadata, JournalpostId journalpostId, Historikkinnslag historikkinnslag, String linkTekst) {
-        HistorikkinnslagDokumentLink historikkinnslagDokumentLink = new HistorikkinnslagDokumentLink();
-        historikkinnslagDokumentLink.setDokumentId(journalMetadata.getDokumentInfoId());
-        historikkinnslagDokumentLink.setJournalpostId(journalpostId);
-        historikkinnslagDokumentLink.setLinkTekst(linkTekst);
-        historikkinnslagDokumentLink.setHistorikkinnslag(historikkinnslag);
-        return historikkinnslagDokumentLink;
-    }
-
-    public void opprettHistorikkinnslagForAutomatiskHenlegelsePgaNySøknad(Behandling behandling) {
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.AVBRUTT_BEH)
-            .medÅrsak(BehandlingResultatType.MERGET_OG_HENLAGT);
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setType(HistorikkinnslagType.AVBRUTT_BEH);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        builder.build(historikkinnslag);
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkRepository.lagre(historikkinnslag);
     }
 
     public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
