@@ -79,7 +79,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var targetSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
         var forventetPassertSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
         
-        if (startSteg != BehandlingStegType.START_STEG && (
+        if (targetSteg != BehandlingStegType.START_STEG && (
                         erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
                         || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
                    )) {
