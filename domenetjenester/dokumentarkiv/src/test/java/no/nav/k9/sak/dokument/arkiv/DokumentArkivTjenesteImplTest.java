@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -25,23 +27,30 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.saf.Arkivsaksystem;
+import no.nav.saf.AvsenderMottaker;
+import no.nav.saf.AvsenderMottakerIdType;
+import no.nav.saf.Bruker;
+import no.nav.saf.BrukerIdType;
+import no.nav.saf.Datotype;
+import no.nav.saf.DokumentInfo;
+import no.nav.saf.Dokumentoversikt;
+import no.nav.saf.DokumentoversiktFagsakQueryRequest;
+import no.nav.saf.DokumentoversiktResponseProjection;
+import no.nav.saf.Dokumentstatus;
+import no.nav.saf.Dokumentvariant;
+import no.nav.saf.Journalpost;
+import no.nav.saf.Journalposttype;
+import no.nav.saf.Journalstatus;
+import no.nav.saf.Kanal;
+import no.nav.saf.LogiskVedlegg;
+import no.nav.saf.RelevantDato;
+import no.nav.saf.Sak;
+import no.nav.saf.SkjermingType;
+import no.nav.saf.Tema;
+import no.nav.saf.Variantformat;
+import no.nav.vedtak.felles.integrasjon.saf.HentDokumentQuery;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.DokumentoversiktFagsakQuery;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.HentDokumentQuery;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.AvsenderMottaker;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.AvsenderMottakerIdType;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Bruker;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.BrukerIdType;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Datotype;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentoversiktFagsak;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Dokumentvariant;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.LogiskVedlegg;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.RelevantDato;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Sak;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Sakstype;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.VariantFormat;
 
 public class DokumentArkivTjenesteImplTest {
 
@@ -70,9 +79,10 @@ public class DokumentArkivTjenesteImplTest {
 
     @Test
     public void skalRetunereDokumentListeMedJournalpostTypeUt() {
-        Journalpost journalpost = byggJournalpost(ArkivFilType.PDF, VariantFormat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Kommunikasjonsretning.UT);
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(List.of(journalpost));
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Journalpost journalpost = byggJournalpost(ArkivFilType.PDF, Variantformat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.U);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -87,9 +97,10 @@ public class DokumentArkivTjenesteImplTest {
 
     @Test
     public void skalRetunereDokumentListeMedJournalpostTypeInn() {
-        Journalpost journalpost = byggJournalpost(ArkivFilType.PDF, VariantFormat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Kommunikasjonsretning.INN);
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(List.of(journalpost));
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Journalpost journalpost = byggJournalpost(ArkivFilType.PDF, Variantformat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.I);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -100,11 +111,12 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumentListeMedUansettInnhold() {
         List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDF, VariantFormat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Kommunikasjonsretning.INN),
-            byggJournalpost(ArkivFilType.XLS, VariantFormat.ARKIV)
+            byggJournalpost(ArkivFilType.PDF, Variantformat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.I),
+            byggJournalpost(ArkivFilType.XLS, Variantformat.ARKIV)
         );
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(journalposter);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         Optional<ArkivJournalPost> arkivDokument = dokumentApplikasjonTjeneste.hentJournalpostForSak(KJENT_SAK, JOURNAL_ID);
 
@@ -115,11 +127,12 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumenterAvFiltypePDF() {
         List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDF, VariantFormat.ARKIV),
-            byggJournalpost(ArkivFilType.XLS, VariantFormat.ARKIV)
+            byggJournalpost(ArkivFilType.PDF, Variantformat.ARKIV),
+            byggJournalpost(ArkivFilType.XLS, Variantformat.ARKIV)
         );
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(journalposter);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -129,11 +142,12 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumenttypeInntektsmelding() {
         Journalpost journalpost = byggJournalpostMedFlereDokumenter(List.of(
-            byggDokumentInfo(ArkivFilType.PDF, VariantFormat.ARKIV, Brevkode.INNTEKTSMELDING),
-            byggDokumentInfo(ArkivFilType.PDF, VariantFormat.ARKIV, Brevkode.UDEFINERT)
+            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING),
+            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UDEFINERT)
         ));
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(List.of(journalpost));
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -146,12 +160,13 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumenterAvVariantFormatARKIV() {
         List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDF, VariantFormat.ARKIV),
-            byggJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV),
-            byggJournalpost(ArkivFilType.XML, VariantFormat.ORIGINAL)
+            byggJournalpost(ArkivFilType.PDF, Variantformat.ARKIV),
+            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV),
+            byggJournalpost(ArkivFilType.XML, Variantformat.ORIGINAL)
         );
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(journalposter);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -161,11 +176,12 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumentListeMedSisteTidspunktØverst() {
         List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Kommunikasjonsretning.UT),
-            byggJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT.minusDays(1), Kommunikasjonsretning.INN)
+            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.U),
+            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, TID_REGISTRERT, TID_JOURNALFØRT.minusDays(1), Journalposttype.I)
         );
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(journalposter);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
@@ -178,11 +194,12 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereAlleDokumentTyper() {
         Journalpost journalpost = byggJournalpostMedFlereDokumenter(List.of(
-            byggDokumentInfo(ArkivFilType.PDF, VariantFormat.ARKIV, Brevkode.INNTEKTSMELDING), // hoveddokument
-            byggDokumentInfo(ArkivFilType.PDF, VariantFormat.ARKIV, Brevkode.UDEFINERT) // annet dokument
+            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING), // hoveddokument
+            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UDEFINERT) // annet dokument
         ));
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(List.of(journalpost));
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, LocalDate.MIN);
 
@@ -192,12 +209,13 @@ public class DokumentArkivTjenesteImplTest {
     @Test
     public void skalRetunereDokumentTyperSiden() {
         List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, Brevkode.INNTEKTSMELDING, TID_REGISTRERT, TID_JOURNALFØRT, Kommunikasjonsretning.UT),
-            byggJournalpost(ArkivFilType.PDFA, VariantFormat.ARKIV, Brevkode.UDEFINERT, TID_REGISTRERT, TID_JOURNALFØRT.minusDays(1), Kommunikasjonsretning.INN)
+            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.U),
+            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, Brevkode.UDEFINERT, TID_REGISTRERT, TID_JOURNALFØRT.minusDays(1), Journalposttype.I)
         );
 
-        DokumentoversiktFagsak dokumentoversiktFagsak = new DokumentoversiktFagsak(journalposter);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQuery.class))).thenReturn(dokumentoversiktFagsak);
+        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
+        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
+            .thenReturn(dokumentoversikt);
 
         Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, TID_JOURNALFØRT.toLocalDate());
 
@@ -218,60 +236,65 @@ public class DokumentArkivTjenesteImplTest {
     }
 
     // Master-bygger
-    private Journalpost byggJournalpost(LocalDateTime registrertTid, LocalDateTime journalførtTid, Kommunikasjonsretning kommunikasjonsretning,
+    private Journalpost byggJournalpost(LocalDateTime registrertTid, LocalDateTime journalførtTid, Journalposttype journalposttype,
                                         List<DokumentInfo> dokumentInfoer) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalpostId(JOURNAL_ID.getVerdi());
+        journalpost.setTittel("tittel");
+        journalpost.setJournalposttype(journalposttype);
+        journalpost.setJournalstatus(Journalstatus.FERDIGSTILT);
+        journalpost.setKanal(Kanal.ALTINN);
+        journalpost.setTema(Tema.AAP);
+        journalpost.setBehandlingstema("behandlingstema");
+        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, new Date(), "fagsakId", "fagsaksystem"));
+        journalpost.setBruker(new Bruker("id", BrukerIdType.AKTOERID));
+        journalpost.setAvsenderMottaker(new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn", "Land", true));
+        journalpost.setJournalfoerendeEnhet("journalstatus");
+        journalpost.setDokumenter(dokumentInfoer);
+        journalpost.setRelevanteDatoer(List.of(
+            new RelevantDato(toDate(journalførtTid), Datotype.DATO_JOURNALFOERT),
+            new RelevantDato(toDate(registrertTid), Datotype.DATO_REGISTRERT)));
+        journalpost.setEksternReferanseId("eksternReferanseId");
 
-        return new Journalpost(JOURNAL_ID.getVerdi(),
-                "tittel",
-                kommunikasjonsretning.getKode(),
-                "journalstatus",
-                "kanal",
-                "tema",
-                "behandlingstema",
-                new Sak("arkivsaksystem", "arkivsaksnummer", "fagsaksystem", "fagsakId", Sakstype.GENERELL_SAK),
-                new Bruker("id", BrukerIdType.AKTOERID),
-                new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn"),
-                "journalforendeEnhet",
-                dokumentInfoer,
-                LocalDateTime.now(),
-                List.of(
-                    new RelevantDato(journalførtTid, Datotype.DATO_JOURNALFOERT),
-                    new RelevantDato(registrertTid, Datotype.DATO_REGISTRERT)),
-        "eksternReferanseId");
+        return journalpost;
     }
 
-    private DokumentInfo byggDokumentInfo(ArkivFilType arkivFilType, VariantFormat variantFormat, Brevkode brevkode) {
-        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(),
-            List.of(new Dokumentvariant(variantFormat, "filnavn", arkivFilType.name(), true)),
-            List.of(new LogiskVedlegg("id", "tittel")));
+    private DokumentInfo byggDokumentInfo(ArkivFilType arkivFilType, Variantformat variantFormat, Brevkode brevkode) {
+        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(), Dokumentstatus.FERDIGSTILT, new Date(), "origJpId", SkjermingType.POL.name(),
+            List.of(new LogiskVedlegg("id", "tittel")),
+            List.of(new Dokumentvariant(variantFormat, "filnavn", "fluuid", arkivFilType.name(), true, SkjermingType.POL)));
     }
 
     // Hjelpebyggere
-    private Journalpost byggJournalpost(ArkivFilType arkivFilType, VariantFormat variantFormat) {
-        return byggJournalpost(TID_JOURNALFØRT, TID_JOURNALFØRT, Kommunikasjonsretning.UT,
+    private Journalpost byggJournalpost(ArkivFilType arkivFilType, Variantformat variantFormat) {
+        return byggJournalpost(TID_JOURNALFØRT, TID_JOURNALFØRT, Journalposttype.U,
             List.of(byggDokumentInfo(arkivFilType, variantFormat, Brevkode.UDEFINERT)));
     }
 
     private Journalpost byggJournalpostMedFlereDokumenter(List<DokumentInfo> dokumentInfoer) {
-        return byggJournalpost(TID_JOURNALFØRT, TID_JOURNALFØRT, Kommunikasjonsretning.UT, dokumentInfoer);
+        return byggJournalpost(TID_JOURNALFØRT, TID_JOURNALFØRT, Journalposttype.U, dokumentInfoer);
     }
 
     private Journalpost byggJournalpost(ArkivFilType arkivFilType,
-                                        VariantFormat variantFormat,
+                                        Variantformat variantFormat,
                                         Brevkode brevkode,
                                         LocalDateTime registrertTid,
                                         LocalDateTime journalførtTid,
-                                        Kommunikasjonsretning kommunikasjonsretning) {
-        return byggJournalpost(registrertTid, journalførtTid, kommunikasjonsretning,
+                                        Journalposttype journalposttype) {
+        return byggJournalpost(registrertTid, journalførtTid, journalposttype,
             List.of(byggDokumentInfo(arkivFilType, variantFormat, brevkode)));
     }
 
     private Journalpost byggJournalpost(ArkivFilType arkivFilType,
-                                        VariantFormat variantFormat,
+                                        Variantformat variantFormat,
                                         LocalDateTime registrertTid,
                                         LocalDateTime journalførtTid,
-                                        Kommunikasjonsretning kommunikasjonsretning) {
-        return byggJournalpost(registrertTid, journalførtTid, kommunikasjonsretning,
+                                        Journalposttype journalposttype) {
+        return byggJournalpost(registrertTid, journalførtTid, journalposttype,
             List.of(byggDokumentInfo(arkivFilType, variantFormat, Brevkode.UDEFINERT)));
+    }
+
+    private Date toDate(LocalDateTime dateTime) {
+        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 }

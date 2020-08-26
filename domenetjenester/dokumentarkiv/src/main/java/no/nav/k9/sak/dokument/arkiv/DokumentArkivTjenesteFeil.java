@@ -6,7 +6,7 @@ import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.HentDokumentQuery;
+import no.nav.vedtak.felles.integrasjon.saf.HentDokumentQuery;
 
 public interface DokumentArkivTjenesteFeil extends DeklarerteFeil {
 

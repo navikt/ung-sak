@@ -24,11 +24,18 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokum
 import no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.saf.AvsenderMottakerResponseProjection;
+import no.nav.saf.BrukerResponseProjection;
+import no.nav.saf.DokumentInfo;
+import no.nav.saf.DokumentInfoResponseProjection;
+import no.nav.saf.DokumentvariantResponseProjection;
+import no.nav.saf.Journalpost;
+import no.nav.saf.JournalpostQueryRequest;
+import no.nav.saf.JournalpostResponseProjection;
+import no.nav.saf.RelevantDatoResponseProjection;
+import no.nav.saf.SakResponseProjection;
+import no.nav.saf.Variantformat;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.JournalpostQuery;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.VariantFormat;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
@@ -95,7 +102,10 @@ public class HistorikkinnslagTjeneste {
         List<HistorikkinnslagDokumentLink> dokumentLinker = new ArrayList<>();
         if (journalpostId != null) {
             if (toggletNySafKlient) {
-                var journalpostIdData = safTjeneste.hentJournalpostInfo(new JournalpostQuery(journalpostId.getVerdi()));
+                var query = new JournalpostQueryRequest();
+                query.setJournalpostId(journalpostId.getVerdi());
+                JournalpostResponseProjection projection = byggDokumentoversiktResponseProjection();
+                var journalpostIdData = safTjeneste.hentJournalpostInfo(query, projection);
                 if (journalpostIdData == null || journalpostIdData.getDokumenter().isEmpty()) {
                     return;
                 }
@@ -105,7 +115,7 @@ public class HistorikkinnslagTjeneste {
                     .stream()
                     .filter(it -> it.getDokumentvarianter()
                         .stream()
-                        .anyMatch(ta -> Objects.equals(VariantFormat.ORIGINAL, ta.getVariantFormat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
+                        .anyMatch(ta -> Objects.equals(Variantformat.ORIGINAL, ta.getVariantformat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
                     .findFirst();
 
                 leggTilSøknadDokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
@@ -122,7 +132,7 @@ public class HistorikkinnslagTjeneste {
                     .stream()
                     .filter(it -> it.getDokumentvarianter()
                         .stream()
-                        .anyMatch(ta -> Objects.equals(VariantFormat.ORIGINAL, ta.getVariantFormat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
+                        .anyMatch(ta -> Objects.equals(Variantformat.ORIGINAL, ta.getVariantFormat()))) // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
                     .findFirst();
 
                 leggTilSøknadDokumentLenkeObsolete(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata, elektroniskSøknad);
@@ -257,4 +267,38 @@ public class HistorikkinnslagTjeneste {
         historikkRepository.lagre(historikkinnslag);
     }
 
+    private JournalpostResponseProjection byggDokumentoversiktResponseProjection() {
+        return new JournalpostResponseProjection()
+                .journalpostId()
+                .tittel()
+                .journalposttype()
+                .journalstatus()
+                .kanal()
+                .tema()
+                .behandlingstema()
+                .sak(new SakResponseProjection()
+                    .fagsaksystem()
+                    .fagsakId())
+                .bruker(new BrukerResponseProjection()
+                    .id()
+                    .type())
+                .avsenderMottaker(new AvsenderMottakerResponseProjection()
+                    .id()
+                    .type()
+                    .navn())
+                .dokumenter(new DokumentInfoResponseProjection()
+                    .dokumentInfoId()
+                    .tittel()
+                    .brevkode()
+                    .dokumentvarianter(new DokumentvariantResponseProjection()
+                        .variantformat()
+                        .filnavn()
+                        .filtype()
+                        .saksbehandlerHarTilgang()
+                    ))
+                .relevanteDatoer(new RelevantDatoResponseProjection()
+                    .dato()
+                    .datotype()
+                );
+    }
 }

@@ -192,7 +192,7 @@ spec:
     - name: VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT
       value: "true"
     - name: SAF_NY_FELLESKLIENT
-      value: "true"
+      value: "false"
 
 
     # Audit logging
