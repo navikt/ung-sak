@@ -37,7 +37,6 @@ import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.dokument.arkiv.ArkivDokument;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjenesteObsolete;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -52,7 +51,6 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.TekniskException;
-import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -70,8 +68,6 @@ public class DokumentRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private VirksomhetTjeneste virksomhetTjeneste;
     private BehandlingRepository behandlingRepository;
-    private DokumentArkivTjenesteObsolete dokumentArkivTjenesteObsolete;
-    private Boolean toggletNySafKlient;
 
     public DokumentRestTjeneste() {
         // For Rest-CDI
@@ -83,17 +79,13 @@ public class DokumentRestTjeneste {
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
                                 VirksomhetTjeneste virksomhetTjeneste,
-                                BehandlingRepository behandlingRepository,
-                                DokumentArkivTjenesteObsolete dokumentArkivTjenesteObsolete,
-                                @KonfigVerdi(value = "SAF_NY_FELLESKLIENT", defaultVerdi = "false") Boolean toggletNySafKlient) {
+                                BehandlingRepository behandlingRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.dokumentArkivTjenesteObsolete = dokumentArkivTjenesteObsolete;
-        this.toggletNySafKlient = toggletNySafKlient;
     }
 
     @GET
@@ -123,11 +115,7 @@ public class DokumentRestTjeneste {
                 .collect(Collectors.groupingBy(MottattDokument::getJournalpostId));
 
             List<ArkivJournalPost> journalPostList;
-            if (toggletNySafKlient) {
-                journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
-            } else {
-                journalPostList = dokumentArkivTjenesteObsolete.hentAlleDokumenterForVisning(saksnummer);
-            }
+            journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
             List<DokumentDto> dokumentResultat = new ArrayList<>();
             journalPostList.forEach(arkivJournalPost -> {
                 dokumentResultat.addAll(mapFraArkivJournalPost(arkivJournalPost, mottatteIMDokument, inntektsMeldinger));

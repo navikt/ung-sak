@@ -190,8 +190,6 @@ spec:
       value: "true"
     - name: "BRUKERUTBETALING_ENABLED"
       value: "true"
-    - name: SAF_NY_FELLESKLIENT
-      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
