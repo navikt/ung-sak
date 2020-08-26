@@ -4,6 +4,9 @@ import javax.enterprise.inject.spi.CDI;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.apache.kafka.streams.KafkaStreams;
+import org.jboss.resteasy.annotations.Query;
+import org.jboss.weld.util.reflection.Formats;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,23 +20,32 @@ public class AppStartupServletContextListener implements ServletContextListener 
     }
 
     private void startupLogging() {
-        // Henter dependent instance og destroyer etterpå.
-        AppStartupInfoLogger appStartupInfoLogger = null;
-        try {
-            appStartupInfoLogger = CDI.current().select(AppStartupInfoLogger.class).get();
-            appStartupInfoLogger.logAppStartupInfo();
-        } catch (Exception e) {
-            OppstartFeil.FACTORY.uventetExceptionVedOppstart(e).log(logger);
-            // men ikke re-throw - vi ønsker ikke at oppstart skal feile pga. feil i logging
-        } finally {
-            if (appStartupInfoLogger != null) {
-                CDI.current().destroy(appStartupInfoLogger);
-            }
-        }
+        log("******** OPPSTARTSINFO start: ********");
+        logVersjoner();
+        log("******** OPPSTARTSINFO slutt. ********");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         // ikke noe
+    }
+
+    private void logVersjoner() {
+        // Noen biblioteker er bundlet med jboss og kan skape konflikter, eller jboss overstyrer vår overstyring via modul classpath
+        // her logges derfor hva som er effektivt tilgjengelig av ulike biblioteker som kan være påvirket ved oppstart
+        log("Bibliotek: Hibernate: {}", org.hibernate.Version.getVersionString());
+        log("Bibliotek: Weld: {}", Formats.version(null));
+        log("Bibliotek: CDI: {}", CDI.class.getPackage().getImplementationVendor() + ":" + CDI.class.getPackage().getSpecificationVersion());
+        log("Bibliotek: Resteasy: {}", Query.class.getPackage().getImplementationVersion()); // tilfeldig valgt Resteasy klasse
+        log("Bibliotek: KafkaStreams: {}", KafkaStreams.class.getPackage().getImplementationVersion());
+    }
+
+    private void log(String msg, Object... args) {
+        if (args == null || args.length == 0) {
+            // skiller ut ellers logger logback ekstra paranteser og fnutter for tomme args
+            logger.info(msg);
+        } else {
+            logger.info(msg, args);
+        }
     }
 }
