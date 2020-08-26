@@ -241,8 +241,7 @@ public class MedlemDtoTjeneste {
     private List<InntektDto> lagInntektDto(InntektArbeidYtelseGrunnlag grunnlag, PersonopplysningerAggregat personopplysningerAggregat, BehandlingReferanse ref) {
         AktørId aktørId = ref.getAktørId();
         List<InntektDto> inntektDto = new ArrayList<>();
-        LocalDate stp = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet().orElse(null);
-        var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(stp).filterPensjonsgivende();
+        var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(LocalDate.now()).filterPensjonsgivende();
         mapAktørInntekt(inntektDto, aktørId, filter, personopplysningerAggregat);
         return inntektDto;
     }
