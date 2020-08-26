@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,13 +27,22 @@ import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.saf.AvsenderMottakerResponseProjection;
+import no.nav.saf.BrukerResponseProjection;
+import no.nav.saf.Datotype;
+import no.nav.saf.DokumentInfo;
+import no.nav.saf.DokumentInfoResponseProjection;
+import no.nav.saf.DokumentoversiktFagsakQueryRequest;
+import no.nav.saf.DokumentoversiktResponseProjection;
+import no.nav.saf.DokumentvariantResponseProjection;
+import no.nav.saf.FagsakInput;
+import no.nav.saf.Journalpost;
+import no.nav.saf.JournalpostResponseProjection;
+import no.nav.saf.LogiskVedleggResponseProjection;
+import no.nav.saf.RelevantDatoResponseProjection;
+import no.nav.saf.SakResponseProjection;
+import no.nav.vedtak.felles.integrasjon.saf.HentDokumentQuery;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.DokumentoversiktFagsakQuery;
-import no.nav.vedtak.felles.integrasjon.saf.graphql.HentDokumentQuery;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Datotype;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentoversiktFagsak;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {
@@ -105,9 +115,12 @@ public class DokumentArkivTjeneste {
     }
 
     public List<ArkivJournalPost> hentAlleJournalposterForSak(Saksnummer saksnummer) {
-        DokumentoversiktFagsakQuery query = new DokumentoversiktFagsakQuery(saksnummer.getVerdi(), Fagsystem.K9SAK.getOffisiellKode());
+        var query = new DokumentoversiktFagsakQueryRequest();
+        query.setFagsak(new FagsakInput(saksnummer.getVerdi(), Fagsystem.K9SAK.getOffisiellKode()));
+        query.setFoerste(1000);
+        var projection = byggDokumentoversiktResponseProjection();
 
-        DokumentoversiktFagsak oversikt = safTjeneste.dokumentoversiktFagsak(query);
+        var oversikt = safTjeneste.dokumentoversiktFagsak(query, projection);
 
         return Optional.ofNullable(oversikt.getJournalposter()).orElse(List.of())
             .stream()
@@ -155,7 +168,7 @@ public class DokumentArkivTjeneste {
             .medJournalpostId(new JournalpostId(journalpost.getJournalpostId()))
             .medBeskrivelse(journalpost.getTittel())
             .medTidspunkt(tidspunkt)
-            .medKommunikasjonsretning(Kommunikasjonsretning.fromKommunikasjonsretningCode(journalpost.getJournalposttype()));
+            .medKommunikasjonsretning(Kommunikasjonsretning.fromKommunikasjonsretningCode(journalpost.getJournalposttype().name()));
 
         var dokumenter = journalpost.getDokumenter();
         for (int i = 0; i < dokumenter.size(); i++) {
@@ -184,7 +197,7 @@ public class DokumentArkivTjeneste {
                 builder.leggTilTilgjengeligFormat(ArkivDokumentHentbart.Builder.ny()
                     .medArkivFilType(
                         innhold.getFiltype() != null ? ArkivFilType.finnForKodeverkEiersKode(innhold.getFiltype()) : ArkivFilType.UDEFINERT)
-                    .medVariantFormat(innhold.getVariantFormat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantFormat().name())
+                    .medVariantFormat(innhold.getVariantformat() != null ? VariantFormat.finnForKodeverkEiersKode(innhold.getVariantformat().name())
                         : VariantFormat.UDEFINERT)
                     .build());
             });
@@ -228,7 +241,50 @@ public class DokumentArkivTjeneste {
     private Optional<LocalDateTime> hentRelevantDato(Journalpost journalpost, Datotype datotype) {
         return Optional.ofNullable(journalpost.getRelevanteDatoer()).orElse(List.of()).stream()
             .filter(it -> it.getDatotype().equals(datotype))
-            .map(it -> it.getDato())
+            .map(it -> it.getDato().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
             .findFirst();
+    }
+
+    private DokumentoversiktResponseProjection byggDokumentoversiktResponseProjection() {
+        return new DokumentoversiktResponseProjection()
+            .journalposter(new JournalpostResponseProjection()
+                .journalpostId()
+                .tittel()
+                .journalposttype()
+                .journalstatus()
+                .kanal()
+                .tema()
+                .behandlingstema()
+                .sak(new SakResponseProjection()
+                    .arkivsaksnummer()
+                    .arkivsaksystem()
+                    .fagsaksystem()
+                    .fagsakId())
+                .bruker(new BrukerResponseProjection()
+                    .id()
+                    .type())
+                .avsenderMottaker(new AvsenderMottakerResponseProjection()
+                    .id()
+                    .type()
+                    .navn())
+                .journalfoerendeEnhet()
+                .dokumenter(new DokumentInfoResponseProjection()
+                    .dokumentInfoId()
+                    .tittel()
+                    .brevkode()
+                    .dokumentvarianter(new DokumentvariantResponseProjection()
+                        .variantformat()
+                        .filnavn()
+                        .filtype()
+                        .saksbehandlerHarTilgang()
+                    )
+                    .logiskeVedlegg(new LogiskVedleggResponseProjection()
+                        .tittel()))
+                .datoOpprettet()
+                .relevanteDatoer(new RelevantDatoResponseProjection()
+                    .dato()
+                    .datotype()
+                )
+                .eksternReferanseId());
     }
 }

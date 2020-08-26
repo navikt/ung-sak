@@ -26,11 +26,13 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.saf.DokumentInfo;
+import no.nav.saf.Dokumentvariant;
+import no.nav.saf.Journalpost;
+import no.nav.saf.SkjermingType;
+import no.nav.saf.Variantformat;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.DokumentInfo;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Dokumentvariant;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.Journalpost;
-import no.nav.vedtak.felles.integrasjon.saf.rest.model.VariantFormat;
+
 
 public class HistorikkinnslagTjenesteTest {
 
@@ -56,11 +58,13 @@ public class HistorikkinnslagTjenesteTest {
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, VariantFormat.ORIGINAL, VariantFormat.ARKIV);
-        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, VariantFormat.ORIGINAL);
-        var respons = new Journalpost(JOURNALPOST_ID.getVerdi(), null, null, null, null, null, null, null, null, null, null, List.of(hoveddokument, vedlegg), null, null, null);
+        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, Variantformat.ORIGINAL, Variantformat.ARKIV);
+        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, Variantformat.ORIGINAL);
+        var respons = new Journalpost();
+        respons.setJournalpostId(JOURNALPOST_ID.getVerdi());
+        respons.setDokumenter(List.of(hoveddokument, vedlegg));
 
-        when(journalTjeneste.hentJournalpostInfo(any())).thenReturn(respons);
+        when(journalTjeneste.hentJournalpostInfo(any(), any())).thenReturn(respons);
 
         // Act
         historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
@@ -100,10 +104,17 @@ public class HistorikkinnslagTjenesteTest {
         verify(historikkRepository, times(0)).lagre(any(Historikkinnslag.class));
     }
 
-    private DokumentInfo byggJournalMetadata(String dokumentId, VariantFormat... variantFormater) {
+    private DokumentInfo byggJournalMetadata(String dokumentId, Variantformat... variantFormater) {
         var varianter = Arrays.stream(variantFormater)
-            .map(variantFormat -> new Dokumentvariant(variantFormat, "asdf", VariantFormat.ORIGINAL.equals(variantFormat) ? ArkivFilType.XML.getKode() : ArkivFilType.PDF.getKode(), true))
+            .map(variantFormat -> new Dokumentvariant(variantFormat, "filnavn", "filuuid",
+                Variantformat.ORIGINAL.equals(variantFormat) ? ArkivFilType.XML.getKode() : ArkivFilType.PDF.getKode(),
+                true, SkjermingType.POL))
             .collect(Collectors.toList());
-        return new DokumentInfo(dokumentId, "asdf", DokumentTypeId.LEGEERKLÆRING.getOffisiellKode(), varianter, List.of());
+
+        var dokumentInfo = new DokumentInfo();
+        dokumentInfo.setDokumentvarianter(varianter);
+        dokumentInfo.setDokumentInfoId(dokumentId);
+        dokumentInfo.setBrevkode(DokumentTypeId.LEGEERKLÆRING.getOffisiellKode());
+        return dokumentInfo;
     }
 }

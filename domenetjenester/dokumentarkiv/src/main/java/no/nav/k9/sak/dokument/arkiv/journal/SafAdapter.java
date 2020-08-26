@@ -6,6 +6,8 @@ import javax.inject.Inject;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.saf.SafTjenesteObsolete;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.saf.JournalpostQueryRequest;
+import no.nav.saf.JournalpostResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
@@ -32,9 +34,11 @@ public class SafAdapter {
     public ArkivJournalPost hentInngåendeJournalpostHoveddokument(JournalpostId journalpostId) {
         String kanal;
         if (toggletNySafKlient) {
-            no.nav.vedtak.felles.integrasjon.saf.graphql.JournalpostQuery query = new no.nav.vedtak.felles.integrasjon.saf.graphql.JournalpostQuery(journalpostId.getVerdi());
-            var journalpost = safTjeneste.hentJournalpostInfo(query);
-            kanal = journalpost.getKanal();
+            var query = new JournalpostQueryRequest();
+            query.setJournalpostId(journalpostId.getVerdi());
+            JournalpostResponseProjection projection = new JournalpostResponseProjection().kanal();
+            var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
+            kanal = journalpost.getKanal().name();
         } else {
             no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery query = new no.nav.k9.sak.dokument.arkiv.saf.graphql.JournalpostQuery(journalpostId.getVerdi());
             var journalpost = safTjenesteObsolete.hentJournalpostInfo(query);
