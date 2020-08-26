@@ -36,10 +36,8 @@ class MapInntekter {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
-    private List<InntektDto> finnPgiInntekterFørStp(InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse ref) {
-        AktørId aktørId = ref.getAktørId();
-        LocalDate stp = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet().orElse(null);
-        var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(stp).filterPensjonsgivende();
+    private List<InntektDto> finnPgiInntekterFørStp(InntektArbeidYtelseGrunnlag grunnlag, AktørId aktørId, LocalDate førDato) {
+        var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(førDato).filterPensjonsgivende();
         List<InntektDto> inntektDto = mapAktørInntekt(filter);
         return inntektDto;
     }
@@ -98,9 +96,9 @@ class MapInntekter {
         return avkortetNavn + "..." + "(" + formatertFødselsdato + ")";
     }
 
-    InntekterDto hentPgiInntekterFørStp(BehandlingReferanse ref) {
+    InntekterDto hentPgiInntekterFørStp(BehandlingReferanse ref, LocalDate førDato) {
         var inntekter = iayTjeneste.finnGrunnlag(ref.getBehandlingId())
-            .map(aggregat -> finnPgiInntekterFørStp(aggregat, ref)).orElse(Collections.emptyList());
+            .map(aggregat -> finnPgiInntekterFørStp(aggregat, ref.getAktørId(), førDato)).orElse(Collections.emptyList());
         return new InntekterDto(inntekter);
     }
 

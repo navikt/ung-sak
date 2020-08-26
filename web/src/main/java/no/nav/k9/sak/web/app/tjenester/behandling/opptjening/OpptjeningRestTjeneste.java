@@ -3,6 +3,8 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opptjening;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -69,9 +71,9 @@ public class OpptjeningRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public InntekterDto getInntekt(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        Long behandlingId = behandling.getId();
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId));
-        return mapInntekter.hentPgiInntekterFørStp(ref);
+        var ref = BehandlingReferanse.fra(behandling);
+        LocalDate førDato = LocalDate.now();
+        return mapInntekter.hentPgiInntekterFørStp(ref, førDato);
     }
 
     @GET
