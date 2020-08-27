@@ -232,7 +232,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     public static class OpprettManuellRevurdering implements AbacDto {
         
         @NotNull
-        @Pattern(regexp = "^[\\p{Alnum} ]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+        @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
         private String saksnumre;
         
         public OpprettManuellRevurdering(String saksnumre) {
