@@ -299,7 +299,7 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
         dto.leggTil(get(HistorikkRestTjeneste.PATH, "historikk", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
-        
+
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));
         dto.leggTil(getFraMap(VilkårRestTjeneste.V3_PATH, "vilkar-v3", uuidQueryParams));
 
@@ -322,6 +322,7 @@ public class BehandlingDtoTjeneste {
         lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
         lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
+        lagTilgjengeligeVedtakbrevlink(behandling).ifPresent(dto::leggTil);
 
         lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
     }
@@ -438,6 +439,14 @@ public class BehandlingDtoTjeneste {
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
         return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
+    }
+
+    private Optional<ResourceLink> lagTilgjengeligeVedtakbrevlink(Behandling behandling) {
+        return Optional.of(ResourceLink.getFraMap(
+            "/k9/formidling/api/brev/tilgjengeligevedtaksbrev",
+            "tilgjengelige-vedtaksbrev",
+            Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString())
+        ));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
