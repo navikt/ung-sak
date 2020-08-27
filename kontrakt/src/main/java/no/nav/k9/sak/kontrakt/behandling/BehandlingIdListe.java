@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -15,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.abac.AbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -33,5 +37,10 @@ public class BehandlingIdListe {
 
     public List<BehandlingIdDto> getBehandlinger() {
         return Collections.unmodifiableList(behandlinger);
+    }
+
+    @AbacAttributt(value = "behandlingUuid")
+    public List<UUID> getBehandlingUuid() {
+        return behandlinger.stream().map(BehandlingIdDto::getBehandlingUuid).collect(Collectors.toList());
     }
 }

@@ -39,7 +39,7 @@ public class BehandlingStatusListe {
     public BehandlingStatusListe(@JsonProperty(value = "behandlinger", required = true) @NotNull @Valid List<StatusDto> behandlinger) {
         this.behandlinger = behandlinger;
     }
-
+    
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.PUBLIC_ONLY, fieldVisibility = Visibility.ANY)
