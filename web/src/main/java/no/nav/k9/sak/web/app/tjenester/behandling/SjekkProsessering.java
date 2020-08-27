@@ -75,7 +75,6 @@ public class SjekkProsessering {
         BehandlingStatus behandlingStatus = behandling.getStatus();
         return BehandlingStatus.UTREDES.equals(behandlingStatus)
             && !behandling.isBehandlingPåVent()
-            && harRolleSaksbehandler()
             && behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling);
     }
 
@@ -89,11 +88,12 @@ public class SjekkProsessering {
     /**
      * Betinget sjekk om innhent registeropplysninger (conditionally) og kjør prosess. Alt gjøres asynkront i form av prosess tasks.
      * Intern sjekk på om hvorvidt registeropplysninger må reinnhentes.
+     * @param sjekkSaksbehandler 
      *
      * @return optional Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
-        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
+    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean sjekkSaksbehandler) {
+        if (!skalInnhenteRegisteropplysningerPåNytt(behandling) || (sjekkSaksbehandler && !harRolleSaksbehandler())) {
             return Optional.empty();
         }
 
