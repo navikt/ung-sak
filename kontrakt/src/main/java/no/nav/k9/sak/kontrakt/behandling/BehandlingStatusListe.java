@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -28,6 +29,7 @@ public class BehandlingStatusListe {
 
     @JsonProperty(value = "behandlinger", required = true)
     @NotNull
+    @Size(min = 0, max = 1000)
     @Valid
     private List<StatusDto> behandlinger = new ArrayList<>();
 
@@ -39,7 +41,7 @@ public class BehandlingStatusListe {
     public BehandlingStatusListe(@JsonProperty(value = "behandlinger", required = true) @NotNull @Valid List<StatusDto> behandlinger) {
         this.behandlinger = behandlinger;
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.PUBLIC_ONLY, fieldVisibility = Visibility.ANY)

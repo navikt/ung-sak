@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -29,6 +30,7 @@ public class BehandlingIdListe {
     @JsonProperty(value = "behandlinger", required = true)
     @NotEmpty
     @Valid
+    @Size(min = 1, max = 1000)
     private List<BehandlingIdDto> behandlinger = new ArrayList<>();
 
     public BehandlingIdListe(@JsonProperty(value = "behandlinger", required = true) @NotEmpty @Valid List<BehandlingIdDto> behandlinger) {
