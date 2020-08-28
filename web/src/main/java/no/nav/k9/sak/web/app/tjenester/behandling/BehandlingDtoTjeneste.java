@@ -413,6 +413,7 @@ public class BehandlingDtoTjeneste {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH, "beregningsgrunnlag", queryParams));
     }
+
     private Optional<ResourceLink> lagBeregningsgrunnlagAlleLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_ALLE, "beregningsgrunnlag-alle", queryParams));
@@ -445,7 +446,8 @@ public class BehandlingDtoTjeneste {
         return Optional.of(ResourceLink.getFraMap(
             "/k9/formidling/api/brev/tilgjengeligevedtaksbrev",
             "tilgjengelige-vedtaksbrev",
-            Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString())
+            Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString(),
+                "sakstype", behandling.getFagsakYtelseType().getKode())
         ));
     }
 
