@@ -117,17 +117,17 @@ public class VilkårBuilderTest {
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
 
-        var fagsakLinje = new VilkårBuilder()
+        var fullstendigTidslinje = new VilkårBuilder()
             .somDummy()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
-        fagsakLinje.leggTil(fagsakLinje.hentBuilderFor(andreSkjæringstidspunkt, sluttAndrePeriode));
+        fullstendigTidslinje.leggTil(fullstendigTidslinje.hentBuilderFor(andreSkjæringstidspunkt, sluttAndrePeriode));
 
         var tilbakestill = new VilkårBuilder(vilkår)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7)
-            .medFagsaksTidslinje(fagsakLinje.getTidslinje())
+            .medFullstendigTidslinje(fullstendigTidslinje.getTidslinje())
             .tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, sluttFørstePeriode));
 
         var tilbakestiltVilkår = tilbakestill.build();

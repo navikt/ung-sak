@@ -92,13 +92,13 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
-        var fagsakTidslinje = perioderTilVurderingTjeneste.utledFagsakPerioder(behandling.getId());
-        var fagsaksTidslinje = fagsaksTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fagsakTidslinje);
+        var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
+        var fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
 
         vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
-            .medFagsakTidslinje(fagsaksTidslinje)
+            .medFagsakTidslinje(fullstendigTidslinje)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
@@ -109,19 +109,19 @@ public class InitierVilkårSteg implements BehandlingSteg {
     /**
      * Utleder tidslinje for hele fagsaken med vilkårsreglene
      *
-     * @param utledetAvstand
-     * @param kantIKantVurderer
-     * @param fagsakTidslinje
-     * @return
+     * @param utledetAvstand    avstand for mellomliggende perioder
+     * @param kantIKantVurderer kant i kant vurderer
+     * @param allePerioder      alle vilkårsperioder for fagsaken
+     * @return dummy vilkårsbuilder for, null for ikke implemterte ytelser
      */
-    private VilkårBuilder fagsaksTidslinje(int utledetAvstand, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> fagsakTidslinje) {
-        if (fagsakTidslinje == null) {
+    private VilkårBuilder fullstendigTidslinje(int utledetAvstand, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> allePerioder) {
+        if (allePerioder == null) {
             return null;
         }
         var vb = new VilkårBuilder()
             .medKantIKantVurderer(kantIKantVurderer)
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand);
-        for (DatoIntervallEntitet datoIntervallEntitet : fagsakTidslinje) {
+        for (DatoIntervallEntitet datoIntervallEntitet : allePerioder) {
             vb.leggTil(vb.hentBuilderFor(datoIntervallEntitet));
         }
         return vb;

@@ -69,7 +69,7 @@ public class VilkårResultatBuilder {
 
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder) {
         if (fagsakTidslinje != null) {
-            vilkårBuilder.medFagsaksTidslinje(fagsakTidslinje);
+            vilkårBuilder.medFullstendigTidslinje(fagsakTidslinje);
         }
         kladd.leggTilVilkår(vilkårBuilder.build());
         return this;

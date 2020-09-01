@@ -244,7 +244,7 @@ public class VilkårBuilder {
             .collect(Collectors.toSet());
     }
 
-    VilkårBuilder medFagsaksTidslinje(LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje) {
+    VilkårBuilder medFullstendigTidslinje(LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje) {
         this.fagsakTidslinje = fagsakTidslinje;
         return this;
     }

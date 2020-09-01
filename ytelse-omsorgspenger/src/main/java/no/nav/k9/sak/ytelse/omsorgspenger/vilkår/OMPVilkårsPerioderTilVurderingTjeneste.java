@@ -70,7 +70,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFagsakPerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
         var fraværPåSak = new HashSet<>(trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandlingRepository.hentBehandling(behandlingId)));
 
         return søktePerioder.utledPeriodeFraSøknadsPerioder(fraværPåSak);
