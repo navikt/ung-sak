@@ -1,4 +1,7 @@
 package no.nav.k9.sak.domene.arbeidsgiver;
+
+import static no.nav.k9.StringTrimmer.trim;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
@@ -74,7 +77,7 @@ public class VirksomhetTjeneste {
         Objects.requireNonNull(orgNummer, "orgNummer"); // NOSONAR
         var org = eregRestKlient.hentOrganisasjon(orgNummer);
         var builder = Virksomhet.getBuilder()
-            .medNavn(org.getNavn())
+            .medNavn(trim(org.getNavn()))
             .medRegistrert(org.getRegistreringsdato())
             .medOrgnr(org.getOrganisasjonsnummer());
         if (OrganisasjonstypeEReg.VIRKSOMHET.equals(org.getType())) {
