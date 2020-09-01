@@ -23,7 +23,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
-import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -104,11 +103,6 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse, LocalDate skjæringstidspunkt) {
-        return null;
-    }
-
-    @Override
     public BeregningsgrunnlagListe hentBeregningsgrunnlagListeDto(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
         return null;
     }
@@ -128,11 +122,6 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
 
         behGrunnlag.push(beregningsgrunnlagGrunnlag.getEksternReferanse());
         grunnlag.add(beregningsgrunnlagGrunnlag);
-    }
-
-    @Override
-    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID uuid) {
-        return Optional.empty();
     }
 
     @Override

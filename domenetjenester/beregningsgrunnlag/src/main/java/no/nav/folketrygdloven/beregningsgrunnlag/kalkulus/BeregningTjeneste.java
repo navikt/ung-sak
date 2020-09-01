@@ -3,7 +3,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -57,8 +56,6 @@ public interface BeregningTjeneste {
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
-    BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
-
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
 
     Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
@@ -66,8 +63,6 @@ public interface BeregningTjeneste {
     Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
     List<BeregningsgrunnlagKobling> hentKoblinger(BehandlingReferanse ref);
-
-    Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID bgGrunnlagsVersjon);
 
     /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
      *

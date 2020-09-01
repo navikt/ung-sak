@@ -116,13 +116,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
-
-        return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagDto(ref, bgReferanse, skjæringstidspunkt);
-    }
-
-    @Override
     public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref) {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
@@ -179,16 +172,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .map(it -> new BeregningsgrunnlagKobling(it, finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), it, true, false)))
             .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(BehandlingReferanse ref, LocalDate skjæringstidspunkt, UUID bgGrunnlagsVersjon) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
-
-        if (bgReferanse.isEmpty()) {
-            return Optional.empty();
-        }
-        return finnTjeneste(ref.getFagsakYtelseType()).hentBeregningsgrunnlagForId(bgReferanse.get(), ref.getFagsakYtelseType(), bgGrunnlagsVersjon);
     }
 
     @Override
