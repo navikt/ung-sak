@@ -9,8 +9,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
@@ -110,12 +108,16 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
     /**
      * Utleder tidslinje for hele fagsaken med vilkårsreglene
+     *
      * @param utledetAvstand
      * @param kantIKantVurderer
      * @param fagsakTidslinje
      * @return
      */
     private VilkårBuilder fagsaksTidslinje(int utledetAvstand, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> fagsakTidslinje) {
+        if (fagsakTidslinje == null) {
+            return null;
+        }
         var vb = new VilkårBuilder()
             .medKantIKantVurderer(kantIKantVurderer)
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand);

@@ -319,6 +319,9 @@ public class VilkårBuilder {
     }
 
     LocalDateTimeline<WrappedVilkårPeriode> getTidslinje() {
+        if (!dummy) {
+            throw new IllegalStateException("Ikke dummy så kan ikke hente ut ");
+        }
         bygget = true;
         if (!tilbakestiltePerioder.isEmpty()) {
             justereUtfallVedTilbakestilling();

@@ -137,7 +137,11 @@ public class VilkårResultatBuilder {
     }
 
     public VilkårResultatBuilder medFagsakTidslinje(VilkårBuilder vilkårBuilder) {
-        this.fagsakTidslinje = vilkårBuilder.getTidslinje();
+        if (vilkårBuilder != null) {
+            this.fagsakTidslinje = vilkårBuilder.getTidslinje();
+        } else {
+            this.fagsakTidslinje = null;
+        }
         return this;
     }
 }

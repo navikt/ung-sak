@@ -16,7 +16,7 @@ public interface VilkårsPerioderTilVurderingTjeneste {
     }
 
     default NavigableSet<DatoIntervallEntitet> utledFagsakPerioder(Long behandlingId) {
-        return new TreeSet<>();
+        return null;
     }
 
     NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
