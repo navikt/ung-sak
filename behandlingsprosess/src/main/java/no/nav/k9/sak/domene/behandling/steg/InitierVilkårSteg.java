@@ -119,6 +119,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
             return null;
         }
         var vb = new VilkårBuilder()
+            .somDummy()
             .medKantIKantVurderer(kantIKantVurderer)
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand);
         for (DatoIntervallEntitet datoIntervallEntitet : allePerioder) {
