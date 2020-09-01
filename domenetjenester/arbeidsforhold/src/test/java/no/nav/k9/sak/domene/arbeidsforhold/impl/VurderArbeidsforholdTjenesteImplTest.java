@@ -71,22 +71,22 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt() {
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
-        final Behandling behandling = scenario.lagre(repositoryProvider);
+        var behandling = scenario.lagre(repositoryProvider);
 
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        final InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
-        final YrkesaktivitetBuilder yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
+        var arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        var yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         var ref = EksternArbeidsforholdRef.ref("ref");
         var internRef = builder.medNyInternArbeidsforholdRef(virksomhet, ref);
         yrkesBuilder.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef);
-        final AktivitetsAvtaleBuilder avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
         avtaleBuilder.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)))
             .medProsentsats(BigDecimal.TEN);
-        final AktivitetsAvtaleBuilder avtaleBuilder1 = yrkesBuilder.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder1 = yrkesBuilder.getAktivitetsAvtaleBuilder();
         avtaleBuilder1.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)));
         yrkesBuilder.leggTilAktivitetsAvtale(avtaleBuilder).leggTilAktivitetsAvtale(avtaleBuilder1);
         arbeidBuilder.leggTilYrkesaktivitet(yrkesBuilder);
@@ -114,22 +114,22 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_2() {
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
-        final Behandling behandling = scenario.lagre(repositoryProvider);
+        var behandling = scenario.lagre(repositoryProvider);
 
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        final InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
-        final YrkesaktivitetBuilder yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
+        var arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        var yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         var ref = EksternArbeidsforholdRef.ref("ref");
         var internRef = builder.medNyInternArbeidsforholdRef(virksomhet, ref);
         yrkesBuilder.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef);
-        final AktivitetsAvtaleBuilder avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
         avtaleBuilder.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)))
             .medProsentsats(BigDecimal.TEN);
-        final AktivitetsAvtaleBuilder avtaleBuilder1 = yrkesBuilder.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder1 = yrkesBuilder.getAktivitetsAvtaleBuilder();
         avtaleBuilder1.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)));
         yrkesBuilder.leggTilAktivitetsAvtale(avtaleBuilder)
             .leggTilAktivitetsAvtale(avtaleBuilder1);
@@ -153,7 +153,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         assertThat(vurder).isEmpty();
     }
 
-    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforhold(final Behandling behandling) {
+    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforhold(Behandling behandling) {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
         var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(behandling.getFagsak().getSaksnummer());
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling), iayGrunnlag, sakInntektsmeldinger, true);
@@ -162,37 +162,37 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     @Test
     public void skal_ikke_gi_aksjonspunkt_3() {
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        final Behandling behandling = scenario.lagre(repositoryProvider);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var behandling = scenario.lagre(repositoryProvider);
 
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        final InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
-        final String orgnummer = "123123123";
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet(orgnummer));
+        var builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
+        var arbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        String orgnummer = "123123123";
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet(orgnummer));
         var ref = EksternArbeidsforholdRef.ref("ref");
         var internRef = builder.medNyInternArbeidsforholdRef(virksomhet, ref);
 
-        final YrkesaktivitetBuilder yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef, virksomhet),
+        var yrkesBuilder = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef, virksomhet),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesBuilder.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef);
-        final AktivitetsAvtaleBuilder avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder = yrkesBuilder.getAktivitetsAvtaleBuilder();
         avtaleBuilder.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)))
             .medProsentsats(BigDecimal.TEN);
-        final AktivitetsAvtaleBuilder avtaleBuilder3 = yrkesBuilder.getAktivitetsAvtaleBuilder();
-        avtaleBuilder3.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)));
+        var avtaleBuilder3 = yrkesBuilder.getAktivitetsAvtaleBuilder()
+            .medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)));
         yrkesBuilder.leggTilAktivitetsAvtale(avtaleBuilder).leggTilAktivitetsAvtale(avtaleBuilder3);
         arbeidBuilder.leggTilYrkesaktivitet(yrkesBuilder);
         var ref1 = EksternArbeidsforholdRef.ref("ref1");
         var internRef1 = builder.medNyInternArbeidsforholdRef(virksomhet, ref1);
-        final YrkesaktivitetBuilder yrkesBuilder1 = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef1, virksomhet),
+        var yrkesBuilder1 = arbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(internRef1, virksomhet),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         yrkesBuilder1.medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(internRef1);
-        final AktivitetsAvtaleBuilder avtaleBuilder1 = yrkesBuilder1.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder1 = yrkesBuilder1.getAktivitetsAvtaleBuilder();
         avtaleBuilder1.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)))
             .medProsentsats(BigDecimal.TEN);
-        final AktivitetsAvtaleBuilder avtaleBuilder2 = yrkesBuilder1.getAktivitetsAvtaleBuilder();
+        var avtaleBuilder2 = yrkesBuilder1.getAktivitetsAvtaleBuilder();
         avtaleBuilder2.medPeriode(DatoIntervallEntitet.fraOgMed(IDAG.minusYears(1)));
         yrkesBuilder1.leggTilAktivitetsAvtale(avtaleBuilder1).leggTilAktivitetsAvtale(avtaleBuilder2);
         arbeidBuilder.leggTilYrkesaktivitet(yrkesBuilder1);
@@ -211,10 +211,10 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_og_aareg_matcher() {
         // Arrange
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
 
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var behandling = scenario.lagre(repositoryProvider);
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         var ref = EksternArbeidsforholdRef.ref("ref");
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ref);
@@ -228,9 +228,9 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_inntektsmelding_uten_arbeidsforholdId() {
         // Arrange
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        final Behandling behandling = scenario.lagre(repositoryProvider);
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var behandling = scenario.lagre(repositoryProvider);
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         var ref = EksternArbeidsforholdRef.ref("ref");
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, null);
@@ -244,10 +244,10 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_ikke_gi_autopunkt_når_arbeidforholdId_mangler_fra_aareg() {
         // Arrange
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        final Behandling behandling = scenario.lagre(repositoryProvider);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         opprettAktørArbeidMedYrkesaktivitet(behandling, null, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ref);
 
@@ -260,11 +260,11 @@ public class VurderArbeidsforholdTjenesteImplTest {
     @Test
     public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding_uten_arbId() {
         // Arrange
-        final var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        final Behandling behandling = scenario.lagre(repositoryProvider);
+        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
+        var behandling = scenario.lagre(repositoryProvider);
         var ref = EksternArbeidsforholdRef.ref("ref");
         var ukjentRef = EksternArbeidsforholdRef.ref("ukjentRef");
-        final Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
+        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
         // Act
@@ -326,8 +326,8 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     private void sendNyInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef ref) {
 
-        JournalpostId journalpostId = new JournalpostId(1L);
-        InntektsmeldingBuilder inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
+        var journalpostId = new JournalpostId(1L);
+        var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdId(ref)
             .medBeløp(BigDecimal.TEN)
@@ -361,18 +361,18 @@ public class VurderArbeidsforholdTjenesteImplTest {
     }
 
     private void avsluttBehandlingOgFagsak(Behandling behandling) {
-        BehandlingLås lås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);
+        var lås = repositoryProvider.getBehandlingRepository().taSkriveLås(behandling);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         repositoryProvider.getBehandlingRepository().lagre(behandling, lås);
-        FagsakRepository fagsakRepository = repositoryProvider.getFagsakRepository();
+        var fagsakRepository = repositoryProvider.getFagsakRepository();
         fagsakRepository.oppdaterFagsakStatus(behandling.getFagsakId(), FagsakStatus.LØPENDE);
     }
 
     private Behandling opprettRevurderingsbehandling(Behandling opprinneligBehandling) {
-        BehandlingType behandlingType = BehandlingType.REVURDERING;
-        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
-        Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
+        var behandlingType = BehandlingType.REVURDERING;
+        var revurderingÅrsak = BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
+        var revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlingÅrsak(revurderingÅrsak).build();
         repositoryProvider.getBehandlingRepository().lagre(revurdering, repositoryProvider.getBehandlingRepository().taSkriveLås(revurdering));
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(opprinneligBehandling.getId(), revurdering.getId());

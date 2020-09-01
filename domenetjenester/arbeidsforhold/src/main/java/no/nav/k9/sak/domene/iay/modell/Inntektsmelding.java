@@ -393,7 +393,7 @@ public class Inntektsmelding implements IndexKey {
     }
 
     public boolean erNyereEnn(Inntektsmelding andre) {
-        return COMP_REKKEFØLGE.compare(this, andre) >= 0;
+        return gjelderSammeArbeidsforhold(andre) && COMP_REKKEFØLGE.compare(this, andre) > 0;
     }
 
 }
