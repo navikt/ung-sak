@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg;
 
+import java.util.NavigableSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -7,6 +8,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+
+import org.jetbrains.annotations.NotNull;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -19,9 +22,12 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -87,15 +93,35 @@ public class InitierVilkårSteg implements BehandlingSteg {
         }
 
         var perioderTilVurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType()).orElseThrow();
-        var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
+        var fagsakTidslinje = perioderTilVurderingTjeneste.utledFagsakPerioder(behandling.getId());
+        var fagsaksTidslinje = fagsaksTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fagsakTidslinje);
+        var vilkårPeriodeMap = perioderTilVurderingTjeneste.utled(behandling.getId());
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
 
         vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
+            .medFagsakTidslinje(fagsaksTidslinje)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
 
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+    }
+
+    /**
+     * Utleder tidslinje for hele fagsaken med vilkårsreglene
+     * @param utledetAvstand
+     * @param kantIKantVurderer
+     * @param fagsakTidslinje
+     * @return
+     */
+    private VilkårBuilder fagsaksTidslinje(int utledetAvstand, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> fagsakTidslinje) {
+        var vb = new VilkårBuilder()
+            .medKantIKantVurderer(kantIKantVurderer)
+            .medMaksMellomliggendePeriodeAvstand(utledetAvstand);
+        for (DatoIntervallEntitet datoIntervallEntitet : fagsakTidslinje) {
+            vb.leggTil(vb.hentBuilderFor(datoIntervallEntitet));
+        }
+        return vb;
     }
 }

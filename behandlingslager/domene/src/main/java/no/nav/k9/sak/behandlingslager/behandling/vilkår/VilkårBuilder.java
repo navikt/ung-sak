@@ -26,8 +26,10 @@ public class VilkårBuilder {
 
     private final Vilkår vilkåret;
     private final NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder = new TreeSet<>();
+    private boolean dummy = false;
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private LocalDateTimeline<WrappedVilkårPeriode> vilkårTidslinje;
+    private LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje = null;
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
 
@@ -66,6 +68,16 @@ public class VilkårBuilder {
             .map(DatoIntervallEntitet::getTomDato)
             .max(LocalDate::compareTo)
             .orElse(Tid.TIDENES_ENDE);
+    }
+
+    /**
+     * Markerer at denne ikke skal legges til i settet med vilkår
+     *
+     * @return builder
+     */
+    public VilkårBuilder somDummy() {
+        dummy = true;
+        return this;
     }
 
     public VilkårBuilder medType(VilkårType type) {
@@ -194,6 +206,9 @@ public class VilkårBuilder {
      */
     public Vilkår build() {
         validerBuilder();
+        if (dummy) {
+            throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
+        }
         if (!tilbakestiltePerioder.isEmpty()) {
             justereUtfallVedTilbakestilling();
         }
@@ -203,6 +218,9 @@ public class VilkårBuilder {
         bygget = true;
         if (kantIKantVurderer.erKomprimerbar()) {
             vilkårTidslinje = vilkårTidslinje.compress();
+        }
+        if (fagsakTidslinje != null) {
+            vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
         }
         var vilkårsPerioderRaw = vilkårTidslinje
             .toSegments()
@@ -214,6 +232,21 @@ public class VilkårBuilder {
         var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw);
         vilkåret.setPerioder(vilkårsPerioder);
         return vilkåret;
+    }
+
+    private Set<DatoIntervallEntitet> toSegments(LocalDateTimeline<WrappedVilkårPeriode> tidslinje) {
+        return tidslinje.toSegments()
+            .stream()
+            .filter(it -> it.getValue() != null)
+            .map(this::opprettHoldKonsistens)
+            .map(WrappedVilkårPeriode::getVilkårPeriode)
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toSet());
+    }
+
+    VilkårBuilder medFagsaksTidslinje(LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje) {
+        this.fagsakTidslinje = fagsakTidslinje;
+        return this;
     }
 
     private void justereUtfallVedTilbakestilling() {
@@ -283,5 +316,16 @@ public class VilkårBuilder {
 
     private boolean enAvPeriodeneErTilVurdering(VilkårPeriode periode, VilkårPeriode vilkårPeriode) {
         return Utfall.IKKE_VURDERT.equals(periode.getUtfall()) || Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall());
+    }
+
+    LocalDateTimeline<WrappedVilkårPeriode> getTidslinje() {
+        bygget = true;
+        if (!tilbakestiltePerioder.isEmpty()) {
+            justereUtfallVedTilbakestilling();
+        }
+        if (!vilkårTidslinje.isContinuous()) {
+            kobleSammenMellomliggendeVilkårsPerioder();
+        }
+        return vilkårTidslinje;
     }
 }

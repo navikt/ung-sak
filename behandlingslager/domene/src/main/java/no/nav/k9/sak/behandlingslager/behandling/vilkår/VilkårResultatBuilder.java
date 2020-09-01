@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -28,6 +29,7 @@ public class VilkårResultatBuilder {
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private boolean built;
     private DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+    private LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje = null;
 
     public VilkårResultatBuilder() {
         super();
@@ -66,6 +68,9 @@ public class VilkårResultatBuilder {
     }
 
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder) {
+        if (fagsakTidslinje != null) {
+            vilkårBuilder.medFagsaksTidslinje(fagsakTidslinje);
+        }
         kladd.leggTilVilkår(vilkårBuilder.build());
         return this;
     }
@@ -128,6 +133,11 @@ public class VilkårResultatBuilder {
 
     public VilkårResultatBuilder medBoundry(DatoIntervallEntitet periode) {
         this.boundry = periode;
+        return this;
+    }
+
+    public VilkårResultatBuilder medFagsakTidslinje(VilkårBuilder vilkårBuilder) {
+        this.fagsakTidslinje = vilkårBuilder.getTidslinje();
         return this;
     }
 }

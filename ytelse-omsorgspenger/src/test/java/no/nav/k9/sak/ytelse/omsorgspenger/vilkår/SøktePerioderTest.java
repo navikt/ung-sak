@@ -20,7 +20,7 @@ public class SøktePerioderTest {
         var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusWeeks(6), LocalDate.now().minusDays(5), UttakArbeidType.ARBEIDSTAKER, Duration.ofMinutes(450)),
             new OppgittFraværPeriode(LocalDate.now().minusDays(5), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Duration.ofMinutes(450)));
 
-        var vilkårsPerioderFraSøktePerioder = søktePerioder.utledPeriodeFraSøknadsPerioder(oppgittFravær);
+        var vilkårsPerioderFraSøktePerioder = søktePerioder.utledPeriodeFraSøknadsPerioder(oppgittFravær.getPerioder());
 
         assertThat(vilkårsPerioderFraSøktePerioder).hasSize(1);
         assertThat(vilkårsPerioderFraSøktePerioder.iterator().next()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(6), LocalDate.now()));
