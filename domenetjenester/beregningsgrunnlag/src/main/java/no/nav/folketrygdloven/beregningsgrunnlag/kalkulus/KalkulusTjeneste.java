@@ -42,7 +42,6 @@ import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagGrunnlagForReferanseRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
@@ -51,7 +50,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
-import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -79,7 +77,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 /**
- * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
+ * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
+ * (https://github.com/navikt/ft-kalkulus/)
  */
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -161,12 +160,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse, LocalDate skjæringstidspunkt) {
-        HentBeregningsgrunnlagDtoForGUIRequest request = lagHentBeregningsgrunnlagRequest(bgReferanse, referanse, skjæringstidspunkt);
-        return restTjeneste.hentBeregningsgrunnlagDto(request);
-    }
-
-    @Override
     public BeregningsgrunnlagListe hentBeregningsgrunnlagListeDto(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
         HentBeregningsgrunnlagDtoListeForGUIRequest request = lagHentBeregningsgrunnlagListeRequest(referanse, bgReferanser);
         return restTjeneste.hentBeregningsgrunnlagDto(request);
@@ -216,8 +209,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
             bgReferanse,
             ytelseSomSkalBeregnes,
-            false
-        );
+            false);
         BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlag(request);
         if (beregningsgrunnlagGrunnlagDto == null) {
             return Optional.empty();
@@ -231,30 +223,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID bgGrunnlagsVersjon) {
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
-        HentBeregningsgrunnlagGrunnlagForReferanseRequest request = new HentBeregningsgrunnlagGrunnlagForReferanseRequest(
-            bgReferanse,
-            ytelseSomSkalBeregnes,
-            bgGrunnlagsVersjon,
-            false
-        );
-        BeregningsgrunnlagGrunnlagDto beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlagForReferanse(request);
-        if (beregningsgrunnlagGrunnlagDto == null) {
-            return Optional.empty();
-        }
-        Beregningsgrunnlag beregningsgrunnlag = FraKalkulusMapper.mapBeregningsgrunnlag(beregningsgrunnlagGrunnlagDto.getBeregningsgrunnlag());
-        return Optional.of(beregningsgrunnlag);
-    }
-
-    @Override
     public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
         YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
         HentBeregningsgrunnlagRequest request = new HentBeregningsgrunnlagRequest(
             bgReferanse,
             ytelseSomSkalBeregnes,
-            false
-        );
+            false);
         restTjeneste.deaktiverBeregningsgrunnlag(request);
     }
 
@@ -269,8 +243,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ErEndringIBeregningRequest request = new ErEndringIBeregningRequest(
             bgReferanse1,
             bgReferanse2,
-            ytelseSomSkalBeregnes
-        );
+            ytelseSomSkalBeregnes);
         return restTjeneste.erEndringIBeregning(request);
     }
 
@@ -283,39 +256,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             DatoIntervallEntitet.fraOgMedTilOgMed(grunnbeløp.getPeriode().getFom(), grunnbeløp.getPeriode().getTom()));
     }
 
-
     protected KalkulusRestTjeneste getKalkulusRestTjeneste() {
         return restTjeneste;
-    }
-
-    private HentBeregningsgrunnlagDtoForGUIRequest lagHentBeregningsgrunnlagRequest(UUID bgReferanse, BehandlingReferanse referanse, LocalDate skjæringstidspunkt) {
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
-        InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse, inntektArbeidYtelseGrunnlag);
-        Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
-            .stream()
-            .map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser)
-            .flatMap(Collection::stream)
-            .map(ref -> new ArbeidsforholdReferanseDto(TilKalkulusMapper.mapTilAktør(ref.getArbeidsgiver()),
-                new InternArbeidsforholdRefDto(ref.getInternReferanse().getReferanse()),
-                new EksternArbeidsforholdRef(ref.getEksternReferanse().getReferanse())))
-            .collect(Collectors.toSet());
-
-        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow().finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getPeriode();
-        LocalDate vilkårFOM = vilkårsPeriode.getFomDato();
-        return new HentBeregningsgrunnlagDtoForGUIRequest(
-            bgReferanse,
-            ytelseSomSkalBeregnes,
-            arbeidsgiverOpplysningerListe,
-            referanser, vilkårFOM
-        );
     }
 
     protected StartBeregningRequest initStartRequest(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow().finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getPeriode();
+        var vilkårsPeriode = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow()
+            .finnPeriodeForSkjæringstidspunkt(skjæringstidspunkt).getPeriode();
         KalkulatorInputDto kalkulatorInputDto = kalkulatorInputTjeneste.byggDto(referanse, ytelseGrunnlag, vilkårsPeriode);
 
         return new StartBeregningRequest(
@@ -327,8 +277,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     protected KalkulusResultat mapFraTilstand(TilstandResponse tilstandResponse) {
-        List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream().map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
-            dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist())).collect(Collectors.toList());
+        List<BeregningAksjonspunktResultat> aksjonspunktResultatList = tilstandResponse.getAksjonspunktMedTilstandDto().stream()
+            .map(dto -> BeregningAksjonspunktResultat.opprettMedFristFor(BeregningAksjonspunktDefinisjon.fraKode(dto.getBeregningAksjonspunktDefinisjon().getKode()),
+                dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
+            .collect(Collectors.toList());
         KalkulusResultat kalkulusResultat = new KalkulusResultat(aksjonspunktResultatList);
         if (tilstandResponse.getVilkarOppfylt() != null) {
             if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {

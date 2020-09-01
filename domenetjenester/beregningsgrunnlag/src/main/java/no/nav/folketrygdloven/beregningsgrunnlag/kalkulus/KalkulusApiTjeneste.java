@@ -12,7 +12,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
-import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -56,8 +55,6 @@ public interface KalkulusApiTjeneste {
 
     Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
 
-    BeregningsgrunnlagDto hentBeregningsgrunnlagDto(BehandlingReferanse referanse, UUID bgReferanse, LocalDate skjæringstidspunkt);
-
     BeregningsgrunnlagListe hentBeregningsgrunnlagListeDto(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser);
 
     Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType);
@@ -65,8 +62,6 @@ public interface KalkulusApiTjeneste {
     Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, UUID uuid);
 
     void lagreBeregningsgrunnlag(BehandlingReferanse referanse, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand opprettet);
-
-    Optional<Beregningsgrunnlag> hentBeregningsgrunnlagForId(UUID bgReferanse, FagsakYtelseType fagsakYtelseType, UUID uuid);
 
     /** Deaktiverer beregningsgrunnlag og kalkulatorinput.
      *
