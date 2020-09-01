@@ -1,6 +1,7 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
@@ -21,7 +22,7 @@ public class InntektsmeldingParser {
     }
 
     @SuppressWarnings("unchecked")
-    private List<InntektsmeldingBuilder> parseInntektsmeldinger(List<MottattDokument> mottatteDokumenter) {
+    public List<InntektsmeldingBuilder> parseInntektsmeldinger(Collection<MottattDokument> mottatteDokumenter) {
         // wrap/dekod alle først
         var mottatt = new IdentityHashMap();
         var oversettere = new IdentityHashMap();
