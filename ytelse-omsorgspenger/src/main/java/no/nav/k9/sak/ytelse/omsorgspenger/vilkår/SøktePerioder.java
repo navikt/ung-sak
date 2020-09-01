@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,6 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
@@ -31,12 +31,12 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
         if (søknadsperioder.isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
-            return utledPeriodeFraSøknadsPerioder(søknadsperioder.get());
+            return utledPeriodeFraSøknadsPerioder(søknadsperioder.get().getPerioder());
         }
     }
 
-    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(OppgittFravær søknadsperioder) {
-        var perioder = søknadsperioder.getPerioder()
+    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(Set<OppgittFraværPeriode> søktePerioder) {
+        var perioder = søktePerioder
             .stream()
             .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
             .map(OppgittFraværPeriode::getPeriode)

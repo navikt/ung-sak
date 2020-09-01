@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -66,6 +67,13 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var fraværPåSak = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandlingRepository.hentBehandling(behandlingId));
         // filtrer bort perioder som ikke kan tilbakestilles pga andre krav fra andre arbeidsgivere på samme dato
         return nulledePerioder.utledPeriode(behandlingId, fraværPåSak);
+    }
+
+    @Override
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+        var fraværPåSak = new HashSet<>(trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandlingRepository.hentBehandling(behandlingId)));
+
+        return søktePerioder.utledPeriodeFraSøknadsPerioder(fraværPåSak);
     }
 
     @Override

@@ -93,6 +93,52 @@ public class VilkårBuilderTest {
     }
 
     @Test
+    public void skal_revertere_mellomliggende_perioder() {
+        var vilkårBuilder = new VilkårBuilder()
+            .medKantIKantVurderer(new DefaultKantIKantVurderer())
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7);
+
+        var førsteSkjæringstidspunkt = LocalDate.now();
+        var sluttFørstePeriode = LocalDate.now().plusMonths(3);
+        var førstePeriode = vilkårBuilder.hentBuilderFor(førsteSkjæringstidspunkt, sluttFørstePeriode)
+            .medUtfall(Utfall.IKKE_VURDERT);
+        var andreSkjæringstidspunkt = LocalDate.now().plusMonths(3).plusDays(6);
+        var sluttAndrePeriode = LocalDate.now().plusMonths(5);
+        var andrePeriode = vilkårBuilder.hentBuilderFor(andreSkjæringstidspunkt, sluttAndrePeriode)
+            .medUtfall(Utfall.IKKE_VURDERT);
+
+        vilkårBuilder.leggTil(førstePeriode)
+            .leggTil(andrePeriode);
+
+        var vilkår = vilkårBuilder.build();
+        assertThat(vilkår).isNotNull();
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt);
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
+
+        var fullstendigTidslinje = new VilkårBuilder()
+            .somDummy()
+            .medKantIKantVurderer(new DefaultKantIKantVurderer())
+            .medMaksMellomliggendePeriodeAvstand(7);
+        fullstendigTidslinje.leggTil(fullstendigTidslinje.hentBuilderFor(andreSkjæringstidspunkt, sluttAndrePeriode));
+
+        var tilbakestill = new VilkårBuilder(vilkår)
+            .medKantIKantVurderer(new DefaultKantIKantVurderer())
+            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medMaksMellomliggendePeriodeAvstand(7)
+            .medFullstendigTidslinje(fullstendigTidslinje.getTidslinje())
+            .tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, sluttFørstePeriode));
+
+        var tilbakestiltVilkår = tilbakestill.build();
+        assertThat(tilbakestiltVilkår).isNotNull();
+        assertThat(tilbakestiltVilkår.getPerioder()).hasSize(1);
+        assertThat(tilbakestiltVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(andreSkjæringstidspunkt);
+        assertThat(tilbakestiltVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
+
+    }
+
+    @Test
     public void skal_teste_mellomliggende_perioder_forskjellig_begrunnelse() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
