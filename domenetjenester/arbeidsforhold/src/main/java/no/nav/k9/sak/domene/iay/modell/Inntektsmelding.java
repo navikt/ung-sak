@@ -67,7 +67,7 @@ public class Inntektsmelding implements IndexKey {
     private LocalDate refusjonOpphører;
 
     private LocalDateTime innsendingstidspunkt;
-    
+
     @ChangeTracked
     private String kanalreferanse;
 
@@ -108,7 +108,7 @@ public class Inntektsmelding implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = {arbeidsgiver, arbeidsforholdRef};
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -150,7 +150,7 @@ public class Inntektsmelding implements IndexKey {
     public LocalDateTime getInnsendingstidspunkt() {
         return innsendingstidspunkt;
     }
-    
+
     void setInnsendingstidspunkt(LocalDateTime innsendingstidspunkt) {
         this.innsendingstidspunkt = innsendingstidspunkt;
     }
@@ -242,7 +242,7 @@ public class Inntektsmelding implements IndexKey {
     public boolean gjelderSammeArbeidsforhold(Inntektsmelding annen) {
         return getArbeidsgiver().equals(annen.getArbeidsgiver())
             && (getArbeidsforholdRef() == null || annen.getArbeidsforholdRef() == null
-            || (getArbeidsforholdRef() != null && getArbeidsforholdRef().gjelderFor(annen.getArbeidsforholdRef())));
+                || (getArbeidsforholdRef() != null && getArbeidsforholdRef().gjelderFor(annen.getArbeidsforholdRef())));
     }
 
     /**
@@ -392,5 +392,8 @@ public class Inntektsmelding implements IndexKey {
         this.ytelseType = fagsakYtelseType;
     }
 
-    
+    public boolean erNyereEnn(Inntektsmelding andre) {
+        return COMP_REKKEFØLGE.compare(this, andre) >= 0;
+    }
+
 }

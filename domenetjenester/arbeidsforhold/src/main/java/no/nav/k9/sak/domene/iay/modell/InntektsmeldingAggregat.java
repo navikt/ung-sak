@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.k9.sak.domene.iay.inntektsmelding.InntektsmeldingErNyereVurderer;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregat {
@@ -105,7 +104,7 @@ public class InntektsmeldingAggregat {
     }
 
     private boolean skalFjerneInntektsmelding(Inntektsmelding gammel, Inntektsmelding ny) {
-        return InntektsmeldingErNyereVurderer.erNyere(gammel, ny);
+        return ny.erNyereEnn(gammel);
     }
 
     void taHensynTilBetraktninger(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
