@@ -1,5 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import static no.nav.k9.StringTrimmer.trim;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -117,13 +119,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .stream()
             .filter(overstyring -> overstyring.getArbeidsgiverNavn() != null) // Vi er kun interessert i overstyringer der SBH har endret navn på arbeidsgiver
             .findFirst()
-            .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), arbeidsforhold.getArbeidsgiverNavn())));
+            .ifPresent(arbeidsforhold -> arbeidsgiverOpplysningerDtos.add(new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(arbeidsforhold.getArbeidsgiver()), trim(arbeidsforhold.getArbeidsgiverNavn()))));
         return arbeidsgiverOpplysningerDtos;
 
     }
 
     public static ArbeidsgiverOpplysningerDto mapOpplysning(Arbeidsgiver key, ArbeidsgiverOpplysninger arbeidsgiverOpplysninger) {
-        return new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(key), arbeidsgiverOpplysninger.getNavn(), arbeidsgiverOpplysninger.getFødselsdato());
+        return new ArbeidsgiverOpplysningerDto(mapArbeidsgiver(key), trim(arbeidsgiverOpplysninger.getNavn()), arbeidsgiverOpplysninger.getFødselsdato());
     }
 
     private static Aktør mapArbeidsgiver(Arbeidsgiver arbeidsgiver) {
