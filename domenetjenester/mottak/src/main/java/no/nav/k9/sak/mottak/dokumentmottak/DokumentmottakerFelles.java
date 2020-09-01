@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -96,20 +95,20 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    public Behandling opprettRevurderingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
+    public Behandling opprettRevurderingFraInntektsmelding(MottattDokument mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling revurdering = behandlingsoppretter.opprettRevurdering(tidligereBehandling, behandlingÅrsakType);
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
         return revurdering;
     }
 
-    public void opprettTaskForÅStarteBehandlingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling behandling) {
+    public void opprettTaskForÅStarteBehandlingFraInntektsmelding(MottattDokument mottattDokument, Behandling behandling) {
         ProsessTaskData prosessTaskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
 
-        mottattDokument.forEach(m -> opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
+        opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
 }

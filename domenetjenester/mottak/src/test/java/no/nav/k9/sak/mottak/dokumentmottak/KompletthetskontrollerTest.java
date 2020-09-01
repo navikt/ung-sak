@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -104,7 +103,7 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
 
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
     }
@@ -122,7 +121,7 @@ public class KompletthetskontrollerTest {
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         // Act
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
         verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
@@ -131,7 +130,7 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
 
         // Act 2
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert 2
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
@@ -144,7 +143,7 @@ public class KompletthetskontrollerTest {
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_KOMPLETTHET)).thenReturn(false);
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
     }
@@ -170,10 +169,10 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
 
         // Act
-        kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
+        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.FOR_TIDLIG_SOKNAD);
     }
@@ -188,10 +187,10 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
 
         // Act
-        kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        kompletthetskontroller.persisterKøetDokumentOgVurderKompletthet(behandling, mottattDokument);
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
+        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.AVV_DOK);
     }

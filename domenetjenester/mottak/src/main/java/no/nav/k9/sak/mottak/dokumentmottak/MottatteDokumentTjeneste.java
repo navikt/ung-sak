@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -60,14 +59,9 @@ public class MottatteDokumentTjeneste {
         this.behandlingRepositoryProvider = behandlingRepositoryProvider;
     }
 
-    public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
-        boolean harPayload = dokumenter.stream().anyMatch(d -> d.harPayload());
-        if (!harPayload) {
-            return; // quick return
-        }
-
-        var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokumenter);
-        for (var dokument : dokumenter) {
+    public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, MottattDokument dokument) {
+        if (dokument.harPayload()) {
+            var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokument);
             // sendte bare ett dokument her, så forventer kun et svar:
             InntektsmeldingBuilder im = inntektsmeldinger.get(0);
             var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
@@ -77,10 +71,10 @@ public class MottatteDokumentTjeneste {
             dokument.setKildesystem(im.getKildesystem());
             mottatteDokumentRepository.lagre(dokument);// oppdaterer
 
+            // gjør etter alle andre lagringer i db da dette medfører remote kall til abakus (bør egentlig flyttes til egen task)
+            inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
+
         }
-        
-        // gjør etter alle andre lagringer i db da dette medfører remote kall til abakus (bør egentlig flyttes til egen task)
-        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {

@@ -14,8 +14,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.GrunnbeløpDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.RefusjonskravDatoDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -56,6 +58,7 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
+import no.nav.k9.sak.domene.iay.inntektsmelding.InntektsmeldingErNyereVurderer;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
@@ -107,8 +110,7 @@ public class TilKalkulusMapper {
         ArbeidsforholdInformasjon arbeidsforholdInformasjon = arbeidsforholdInformasjonOpt.get();
         List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream()
             .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
-                arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse())
-                    : null,
+                arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse()) : null,
                 new ArbeidsforholdHandlingType(arbeidsforholdOverstyring.getHandling().getKode())))
             .collect(Collectors.toList());
 
@@ -198,7 +200,7 @@ public class TilKalkulusMapper {
         var inntektsmeldingerSomErNærmereEllerNyere = inntektsmeldingene.stream()
             .filter(arbeidsforholdMatcher(inntektsmelding))
             .filter(it -> erNærmereEllerLikeNæreSkjæringtidspunktet(it, datoNærmestSkjæringstidspunktet.get(), vilkårsPeriode.getFomDato())
-                && inntektsmelding.erNyereEnn(it))
+                && InntektsmeldingErNyereVurderer.erNyere(it, inntektsmelding))
             .collect(Collectors.toList());
 
         return !inntektsmeldingerSomErNærmereEllerNyere.isEmpty();
@@ -345,11 +347,9 @@ public class TilKalkulusMapper {
     }
 
     public static List<RefusjonskravDatoDto> mapTilDto(List<RefusjonskravDato> refusjonskravDatoes) {
-        // FIXME TSF-1102 (Espen Velsvik): førsteInnsendingAvRefusjonskrav dato blir feil for inntektsmeldinger mottatt april-august 2020.
-        // Kalkulus bruker dette til å avlede et aksjonspunkt hvorvidt refusjonskravet har kommet for sent. Men logikken her er uansett feil da
-        // refusjonskrav for omsorgspenger / pleiepenger må knyttes tli
-        // dato refusjonskravet for en gitt periode ble fremsatt, og ikke første dato blant alle refusjonskrav. Må fikses for 2021 og når frist
-        // reduseres fra 9mnd -> 3mnd.
+        // FIXME TSF-1102 (Espen Velsvik): førsteInnsendingAvRefusjonskrav dato blir feil for inntektsmeldinger mottatt april-august 2020. 
+        // Kalkulus bruker dette til å avlede et aksjonspunkt hvorvidt refusjonskravet har kommet for sent.  Men logikken her er uansett feil da refusjonskrav for omsorgspenger / pleiepenger må knyttes tli 
+        // dato refusjonskravet for en gitt periode ble fremsatt, og ikke første dato blant alle refusjonskrav.  Må fikses for 2021 og når frist reduseres fra 9mnd -> 3mnd.
         return refusjonskravDatoes.stream().map(refusjonskravDato -> new RefusjonskravDatoDto(mapTilAktør(
             refusjonskravDato.getArbeidsgiver()),
             refusjonskravDato.getFørsteDagMedRefusjonskrav(),
@@ -363,6 +363,14 @@ public class TilKalkulusMapper {
             return orgNummer;
         }
         return periode.getArbeidsgiverAktørId() != null ? new AktørIdPersonident(periode.getArbeidsgiverAktørId()) : null;
+    }
+
+    public static List<GrunnbeløpDto> mapGrunnbeløp(List<Grunnbeløp> mapGrunnbeløpSatser) {
+        return mapGrunnbeløpSatser.stream().map(grunnbeløp -> new GrunnbeløpDto(
+            new Periode(grunnbeløp.getFom(), grunnbeløp.getTom()),
+            BigDecimal.valueOf(grunnbeløp.getGSnitt()),
+            BigDecimal.valueOf(grunnbeløp.getGVerdi())))
+            .collect(Collectors.toList());
     }
 
     public InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag,

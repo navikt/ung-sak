@@ -3,7 +3,6 @@ package no.nav.k9.sak.mottak;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
@@ -132,7 +131,7 @@ public class Behandlingsoppretter {
         return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
-    public Behandling opprettNyFørstegangsbehandling(Collection<MottattDokument> mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
+    public Behandling opprettNyFørstegangsbehandling(MottattDokument mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
         var nyFørstegangsbehandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyFørstegangsbehandling, mottattDokument);
         return nyFørstegangsbehandling;

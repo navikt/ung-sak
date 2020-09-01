@@ -66,7 +66,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         MottattDokument mottattDokument = builder.build();
 
         boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
-
+        
         Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
         if (ok) {
@@ -79,20 +79,18 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
     }
 
-    private boolean valider(MottattDokument m, FagsakYtelseType ytelseType) {
-        boolean valid = true;
-        var dokumentmottaker = finnMottaker(m.getType(), ytelseType);
+    private boolean valider(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
+        var dokumentmottaker = finnMottaker(mottattDokument.getType(), ytelseType);
         try {
-            dokumentmottaker.validerDokument(m, ytelseType);
+            dokumentmottaker.validerDokument(mottattDokument, ytelseType);
+            return true;
         } catch (MottattInntektsmeldingException e) {
             String feilmelding = toFeilmelding(e);
             // skriver på feilmelding
-            m.setFeilmelding(feilmelding);
+            mottattDokument.setFeilmelding(feilmelding);
             e.getFeil().log(log);
-            valid = false;
+            return false;
         }
-
-        return valid;
     }
 
     private String toFeilmelding(TekniskException e) {

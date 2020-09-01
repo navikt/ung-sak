@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -125,7 +124,7 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
 
         // Assert
-        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, List.of(mottattDokument));
+        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
@@ -152,8 +151,8 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
 
         // Assert - sjekk flyt
-        verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurderingBehandling, List.of(mottattDokument));
-        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, List.of(mottattDokument));
+        verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurderingBehandling, mottattDokument);
+        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
@@ -172,7 +171,7 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
 
         // Assert - sjekk flyt
-        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
@@ -191,7 +190,7 @@ public class DokumentmottakerInntektsmeldingTest {
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
 
         // Assert - sjekk flyt
-        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
+        verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
@@ -218,7 +217,7 @@ public class DokumentmottakerInntektsmeldingTest {
 
         // Assert
         verify(behandlingsoppretter).opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, List.of(mottattDokument));
+        verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
 
