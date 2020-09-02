@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -27,22 +28,23 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
+    private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
-
 
     HåndterMottattDokumentTask() {
         // for CDI proxy
     }
 
     @Inject
-    public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider, 
+    public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider,
                                       InnhentDokumentTjeneste innhentDokumentTjeneste,
                                       MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.innhentDokumentTjeneste = innhentDokumentTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
+        this.fagsakRepository = repositoryProvider.getFagsakRepository();
     }
 
     @Override
@@ -50,15 +52,16 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         Long dokumentId = Long.valueOf(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY));
         String feilmelding = "Utviklerfeil: HåndterMottattDokument uten gyldig mottatt dokument, id=" + dokumentId;
         MottattDokument mottattDokument = mottatteDokumentTjeneste.hentMottattDokument(dokumentId)
-                .orElseThrow(() -> new IllegalStateException(feilmelding));
-        
+            .orElseThrow(() -> new IllegalStateException(feilmelding));
+
         BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
         if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
             behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY));
         } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.harPayload()) {
-             inntektsmeldingParser.xmlTilWrapper(mottattDokument);
+            inntektsmeldingParser.xmlTilWrapper(mottattDokument);
         }
-        innhentDokumentTjeneste.utfør(mottattDokument, behandlingÅrsakType);
+        var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
+        innhentDokumentTjeneste.utfør(fagsak, List.of(mottattDokument), behandlingÅrsakType);
     }
 
     @Override

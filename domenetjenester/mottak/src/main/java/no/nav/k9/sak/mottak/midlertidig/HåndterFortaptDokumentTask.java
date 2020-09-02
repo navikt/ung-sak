@@ -1,5 +1,7 @@
 package no.nav.k9.sak.mottak.midlertidig;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -49,6 +51,6 @@ public class HåndterFortaptDokumentTask implements ProsessTaskHandler {
         var behandling = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId());
         log.info("Lagrer fortapt dokument='{}' på behandling='{}'", mottattDokument, behandling);
 
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
     }
 }
