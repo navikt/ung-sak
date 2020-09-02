@@ -11,9 +11,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -28,7 +26,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagKoblingDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -64,25 +61,6 @@ public class BeregningsgrunnlagRestTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Hent beregningsgrunnlag for angitt behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "beregningsgrunnlag")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @Path(PATH)
-    @Deprecated
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingId) {
-        Long id = behandlingId.getBehandlingId();
-        var behandling = id != null
-            ? behandlingRepository.hentBehandling(id)
-            : behandlingRepository.hentBehandling(behandlingId.getBehandlingUuid());
-        final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
-        if (opptjening.isEmpty()) {
-            return null;
-        }
-        return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
-    }
-
     @GET
     @Operation(description = "Hent beregningsgrunnlag for angitt behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "beregningsgrunnlag")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -94,7 +72,7 @@ public class BeregningsgrunnlagRestTjeneste {
             // behandlinger for ytelse FRISINN har ikke opptjening
             return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
         }
-        final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
+        var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
         if (opptjening.isEmpty()) {
             return null;
         }
@@ -112,7 +90,7 @@ public class BeregningsgrunnlagRestTjeneste {
             // behandlinger for ytelse FRISINN har ikke opptjening
             return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
         }
-        final var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
+        var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
         if (opptjening.isEmpty()) {
             return null;
         }

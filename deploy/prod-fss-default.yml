@@ -191,6 +191,8 @@ spec:
       value: "true"
     - name: VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT
       value: "true"
+    - name: "AKSJONSPUNKT_7035_ENABLED"
+      value: "true"
 
 
     # Audit logging

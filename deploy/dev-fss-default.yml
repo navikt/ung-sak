@@ -190,6 +190,8 @@ spec:
       value: "true"
     - name: "BRUKERUTBETALING_ENABLED"
       value: "true"
+    - name: "AKSJONSPUNKT_7035_ENABLED"
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

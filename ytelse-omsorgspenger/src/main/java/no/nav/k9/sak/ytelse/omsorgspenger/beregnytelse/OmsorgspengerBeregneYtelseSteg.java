@@ -61,7 +61,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @KonfigVerdi(value = "brukerutbetaling.enabled", required = false) boolean brukerutbetalingEnabled,
+                                          @KonfigVerdi(value = "BRUKERUTBETALING_ENABLED", required = false) boolean brukerutbetalingEnabled,
                                           @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
