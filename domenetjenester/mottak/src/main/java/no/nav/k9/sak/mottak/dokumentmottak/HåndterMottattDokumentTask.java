@@ -1,12 +1,13 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -49,19 +50,27 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        Long dokumentId = Long.valueOf(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY));
-        String feilmelding = "Utviklerfeil: HåndterMottattDokument uten gyldig mottatt dokument, id=" + dokumentId;
-        MottattDokument mottattDokument = mottatteDokumentTjeneste.hentMottattDokument(dokumentId)
-            .orElseThrow(() -> new IllegalStateException(feilmelding));
+        List<String> dokumentIder = Arrays.asList(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY).split("[\\s,]+"));
 
-        BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
-        if (prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY) != null) {
-            behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY));
-        } else if (prosessTaskData.getBehandlingId() == null && mottattDokument.harPayload()) {
-            inntektsmeldingParser.xmlTilWrapper(mottattDokument);
-        }
+        List<MottattDokument> mottatteDokumenter = finnDokumenter(prosessTaskData.getBehandlingId(), dokumentIder);
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
-        innhentDokumentTjeneste.utfør(fagsak, List.of(mottattDokument), behandlingÅrsakType);
+        innhentDokumentTjeneste.utfør(fagsak, mottatteDokumenter);
+    }
+
+    private List<MottattDokument> finnDokumenter(String behandlingId, List<String> dokumentIder) {
+        List<MottattDokument> dokumenter = new ArrayList<>();
+
+        for (var dokId : dokumentIder) {
+            Long dokumentId = Long.parseLong(dokId);
+            MottattDokument mottattDokument = mottatteDokumentTjeneste.hentMottattDokument(dokumentId)
+                .orElseThrow(() -> new IllegalStateException("Utviklerfeil: HåndterMottattDokument uten gyldig mottatt dokument, id=" + dokumentId));
+
+            if (behandlingId == null && mottattDokument.harPayload()) {
+                inntektsmeldingParser.xmlTilWrapper(mottattDokument); // gjør en tidlig validering
+            }
+            dokumenter.add(mottattDokument);
+        }
+        return dokumenter;
     }
 
     @Override

@@ -98,8 +98,7 @@ public class DokumentmottakerInntektsmeldingTest {
             mottatteDokumentTjeneste,
             behandlingsoppretter,
             kompletthetskontroller,
-            repositoryProvider,
-            null));
+            repositoryProvider));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
@@ -122,7 +121,7 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak());
 
         // Assert
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(revurderingBehandling, List.of(mottattDokument));
@@ -149,7 +148,7 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, revurderingBehandling.getFagsak());
 
         // Assert - sjekk flyt
         verify(dokumentmottaker).oppdaterÅpenBehandlingMedDokument(revurderingBehandling, List.of(mottattDokument));
@@ -169,7 +168,7 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak());
 
         // Assert - sjekk flyt
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
@@ -188,7 +187,7 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak());
 
         // Assert - sjekk flyt
         verify(kompletthetskontroller).persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
@@ -214,7 +213,7 @@ public class DokumentmottakerInntektsmeldingTest {
         when(behandlingsoppretter.opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak(), BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak());
 
         // Assert
         verify(behandlingsoppretter).opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
@@ -233,7 +232,7 @@ public class DokumentmottakerInntektsmeldingTest {
         when(behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty())).thenReturn(førstegangsbehandling);
 
         // Act
-        dokumentmottaker.mottaDokument(mottattDokument, fagsak, BehandlingÅrsakType.UDEFINERT);
+        dokumentmottaker.mottaDokument(mottattDokument, fagsak);
 
         // Assert
         verify(behandlingsoppretter).opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
