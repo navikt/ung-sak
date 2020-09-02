@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentKategori;
@@ -18,7 +17,6 @@ public class InngåendeSaksdokument {
     private LocalDateTime forsendelseMottattTidspunkt;
     private Boolean elektroniskSøknad;
     private String payload;
-    private BehandlingÅrsakType behandlingÅrsakType;
     private UUID forsendelseId;
     private DokumentKategori dokumentKategori;
     private String kanalreferanse;
@@ -56,10 +54,6 @@ public class InngåendeSaksdokument {
 
     public Brevkode getType() {
         return type;
-    }
-
-    public BehandlingÅrsakType getBehandlingÅrsakType() {
-        return behandlingÅrsakType;
     }
 
     public UUID getForsendelseId() {

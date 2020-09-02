@@ -4,7 +4,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -14,7 +18,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -47,35 +50,56 @@ public class SaksbehandlingDokumentmottakTjeneste {
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
     }
 
-    public void dokumentAnkommet(InngåendeSaksdokument saksdokument) {
+    public void dokumenterAnkommet(Collection<InngåendeSaksdokument> saksdokumenter) {
 
-        LocalDateTime mottattTidspunkt = Objects.requireNonNull(saksdokument.getForsendelseMottattTidspunkt(), "forsendelseMottattTidspunkt");
-        LocalDate forsendelseMottatt = Objects.requireNonNull(saksdokument.getForsendelseMottatt(), "forsendelseMottattDato");
-        var builder = new MottattDokument.Builder()
-            .medMottattDato(LocalDate.parse(forsendelseMottatt.toString()))
-            .medPayload(saksdokument.getPayload())
-            .medType(saksdokument.getType())
-            .medFagsakId(saksdokument.getFagsakId());
+        int antallOk = 0;
+        int antall = 0;
 
-        builder.medMottattTidspunkt(mottattTidspunkt);
-        builder.medKanalreferanse(saksdokument.getKanalreferanse());
-
-        if (saksdokument.getJournalpostId() != null) {
-            builder.medJournalPostId(new JournalpostId(saksdokument.getJournalpostId().getVerdi()));
+        var fagsakIder = saksdokumenter.stream().map(s -> s.getFagsakId()).collect(Collectors.toSet());
+        if (fagsakIder.size() != 1) {
+            throw new UnsupportedOperationException("Kan kun angi saksdokumenter for samme fagsak. Fikk: " + fagsakIder);
         }
-        MottattDokument mottattDokument = builder.build();
+        var fagsakId = fagsakIder.iterator().next();
 
-        boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
+        Set<String> mottattDokumentIder = new LinkedHashSet<>();
 
-        Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
+        for (var saksdokument : saksdokumenter) {
+            antall++;
 
-        if (ok) {
+            LocalDateTime mottattTidspunkt = Objects.requireNonNull(saksdokument.getForsendelseMottattTidspunkt(), "forsendelseMottattTidspunkt");
+            LocalDate forsendelseMottatt = Objects.requireNonNull(saksdokument.getForsendelseMottatt(), "forsendelseMottattDato");
+            var builder = new MottattDokument.Builder()
+                .medMottattDato(LocalDate.parse(forsendelseMottatt.toString()))
+                .medPayload(saksdokument.getPayload())
+                .medType(saksdokument.getType())
+                .medFagsakId(saksdokument.getFagsakId());
+
+            builder.medMottattTidspunkt(mottattTidspunkt);
+            builder.medKanalreferanse(saksdokument.getKanalreferanse());
+
+            if (saksdokument.getJournalpostId() != null) {
+                builder.medJournalPostId(new JournalpostId(saksdokument.getJournalpostId().getVerdi()));
+            }
+            MottattDokument mottattDokument = builder.build();
+
+            boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
+            if (ok) {
+                antallOk++;
+            }
+
+            Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
+            mottattDokumentIder.add(mottattDokumentId.toString());
+        }
+
+        if (antallOk == antall) {
             var prosessTaskData = new ProsessTaskData(HåndterMottattDokumentTask.TASKTYPE);
-            prosessTaskData.setFagsakId(saksdokument.getFagsakId());
-            prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, mottattDokumentId.toString());
-            settÅrsakHvisDefinert(saksdokument.getBehandlingÅrsakType(), prosessTaskData);
+            prosessTaskData.setFagsakId(fagsakId);
+            prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, String.join(",", mottattDokumentIder));
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskRepository.lagre(prosessTaskData);
+        } else if (antallOk > 0 && antallOk < antall) {
+            // blanda drops
+            throw new IllegalArgumentException("Fikk noe gyldig [" + antallOk + "] og noen ugyldige [" + (antall - antallOk) + "] meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");
         }
     }
 
@@ -102,12 +126,6 @@ public class SaksbehandlingDokumentmottakTjeneste {
             pw.flush();
             var f = e.getFeil();
             return String.format("%s: %s\n%s", f.getKode(), f.getFeilmelding(), sw);
-        }
-    }
-
-    private void settÅrsakHvisDefinert(BehandlingÅrsakType behandlingÅrsakType, ProsessTaskData prosessTaskData) {
-        if (behandlingÅrsakType != null && !BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
-            prosessTaskData.setProperty(HåndterMottattDokumentTask.BEHANDLING_ÅRSAK_TYPE_KEY, behandlingÅrsakType.getKode());
         }
     }
 

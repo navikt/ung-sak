@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -38,7 +37,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     private BehandlingRevurderingRepository revurderingRepository;
     private BehandlingRepository behandlingRepository;
 
-    private BeanManager beanManager;
     private BehandlingLåsRepository behandlingLåsRepository;
 
     private InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
@@ -52,13 +50,11 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
                                            MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                            Behandlingsoppretter behandlingsoppretter,
                                            Kompletthetskontroller kompletthetskontroller,
-                                           BehandlingRepositoryProvider repositoryProvider,
-                                           BeanManager beanManager) {
+                                           BehandlingRepositoryProvider repositoryProvider) {
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlingsoppretter = behandlingsoppretter;
         this.kompletthetskontroller = kompletthetskontroller;
-        this.beanManager = beanManager;
 
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -66,12 +62,12 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     @Override
-    public void mottaDokument(Collection<MottattDokument> mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    public void mottaDokument(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
         doMottaDokument(fagsak, mottattDokument);
     }
 
     @Override
-    public void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    public void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak) {
         doMottaDokument(fagsak, List.of(mottattDokument));
     }
 

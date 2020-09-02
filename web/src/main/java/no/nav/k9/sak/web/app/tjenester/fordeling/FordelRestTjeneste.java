@@ -6,9 +6,13 @@ import static no.nav.vedtak.feil.LogLevel.WARN;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -29,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -197,8 +202,39 @@ public class FordelRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalpost(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakDto mottattJournalpost) {
 
-        InngåendeSaksdokument saksdokument = map(mottattJournalpost);
-        dokumentmottakTjeneste.dokumentAnkommet(saksdokument);
+        InngåendeSaksdokument saksdokument = mapJournalpost(mottattJournalpost);
+        dokumentmottakTjeneste.dokumenterAnkommet(List.of(saksdokument));
+    }
+
+    @POST
+    @Path("/journalposter")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void mottaJournalposter(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid List<AbacJournalpostMottakDto> mottattJournalposter) {
+
+        Set<Saksnummer> saksnummere = mottattJournalposter.stream().map(m -> m.getSaksnummer()).collect(Collectors.toSet());
+        if (saksnummere.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
+        }
+
+        Set<Brevkode> typer = mottattJournalposter.stream().map(m -> m.getType()).collect(Collectors.toSet());
+        if (typer.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike typer: " + typer);
+        }
+
+        Set<FagsakYtelseType> ytelseTyper = mottattJournalposter.stream().map(m -> m.getYtelseType()).collect(Collectors.toSet());
+        if (ytelseTyper.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
+        }
+
+        List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
+            .map(m -> mapJournalpost(m))
+            .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
+            .collect(Collectors.toList());
+
+        dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
     }
 
     @SuppressWarnings("rawtypes")
@@ -207,7 +243,7 @@ public class FordelRestTjeneste {
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke støtte for ytelseType:" + ytelseType));
     }
 
-    private InngåendeSaksdokument map(AbacJournalpostMottakDto mottattJournalpost) {
+    private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakDto mottattJournalpost) {
         JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
 
         Saksnummer saksnummer = mottattJournalpost.getSaksnummer();

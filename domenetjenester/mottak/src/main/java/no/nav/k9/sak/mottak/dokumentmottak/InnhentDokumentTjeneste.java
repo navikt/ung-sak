@@ -1,6 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -8,7 +8,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -25,22 +24,22 @@ public class InnhentDokumentTjeneste {
         this.mottakere = mottakere;
     }
 
-    public void utfør(Fagsak fagsak, List<MottattDokument> mottattDokument, BehandlingÅrsakType behandlingÅrsakType) {
+    public void utfør(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
         var type = getMottattDokumentType(mottattDokument);
         Dokumentmottaker dokumentmottaker = finnMottaker(type, fagsak.getYtelseType());
-        dokumentmottaker.mottaDokument(mottattDokument, fagsak, behandlingÅrsakType);
+        dokumentmottaker.mottaDokument(mottattDokument, fagsak);
     }
 
-    private Brevkode getMottattDokumentType(List<MottattDokument> mottattDokument) {
+    private Brevkode getMottattDokumentType(Collection<MottattDokument> mottattDokument) {
         if (mottattDokument == null || mottattDokument.isEmpty()) {
-            throw new IllegalArgumentException("Mottattdokument er null eller empty");
+            throw new IllegalArgumentException("MottattDokument er null eller empty");
         }
-        var type = mottattDokument.get(0).getType();
         var typer = mottattDokument.stream().map(m -> m.getType()).distinct().collect(Collectors.toList());
         if (typer.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottatt dokument med ulike typer: " + typer);
+        } else {
+            return typer.get(0);
         }
-        return type;
     }
 
     private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
