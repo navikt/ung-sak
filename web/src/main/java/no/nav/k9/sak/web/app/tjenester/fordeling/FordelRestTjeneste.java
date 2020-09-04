@@ -195,18 +195,6 @@ public class FordelRestTjeneste {
     }
 
     @POST
-    @Path("/journalpost")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(JSON_UTF8)
-    @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en ny journalpost som skal behandles i systemet."), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void mottaJournalpost(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakDto mottattJournalpost) {
-
-        InngåendeSaksdokument saksdokument = mapJournalpost(mottattJournalpost);
-        dokumentmottakTjeneste.dokumenterAnkommet(List.of(saksdokument));
-    }
-
-    @POST
     @Path("/journalposter")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
