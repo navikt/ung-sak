@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -169,15 +170,25 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        var maxTom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo);
 
         if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
+            if (maxTom.isPresent()) {
+                var utvidetTilVUrdering = vilkår.get()
+                    .getPerioder()
+                    .stream()
+                    .filter(it -> it.getFom().isAfter(maxTom.get()))
+                    .filter(it -> IKKE_VURDERT.equals(it.getUtfall()))
+                    .map(VilkårPeriode::getPeriode)
+                    .collect(Collectors.toList());
+                perioder.addAll(utvidetTilVUrdering);
+            }
             var avslåttePerioder = vilkår.get()
                 .getPerioder()
                 .stream()
                 .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getUtfall()))
                 .map(VilkårPeriode::getPeriode)
                 .collect(Collectors.toList());
-
             perioder.removeAll(avslåttePerioder);
         }
         return Collections.unmodifiableNavigableSet(perioder);
