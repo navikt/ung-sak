@@ -218,7 +218,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         sendNyInntektsmelding(behandling, virksomhet, ref);
 
         // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -234,7 +234,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         sendNyInntektsmelding(behandling, virksomhet, null);
 
         // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -250,7 +250,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         sendNyInntektsmelding(behandling, virksomhet, ref);
 
         // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat).isFalse();
     }
@@ -266,13 +266,13 @@ public class VurderArbeidsforholdTjenesteImplTest {
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
         // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat).isTrue();
         // Arrange
         sendNyInntektsmelding(behandling, virksomhet, null);
         // Act
-        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat2).isFalse();
     }
@@ -288,13 +288,13 @@ public class VurderArbeidsforholdTjenesteImplTest {
         opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
         sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
         // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat).isTrue();
         // Arrange
         sendNyInntektsmelding(behandling, virksomhet, ref);
         // Act
-        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId(), skjæringstidspunkt);
+        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
         // Assert
         assertThat(resultat2).isFalse();
     }

@@ -22,22 +22,16 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingSomIkkeKommer;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class InntektsmeldingTjeneste {
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-
-    InntektsmeldingTjeneste() {
-        // CDI-runner
-    }
+    private final InntektArbeidYtelseTjeneste iayTjeneste;
 
     @Inject
     public InntektsmeldingTjeneste(InntektArbeidYtelseTjeneste iayTjeneste) {
@@ -45,11 +39,34 @@ public class InntektsmeldingTjeneste {
     }
 
     /**
+     * Filtrer vekk inntektsmeldinger som er knyttet til et arbeidsforhold som har en tom dato som slutter før STP.
+     */
+    private static List<Inntektsmelding> filtrerVekkInntektsmeldingPåInaktiveArbeidsforhold(YrkesaktivitetFilter filter, Collection<Yrkesaktivitet> yrkesaktiviteter,
+                                                                                            Collection<Inntektsmelding> inntektsmeldinger,
+                                                                                            LocalDate skjæringstidspunktet) {
+        List<Inntektsmelding> resultat = new ArrayList<>();
+
+        inntektsmeldinger.forEach(im -> {
+            boolean skalLeggeTil = yrkesaktiviteter.stream()
+                .anyMatch(y -> {
+                    boolean gjelderFor = y.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef());
+                    var ansettelsesPerioder = filter.getAnsettelsesPerioder(y);
+                    return gjelderFor && ansettelsesPerioder.stream()
+                        .anyMatch(ap -> ap.getPeriode().inkluderer(skjæringstidspunktet) || ap.getPeriode().getFomDato().isAfter(skjæringstidspunktet));
+                });
+            if (skalLeggeTil) {
+                resultat.add(im);
+            }
+        });
+        return Collections.unmodifiableList(resultat);
+    }
+
+    /**
      * Henter alle inntektsmeldinger
      * Tar hensyn til inaktive arbeidsforhold, dvs. fjerner de
      * inntektsmeldingene som er koblet til inaktivte arbeidsforhold
      *
-     * @param ref {@link BehandlingReferanse}
+     * @param ref                             {@link BehandlingReferanse}
      * @param skjæringstidspunktForOpptjening datoen arbeidsforhold må inkludere eller starte etter for å bli regnet som aktive
      * @return Liste med inntektsmeldinger {@link Inntektsmelding}
      */
@@ -98,46 +115,10 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Henter alle inntektsmeldinger
-     * Tar hensyn til inaktive arbeidsforhold, dvs. fjerner de
-     * inntektsmeldingene som er koblet til inaktivte arbeidsforhold
-     * Spesial håndtering i forbindelse med beregning
-     *
-     * @param ref {@link BehandlingReferanse}
-     * @param skjæringstidspunktForOpptjening datoen arbeidsforhold må inkludere eller starte etter for å bli regnet som aktive
-     * @return Liste med inntektsmeldinger {@link Inntektsmelding}
-     */
-    public List<Inntektsmelding> hentInntektsmeldingerBeregning(BehandlingReferanse ref, LocalDate skjæringstidspunktForOpptjening) {
-        AktørId aktørId = ref.getAktørId();
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(ref.getBehandlingId());
-        if (iayGrunnlag.isPresent()) {
-            return hentInntektsmeldingerBeregning(aktørId, skjæringstidspunktForOpptjening, iayGrunnlag.get());
-        }
-        return emptyList();
-    }
-
-    private List<Inntektsmelding> hentInntektsmeldingerBeregning(AktørId aktørId, LocalDate skjæringstidspunktForOpptjening, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        LocalDate skjæringstidspunktMinusEnDag = skjæringstidspunktForOpptjening.minusDays(1);
-        List<Inntektsmelding> inntektsmeldinger = iayGrunnlag.getInntektsmeldinger().map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes)
-            .orElse(emptyList());
-
-        var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(aktørId));
-        Collection<Yrkesaktivitet> yrkesaktiviteter = filter.getYrkesaktiviteter();
-
-
-        // kan ikke filtrere når det ikke finnes yrkesaktiviteter
-        if (yrkesaktiviteter.isEmpty()) {
-            return inntektsmeldinger;
-        }
-        return filtrerVekkInntektsmeldingPåInaktiveArbeidsforhold(filter, yrkesaktiviteter, inntektsmeldinger, skjæringstidspunktMinusEnDag);
-    }
-
     public Optional<Inntektsmelding> hentInntektsMeldingFor(Long behandlingId, JournalpostId journalpostId) {
         var grunnlag = iayTjeneste.hentGrunnlag(behandlingId);
-        var inntektsmelding = grunnlag.getInntektsmeldinger().stream().flatMap(imagg -> imagg.getAlleInntektsmeldinger().stream())
+        return grunnlag.getInntektsmeldinger().stream().flatMap(imagg -> imagg.getAlleInntektsmeldinger().stream())
             .filter(im -> Objects.equals(im.getJournalpostId(), journalpostId)).findFirst();
-        return inntektsmelding;
     }
 
     /**
@@ -159,84 +140,11 @@ public class InntektsmeldingTjeneste {
      * <br>
      * <b>NB!</b> Tar ikke hensyn til om inntektsmeldingen er knyttet til et inaktivt arbeidsforhold
      *
-     * @param behandlingIder
+     * @param behandlingIder behandlingene
      * @return Liste med inntektsmeldinger {@link Inntektsmelding}
      */
     public List<Inntektsmelding> hentAlleInntektsmeldingerForAngitteBehandlinger(Set<Long> behandlingIder) {
         return hentUtAlleInntektsmeldingeneFraBehandlingene(behandlingIder);
-    }
-
-    /**
-     * Henter ut alle inntektsmeldinger koblet til fagsaken på alle behandlinger, uavhengig av status
-     * <br>
-     * <b>NB!</b> Tar ikke hensyn til om inntektsmeldingen er knyttet til et inaktivt arbeidsforhold
-     *
-     * @param saksnummer som gjelder fagsaken
-     * @return Liste med inntektsmeldinger {@link Inntektsmelding}
-     */
-    private List<Inntektsmelding> hentAlleInntektsmeldingerForFagsak(Saksnummer saksnummer) {
-        return List.copyOf(iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer));
-    }
-
-    /**
-     * Henter ut alle datoer for innsending av refusjonskrav og første gyldige refusjonskrav for alle inntektsmeldinger koblet til fagsaken på alle behandlinger, uavhengig av status
-     * <br>
-     * <b>NB!</b> Tar ikke hensyn til om inntektsmeldingen for det aktuelle refusjonskravet er knyttet til et inaktivt arbeidsforhold
-     *
-     * @param saksnummer som gjelder fagsaken
-     * @return Liste med inntektsmeldinger {@link Inntektsmelding}
-     */
-    public List<RefusjonskravDato> hentAlleRefusjonskravDatoerForFagsak(Saksnummer saksnummer) {
-        return List.copyOf(iayTjeneste.hentRefusjonskravDatoerForSak(saksnummer));
-    }
-
-    /**
-     * Henter ut alle datoer for refusjon og innsendelse av refusjonskrav koblet til fagsaken, også de på inaktive grunnlag.
-     *
-     * @param saksnummer Saksnummer til fagsak
-     * @return Map med refusjonskravdatoer per arbeidsgiver
-     */
-    public Map<Arbeidsgiver, List<RefusjonskravDato>> hentAlleRefusjonskravdatoerForFagsakInkludertInaktive(Saksnummer saksnummer) {
-        List<RefusjonskravDato> alleRefusjonskravDatoer = hentAlleRefusjonskravDatoerForFagsak(saksnummer);
-
-        return alleRefusjonskravDatoer.stream()
-            .collect(Collectors.groupingBy(RefusjonskravDato::getArbeidsgiver));
-    }
-
-    /**
-     * Henter ut alle inntektsmeldinger koblet til fagsaken, også de på inaktive grunnlag.
-     *
-     * @param saksnummer Saksnummer til fagsak
-     * @return Map med inntektsmeldinger per arbeidsgiver
-     */
-    public Map<Arbeidsgiver, List<Inntektsmelding>> hentAlleInntektsmeldingerForFagsakInkludertInaktive(Saksnummer saksnummer) {
-        List<Inntektsmelding> alleInntektsmeldinger = hentAlleInntektsmeldingerForFagsak(saksnummer);
-
-        return alleInntektsmeldinger.stream()
-            .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver));
-    }
-
-    /**
-     * Filtrer vekk inntektsmeldinger som er knyttet til et arbeidsforhold som har en tom dato som slutter før STP.
-     */
-    private static List<Inntektsmelding> filtrerVekkInntektsmeldingPåInaktiveArbeidsforhold(YrkesaktivitetFilter filter, Collection<Yrkesaktivitet> yrkesaktiviteter,
-                                                                                     Collection<Inntektsmelding> inntektsmeldinger,
-                                                                                     LocalDate skjæringstidspunktet) {
-        List<Inntektsmelding> resultat = new ArrayList<>();
-
-        inntektsmeldinger.forEach(im -> {
-            boolean skalLeggeTil = yrkesaktiviteter.stream()
-                .anyMatch(y -> {
-                    boolean gjelderFor = y.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef());
-                    var ansettelsesPerioder = filter.getAnsettelsesPerioder(y);
-                    return gjelderFor && ansettelsesPerioder.stream()
-                        .anyMatch(ap -> ap.getPeriode().inkluderer(skjæringstidspunktet) || ap.getPeriode().getFomDato().isAfter(skjæringstidspunktet));
-                });
-            if (skalLeggeTil) {
-                resultat.add(im);
-            }
-        });
-        return Collections.unmodifiableList(resultat);
     }
 
     private Map<String, Inntektsmelding> hentIMMedIndexKey(Long behandlingId) {
@@ -246,7 +154,7 @@ public class InntektsmeldingTjeneste {
             .orElse(Collections.emptyList());
 
         return inntektsmeldinger.stream()
-            .collect(Collectors.toMap(im -> im.getIndexKey(), im -> im));
+            .collect(Collectors.toMap(Inntektsmelding::getIndexKey, im -> im));
     }
 
     private List<Inntektsmelding> hentUtAlleInntektsmeldingeneFraBehandlingene(Collection<Long> behandlingIder) {

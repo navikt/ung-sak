@@ -22,7 +22,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -99,12 +98,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                       SakInntektsmeldinger sakInntektsmeldinger,
                                                                       UtledArbeidsforholdParametere param) {
-        FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         AktørId aktørId = ref.getAktørId();
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
 
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderArbeidsforholdTjeneste.endringerIInntektsmelding(ref, iayGrunnlag,
-            sakInntektsmeldinger, ytelseType);
+            sakInntektsmeldinger);
 
         var inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref.getAktørId(), skjæringstidspunkt, iayGrunnlag);
 

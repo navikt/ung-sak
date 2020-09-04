@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
@@ -155,13 +154,11 @@ public class VurderArbeidsforholdTjeneste {
      * Benyttes for å markere arbeidsforhold det må tas stilling til å hva saksbehandler skal gjøre.
      *
      * @param behandlingReferanse behandlingen
-     * @param ytelseType          FagsakYtelseTypen
      * @return Endringene i inntektsmeldinger
      */
     public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> endringerIInntektsmelding(BehandlingReferanse behandlingReferanse,
                                                                                     InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                    SakInntektsmeldinger sakInntektsmeldinger,
-                                                                                    FagsakYtelseType ytelseType) {
+                                                                                    SakInntektsmeldinger sakInntektsmeldinger) {
         Objects.requireNonNull(iayGrunnlag, "iayGrunnlag");
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result = new HashMap<>();
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> yrkesaktiviteterPerArbeidsgiver = mapYrkesaktiviteterPerArbeidsgiver(behandlingReferanse, iayGrunnlag);
@@ -189,18 +186,18 @@ public class VurderArbeidsforholdTjeneste {
      * @param utledetSkjæringstidspunkt
      * @return true om det finnes inntektsmelding som oppfyller premisset skissert over
      */
-    public boolean inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
+    public boolean inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(Long behandlingId, AktørId aktørId) {
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);
-        if (!inntektArbeidYtelseGrunnlagOptional.isPresent()) {
+        if (inntektArbeidYtelseGrunnlagOptional.isEmpty()) {
             return false;
         }
         InntektArbeidYtelseGrunnlag grunnlag = inntektArbeidYtelseGrunnlagOptional.get();
         Optional<InntektsmeldingAggregat> inntektsmeldingerOpt = grunnlag.getInntektsmeldinger();
-        if (!inntektsmeldingerOpt.isPresent()) {
+        if (inntektsmeldingerOpt.isEmpty()) {
             return false;
         }
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingerOpt.get().getInntektsmeldingerSomSkalBrukes();
-        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(aktørId, grunnlag, skjæringstidspunkt);
+        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(aktørId, grunnlag);
         if (yrkesaktiviteter.isEmpty()) {
             return false;
         }
@@ -223,14 +220,11 @@ public class VurderArbeidsforholdTjeneste {
             .allMatch(ya -> matchYrkesaktivitetTilInntektsmelding(inntektsmeldinger, ya));
     }
 
-    private List<Yrkesaktivitet> getAlleArbeidsforhold(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, LocalDate skjæringstidspunkt) {
+    private List<Yrkesaktivitet> getAlleArbeidsforhold(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag) {
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
-        Collection<Yrkesaktivitet> yrkesaktiviteterFørStp = filter.før(skjæringstidspunkt).getYrkesaktiviteter();
-        Collection<Yrkesaktivitet> yrkesaktiviteterEtterStp = filter.etter(skjæringstidspunkt).getYrkesaktiviteter();
-
-        return Stream.of(yrkesaktiviteterFørStp, yrkesaktiviteterEtterStp)
-            .flatMap(Collection::stream)
+        return filter.getAlleYrkesaktiviteter()
+            .stream()
             .filter(Yrkesaktivitet::erArbeidsforhold)
             .distinct()
             .collect(Collectors.toList());
@@ -301,8 +295,7 @@ public class VurderArbeidsforholdTjeneste {
 
     private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> mapYrkesaktiviteterPerArbeidsgiver(BehandlingReferanse behandlingReferanse,
                                                                                                InntektArbeidYtelseGrunnlag grunnlag) {
-        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(behandlingReferanse.getAktørId(), grunnlag,
-            behandlingReferanse.getUtledetSkjæringstidspunkt());
+        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(behandlingReferanse.getAktørId(), grunnlag);
         return yrkesaktiviteter.stream()
             .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,
                 flatMapping(ya -> Stream.of(ya.getArbeidsforholdRef()), Collectors.toSet())));
