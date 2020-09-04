@@ -103,13 +103,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             for (Aktivitet uttaksPlanOmsorgspengerAktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
                 for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
                     for (Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
-                        // Spesialbehandling for de som ryker ut på omsorgsvilkåret og har dnr.
-                        // https://jira.adeo.no/browse/TSF-946
-                        if ((Vilkår.OMSORGSVILKÅRET.equals(vilkår) &&
-                            new PersonIdent(årskvantumResultat.getårskvantum().getPersonIdent()).erDnr() &&
-                            uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT))) {
-                            return true;
-                        } else if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår)) &&
+                        if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår) || Vilkår.OMSORGSVILKÅRET.equals(vilkår)) &&
                             (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
                                 uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
                             return true;
