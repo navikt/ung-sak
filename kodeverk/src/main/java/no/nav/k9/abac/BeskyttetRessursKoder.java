@@ -15,4 +15,12 @@ public class BeskyttetRessursKoder {
     public static final String RISIKOKLASSIFISERING = "no.nav.abac.attributter.k9.risikoklassifisering";
     public static final String UTTAKSPLAN = "no.nav.abac.attributter.resource.k9.uttaksplan";
 
+    /**
+     * Egne ressurs definisjoner. Disse brukes kun dersom systembruker. De er ikke inkludert i Abacpolicy, men sikrer at ingen andre får tilgang
+     * til denne tjenesten, og spores unikt i sporingslogg.
+     */
+
+    /** oppfriskning av mange behandlinger i bolk. */
+    public static final String REFRESH_BEHANDLING_REGISTERDATA = "no.nav.abac.attributter.resource.k9.behandling.refresh";
+
 }

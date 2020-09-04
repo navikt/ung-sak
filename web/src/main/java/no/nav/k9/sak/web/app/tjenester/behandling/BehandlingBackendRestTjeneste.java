@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.abac.BeskyttetRessursKoder;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
@@ -39,6 +41,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingStatusListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -92,9 +95,9 @@ public class BehandlingBackendRestTjeneste {
     @Operation(description = "Init hent behandling", tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "202", description = "Hent behandling initiert, Returnerer status på fremdrift/feil i backend", headers = @Header(name = HttpHeaders.LOCATION))
     })
-    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = UPDATE, resource = BeskyttetRessursKoder.REFRESH_BEHANDLING_REGISTERDATA)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response oppfriskSaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdListe behandlinger) {
+    public Response oppfriskSaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = BehandlingBackendRestTjeneste.AbacDataSupplier.class) BehandlingIdListe behandlinger) {
 
         List<BehandlingStatusListe.StatusDto> result = new ArrayList<>();
         int max = 100;
@@ -117,6 +120,13 @@ public class BehandlingBackendRestTjeneste {
         }
 
         return Response.ok(new BehandlingStatusListe(result)).status(Status.ACCEPTED).build();
+    }
+    
+    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
     }
 
 }
