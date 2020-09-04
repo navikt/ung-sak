@@ -19,7 +19,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
@@ -199,33 +198,6 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
         sendInnInntektsmeldingPå(behandling, virksomhetOrgnr2, arbeidsforholdId2);
         // Act
         aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-        // Assert
-        assertThat(aksjonspunktResultater).isEmpty();
-    }
-
-    @Test
-    public void skal_ikke_få_aksjonspunkt_på_berørt_behandling() {
-        // Arrange
-        AktørId aktørId1 = AktørId.dummy();
-        var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        Behandling originalBehandling = scenario.lagre(repositoryProvider);
-        scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        scenario.medOriginalBehandling(originalBehandling, BehandlingÅrsakType.BERØRT_BEHANDLING);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        String virksomhetOrgnr2 = "648751348";
-        var arbeidsforholdId1 = InternArbeidsforholdRef.nyRef();
-        var arbeidsforholdId2 = InternArbeidsforholdRef.nyRef();
-
-        final InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-        leggTilArbeidsforholdPåBehandling(behandling, ORGNR, arbeidsforholdId1, builder);
-        leggTilArbeidsforholdPåBehandling(behandling, virksomhetOrgnr2, arbeidsforholdId2, builder);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-        opprettInntekt(aktørId1, behandling, ORGNR, arbeidsforholdId1);
-        opprettInntekt(aktørId1, behandling, virksomhetOrgnr2, arbeidsforholdId2);
-
-        // Act
-        List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-
         // Assert
         assertThat(aksjonspunktResultater).isEmpty();
     }

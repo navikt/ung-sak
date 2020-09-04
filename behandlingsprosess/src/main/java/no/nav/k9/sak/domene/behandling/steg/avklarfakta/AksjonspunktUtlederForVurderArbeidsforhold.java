@@ -16,8 +16,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -56,19 +54,10 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
-        if (skalVentePåInntektsmelding(param)) {
-            var skjæringstidspunkt = param.getSkjæringstidspunkt();
-            boolean ventPåGyldigInntektsmeldingForArbeidsforhold = vurderArbeidsforholdTjeneste
-                .inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(param.getBehandlingId(), param.getAktørId(),
-                    skjæringstidspunkt.getUtledetSkjæringstidspunkt());
-            if (ventPåGyldigInntektsmeldingForArbeidsforhold) {
-                return Collections.singletonList(opprettSettPåVentAutopunktUgyldigInntektsmelding());
-            }
-        }
-
-        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.BERØRT_BEHANDLING)) {
-            return INGEN_AKSJONSPUNKTER;
+        boolean ventPåGyldigInntektsmeldingForArbeidsforhold = vurderArbeidsforholdTjeneste
+            .inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(param.getBehandlingId(), param.getAktørId());
+        if (ventPåGyldigInntektsmeldingForArbeidsforhold) {
+            return Collections.singletonList(opprettSettPåVentAutopunktUgyldigInntektsmelding());
         }
 
         var iayGrunnlag = iayTjeneste.finnGrunnlag(param.getBehandlingId());
@@ -93,10 +82,6 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
         var sakInntektsmeldinger = taStillingTilEndringerIArbeidsforhold ? iayTjeneste.hentInntektsmeldinger(param.getSaksnummer()) : null;
         vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef(), iayGrunnlag, sakInntektsmeldinger, taStillingTilEndringerIArbeidsforhold);
         return vurder;
-    }
-
-    private boolean skalVentePåInntektsmelding(AksjonspunktUtlederInput param) {
-        return !(FagsakYtelseType.ENGANGSTØNAD.equals(param.getYtelseType()));
     }
 
     private AksjonspunktResultat opprettSettPåVentAutopunktUgyldigInntektsmelding() {
