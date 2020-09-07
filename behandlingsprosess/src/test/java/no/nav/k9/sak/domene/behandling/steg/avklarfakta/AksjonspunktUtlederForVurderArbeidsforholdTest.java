@@ -251,8 +251,7 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
 
         // Assert
         assertThat(aksjonspunktResultater).hasSize(1);
-        assertThat(aksjonspunktResultater.get(0).getAksjonspunktDefinisjon())
-            .isEqualTo(AksjonspunktDefinisjon.AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID);
+        assertThat(aksjonspunktResultater.get(0).getAksjonspunktDefinisjon()).isEqualTo(VURDER_ARBEIDSFORHOLD);
     }
 
     private void leggTilArbeidsforholdPåBehandling(Behandling behandling, String virksomhetOrgnr, InternArbeidsforholdRef ref,

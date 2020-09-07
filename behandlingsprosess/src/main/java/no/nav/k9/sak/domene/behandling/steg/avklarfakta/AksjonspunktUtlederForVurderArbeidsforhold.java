@@ -54,12 +54,6 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
-        boolean ventPåGyldigInntektsmeldingForArbeidsforhold = vurderArbeidsforholdTjeneste
-            .inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(param.getBehandlingId(), param.getAktørId());
-        if (ventPåGyldigInntektsmeldingForArbeidsforhold) {
-            return Collections.singletonList(opprettSettPåVentAutopunktUgyldigInntektsmelding());
-        }
-
         var iayGrunnlag = iayTjeneste.finnGrunnlag(param.getBehandlingId());
         if (iayGrunnlag.isPresent()) {
             var vurder = hentArbeidsforholdTilVurdering(param, iayGrunnlag.get());
@@ -82,12 +76,6 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
         var sakInntektsmeldinger = taStillingTilEndringerIArbeidsforhold ? iayTjeneste.hentInntektsmeldinger(param.getSaksnummer()) : null;
         vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef(), iayGrunnlag, sakInntektsmeldinger, taStillingTilEndringerIArbeidsforhold);
         return vurder;
-    }
-
-    private AksjonspunktResultat opprettSettPåVentAutopunktUgyldigInntektsmelding() {
-        LocalDateTime frist = LocalDateTime.of(LocalDate.now().plusDays(14), LocalTime.MIDNIGHT);
-        AksjonspunktDefinisjon apDef = AksjonspunktDefinisjon.AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID;
-        return AksjonspunktResultat.opprettForAksjonspunktMedFrist(apDef, Venteårsak.VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID, frist);
     }
 
     private boolean skalTaStillingTilEndringerIArbeidsforhold(BehandlingReferanse behandlingReferanse) {
