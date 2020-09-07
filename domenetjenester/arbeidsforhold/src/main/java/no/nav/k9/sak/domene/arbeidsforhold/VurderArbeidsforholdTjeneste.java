@@ -178,47 +178,6 @@ public class VurderArbeidsforholdTjeneste {
         return result;
     }
 
-    /**
-     * Vurderer om det finnes en inntektsmelding som har en arbeidsforholdId som ikke finnes i aareg for arbeidsgiveren det gjelder.
-     *
-     * @param behandlingId
-     * @param aktørId
-     * @param utledetSkjæringstidspunkt
-     * @return true om det finnes inntektsmelding som oppfyller premisset skissert over
-     */
-    public boolean inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(Long behandlingId, AktørId aktørId) {
-        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);
-        if (inntektArbeidYtelseGrunnlagOptional.isEmpty()) {
-            return false;
-        }
-        InntektArbeidYtelseGrunnlag grunnlag = inntektArbeidYtelseGrunnlagOptional.get();
-        Optional<InntektsmeldingAggregat> inntektsmeldingerOpt = grunnlag.getInntektsmeldinger();
-        if (inntektsmeldingerOpt.isEmpty()) {
-            return false;
-        }
-        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingerOpt.get().getInntektsmeldingerSomSkalBrukes();
-        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(aktørId, grunnlag);
-        if (yrkesaktiviteter.isEmpty()) {
-            return false;
-        }
-
-        return vurderOmArbeidsforholdManglerInntektsmeldingMedGyldigArbeidsforholdId(inntektsmeldinger, yrkesaktiviteter);
-    }
-
-    private boolean vurderOmArbeidsforholdManglerInntektsmeldingMedGyldigArbeidsforholdId(List<Inntektsmelding> inntektsmeldinger,
-                                                                                          List<Yrkesaktivitet> yrkesaktiviteter) {
-        List<Inntektsmelding> ugyldigeInntektsmeldinger = inntektsmeldinger.stream()
-            .filter(Inntektsmelding::gjelderForEtSpesifiktArbeidsforhold)
-            .filter(im -> !matchInntektsmeldingTilArbeidsforhold(yrkesaktiviteter, im))
-            .collect(Collectors.toList());
-        List<Yrkesaktivitet> yrkesaktiviteterMedUgyldigIM = yrkesaktiviteter.stream()
-            .filter(ya -> ugyldigeInntektsmeldinger.stream()
-                .anyMatch(im -> im.getArbeidsgiver().equals(ya.getArbeidsgiver())))
-            .collect(Collectors.toList());
-        return !yrkesaktiviteterMedUgyldigIM
-            .stream()
-            .allMatch(ya -> matchYrkesaktivitetTilInntektsmelding(inntektsmeldinger, ya));
-    }
 
     private List<Yrkesaktivitet> getAlleArbeidsforhold(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag) {
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
@@ -228,19 +187,6 @@ public class VurderArbeidsforholdTjeneste {
             .filter(Yrkesaktivitet::erArbeidsforhold)
             .distinct()
             .collect(Collectors.toList());
-    }
-
-    private boolean matchInntektsmeldingTilArbeidsforhold(List<Yrkesaktivitet> yrkesaktiviteter, Inntektsmelding im) {
-        return yrkesaktiviteter
-            .stream()
-            .anyMatch(ya -> ya.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef()));
-    }
-
-    private boolean matchYrkesaktivitetTilInntektsmelding(List<Inntektsmelding> inntektsmeldinger, Yrkesaktivitet ya) {
-        return inntektsmeldinger
-            .stream()
-            .filter(Inntektsmelding::gjelderForEtSpesifiktArbeidsforhold)
-            .anyMatch(im -> ya.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef()));
     }
 
     private void erMottattInntektsmeldingUtenArbeidsforhold(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, InntektArbeidYtelseGrunnlag grunnlag,

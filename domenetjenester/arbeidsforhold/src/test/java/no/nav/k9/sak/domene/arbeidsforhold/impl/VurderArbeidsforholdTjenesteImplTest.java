@@ -33,11 +33,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
-import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -204,122 +201,6 @@ public class VurderArbeidsforholdTjenesteImplTest {
         var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(behandling.getFagsak().getSaksnummer());
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling), iayGrunnlag, sakInntektsmeldinger, false);
         assertThat(vurder).isEmpty();
-    }
-
-    @Test
-    public void skal_ikke_gi_autopunkt_når_inntektsmelding_og_aareg_matcher() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-
-        var behandling = scenario.lagre(repositoryProvider);
-        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
-        var ref = EksternArbeidsforholdRef.ref("ref");
-        opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
-        sendNyInntektsmelding(behandling, virksomhet, ref);
-
-        // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat).isFalse();
-    }
-
-    @Test
-    public void skal_ikke_gi_autopunkt_når_inntektsmelding_uten_arbeidsforholdId() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        var behandling = scenario.lagre(repositoryProvider);
-        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
-        var ref = EksternArbeidsforholdRef.ref("ref");
-        opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
-        sendNyInntektsmelding(behandling, virksomhet, null);
-
-        // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat).isFalse();
-    }
-
-    @Test
-    public void skal_ikke_gi_autopunkt_når_arbeidforholdId_mangler_fra_aareg() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        var behandling = scenario.lagre(repositoryProvider);
-        var ref = EksternArbeidsforholdRef.ref("ref");
-        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
-        opprettAktørArbeidMedYrkesaktivitet(behandling, null, virksomhet);
-        sendNyInntektsmelding(behandling, virksomhet, ref);
-
-        // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat).isFalse();
-    }
-
-    @Test
-    public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding_uten_arbId() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        var behandling = scenario.lagre(repositoryProvider);
-        var ref = EksternArbeidsforholdRef.ref("ref");
-        var ukjentRef = EksternArbeidsforholdRef.ref("ukjentRef");
-        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
-        opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
-        sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
-        // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat).isTrue();
-        // Arrange
-        sendNyInntektsmelding(behandling, virksomhet, null);
-        // Act
-        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat2).isFalse();
-    }
-
-    @Test
-    public void skal_gi_og_deretter_ikke__gi_autopunkt_når_arbeidsforholdId_i_inntektsmelding_ikke_matcher_i_aareg_og_deretter_ny_gyldig_inntektsmelding() {
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        var behandling = scenario.lagre(repositoryProvider);
-        var ref = EksternArbeidsforholdRef.ref("ref");
-        var ukjentRef = EksternArbeidsforholdRef.ref("ukjentRef");
-        var virksomhet = Arbeidsgiver.virksomhet(opprettVirksomhet("123123123"));
-        opprettAktørArbeidMedYrkesaktivitet(behandling, ref, virksomhet);
-        sendNyInntektsmelding(behandling, virksomhet, ukjentRef);
-        // Act
-        boolean resultat = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat).isTrue();
-        // Arrange
-        sendNyInntektsmelding(behandling, virksomhet, ref);
-        // Act
-        boolean resultat2 = tjeneste.inntektsmeldingMedArbeidsforholdIdSomIkkeMatcherArbeidsforholdIAAReg(behandling.getId(), behandling.getAktørId());
-        // Assert
-        assertThat(resultat2).isFalse();
-    }
-
-    private void opprettAktørArbeidMedYrkesaktivitet(Behandling behandling, EksternArbeidsforholdRef ref, Arbeidsgiver arbeidsgiver) {
-        InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
-
-        InternArbeidsforholdRef internRef = builder.medNyInternArbeidsforholdRef(arbeidsgiver, ref);
-        InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
-        YrkesaktivitetBuilder yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-        AktivitetsAvtaleBuilder aktivitetsAvtale = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
-            .medPeriode(DatoIntervallEntitet.fraOgMed(skjæringstidspunkt.minusYears(2)))
-            .medProsentsats(BigDecimal.TEN);
-        AktivitetsAvtaleBuilder arbeidsperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
-            .medPeriode(DatoIntervallEntitet.fraOgMed(skjæringstidspunkt.minusYears(2)));
-        yrkesaktivitetBuilder
-            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-            .medArbeidsgiver(arbeidsgiver)
-            .leggTilAktivitetsAvtale(aktivitetsAvtale)
-            .leggTilAktivitetsAvtale(arbeidsperiode)
-            .medArbeidsforholdId(internRef);
-
-        InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeid = aktørArbeidBuilder.leggTilYrkesaktivitet(yrkesaktivitetBuilder);
-        builder.leggTilAktørArbeid(aktørArbeid);
-        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
     }
 
     private void sendNyInntektsmelding(Behandling behandling, Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef ref) {
