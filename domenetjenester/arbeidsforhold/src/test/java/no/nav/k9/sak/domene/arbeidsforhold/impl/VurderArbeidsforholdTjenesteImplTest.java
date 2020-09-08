@@ -56,9 +56,9 @@ public class VurderArbeidsforholdTjenesteImplTest {
     private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null,
         new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
-    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(
-        new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
-    private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
+    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(
+        new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
+    private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
 
     @Before
     public void setup() {
