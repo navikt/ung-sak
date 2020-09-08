@@ -23,7 +23,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 
-@JsonSerialize(keyUsing = Serializer.class)
+@JsonSerialize(contentUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
