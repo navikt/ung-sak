@@ -1,6 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,17 +38,14 @@ public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOpp
 
     @Override
     public OppdateringResultat oppdater(FastsettBeregningsgrunnlagATFLDtoer dtoer, AksjonspunktOppdaterParameter param) {
+        Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        // TODO FIKS HISTORIKK
 
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
-        for (FastsettBeregningsgrunnlagATFLDto dto : dtoer.getGrunnlag()) {
-            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-            @SuppressWarnings("unused")
-            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-            // TODO FIKS HISTORIKK
-
-            håndterEventueltOverflødigAksjonspunkt(param.getBehandling())
-                .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
-        }
+        håndterEventueltOverflødigAksjonspunkt(param.getBehandling())
+            .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
         return builder.build();
     }
 

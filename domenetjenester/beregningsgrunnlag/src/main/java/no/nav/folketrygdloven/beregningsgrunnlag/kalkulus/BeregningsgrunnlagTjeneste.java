@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -72,9 +73,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
-
-        return finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregning(håndterBeregningDto, bgReferanse);
+        OppdaterBeregningsgrunnlagResultat oppdaterBeregningsgrunnlagResultat = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregning(håndterBeregningDto, bgReferanse);
+        oppdaterBeregningsgrunnlagResultat.setSkjæringstidspunkt(skjæringstidspunkt);
+        return oppdaterBeregningsgrunnlagResultat;
     }
+
+    @Override
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref) {
+        Map<UUID, LocalDate> referanseTilStpMap = håndterMap.keySet().stream()
+            .collect(Collectors.toMap(v -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), v, true, false), v -> v));
+        Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        Map<UUID, HåndterBeregningDto> referanseTilDtoMap = håndterMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
+        List<OppdaterBeregningsgrunnlagResultat> resultatListe = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregningListe(ref, referanseTilDtoMap);
+        resultatListe.forEach(e -> e.setSkjæringstidspunkt(referanseTilStpMap.get(e.getReferanse())));
+        return resultatListe;
+    }
+
 
     @Override
     public Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {

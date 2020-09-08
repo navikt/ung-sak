@@ -1,7 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -45,14 +48,15 @@ public class VurderVarigEndringEllerNyoppstartetSNOppdaterer implements Aksjonsp
         OppdateringResultat.Builder resultatBuilder = OppdateringResultat.utenTransisjon();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        for (VurderVarigEndringEllerNyoppstartetSNDto dto : dtoer.getGrunnlag()) {
+        Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        // TODO FIKS HISTORIKK
 
+        for (VurderVarigEndringEllerNyoppstartetSNDto dto : dtoer.getGrunnlag()) {
             // Aksjonspunkt "opprettet" i GUI må legge til, bør endre på hvordan dette er løst
             if (dto.getErVarigEndretNaering()) {
-                if (dto.getBruttoBeregningsgrunnlag() != null) {
-                    HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-                    kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-                } else {
+                if (dto.getBruttoBeregningsgrunnlag() == null) {
                     behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, List.of(FASTSETTBRUTTOSNKODE));
                 }
             } else {

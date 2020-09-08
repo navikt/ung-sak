@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.output;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -19,10 +20,11 @@ public class MapEndringsresultat {
         // Skjul
     }
 
-    public static OppdaterBeregningsgrunnlagResultat mapFraOppdateringRespons(OppdateringRespons oppdateringRespons) {
+    public static OppdaterBeregningsgrunnlagResultat mapFraOppdateringRespons(OppdateringRespons oppdateringRespons, UUID bgReferanse) {
         return oppdateringRespons == null ? null :
             new OppdaterBeregningsgrunnlagResultat(mapTilBeregningsgrunnlagEndring(oppdateringRespons.getBeregningsgrunnlagEndring()),
-                mapFaktaOmBeregningVurderinger(oppdateringRespons.getFaktaOmBeregningVurderinger())
+                mapFaktaOmBeregningVurderinger(oppdateringRespons.getFaktaOmBeregningVurderinger()),
+                bgReferanse
             );
     }
 

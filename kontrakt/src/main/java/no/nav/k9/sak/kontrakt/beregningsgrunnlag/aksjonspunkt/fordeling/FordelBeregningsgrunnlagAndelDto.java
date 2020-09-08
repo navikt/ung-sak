@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
+package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -17,12 +17,12 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
+public class FordelBeregningsgrunnlagAndelDto extends FordelRedigerbarAndelDto {
 
     @JsonProperty(value = "fastsatteVerdier", required = true)
     @Valid
     @NotNull
-    private FastsatteVerdierDto fastsatteVerdier;
+    private FordelFastsatteVerdierDto fastsatteVerdier;
 
     @JsonProperty(value = "forrigeArbeidsinntektPrÅr")
     @Min(0)
@@ -38,21 +38,22 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
     @Max(Integer.MAX_VALUE)
     private Integer forrigeRefusjonPrÅr;
 
-    public FastsettBeregningsgrunnlagAndelDto() {
+    public FordelBeregningsgrunnlagAndelDto() {
         //
     }
 
-    public FastsettBeregningsgrunnlagAndelDto(RedigerbarAndelDto andelDto,
-                                              FastsatteVerdierDto fastsatteVerdier, Inntektskategori forrigeInntektskategori, Integer forrigeRefusjonPrÅr,
-                                              Integer forrigeArbeidsinntektPrÅr) {
-        super(andelDto.getAndelsnr(), andelDto.getLagtTilAvSaksbehandler(), andelDto.getNyAndel());
+    public FordelBeregningsgrunnlagAndelDto(FordelRedigerbarAndelDto andelDto,
+                                            FordelFastsatteVerdierDto fastsatteVerdier, Inntektskategori forrigeInntektskategori, Integer forrigeRefusjonPrÅr,
+                                            Integer forrigeArbeidsinntektPrÅr) {
+        super(andelDto.getNyAndel(), andelDto.getArbeidsgiverId(), andelDto.getArbeidsforholdId(),
+            andelDto.getAndelsnr(), andelDto.getLagtTilAvSaksbehandler(), andelDto.getAktivitetStatus(), OpptjeningAktivitetType.ARBEID);
         this.fastsatteVerdier = fastsatteVerdier;
         this.forrigeArbeidsinntektPrÅr = forrigeArbeidsinntektPrÅr;
         this.forrigeInntektskategori = forrigeInntektskategori;
         this.forrigeRefusjonPrÅr = forrigeRefusjonPrÅr;
     }
 
-    public FastsatteVerdierDto getFastsatteVerdier() {
+    public FordelFastsatteVerdierDto getFastsatteVerdier() {
         return fastsatteVerdier;
     }
 
@@ -68,7 +69,7 @@ public class FastsettBeregningsgrunnlagAndelDto extends RedigerbarAndelDto {
         return forrigeRefusjonPrÅr;
     }
 
-    public void setFastsatteVerdier(FastsatteVerdierDto fastsatteVerdier) {
+    public void setFastsatteVerdier(FordelFastsatteVerdierDto fastsatteVerdier) {
         this.fastsatteVerdier = fastsatteVerdier;
     }
 

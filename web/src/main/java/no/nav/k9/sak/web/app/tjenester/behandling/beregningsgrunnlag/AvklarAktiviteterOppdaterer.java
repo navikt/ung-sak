@@ -1,6 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
 
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -10,7 +14,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDtoer;
 
 @ApplicationScoped
@@ -30,12 +33,9 @@ public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<Avkla
 
     @Override
     public OppdateringResultat oppdater(AvklarteAktiviteterDtoer dtoer, AksjonspunktOppdaterParameter param) {
-        for (AvklarteAktiviteterDto dto : dtoer.getGrunnlag()) {
-            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-            @SuppressWarnings("unused")
-            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-            // TODO Ta i bruk respons for historikk når dette er klart på kalkulus
-        }
+        Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
         return OppdateringResultat.utenOveropp();
     }
 

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagATFLDtoer;
+import no.nav.k9.sak.typer.Periode;
 
 public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     private FastsettBeregningsgrunnlagATFLOppdaterer oppdaterer;
@@ -53,7 +55,7 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
         when(ap.erOpprettet()).thenReturn(true);
 
         //Dto
-        FastsettBeregningsgrunnlagATFLDto dto = new FastsettBeregningsgrunnlagATFLDto("begrunnelse", Collections.emptyList(), null);
+        FastsettBeregningsgrunnlagATFLDto dto = new FastsettBeregningsgrunnlagATFLDto(Collections.emptyList(), null, new Periode(LocalDate.now(), LocalDate.now()));
         // Act
         FastsettBeregningsgrunnlagATFLDtoer dtoer = new FastsettBeregningsgrunnlagATFLDtoer("", List.of(dto));
         var resultat = oppdaterer.oppdater(dtoer, new AksjonspunktOppdaterParameter(behandling, ap, dtoer));

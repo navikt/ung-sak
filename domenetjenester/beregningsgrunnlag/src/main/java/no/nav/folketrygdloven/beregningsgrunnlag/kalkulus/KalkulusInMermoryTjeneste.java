@@ -66,6 +66,11 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap) {
+        return List.of();
+    }
+
+    @Override
     public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
         var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
