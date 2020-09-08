@@ -27,6 +27,7 @@ import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
@@ -40,6 +41,7 @@ public class SjekkProsessering {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private ProsessTaskRepository prosessTaskRepository;
     private String gruppenavnSaksbehandler;
 
     SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste) {
@@ -50,11 +52,13 @@ public class SjekkProsessering {
     public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
                              BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                              @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
-                             BehandlingRepository behandlingRepository) {
+                             BehandlingRepository behandlingRepository,
+                             ProsessTaskRepository prosessTaskRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;
         this.behandlingRepository = behandlingRepository;
+        this.prosessTaskRepository = prosessTaskRepository;
     }
 
     public Behandling hentBehandling(UUID behandlingUuid) {
@@ -104,6 +108,20 @@ public class SjekkProsessering {
         // henter alltid registeropplysninger og kjører alltid prosess
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
+    
+    public boolean opprettTaskForOppfrisking(Behandling behandling) {
+        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
+            return false;
+        }
+
+        if (pågårEllerFeiletTasks(behandling)) {
+            return false;
+        }
+
+        final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling);
+        prosessTaskRepository.lagre(oppfriskTaskData);
+        return true;
+    }
 
     private boolean pågårEllerFeiletTasks(Behandling behandling) {
         var taskStatus = sjekkProsessTaskPågårForBehandling(behandling, null);
@@ -119,7 +137,7 @@ public class SjekkProsessering {
      *
      * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    private String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
+    String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
         ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling);
         String gruppeNavn = asynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);

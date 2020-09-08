@@ -58,7 +58,8 @@ public class BehandlingBackendRestTjeneste {
 
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
-
+    
+    
     public BehandlingBackendRestTjeneste() {
         // for resteasy
     }
@@ -111,8 +112,9 @@ public class BehandlingBackendRestTjeneste {
             var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid);
             if (behandling.erStatusFerdigbehandlet()) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
+            } else if (!sjekkProsessering.opprettTaskForOppfrisking(behandling)) {
+                result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
             } else {
-                sjekkProsessering.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, false);
                 var taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, taskStatus.orElse(null), behandling.getStatus()));
             }
