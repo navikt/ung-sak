@@ -124,7 +124,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     }
 
     public InternArbeidsforholdRef getArbeidsforholdRef() {
-        return arbeidsforholdRef;
+        return arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef;
     }
 
     public Arbeidsgiver getArbeidsgiver() {

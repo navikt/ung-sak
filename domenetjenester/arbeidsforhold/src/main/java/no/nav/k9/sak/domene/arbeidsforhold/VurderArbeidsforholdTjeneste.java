@@ -30,13 +30,10 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.EndringIArbeidsforholdId;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.ManglendePåkrevdeInntektsmeldingerTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -47,7 +44,6 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
 public class VurderArbeidsforholdTjeneste {
@@ -56,17 +52,14 @@ public class VurderArbeidsforholdTjeneste {
         .collect(Collectors.toSet());
     private static final Logger logger = LoggerFactory.getLogger(VurderArbeidsforholdTjeneste.class);
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjenester;
+    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester;
 
     VurderArbeidsforholdTjeneste() {
         // CDI
     }
 
     @Inject
-    public VurderArbeidsforholdTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                        @Any Instance<ManglendePåkrevdeInntektsmeldingerTjeneste> påkrevdeInntektsmeldingerTjenester) {
-        this.iayTjeneste = inntektArbeidYtelseTjeneste;
+    public VurderArbeidsforholdTjeneste(@Any Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester) {
         this.påkrevdeInntektsmeldingerTjenester = påkrevdeInntektsmeldingerTjenester;
     }
 
@@ -126,16 +119,17 @@ public class VurderArbeidsforholdTjeneste {
 
         // Ikke relevant å sjekke permisjonen da dette går til avslag ..
         //VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
-        leggTilManglendePåkrevdeInntektsmeldinger(ref, result);
+        var ytelsespesifikkeInntektsmeldingTjeneste = finnPåkrevdeInntektsmeldingerTjeneste(ref);
+        leggTilManglendePåkrevdeInntektsmeldinger(ref, result, ytelsespesifikkeInntektsmeldingTjeneste);
         erRapportertNormalInntektUtenArbeidsforhold(iayGrunnlag, ref);
-        erMottattInntektsmeldingUtenArbeidsforhold(result, iayGrunnlag, ref);
+        erMottattInntektsmeldingUtenArbeidsforhold(result, ref, ytelsespesifikkeInntektsmeldingTjeneste);
 
         return result;
 
     }
 
-    private void leggTilManglendePåkrevdeInntektsmeldinger(BehandlingReferanse ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result) {
-        var manglendePåkrevdeInntektsmeldinger = finnPåkrevdeInntektsmeldingerTjeneste(ref).leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref);
+    private void leggTilManglendePåkrevdeInntektsmeldinger(BehandlingReferanse ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
+        var manglendePåkrevdeInntektsmeldinger = ytelsespesifikkeInntektsmeldingTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref);
         manglendePåkrevdeInntektsmeldinger.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
@@ -144,7 +138,7 @@ public class VurderArbeidsforholdTjeneste {
         return a;
     }
 
-    private ManglendePåkrevdeInntektsmeldingerTjeneste finnPåkrevdeInntektsmeldingerTjeneste(BehandlingReferanse ref) {
+    private YtelsespesifikkeInntektsmeldingTjeneste finnPåkrevdeInntektsmeldingerTjeneste(BehandlingReferanse ref) {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(påkrevdeInntektsmeldingerTjenester, ref.getFagsakYtelseType());
         return tjeneste.orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for PåkrevdeInntektsmeldingerTjeneste for behandling " + ref.getBehandlingUuid()));
     }
@@ -189,31 +183,12 @@ public class VurderArbeidsforholdTjeneste {
             .collect(Collectors.toList());
     }
 
-    private void erMottattInntektsmeldingUtenArbeidsforhold(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, InntektArbeidYtelseGrunnlag grunnlag,
-                                                            BehandlingReferanse behandlingReferanse) {
-        final Optional<InntektsmeldingAggregat> inntektsmeldinger = grunnlag.getInntektsmeldinger();
-        if (inntektsmeldinger.isPresent()) {
-            final InntektsmeldingAggregat aggregat = inntektsmeldinger.get();
-            for (Inntektsmelding inntektsmelding : aggregat.getInntektsmeldingerSomSkalBrukes()) {
-                final Tuple<Long, Long> antallArbeidsforIArbeidsgiveren = antallArbeidsforHosArbeidsgiveren(behandlingReferanse, grunnlag,
-                    inntektsmelding.getArbeidsgiver(),
-                    inntektsmelding.getArbeidsforholdRef());
-                if (antallArbeidsforIArbeidsgiveren.getElement1() == 0 && antallArbeidsforIArbeidsgiveren.getElement2() == 0
-                    && IkkeTattStillingTil.vurder(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef(), grunnlag)) {
-                    final Arbeidsgiver arbeidsgiver = inntektsmelding.getArbeidsgiver();
-                    final Set<InternArbeidsforholdRef> arbeidsforholdRefs = trekkUtRef(inntektsmelding);
-                    LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
-                    logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
-                }
-            }
-        }
-    }
+    private void erMottattInntektsmeldingUtenArbeidsforhold(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
+                                                            BehandlingReferanse behandlingReferanse,
+                                                            YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
 
-    private Set<InternArbeidsforholdRef> trekkUtRef(Inntektsmelding inntektsmelding) {
-        if (inntektsmelding.gjelderForEtSpesifiktArbeidsforhold()) {
-            return Stream.of(inntektsmelding.getArbeidsforholdRef()).collect(Collectors.toSet());
-        }
-        return Stream.of(InternArbeidsforholdRef.nullRef()).collect(Collectors.toSet());
+        var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erMottattInntektsmeldingUtenArbeidsforhold(behandlingReferanse);
+        resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
     private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver,
@@ -247,31 +222,8 @@ public class VurderArbeidsforholdTjeneste {
                 flatMapping(ya -> Stream.of(ya.getArbeidsforholdRef()), Collectors.toSet())));
     }
 
-    private Tuple<Long, Long> antallArbeidsforHosArbeidsgiveren(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag,
-                                                                Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        LocalDate skjæringstidspunkt = behandlingReferanse.getUtledetSkjæringstidspunkt();
-
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
-
-        long antallFør = antallArbeidsfor(arbeidsgiver, arbeidsforholdRef, filter.før(skjæringstidspunkt));
-        long antallEtter = antallArbeidsfor(arbeidsgiver, arbeidsforholdRef, filter.etter(skjæringstidspunkt));
-
-        return new Tuple<>(antallFør, antallEtter);
-    }
-
-    private long antallArbeidsfor(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, YrkesaktivitetFilter filter) {
-        long antall = 0;
-        antall = filter.getYrkesaktiviteter()
-            .stream()
-            .filter(yr -> ARBEIDSFORHOLD_TYPER.contains(yr.getArbeidType())
-                && yr.getArbeidsgiver().equals(arbeidsgiver)
-                && yr.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef))
-            .count();
-        return antall;
-    }
-
     private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> inntektsmeldingerPerArbeidsgiver(Optional<InntektsmeldingAggregat> inntektsmeldingAggregat) {
-        if (!inntektsmeldingAggregat.isPresent()) {
+        if (inntektsmeldingAggregat.isEmpty()) {
             return Collections.emptyMap();
         }
         return inntektsmeldingAggregat.get()

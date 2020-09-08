@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
@@ -363,5 +364,13 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår).isNotNull();
         assertThat(oppdatertVilkår.getPerioder()).hasSize(3);
         assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(2);
+    }
+
+    @Test
+    public void name() {
+        var zero = Duration.ZERO;
+        var string = Duration.parse("PT0S");
+
+        assertThat(zero.equals(string)).isTrue();
     }
 }

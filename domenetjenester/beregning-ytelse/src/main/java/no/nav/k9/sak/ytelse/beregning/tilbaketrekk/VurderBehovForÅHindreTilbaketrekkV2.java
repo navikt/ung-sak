@@ -33,7 +33,7 @@ public class VurderBehovForÅHindreTilbaketrekkV2 {
             List<BRNøkkelMedAndeler> originaleAndelerSortertPåNøkkel = MapAndelerSortertPåNøkkel.map(originaleAndeler);
             List<BRNøkkelMedAndeler> revurderingAndelerSortertPåNøkkel = MapAndelerSortertPåNøkkel.map(revurderingAndeler);
 
-            for(BRNøkkelMedAndeler originalAndel : originaleAndelerSortertPåNøkkel) {
+            for (BRNøkkelMedAndeler originalAndel : originaleAndelerSortertPåNøkkel) {
                 Optional<BRNøkkelMedAndeler> andelerIRevurderingGrunnlagMedSammeNøkkel = finnSammenligningsandelMedSammeNøkkel(originalAndel.getNøkkel(), revurderingAndelerSortertPåNøkkel);
 
                 if (andelerIRevurderingGrunnlagMedSammeNøkkel.isPresent()) {
@@ -136,10 +136,8 @@ public class VurderBehovForÅHindreTilbaketrekkV2 {
             int revurderingDagsatsArbeidsgiver = 0;
             int endringIDagsatsBruker = revurderingDagsatsBruker - originalBrukersAndel.getDagsats();
 
-            boolean skalStoppes = KanRedusertBeløpTilBrukerDekkesAvNyRefusjon.vurder(
-                endringIDagsatsBruker,
-                revurderingDagsatsArbeidsgiver
-            );
+            boolean skalStoppes = KanRedusertBeløpTilBrukerDekkesAvNyRefusjon.vurder(endringIDagsatsBruker,
+                revurderingDagsatsArbeidsgiver);
             if (skalStoppes) {
                 return true;
             }
