@@ -84,7 +84,6 @@ public class BehandlingDtoTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private SøknadRepository søknadRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -106,7 +105,6 @@ public class BehandlingDtoTjeneste {
                                  SøknadRepository søknadRepository,
                                  UttakRepository uttakRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
 
@@ -115,7 +113,6 @@ public class BehandlingDtoTjeneste {
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.k9OppdragProxyUrl = k9OppdragProxyUrl;
@@ -213,8 +210,7 @@ public class BehandlingDtoTjeneste {
     }
 
     BehandlingsresultatDto lagBehandlingsresultat(Behandling behandling) {
-        var skjæringstidspunkt = finnSkjæringstidspunkt(behandling);
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
         var behandlingsresultat = lagBehandlingsresultat(ref);
         return behandlingsresultat;
     }
@@ -237,7 +233,6 @@ public class BehandlingDtoTjeneste {
             dto.setVilkårResultat(vilkårResultater);
         }
 
-        dto.setSkjæringstidspunkt(finnSkjæringstidspunktForBehandling(ref).orElse(null));
         dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(ref));
 
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakFor(ref.getBehandlingUuid());
@@ -421,21 +416,6 @@ public class BehandlingDtoTjeneste {
 
     private boolean erRevurderingMedUendretUtfall(BehandlingReferanse ref) {
         return ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret();
-    }
-
-    private Optional<SkjæringstidspunktDto> finnSkjæringstidspunktForBehandling(BehandlingReferanse ref) {
-        if (!ref.getBehandlingType().erYtelseBehandlingType()) {
-            return Optional.empty();
-        }
-        var skjæringstidspunktHvisUtledet = ref.getSkjæringstidspunkt().getSkjæringstidspunktHvisUtledet();
-        if (skjæringstidspunktHvisUtledet.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(new SkjæringstidspunktDto(skjæringstidspunktHvisUtledet.get()));
-    }
-
-    private Skjæringstidspunkt finnSkjæringstidspunkt(Behandling behandling) {
-        return skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
