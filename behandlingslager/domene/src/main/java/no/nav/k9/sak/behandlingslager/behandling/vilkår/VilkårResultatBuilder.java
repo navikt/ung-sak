@@ -29,7 +29,7 @@ public class VilkårResultatBuilder {
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private boolean built;
     private DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
-    private LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje = null;
+    private LocalDateTimeline<WrappedVilkårPeriode> fullstendigTidslinje = null;
 
     public VilkårResultatBuilder() {
         super();
@@ -49,8 +49,12 @@ public class VilkårResultatBuilder {
 
     public VilkårBuilder hentBuilderFor(VilkårType vilkårType) {
         final var vilkåret = kladd.getVilkårene().stream().filter(v -> vilkårType.equals(v.getVilkårType())).findFirst().orElse(new Vilkår());
-        return new VilkårBuilder(vilkåret)
+        var vilkårBuilder = new VilkårBuilder(vilkåret)
             .medType(vilkårType);
+        if (fullstendigTidslinje != null) {
+            vilkårBuilder.medFullstendigTidslinje(fullstendigTidslinje);
+        }
+        return vilkårBuilder;
     }
 
     public VilkårResultatBuilder medMaksMellomliggendePeriodeAvstand(int mellomliggendePeriodeAvstand) {
@@ -68,8 +72,8 @@ public class VilkårResultatBuilder {
     }
 
     public VilkårResultatBuilder leggTil(VilkårBuilder vilkårBuilder) {
-        if (fagsakTidslinje != null) {
-            vilkårBuilder.medFullstendigTidslinje(fagsakTidslinje);
+        if (fullstendigTidslinje != null) {
+            vilkårBuilder.medFullstendigTidslinje(fullstendigTidslinje);
         }
         kladd.leggTilVilkår(vilkårBuilder.build());
         return this;
@@ -114,7 +118,7 @@ public class VilkårResultatBuilder {
                 .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
                 .medKantIKantVurderer(kantIKantVurderer))
             .peek(v -> intervaller.forEach(p -> v.leggTil(v.hentBuilderFor(p.getFomDato(), p.getTomDato()).medUtfall(Utfall.IKKE_VURDERT))))
-            .forEach(builder -> kladd.leggTilVilkår(builder.build()));
+            .forEach(this::leggTil);
         return this;
     }
 
@@ -126,7 +130,7 @@ public class VilkårResultatBuilder {
                 .medKantIKantVurderer(kantIKantVurderer)
                 .tilbakestill(perioderSomSkalTilbakestilles);
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
-            kladd.leggTilVilkår(builder.build());
+            leggTil(builder);
         });
         return this;
     }
@@ -136,11 +140,11 @@ public class VilkårResultatBuilder {
         return this;
     }
 
-    public VilkårResultatBuilder medFagsakTidslinje(VilkårBuilder vilkårBuilder) {
+    public VilkårResultatBuilder medFullstendigTidslinje(VilkårBuilder vilkårBuilder) {
         if (vilkårBuilder != null) {
-            this.fagsakTidslinje = vilkårBuilder.getTidslinje();
+            this.fullstendigTidslinje = vilkårBuilder.getTidslinje();
         } else {
-            this.fagsakTidslinje = null;
+            this.fullstendigTidslinje = null;
         }
         return this;
     }

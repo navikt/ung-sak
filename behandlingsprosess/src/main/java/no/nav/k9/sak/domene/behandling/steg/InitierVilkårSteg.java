@@ -98,7 +98,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
 
         vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
-            .medFagsakTidslinje(fullstendigTidslinje)
+            .medFullstendigTidslinje(fullstendigTidslinje)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
