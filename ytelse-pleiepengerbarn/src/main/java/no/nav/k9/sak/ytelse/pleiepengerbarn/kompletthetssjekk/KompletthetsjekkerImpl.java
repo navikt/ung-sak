@@ -112,8 +112,7 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     }
 
     private void loggManglendeInntektsmeldinger(Long behandlingId, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
-        String arbgivere = manglendeInntektsmeldinger.stream().map(ManglendeVedlegg::getArbeidsgiver).collect(Collectors.toList()).toString();
-        LOGGER.info("Behandling {} er ikke komplett - mangler IM fra arbeidsgivere [{}]", behandlingId, arbgivere); // NOSONAR //$NON-NLS-1$
+        LOGGER.info("Behandling {} er ikke komplett - mangler IM fra arbeidsgivere", behandlingId); // NOSONAR //$NON-NLS-1$
     }
 
     @Override
