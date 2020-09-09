@@ -29,10 +29,6 @@ public class BehandlingsresultatDto {
     @Valid
     private Boolean erRevurderingMedUendretUtfall;
 
-    @JsonProperty(value = "skjæringstidspunkt")
-    @Valid
-    private SkjæringstidspunktDto skjæringstidspunkt;
-
     @JsonProperty(value = "type", required = true)
     @NotNull
     @Valid
@@ -55,10 +51,6 @@ public class BehandlingsresultatDto {
         return Boolean.TRUE.equals(erRevurderingMedUendretUtfall);
     }
 
-    public SkjæringstidspunktDto getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
     public BehandlingResultatType getResultatType() {
         return type;
     }
@@ -73,10 +65,6 @@ public class BehandlingsresultatDto {
 
     public void setErRevurderingMedUendretUtfall(Boolean erRevurderingMedUendretUtfall) {
         this.erRevurderingMedUendretUtfall = erRevurderingMedUendretUtfall;
-    }
-
-    public void setSkjæringstidspunkt(SkjæringstidspunktDto skjæringstidspunkt) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 
     public void setResultatType(BehandlingResultatType type) {
