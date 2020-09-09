@@ -113,8 +113,7 @@ public class InntektsmeldingRegisterTjeneste {
 
         påkrevdeInntektsmeldinger.forEach((key, value) -> {
             String arbeidsforholdReferanser = value.stream().map(InternArbeidsforholdRef::toString).collect(Collectors.joining(","));
-            LOGGER.info("{} påkrevdeInntektsmeldinger[{}]: identifikator: {}, arbeidsforholdRef: {}", filtrert, referanse.getBehandlingId(), key.getIdentifikator(),
-                arbeidsforholdReferanser);
+            LOGGER.info("{} påkrevdeInntektsmeldinger[{}]: arbeidsforholdRef: {}", filtrert, referanse.getBehandlingId(), arbeidsforholdReferanser);
         });
     }
 
