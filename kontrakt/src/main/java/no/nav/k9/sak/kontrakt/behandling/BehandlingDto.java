@@ -226,6 +226,11 @@ public class BehandlingDto {
         return behandlingsfristTid;
     }
 
+
+    public BehandlingResultatType getBehandlingResultatType() {
+        return behandlingResultatType;
+    }
+
     public BehandlingsresultatDto getBehandlingsresultat() {
         return behandlingsresultat;
     }
@@ -346,6 +351,10 @@ public class BehandlingDto {
         this.behandlingsfristTid = behandlingsfristTid;
     }
 
+    public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
+        this.behandlingResultatType = behandlingResultatType;
+    }
+
     public void setBehandlingsresultat(BehandlingsresultatDto dto) {
         this.behandlingsresultat = dto;
     }
@@ -430,7 +439,7 @@ public class BehandlingDto {
     public void setBehandlingKøet(boolean behandlingKøet) {
         this.behandlingKøet = behandlingKøet;
     }
-    
+
     public String getAnsvarligBeslutter() {
         return ansvarligBeslutter;
     }
