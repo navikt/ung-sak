@@ -86,7 +86,10 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
             .orElseThrow()
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
-        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
+        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
+        if (tidligsteStp.isEmpty()) {
+            return Set.of();
+        }
         Set<LocalDate> datoer = new HashSet<>();
 
         for (DatoIntervallEntitet vilkårsPeriode : vilkårsPerioder) {
@@ -97,7 +100,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
         // ønsker bare å se på datoer etter skjæringstidspunktet
         return datoer.stream()
-            .filter(entry -> entry.isAfter(tidligsteStp.minusDays(1)))
+            .filter(entry -> entry.isAfter(tidligsteStp.get().minusDays(1)))
             .sorted().collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -110,7 +113,10 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
             .orElseThrow()
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
-        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
+        var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
+        if (tidligsteStp.isEmpty()) {
+            return Map.of();
+        }
         for (DatoIntervallEntitet periode : vilkårsPerioder) {
             mergeResultat(datoer, Map.of(periode.getFomDato(), Set.of(VurderingsÅrsak.SKJÆRINGSTIDSPUNKT)));
             mergeResultat(datoer, utledVurderingsdatoerForTPS(behandling, periode));
@@ -118,7 +124,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
         mergeResultat(datoer, utledVurderingsdatoerForMedlemskap(behandlingId, endringssjekker));
 
         return datoer.entrySet().stream()
-            .filter(entry -> entry.getKey().isAfter(tidligsteStp.minusDays(1)))
+            .filter(entry -> entry.getKey().isAfter(tidligsteStp.get().minusDays(1)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
