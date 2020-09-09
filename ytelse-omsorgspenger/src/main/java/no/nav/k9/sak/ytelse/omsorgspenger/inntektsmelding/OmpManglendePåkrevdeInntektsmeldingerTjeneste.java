@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.flatMapping;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,14 +23,11 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
-import no.nav.vedtak.util.Tuple;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -85,7 +81,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
             var arbeidsgiver = arbeidsgiverArbeidsforhold.getArbeidsgiver();
             var arbeidsforhold = arbeidsgiverArbeidsforholdMap.getOrDefault(arbeidsgiver, Set.of());
             var arbeidsforholdet = arbeidsgiverArbeidsforhold.getArbeidsforhold();
-            if (!arbeidsforhold.contains(arbeidsforholdet) && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
+            if (arbeidsforhold.stream().noneMatch(arbeidsforholdet::gjelderFor) && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
                 var arbeidsforholdRefs = Set.of(arbeidsforholdet);
                 LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
                 logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);

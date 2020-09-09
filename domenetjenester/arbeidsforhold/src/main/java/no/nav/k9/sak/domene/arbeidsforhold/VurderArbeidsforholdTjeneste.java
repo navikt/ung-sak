@@ -191,8 +191,7 @@ public class VurderArbeidsforholdTjeneste {
         resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
-    private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver,
-        Set<ArbeidsforholdMedÅrsak>> result,
+    private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
                                                       SakInntektsmeldinger sakInntektsmeldinger,
                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                       BehandlingReferanse behandlingReferanse) {
