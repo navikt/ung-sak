@@ -136,7 +136,6 @@ public class VilkårBuilderTest {
         assertThat(tilbakestiltVilkår.getPerioder()).hasSize(1);
         assertThat(tilbakestiltVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(andreSkjæringstidspunkt);
         assertThat(tilbakestiltVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
-
     }
 
     @Test
