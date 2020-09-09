@@ -184,7 +184,7 @@ public class OppgaveTjeneste {
             logger.info("GOSYS fant {} oppgaver av type {}, for ytelse {}", oppgaver.size(), oppgavetype, ytelseType);
             return !oppgaver.isEmpty();
         } catch (Exception e) {
-            throw OppgaveFeilmeldinger.FACTORY.feilVedHentingAvOppgaver(ytelseType, oppgavetype, aktørId, e).toException();
+            throw OppgaveFeilmeldinger.FACTORY.feilVedHentingAvOppgaver(ytelseType, oppgavetype, e).toException();
         }
     }
 
