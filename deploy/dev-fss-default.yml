@@ -130,9 +130,9 @@ spec:
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
     - name: FPABAKUS_URL
-      value: http://fpabakus.q1/fpabakus
+      value: http://fpabakus/fpabakus
     - name: FTKALKULUS_URL
-      value: http://ftkalkulus.q1/ftkalkulus
+      value: http://ftkalkulus/ftkalkulus
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.default/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
