@@ -143,6 +143,8 @@ spec:
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: http://oppgave.default/api/v1/oppgaver
+    - name: K9_TILBAKE_DIREKTE_URL
+      value: https://app-q1.adeo.no/k9/tilbake/api
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -192,6 +194,8 @@ spec:
       value: "true"
     - name: "AKSJONSPUNKT_7035_ENABLED"
       value: "false"
+    - name: K9TILBAKE_AKTIVERT
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
