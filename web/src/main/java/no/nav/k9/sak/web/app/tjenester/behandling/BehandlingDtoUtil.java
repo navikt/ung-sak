@@ -59,7 +59,7 @@ public class BehandlingDtoUtil {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
-        
+
         dto.setFagsakId(behandling.getFagsakId());
         dto.setId(behandling.getId());
         dto.setUuid(behandling.getUuid());
@@ -75,6 +75,7 @@ public class BehandlingDtoUtil {
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
         dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
         dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
+        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
 
         dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
         dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
@@ -111,7 +112,7 @@ public class BehandlingDtoUtil {
     static ResourceLink getFraMap(String path, String rel, Map<String, String> queryParams) {
         return ResourceLink.get(getApiPath(path), rel, queryParams);
     }
-    
+
     static ResourceLink buildLink(String path, String rel, HttpMethod method, Consumer<URIBuilder> uriBuilder) {
         String apiPath = BehandlingDtoUtil.getApiPath(path);
         try {
