@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -23,21 +22,24 @@ public class InntektsmeldingFravær {
 
     public List<OppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Set<Inntektsmelding> inntektsmeldinger) {
         var sortedIm = inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
-        
+
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
-        Map<Object, List<OppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
+        Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<OppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var im : sortedIm) {
             var arbeidsgiver = im.getArbeidsgiver();
             var arbeidsforholdRef = im.getArbeidsforholdRef();
-            var dummyGruppe = Arrays.asList(aktivitetType, arbeidsgiver, arbeidsforholdRef);
-            var aktiviteter = mapByAktivitet.getOrDefault(dummyGruppe, new ArrayList<>());
+            var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
+            var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
             var liste = im.getOppgittFravær().stream()
                 .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag()))
                 .collect(Collectors.toList());
 
             var timeline = mapTilTimeline(aktiviteter);
+            var imTidslinje = mapTilTimeline(liste);
 
-            timeline = timeline.combine(mapTilTimeline(liste), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            ryddOppIBerørteTidslinjer(mapByAktivitet, gruppe, imTidslinje);
+
+            timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
             var oppdatertListe = timeline.compress()
                 .toSegments()
@@ -47,7 +49,7 @@ public class InntektsmeldingFravær {
                 .map(this::opprettHoldKonsistens)
                 .collect(Collectors.toList());
 
-            mapByAktivitet.put(dummyGruppe, oppdatertListe);
+            mapByAktivitet.put(gruppe, oppdatertListe);
         }
 
         // sjekker mot overlappende data - foreløpig krasj and burn hvis overlappende segmenter
@@ -59,6 +61,30 @@ public class InntektsmeldingFravær {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+    }
+
+    private void ryddOppIBerørteTidslinjer(Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<OppgittFraværPeriode>> mapByAktivitet,
+                                           AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold gruppe,
+                                           LocalDateTimeline<WrappedOppgittFraværPeriode> imTidslinje) {
+        var entries = mapByAktivitet.entrySet()
+            .stream()
+            .filter(it -> !it.getKey().equals(gruppe) && it.getKey().matcher(gruppe))
+            .collect(Collectors.toList());
+
+        for (Map.Entry<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<OppgittFraværPeriode>> entry : entries) {
+            var timeline = mapTilTimeline(entry.getValue());
+
+            timeline = timeline.disjoint(imTidslinje);
+            var oppdatertListe = timeline.compress()
+                .toSegments()
+                .stream()
+                .filter(it -> it.getValue() != null)
+                .filter(it -> it.getValue().getPeriode() != null)
+                .map(this::opprettHoldKonsistens)
+                .collect(Collectors.toList());
+
+            mapByAktivitet.put(entry.getKey(), oppdatertListe);
+        }
     }
 
     @NotNull

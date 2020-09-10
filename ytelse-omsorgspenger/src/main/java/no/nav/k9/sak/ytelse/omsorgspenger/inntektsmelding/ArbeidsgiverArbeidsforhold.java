@@ -12,7 +12,7 @@ class ArbeidsgiverArbeidsforhold {
 
     public ArbeidsgiverArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
         this.arbeidsgiver = Objects.requireNonNull(arbeidsgiver);
-        this.arbeidsforhold = arbeidsforhold;
+        this.arbeidsforhold = Objects.requireNonNull(arbeidsforhold);
     }
 
     public Arbeidsgiver getArbeidsgiver() {
@@ -21,6 +21,14 @@ class ArbeidsgiverArbeidsforhold {
 
     public InternArbeidsforholdRef getArbeidsforhold() {
         return arbeidsforhold;
+    }
+
+    public boolean matcher(ArbeidsgiverArbeidsforhold arbeidsforhold) {
+        if (!arbeidsgiver.equals(arbeidsforhold.getArbeidsgiver())) {
+            return false;
+        }
+
+        return this.arbeidsforhold.gjelderFor(arbeidsforhold.getArbeidsforhold());
     }
 
     @Override
