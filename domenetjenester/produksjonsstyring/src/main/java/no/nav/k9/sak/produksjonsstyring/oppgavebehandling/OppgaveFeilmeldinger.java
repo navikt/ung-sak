@@ -18,6 +18,6 @@ public interface OppgaveFeilmeldinger extends DeklarerteFeil { // NOSONAR
     @TekniskFeil(feilkode = "K9-395339", feilmelding = "Fant ikke oppgave med id=%s, som skulle vært avsluttet på behandlingId=%s.", logLevel = LogLevel.WARN)
     Feil oppgaveMedIdIkkeFunnet(String oppgaveId, Long behandlingId);
 
-    @TekniskFeil(feilkode = "K9-395340", feilmelding = "Feil ved henting av oppgaver for ytelseType=%s, oppgavetype=%s, aktørId=%s", logLevel = LogLevel.WARN)
-    Feil feilVedHentingAvOppgaver(FagsakYtelseType ytelseType, OppgaveÅrsak oppgavetype, AktørId aktørId, Exception e);
+    @TekniskFeil(feilkode = "K9-395340", feilmelding = "Feil ved henting av oppgaver for ytelseType=%s, oppgavetype=%s", logLevel = LogLevel.WARN)
+    Feil feilVedHentingAvOppgaver(FagsakYtelseType ytelseType, OppgaveÅrsak oppgavetype, Exception e);
 }
