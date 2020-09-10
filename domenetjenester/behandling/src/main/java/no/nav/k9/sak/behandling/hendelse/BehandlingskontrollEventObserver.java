@@ -120,6 +120,7 @@ public class BehandlingskontrollEventObserver {
             .medOpprettetBehandling(behandling.getOpprettetDato())
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
+            .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
             .build();
     }
 }

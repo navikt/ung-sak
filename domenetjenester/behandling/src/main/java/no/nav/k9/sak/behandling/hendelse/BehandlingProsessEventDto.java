@@ -70,7 +70,7 @@ public class BehandlingProsessEventDto {
     public BehandlingProsessEventDto() {
     }
 
-    protected BehandlingProsessEventDto(Builder<?> builder) {
+    protected BehandlingProsessEventDto(Builder builder) {
         this.eksternId = builder.eksternId;
         this.fagsystem = builder.fagsystem;
         this.saksnummer = builder.saksnummer;
@@ -89,10 +89,11 @@ public class BehandlingProsessEventDto {
         this.behandlingTypeKode = builder.behandlingTypeKode;
         this.opprettetBehandling = builder.opprettetBehandling;
         this.aksjonspunktKoderMedStatusListe = builder.aksjonspunktKoderMedStatusListe;
+        this.ansvarligSaksbehandlerForTotrinn = builder.ansvarligSaksbehandlerForTotrinn;
     }
 
-    public static Builder<?> builder() {
-        return new BuilderImpl();
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getEksternId() {
@@ -171,7 +172,7 @@ public class BehandlingProsessEventDto {
         return resultatType;
     }
 
-    public static abstract class Builder<T extends Builder<T>> {
+    public static class Builder {
         private UUID eksternId;
         private Fagsystem fagsystem;
         private String saksnummer;
@@ -188,100 +189,103 @@ public class BehandlingProsessEventDto {
         private LocalDateTime opprettetBehandling;
         private Map<String, String> aksjonspunktKoderMedStatusListe;
         private String resultatType;
+        private String ansvarligSaksbehandlerForTotrinn;
+        
+        
+        private Builder() {
+            
+        }
+        
 
-        protected abstract T self();
-
-        public T medEksternId(UUID eksternId) {
+        public Builder medEksternId(UUID eksternId) {
             this.eksternId = eksternId;
-            return self();
+            return this;
         }
 
 
-        public T medFagsystem(Fagsystem fagsystem) {
+        public Builder medFagsystem(Fagsystem fagsystem) {
             this.fagsystem = fagsystem;
-            return self();
+            return this;
         }
 
-        public T medSaksnummer(String saksnummer) {
+        public Builder medSaksnummer(String saksnummer) {
             this.saksnummer = saksnummer;
-            return self();
+            return this;
         }
 
-        public T medAktørId(String aktørId) {
+        public Builder medAktørId(String aktørId) {
             this.aktørId = aktørId;
-            return self();
+            return this;
         }
 
-        public T getBehandlingstidFrist(LocalDate behandlingstidFrist) {
+        public Builder getBehandlingstidFrist(LocalDate behandlingstidFrist) {
             this.behandlingstidFrist = behandlingstidFrist;
-            return self();
+            return this;
         }
 
-        public T medBehandlingId(Long behandlingId) {
+        public Builder medBehandlingId(Long behandlingId) {
             this.behandlingId = behandlingId;
-            return self();
+            return this;
         }
 
-        public T medEventTid(LocalDateTime eventTid) {
+        public Builder medEventTid(LocalDateTime eventTid) {
             this.eventTid = eventTid;
-            return self();
+            return this;
         }
 
-        public T medEventHendelse(EventHendelse eventHendelse) {
+        public Builder medEventHendelse(EventHendelse eventHendelse) {
             this.eventHendelse = eventHendelse;
-            return self();
+            return this;
         }
 
-        public T medBehandlingStatus(String behandlingStatus) {
+        public Builder medBehandlingStatus(String behandlingStatus) {
             this.behandlingStatus = behandlingStatus;
-            return self();
+            return this;
         }
 
-        public T medBehandlingSteg(String behandlingSteg) {
+        public Builder medBehandlingSteg(String behandlingSteg) {
             this.behandlingSteg = behandlingSteg;
-            return self();
+            return this;
         }
 
-        public T medBehandlendeEnhet(String behandlendeEnhet) {
+        public Builder medBehandlendeEnhet(String behandlendeEnhet) {
             this.behandlendeEnhet = behandlendeEnhet;
-            return self();
+            return this;
         }
 
-        public T medYtelseTypeKode(String ytelseTypeKode) {
+        public Builder medYtelseTypeKode(String ytelseTypeKode) {
             this.ytelseTypeKode = ytelseTypeKode;
-            return self();
+            return this;
         }
 
-        public T medBehandlingTypeKode(String behandlingTypeKode) {
+        public Builder medBehandlingTypeKode(String behandlingTypeKode) {
             this.behandlingTypeKode = behandlingTypeKode;
-            return self();
+            return this;
         }
 
-        public T medOpprettetBehandling(LocalDateTime opprettetBehandling) {
+        public Builder medOpprettetBehandling(LocalDateTime opprettetBehandling) {
             this.opprettetBehandling = opprettetBehandling;
-            return self();
+            return this;
         }
 
-        public T medBehandlingResultat(BehandlingResultatType resultatType) {
+        public Builder medBehandlingResultat(BehandlingResultatType resultatType) {
             Objects.requireNonNull(resultatType);
             this.resultatType = Objects.requireNonNull(resultatType).getKode();
-            return self();
+            return this;
         }
 
-        public T medAksjonspunktKoderMedStatusListe(Map<String, String> aksjonspunktKoderMedStatusListe) {
+        public Builder medAksjonspunktKoderMedStatusListe(Map<String, String> aksjonspunktKoderMedStatusListe) {
             this.aksjonspunktKoderMedStatusListe = aksjonspunktKoderMedStatusListe;
-            return self();
+            return this;
+        }
+        
+        public Builder medAnsvarligSaksbehandlerForTotrinn(String ansvarligSaksbehandlerForTotrinn) {
+            this.ansvarligSaksbehandlerForTotrinn = ansvarligSaksbehandlerForTotrinn;
+            return this;
         }
 
         public BehandlingProsessEventDto build() {
             return new BehandlingProsessEventDto(this);
-        }
-    }
-
-    private static class BuilderImpl extends Builder<BuilderImpl> {
-        @Override
-        protected BuilderImpl self() {
-            return this;
         }
     }
 }
