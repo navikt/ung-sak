@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -9,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -25,12 +28,14 @@ public class FastsettBruttoBeregningsgrunnlagSNDto extends BekreftetBeregningsgr
         // For Jackson
     }
 
-    public Integer getBruttoBeregningsgrunnlag() {
-        return bruttoBeregningsgrunnlag;
+    public FastsettBruttoBeregningsgrunnlagSNDto(@Valid @NotNull Periode periode,
+                                                 @NotNull @Min(0) @Max(Integer.MAX_VALUE) Integer bruttoBeregningsgrunnlag) {
+        super(periode);
+        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
     }
 
-    public void setBruttoBeregningsgrunnlag(Integer bruttoBeregningsgrunnlag) {
-        this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+    public Integer getBruttoBeregningsgrunnlag() {
+        return bruttoBeregningsgrunnlag;
     }
 
 }

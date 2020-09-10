@@ -35,6 +35,9 @@ public abstract class BekreftetBeregningsgrunnlagDto {
         return periode;
     }
 
+    public void setPeriode(Periode periode) {
+        this.periode = periode;
+    }
 
     @Override
     public boolean equals(Object o) {

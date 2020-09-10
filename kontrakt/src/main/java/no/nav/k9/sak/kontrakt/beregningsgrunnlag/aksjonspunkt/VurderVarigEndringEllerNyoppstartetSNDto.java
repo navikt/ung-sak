@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -27,6 +29,10 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregning
 
     public VurderVarigEndringEllerNyoppstartetSNDto() {
         //
+    }
+
+    public VurderVarigEndringEllerNyoppstartetSNDto(@Valid @NotNull Periode periode) {
+        super(periode);
     }
 
     public Integer getBruttoBeregningsgrunnlag() {
