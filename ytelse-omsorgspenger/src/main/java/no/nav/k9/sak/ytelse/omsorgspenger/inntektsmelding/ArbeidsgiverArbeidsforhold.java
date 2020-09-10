@@ -23,7 +23,7 @@ class ArbeidsgiverArbeidsforhold {
         return arbeidsforhold;
     }
 
-    public boolean matcher(ArbeidsgiverArbeidsforhold arbeidsforhold) {
+    public boolean identifisererSamme(ArbeidsgiverArbeidsforhold arbeidsforhold) {
         if (!arbeidsgiver.equals(arbeidsforhold.getArbeidsgiver())) {
             return false;
         }

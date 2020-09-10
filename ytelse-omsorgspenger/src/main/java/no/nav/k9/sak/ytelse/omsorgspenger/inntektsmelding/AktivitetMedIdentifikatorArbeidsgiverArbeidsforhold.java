@@ -22,19 +22,19 @@ class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
         return arbeidsgiverArbeidsforhold;
     }
 
-    public boolean matcher(AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitet) {
+    public boolean gjelderSamme(AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold aktivitet) {
         if (!aktivitetType.equals(aktivitet.getAktivitetType())) {
             return false;
         }
 
-        return arbeidsgiverArbeidsforhold.matcher(aktivitet.getArbeidsgiverArbeidsforhold());
+        return arbeidsgiverArbeidsforhold.identifisererSamme(aktivitet.getArbeidsgiverArbeidsforhold());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold that = (AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold) o;
+        var that = (AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold) o;
         return aktivitetType == that.aktivitetType &&
             Objects.equals(arbeidsgiverArbeidsforhold, that.arbeidsgiverArbeidsforhold);
     }

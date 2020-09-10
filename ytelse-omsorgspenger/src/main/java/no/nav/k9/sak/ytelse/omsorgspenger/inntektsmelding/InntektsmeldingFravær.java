@@ -68,7 +68,7 @@ public class InntektsmeldingFravær {
                                            LocalDateTimeline<WrappedOppgittFraværPeriode> imTidslinje) {
         var entries = mapByAktivitet.entrySet()
             .stream()
-            .filter(it -> !it.getKey().equals(gruppe) && it.getKey().matcher(gruppe))
+            .filter(it -> !it.getKey().equals(gruppe) && it.getKey().gjelderSamme(gruppe))
             .collect(Collectors.toList());
 
         for (Map.Entry<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<OppgittFraværPeriode>> entry : entries) {
