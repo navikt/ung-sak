@@ -32,6 +32,11 @@ public class FastsatteVerdierDto {
         //
     }
 
+    public FastsatteVerdierDto(@Min(0) @Max(Integer.MAX_VALUE) Integer fastsattBeløp, @Valid Inntektskategori inntektskategori) {
+        this.fastsattBeløp = fastsattBeløp;
+        this.inntektskategori = inntektskategori;
+    }
+
     public Integer getFastsattBeløp() {
         return fastsattBeløp;
     }
