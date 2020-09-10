@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -26,9 +27,13 @@ public class VurderFaktaOmBeregningDto extends BekreftetBeregningsgrunnlagDto {
         //
     }
 
+    public VurderFaktaOmBeregningDto(@Valid @NotNull Periode periode, @Valid @NotNull FaktaBeregningLagreDto fakta) {
+        super(periode);
+        this.fakta = fakta;
+    }
+
     public FaktaBeregningLagreDto getFakta() {
         return fakta;
     }
-
 
 }
