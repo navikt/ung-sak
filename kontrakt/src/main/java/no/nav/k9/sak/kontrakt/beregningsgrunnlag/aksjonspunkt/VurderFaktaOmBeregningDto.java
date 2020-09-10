@@ -1,7 +1,5 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
-import java.time.LocalDate;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -17,13 +15,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE)
 public class VurderFaktaOmBeregningDto extends BekreftetBeregningsgrunnlagDto {
-
-    @JsonProperty(value = "skjæringstidspunkt")
-    @Valid
-    @NotNull
-    private LocalDate skjæringstidspunkt;
 
     @JsonProperty(value = "fakta", required = true)
     @Valid
@@ -34,24 +26,9 @@ public class VurderFaktaOmBeregningDto extends BekreftetBeregningsgrunnlagDto {
         //
     }
 
-    public VurderFaktaOmBeregningDto(String begrunnelse, FaktaBeregningLagreDto fakta) {
-        super(begrunnelse);
-        this.fakta = fakta;
-    }
-
     public FaktaBeregningLagreDto getFakta() {
         return fakta;
     }
 
-    public void setFakta(FaktaBeregningLagreDto fakta) {
-        this.fakta = fakta;
-    }
 
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
-    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
-    }
 }

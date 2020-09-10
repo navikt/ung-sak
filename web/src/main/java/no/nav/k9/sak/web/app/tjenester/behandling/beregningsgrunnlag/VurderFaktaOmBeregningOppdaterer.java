@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -33,12 +37,10 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
 
     @Override
     public OppdateringResultat oppdater(VurderFaktaOmBeregningDtoer dtoer, AksjonspunktOppdaterParameter param) {
-        for (VurderFaktaOmBeregningDto dto : dtoer.getGrunnlag()) {
-
-            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-            var resultat = kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-            faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultat, dto.getBegrunnelse());
-        }
+        Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+        var resultatListe = kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultatListe, dtoer.getBegrunnelse());
         return OppdateringResultat.utenOveropp();
     }
 

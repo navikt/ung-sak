@@ -1,7 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -24,11 +23,6 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE)
 public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
-
-    @JsonProperty(value = "endringer")
-    @Size(max = 200)
-    @Valid
-    private Set<Lønnsendring> endringer;
 
     @JsonProperty(value = "fakta")
     @Valid
@@ -55,10 +49,6 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
         return null;
     }
 
-    public Set<Lønnsendring> getEndringer() {
-        return endringer;
-    }
-
     @JsonIgnore
     @Override
     public boolean getErVilkarOk() {
@@ -71,10 +61,6 @@ public class OverstyrBeregningsgrunnlagDto extends OverstyringAksjonspunktDto {
 
     public List<FastsettBeregningsgrunnlagAndelDto> getOverstyrteAndeler() {
         return overstyrteAndeler;
-    }
-
-    public void setEndringer(Set<Lønnsendring> endringer) {
-        this.endringer = endringer;
     }
 
     public void setFakta(FaktaBeregningLagreDto fakta) {

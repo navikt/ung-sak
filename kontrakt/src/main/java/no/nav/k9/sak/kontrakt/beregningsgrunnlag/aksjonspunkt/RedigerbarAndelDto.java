@@ -24,35 +24,11 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class RedigerbarAndelDto {
 
-    @JsonProperty(value = "aktivitetStatus", required = true)
-    @NotNull
-    @Valid
-    private AktivitetStatus aktivitetStatus;
-
     @JsonProperty(value = "andelsnr", required = true)
     @NotNull
     @Min(0)
     @Max(Long.MAX_VALUE)
     private Long andelsnr;
-
-    @JsonProperty(value = "arbeidsforholdId")
-    @Pattern(regexp = "^[\\p{XDigit}_]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String arbeidsforholdId;
-
-    @JsonProperty(value = "arbeidsforholdType", required = true)
-    @NotNull
-    @Valid
-    private OpptjeningAktivitetType arbeidsforholdType;
-
-    @JsonProperty(value = "arbeidsgiverId")
-    @Pattern(regexp = "[\\d]{9}|[\\d]{13}")
-    private String arbeidsgiverId;
-
-    @JsonProperty(value = "beregningsperiodeFom")
-    private LocalDate beregningsperiodeFom;
-
-    @JsonProperty(value = "beregningsperiodeTom")
-    private LocalDate beregningsperiodeTom;
 
     @JsonProperty(value = "lagtTilAvSaksbehandler")
     private Boolean lagtTilAvSaksbehandler;
@@ -64,71 +40,14 @@ public class RedigerbarAndelDto {
         //
     }
 
-    public RedigerbarAndelDto(Boolean nyAndel,
-                              Long andelsnr,
-                              Boolean lagtTilAvSaksbehandler,
-                              AktivitetStatus aktivitetStatus, OpptjeningAktivitetType arbeidsforholdType) {
-        this(nyAndel, null, (InternArbeidsforholdRef) null, andelsnr, lagtTilAvSaksbehandler, aktivitetStatus, arbeidsforholdType);
-    }
-
-    public RedigerbarAndelDto(Boolean nyAndel,
-                              String arbeidsgiverId, InternArbeidsforholdRef arbeidsforholdId,
-                              Long andelsnr,
-                              Boolean lagtTilAvSaksbehandler,
-                              AktivitetStatus aktivitetStatus, OpptjeningAktivitetType arbeidsforholdType) {
-        Objects.requireNonNull(aktivitetStatus, "aktivitetStatus");
-        Objects.requireNonNull(arbeidsforholdType, "arbeidsforholdType");
-        this.nyAndel = nyAndel;
-        this.arbeidsgiverId = arbeidsgiverId;
-        this.arbeidsforholdId = arbeidsforholdId == null ? null : arbeidsforholdId.getReferanse();
+    public RedigerbarAndelDto(@NotNull @Min(0) @Max(Long.MAX_VALUE) Long andelsnr, Boolean lagtTilAvSaksbehandler, Boolean nyAndel) {
         this.andelsnr = andelsnr;
         this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
-        this.aktivitetStatus = aktivitetStatus;
-        this.arbeidsforholdType = arbeidsforholdType;
-    }
-
-    public RedigerbarAndelDto(Boolean nyAndel,
-                              String arbeidsgiverId, String internArbeidsforholdId,
-                              Long andelsnr,
-                              Boolean lagtTilAvSaksbehandler,
-                              AktivitetStatus aktivitetStatus, OpptjeningAktivitetType arbeidsforholdType) {
-        Objects.requireNonNull(aktivitetStatus, "aktivitetStatus");
-        Objects.requireNonNull(arbeidsforholdType, "arbeidsforholdType");
         this.nyAndel = nyAndel;
-        this.arbeidsgiverId = arbeidsgiverId;
-        this.arbeidsforholdId = internArbeidsforholdId;
-        this.andelsnr = andelsnr;
-        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
-        this.aktivitetStatus = aktivitetStatus;
-        this.arbeidsforholdType = arbeidsforholdType;
-    }
-
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
     }
 
     public Long getAndelsnr() {
         return andelsnr;
-    }
-
-    public InternArbeidsforholdRef getArbeidsforholdId() {
-        return InternArbeidsforholdRef.ref(arbeidsforholdId);
-    }
-
-    public OpptjeningAktivitetType getArbeidsforholdType() {
-        return arbeidsforholdType;
-    }
-
-    public String getArbeidsgiverId() {
-        return arbeidsgiverId;
-    }
-
-    public LocalDate getBeregningsperiodeFom() {
-        return beregningsperiodeFom;
-    }
-
-    public LocalDate getBeregningsperiodeTom() {
-        return beregningsperiodeTom;
     }
 
     public Boolean getLagtTilAvSaksbehandler() {
@@ -139,39 +58,5 @@ public class RedigerbarAndelDto {
         return nyAndel;
     }
 
-    public void setAktivitetStatus(AktivitetStatus aktivitetStatus) {
-        this.aktivitetStatus = aktivitetStatus;
-    }
 
-    public void setAndelsnr(Long andelsnr) {
-        this.andelsnr = andelsnr;
-    }
-
-    public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = arbeidsforholdId;
-    }
-
-    public void setArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-        this.arbeidsforholdType = arbeidsforholdType;
-    }
-
-    public void setArbeidsgiverId(String arbeidsgiverId) {
-        this.arbeidsgiverId = arbeidsgiverId;
-    }
-
-    public void setBeregningsperiodeFom(LocalDate beregningsperiodeFom) {
-        this.beregningsperiodeFom = beregningsperiodeFom;
-    }
-
-    public void setBeregningsperiodeTom(LocalDate beregningsperiodeTom) {
-        this.beregningsperiodeTom = beregningsperiodeTom;
-    }
-
-    public void setLagtTilAvSaksbehandler(Boolean lagtTilAvSaksbehandler) {
-        this.lagtTilAvSaksbehandler = lagtTilAvSaksbehandler;
-    }
-
-    public void setNyAndel(Boolean nyAndel) {
-        this.nyAndel = nyAndel;
-    }
 }

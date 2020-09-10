@@ -1,8 +1,5 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt;
 
-import java.time.LocalDate;
-
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -17,13 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE)
 public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregningsgrunnlagDto {
-
-    @JsonProperty(value = "skjæringstidspunkt")
-    @Valid
-    @NotNull
-    private LocalDate skjæringstidspunkt;
 
     @JsonProperty(value = "bruttoBeregningsgrunnlag")
     @Min(0)
@@ -37,12 +28,6 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregning
     public VurderVarigEndringEllerNyoppstartetSNDto() {
         //
     }
-
-    public VurderVarigEndringEllerNyoppstartetSNDto(String begrunnelse, boolean erVarigEndretNaering) {
-        super(begrunnelse);
-        this.erVarigEndretNaering = erVarigEndretNaering;
-    }
-
 
     public Integer getBruttoBeregningsgrunnlag() {
         return bruttoBeregningsgrunnlag;
@@ -60,11 +45,4 @@ public class VurderVarigEndringEllerNyoppstartetSNDto extends BekreftetBeregning
         this.erVarigEndretNaering = erVarigEndretNaering;
     }
 
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
-    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
-    }
 }

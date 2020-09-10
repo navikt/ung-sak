@@ -1,6 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -52,6 +54,13 @@ public interface KalkulusApiTjeneste {
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
     OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID behandlingUuid);
+
+    /**
+     * @param behandlingReferanse Behandlingreferanse
+     * @param håndterMap Map med dto for håndtering av beregning aksjonspunkt
+     * @return Liste av OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
+     */
+    List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap);
 
     Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
 

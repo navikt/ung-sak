@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -49,6 +50,13 @@ public interface BeregningTjeneste {
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
     OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+
+    /**
+     * @param håndterMap Map fra skjæringstidspunkt til Dto for håndtering av beregning aksjonspunkt
+     * @param ref {@link BehandlingReferanse}
+     * @return Liste av OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
+     */
+    List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref);
 
     Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 

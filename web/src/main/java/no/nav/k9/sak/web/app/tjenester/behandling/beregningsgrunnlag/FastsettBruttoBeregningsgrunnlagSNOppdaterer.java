@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -9,7 +13,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDtoer;
 
 @ApplicationScoped
@@ -29,10 +32,10 @@ public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements Aksjonspunk
 
     @Override
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNDtoer dtoer, AksjonspunktOppdaterParameter param) {
-        for (FastsettBruttoBeregningsgrunnlagSNDto dto : dtoer.getGrunnlag()) {
-            HåndterBeregningDto håndterBeregningDto = MapDtoTilRequest.map(dto);
-            kalkulusTjeneste.oppdaterBeregning(håndterBeregningDto, param.getRef(), dto.getSkjæringstidspunkt());
-        }
+        Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOveropp();
     }
 }
