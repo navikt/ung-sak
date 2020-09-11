@@ -21,7 +21,6 @@ import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,6 +35,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
@@ -123,29 +123,32 @@ public class Behandling extends BaseEntitet {
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @ManyToOne
-    @JoinColumn(name = "original_behandling_id", updatable = false)
-    private Behandling originalBehandling;
+    @Column(name = "original_behandling_id", updatable = false)
+    private Long originalBehandlingId;
 
     @Convert(converter = BehandlingStatusKodeverdiConverter.class)
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "behandling")
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @JoinColumn(name = "behandling_id", nullable = false)
     @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
     @Where(clause = "aktiv=true")
-    private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
+    private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(2);
 
     @Convert(converter = BehandlingTypeKodeverdiConverter.class)
     @Column(name = "behandling_type", nullable = false)
     private BehandlingType behandlingType = BehandlingType.UDEFINERT;
 
     // CascadeType.ALL + orphanRemoval=true må til for at aksjonspunkter skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "behandling", orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = Aksjonspunkt.class)
-    private Set<Aksjonspunkt> aksjonspunkter = new HashSet<>();
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @JoinColumn(name = "behandling_id", nullable = false)
+    private Set<Aksjonspunkt> aksjonspunkter = new HashSet<>(2);
 
-    @OneToMany(mappedBy = "behandling")
-    private Set<BehandlingÅrsak> behandlingÅrsaker = new HashSet<>(1);
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @JoinColumn(name = "behandling_id", nullable = false)
+    @BatchSize(size = 20)
+    private Set<BehandlingÅrsak> behandlingÅrsaker = new HashSet<>(2);
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -265,7 +268,6 @@ public class Behandling extends BaseEntitet {
             throw new IllegalStateException("Utvikler-feil: kan ikke legge til årsaker på en behandling som er avsluttet.");
         }
         behandlingÅrsaker.forEach(bå -> {
-            bå.setBehandling(this);
             this.behandlingÅrsaker.add(bå);
         });
     }
@@ -276,8 +278,8 @@ public class Behandling extends BaseEntitet {
             .anyMatch(behandlingÅrsak::equals);
     }
 
-    public Optional<Behandling> getOriginalBehandling() {
-        return Optional.ofNullable(originalBehandling);
+    public Optional<Long> getOriginalBehandlingId() {
+        return Optional.ofNullable(originalBehandlingId);
     }
 
     public boolean erManueltOpprettet() {
@@ -843,7 +845,7 @@ public class Behandling extends BaseEntitet {
 
             if (forrigeBehandling != null) {
                 behandling = new Behandling(forrigeBehandling.getFagsak(), behandlingType);
-                behandling.originalBehandling = forrigeBehandling;
+                behandling.originalBehandlingId = forrigeBehandling.getId();
                 behandling.behandlendeEnhet = forrigeBehandling.behandlendeEnhet;
                 behandling.behandlendeEnhetNavn = forrigeBehandling.behandlendeEnhetNavn;
                 behandling.behandlendeEnhetÅrsak = forrigeBehandling.behandlendeEnhetÅrsak;

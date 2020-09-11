@@ -84,7 +84,8 @@ public class FrisinnVurderPreconditionBeregningSteg implements Beregningsgrunnla
         }
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (behandling.erRevurdering()) {
-            ryddVilkårForOverstyrtRevurdering(kontekst, behandling, behandling.getOriginalBehandling().get());
+            var originalBehandling = behandlingRepository.hentBehandling(behandling.getOriginalBehandlingId().get());
+            ryddVilkårForOverstyrtRevurdering(kontekst, behandling, originalBehandling);
         }
     }
 

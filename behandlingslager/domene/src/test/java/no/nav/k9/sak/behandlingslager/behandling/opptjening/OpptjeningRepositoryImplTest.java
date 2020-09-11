@@ -69,7 +69,7 @@ public class OpptjeningRepositoryImplTest {
         Opptjening opptjeningsperiode = opptjeningRepository.lagreOpptjeningsperiode(behandling, today, tomorrow, false);
 
         // Act
-        opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(behandling, revurdering);
+        opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), revurdering);
         var funnet = opptjeningRepository.finnOpptjening(revurdering.getId()).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(today, tomorrow))).orElseThrow();
 
         // Assert
@@ -154,7 +154,7 @@ public class OpptjeningRepositoryImplTest {
 
         // Assert
         assertThat(næring.getKode()).isEqualTo(næringKode);
-        assertThat(næring.getNavn()).isNotJavaBlank();
+        assertThat(næring.getNavn()).isNotBlank();
     }
 
     @Test
@@ -165,6 +165,6 @@ public class OpptjeningRepositoryImplTest {
 
         // Assert
         assertThat(resultat.getKode()).isEqualTo(kode);
-        assertThat(resultat.getNavn()).isNotJavaBlank();
+        assertThat(resultat.getNavn()).isNotBlank();
     }
 }

@@ -54,8 +54,7 @@ public class InternalManipulerBehandling {
                 }
                 eksisterendeTilstand.ifPresent(it -> it.setBehandlingStegStatus(ikkeFerdigStegStatus));
             }
-            BehandlingStegTilstand tilstand = new BehandlingStegTilstand(behandling, stegType);
-            tilstand.setBehandlingStegStatus(nesteStegStatus);
+            BehandlingStegTilstand tilstand = new BehandlingStegTilstand(stegType, nesteStegStatus);
             behandling.oppdaterBehandlingStegOgStatus(tilstand);
 
             log.info("Markerer nytt steg som aktivt: {}", stegType);

@@ -220,9 +220,9 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private boolean harAvslåttForrigeBehandling(Behandling revurdering) {
-        Optional<Behandling> originalBehandlingOpt = revurdering.getOriginalBehandling();
+        Optional<Long> originalBehandlingOpt = revurdering.getOriginalBehandlingId();
         if (originalBehandlingOpt.isPresent()) {
-            Behandling behandling = originalBehandlingOpt.get();
+            Behandling behandling = behandlingRepository.hentBehandling(originalBehandlingOpt.get());
             // Dersom originalBehandling er et beslutningsvedtak må vi lete videre etter det faktiske resultatet for å kunne vurdere om forrige
             // behandling var avslått
             if (behandling.getBehandlingResultatType().isBehandlingsresultatIkkeEndret()) {

@@ -48,14 +48,6 @@ public class AksjonspunktRepositoryTest {
     }
 
     @Test
-    public void hent_aksjonspunkt_for_behandling() throws Exception {
-        var aksjonspunkter0 = opprettAksjonspunkt(AUTO_MANUELT_SATT_PÅ_VENT);
-        var aksjonspunkter = aksjonspunktRepository.hentAksjonspunkter(behandling.getId(), AksjonspunktStatus.OPPRETTET);
-        assertThat(aksjonspunkter).containsExactlyInAnyOrderElementsOf(aksjonspunkter0);
-
-    }
-    
-    @Test
     public void hent_aksjonspunkt_for_saksnummer() throws Exception {
         var aksjonspunkter0 = opprettAksjonspunkt(AUTO_MANUELT_SATT_PÅ_VENT);
         var aksjonspunkterPerBehandling = aksjonspunktRepository.hentAksjonspunkter(fagsak.getSaksnummer(), AksjonspunktStatus.OPPRETTET);
@@ -70,6 +62,16 @@ public class AksjonspunktRepositoryTest {
         var aksjonspunkterPerBehandling = aksjonspunktRepository.hentAksjonspunkter(AksjonspunktStatus.OPPRETTET);
         assertThat(aksjonspunkterPerBehandling).containsKey(behandling).hasSize(1);
         assertThat(aksjonspunkterPerBehandling.values()).containsOnly(aksjonspunkter0);
+
+    }
+
+    @Test
+    public void hent_bruker_ident_for_aksjonspunkt() throws Exception {
+        @SuppressWarnings("unused")
+        var aksjonspunkter0 = opprettAksjonspunkt(AUTO_MANUELT_SATT_PÅ_VENT);
+        var aksjonspunkterPerBehandling = aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AUTO_MANUELT_SATT_PÅ_VENT);
+        var bruker = behandling.getAktørId();
+        assertThat(aksjonspunkterPerBehandling).contains(bruker).hasSize(1);
 
     }
 

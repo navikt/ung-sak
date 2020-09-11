@@ -59,12 +59,13 @@ public class RevurderingTjenesteFelles {
     }
 
     public void kopierVilkårsresultat(Behandling origBehandling, Behandling revurdering, BehandlingskontrollKontekst kontekst) {
-        vilkårResultatRepository.kopier(origBehandling.getId(), revurdering.getId());
+        Long originalBehandlingId = origBehandling.getId();
+        vilkårResultatRepository.kopier(originalBehandlingId, revurdering.getId());
         behandlingRepository.lagre(revurdering, kontekst.getSkriveLås());
 
         // Kan være at førstegangsbehandling ble avslått før den har kommet til opptjening.
-        if (opptjeningRepository.finnOpptjening(origBehandling.getId()).isPresent()) {
-            opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(origBehandling, revurdering);
+        if (opptjeningRepository.finnOpptjening(originalBehandlingId).isPresent()) {
+            opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, revurdering);
         }
     }
 }

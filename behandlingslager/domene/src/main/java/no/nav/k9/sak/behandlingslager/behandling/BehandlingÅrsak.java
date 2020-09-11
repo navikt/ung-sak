@@ -12,8 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -33,10 +31,6 @@ public class BehandlingÅrsak extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
-
     @Convert(converter = BehandlingÅrsakKodeverdiConverter.class)
     @Column(name="behandling_arsak_type", nullable = false)
     private BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
@@ -50,10 +44,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
     public Long getId() {
         return id;
-    }
-
-    public Long getBehandlingId() {
-        return behandling.getId();
     }
 
     public BehandlingÅrsakType getBehandlingÅrsakType() {
@@ -70,10 +60,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
     public static BehandlingÅrsak.Builder builder(List<BehandlingÅrsakType> behandlingÅrsakTyper) {
         return new Builder(behandlingÅrsakTyper);
-    }
-
-    void setBehandling(Behandling behandling) {
-        this.behandling = behandling;
     }
 
     public static class Builder {
@@ -106,7 +92,6 @@ public class BehandlingÅrsak extends BaseEntitet {
                 } else {
                     // Opprett ny (INSERT)
                     BehandlingÅrsak behandlingÅrsak = new BehandlingÅrsak();
-                    behandlingÅrsak.behandling = behandling;
                     behandlingÅrsak.behandlingÅrsakType = årsakType;
                     behandlingÅrsak.manueltOpprettet = this.manueltOpprettet;
                     nyeÅrsaker.add(behandlingÅrsak);

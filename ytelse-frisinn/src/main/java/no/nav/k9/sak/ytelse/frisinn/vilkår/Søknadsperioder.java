@@ -47,8 +47,8 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
         var uttakAktivitet = uttakRepository.hentFastsattUttak(behandlingId);
         List<Periode> søknadsperioder = FrisinnSøknadsperiodeMapper.map(uttakAktivitet);
 
-        var origUttakAktivitet = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandling()
-            .map(orig -> uttakRepository.hentFastsattUttak(orig.getId()));
+        var origUttakAktivitet = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandlingId()
+            .map(orig -> uttakRepository.hentFastsattUttak(orig));
 
         var origSøknadsperioder = origUttakAktivitet.map(FrisinnSøknadsperiodeMapper::map)
             .orElse(Collections.emptyList());

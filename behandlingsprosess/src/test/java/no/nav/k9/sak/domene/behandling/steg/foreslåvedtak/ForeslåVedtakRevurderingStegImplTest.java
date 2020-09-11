@@ -13,9 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,6 +24,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -48,6 +47,7 @@ import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 public class ForeslåVedtakRevurderingStegImplTest {
 
@@ -77,7 +77,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
     private DefaultErEndringIBeregningTjeneste endringIBeregningTjeneste;
 
     private BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
-    private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingStegForeldrepenger;
+    private ForeslåVedtakRevurderingStegImpl foreslåVedtakRevurderingSteg;
 
     private Behandling orginalBehandling;
     private Behandling revurdering;
@@ -107,10 +107,11 @@ public class ForeslåVedtakRevurderingStegImplTest {
         when(kontekstRevurdering.getBehandlingId()).thenReturn(revurdering.getId());
         when(kontekstRevurdering.getSkriveLås()).thenReturn(behandlingLås);
         when(behandlingRepository.hentBehandling(kontekstRevurdering.getBehandlingId())).thenReturn(revurdering);
+        when(behandlingRepository.hentBehandling(orginalBehandling.getId())).thenReturn(orginalBehandling);
 
         endringIBeregningTjeneste = new DefaultErEndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
 
-        foreslåVedtakRevurderingStegForeldrepenger =
+        foreslåVedtakRevurderingSteg =
             new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste));
         when(foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekstRevurdering)).thenReturn(behandleStegResultat);
         when(behandleStegResultat.getAksjonspunktResultater()).thenReturn(Collections.emptyList());
@@ -121,7 +122,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
         when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
 
-        BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
+        BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingSteg.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe()).isEmpty();
     }
 
@@ -130,7 +131,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
         when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
 
-        BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingStegForeldrepenger.utførSteg(kontekstRevurdering);
+        BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingSteg.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST);
     }
 
@@ -139,7 +140,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         // Arrange
 
         // Act
-        foreslåVedtakRevurderingStegForeldrepenger.vedHoppOverBakover(kontekstRevurdering, null, null, null);
+        foreslåVedtakRevurderingSteg.vedHoppOverBakover(kontekstRevurdering, null, null, null);
 
         // Assert
         revurdering = behandlingRepository.hentBehandling(revurdering.getId());

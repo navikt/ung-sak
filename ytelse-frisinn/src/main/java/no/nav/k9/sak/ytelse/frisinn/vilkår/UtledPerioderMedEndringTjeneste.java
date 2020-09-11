@@ -90,13 +90,14 @@ public class UtledPerioderMedEndringTjeneste {
      */
     public List<DatoIntervallEntitet> finnPeriodeMedEndring(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Optional<Behandling> originalBehandlingOpt = behandling.getOriginalBehandling();
+        Optional<Long> originalBehandlingOpt = behandling.getOriginalBehandlingId();
         if (originalBehandlingOpt.isEmpty()) {
             return Collections.emptyList();
         }
 
-        Behandling forrigeBehandling = originalBehandlingOpt.get();
-        InntektArbeidYtelseGrunnlag forrigeGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(forrigeBehandling.getId()).orElseThrow(() -> new IllegalStateException("Forventet å finne et grunnlag for behandling:" + forrigeBehandling.getId()));
+        Long originalBehandlingId = originalBehandlingOpt.get();
+        InntektArbeidYtelseGrunnlag forrigeGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(originalBehandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventet å finne et grunnlag for behandling:" + originalBehandlingId));
         InntektArbeidYtelseGrunnlag nyttGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Forventet å finne et grunnlag for behandling:" + behandlingId));
 
         return utledDiffIperioder(forrigeGrunnlag, nyttGrunnlag);

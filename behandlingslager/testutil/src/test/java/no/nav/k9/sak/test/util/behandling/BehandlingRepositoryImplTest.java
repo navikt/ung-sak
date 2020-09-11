@@ -2,7 +2,6 @@ package no.nav.k9.sak.test.util.behandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -339,130 +338,11 @@ public class BehandlingRepositoryImplTest {
     }
 
     @Test
-    public void skal_finne_førstegangsbehandling_naar_frist_er_utgatt() {
-        // Arrange
-        LocalDate tidsfrist = LocalDate.now().minusDays(1);
-        var scenario = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingstidFrist(tidsfrist);
-        scenario.lagre(repositoryProvider);
-
-        // Act
-        List<Behandling> liste = behandlingKandidaterRepository.finnBehandlingerMedUtløptBehandlingsfrist();
-
-        // Assert
-        assertThat(liste).hasSize(1);
-    }
-
-    @Test
-    public void skal_ikke_finne_revurderingsbehandling() {
-        // Arrange
-        Behandling behandling = opprettRevurderingsKandidat();
-
-        LocalDate tidsfrist = LocalDate.now().minusDays(1);
-        Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingstidFrist(tidsfrist).build();
-        // Tidsfristen blir overstyrt
-        revurderingsBehandling.setBehandlingstidFrist(tidsfrist);
-        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
-
-        // Act
-        List<Behandling> liste = behandlingKandidaterRepository.finnBehandlingerMedUtløptBehandlingsfrist();
-
-        // Assert
-        assertThat(liste).isEmpty();
-    }
-
-    @Test
-    public void skal_finne_revurderingsbehandling_med_endringssøknad() {
-        // Arrange
-        Behandling behandling = opprettRevurderingsKandidat();
-
-        LocalDate tidsfrist = LocalDate.now().minusDays(1);
-        Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingstidFrist(tidsfrist)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))
-            .build();
-        // Tidsfristen blir overstyrt
-        revurderingsBehandling.setBehandlingstidFrist(tidsfrist);
-        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
-        // Act
-        List<Behandling> liste = behandlingKandidaterRepository.finnBehandlingerMedUtløptBehandlingsfrist();
-        // Assert
-        assertThat(liste).hasSize(1);
-    }
-
-    @Test
     public void skal_opprettholde_id_etter_endringer() {
 
         // Lagre Personopplysning
         AbstractTestScenario<?> scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.lagre(repositoryProvider);
-    }
-
-    @Test
-    public void skal_finne_årsaker_for_behandling() {
-
-        // Arrange
-        Behandling behandling = opprettBuilderForBehandling()
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)
-                .medManueltOpprettet(false))
-            .build();
-        lagreBehandling(behandling);
-
-        // Act
-        List<BehandlingÅrsak> liste = behandlingRepository.finnÅrsakerForBehandling(behandling);
-
-        // Assert
-        assertThat(liste).hasSize(1);
-        assertThat(liste.get(0).getBehandlingÅrsakType()).isEqualTo(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-    }
-
-    @Test
-    public void skal_finne_årsakstyper_for_behandling() {
-
-        // Arrange
-        Behandling behandling = opprettBuilderForBehandling()
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ANNET)
-                .medManueltOpprettet(false))
-            .build();
-        lagreBehandling(behandling);
-
-        // Act
-        List<BehandlingÅrsakType> liste = behandlingRepository.finnÅrsakTyperForBehandling(behandling);
-
-        // Assert
-        assertThat(liste).hasSize(1);
-        assertThat(liste.get(0)).isEqualTo(BehandlingÅrsakType.RE_ANNET);
-    }
-
-    @Test
-    public void skal_ikke_finne_noen_årsakstyper_hvis_ingen() {
-
-        // Arrange
-        Behandling behandling = opprettBuilderForBehandling()
-            .build();
-        lagreBehandling(behandling);
-
-        // Act
-        List<BehandlingÅrsakType> liste = behandlingRepository.finnÅrsakTyperForBehandling(behandling);
-
-        // Assert
-        assertThat(liste).isEmpty();
-    }
-
-    @Test
-    public void skal_ikke_finne_noen_årsaker_hvis_ingen() {
-
-        // Arrange
-        Behandling behandling = opprettBuilderForBehandling()
-            .build();
-        lagreBehandling(behandling);
-
-        // Act
-        List<BehandlingÅrsak> liste = behandlingRepository.finnÅrsakerForBehandling(behandling);
-
-        // Assert
-        assertThat(liste).isEmpty();
     }
 
     @Test

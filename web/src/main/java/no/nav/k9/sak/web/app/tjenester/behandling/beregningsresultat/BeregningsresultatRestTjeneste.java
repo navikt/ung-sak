@@ -106,7 +106,8 @@ public class BeregningsresultatRestTjeneste {
             return false;
         }
 
-        Behandling originalBehandling = behandling.getOriginalBehandling().orElseThrow(() -> new IllegalStateException("Revurdering må ha originalbehandling"));
+        Long originalBehandlingId = behandling.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Revurdering må ha originalbehandling"));
+        Behandling originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
 
         boolean harSammeResultatType = behandlingResultatType.equals(originalBehandling.getBehandlingResultatType());
         return harSammeResultatType;

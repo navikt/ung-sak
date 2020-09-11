@@ -15,8 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -56,10 +54,6 @@ public class Aksjonspunkt extends BaseEntitet {
     @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
     @Column(name = "behandling_steg_funnet")
     private BehandlingStegType behandlingSteg;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
 
     @Convert(converter = AksjonspunktStatusKodeverdiConverter.class)
     @Column(name = "aksjonspunkt_status", nullable = false)
@@ -129,11 +123,6 @@ public class Aksjonspunkt extends BaseEntitet {
 
     public boolean erManueltOpprettet() {
         return this.aksjonspunktDefinisjon.getAksjonspunktType() != null && this.aksjonspunktDefinisjon.getAksjonspunktType().erOverstyringpunkt();
-    }
-
-    void setBehandlingsresultat(Behandling behandling) {
-        // brukes kun internt for å koble sammen aksjonspunkt og behandling
-        this.behandling = behandling;
     }
 
     public AksjonspunktDefinisjon getAksjonspunktDefinisjon() {
@@ -214,7 +203,6 @@ public class Aksjonspunkt extends BaseEntitet {
         }
         Aksjonspunkt kontrollpunkt = (Aksjonspunkt) object;
         return Objects.equals(getAksjonspunktDefinisjon(), kontrollpunkt.getAksjonspunktDefinisjon())
-            && Objects.equals(behandling, kontrollpunkt.behandling)
             && Objects.equals(getStatus(), kontrollpunkt.getStatus())
             && Objects.equals(getPeriode(), kontrollpunkt.getPeriode())
             && Objects.equals(getFristTid(), kontrollpunkt.getFristTid());
@@ -222,7 +210,7 @@ public class Aksjonspunkt extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAksjonspunktDefinisjon(), behandling, getStatus(), getPeriode(), getFristTid());
+        return Objects.hash(getAksjonspunktDefinisjon(), getStatus(), getPeriode(), getFristTid());
     }
 
     public String getBegrunnelse() {
@@ -345,7 +333,6 @@ public class Aksjonspunkt extends BaseEntitet {
                 return eksisterendeAksjonspunkt;
             } else {
                 // Opprett ny og knytt til behandlingsresultat
-                ap.setBehandlingsresultat(behandling);
                 InternalUtil.leggTilAksjonspunkt(behandling, ap);
                 return ap;
             }
