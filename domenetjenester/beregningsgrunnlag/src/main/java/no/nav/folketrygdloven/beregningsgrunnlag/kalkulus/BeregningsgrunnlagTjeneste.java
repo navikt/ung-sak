@@ -150,6 +150,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .stream()
                 .filter(bg -> bg.getBeregningsgrunnlag() != null)
                 .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
+                .sorted(Comparator.comparing(BeregningsgrunnlagDto::getSkjæringstidspunkt))
                 .collect(Collectors.toList());
         }
         return List.of();
