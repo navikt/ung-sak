@@ -51,6 +51,16 @@ public class FordelFastsatteVerdierDto {
         //
     }
 
+    public FordelFastsatteVerdierDto(@Valid Inntektskategori inntektskategori, @Min(0) @Max(Integer.MAX_VALUE) Integer refusjonPrÅr, @Min(0) @Max(Integer.MAX_VALUE) Integer fastsattÅrsbeløpInklNaturalytelse) {
+        this.inntektskategori = inntektskategori;
+        this.refusjonPrÅr = refusjonPrÅr;
+        this.fastsattÅrsbeløpInklNaturalytelse = fastsattÅrsbeløpInklNaturalytelse;
+    }
+
+    public FordelFastsatteVerdierDto(@Valid Inntektskategori inntektskategori, @Min(0) @Max(Integer.MAX_VALUE) Integer fastsattÅrsbeløpInklNaturalytelse) {
+        this.inntektskategori = inntektskategori;
+        this.fastsattÅrsbeløpInklNaturalytelse = fastsattÅrsbeløpInklNaturalytelse;
+    }
 
     public Integer getFastsattÅrsbeløp() {
         return fastsattÅrsbeløp;
