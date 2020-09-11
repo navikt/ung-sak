@@ -210,17 +210,24 @@ public class VilkårBuilder {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
         }
         if (!tilbakestiltePerioder.isEmpty()) {
-            justereUtfallVedTilbakestilling();
+            justereUtfallVedTilbakestilling(tilbakestiltePerioder);
         }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
+        if (fagsakTidslinje != null) {
+            var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
+            vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
+            var periodeneSomFaltBort = tidslinjeSomFaltBort.toSegments()
+                .stream()
+                .filter(it -> it.getValue() != null)
+                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
+            justereUtfallVedTilbakestilling(periodeneSomFaltBort);
+        }
         bygget = true;
         if (kantIKantVurderer.erKomprimerbar()) {
             vilkårTidslinje = vilkårTidslinje.compress();
-        }
-        if (fagsakTidslinje != null) {
-            vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
         }
         var vilkårsPerioderRaw = vilkårTidslinje
             .toSegments()
@@ -234,22 +241,12 @@ public class VilkårBuilder {
         return vilkåret;
     }
 
-    private Set<DatoIntervallEntitet> toSegments(LocalDateTimeline<WrappedVilkårPeriode> tidslinje) {
-        return tidslinje.toSegments()
-            .stream()
-            .filter(it -> it.getValue() != null)
-            .map(this::opprettHoldKonsistens)
-            .map(WrappedVilkårPeriode::getVilkårPeriode)
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toSet());
-    }
-
     VilkårBuilder medFullstendigTidslinje(LocalDateTimeline<WrappedVilkårPeriode> fagsakTidslinje) {
         this.fagsakTidslinje = fagsakTidslinje;
         return this;
     }
 
-    private void justereUtfallVedTilbakestilling() {
+    private void justereUtfallVedTilbakestilling(NavigableSet<DatoIntervallEntitet> tilbakestiltePerioder) {
         var datoerSomOverlapperBakover = tilbakestiltePerioder.stream()
             .map(DatoIntervallEntitet::getFomDato)
             .map(it -> it.minusDays(1))
@@ -324,11 +321,24 @@ public class VilkårBuilder {
         }
         bygget = true;
         if (!tilbakestiltePerioder.isEmpty()) {
-            justereUtfallVedTilbakestilling();
+            justereUtfallVedTilbakestilling(tilbakestiltePerioder);
         }
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
-        return vilkårTidslinje;
+
+        var vilkårsPerioderRaw = vilkårTidslinje
+            .toSegments()
+            .stream()
+            .filter(it -> it.getValue() != null)
+            .map(this::opprettHoldKonsistens)
+            .map(WrappedVilkårPeriode::getVilkårPeriode)
+            .collect(Collectors.toList());
+        var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw)
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
+            .collect(Collectors.toList());
+
+        return new LocalDateTimeline<>(vilkårsPerioder);
     }
 }
