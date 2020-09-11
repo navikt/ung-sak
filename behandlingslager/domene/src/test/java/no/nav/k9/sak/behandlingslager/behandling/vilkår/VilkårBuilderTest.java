@@ -18,7 +18,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_opprette_perioder_for_resultat() {
-        var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET).medKantIKantVurderer(new DefaultKantIKantVurderer());
+        var vilkårBuilder = new VilkårBuilder().medType(VilkårType.OPPTJENINGSVILKÅRET).medKantIKantVurderer(new DefaultKantIKantVurderer());
 
         var førsteSkjæringstidspunkt = LocalDate.now();
         var sluttFørstePeriode = LocalDate.now().plusMonths(3);
@@ -72,7 +72,7 @@ public class VilkårBuilderTest {
     public void skal_teste_mellomliggende_perioder() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -97,7 +97,7 @@ public class VilkårBuilderTest {
     public void skal_revertere_mellomliggende_perioder() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -126,7 +126,7 @@ public class VilkårBuilderTest {
 
         var tilbakestill = new VilkårBuilder(vilkår)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7)
             .medFullstendigTidslinje(fullstendigTidslinje.getTidslinje())
             .tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, sluttFørstePeriode));
@@ -142,7 +142,7 @@ public class VilkårBuilderTest {
     public void skal_teste_mellomliggende_perioder_forskjellig_begrunnelse() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -169,7 +169,7 @@ public class VilkårBuilderTest {
     public void skal_få_to_perioder_hvis_avstand_er_mer_enn_6_dager() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -194,7 +194,7 @@ public class VilkårBuilderTest {
     public void skal_håndtere_tilbakestilling_av_periode() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -230,7 +230,7 @@ public class VilkårBuilderTest {
     public void skal_få_periode_selv_om_denne_er_en_del_etterspurt_periode() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -266,7 +266,7 @@ public class VilkårBuilderTest {
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -300,7 +300,7 @@ public class VilkårBuilderTest {
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering_selv_ved_overstyring() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -335,7 +335,7 @@ public class VilkårBuilderTest {
     public void skal_nullstille_ved_nulltimer() {
         var vilkårBuilder = new VilkårBuilder()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.MEDLEMSKAPSVILKÅRET)
+            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
