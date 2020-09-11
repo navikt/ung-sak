@@ -25,9 +25,7 @@ import org.hibernate.jpa.QueryHints;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -361,10 +359,6 @@ public class BehandlingRepository {
 
     Long lagre(Behandling behandling) {
         getEntityManager().persist(behandling);
-
-        List<BehandlingÅrsak> behandlingÅrsak = behandling.getBehandlingÅrsaker();
-        behandlingÅrsak.forEach(getEntityManager()::persist);
-
         getEntityManager().flush();
 
         return behandling.getId();
@@ -401,27 +395,5 @@ public class BehandlingRepository {
         Timestamp timestamp = (Timestamp) resultat;
         LocalDateTime value = LocalDateTime.ofInstant(timestamp.toInstant(), TimeZone.getDefault().toZoneId());
         return Optional.of(value);
-    }
-
-    public List<BehandlingÅrsak> finnÅrsakerForBehandling(Behandling behandling) {
-        TypedQuery<BehandlingÅrsak> query = entityManager.createQuery(
-            "FROM BehandlingÅrsak  årsak " +
-                "WHERE (årsak.behandling = :behandling)",
-            BehandlingÅrsak.class);
-
-        query.setParameter("behandling", behandling);
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
-        return query.getResultList();
-    }
-
-    public List<BehandlingÅrsakType> finnÅrsakTyperForBehandling(Behandling behandling) {
-        TypedQuery<BehandlingÅrsakType> query = entityManager.createQuery(
-            "select distinct behandlingÅrsakType FROM BehandlingÅrsak årsak " +
-                "WHERE årsak.behandling = :behandling",
-            BehandlingÅrsakType.class);
-
-        query.setParameter("behandling", behandling);
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
-        return query.getResultList();
     }
 }

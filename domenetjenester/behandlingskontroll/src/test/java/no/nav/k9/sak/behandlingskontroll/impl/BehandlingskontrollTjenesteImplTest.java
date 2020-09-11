@@ -287,8 +287,10 @@ public class BehandlingskontrollTjenesteImplTest {
                     .containsExactly(stegStatuser);
     }
 
+    @SuppressWarnings("unchecked")
     private List<BehandlingStegTilstand> getBehandlingStegTilstand(Behandling behandling) {
-        return em.createQuery("from BehandlingStegTilstand where behandling.id=:id", BehandlingStegTilstand.class).setParameter("id", behandling.getId()).getResultList();
+        return em.createNativeQuery("select s.* from behandling_steg_tilstand s where s.behandling_id=:id", BehandlingStegTilstand.class)
+            .setParameter("id", behandling.getId()).getResultList();
     }
 
     private void initBehandlingskontrollTjeneste() {

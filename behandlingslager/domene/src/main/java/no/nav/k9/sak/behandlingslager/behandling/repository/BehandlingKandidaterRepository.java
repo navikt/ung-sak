@@ -1,12 +1,10 @@
 package no.nav.k9.sak.behandlingslager.behandling.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -17,7 +15,6 @@ import org.hibernate.jpa.QueryHints;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
@@ -49,49 +46,6 @@ public class BehandlingKandidaterRepository {
 
     protected EntityManager getEntityManager() {
         return entityManager;
-    }
-
-    public List<Behandling> finnBehandlingerMedUtløptBehandlingsfrist() {
-        return Stream.concat(finnUtløpteBehandlingerForEnkleTyper().stream(),
-            finnUtløpteBehandlingerEndringssøknader().stream())
-            .collect(Collectors.toList());
-    }
-
-    private List<Behandling> finnUtløpteBehandlingerEndringssøknader() {
-
-        TypedQuery<Behandling> query = entityManager.createQuery(
-            "SELECT behandling FROM Behandling behandling " +
-                "INNER JOIN BehandlingÅrsak behandling_arsak " +
-                "ON behandling=behandling_arsak.behandling " +
-                "WHERE NOT behandling.status IN (:avsluttetOgIverksetterStatus) " +
-                "AND behandling.behandlingstidFrist< :idag " +
-                "AND behandling_arsak.behandlingÅrsakType = :endringType " +
-                "AND behandling.behandlingType = :revurderingType", //$NON-NLS-1$
-            Behandling.class);
-
-        query.setParameter("idag", LocalDate.now()); //$NON-NLS-1$
-        query.setParameter("revurderingType", BehandlingType.REVURDERING);
-        query.setParameter("endringType", BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-        query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
-        return query.getResultList();
-    }
-
-    private List<Behandling> finnUtløpteBehandlingerForEnkleTyper() {
-        Set<BehandlingType> behandlingTyperMedVarselBrev = hentBehandlingTyperMedBehandlingstidVarselBrev();
-
-        TypedQuery<Behandling> query = entityManager.createQuery(
-            "FROM Behandling behandling " +
-                "WHERE NOT behandling.status IN (:avsluttetOgIverksetterStatus) " +
-                "AND behandling.behandlingstidFrist< :idag " +
-                "AND behandling.behandlingType in (:list)", //$NON-NLS-1$
-            Behandling.class);
-
-        query.setParameter("idag", LocalDate.now()); //$NON-NLS-1$
-        query.setParameter("list", behandlingTyperMedVarselBrev);
-        query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
-        return query.getResultList();
     }
 
     private Set<BehandlingType> hentBehandlingTyperMedBehandlingstidVarselBrev() {

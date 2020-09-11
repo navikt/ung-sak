@@ -22,7 +22,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -49,10 +48,8 @@ import no.nav.k9.sak.kontrakt.behandling.HenleggBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
-import no.nav.k9.sak.kontrakt.behandling.SkjæringstidspunktDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
@@ -260,9 +257,9 @@ public class BehandlingDtoTjeneste {
     public BehandlingDto lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(Behandling revurdering) {
         var dto = new BehandlingDto();
 
-        Optional<Behandling> originalBehandling = revurdering.getOriginalBehandling();
+        Optional<Long> originalBehandling = revurdering.getOriginalBehandlingId();
 
-        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(revurdering, originalBehandling.map(Behandling::getId));
+        var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(revurdering, originalBehandling);
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(revurdering.getId()).orElse(null);
         setStandardfelter(revurdering, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
 

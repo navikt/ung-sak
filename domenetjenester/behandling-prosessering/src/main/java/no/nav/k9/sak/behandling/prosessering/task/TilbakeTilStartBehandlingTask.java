@@ -117,9 +117,8 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         vilkårResultatRepository.deaktiverVilkårsResultat(behandlingId);
         opptjeningRepository.deaktiverOpptjening(behandlingId);
 
-        behandling.getOriginalBehandling().ifPresent(originalBehandling -> {
-            Long originalId = originalBehandling.getId();
-            opptjeningRepository.finnOpptjening(originalId).ifPresent(o -> opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling, behandling));
+        behandling.getOriginalBehandlingId().ifPresent(originalId -> {
+            opptjeningRepository.finnOpptjening(originalId).ifPresent(o -> opptjeningRepository.kopierGrunnlagFraEksisterendeBehandling(originalId, behandling));
             vilkårResultatRepository.kopier(originalId, behandlingId);
         });
 

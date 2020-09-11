@@ -36,6 +36,7 @@ import javax.persistence.SqlResultSetMappings;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
@@ -119,11 +120,11 @@ public class Behandling extends BaseEntitet {
     @Column(name = "uuid")
     private UUID uuid;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "original_behandling_id", updatable = false)
     private Behandling originalBehandling;
 
@@ -131,7 +132,8 @@ public class Behandling extends BaseEntitet {
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "behandling")
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @JoinColumn(name = "behandling_id", nullable = false)
     @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
     @Where(clause = "aktiv=true")
     private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(1);
@@ -144,7 +146,9 @@ public class Behandling extends BaseEntitet {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "behandling", orphanRemoval = true, cascade = CascadeType.ALL, targetEntity = Aksjonspunkt.class)
     private Set<Aksjonspunkt> aksjonspunkter = new HashSet<>();
 
-    @OneToMany(mappedBy = "behandling")
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @JoinColumn(name = "behandling_id", nullable = false)
+    @BatchSize(size = 20)
     private Set<BehandlingÅrsak> behandlingÅrsaker = new HashSet<>(1);
 
     @Version
@@ -265,7 +269,6 @@ public class Behandling extends BaseEntitet {
             throw new IllegalStateException("Utvikler-feil: kan ikke legge til årsaker på en behandling som er avsluttet.");
         }
         behandlingÅrsaker.forEach(bå -> {
-            bå.setBehandling(this);
             this.behandlingÅrsaker.add(bå);
         });
     }
@@ -278,6 +281,10 @@ public class Behandling extends BaseEntitet {
 
     public Optional<Behandling> getOriginalBehandling() {
         return Optional.ofNullable(originalBehandling);
+    }
+
+    public Optional<Long> getOriginalBehandlingId() {
+        return originalBehandling == null ? Optional.empty() : Optional.of(originalBehandling.getId());
     }
 
     public boolean erManueltOpprettet() {

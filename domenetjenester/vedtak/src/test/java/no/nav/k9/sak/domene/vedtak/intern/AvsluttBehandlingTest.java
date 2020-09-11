@@ -136,7 +136,7 @@ public class AvsluttBehandlingTest {
     public void testAvsluttBehandlingMedAnnenBehandlingSomVenter() {
         // Arrange
         Behandling annenBehandling = lagBehandling(LocalDateTime.now().minusDays(1), LocalDateTime.now());
-        BehandlingStegTilstand tilstand = new BehandlingStegTilstand(annenBehandling, BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.STARTET);
+        BehandlingStegTilstand tilstand = new BehandlingStegTilstand(BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.STARTET);
         Whitebox.setInternalState(annenBehandling, "status", BehandlingStatus.IVERKSETTER_VEDTAK);
         Whitebox.setInternalState(annenBehandling, "behandlingStegTilstander", List.of(tilstand));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(List.of(behandling, annenBehandling));
@@ -153,7 +153,7 @@ public class AvsluttBehandlingTest {
     public void testAvsluttBehandlingMedAnnenBehandlingSomErUnderIverksetting() {
         // Arrange
         Behandling annenBehandling = lagBehandling(LocalDateTime.now().minusDays(1), LocalDateTime.now());
-        BehandlingStegTilstand tilstand = new BehandlingStegTilstand(annenBehandling, BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.VENTER);
+        BehandlingStegTilstand tilstand = new BehandlingStegTilstand(BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.VENTER);
         Whitebox.setInternalState(annenBehandling, "status", BehandlingStatus.IVERKSETTER_VEDTAK);
         Whitebox.setInternalState(annenBehandling, "behandlingStegTilstander", List.of(tilstand));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId())).thenReturn(List.of(behandling, annenBehandling));
@@ -256,7 +256,7 @@ public class AvsluttBehandlingTest {
         }
         Whitebox.setInternalState(behandling, "status", BehandlingStatus.IVERKSETTER_VEDTAK);
         Whitebox.setInternalState(behandling, "behandlingStegTilstander",
-            List.of(new BehandlingStegTilstand(behandling, BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.STARTET)));
+            List.of(new BehandlingStegTilstand(BehandlingStegType.IVERKSETT_VEDTAK, BehandlingStegStatus.STARTET)));
         return behandling;
     }
 

@@ -159,9 +159,8 @@ public class OpptjeningRepository {
     /**
      * Kopier over grunnlag til ny behandling
      */
-    public void kopierGrunnlagFraEksisterendeBehandling(Behandling origBehandling, Behandling nyBehandling) {
+    public void kopierGrunnlagFraEksisterendeBehandling(Long orgBehandlingId, Behandling nyBehandling) {
         // Opptjening er ikke koblet til Behandling gjennom aggregatreferanse. Må derfor kopieres som deep copy
-        Long orgBehandlingId = origBehandling.getId();
         var origOpptjening = hentTidligereOpptjening(orgBehandlingId, true)
             .orElseThrow(() -> new IllegalStateException("Original behandling har ikke opptjening."));
 

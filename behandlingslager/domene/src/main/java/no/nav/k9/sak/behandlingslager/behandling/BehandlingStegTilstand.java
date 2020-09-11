@@ -8,8 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -25,12 +23,12 @@ import no.nav.k9.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConver
 @Table(name = "BEHANDLING_STEG_TILSTAND")
 public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_STEG_TILSTAND")
+    private Long id;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "behandling_id", nullable = false, updatable = false)
-    private Behandling behandling;
 
     @Convert(converter = BehandlingStegTypeKodeverdiConverter.class)
     @Column(name = "behandling_steg", nullable = false, updatable = false)
@@ -40,20 +38,15 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
     @Column(name = "behandling_steg_status", nullable = false)
     private BehandlingStegStatus behandlingStegStatus = BehandlingStegStatus.UDEFINERT;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_STEG_TILSTAND")
-    private Long id;
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public BehandlingStegTilstand(Behandling behandling, BehandlingStegType behandlingSteg) {
-        this(behandling, behandlingSteg, BehandlingStegStatus.UDEFINERT);
+    public BehandlingStegTilstand(BehandlingStegType behandlingSteg) {
+        this(behandlingSteg, BehandlingStegStatus.UDEFINERT);
     }
 
-    public BehandlingStegTilstand(Behandling behandling, BehandlingStegType behandlingSteg, BehandlingStegStatus stegStatus) {
-        this.behandling = behandling;
+    public BehandlingStegTilstand(BehandlingStegType behandlingSteg, BehandlingStegStatus stegStatus) {
         this.behandlingSteg = behandlingSteg;
         this.setBehandlingStegStatus(stegStatus);
     }
@@ -73,14 +66,6 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
         BehandlingStegTilstand that = (BehandlingStegTilstand) o;
         return Objects.equals(getBehandlingSteg(), that.getBehandlingSteg()) &&
             Objects.equals(getBehandlingStegStatus(), that.getBehandlingStegStatus());
-    }
-
-    public Behandling getBehandling() {
-        return behandling;
-    }
-
-    public Long getBehandlingId() {
-        return behandling.getId();
     }
 
     public BehandlingStegType getBehandlingSteg() {
@@ -116,9 +101,9 @@ public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<behandlingId=" + behandling.getId()
-            + ", steg=" + getBehandlingSteg()
+        return getClass().getSimpleName() + "<steg=" + getBehandlingSteg()
             + ", stegStatus=" + getBehandlingStegStatus()
+            + ", aktiv=" + aktiv
             + ">";
     }
 

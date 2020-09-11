@@ -158,7 +158,7 @@ public class FremoverhoppTest {
             throw new IllegalStateException("BehandlingStegStatus " + fraPort + " ikke støttet i testen");
         }
 
-        BehandlingStegTilstand fraTilstand = new BehandlingStegTilstand(behandling, fra.getSteg(), fraStatus);
+        BehandlingStegTilstand fraTilstand = new BehandlingStegTilstand(fra.getSteg(), fraStatus);
         // BehandlingStegTilstand tilTilstand = new BehandlingStegTilstand(behandling, til, BehandlingStegStatus.VENTER);
         Fagsak fagsak = behandling.getFagsak();
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
