@@ -78,8 +78,9 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     }
 
     private Behandling getOriginalBehandling(Behandling behandling) {
-        return behandling.getOriginalBehandling()
+        var originalBehandlingId = behandling.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Revurdering skal alltid ha orginal behandling"));
+        return behandlingRepository.hentBehandling(originalBehandlingId);
     }
 
     private boolean erRevurderingensBeregningsgrunnlagMindreEnnOrginal(BehandlingReferanse orginalBehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {

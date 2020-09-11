@@ -383,8 +383,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagOriginalBehandlingLink(Behandling behandling) {
-        if (behandling.getOriginalBehandling().isPresent()) {
-            var originalBehandling = behandling.getOriginalBehandling().get();
+        if (behandling.getOriginalBehandlingId().isPresent()) {
+            var originalBehandling = behandlingRepository.hentBehandling(behandling.getOriginalBehandlingId().get());
             var originalQueryParams = Map.of(BehandlingUuidDto.NAME, originalBehandling.getUuid().toString());
             return Optional.of(getFraMap(BehandlingRestTjeneste.REVURDERING_ORGINAL_PATH, "original-behandling", originalQueryParams));
         } else {

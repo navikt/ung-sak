@@ -58,8 +58,8 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     @Override
     public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
         Behandling revurdering = behandlingRepository.hentBehandling(revurderingRef.getBehandlingId());
-        Behandling originalBehandling = revurdering.getOriginalBehandling().orElseThrow();
-
+        Long originalBehandlingId = revurdering.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Mangler originalBehandlingId for behandling: " + revurdering.getId()));
+        var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
         return doBestemBehandlingsresultatForRevurdering(revurdering, originalBehandling, vedtakVarsel);
     }
 

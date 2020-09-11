@@ -92,7 +92,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                 beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build());
             }
         } else {
-            var originalBehandling = behandling.getOriginalBehandling();
+            var originalBehandlingId = behandling.getOriginalBehandlingId();
 
             var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
 
@@ -102,14 +102,14 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
                 DatoIntervallEntitet sisteSøknadsperiode = uttakRepository.hentGrunnlag(behandlingId).map(UttakGrunnlag::getOppgittSøknadsperioder).map(Søknadsperioder::getMaksPeriode)
                     .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
-                Boolean erNySøknadsperiode = originalBehandling.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
+                Boolean erNySøknadsperiode = originalBehandlingId.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
 
                 beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
 
                 var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
 
                 if (erNySøknadsperiode) {
-                    Behandling origBehandling = originalBehandling.get();
+                    Behandling origBehandling = behandlingRepository.hentBehandling(originalBehandlingId.get());
                     Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(origBehandling.getId());
                     beregningsresultat = MapBeregningsresultat.mapResultatFraForrige(beregningsresultat, origBeregningsresultat, sisteSøknadsperiode);
                 }
@@ -135,9 +135,9 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         beregningsresultatRepository.deaktiverBeregningsresultat(behandling.getId(), kontekst.getSkriveLås());
     }
 
-    private boolean erNySøknadperiode(Behandling revurdering, Behandling origBehandling) {
+    private boolean erNySøknadperiode(Behandling revurdering, Long origBehandlingId) {
         var nyttUttak = uttakRepository.hentFastsattUttak(revurdering.getId());
-        var origUttak = uttakRepository.hentFastsattUttak(origBehandling.getId());
+        var origUttak = uttakRepository.hentFastsattUttak(origBehandlingId);
 
         List<Periode> nyeSøknadsperioder = FrisinnSøknadsperiodeMapper.map(nyttUttak);
         List<Periode> origSøknadsperioder = FrisinnSøknadsperiodeMapper.map(origUttak);

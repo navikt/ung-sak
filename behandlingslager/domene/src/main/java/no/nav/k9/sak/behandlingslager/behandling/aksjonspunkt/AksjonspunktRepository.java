@@ -1,10 +1,13 @@
 package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -52,16 +55,6 @@ public class AksjonspunktRepository {
         }
     }
 
-    /** Returnerer aksjonspunkter for behandling. */
-    @SuppressWarnings("unchecked")
-    public List<Aksjonspunkt> hentAksjonspunkter(Long behandlingId, AksjonspunktStatus... statuser) {
-        List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
-        return em.createQuery("Select a from Aksjonspunkt a where a.behandling.id=:id and a.status IN (:statuser)")
-            .setParameter("id", behandlingId)
-            .setParameter("statuser", statusList)
-            .getResultList();
-    }
-
     public void fjernToTrinnsBehandlingKreves(Aksjonspunkt aksjonspunkt) {
         aksjonspunkt.fjernToTrinnsFlagg();
     }
@@ -70,21 +63,24 @@ public class AksjonspunktRepository {
     @SuppressWarnings("unchecked")
     public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(Saksnummer saksnummer, AksjonspunktStatus... statuser) {
         List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
-        List<Object[]> list = em.createQuery("Select b, a from Aksjonspunkt a "
-            + "JOIN a.behandling b "
-            + "JOIN b.fagsak f where a.status IN (:statuser) and f.saksnummer=:saksnummer")
-            .setParameter("saksnummer", saksnummer)
-            .setParameter("statuser", statusList)
+
+        String sql = "select b.* from behandling b"
+            + " inner join aksjonspunkt a on a.behandling_id=b.id"
+            + " inner join fagsak f on f.id=b.fagsak_id"
+            + " where a.aksjonspunkt_status IN (:statuser) and f.saksnummer=:saksnummer";
+        List<Behandling> list = em
+            .createNativeQuery(sql, Behandling.class)
+            .setParameter("statuser", statusList.stream().map(AksjonspunktStatus::getKode).collect(Collectors.toSet()))
+            .setParameter("saksnummer", saksnummer.getVerdi())
             .getResultList();
 
         Map<Behandling, List<Aksjonspunkt>> map = new LinkedHashMap<>();
-        for (var tuple : list) {
-            var beh = (Behandling) tuple[0];
-            var aks = (Aksjonspunkt) tuple[1];
-            if (!map.containsKey(beh)) {
-                map.put(beh, new ArrayList<>());
-            }
-            map.get(beh).add(aks);
+        for (Behandling b : list) {
+            Set<Aksjonspunkt> aksjonspunkter = b.getAksjonspunkter()
+                .stream()
+                .filter(a -> statusList.contains(a.getStatus()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            map.put(b, List.copyOf(aksjonspunkter));
         }
 
         return map;
@@ -94,34 +90,43 @@ public class AksjonspunktRepository {
     @SuppressWarnings("unchecked")
     public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(AksjonspunktStatus... statuser) {
         List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
-        List<Object[]> list = em.createQuery("Select b, a from Aksjonspunkt a JOIN a.behandling b where a.status IN (:statuser)")
-            .setParameter("statuser", statusList)
+        String sql = "select distinct b.* from behandling b"
+            + " inner join aksjonspunkt a on a.behandling_id=b.id"
+            + " where a.aksjonspunkt_status IN (:statuser)";
+        List<Behandling> list = em
+            .createNativeQuery(sql, Behandling.class)
+            .setParameter("statuser", statusList.stream().map(AksjonspunktStatus::getKode).collect(Collectors.toSet()))
             .getResultList();
 
         Map<Behandling, List<Aksjonspunkt>> map = new LinkedHashMap<>();
-        for (var tuple : list) {
-            var beh = (Behandling) tuple[0];
-            var aks = (Aksjonspunkt) tuple[1];
-            if (skipBehandling(beh)) {
+        for (Behandling b : list) {
+            if (skipBehandling(b)) {
                 continue;
             }
-            if (!map.containsKey(beh)) {
-                map.put(beh, new ArrayList<>());
-            }
-            map.get(beh).add(aks);
+            Set<Aksjonspunkt> aksjonspunkter = b.getAksjonspunkter()
+                .stream()
+                .filter(a -> statusList.contains(a.getStatus()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            map.put(b, List.copyOf(aksjonspunkter));
         }
 
         return map;
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<AktørId> hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
-        return em.createQuery("Select f.brukerAktørId from Aksjonspunkt a JOIN a.behandling b JOIN b.fagsak f where a.status = :status AND a.aksjonspunktDefinisjon = :definisjon")
-            .setParameter("status", AksjonspunktStatus.OPPRETTET)
-            .setParameter("definisjon", aksjonspunktDefinisjon)
-            .getResultList();
+        String sql = "select f.bruker_aktoer_id from fagsak f"
+            + " inner join behandling b on b.fagsak_id=f.id"
+            + " inner join aksjonspunkt a on a.behandling_id=b.id"
+            + " where a.aksjonspunkt_status = :status AND a.aksjonspunkt_def = :definisjon";
+        Stream<String> stream = em.createNativeQuery(sql)
+            .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
+            .setParameter("definisjon", aksjonspunktDefinisjon.getKode())
+            .getResultStream();
+
+        return stream.map(a -> new AktørId(a)).collect(Collectors.toList());
     }
-    
+
     private boolean skipBehandling(Behandling beh) {
         return beh.getFagsakYtelseType() == FagsakYtelseType.OBSOLETE;
     }

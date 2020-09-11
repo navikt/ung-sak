@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
@@ -31,6 +32,7 @@ public class VedtakTjeneste {
 
     private HistorikkRepository historikkRepository;
     private TotrinnTjeneste totrinnTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     VedtakTjeneste() {
         // CDI
@@ -38,8 +40,10 @@ public class VedtakTjeneste {
 
     @Inject
     public VedtakTjeneste(HistorikkRepository historikkRepository,
+                          BehandlingRepository behandlingRepository,
                           TotrinnTjeneste totrinnTjeneste) {
         this.historikkRepository = historikkRepository;
+        this.behandlingRepository = behandlingRepository;
         this.totrinnTjeneste = totrinnTjeneste;
     }
 
@@ -128,9 +132,12 @@ public class VedtakTjeneste {
 
     private VedtakResultatType utledVedtakResultatType(Behandling behandling, BehandlingResultatType resultatType) {
         if (BehandlingResultatType.INGEN_ENDRING.equals(resultatType)) {
-            Optional<Behandling> originalBehandlingOpt = behandling.getOriginalBehandling();
-            if (originalBehandlingOpt.isPresent() && !Objects.equals(originalBehandlingOpt.get().getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
-                return utledVedtakResultatType(originalBehandlingOpt.get());
+            Optional<Long> originalBehandlingOpt = behandling.getOriginalBehandlingId();
+            if (originalBehandlingOpt.isPresent()) {
+                var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingOpt.get());
+                if (!Objects.equals(originalBehandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
+                    return utledVedtakResultatType(originalBehandling);
+                }
             }
         }
         if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType)) {

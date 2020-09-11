@@ -14,7 +14,6 @@ import javax.persistence.TypedQuery;
 import org.hibernate.jpa.QueryHints;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
@@ -30,7 +29,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 @Dependent
 public class BehandlingKandidaterRepository {
 
-    private static final Set<AksjonspunktDefinisjon> AUTOPUNKTER = List.of(AksjonspunktDefinisjon.values()).stream().filter(a -> AksjonspunktType.AUTOPUNKT.equals(a.getAksjonspunktType())).collect(Collectors.toSet());
+    private static final Set<AksjonspunktDefinisjon> AUTOPUNKTER = List.of(AksjonspunktDefinisjon.values()).stream().filter(a -> AksjonspunktType.AUTOPUNKT.equals(a.getAksjonspunktType()))
+        .collect(Collectors.toSet());
     private static final Set<BehandlingStatus> AVSLUTTENDE_STATUS = BehandlingStatus.getFerdigbehandletStatuser();
     private static final String AVSLUTTENDE_KEY = "avsluttetOgIverksetterStatus";
     private EntityManager entityManager;
@@ -48,31 +48,26 @@ public class BehandlingKandidaterRepository {
         return entityManager;
     }
 
-    private Set<BehandlingType> hentBehandlingTyperMedBehandlingstidVarselBrev() {
-        return BehandlingType.kodeMap().values().stream()
-            .filter(BehandlingType::isBehandlingstidVarselbrev)
-            .collect(Collectors.toSet());
-    }
-
+    @SuppressWarnings("unchecked")
     public List<Behandling> finnBehandlingerForAutomatiskGjenopptagelse() {
 
         Set<AksjonspunktDefinisjon> autopunktKoder = new HashSet<>(AUTOPUNKTER);
 
         LocalDateTime naa = LocalDateTime.now();
 
-        TypedQuery<Behandling> query = getEntityManager().createQuery(
-            " SELECT DISTINCT b " +
-                " FROM Aksjonspunkt ap " +
-                " INNER JOIN ap.behandling b " +
-                " WHERE ap.status IN :aapneAksjonspunktKoder " +
-                "   AND b.fagsak.ytelseType != 'OBSOLETE'" +
-                "   AND ap.aksjonspunktDefinisjon IN (:autopunktKoder) " +
-                "   AND ap.fristTid < :naa ",
-            Behandling.class);
-        query.setHint(QueryHints.HINT_READONLY, "true");
-        query.setParameter("aapneAksjonspunktKoder", AksjonspunktStatus.getÅpneAksjonspunktStatuser());
-        query.setParameter("autopunktKoder", autopunktKoder);
-        query.setParameter("naa", naa);
+        String sql = " SELECT DISTINCT b.* " +
+            " FROM aksjonspunkt ap " +
+            " INNER JOIN behandling b on b.id=ap.behandling_id " +
+            " INNER JOIN fagsak f on f.id=b.fagsak_id" +
+            " WHERE ap.aksjonspunkt_status IN :aapneAksjonspunktKoder " +
+            "   AND f.ytelse_type != 'OBSOLETE'" +
+            "   AND ap.aksjonspunkt_def IN (:autopunktKoder) " +
+            "   AND ap.frist_tid < :naa ";
+        var query = getEntityManager().createNativeQuery(sql, Behandling.class)
+            .setHint(QueryHints.HINT_READONLY, "true")
+            .setParameter("aapneAksjonspunktKoder", AksjonspunktStatus.getÅpneAksjonspunktStatuser().stream().map(a -> a.getKode()).collect(Collectors.toList()))
+            .setParameter("autopunktKoder", autopunktKoder.stream().map(a -> a.getKode()).collect(Collectors.toList()))
+            .setParameter("naa", naa);
 
         return query.getResultList();
     }
@@ -83,26 +78,26 @@ public class BehandlingKandidaterRepository {
             "FROM Behandling behandling " +
                 "WHERE behandling.status NOT IN (:avsluttetOgIverksetterStatus) " +
                 "   AND b.fagsak.ytelseType != 'OBSOLETE'" +
-                "  AND behandling.behandlendeEnhet = :enhet ", //$NON-NLS-1$
+                "  AND behandling.behandlendeEnhet = :enhet ",
             Behandling.class);
 
-        query.setParameter("enhet", enhetId); //$NON-NLS-1$
+        query.setParameter("enhet", enhetId);
         query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS);
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
+        query.setHint(QueryHints.HINT_READONLY, "true");
         return query.getResultList();
     }
 
+    @SuppressWarnings("unchecked")
     public List<Behandling> finnÅpneBehandlingerUtenÅpneAksjonspunktEllerAutopunkt() {
 
-        TypedQuery<Behandling> query = entityManager.createQuery(
-            "SELECT bh FROM Behandling bh " +
-                "WHERE bh.status NOT IN (:avsluttetOgIverksetterStatus) " +
-                "  AND NOT EXISTS (SELECT ap FROM Aksjonspunkt ap WHERE ap.behandling=bh AND ap.status = :status) ", //$NON-NLS-1$
-            Behandling.class);
+        String sql = "SELECT b.* FROM Behandling b "
+            + " WHERE b.behandling_status NOT IN (:avsluttetOgIverksetterStatus) "
+            + " AND NOT EXISTS (SELECT 1 FROM Aksjonspunkt ap WHERE ap.behandling_id=b.id AND ap.aksjonspunkt_status = :status) ";
 
-        query.setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS); //$NON-NLS-1$
-        query.setParameter("status", AksjonspunktStatus.OPPRETTET); //$NON-NLS-1$
-        query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
+        var query = entityManager.createNativeQuery(sql, Behandling.class)
+            .setParameter(AVSLUTTENDE_KEY, AVSLUTTENDE_STATUS.stream().map(BehandlingStatus::getKode).collect(Collectors.toList()))
+            .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
+            .setHint(QueryHints.HINT_READONLY, "true");
         return query.getResultList();
     }
 }

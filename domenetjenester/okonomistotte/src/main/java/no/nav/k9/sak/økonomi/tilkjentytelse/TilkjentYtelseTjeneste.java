@@ -147,7 +147,7 @@ public class TilkjentYtelseTjeneste {
         info.setAnsvarligSaksbehandler(vedtak == null ? behandling.getAnsvarligSaksbehandler() : vedtak.getAnsvarligSaksbehandler());
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak == null ? LocalDate.now() : vedtak.getVedtaksdato());
-        behandling.getOriginalBehandling().ifPresent(ob -> info.setForrigeBehandlingId(ob.getUuid()));
+        behandling.getOriginalBehandlingId().ifPresent(ob -> info.setForrigeBehandlingId(behandlingRepository.hentBehandling(ob).getUuid()));
         return info;
     }
 
