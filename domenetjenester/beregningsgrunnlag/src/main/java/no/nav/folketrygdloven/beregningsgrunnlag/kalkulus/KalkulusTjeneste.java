@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -164,6 +165,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         OppdateringListeRespons oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe, behandlingReferanse.getBehandlingUuid()));
         return oppdateringRespons.getOppdateringer().stream()
             .map(oppdatering -> MapEndringsresultat.mapFraOppdateringRespons(oppdatering.getOppdatering(), oppdatering.getEksternReferanse()))
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
