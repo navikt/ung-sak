@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -123,7 +124,8 @@ public class InitierVilkårSteg implements BehandlingSteg {
             .medKantIKantVurderer(kantIKantVurderer)
             .medMaksMellomliggendePeriodeAvstand(utledetAvstand);
         for (DatoIntervallEntitet datoIntervallEntitet : allePerioder) {
-            vb.leggTil(vb.hentBuilderFor(datoIntervallEntitet));
+            vb.leggTil(vb.hentBuilderFor(datoIntervallEntitet)
+                .medUtfall(Utfall.IKKE_VURDERT));
         }
         return vb;
     }

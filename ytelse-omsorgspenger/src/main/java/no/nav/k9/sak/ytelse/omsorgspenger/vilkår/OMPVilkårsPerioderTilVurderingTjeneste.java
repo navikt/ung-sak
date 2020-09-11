@@ -38,6 +38,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private BehandlingRepository behandlingRepository;
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -81,7 +82,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var perioder = utledPeriode(behandlingId, vilkårType);
         var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(nulledePerioder.utledPeriode(behandlingId)
             .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1)))
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toCollection(TreeSet::new)));
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
@@ -95,7 +96,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkår.getPerioder()
             .stream()
             .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
-                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> erKantIKantVurderer.erKantIKant(it.getPeriode(), p)))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -121,6 +122,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
-        return new PåTversAvHelgErKantIKantVurderer();
+        return erKantIKantVurderer;
     }
 }

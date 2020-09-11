@@ -36,7 +36,6 @@ public class InngangsvilkårFellesTjeneste {
                                         BehandlingRepository behandlingRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste) {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.regelOrkestrerer = regelOrkestrerer;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
