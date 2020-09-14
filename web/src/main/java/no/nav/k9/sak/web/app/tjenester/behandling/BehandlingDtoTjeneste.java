@@ -8,10 +8,12 @@ import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.setSt
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,7 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -28,7 +31,9 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -221,12 +226,10 @@ public class BehandlingDtoTjeneste {
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isPresent()) {
-            var vilkårResultater = vilkårene.get().getVilkårene().stream()
-                .flatMap(vt -> vt.getPerioder().stream())
-                .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(),
-                    new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall())))
-                .collect(Collectors.groupingBy(Map.Entry::getKey,
-                    Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
+            Map<VilkårType, Set<VilkårResultatDto>> vilkårResultater = vilkårene.get()
+                .getVilkårene().stream()
+                .map(this::mapVilkår)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             dto.setVilkårResultat(vilkårResultater);
         }
 
@@ -236,6 +239,14 @@ public class BehandlingDtoTjeneste {
         behandlingVedtak.ifPresent(bv -> dto.setVedtaksdato(bv.getVedtaksdato()));
 
         return dto;
+    }
+
+    private Map.Entry<VilkårType, Set<VilkårResultatDto>> mapVilkår(Vilkår vt) {
+        return new AbstractMap.SimpleEntry<>(vt.getVilkårType(), vt.getPerioder().stream().map(this::mapVilkårResultat).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    private VilkårResultatDto mapVilkårResultat(VilkårPeriode vp) {
+        return new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall());
     }
 
     boolean erBehandlingMedGjeldendeVedtak(Behandling behandling, Optional<Long> behandlingMedGjeldendeVedtak) {
@@ -350,7 +361,6 @@ public class BehandlingDtoTjeneste {
                 throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
         }
 
-
     }
 
     private void leggTilUttakEndepunkt(Behandling behandling, BehandlingDto dto) {
@@ -424,8 +434,7 @@ public class BehandlingDtoTjeneste {
             "/k9/formidling/api/brev/tilgjengeligevedtaksbrev",
             "tilgjengelige-vedtaksbrev",
             Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString(),
-                "sakstype", behandling.getFagsakYtelseType().getKode())
-        ));
+                "sakstype", behandling.getFagsakYtelseType().getKode())));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {

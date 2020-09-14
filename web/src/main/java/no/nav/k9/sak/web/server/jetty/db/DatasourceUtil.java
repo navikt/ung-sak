@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.server.jetty.db;
 
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -9,19 +10,18 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil;
 import no.nav.vault.jdbc.hikaricp.VaultError;
-import no.nav.vedtak.konfig.PropertyUtil;
 
 public class DatasourceUtil {
 
     public static DataSource createDatasource(String datasourceName, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
         String rolePrefix = getRolePrefix(datasourceName);
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            final HikariConfig config = initConnectionPoolConfig(datasourceName, null, maxPoolSize);
-            final String password = PropertyUtil.getProperty(datasourceName + ".password");
+            var config = initConnectionPoolConfig(datasourceName, null, maxPoolSize);
+            String password = getProperty(datasourceName + ".password");
             return createLocalDatasource(config, "public", rolePrefix, password);
         } else {
-            final String dbRole = getRole(rolePrefix, role);
-            final HikariConfig config = initConnectionPoolConfig(datasourceName, dbRole, maxPoolSize);
+            String dbRole = getRole(rolePrefix, role);
+            var config = initConnectionPoolConfig(datasourceName, dbRole, maxPoolSize);
             return createVaultDatasource(config, environmentClass.mountPath(), dbRole);
         }
     }
@@ -35,12 +35,16 @@ public class DatasourceUtil {
     }
 
     private static String getRolePrefix(String datasourceName) {
-        return PropertyUtil.getProperty(datasourceName + ".username");
+        return getProperty(datasourceName + ".username");
+    }
+
+    private static String getProperty(String key) {
+        return System.getProperty(key, System.getenv(key.toUpperCase(Locale.getDefault()).replace('.', '_')));
     }
 
     private static HikariConfig initConnectionPoolConfig(String dataSourceName, String dbRole, int maxPoolSize) {
-        final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(PropertyUtil.getProperty(dataSourceName + ".url"));
+        var config = new HikariConfig();
+        config.setJdbcUrl(getProperty(dataSourceName + ".url"));
 
         config.setMinimumIdle(0);
         config.setMaximumPoolSize(maxPoolSize);
@@ -50,7 +54,7 @@ public class DatasourceUtil {
         config.setDriverClassName("org.postgresql.Driver");
         
         if (dbRole != null) {
-            final String initSql = String.format("SET ROLE \"%s\"", dbRole);
+            var initSql = String.format("SET ROLE \"%s\"", dbRole);
             config.setConnectionInitSql(initSql);
         }
         

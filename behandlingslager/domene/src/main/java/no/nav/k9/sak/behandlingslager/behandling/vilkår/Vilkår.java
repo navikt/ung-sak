@@ -15,10 +15,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
+import org.hibernate.annotations.BatchSize;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -34,15 +36,14 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VILKAR")
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
-    private Vilkårene vilkårene;
-
     @Convert(converter = VilkårTypeKodeverdiConverter.class)
     @Column(name = "vilkar_type", nullable = false, updatable = false)
     private VilkårType vilkårType;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkår")
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @JoinColumn(name = "vilkar_id", nullable = false, updatable = false)
+    @OrderBy(value = "periode.fomDato asc nulls first")
+    @BatchSize(size = 20)
     private List<VilkårPeriode> perioder = new ArrayList<>();
 
     @Version
@@ -55,12 +56,12 @@ public class Vilkår extends BaseEntitet implements IndexKey {
 
     Vilkår(Vilkår v) {
         this.vilkårType = v.vilkårType;
-        this.perioder = v.getPerioder().stream().map(VilkårPeriode::new).peek(vp -> vp.setVilkår(this)).collect(Collectors.toList());
+        this.perioder = v.getPerioder().stream().map(VilkårPeriode::new).collect(Collectors.toList());
     }
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = {getVilkårType()};
+        Object[] keyParts = { getVilkårType() };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -76,20 +77,13 @@ public class Vilkår extends BaseEntitet implements IndexKey {
         this.vilkårType = vilkårType;
     }
 
-    void setVilkårene(Vilkårene vilkårene) {
-        this.vilkårene = vilkårene;
-    }
-
     public List<VilkårPeriode> getPerioder() {
         return Collections.unmodifiableList(perioder);
     }
 
     void setPerioder(List<VilkårPeriode> perioder) {
         this.perioder.clear();
-        this.perioder.addAll(perioder
-            .stream()
-            .peek(it -> it.setVilkår(this))
-            .collect(Collectors.toList()));
+        this.perioder.addAll(perioder.stream().map(VilkårPeriode::new).collect(Collectors.toList()));
     }
 
     public VilkårPeriode finnPeriodeForSkjæringstidspunkt(LocalDate skjæringstidspunkt) {

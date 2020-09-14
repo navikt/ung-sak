@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,9 +20,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
+import org.hibernate.annotations.BatchSize;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -47,8 +50,10 @@ public class Vilkårene extends BaseEntitet {
     private long versjon;
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE}, mappedBy = "vilkårene")
-    private Set<Vilkår> vilkårne = new LinkedHashSet<>();
+    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
+    @BatchSize(size = 20)
+    private Set<Vilkår> vilkårne = new HashSet<>();
 
     Vilkårene() {
         // for hibernate
@@ -57,7 +62,7 @@ public class Vilkårene extends BaseEntitet {
     Vilkårene(Vilkårene resultat) {
         if (resultat != null) {
             // For kopi mellom behandlinger
-            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).peek(v -> v.setVilkårene(this)).collect(Collectors.toSet());
+            this.vilkårne.addAll(resultat.vilkårne);
         }
     }
 
@@ -82,7 +87,6 @@ public class Vilkårene extends BaseEntitet {
 
     void leggTilVilkår(Vilkår vilkår) {
         vilkårne.removeIf(it -> it.getVilkårType().equals(vilkår.getVilkårType()));
-        vilkår.setVilkårene(this);
         vilkårne.add(vilkår);
     }
 
