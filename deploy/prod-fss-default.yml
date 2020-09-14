@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: { { image } }
+  image: {{ image }}
   port: 8080
   liveness:
     path: /k9/sak/internal/health/isAlive
