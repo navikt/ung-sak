@@ -41,7 +41,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     private VilkårType vilkårType;
 
     @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
-    @JoinColumn(name = "vilkar_id", nullable = false, updatable = false)
+    @JoinColumn(name = "vilkar_id", nullable = false)
     @OrderBy(value = "periode.fomDato asc nulls first")
     @BatchSize(size = 20)
     private List<VilkårPeriode> perioder = new ArrayList<>();
@@ -50,13 +50,23 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    /**
+     * Merk - denne er kun for builder - bygger en ugyldig Vilkår (uten vilkårtype).
+     * 
+     * @deprecated bør ikke brukes av builder og gjøres private
+     */
+    @Deprecated
     Vilkår() {
         // for hibernate og builder
     }
 
     Vilkår(Vilkår v) {
-        this.vilkårType = v.vilkårType;
+        this(v.getVilkårType());
         this.perioder = v.getPerioder().stream().map(VilkårPeriode::new).collect(Collectors.toList());
+    }
+
+    Vilkår(VilkårType vilkårType) {
+        this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
     }
 
     @Override
@@ -74,7 +84,7 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     }
 
     void setVilkårType(VilkårType vilkårType) {
-        this.vilkårType = vilkårType;
+        this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
     }
 
     public List<VilkårPeriode> getPerioder() {

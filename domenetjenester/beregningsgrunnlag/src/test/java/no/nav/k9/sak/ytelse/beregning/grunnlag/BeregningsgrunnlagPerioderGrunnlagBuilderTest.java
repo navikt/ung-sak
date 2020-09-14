@@ -18,7 +18,7 @@ public class BeregningsgrunnlagPerioderGrunnlagBuilderTest {
     public void skal_oppføre_seg() {
         var beregningsgrunnlag = new BeregningsgrunnlagPeriode(UUID.randomUUID(), LocalDate.now());
 
-        var vilkårBuilder = new VilkårBuilder().medType(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var periodeBuilder = vilkårBuilder.hentBuilderFor(LocalDate.now(), LocalDate.now().plusDays(3))
             .medUtfall(Utfall.IKKE_VURDERT);
 
