@@ -15,9 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -27,10 +25,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
@@ -47,10 +43,6 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VILKAR_PERIODE")
     private Long id;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "vilkar_id", nullable = false, updatable = false)
-    private Vilkår vilkår;
 
     @Column(name = "manuelt_vurdert", updatable = false, nullable = false)
     private boolean manueltVurdert = false;
@@ -234,10 +226,6 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         this.manueltVurdert = manueltVurdert;
     }
 
-    public void setVilkår(Vilkår vilkår) {
-        this.vilkår = vilkår;
-    }
-
     public String getRegelEvaluering() {
         return regelEvaluering;
     }
@@ -252,10 +240,6 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
 
     void setRegelInput(String regelInput) {
         this.regelInput = regelInput;
-    }
-
-    public VilkårType getVilkårType() {
-        return vilkår.getVilkårType();
     }
 
     @Override
