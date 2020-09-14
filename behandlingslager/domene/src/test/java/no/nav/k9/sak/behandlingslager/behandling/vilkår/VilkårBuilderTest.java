@@ -18,7 +18,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_opprette_perioder_for_resultat() {
-        var vilkårBuilder = new VilkårBuilder().medType(VilkårType.OPPTJENINGSVILKÅRET).medKantIKantVurderer(new DefaultKantIKantVurderer());
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+            .medKantIKantVurderer(new DefaultKantIKantVurderer());
 
         var førsteSkjæringstidspunkt = LocalDate.now();
         var sluttFørstePeriode = LocalDate.now().plusMonths(3);
@@ -70,9 +71,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -95,9 +95,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_revertere_mellomliggende_perioder() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -118,7 +117,7 @@ public class VilkårBuilderTest {
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
 
-        var fullstendigTidslinje = new VilkårBuilder()
+        var fullstendigTidslinje = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .somDummy()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
@@ -126,7 +125,6 @@ public class VilkårBuilderTest {
 
         var tilbakestill = new VilkårBuilder(vilkår)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7)
             .medFullstendigTidslinje(fullstendigTidslinje.getTidslinje())
             .tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(førsteSkjæringstidspunkt, sluttFørstePeriode));
@@ -140,9 +138,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder_forskjellig_begrunnelse() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -162,14 +159,14 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(1), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(1),
+            LocalDate.now().plusMonths(5));
     }
 
     @Test
     public void skal_få_to_perioder_hvis_avstand_er_mer_enn_6_dager() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -187,14 +184,14 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
     }
 
     @Test
     public void skal_håndtere_tilbakestilling_av_periode() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -212,7 +209,8 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
 
         var vilkårTilbakestilt = new VilkårBuilder(vilkår)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
@@ -228,9 +226,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_få_periode_selv_om_denne_er_en_del_etterspurt_periode() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -248,7 +245,8 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
 
         var oppdateringBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new DefaultKantIKantVurderer());
         var oppdatertFørsteSkjæringstidspunkt = førsteSkjæringstidspunkt.minusDays(10);
@@ -258,15 +256,16 @@ public class VilkårBuilderTest {
         var oppdatertVilkår = oppdateringBuilder.build();
         assertThat(oppdatertVilkår).isNotNull();
         assertThat(oppdatertVilkår.getPerioder()).hasSize(2);
-        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(oppdatertFørsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(oppdatertFørsteSkjæringstidspunkt,
+            andreSkjæringstidspunkt);
+        assertThat(oppdatertVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
     }
 
     @Test
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -284,7 +283,8 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
 
         var oppdateringBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new DefaultKantIKantVurderer());
         var nyPeriode = LocalDate.now().plusMonths(5).plusDays(1);
@@ -298,9 +298,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering_selv_ved_overstyring() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -319,7 +318,8 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
 
         var oppdateringBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new DefaultKantIKantVurderer());
         var nyPeriode = LocalDate.now().plusMonths(5).plusDays(1);
@@ -333,9 +333,8 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_nullstille_ved_nulltimer() {
-        var vilkårBuilder = new VilkårBuilder()
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
-            .medType(VilkårType.OPPTJENINGSVILKÅRET)
             .medMaksMellomliggendePeriodeAvstand(7);
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -354,7 +353,8 @@ public class VilkårBuilderTest {
         assertThat(vilkår).isNotNull();
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt, andreSkjæringstidspunkt);
-        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7), LocalDate.now().plusMonths(5));
+        assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(andreSkjæringstidspunkt.minusDays(7),
+            LocalDate.now().plusMonths(5));
 
         var oppdateringBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new DefaultKantIKantVurderer());
         oppdateringBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(andreSkjæringstidspunkt.plusDays(7), andreSkjæringstidspunkt.plusDays(10)));

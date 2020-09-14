@@ -25,7 +25,7 @@ public class OpptjeningResultatBuilderTest {
         opptjening.setOpptjentPeriode(Period.ofDays(28));
         opptjening.setOpptjeningAktivitet(Set.of(new OpptjeningAktivitet(periode.getFomDato(), periode.getTomDato(), OpptjeningAktivitetType.ARBEID, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
 
-        var vilkårBuilder = new VilkårBuilder().medType(VilkårType.OPPTJENINGSVILKÅRET);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
         var periodeBuilder = vilkårBuilder.hentBuilderFor(LocalDate.now(), LocalDate.now().plusDays(3))
             .medUtfall(Utfall.IKKE_VURDERT);
 

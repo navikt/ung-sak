@@ -33,8 +33,15 @@ public class VilkårBuilder {
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
 
+    /** @deprecated bygger ugyldig vilkår. */
+    @Deprecated(forRemoval = true)
     public VilkårBuilder() {
         this.vilkåret = new Vilkår();
+        this.vilkårTidslinje = new LocalDateTimeline<>(List.of());
+    }
+
+    public VilkårBuilder(VilkårType vilkårType) {
+        this.vilkåret = new Vilkår(vilkårType);
         this.vilkårTidslinje = new LocalDateTimeline<>(List.of());
     }
 
@@ -80,6 +87,8 @@ public class VilkårBuilder {
         return this;
     }
 
+    /** @deprecated bruk ctor {@link #VilkårBuilder(VilkårType)}. */
+    @Deprecated(forRemoval = true)
     public VilkårBuilder medType(VilkårType type) {
         validerBuilder();
         vilkåret.setVilkårType(type);
@@ -206,6 +215,8 @@ public class VilkårBuilder {
      */
     public Vilkår build() {
         validerBuilder();
+
+
         if (dummy) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");
         }
@@ -238,6 +249,7 @@ public class VilkårBuilder {
             .collect(Collectors.toList());
         var vilkårsPerioder = sammenkobleOgJusterUtfallHvisEnPeriodeTilVurdering(vilkårsPerioderRaw);
         vilkåret.setPerioder(vilkårsPerioder);
+        Objects.requireNonNull(vilkåret.getVilkårType(), "Mangler vilkårType");
         return vilkåret;
     }
 

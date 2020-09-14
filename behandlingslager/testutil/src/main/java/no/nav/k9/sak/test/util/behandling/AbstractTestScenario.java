@@ -682,7 +682,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {
-            inngangsvilkårBuilder.leggTil(new VilkårBuilder().medType(vilkårType).leggTil(new VilkårPeriodeBuilder()
+            inngangsvilkårBuilder.leggTil(new VilkårBuilder(vilkårType).leggTil(new VilkårPeriodeBuilder()
                 .medPeriode(LocalDate.now().minusMonths(3), LocalDate.now())
                 .medUtfall(vilkårUtfallType)));
         });

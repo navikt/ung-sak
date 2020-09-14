@@ -51,7 +51,7 @@ public class Vilkårene extends BaseEntitet {
 
     // CascadeType.ALL + orphanRemoval=true må til for at Vilkår skal bli slettet fra databasen ved fjerning fra HashSet
     @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
-    @JoinColumn(name = "vilkar_resultat_id", nullable = false, updatable = false)
+    @JoinColumn(name = "vilkar_resultat_id", nullable = false)
     @BatchSize(size = 20)
     private Set<Vilkår> vilkårne = new HashSet<>();
 

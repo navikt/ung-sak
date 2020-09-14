@@ -47,20 +47,27 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         // Hent behandlingsgrunnlag og vilkårtyper
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         List<VilkårType> vilkårHåndtertAvSteg = vilkårHåndtertAvSteg();
-        Set<VilkårType> vilkårTyper = vilkårResultatRepository.hent(kontekst.getBehandlingId())
-            .getVilkårene()
+        List<Vilkår> vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId()).getVilkårene();
+
+        Set<VilkårType> alleVilkårTyper = vilkårene
             .stream()
             .map(Vilkår::getVilkårType)
+            .collect(Collectors.toSet());
+
+        Set<VilkårType> aktuelleVilkårTyper = alleVilkårTyper
+            .stream()
             .filter(vilkårHåndtertAvSteg::contains)
             .collect(Collectors.toSet());
 
-        if (!(vilkårHåndtertAvSteg.isEmpty() || !vilkårTyper.isEmpty())) {
-            throw new IllegalArgumentException(String.format("Utviklerfeil: Steg[%s] håndterer ikke angitte vilkår %s", this.getClass(), vilkårTyper)); //$NON-NLS-1$ //$NON-NLS-2$
+        if (!vilkårHåndtertAvSteg.isEmpty() && aktuelleVilkårTyper.isEmpty()) {
+            throw new IllegalArgumentException(
+                String.format("Utviklerfeil: Steg[%s] håndterer ikke angitte vilkår %s, håndterer kun [%s]. Alle vilkår tilgjengelig: %s", this.getClass(), vilkårHåndtertAvSteg, aktuelleVilkårTyper, //$NON-NLS-1$
+                    alleVilkårTyper)); //$NON-NLS-2$
         }
 
         final var aksjonspunkter = new ArrayList<AksjonspunktResultat>();
         // Kall regelmotor
-        vilkårTyper.forEach(vilkår -> aksjonspunkter.addAll(vurderVilkårIPerioder(vilkår, behandling, kontekst)));
+        aktuelleVilkårTyper.forEach(vilkår -> aksjonspunkter.addAll(vurderVilkårIPerioder(vilkår, behandling, kontekst)));
 
         // Returner behandlingsresultat
         return stegResultat(aksjonspunkter);

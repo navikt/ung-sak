@@ -264,7 +264,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
             .medAnsvarligSaksbehandler("asdf").build();
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
 
-        final var vilkårBuilder = new VilkårBuilder().medType(VilkårType.MEDLEMSKAPSVILKÅRET);
+        final var vilkårBuilder = new VilkårBuilder(VilkårType.MEDLEMSKAPSVILKÅRET);
         final var vilkårResultat = Vilkårene.builder()
             .leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE).medUtfall(Utfall.IKKE_OPPFYLT)))
             .build();
