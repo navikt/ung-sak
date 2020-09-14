@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.medlem.impl;
 
-import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
@@ -16,5 +15,5 @@ public interface MedlemFeil extends DeklarerteFeil {
     Feil fikkSikkerhetsavvikFraMedlem(Sikkerhetsbegrensning e);
 
     @IntegrasjonFeil(feilkode = "FP-085790", feilmelding = "Feil ved kall til medlemskap tjenesten.", logLevel = LogLevel.ERROR)
-    Feil feilVedKallTilMedlem(PersonIkkeFunnet e);
+    Feil feilVedKallTilMedlem(Exception e);
 }
