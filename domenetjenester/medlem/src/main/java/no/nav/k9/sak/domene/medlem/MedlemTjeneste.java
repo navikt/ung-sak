@@ -36,7 +36,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
-import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.medlem.impl.HentMedlemskapFraRegister;
 import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
@@ -92,11 +91,13 @@ public class MedlemTjeneste {
     /**
      * Finn medlemskapsperioder i MEDL2 register for en person.
      *
-     * @param finnMedlemRequest Inneholder fødselsnummer, start-/slutt- dato for søket, og behandling-/fagsak- ID.
+     * @param aktørId aktøren det skal innhentes informasjon om.
+     * @param fom     periode start for innhenting
+     * @param tom     periode slutt for innhenting
      * @return Liste av medlemsperioder funnet
      */
-    public List<Medlemskapsperiode> finnMedlemskapPerioder(FinnMedlemRequest finnMedlemRequest) {
-        return hentMedlemskapFraRegister.finnMedlemskapPerioder(finnMedlemRequest);
+    public List<Medlemskapsperiode> finnMedlemskapPerioder(AktørId aktørId, LocalDate fom, LocalDate tom) {
+        return hentMedlemskapFraRegister.finnMedlemskapPerioder(aktørId, fom, tom);
     }
 
     public Optional<MedlemskapAggregat> hentMedlemskap(Long behandlingId) {

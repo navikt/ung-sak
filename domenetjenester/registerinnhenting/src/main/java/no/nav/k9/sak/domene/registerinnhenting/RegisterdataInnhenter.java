@@ -56,7 +56,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
-import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
@@ -155,8 +154,7 @@ public class RegisterdataInnhenter {
         Long behandlingId = behandling.getId();
 
         // Innhent medl for søker
-        Personinfo søkerInfo = innhentSaksopplysningerForSøker(behandling.getAktørId());
-        List<MedlemskapPerioderEntitet> medlemskapsperioder = innhentMedlemskapsopplysninger(søkerInfo, behandling);
+        List<MedlemskapPerioderEntitet> medlemskapsperioder = innhentMedlemskapsopplysninger(behandling.getAktørId(), behandling);
         medlemskapRepository.lagreMedlemskapRegisterOpplysninger(behandlingId, medlemskapsperioder);
     }
 
@@ -389,16 +387,15 @@ public class RegisterdataInnhenter {
         return NavBrukerKjønn.KVINNE.equals(kjønn) ? RelasjonsRolleType.MORA : RelasjonsRolleType.FARA;
     }
 
-    private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysninger(Personinfo søkerInfo, Behandling behandling) {
+    private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysninger(AktørId søkerInfo, Behandling behandling) {
         return innhentMedlemskapsopplysningerFor(søkerInfo, behandling);
     }
 
-    private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysningerFor(Personinfo søkerInfo, Behandling behandling) {
+    private List<MedlemskapPerioderEntitet> innhentMedlemskapsopplysningerFor(AktørId søkerInfo, Behandling behandling) {
         var opplysningsperiode = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), false);
         LocalDate fom = opplysningsperiode.getFom();
         LocalDate tom = opplysningsperiode.getTom();
-        var finnMedlemRequest = new FinnMedlemRequest(søkerInfo.getPersonIdent(), fom, tom);
-        List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(finnMedlemRequest);
+        List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(søkerInfo, fom, tom);
         List<MedlemskapPerioderEntitet> resultat = new ArrayList<>();
         for (var medlemskapsperiode : medlemskapsperioder) {
             resultat.add(lagMedlemskapPeriode(medlemskapsperiode));

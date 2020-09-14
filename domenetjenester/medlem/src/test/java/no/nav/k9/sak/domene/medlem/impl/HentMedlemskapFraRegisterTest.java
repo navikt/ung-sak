@@ -1,9 +1,8 @@
 package no.nav.k9.sak.domene.medlem.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,80 +10,59 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.medlem.api.FinnMedlemRequest;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
-import no.nav.k9.sak.domene.medlem.api.MedlemskapsperiodeKoder;
-import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
-import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.tjeneste.felles.v1.informasjon.ForretningsmessigUnntaksdetaljer;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Studieinformasjon;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.GrunnlagstypeMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.KildeMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.LandkodeMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.LovvalgMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.PeriodetypeMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.StatuskodeMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.kodeverk.TrygdedekningMedTerm;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
-import no.nav.vedtak.exception.IntegrasjonException;
-import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
-import no.nav.vedtak.felles.integrasjon.medl.MedlemConsumer;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.vedtak.felles.integrasjon.medl2.Medlemskapsunntak;
+import no.nav.vedtak.felles.integrasjon.medl2.MedlemsunntakRestKlient;
 
 public class HentMedlemskapFraRegisterTest {
 
-    private static final FiktiveFnr FIKTIVE_FNR = new FiktiveFnr();
-
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
-    private MedlemConsumer medlemConsumer = mock(MedlemConsumer.class);
-    private HentMedlemskapFraRegister medlemTjeneste;
-
-    private static final PersonIdent IDENT = FIKTIVE_FNR.nestePersonIdent();
-    private static final LocalDate FRA_OG_MED = LocalDate.of(2009, 1, 1);
-    private static final LocalDate TIL_OG_MED = LocalDate.of(2020, 12, 31);
+    private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final long MEDL_ID_1 = 2663947L;
-    private static final long MEDL_ID_2 = 2663948L;
-    private static final long MEDL_ID_3 = 666L;
+    private final MedlemsunntakRestKlient restKlient = mock(MedlemsunntakRestKlient.class);
+    private HentMedlemskapFraRegister medlemTjeneste;
 
     @Before
     public void before() {
-        medlemTjeneste = new HentMedlemskapFraRegister(medlemConsumer);
+        medlemTjeneste = new HentMedlemskapFraRegister(restKlient);
     }
 
     @Test
-    public void skal_hente_medlemsperioder_og_logge_dem_til_saksopplysningslageret()throws Exception {
+    public void skal_hente_medlemsperioder_og_logge_dem_til_saksopplysningslageret() throws Exception {
         // Arrange
-        HentPeriodeListeResponse response = opprettResponse();
+        Medlemskapsunntak unntak = mock(Medlemskapsunntak.class);
+        when(unntak.getUnntakId()).thenReturn(MEDL_ID_1);
+        var fom = LocalDate.now().minusMonths(9);
+        when(unntak.getFraOgMed()).thenReturn(fom);
+        var tom = LocalDate.now().plusMonths(1);
+        when(unntak.getTilOgMed()).thenReturn(tom);
+        when(unntak.getDekning()).thenReturn("Full");
+        when(unntak.getLovvalg()).thenReturn("ENDL");
+        when(unntak.getLovvalgsland()).thenReturn("UZB");
+        when(unntak.getKilde()).thenReturn("AVGSYS");
+        var besluttet = LocalDate.now();
+        when(unntak.getBesluttet()).thenReturn(besluttet);
+        when(unntak.getStudieland()).thenReturn("VUT");
+        when(unntak.isMedlem()).thenReturn(true);
 
-        ArgumentCaptor<HentPeriodeListeRequest> requestCaptor = ArgumentCaptor.forClass(HentPeriodeListeRequest.class);
-        when(medlemConsumer.hentPeriodeListe(requestCaptor.capture())).thenReturn(response);
-
-        FinnMedlemRequest finnMedlemRequest = new FinnMedlemRequest(IDENT, FRA_OG_MED, TIL_OG_MED);
+        when(restKlient.finnMedlemsunntak(eq(AKTØR_ID.getId()), any(), any())).thenReturn(List.of(unntak));
 
         // Act
-        List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(finnMedlemRequest);
+        List<Medlemskapsperiode> medlemskapsperioder = medlemTjeneste.finnMedlemskapPerioder(AKTØR_ID, LocalDate.now().minusYears(1), LocalDate.now().plusYears(1));
 
         // Assert
-        assertThat(medlemskapsperioder).hasSize(3);
+        assertThat(medlemskapsperioder).hasSize(1);
 
         Medlemskapsperiode medlemskapsperiode1 = new Medlemskapsperiode.Builder()
-            .medFom(LocalDate.of(2010, 8, 1))
-            .medTom(LocalDate.of(2010, 12, 31))
-            .medDatoBesluttet(LocalDate.of(2012, 5, 26))
+            .medFom(fom)
+            .medTom(tom)
+            .medDatoBesluttet(besluttet)
             .medErMedlem(true)
             .medDekning(MedlemskapDekningType.FULL)
             .medLovvalg(MedlemskapType.ENDELIG)
@@ -93,107 +71,6 @@ public class HentMedlemskapFraRegisterTest {
             .medStudieland(Landkoder.fraKode("VUT"))
             .medMedlId(MEDL_ID_1)
             .build();
-        Medlemskapsperiode medlemskapsperiode2 = new Medlemskapsperiode.Builder()
-            .medFom(LocalDate.of(2011, 1, 1))
-            .medTom(LocalDate.of(2011, 12, 31))
-            .medDatoBesluttet(LocalDate.of(2012, 5, 26))
-            .medErMedlem(true)
-            .medDekning(MedlemskapDekningType.FTL_2_9_1_a)
-            .medLovvalg(MedlemskapType.ENDELIG)
-            .medKilde(MedlemskapKildeType.AVGSYS)
-            .medMedlId(MEDL_ID_2)
-            .build();
-        Medlemskapsperiode medlemskapsperiode3 = new Medlemskapsperiode.Builder()
-            .medFom(LocalDate.of(2012, 1, 1))
-            .medTom(LocalDate.of(2012, 12, 31))
-            .medDatoBesluttet(LocalDate.of(2013, 5, 26))
-            .medErMedlem(false)
-            .medDekning(MedlemskapDekningType.FULL)
-            .medLovvalg(MedlemskapType.UNDER_AVKLARING)
-            .medKilde(MedlemskapKildeType.LAANEKASSEN)
-            .medMedlId(MEDL_ID_3)
-            .build();
-        assertThat(medlemskapsperioder).containsExactlyInAnyOrder(medlemskapsperiode1, medlemskapsperiode2, medlemskapsperiode3);
-
-    }
-
-    @Test
-    public void skal_handtere_personikkefunnet_exception_fra_consumer()  {
-        try {
-            // Arrange
-            PersonIkkeFunnet personIkkeFunnet = new PersonIkkeFunnet("Feil", new ForretningsmessigUnntaksdetaljer());
-            doThrow(personIkkeFunnet).when(medlemConsumer).hentPeriodeListe(any(HentPeriodeListeRequest.class));
-            FinnMedlemRequest finnMedlemRequest = new FinnMedlemRequest(IDENT, FRA_OG_MED, TIL_OG_MED);
-
-            // Act
-            medlemTjeneste.finnMedlemskapPerioder(finnMedlemRequest);
-            fail("Forventet VLException");
-        } catch (Exception e) {
-            // Assert
-            assertThat(e.getCause()).isInstanceOf(PersonIkkeFunnet.class);
-            assertThat(e.getCause().getMessage()).contains("Feil");
-        }
-    }
-
-    @Test
-    public void skal_handtere_sikkerhet_exception_fra_consumer()  {
-        try {
-            // Arrange
-            Sikkerhetsbegrensning sikkerhetsbegrensning = new Sikkerhetsbegrensning("Feil", new ForretningsmessigUnntaksdetaljer());
-            doThrow(sikkerhetsbegrensning).when(medlemConsumer).hentPeriodeListe(any(HentPeriodeListeRequest.class));
-            FinnMedlemRequest finnMedlemRequest = new FinnMedlemRequest(IDENT, FRA_OG_MED, TIL_OG_MED);
-
-            // Act
-            medlemTjeneste.finnMedlemskapPerioder(finnMedlemRequest);
-            fail("Forventet VLException");
-        } catch (Exception e) {
-            // Assert
-            assertThat(e).isInstanceOf(IntegrasjonException.class);
-            assertThat(e.getMessage()).contains("sikkerhetsavvik");
-        }
-    }
-
-    private HentPeriodeListeResponse opprettResponse() throws Exception {
-        Medlemsperiode periode1 = new Medlemsperiode()
-            .withId(MEDL_ID_1)
-            .withFraOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2010, 8, 1)))
-            .withTilOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2010, 12, 31)))
-            .withDatoBesluttet(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2012, 5, 26)))
-            .withStatus(new StatuskodeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeStatus.GYLD.toString()))
-            .withTrygdedekning(new TrygdedekningMedTerm().withValue("Full"))
-            .withType(new PeriodetypeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeType.PMMEDSKP.toString()))
-            .withLovvalg(new LovvalgMedTerm().withValue("ENDL"))
-            .withLand(new LandkodeMedTerm().withValue("UZB"))
-            .withKilde(new KildeMedTerm().withValue("AVGSYS"))
-            .withStudieinformasjon(new Studieinformasjon().withStudieland(new LandkodeMedTerm().withValue("VUT")))
-            .withGrunnlagstype(new GrunnlagstypeMedTerm().withValue("MEDFT"));
-
-        Medlemsperiode periode2 = new Medlemsperiode()
-            .withId(MEDL_ID_2)
-            .withFraOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2011, 1, 1)))
-            .withTilOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2011, 12, 31)))
-            .withDatoBesluttet(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2012, 5, 26)))
-            .withStatus(new StatuskodeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeStatus.GYLD.toString()))
-            .withTrygdedekning(new TrygdedekningMedTerm().withValue("FTL_2-9_1_ledd_a"))
-            .withType(new PeriodetypeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeType.PMMEDSKP.toString()))
-            .withLovvalg(new LovvalgMedTerm().withValue("ENDL"))
-            .withKilde(new KildeMedTerm().withValue("AVGSYS"))
-            .withGrunnlagstype(new GrunnlagstypeMedTerm().withValue("MEDFT"));
-
-        // Periode med type = uten medlemskap, skal oversees
-        Medlemsperiode periode3 = new Medlemsperiode()
-            .withId(MEDL_ID_3)
-            .withFraOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2012, 1, 1)))
-            .withTilOgMed(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2012, 12, 31)))
-            .withDatoBesluttet(DateUtil.convertToXMLGregorianCalendar(LocalDate.of(2013, 5, 26)))
-            .withStatus(new StatuskodeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeStatus.UAVK.toString()))
-            .withTrygdedekning(new TrygdedekningMedTerm().withValue("Full"))
-            .withType(new PeriodetypeMedTerm().withValue(MedlemskapsperiodeKoder.PeriodeType.PUMEDSKP.toString()))
-            .withLovvalg(new LovvalgMedTerm().withValue("UAVK"))
-            .withKilde(new KildeMedTerm().withValue("LAANEKASSEN"))
-            .withGrunnlagstype(new GrunnlagstypeMedTerm().withValue("MEDFT"));
-
-        return new HentPeriodeListeResponse()
-            .withPeriodeListe(periode1, periode2, periode3);
+        assertThat(medlemskapsperioder).contains(medlemskapsperiode1);
     }
 }
