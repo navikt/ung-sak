@@ -98,7 +98,7 @@ public class VurderLøpendeMedlemskapStegTest {
 
         Behandling revudering = opprettRevudering(behandling);
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
-        final var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+        var vilkårBuilder = inngangsvilkårBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(ettÅrSiden, datoMedEndring).medUtfall(Utfall.OPPFYLT));
         inngangsvilkårBuilder.leggTil(vilkårBuilder);
         Vilkårene vilkårene = inngangsvilkårBuilder.build();
