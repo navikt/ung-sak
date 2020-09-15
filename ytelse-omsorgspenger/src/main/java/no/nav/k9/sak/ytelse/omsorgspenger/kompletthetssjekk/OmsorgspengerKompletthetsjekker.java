@@ -97,7 +97,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         return KompletthetResultat.oppfylt();
     }
 
-    private void loggManglendeInntektsmeldinger(Long behandlingId, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
+    private void loggManglendeInntektsmeldinger(Long behandlingId, @SuppressWarnings("unused") List<ManglendeVedlegg> manglendeInntektsmeldinger) {
         LOGGER.info("Behandling {} er ikke komplett - mangler IM fra arbeidsgivere.", behandlingId); // NOSONAR //$NON-NLS-1$
     }
 

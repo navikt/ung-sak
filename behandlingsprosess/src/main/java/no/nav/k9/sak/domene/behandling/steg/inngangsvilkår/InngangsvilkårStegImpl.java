@@ -112,7 +112,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         });
     }
 
-    protected void ryddOppVilkårsPeriode(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, DatoIntervallEntitet periode) {
+    protected void ryddOppVilkårsPeriode(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, @SuppressWarnings("unused") DatoIntervallEntitet periode) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         RyddVilkårTyper ryddVilkårTyper = new RyddVilkårTyper(modell, repositoryProvider, behandling, kontekst);
         ryddVilkårTyper.ryddVedTilbakeføring();

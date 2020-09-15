@@ -136,6 +136,27 @@ public class VilkårResultatTest {
     }
 
     @Test
+    public void skal_hente_vilkårresultatperioder_optimalisert_uten_regelsporing() throws Exception {
+        // Arrange
+        lagreBehandling(behandling1);
+        Long behandlingId = behandling1.getId();
+
+        VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();
+        vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
+            .leggTil(new VilkårPeriodeBuilder()
+                .medUtfall(Utfall.IKKE_OPPFYLT)
+                .medAvslagsårsak(Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING)
+                .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)));
+
+        // Act
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+
+        var resultater = vilkårResultatRepository.hentVilkårResultater(behandlingId);
+
+        assertThat(resultater).hasSize(1);
+    }
+
+    @Test
     public void skal_legge_til_vilkår() throws Exception {
         // Arrange
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();

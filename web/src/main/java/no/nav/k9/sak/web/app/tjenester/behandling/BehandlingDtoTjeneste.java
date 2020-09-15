@@ -8,12 +8,10 @@ import static no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil.setSt
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,7 +21,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -31,9 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -55,7 +50,6 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
@@ -217,21 +211,18 @@ public class BehandlingDtoTjeneste {
         return behandlingsresultat;
     }
 
-    BehandlingsresultatDto lagBehandlingsresultat(BehandlingReferanse ref) {
+    private BehandlingsresultatDto lagBehandlingsresultat(BehandlingReferanse ref) {
         var dto = new BehandlingsresultatDto();
 
         Long behandlingId = ref.getBehandlingId();
 
         dto.setResultatType(ref.getBehandlingResultat());
 
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (vilkårene.isPresent()) {
-            Map<VilkårType, Set<VilkårResultatDto>> vilkårResultater = vilkårene.get()
-                .getVilkårene().stream()
-                .map(this::mapVilkår)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            dto.setVilkårResultat(vilkårResultater);
-        }
+        var vilkårResultater = vilkårResultatRepository.hentVilkårResultater(behandlingId);
+        var vilkårResultaterMap = vilkårResultater.stream()
+            .map(vp -> new AbstractMap.SimpleEntry<>(vp.getVilkårType(), new VilkårResultatDto(vp.getPeriode(), vp.getAvslagsårsak(), vp.getUtfall())))
+            .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toSet())));
+        dto.setVilkårResultat(vilkårResultaterMap);
 
         dto.setErRevurderingMedUendretUtfall(erRevurderingMedUendretUtfall(ref));
 
@@ -239,14 +230,6 @@ public class BehandlingDtoTjeneste {
         behandlingVedtak.ifPresent(bv -> dto.setVedtaksdato(bv.getVedtaksdato()));
 
         return dto;
-    }
-
-    private Map.Entry<VilkårType, Set<VilkårResultatDto>> mapVilkår(Vilkår vt) {
-        return new AbstractMap.SimpleEntry<>(vt.getVilkårType(), vt.getPerioder().stream().map(this::mapVilkårResultat).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    private VilkårResultatDto mapVilkårResultat(VilkårPeriode vp) {
-        return new VilkårResultatDto(new Periode(vp.getFom(), vp.getTom()), vp.getAvslagsårsak(), vp.getUtfall());
     }
 
     boolean erBehandlingMedGjeldendeVedtak(Behandling behandling, Optional<Long> behandlingMedGjeldendeVedtak) {

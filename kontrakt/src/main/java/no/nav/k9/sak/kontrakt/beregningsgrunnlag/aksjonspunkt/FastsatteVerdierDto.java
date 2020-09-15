@@ -17,8 +17,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class FastsatteVerdierDto {
 
-    private static final int MÅNEDER_I_1_ÅR = 12;
-
     @JsonProperty(value = "fastsattBeløp")
     @Min(0)
     @Max(Integer.MAX_VALUE)
