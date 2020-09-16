@@ -169,7 +169,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        var utvidetTilVUrdering = new TreeSet<>(perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref));
+        var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
         perioder.addAll(utvidetTilVUrdering);
 
         if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
