@@ -248,7 +248,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     }
 
     void setRegelEvaluering(String regelEvaluering) {
-        if (this.regelEvaluering != null) {
+        if (this.id != null && this.regelEvaluering != null) {
             throw new IllegalStateException("Kan ikke overskrive regelEvaluering for VilkårPeriode: " + this.id);
         }
         this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : ClobProxy.generateProxy(regelEvaluering);
@@ -259,7 +259,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     }
 
     void setRegelInput(String regelInput) {
-        if (this.regelInput != null) {
+        if (this.id != null && this.regelInput != null) {
             throw new IllegalStateException("Kan ikke overskrive regelInput for VilkårPeriode: " + this.id);
         }
         this.regelInput = regelInput == null || regelInput.isEmpty() ? null : ClobProxy.generateProxy(regelInput);
@@ -299,11 +299,11 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         if (payloadString != null && !payloadString.isBlank()) {
             return payloadString; // quick return, deserialisert tidligere
         }
-    
+
         if (payload == null || (payloadString != null && payloadString.isEmpty())) {
             return null; // quick return, har ikke eller er tom
         }
-    
+
         payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
         try {
             BufferedReader in = new BufferedReader(payload.getCharacterStream());
@@ -318,6 +318,6 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         }
         payloadStringRef.set(payloadString);
         return payloadString;
-    
+
     }
 }
