@@ -17,7 +17,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +140,7 @@ public class ÅrskvantumTjeneste {
         var perioder = utledPerioderRelevantForBehandling(behandling, grunnlag);
 
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
-        
+
         /** @deprecated FIXME TSF-1101 Frode Lindås: innsendingstidpsunktet er ikke nødvendigvis satt korrekt.  Årskvantum etablerer ny måte å sortere uttaksplaner på. */
         @Deprecated
         var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
@@ -192,7 +191,6 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
-    @NotNull
     private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger, Set<OppgittFraværPeriode> perioder, Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, behandling.getFagsak().getPeriode(), perioder)
@@ -247,12 +245,10 @@ public class ÅrskvantumTjeneste {
         return ArbeidsforholdStatus.AKTIVT;
     }
 
-    @NotNull
     private Tuple<Familierelasjon, Optional<Personinfo>> innhentPersonopplysningForBarn(Familierelasjon it) {
         return new Tuple<>(it, tpsTjeneste.hentBrukerForFnr(it.getPersonIdent()));
     }
 
-    @NotNull
     private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Tuple<Familierelasjon, Optional<Personinfo>> it) {
         var personinfo = it.getElement2().orElseThrow();
         return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), BarnType.VANLIG);
