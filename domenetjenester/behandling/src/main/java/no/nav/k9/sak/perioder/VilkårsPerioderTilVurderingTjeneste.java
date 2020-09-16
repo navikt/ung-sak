@@ -11,11 +11,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface VilkårsPerioderTilVurderingTjeneste {
 
-    default NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
+    default NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(@SuppressWarnings("unused") Long behandlingId) {
         return new TreeSet<>();
     }
 
-    default NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    default NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SuppressWarnings("unused") Long behandlingId) {
         return null;
     }
 

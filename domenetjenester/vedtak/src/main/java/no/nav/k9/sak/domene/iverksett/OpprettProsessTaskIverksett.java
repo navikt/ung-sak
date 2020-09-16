@@ -11,5 +11,6 @@ public interface OpprettProsessTaskIverksett {
         opprettIverksettingstasker(behandling);
     }
 
-    default void opprettYtelsesSpesifikkeTasks(Behandling behandling) { }
+    default void opprettYtelsesSpesifikkeTasks(@SuppressWarnings("unused") Behandling behandling) {
+    }
 }

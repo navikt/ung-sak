@@ -1,32 +1,39 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår.periode;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PersistenceException;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.engine.jdbc.ClobProxy;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
@@ -78,14 +85,20 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     private String begrunnelse;
 
     @Lob
-    @Column(name = "regel_evaluering", columnDefinition = "text")
-    @Basic(fetch = FetchType.LAZY)
-    private String regelEvaluering;
+    @Column(name = "regel_evaluering")
+    @DiffIgnore
+    private Clob regelEvaluering;
+
+    @Transient
+    private transient AtomicReference<String> regelEvalueringCached = new AtomicReference<>();
 
     @Lob
-    @Column(name = "regel_input", columnDefinition = "text")
-    @Basic(fetch = FetchType.LAZY)
-    private String regelInput;
+    @Column(name = "regel_input")
+    @DiffIgnore
+    private Clob regelInput;
+
+    @Transient
+    private transient AtomicReference<String> regelInputCached = new AtomicReference<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -103,8 +116,12 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
         this.merknadParametere = vilkårPeriode.merknadParametere;
         this.avslagsårsak = vilkårPeriode.avslagsårsak;
         this.utfallMerknad = vilkårPeriode.utfallMerknad;
+
         this.regelInput = vilkårPeriode.regelInput;
+        this.regelInputCached = vilkårPeriode.regelInputCached;
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
+        this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
+
         this.begrunnelse = vilkårPeriode.begrunnelse;
     }
 
@@ -227,19 +244,25 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
     }
 
     public String getRegelEvaluering() {
-        return regelEvaluering;
+        return getPayload(regelEvaluering, regelEvalueringCached);
     }
 
     void setRegelEvaluering(String regelEvaluering) {
-        this.regelEvaluering = regelEvaluering;
+        if (this.regelEvaluering != null) {
+            throw new IllegalStateException("Kan ikke overskrive regelEvaluering for VilkårPeriode: " + this.id);
+        }
+        this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : ClobProxy.generateProxy(regelEvaluering);
     }
 
     public String getRegelInput() {
-        return regelInput;
+        return getPayload(regelInput, regelInputCached);
     }
 
     void setRegelInput(String regelInput) {
-        this.regelInput = regelInput;
+        if (this.regelInput != null) {
+            throw new IllegalStateException("Kan ikke overskrive regelInput for VilkårPeriode: " + this.id);
+        }
+        this.regelInput = regelInput == null || regelInput.isEmpty() ? null : ClobProxy.generateProxy(regelInput);
     }
 
     @Override
@@ -269,5 +292,32 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey {
             ", utfall=" + utfall +
             ", overstyrtUtfall=" + overstyrtUtfall +
             '}';
+    }
+
+    private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
+        var payloadString = payloadStringRef.get();
+        if (payloadString != null && !payloadString.isBlank()) {
+            return payloadString; // quick return, deserialisert tidligere
+        }
+    
+        if (payload == null || (payloadString != null && payloadString.isEmpty())) {
+            return null; // quick return, har ikke eller er tom
+        }
+    
+        payloadString = ""; // dummy value for å signalisere at er allerede deserialisert
+        try {
+            BufferedReader in = new BufferedReader(payload.getCharacterStream());
+            String line;
+            StringBuilder sb = new StringBuilder(2048);
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            payloadString = sb.toString();
+        } catch (SQLException | IOException e) {
+            throw new PersistenceException("Kunne ikke lese payload: ", e);
+        }
+        payloadStringRef.set(payloadString);
+        return payloadString;
+    
     }
 }
