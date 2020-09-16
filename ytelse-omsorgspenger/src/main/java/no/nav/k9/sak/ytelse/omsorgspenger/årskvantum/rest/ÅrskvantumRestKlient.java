@@ -110,6 +110,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/minmax");
             var result = restKlient.post(endpoint, new MinMaxRequest(saksnummer.getVerdi()), Set.of(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())), Periode.class);
+            if(result == null) {
+                return null;
+            }
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", saksnummer=" + saksnummer + ": " + constraints);
