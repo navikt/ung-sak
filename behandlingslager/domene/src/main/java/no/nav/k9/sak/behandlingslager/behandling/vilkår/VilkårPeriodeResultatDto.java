@@ -20,8 +20,8 @@ public class VilkårPeriodeResultatDto {
     public VilkårPeriodeResultatDto(VilkårType vilkårType, Periode periode, Avslagsårsak avslagsårsak, Utfall utfall) {
         this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
         this.periode = Objects.requireNonNull(periode, "periode");
-        this.avslagsårsak = Objects.requireNonNull(avslagsårsak, "avslagsårsak");
         this.utfall = utfall == null ? Utfall.IKKE_VURDERT : utfall;
+        this.avslagsårsak = this.utfall.equals(Utfall.IKKE_OPPFYLT) ? Objects.requireNonNull(avslagsårsak, "avslagsårsak") : avslagsårsak;
     }
 
     public Periode getPeriode() {
