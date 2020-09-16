@@ -41,7 +41,7 @@
 		<felles.version>2.2.0-20200914205557-cabef94</felles.version>
 
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
-		<k9format.version>5.0.0-20200518161226-b6cd151</k9format.version>
+		<k9format.version>5.0.0-20200916141021-ab54476</k9format.version>
 	</properties>
 
     <repositories>
@@ -59,7 +59,16 @@
 	<dependencyManagement>
 
 		<dependencies>
-			<!-- Felles biblioteker - Importerte avhengigheter. -->
+        
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.11.2</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+			
+            <!-- Felles biblioteker - Importerte avhengigheter. -->
 			<dependency>
 				<!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
 				<groupId>no.nav.foreldrepenger.felles</groupId>

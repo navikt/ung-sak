@@ -1,5 +1,6 @@
 package no.nav.k9.sak.typer;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.junit.Test;
@@ -23,11 +24,11 @@ public class SerialiserKodeverkTest {
     
     @Test
     public void skal_serdeser_enum_key_i_map() throws Exception {
-        Map<VilkårType, String> map = Map.of(VilkårType.OMSORGEN_FOR, "hello");
+        Map<VilkårType, String> map = new EnumMap<>(Map.of(VilkårType.OMSORGEN_FOR, "hello"));
         var json = OM.writeValueAsString(map);
         System.out.println(json);
         
-        var vt = OM.readValue(json, VilkårType.class);
+        var vt = OM.readValue(json, Map.class);
         System.out.println(vt);
     }
 }
