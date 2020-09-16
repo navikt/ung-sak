@@ -21,6 +21,7 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
 import no.nav.k9.aarskvantum.kontrakter.Hjemmel;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Periodetype;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
@@ -94,13 +95,13 @@ public class MapFraÅrskvantumResultatTest {
 
     private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad, Periodetype.NY);
 
     }
 
     private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO, Periodetype.NY);
 
     }
 }
