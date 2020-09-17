@@ -8,10 +8,13 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -69,16 +72,36 @@ public enum BehandlingType implements Kodeverdi {
         this.behandlingstidVarselbrev = behandlingstidVarselbrev;
     }
 
-    @JsonCreator
-    public static BehandlingType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static BehandlingType fraKode(@JsonProperty(value = "kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = getVerdi(node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingType: " + kode);
+            throw new IllegalArgumentException("Ukjent BehandlingType: for input " + node);
         }
         return ad;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static String getVerdi(Object node, String key) {
+        String kode;
+        if (node instanceof String) {
+            kode = (String) node;
+        } else {
+            if (node instanceof JsonNode) {
+                kode = ((JsonNode) node).get(key).asText();
+            } else if (node instanceof TextNode) {
+                kode = ((TextNode) node).asText();
+            } else if (node instanceof Map) {
+                kode = (String) ((Map) node).get(key);
+            } else {
+                throw new IllegalArgumentException("Støtter ikke node av type: " + node.getClass());
+            }
+        }
+        return kode;
     }
 
     public static Map<String, BehandlingType> kodeMap() {
@@ -90,13 +113,13 @@ public enum BehandlingType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(value="kode")
+    @JsonProperty(value = "kode")
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -105,7 +128,7 @@ public enum BehandlingType implements Kodeverdi {
     public static BehandlingType fromString(String kode) {
         return fraKode(kode);
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
