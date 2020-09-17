@@ -9,6 +9,4 @@ public interface HarEtablertYtelse {
 
     boolean vurder(boolean finnesInnvilgetIkkeOpphørtVedtak);
 
-    VedtakVarsel fastsettForIkkeEtablertYtelse(Behandling revurdering);
-
 }

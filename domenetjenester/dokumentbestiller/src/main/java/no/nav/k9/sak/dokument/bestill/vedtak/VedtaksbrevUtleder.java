@@ -5,7 +5,6 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.dokument.bestill.BrevFeil;
 
 public class VedtaksbrevUtleder {
@@ -17,28 +16,20 @@ public class VedtaksbrevUtleder {
         return VedtakResultatType.AVSLAG.equals(behandlingVedtak.getVedtakResultatType());
     }
 
-    static boolean erKlageBehandling(BehandlingVedtak behandlingVedtak) {
-        return VedtakResultatType.VEDTAK_I_KLAGEBEHANDLING.equals(behandlingVedtak.getVedtakResultatType());
-    }
-
-    static boolean erAnkeBehandling(BehandlingVedtak behandlingVedtak) {
-        return VedtakResultatType.VEDTAK_I_ANKEBEHANDLING.equals(behandlingVedtak.getVedtakResultatType());
-    }
-
     static boolean erInnvilget(BehandlingVedtak behandlingVedtak) {
         return VedtakResultatType.INNVILGET.equals(behandlingVedtak.getVedtakResultatType());
     }
 
-    static boolean erLagetFritekstBrev(VedtakVarsel behandlingsresultat) {
-        return Vedtaksbrev.FRITEKST.equals(behandlingsresultat.getVedtaksbrev());
+    static boolean erLagetFritekstBrev(Vedtaksbrev behandlingsresultat) {
+        return Vedtaksbrev.FRITEKST.equals(behandlingsresultat);
     }
 
     public static DokumentMalType velgDokumentMalForVedtak(BehandlingReferanse ref,
-                                                           VedtakVarsel behandlingsresultat,
+                                                           Vedtaksbrev vedtaksbrev,
                                                            BehandlingVedtak behandlingVedtak) {
         DokumentMalType dokumentMal = null;
 
-        if (erLagetFritekstBrev(behandlingsresultat)) {
+        if (erLagetFritekstBrev(vedtaksbrev)) {
             dokumentMal = DokumentMalType.FRITEKST_DOK;
         } else if (erRevurderingMedUendretUtfall(behandlingVedtak)) {
             dokumentMal = DokumentMalType.UENDRETUTFALL_DOK;
@@ -48,7 +39,7 @@ public class VedtaksbrevUtleder {
             dokumentMal = ref.getBehandlingResultat().isBehandlingsresultatOpphørt() ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK;
         }
         if (dokumentMal == null) {
-            throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandlingsresultat.getBehandlingId()).toException();
+            throw BrevFeil.FACTORY.ingenBrevmalKonfigurert(behandlingVedtak.getBehandlingId()).toException();
         }
         return dokumentMal;
     }

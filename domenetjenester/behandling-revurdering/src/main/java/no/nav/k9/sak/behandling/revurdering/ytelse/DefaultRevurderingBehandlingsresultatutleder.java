@@ -16,7 +16,5 @@ public class DefaultRevurderingBehandlingsresultatutleder implements Revurdering
     }
 
     @Override
-    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
-        return vedtakVarsel == null ? new VedtakVarsel() : vedtakVarsel;
-    }
+    public void bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef) { }
 }

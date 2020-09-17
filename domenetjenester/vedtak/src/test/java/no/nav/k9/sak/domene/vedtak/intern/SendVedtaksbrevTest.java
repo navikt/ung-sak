@@ -69,6 +69,7 @@ public class SendVedtaksbrevTest {
     @Before
     public void oppsett() {
         sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository,
+            repositoryProvider.getFagsakRepository(),
             repositoryProvider.getBehandlingVedtakRepository(),
             vedtakVarselRepository,
             dokumentBestillerApplikasjonTjeneste);

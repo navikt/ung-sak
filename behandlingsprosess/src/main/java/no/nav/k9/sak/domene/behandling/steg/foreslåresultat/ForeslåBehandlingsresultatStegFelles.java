@@ -44,14 +44,14 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
 
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        
+
         precondition(behandling);
 
         var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType()).orElseThrow();
-        tjeneste.foreslåVedtakVarsel(ref, kontekst);
+        tjeneste.foreslåBehandlingsresultatType(ref, kontekst);
 
         postcondition(behandling);
 
@@ -61,7 +61,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
 
     protected void precondition(Behandling behandling) {
         validerAtAlleVilkårErVurdert(behandling.getId());
-        
+
         var ugyldigResultat = BehandlingResultatType.kodeMap().values().stream().filter(r -> r.erHenleggelse()).collect(Collectors.toSet());
         var resultatType = behandling.getBehandlingResultatType();
         if (ugyldigResultat.contains(resultatType)) {

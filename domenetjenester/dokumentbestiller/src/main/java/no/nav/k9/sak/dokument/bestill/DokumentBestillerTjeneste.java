@@ -20,8 +20,7 @@ public class DokumentBestillerTjeneste {
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
-    private VedtakVarselRepository vedtakVarselRepository;
-    
+
     DokumentBestillerTjeneste() {
         // CDI
     }
@@ -29,20 +28,18 @@ public class DokumentBestillerTjeneste {
     @Inject
     public DokumentBestillerTjeneste(@KonfigVerdi(value = "behandling.default.ventefrist.periode", defaultVerdi = "P4W") Period defaultVenteFrist,
                                      OppgaveTjeneste oppgaveTjeneste,
-                                     VedtakVarselRepository vedtakVarselRepository,
                                      OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
                                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                      DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.defaultVenteFrist = defaultVenteFrist;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.vedtakVarselRepository = vedtakVarselRepository;
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
     }
 
     public void håndterVarselRevurdering(Behandling behandling, VarselRevurderingAksjonspunkt adapter) {
-        new VarselRevurderingHåndterer(defaultVenteFrist, oppgaveBehandlingKoblingRepository, vedtakVarselRepository, oppgaveTjeneste, behandlingskontrollTjeneste, dokumentBestillerApplikasjonTjeneste)
+        new VarselRevurderingHåndterer(defaultVenteFrist, oppgaveBehandlingKoblingRepository, oppgaveTjeneste, behandlingskontrollTjeneste, dokumentBestillerApplikasjonTjeneste)
             .oppdater(behandling, adapter);
     }
 }

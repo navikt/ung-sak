@@ -56,14 +56,14 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
 
 
     @Override
-    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
+    public void bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef) {
         Behandling revurdering = behandlingRepository.hentBehandling(revurderingRef.getBehandlingId());
         Long originalBehandlingId = revurdering.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Mangler originalBehandlingId for behandling: " + revurdering.getId()));
         var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
-        return doBestemBehandlingsresultatForRevurdering(revurdering, originalBehandling, vedtakVarsel);
+        doBestemBehandlingsresultatForRevurdering(revurdering, originalBehandling);
     }
 
-    private VedtakVarsel doBestemBehandlingsresultatForRevurdering(Behandling revurdering, Behandling originalBehandling, VedtakVarsel vedtakVarsel) {
+    private void doBestemBehandlingsresultatForRevurdering(Behandling revurdering, Behandling originalBehandling) {
         var beregningsvilkår = vilkårResultatRepository.hent(revurdering.getId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var erNySøknadsperiode = erNySøknadperiode(revurdering, originalBehandling);
@@ -78,14 +78,6 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
                 revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
             }
         }
-
-        // Oppdatering av vedtaksbrev
-        if (!erNySøknadsperiode && revurdering.getBehandlingResultatType().equals(BehandlingResultatType.INGEN_ENDRING)) {
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
-        } else {
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
-        }
-        return vedtakVarsel;
     }
 
     private boolean erHeltEllerDelvisInnvilget(Vilkår beregningsvilkår) {
