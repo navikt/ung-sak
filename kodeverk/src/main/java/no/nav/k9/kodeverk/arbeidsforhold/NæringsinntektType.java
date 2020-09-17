@@ -7,10 +7,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.TempAvledeKode;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -27,7 +30,7 @@ public enum NæringsinntektType implements YtelseType {
     DAGPENGER_TIL_FISKER("DAGPENGER_TIL_FISKER", "Dagpenger til fisker", "dagpengerTilFisker"),
     ANNET("ANNET", "Annet", "annet"),
     UDEFINERT("-", "Udefinert", null),
-    
+
     ;
 
     private static final Map<String, NæringsinntektType> KODER = new LinkedHashMap<>();
@@ -44,12 +47,11 @@ public enum NæringsinntektType implements YtelseType {
 
     @JsonIgnore
     private String navn;
-    
+
     @JsonIgnore
     private String offisiellKode;
 
     private String kode;
-
 
     private NæringsinntektType(String kode, String navn, String offisiellKode) {
         this.kode = kode;
@@ -57,11 +59,12 @@ public enum NæringsinntektType implements YtelseType {
         this.offisiellKode = offisiellKode;
     }
 
-    @JsonCreator
-    public static NæringsinntektType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static NæringsinntektType fraKode(@JsonProperty("kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(NæringsinntektType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent NæringsinntektType: " + kode);
@@ -72,7 +75,7 @@ public enum NæringsinntektType implements YtelseType {
     public static Map<String, NæringsinntektType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
@@ -94,5 +97,5 @@ public enum NæringsinntektType implements YtelseType {
     public String getKode() {
         return kode;
     }
-    
+
 }

@@ -7,11 +7,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -63,26 +64,26 @@ public enum HistorikkinnslagType implements Kodeverdi {
 
     // Mal Type 6
     NY_INFO_FRA_TPS("NY_INFO_FRA_TPS", "Ny info fra TPS", HistorikkinnslagMal.MAL_TYPE_6),
-    
+
     // Mal Type 7
     OVERSTYRT("OVERSTYRT", "Overstyrt", HistorikkinnslagMal.MAL_TYPE_7),
-    
+
     // Mal Type 8
     OPPTJENING("OPPTJENING", "Behandlet opptjeningsperiode", HistorikkinnslagMal.MAL_TYPE_8),
-    
+
     // Mal Type 9
     OVST_UTTAK_SPLITT("OVST_UTTAK_SPLITT", "Manuelt overstyring av uttak - splitting av periode", HistorikkinnslagMal.MAL_TYPE_9),
     FASTSATT_UTTAK_SPLITT("FASTSATT_UTTAK_SPLITT", "Manuelt fastsetting av uttak - splitting av periode", HistorikkinnslagMal.MAL_TYPE_9),
-    
+
     // Mal Type 10
     FASTSATT_UTTAK("FASTSATT_UTTAK", "Manuelt fastsetting av uttak", HistorikkinnslagMal.MAL_TYPE_10),
     OVST_UTTAK("OVST_UTTAK", "Manuelt overstyring av uttak", HistorikkinnslagMal.MAL_TYPE_10),
 
     UDEFINERT("-", "Ikke definert", null),
     ;
-    
+
     private String mal;
-    
+
     private static final Map<String, HistorikkinnslagType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "HISTORIKKINNSLAG_TYPE";
@@ -106,11 +107,12 @@ public enum HistorikkinnslagType implements Kodeverdi {
         this.mal = mal;
     }
 
-    @JsonCreator
-    public static HistorikkinnslagType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static HistorikkinnslagType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(HistorikkinnslagType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent HistorikkinnslagType: " + kode);
@@ -138,7 +140,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

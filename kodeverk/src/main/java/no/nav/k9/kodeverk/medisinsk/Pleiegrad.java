@@ -5,10 +5,11 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -20,7 +21,7 @@ public enum Pleiegrad implements Kodeverdi {
     KONTINUERLIG_TILSYN("KONTINUERLIG_TILSYN", "Kontinuerlig tilsyn", null, 100),
     UTVIDET_KONTINUERLIG_TILSYN("UTVIDET_KONTINUERLIG_TILSYN", "Utvidet kontinuerlig tilsyn", null, 200),
     INNLEGGELSE("INNLEGGELSE", "Innleggelse", null, 200),
-    INGEN("INGEN","Ingen kontinuerlig tilsyn", null, 0),
+    INGEN("INGEN", "Ingen kontinuerlig tilsyn", null, 0),
     UDEFINERT("-", "Ikke definert", null, 0),
     ;
 
@@ -59,11 +60,12 @@ public enum Pleiegrad implements Kodeverdi {
         this.prosent = prosent;
     }
 
-    @JsonCreator
-    public static Pleiegrad fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static Pleiegrad  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(Pleiegrad.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent Pleiegrad: " + kode);
@@ -80,7 +82,7 @@ public enum Pleiegrad implements Kodeverdi {
     public int getProsent() {
         return prosent;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;

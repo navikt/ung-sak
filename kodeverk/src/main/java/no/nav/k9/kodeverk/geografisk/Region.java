@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -92,14 +94,15 @@ public enum Region implements Kodeverdi {
         this.land = land;
     }
 
-    @JsonCreator
-    public static Region fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static Region fraKode(@JsonProperty("kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(Region.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent FagsakYtelseType: " + kode);
+            throw new IllegalArgumentException("Ukjent Region: " + kode);
         }
         return ad;
     }
@@ -143,7 +146,7 @@ public enum Region implements Kodeverdi {
             .filter(v -> v.getLand().contains(landKode))
             .collect(Collectors.toList());
     }
-    
+
     public static Region finnHøyestRangertRegion(List<String> statsborgerskap) {
         Set<Region> regioner = new HashSet<>();
         for (String skap : statsborgerskap) {
@@ -174,13 +177,12 @@ public enum Region implements Kodeverdi {
 
     public static List<Region> finnRegioner(String landKode) {
         List<Region> regionKoder = Region.fraLandkode(landKode);
-        
+
         if (regionKoder.isEmpty()) {
             return List.of(Region.TREDJELANDS_BORGER);
         }
 
         return regionKoder;
     }
-
 
 }

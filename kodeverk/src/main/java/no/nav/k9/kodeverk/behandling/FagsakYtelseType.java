@@ -9,6 +9,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -94,14 +96,15 @@ public enum FagsakYtelseType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static FagsakYtelseType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static FagsakYtelseType fraKode(@JsonProperty(value = "kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(FagsakYtelseType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent FagsakYtelseType: " + kode);
+            throw new IllegalArgumentException("Ukjent FagsakYtelseType: for input " + node);
         }
         return ad;
     }
@@ -110,13 +113,13 @@ public enum FagsakYtelseType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @JsonProperty(value="kode")
+    @JsonProperty(value = "kode")
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

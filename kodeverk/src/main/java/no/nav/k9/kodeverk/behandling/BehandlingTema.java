@@ -9,17 +9,19 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingTema implements Kodeverdi {
-    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN),  // ny ordning fom 011017
+    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN), // ny ordning fom 011017
     OMSORGSPENGER("OMS_OMSORG", "Omsorgspenger", "ab0149", FagsakYtelseType.OMSORGSPENGER),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
@@ -62,15 +64,15 @@ public enum BehandlingTema implements Kodeverdi {
         this.fagsakYtelseType = fagsakYtelseType;
     }
 
-
-    @JsonCreator
-    public static BehandlingTema fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static BehandlingTema fraKode(@JsonProperty(value = "kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(BehandlingTema.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingTema: " + kode);
+            throw new IllegalArgumentException("Ukjent BehandlingTema: for input " + node);
         }
         return ad;
     }
@@ -90,19 +92,19 @@ public enum BehandlingTema implements Kodeverdi {
     public static BehandlingTema fromString(String kode) {
         return fraKode(kode);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
     }
 
-    @JsonProperty(value="kodeverk", access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty(value="kode")
+    @JsonProperty(value = "kode")
     @Override
     public String getKode() {
         return kode;

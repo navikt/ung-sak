@@ -12,11 +12,12 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -71,8 +72,12 @@ public enum RelasjonsRolleType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static RelasjonsRolleType fraKode(@JsonProperty("kode") String kode) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static RelasjonsRolleType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
+            return null;
+        }
+        String kode = TempAvledeKode.getVerdi(RelasjonsRolleType.class, node, "kode");
         var ad = fraKodeOptional(kode);
         if (ad.isEmpty()) {
             throw new IllegalArgumentException("Ukjent RelasjonsRolleType: " + kode);

@@ -9,11 +9,12 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
@@ -23,11 +24,11 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Brevkode implements Kodeverdi {
 
-    // Match mot Deprecated  {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
+    // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
     INNTEKTSMELDING("INNTEKTSMELDING", "4936"),
-    LEGEERKLÆRING("LEGEERKLÆRING", "I000023"),  // Brevkode ikke avklart
+    LEGEERKLÆRING("LEGEERKLÆRING", "I000023"), // Brevkode ikke avklart
 
-    // Match mot Deprecated  {@link no.nav.k9.kodeverk.dokument.Dokumentkategori}
+    // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.Dokumentkategori}
     KLAGE_ELLER_ANKE("KLGA", "KA"), // Brevkode ikke avklart
     IKKE_TOLKBART_SKJEMA("ITSKJ", "IS"), // Brevkode ikke avklart
     SØKNAD("SOKN", "SOK"), // Brevkode ikke avklart
@@ -79,11 +80,12 @@ public enum Brevkode implements Kodeverdi {
 
     }
 
-    @JsonCreator
-    public static Brevkode fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static Brevkode  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(Brevkode.class, node, "kode");
         var ad = KODER.get(kode);
 
         if (ad == null) {
