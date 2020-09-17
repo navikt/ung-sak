@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 public enum DokumentMalType implements Kodeverdi {
@@ -71,8 +72,12 @@ public enum DokumentMalType implements Kodeverdi {
         return navn;
     }
 
-    @JsonCreator
-    public static DokumentMalType fraKode(@JsonProperty("kode") String kode) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static DokumentMalType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
+            throw new IllegalArgumentException("Ukjent DokumentMalType: " + node);
+        }
+        String kode = TempAvledeKode.getVerdi(DokumentMalType.class, node, "kode");
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {
             throw new IllegalArgumentException("Ukjent DokumentMalType: " + kode);

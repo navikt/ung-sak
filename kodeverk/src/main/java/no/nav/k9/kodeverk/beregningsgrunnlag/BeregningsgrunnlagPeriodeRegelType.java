@@ -7,12 +7,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
-
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -26,6 +27,7 @@ public enum BeregningsgrunnlagPeriodeRegelType implements Kodeverdi {
     FINN_GRENSEVERDI("FINN_GRENSEVERDI", "Finne grenseverdi til kjøring av fastsett beregningsgrunnlag for SVP"),
     UDEFINERT("-", "Ikke definert"),
     ;
+
     public static final String KODEVERK = "BG_PERIODE_REGEL_TYPE";
     private static final Map<String, BeregningsgrunnlagPeriodeRegelType> KODER = new LinkedHashMap<>();
 
@@ -47,11 +49,12 @@ public enum BeregningsgrunnlagPeriodeRegelType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static BeregningsgrunnlagPeriodeRegelType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static BeregningsgrunnlagPeriodeRegelType fraKode(@JsonProperty("kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(BeregningsgrunnlagPeriodeRegelType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent BeregningsgrunnlagPeriodeRegelType: " + kode);
@@ -79,7 +82,7 @@ public enum BeregningsgrunnlagPeriodeRegelType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

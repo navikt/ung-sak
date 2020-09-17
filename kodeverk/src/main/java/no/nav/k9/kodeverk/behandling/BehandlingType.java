@@ -13,9 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -77,31 +76,12 @@ public enum BehandlingType implements Kodeverdi {
         if (node == null) {
             return null;
         }
-        String kode = getVerdi(node, "kode");
+        String kode = TempAvledeKode.getVerdi(BehandlingType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent BehandlingType: for input " + node);
         }
         return ad;
-    }
-
-    @SuppressWarnings("rawtypes")
-    private static String getVerdi(Object node, String key) {
-        String kode;
-        if (node instanceof String) {
-            kode = (String) node;
-        } else {
-            if (node instanceof JsonNode) {
-                kode = ((JsonNode) node).get(key).asText();
-            } else if (node instanceof TextNode) {
-                kode = ((TextNode) node).asText();
-            } else if (node instanceof Map) {
-                kode = (String) ((Map) node).get(key);
-            } else {
-                throw new IllegalArgumentException("Støtter ikke node av type: " + node.getClass());
-            }
-        }
-        return kode;
     }
 
     public static Map<String, BehandlingType> kodeMap() {

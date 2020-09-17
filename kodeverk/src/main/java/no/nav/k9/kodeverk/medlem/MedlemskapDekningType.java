@@ -12,11 +12,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -35,11 +36,10 @@ public enum MedlemskapDekningType implements Kodeverdi {
     IHT_AVTALE("IHT_AVTALE", "I henhold til avtale"),
     OPPHOR("OPPHOR", "Opphør"),
     UNNTATT("UNNTATT", "Unntatt"),
-    
+
     UDEFINERT("-", "Ikke definert"),
     ;
 
-    
     public static final List<MedlemskapDekningType> DEKNINGSTYPER = unmodifiableList(asList(
         FTL_2_6,
         FTL_2_7_a,
@@ -59,22 +59,19 @@ public enum MedlemskapDekningType implements Kodeverdi {
         FTL_2_9_1_c,
         FTL_2_9_2_a,
         FTL_2_9_2_c,
-        FULL
-            ));
+        FULL));
 
     public static final List<MedlemskapDekningType> DEKNINGSTYPE_ER_MEDLEM_UNNTATT = unmodifiableList(singletonList(
         UNNTATT));
 
     public static final List<MedlemskapDekningType> DEKNINGSTYPE_ER_IKKE_MEDLEM = unmodifiableList(asList(
         FTL_2_6,
-        FTL_2_9_1_b
-            ));
+        FTL_2_9_1_b));
 
     public static final List<MedlemskapDekningType> DEKNINGSTYPE_ER_UAVKLART = unmodifiableList(asList(
         IHT_AVTALE,
         OPPHOR));
 
-    
     private static final Map<String, MedlemskapDekningType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "MEDLEMSKAP_DEKNING";
@@ -101,11 +98,12 @@ public enum MedlemskapDekningType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static MedlemskapDekningType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static MedlemskapDekningType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(MedlemskapDekningType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent MedlemskapDekningType: " + kode);
@@ -133,7 +131,7 @@ public enum MedlemskapDekningType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

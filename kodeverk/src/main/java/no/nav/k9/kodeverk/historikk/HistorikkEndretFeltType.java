@@ -7,11 +7,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -22,12 +23,12 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     AKTIVITET("AKTIVITET", "Aktivitet"),
     AKTIVITET_PERIODE("AKTIVITET_PERIODE", "Perioden med aktivitet"),
     OPPTJENINGSVILKARET("OPPTJENINGSVILKARET", "Opptjeningsvilkåret"),
-    
+
     /** Arbeidsforhold og inntekt. */
     ARBEIDSFORHOLD("ARBEIDSFORHOLD", "Arbeidsforhold"),
     DAGPENGER_INNTEKT("DAGPENGER_INNTEKT", "Dagpenger"),
     FASTSETT_ETTERLØNN_SLUTTPAKKE("FASTSETT_ETTERLØNN_SLUTTPAKKE", "Fastsett søkers månedsinntekt fra etterlønn eller sluttpakke"),
-    
+
     /** Søknad og behandling. */
     AVKLARSAKSOPPLYSNINGER("AVKLARSAKSOPPLYSNINGER", "Avklar saksopplysninger"),
     BEHANDLENDE_ENHET("BEHANDLENDE_ENHET", "Behandlende enhet"),
@@ -35,7 +36,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     OVERSTYRT_VURDERING("OVERSTYRT_VURDERING", "Overstyrt vurdering"),
     SOKERSOPPLYSNINGSPLIKT("SOKERSOPPLYSNINGSPLIKT", "Søkers opplysningsplikt"),
     SOKNADSFRISTVILKARET("SOKNADSFRISTVILKARET", "Søknadsfristvilkåret"),
-    
+
     /** Beregning og inntektshistorikk. */
     ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD("ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "Endring tidsbegrenset arbeidsforhold"),
     FRILANSVIRKSOMHET("FRILANSVIRKSOMHET", "Frilansvirksomhet"),
@@ -48,27 +49,27 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     MOTTAR_YTELSE_FRILANS("MOTTAR_YTELSE_FRILANS", "Mottar søker ytelse for frilansaktiviteten"),
     SELVSTENDIG_NÆRINGSDRIVENDE("SELVSTENDIG_NAERINGSDRIVENDE", "Selvstendig næringsdrivende"),
     VURDER_ETTERLØNN_SLUTTPAKKE("VURDER_ETTERLØNN_SLUTTPAKKE", "Har søker inntekt fra etterlønn eller sluttpakke"),
-    
+
     /** Medlemskap og utenlandstilsnitt. */
     ER_SOKER_BOSATT_I_NORGE("ER_SOKER_BOSATT_I_NORGE", "Er søker bosatt i Norge?"),
     GYLDIG_MEDLEM_FOLKETRYGDEN("GYLDIG_MEDLEM_FOLKETRYGDEN", "Gyldig medlem i folketrygden"),
     OPPHOLDSRETT_EOS("OPPHOLDSRETT_EOS", "Bruker har oppholdsrett i EØS"),
     OPPHOLDSRETT_IKKE_EOS("OPPHOLDSRETT_IKKE_EOS", "Bruker har ikke oppholdsrett i EØS"),
     UTLAND("UTLAND", "Utland"),
-    
+
     /** Tilbakekreving. */
     ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON("ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "Er det særlige grunner til reduksjon"),
     ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT("ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "Er vilkårene for tilbakekreving oppfylt"),
     FASTSETT_VIDERE_BEHANDLING("FASTSETT_VIDERE_BEHANDLING", "Fastsett videre behandling"),
     TILBAKETREKK("TILBAKETREKK", "Tilbaketrekk"),
-    
+
     /** Faresignaler. */
     FARESIGNALER("FARESIGNALER", "Faresignaler"),
-    
+
     /** Refusjonskrav. */
     NYTT_REFUSJONSKRAV("NYTT_REFUSJONSKRAV", "Nytt refusjonskrav"),
     NY_REFUSJONSFRIST("NY_REFUSJONSFRIST", "Ny refusjonsfrist"),
-    
+
     UDEFINERT("-", "Ikke definert"),
     ;
 
@@ -98,11 +99,12 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static HistorikkEndretFeltType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static HistorikkEndretFeltType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(HistorikkEndretFeltType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent HistorikkEndretFeltType: " + kode);

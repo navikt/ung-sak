@@ -9,16 +9,17 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum VariantFormat implements Kodeverdi{
+public enum VariantFormat implements Kodeverdi {
 
     SLADDET("SLADD", "Sladdet format", "SLADDET"),
     SKANNING_META("SKANM", "Skanning metadata", "SKANNING_META"),
@@ -29,16 +30,16 @@ public enum VariantFormat implements Kodeverdi{
     BREVBESTILLING("BREVB", "Brevbestilling data", "BREVBESTILLING"),
     ARKIV("ARKIV", "Arkivformat", "ARKIV"),
     UDEFINERT("-", "Ikke definert", null),
-    
+
     ;
+
     private static final String KODEVERK = "VARIANT_FORMAT";
-    
+
     private static final Map<String, VariantFormat> KODER = new LinkedHashMap<>();
-    
-    
+
     @JsonIgnore
     private String navn;
-    
+
     @JsonIgnore
     private String offisiellKode;
 
@@ -49,13 +50,13 @@ public enum VariantFormat implements Kodeverdi{
         this.navn = navn;
         this.offisiellKode = offisiellKode;
     }
-    
 
-    @JsonCreator
-    public static VariantFormat fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static VariantFormat  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(VariantFormat.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent VariantFormat: " + kode);
@@ -66,7 +67,7 @@ public enum VariantFormat implements Kodeverdi{
     public static Map<String, VariantFormat> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -75,7 +76,7 @@ public enum VariantFormat implements Kodeverdi{
     public static void main(String[] args) {
         System.out.println(KODER.keySet());
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
@@ -87,12 +88,12 @@ public enum VariantFormat implements Kodeverdi{
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return offisiellKode;
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -100,7 +101,7 @@ public enum VariantFormat implements Kodeverdi{
             }
         }
     }
-    
+
     public static VariantFormat finnForKodeverkEiersKode(String offisiellDokumentType) {
         return List.of(values()).stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst().orElse(UDEFINERT);
     }

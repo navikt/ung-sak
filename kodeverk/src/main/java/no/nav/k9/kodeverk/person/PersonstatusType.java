@@ -10,11 +10,12 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -33,15 +34,15 @@ public enum PersonstatusType implements Kodeverdi {
     UTAN("UTAN", "Utgått person annullert tilgang Fnr", false),
     UTPE("UTPE", "Utgått person", false),
     UTVA("UTVA", "Utvandret", true),
-    
+
     UDEFINERT("-", "Ikke definert", false),
-    
+
     ;
 
     private static final Map<String, PersonstatusType> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "PERSONSTATUS_TYPE";
-    
+
     @JsonIgnore
     private String navn;
 
@@ -59,13 +60,13 @@ public enum PersonstatusType implements Kodeverdi {
     public static boolean erDød(PersonstatusType personstatus) {
         return DØD.equals(personstatus) || DØDD.equals(personstatus);
     }
-    
 
-    @JsonCreator
-    public static PersonstatusType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static PersonstatusType  fraKode(@JsonProperty("kode") Object node)  {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(PersonstatusType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent PersonstatusType: " + kode);
@@ -76,7 +77,7 @@ public enum PersonstatusType implements Kodeverdi {
     public static Map<String, PersonstatusType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -85,7 +86,7 @@ public enum PersonstatusType implements Kodeverdi {
     public static void main(String[] args) {
         System.out.println(KODER.keySet());
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
@@ -97,12 +98,12 @@ public enum PersonstatusType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
@@ -110,7 +111,7 @@ public enum PersonstatusType implements Kodeverdi {
             }
         }
     }
-    
+
     public static Set<PersonstatusType> personstatusTyperFortsattBehandling() {
         return List.of(values()).stream().filter(s -> s.fortsettBehandling).collect(Collectors.toSet());
     }

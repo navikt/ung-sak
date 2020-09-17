@@ -8,11 +8,13 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
@@ -81,14 +83,15 @@ public enum Avslagsårsak implements Kodeverdi {
         this.lovReferanser = lovReferanser;
     }
 
-    @JsonCreator
-    public static Avslagsårsak fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static Avslagsårsak fraKode(@JsonProperty(value = "kode") Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(Avslagsårsak.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent Avslagsårsak: " + kode);
+            throw new IllegalArgumentException("Ukjent Avslagsårsak: for input " + node);
         }
         return ad;
     }
