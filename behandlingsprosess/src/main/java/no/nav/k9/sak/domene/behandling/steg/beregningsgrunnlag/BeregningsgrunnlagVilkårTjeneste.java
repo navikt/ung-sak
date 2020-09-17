@@ -24,7 +24,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -38,7 +37,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class BeregningsgrunnlagVilkårTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private VedtakVarselRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
@@ -52,7 +50,6 @@ public class BeregningsgrunnlagVilkårTjeneste {
                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                             VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårsPerioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
@@ -125,9 +122,8 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
-        Optional<VedtakVarsel> behandlingresultatOpt = behandlingsresultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         settVilkårutfallTilIkkeVurdert(kontekst.getBehandlingId(), vilkårsPeriode);
-        nullstillVedtaksresultat(kontekst, behandlingresultatOpt);
+        nullstillBehandlingsresultat(kontekst);
     }
 
     public void settVilkårutfallTilIkkeVurdert(Long behandlingId, DatoIntervallEntitet vilkårsPeriode) {
@@ -153,9 +149,9 @@ public class BeregningsgrunnlagVilkårTjeneste {
         vilkårResultatRepository.lagre(behandlingId, nyttResultat);
     }
 
-    private void nullstillVedtaksresultat(BehandlingskontrollKontekst kontekst, Optional<VedtakVarsel> behandlingresultatOpt) {
+    private void nullstillBehandlingsresultat(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (behandlingresultatOpt.isEmpty() || Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
+        if (Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
             return;
         }
         behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
