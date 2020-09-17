@@ -21,5 +21,9 @@ public class BehandlingTypeTest {
         // forsøker med ren key input også
         var t2 = om.reader().forType(BehandlingType.class).readValue("\"" + BehandlingType.REVURDERING.getKode() + "\"");
         assertThat(t2).isNotNull().isSameAs(t);
+
+        var t3 = om.reader().forType(BehandlingType.class).readValue("{\"kode\":\"BT-004\",\"kodeverk\":\"BEHANDLING_TYPE\"}");
+        assertThat(t3).isNotNull().isSameAs(t3);
+
     }
 }
