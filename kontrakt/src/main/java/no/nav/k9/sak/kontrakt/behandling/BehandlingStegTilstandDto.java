@@ -57,4 +57,11 @@ public class BehandlingStegTilstandDto {
     public ZonedDateTime getTidsstempel() {
         return tidsstempel;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<stegType=" + stegType
+            + ", stegStatus=" + stegStatus
+            + ">";
+    }
 }
