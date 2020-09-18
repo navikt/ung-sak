@@ -131,7 +131,7 @@ public enum BeregningAksjonspunktDefinisjon implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningAksjonspunktDefinisjon fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningAksjonspunktDefinisjon fraKode(Object node) {
         if (node == null) {
             return null;
         }

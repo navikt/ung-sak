@@ -54,7 +54,7 @@ public enum TilbakekrevingVidereBehandling implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static TilbakekrevingVidereBehandling fraKode(@JsonProperty(value = "kode") Object node) {
+    public static TilbakekrevingVidereBehandling fraKode(Object node) {
         if (node == null) {
             return null;
         }

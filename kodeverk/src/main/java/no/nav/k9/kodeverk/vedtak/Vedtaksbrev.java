@@ -41,7 +41,7 @@ public enum Vedtaksbrev implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Vedtaksbrev fraKode(@JsonProperty(value = "kode") Object node) {
+    public static Vedtaksbrev fraKode(Object node) {
         if (node == null) {
             return null;
         }

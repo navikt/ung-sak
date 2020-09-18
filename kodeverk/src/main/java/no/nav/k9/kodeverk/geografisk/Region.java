@@ -95,7 +95,7 @@ public enum Region implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Region fraKode(@JsonProperty("kode") Object node) {
+    public static Region fraKode(Object node) {
         if (node == null) {
             return null;
         }

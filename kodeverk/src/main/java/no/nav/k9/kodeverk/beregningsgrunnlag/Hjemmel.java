@@ -60,7 +60,7 @@ public enum Hjemmel implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Hjemmel fraKode(@JsonProperty("kode") Object node) {
+    public static Hjemmel fraKode(Object node) {
         if (node == null) {
             return null;
         }

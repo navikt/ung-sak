@@ -85,7 +85,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingÅrsakType fraKode(@JsonProperty(value = "kode") Object node) {
+    public static BehandlingÅrsakType fraKode(Object node) {
         if (node == null) {
             return null;
         }

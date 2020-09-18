@@ -42,7 +42,7 @@ public enum IverksettingStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static IverksettingStatus fraKode(@JsonProperty(value = "kode") Object node) {
+    public static IverksettingStatus fraKode(Object node) {
         if (node == null) {
             return null;
         }

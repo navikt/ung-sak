@@ -53,7 +53,7 @@ public enum HistorikkOpplysningType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkOpplysningType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkOpplysningType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

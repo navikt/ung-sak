@@ -91,7 +91,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static VilkårUtfallMerknad fraKode(@JsonProperty(value = "kode") Object node) {
+    public static VilkårUtfallMerknad fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -42,7 +42,7 @@ public enum KonsekvensForYtelsen implements Kodeverdi{
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static KonsekvensForYtelsen fraKode(@JsonProperty(value = "kode") Object node) {
+    public static KonsekvensForYtelsen fraKode(Object node) {
         if (node == null) {
             return null;
         }

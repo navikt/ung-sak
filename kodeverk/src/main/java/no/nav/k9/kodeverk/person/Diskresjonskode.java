@@ -51,7 +51,7 @@ public enum Diskresjonskode implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Diskresjonskode  fraKode(@JsonProperty("kode") Object node)  {
+    public static Diskresjonskode  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

@@ -41,7 +41,7 @@ public enum DokumentGruppe implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static DokumentGruppe  fraKode(@JsonProperty("kode") Object node)  {
+    public static DokumentGruppe  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

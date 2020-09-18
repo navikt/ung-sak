@@ -51,7 +51,7 @@ public enum Utfall implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Utfall fraKode(@JsonProperty(value = "kode") Object node) {
+    public static Utfall fraKode(Object node) {
         if (node == null) {
             return null;
         }

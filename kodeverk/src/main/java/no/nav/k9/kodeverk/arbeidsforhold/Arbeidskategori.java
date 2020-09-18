@@ -66,7 +66,7 @@ public enum Arbeidskategori implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Arbeidskategori fraKode(@JsonProperty("kode") Object node) {
+    public static Arbeidskategori fraKode(Object node) {
         if (node == null) {
             return null;
         }

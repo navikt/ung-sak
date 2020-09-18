@@ -73,7 +73,7 @@ public enum DokumentMalType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static DokumentMalType  fraKode(@JsonProperty("kode") Object node)  {
+    public static DokumentMalType  fraKode(Object node)  {
         if (node == null) {
             throw new IllegalArgumentException("Ukjent DokumentMalType: " + node);
         }

@@ -59,7 +59,7 @@ public enum RevurderingVarslingÅrsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static RevurderingVarslingÅrsak fraKode(@JsonProperty(value = "kode") Object node) {
+    public static RevurderingVarslingÅrsak fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -54,7 +54,7 @@ public enum HistorikkAktør implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkAktør  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkAktør  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

@@ -76,7 +76,7 @@ public enum TemaUnderkategori implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static TemaUnderkategori fraKode(@JsonProperty("kode") Object node) {
+    public static TemaUnderkategori fraKode(Object node) {
         if (node == null) {
             return null;
         }

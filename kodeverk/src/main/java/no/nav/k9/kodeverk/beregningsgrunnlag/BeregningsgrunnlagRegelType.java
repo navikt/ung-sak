@@ -46,7 +46,7 @@ public enum BeregningsgrunnlagRegelType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningsgrunnlagRegelType fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningsgrunnlagRegelType fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -161,7 +161,7 @@ public enum VilkårType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static VilkårType fraKode(@JsonProperty(value = "kode") Object node) {
+    public static VilkårType fraKode(Object node) {
         if (node == null) {
             return null;
         }

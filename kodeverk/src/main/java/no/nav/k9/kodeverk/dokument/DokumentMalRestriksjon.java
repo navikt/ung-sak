@@ -55,7 +55,7 @@ public enum DokumentMalRestriksjon implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static DokumentMalRestriksjon  fraKode(@JsonProperty("kode") Object node)  {
+    public static DokumentMalRestriksjon  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

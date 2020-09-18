@@ -88,7 +88,7 @@ public enum PensjonTrygdType implements YtelseType {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static PensjonTrygdType fraKode(@JsonProperty("kode") Object node) {
+    public static PensjonTrygdType fraKode(Object node) {
         if (node == null) {
             return null;
         }

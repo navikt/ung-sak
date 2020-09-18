@@ -68,7 +68,7 @@ public enum BeregningsgrunnlagTilstand implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningsgrunnlagTilstand fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningsgrunnlagTilstand fraKode(Object node) {
         if (node == null) {
             return null;
         }

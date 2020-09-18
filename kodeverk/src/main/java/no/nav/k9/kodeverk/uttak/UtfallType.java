@@ -58,7 +58,7 @@ public enum UtfallType implements Kodeverdi {
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent PeriodeResultatType: " + kode);
+            throw new IllegalArgumentException("Ukjent UtfallType: " + kode);
         }
         return ad;
     }

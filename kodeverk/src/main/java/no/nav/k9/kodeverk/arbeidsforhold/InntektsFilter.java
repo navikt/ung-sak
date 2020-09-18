@@ -84,7 +84,7 @@ public enum InntektsFilter implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektsFilter fraKode(@JsonProperty("kode") Object node) {
+    public static InntektsFilter fraKode(Object node) {
         if (node == null) {
             return null;
         }

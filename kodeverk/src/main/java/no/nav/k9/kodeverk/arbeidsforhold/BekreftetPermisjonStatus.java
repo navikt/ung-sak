@@ -58,7 +58,7 @@ public enum BekreftetPermisjonStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BekreftetPermisjonStatus fraKode(@JsonProperty("kode") Object node) {
+    public static BekreftetPermisjonStatus fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -57,7 +57,7 @@ public enum Organisasjonstype implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Organisasjonstype  fraKode(@JsonProperty("kode") Object node)  {
+    public static Organisasjonstype  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

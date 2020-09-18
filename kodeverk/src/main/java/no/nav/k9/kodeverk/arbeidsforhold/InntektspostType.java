@@ -57,7 +57,7 @@ public enum InntektspostType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektspostType fraKode(@JsonProperty("kode") Object node) {
+    public static InntektspostType fraKode(Object node) {
         if (node == null) {
             return null;
         }

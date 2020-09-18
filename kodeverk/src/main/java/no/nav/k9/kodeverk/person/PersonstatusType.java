@@ -62,7 +62,7 @@ public enum PersonstatusType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static PersonstatusType  fraKode(@JsonProperty("kode") Object node)  {
+    public static PersonstatusType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

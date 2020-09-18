@@ -52,7 +52,7 @@ public enum VariantFormat implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static VariantFormat  fraKode(@JsonProperty("kode") Object node)  {
+    public static VariantFormat  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

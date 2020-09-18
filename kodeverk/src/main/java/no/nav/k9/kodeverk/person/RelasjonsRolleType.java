@@ -73,7 +73,7 @@ public enum RelasjonsRolleType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static RelasjonsRolleType  fraKode(@JsonProperty("kode") Object node)  {
+    public static RelasjonsRolleType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

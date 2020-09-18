@@ -65,7 +65,7 @@ public enum Fagsystem implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Fagsystem fraKode(@JsonProperty(value = "kode") Object node) {
+    public static Fagsystem fraKode(Object node) {
         if (node == null) {
             return null;
         }

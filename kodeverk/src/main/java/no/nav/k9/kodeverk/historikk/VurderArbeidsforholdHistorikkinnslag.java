@@ -60,7 +60,7 @@ public enum VurderArbeidsforholdHistorikkinnslag implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static VurderArbeidsforholdHistorikkinnslag  fraKode(@JsonProperty("kode") Object node)  {
+    public static VurderArbeidsforholdHistorikkinnslag  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

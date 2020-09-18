@@ -60,7 +60,7 @@ public enum NæringsinntektType implements YtelseType {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static NæringsinntektType fraKode(@JsonProperty("kode") Object node) {
+    public static NæringsinntektType fraKode(Object node) {
         if (node == null) {
             return null;
         }

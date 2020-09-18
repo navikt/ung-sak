@@ -88,7 +88,7 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkEndretFeltVerdiType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkEndretFeltVerdiType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

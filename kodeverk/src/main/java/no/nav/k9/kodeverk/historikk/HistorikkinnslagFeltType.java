@@ -62,7 +62,7 @@ public enum HistorikkinnslagFeltType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkinnslagFeltType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkinnslagFeltType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

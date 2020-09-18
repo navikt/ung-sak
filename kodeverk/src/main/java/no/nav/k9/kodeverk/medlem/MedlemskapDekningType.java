@@ -99,7 +99,7 @@ public enum MedlemskapDekningType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static MedlemskapDekningType  fraKode(@JsonProperty("kode") Object node)  {
+    public static MedlemskapDekningType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

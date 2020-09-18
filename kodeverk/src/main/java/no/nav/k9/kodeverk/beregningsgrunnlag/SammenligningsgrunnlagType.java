@@ -59,7 +59,7 @@ public enum SammenligningsgrunnlagType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static SammenligningsgrunnlagType fraKode(@JsonProperty("kode") Object node) {
+    public static SammenligningsgrunnlagType fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -53,7 +53,7 @@ public enum UtsettelseÅrsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static UtsettelseÅrsak fraKode(@JsonProperty(value = "kode") Object node) {
+    public static UtsettelseÅrsak fraKode(Object node) {
         if (node == null) {
             return null;
         }

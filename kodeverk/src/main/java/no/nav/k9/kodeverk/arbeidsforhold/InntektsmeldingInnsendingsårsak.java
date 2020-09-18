@@ -48,7 +48,7 @@ public enum InntektsmeldingInnsendingsårsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektsmeldingInnsendingsårsak fraKode(@JsonProperty("kode") Object node) {
+    public static InntektsmeldingInnsendingsårsak fraKode(Object node) {
         if (node == null) {
             return null;
         }

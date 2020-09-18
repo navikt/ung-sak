@@ -84,7 +84,7 @@ public enum Avslagsårsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Avslagsårsak fraKode(@JsonProperty(value = "kode") Object node) {
+    public static Avslagsårsak fraKode(Object node) {
         if (node == null) {
             return null;
         }
