@@ -57,16 +57,18 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={} (før)", ref.getBehandlingId(), behandling.getBehandlingResultatType());
 
+
+        if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
+            behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+        } else {
+            behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+            log.info("Behandling {} innvilget", ref.getBehandlingId());
+        }
+
         if (ref.erRevurdering()) {
             revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref);
-        } else {
-            if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
-                behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-            } else {
-                behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-                log.info("Behandling {} innvilget", ref.getBehandlingId());
-            }
         }
+
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={}", ref.getBehandlingId(), behandling.getBehandlingResultatType());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
