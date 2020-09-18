@@ -65,7 +65,7 @@ public enum OffentligYtelseType implements YtelseType {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static OffentligYtelseType fraKode(@JsonProperty("kode") Object node) {
+    public static OffentligYtelseType fraKode(Object node) {
         if (node == null) {
             return null;
         }

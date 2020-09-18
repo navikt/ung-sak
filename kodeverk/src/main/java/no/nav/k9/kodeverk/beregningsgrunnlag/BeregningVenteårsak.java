@@ -85,7 +85,7 @@ public enum BeregningVenteårsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningVenteårsak fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningVenteårsak fraKode(Object node) {
         if (node == null) {
             return null;
         }

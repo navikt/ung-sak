@@ -100,7 +100,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkEndretFeltType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkEndretFeltType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

@@ -162,7 +162,7 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static OpptjeningAktivitetType  fraKode(@JsonProperty("kode") Object node)  {
+    public static OpptjeningAktivitetType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

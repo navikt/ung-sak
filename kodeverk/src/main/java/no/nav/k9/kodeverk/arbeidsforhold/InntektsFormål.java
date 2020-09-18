@@ -55,7 +55,7 @@ public enum InntektsFormål implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektsFormål fraKode(@JsonProperty("kode") Object node) {
+    public static InntektsFormål fraKode(Object node) {
         if (node == null) {
             return null;
         }

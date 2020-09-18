@@ -50,7 +50,7 @@ public enum BeregningsgrunnlagPeriodeRegelType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningsgrunnlagPeriodeRegelType fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningsgrunnlagPeriodeRegelType fraKode(Object node) {
         if (node == null) {
             return null;
         }

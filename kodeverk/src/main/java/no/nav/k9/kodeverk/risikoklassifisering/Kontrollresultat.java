@@ -52,7 +52,7 @@ public enum Kontrollresultat implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Kontrollresultat  fraKode(@JsonProperty("kode") Object node)  {
+    public static Kontrollresultat  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

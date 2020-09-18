@@ -46,7 +46,7 @@ public enum BeregningAktivitetHandlingType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningAktivitetHandlingType fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningAktivitetHandlingType fraKode(Object node) {
         if (node == null) {
             return null;
         }

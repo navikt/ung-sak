@@ -81,7 +81,7 @@ public enum Brevkode implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Brevkode  fraKode(@JsonProperty("kode") Object node)  {
+    public static Brevkode  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

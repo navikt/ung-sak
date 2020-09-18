@@ -47,7 +47,7 @@ public enum BeregningsgrunnlagAndeltype implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BeregningsgrunnlagAndeltype fraKode(@JsonProperty("kode") Object node) {
+    public static BeregningsgrunnlagAndeltype fraKode(Object node) {
         if (node == null) {
             return null;
         }

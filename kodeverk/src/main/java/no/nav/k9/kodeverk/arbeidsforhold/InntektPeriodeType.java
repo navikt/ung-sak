@@ -64,7 +64,7 @@ public enum InntektPeriodeType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektPeriodeType fraKode(@JsonProperty("kode") Object node) {
+    public static InntektPeriodeType fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -58,7 +58,7 @@ public enum InntektsKilde implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static InntektsKilde fraKode(@JsonProperty("kode") Object node) {
+    public static InntektsKilde fraKode(Object node) {
         if (node == null) {
             return null;
         }

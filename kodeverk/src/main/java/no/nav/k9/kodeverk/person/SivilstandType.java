@@ -78,7 +78,7 @@ public enum SivilstandType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static SivilstandType  fraKode(@JsonProperty("kode") Object node)  {
+    public static SivilstandType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

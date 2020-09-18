@@ -53,7 +53,7 @@ public enum HistorikkAvklartSoeknadsperiodeType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkAvklartSoeknadsperiodeType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkAvklartSoeknadsperiodeType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

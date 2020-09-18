@@ -54,7 +54,7 @@ public enum FaresignalVurdering implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static FaresignalVurdering  fraKode(@JsonProperty("kode") Object node)  {
+    public static FaresignalVurdering  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

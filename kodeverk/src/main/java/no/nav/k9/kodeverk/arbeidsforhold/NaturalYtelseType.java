@@ -75,7 +75,7 @@ public enum NaturalYtelseType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static NaturalYtelseType fraKode(@JsonProperty("kode") Object node) {
+    public static NaturalYtelseType fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -43,7 +43,7 @@ public enum ArbeidsforholdKilde implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static ArbeidsforholdKilde fraKode(@JsonProperty("kode") Object node) {
+    public static ArbeidsforholdKilde fraKode(Object node) {
         if (node == null) {
             return null;
         }

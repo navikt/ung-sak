@@ -64,7 +64,7 @@ public enum SkatteOgAvgiftsregelType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static SkatteOgAvgiftsregelType fraKode(@JsonProperty("kode") Object node) {
+    public static SkatteOgAvgiftsregelType fraKode(Object node) {
         if (node == null) {
             return null;
         }

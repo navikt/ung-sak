@@ -50,7 +50,7 @@ public enum VedtakResultatType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static VedtakResultatType fraKode(@JsonProperty(value = "kode") Object node) {
+    public static VedtakResultatType fraKode(Object node) {
         if (node == null) {
             return null;
         }

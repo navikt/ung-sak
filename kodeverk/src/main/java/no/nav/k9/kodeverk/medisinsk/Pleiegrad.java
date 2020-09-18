@@ -61,7 +61,7 @@ public enum Pleiegrad implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Pleiegrad  fraKode(@JsonProperty("kode") Object node)  {
+    public static Pleiegrad  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

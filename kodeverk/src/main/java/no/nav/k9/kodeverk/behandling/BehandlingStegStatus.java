@@ -68,7 +68,7 @@ public enum BehandlingStegStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingStegStatus fraKode(@JsonProperty(value = "kode") Object node) {
+    public static BehandlingStegStatus fraKode(Object node) {
         if (node == null) {
             return null;
         }

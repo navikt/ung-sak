@@ -62,7 +62,7 @@ public enum PeriodeÅrsak implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static PeriodeÅrsak fraKode(@JsonProperty("kode") Object node) {
+    public static PeriodeÅrsak fraKode(Object node) {
         if (node == null) {
             return null;
         }

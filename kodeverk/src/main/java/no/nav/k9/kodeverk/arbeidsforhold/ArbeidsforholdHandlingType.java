@@ -64,7 +64,7 @@ public enum ArbeidsforholdHandlingType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static ArbeidsforholdHandlingType fraKode(@JsonProperty("kode") Object node) {
+    public static ArbeidsforholdHandlingType fraKode(Object node) {
         if (node == null) {
             return null;
         }

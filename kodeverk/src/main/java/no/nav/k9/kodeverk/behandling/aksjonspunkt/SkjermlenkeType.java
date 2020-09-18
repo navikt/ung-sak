@@ -2,9 +2,11 @@ package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import no.nav.k9.kodeverk.api.Kodeverdi;
 
+import no.nav.k9.kodeverk.TempAvledeKode;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -69,11 +71,12 @@ public enum SkjermlenkeType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static SkjermlenkeType fraKode(@JsonProperty("kode") String kode) {
-        if (kode == null) {
+    @JsonCreator(mode = Mode.DELEGATING)
+    public static SkjermlenkeType fraKode(Object node) {
+        if (node == null) {
             return null;
         }
+        String kode = TempAvledeKode.getVerdi(SkjermlenkeType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent SkjermlenkeType: " + kode);

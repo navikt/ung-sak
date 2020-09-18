@@ -65,7 +65,7 @@ public enum MedlemskapKildeType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static MedlemskapKildeType  fraKode(@JsonProperty("kode") Object node)  {
+    public static MedlemskapKildeType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

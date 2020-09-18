@@ -98,7 +98,7 @@ public enum ArbeidType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static ArbeidType fraKode(@JsonProperty("kode") Object node) {
+    public static ArbeidType fraKode(Object node) {
         if (node == null) {
             return null;
         }

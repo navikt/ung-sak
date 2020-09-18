@@ -69,7 +69,7 @@ public enum AktivitetStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static AktivitetStatus fraKode(@JsonProperty("kode") Object node) {
+    public static AktivitetStatus fraKode(Object node) {
         if (node == null) {
             return null;
         }

@@ -53,7 +53,7 @@ public enum HistorikkResultatType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkResultatType  fraKode(@JsonProperty("kode") Object node)  {
+    public static HistorikkResultatType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

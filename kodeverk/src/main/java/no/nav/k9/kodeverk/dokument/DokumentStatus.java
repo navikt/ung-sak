@@ -45,7 +45,7 @@ public enum DokumentStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static DokumentStatus  fraKode(@JsonProperty("kode") Object node)  {
+    public static DokumentStatus  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

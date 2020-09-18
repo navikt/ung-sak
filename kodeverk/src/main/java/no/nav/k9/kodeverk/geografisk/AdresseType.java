@@ -58,7 +58,7 @@ public enum AdresseType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static AdresseType fraKode(@JsonProperty("kode") Object node) {
+    public static AdresseType fraKode(Object node) {
         if (node == null) {
             return null;
         }

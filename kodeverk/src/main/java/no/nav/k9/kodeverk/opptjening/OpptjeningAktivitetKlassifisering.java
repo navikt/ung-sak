@@ -53,7 +53,7 @@ public enum OpptjeningAktivitetKlassifisering implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static OpptjeningAktivitetKlassifisering  fraKode(@JsonProperty("kode") Object node)  {
+    public static OpptjeningAktivitetKlassifisering  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

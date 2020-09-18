@@ -53,7 +53,7 @@ public enum RelatertYtelseTilstand implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static RelatertYtelseTilstand fraKode(@JsonProperty("kode") Object node) {
+    public static RelatertYtelseTilstand fraKode(Object node) {
         if (node == null) {
             return null;
         }

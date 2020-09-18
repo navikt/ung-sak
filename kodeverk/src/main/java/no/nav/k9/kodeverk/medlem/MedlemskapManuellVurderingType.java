@@ -50,7 +50,7 @@ public enum MedlemskapManuellVurderingType implements Kodeverdi {
     }
     
     @JsonCreator(mode = Mode.DELEGATING)
-    public static MedlemskapManuellVurderingType  fraKode(@JsonProperty("kode") Object node)  {
+    public static MedlemskapManuellVurderingType  fraKode(Object node)  {
         if (node == null) {
             return null;
         }

@@ -97,7 +97,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static FagsakYtelseType fraKode(@JsonProperty(value = "kode") Object node) {
+    public static FagsakYtelseType fraKode(Object node) {
         if (node == null) {
             return null;
         }

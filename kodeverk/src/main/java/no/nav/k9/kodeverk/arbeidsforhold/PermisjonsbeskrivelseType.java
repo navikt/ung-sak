@@ -65,7 +65,7 @@ public enum PermisjonsbeskrivelseType implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static PermisjonsbeskrivelseType fraKode(@JsonProperty("kode") Object node) {
+    public static PermisjonsbeskrivelseType fraKode(Object node) {
         if (node == null) {
             return null;
         }

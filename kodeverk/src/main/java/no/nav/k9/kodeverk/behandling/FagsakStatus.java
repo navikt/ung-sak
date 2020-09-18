@@ -54,7 +54,7 @@ public enum FagsakStatus implements Kodeverdi {
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static FagsakStatus fraKode(@JsonProperty(value = "kode") Object node) {
+    public static FagsakStatus fraKode(Object node) {
         if (node == null) {
             return null;
         }
