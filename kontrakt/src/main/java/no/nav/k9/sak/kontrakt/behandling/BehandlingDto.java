@@ -226,7 +226,6 @@ public class BehandlingDto {
         return behandlingsfristTid;
     }
 
-
     public BehandlingResultatType getBehandlingResultatType() {
         return behandlingResultatType;
     }
@@ -466,5 +465,15 @@ public class BehandlingDto {
 
     public void setTaskStatus(AsyncPollingStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<behandlingId=" + id + " (" + uuid + ")"
+            + ", ytelseType=" + this.type
+            + ", resultatType=" + this.behandlingResultatType
+            + ", status=" + this.status
+            + ", stegTilstand=" + this.stegTilstand
+            + ">";
     }
 }
