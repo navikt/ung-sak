@@ -39,8 +39,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -62,17 +60,11 @@ public class ForeslåVedtakRevurderingStegImplTest {
     @Mock
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     @Mock
-    private VedtakVarselRepository vedtakVarselRepository;
-    @Mock
     private BehandlingRepository behandlingRepository;
     @Mock
     private BeregningTjeneste beregningsgrunnlagTjeneste;
     @Mock
     private VilkårResultatRepository vilkårResultatRepository;
-    @Mock
-    private VedtakVarsel behandlingsresultat;
-    @Mock
-    private VedtakVarsel orginalBehandlingsresultat;
 
     private DefaultErEndringIBeregningTjeneste endringIBeregningTjeneste;
 

@@ -10,7 +10,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -22,7 +21,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
@@ -56,14 +54,14 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
 
 
     @Override
-    public VedtakVarsel bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef, VedtakVarsel vedtakVarsel, boolean erVarselOmRevurderingSendt) {
+    public void bestemBehandlingsresultatForRevurdering(BehandlingReferanse revurderingRef) {
         Behandling revurdering = behandlingRepository.hentBehandling(revurderingRef.getBehandlingId());
         Long originalBehandlingId = revurdering.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Mangler originalBehandlingId for behandling: " + revurdering.getId()));
         var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
-        return doBestemBehandlingsresultatForRevurdering(revurdering, originalBehandling, vedtakVarsel);
+        doBestemBehandlingsresultatForRevurdering(revurdering, originalBehandling);
     }
 
-    private VedtakVarsel doBestemBehandlingsresultatForRevurdering(Behandling revurdering, Behandling originalBehandling, VedtakVarsel vedtakVarsel) {
+    private void doBestemBehandlingsresultatForRevurdering(Behandling revurdering, Behandling originalBehandling) {
         var beregningsvilkår = vilkårResultatRepository.hent(revurdering.getId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         var erNySøknadsperiode = erNySøknadperiode(revurdering, originalBehandling);
@@ -78,14 +76,6 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
                 revurdering.setBehandlingResultatType(BehandlingResultatType.INGEN_ENDRING);
             }
         }
-
-        // Oppdatering av vedtaksbrev
-        if (!erNySøknadsperiode && revurdering.getBehandlingResultatType().equals(BehandlingResultatType.INGEN_ENDRING)) {
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.INGEN);
-        } else {
-            vedtakVarsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
-        }
-        return vedtakVarsel;
     }
 
     private boolean erHeltEllerDelvisInnvilget(Vilkår beregningsvilkår) {

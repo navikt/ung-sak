@@ -35,8 +35,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
@@ -63,9 +61,6 @@ public class BehandlingRepositoryImplTest {
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
-
-    @Inject
-    private VedtakVarselRepository vedtakVarselRepository;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -211,10 +206,6 @@ public class BehandlingRepositoryImplTest {
         Map<String, VurderÅrsak> stringVurderÅrsakMap = VurderÅrsak.kodeMap();
         assertThat(stringVurderÅrsakMap).hasSize(5);
         assertThat(stringVurderÅrsakMap.containsValue(VurderÅrsak.FEIL_FAKTA)).isTrue();
-    }
-
-    private VedtakVarsel getBehandlingsresultat(Behandling behandling) {
-        return vedtakVarselRepository.hentHvisEksisterer(behandling.getId()).orElse(null);
     }
 
     @Test
@@ -412,16 +403,13 @@ public class BehandlingRepositoryImplTest {
         return behandling;
     }
 
-    private VedtakVarsel oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean henlegg) {
-
+    private void oppdaterMedBehandlingsresultatOgLagre(Behandling behandling, boolean henlegg) {
         if (henlegg) {
             behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
         }
 
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         behandlingRepository.lagre(behandling, lås);
-
-        return getBehandlingsresultat(behandling);
     }
 
     private Behandling.Builder opprettBuilderForBehandling() {

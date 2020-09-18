@@ -43,11 +43,7 @@ public class DokumentKafkaBestiller {
             årsak = RevurderingVarslingÅrsak.fraKode(bestillBrevDto.getÅrsakskode());
         }
         Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-        bestillBrev(behandling, bestillBrevDto.getBrevmalkode(), bestillBrevDto.getFritekst(), årsak, aktør);
-    }
-
-    public void bestillBrev(Behandling behandling, String dokumentMalKode, String fritekst, RevurderingVarslingÅrsak årsak, HistorikkAktør aktør) {
-        bestillBrev(behandling, DokumentMalType.fraKode(dokumentMalKode), fritekst, årsak, aktør);
+        bestillBrev(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), årsak, aktør);
     }
 
     public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, RevurderingVarslingÅrsak årsak, HistorikkAktør aktør) {
@@ -59,7 +55,7 @@ public class DokumentKafkaBestiller {
         try {
             ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
             prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            
+
             prosessTaskData.setPayload(JsonObjectMapper.getJson(fritekst));
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());

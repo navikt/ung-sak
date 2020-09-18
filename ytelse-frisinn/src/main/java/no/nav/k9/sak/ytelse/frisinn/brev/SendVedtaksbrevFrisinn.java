@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrev;
 import org.slf4j.Logger;
@@ -30,10 +31,11 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
 
     @Inject
     public SendVedtaksbrevFrisinn(BehandlingRepository behandlingRepository,
+                           FagsakRepository fagsakRepository,
                            BehandlingVedtakRepository behandlingVedtakRepository,
                            VedtakVarselRepository vedtakvarselRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
-        super(behandlingRepository, behandlingVedtakRepository, vedtakvarselRepository, dokumentBestillerApplikasjonTjeneste);
+        super(behandlingRepository, fagsakRepository, behandlingVedtakRepository, vedtakvarselRepository, dokumentBestillerApplikasjonTjeneste);
         this.vedtakvarselRepository = vedtakvarselRepository;
     }
 
@@ -47,6 +49,12 @@ public class SendVedtaksbrevFrisinn extends SendVedtaksbrev {
             log.info("Vedtaksbrev for frisinn overstyrt og sendes derfor ikke automatisk for behandling {}", ref.getBehandlingId()); //$NON-NLS-1$
             return false;
         }
+
+        if (ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret()) {
+            log.info("Sender ikke vedtaksbrev for frisinn ved revurdering som ikke fører til endring i utbetaling. BehandlingId {}", ref.getBehandlingId()); //$NON-NLS-1$
+            return false;
+        }
+
         return true;
     }
 

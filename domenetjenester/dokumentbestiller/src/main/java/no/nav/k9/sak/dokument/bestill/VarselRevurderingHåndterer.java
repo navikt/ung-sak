@@ -13,8 +13,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
@@ -27,17 +25,14 @@ class VarselRevurderingHåndterer {
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private OppgaveTjeneste oppgaveTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private VedtakVarselRepository vedtakVarselRepository;
 
     VarselRevurderingHåndterer(Period defaultVenteFrist,
                                OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
-                               VedtakVarselRepository vedtakVarselRepository,
                                OppgaveTjeneste oppgaveTjeneste,
                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.defaultVenteFrist = defaultVenteFrist;
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
-        this.vedtakVarselRepository = vedtakVarselRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
@@ -48,15 +43,8 @@ class VarselRevurderingHåndterer {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.REVURDERING_DOK, adapter.getFritekst());
         bestillBrevDto.setÅrsakskode(RevurderingVarslingÅrsak.ANNET.getKode());
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.SAKSBEHANDLER);
-        
-        settBehandlingPåVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()), adapter.getBegrunnelse());
-        registrerVarselOmRevurdering(behandlingId);
-    }
 
-    private void registrerVarselOmRevurdering(Long behandlingId) {
-        var varsel = vedtakVarselRepository.hentHvisEksisterer(behandlingId).orElse(new VedtakVarsel());
-        varsel.setHarSendtVarselOmRevurdering(true);
-        vedtakVarselRepository.lagre(behandlingId, varsel);
+        settBehandlingPåVent(behandling, adapter.getFrist(), fraDto(adapter.getVenteÅrsakKode()), adapter.getBegrunnelse());
     }
 
     private void settBehandlingPåVent(Behandling behandling, LocalDate frist, Venteårsak venteårsak, String venteårsakVariant) {

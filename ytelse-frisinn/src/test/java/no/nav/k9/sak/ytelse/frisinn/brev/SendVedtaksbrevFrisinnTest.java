@@ -1,8 +1,9 @@
 package no.nav.k9.sak.ytelse.frisinn.brev;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -18,9 +19,13 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,6 +58,7 @@ public class SendVedtaksbrevFrisinnTest {
 
     private SendVedtaksbrevFrisinn sendVedtaksbrev;
     private Behandling behandling;
+    private Fagsak fagsak;
 
     private TestScenarioBuilder scenario;
 
@@ -63,7 +69,12 @@ public class SendVedtaksbrevFrisinnTest {
 
     @Before
     public void oppsett() {
+        fagsak = new Fagsak(FagsakYtelseType.FRISINN, AktørId.dummy(), mock(Saksnummer.class));
+        var fagsakRepository = mock(FagsakRepository.class);
+        when(fagsakRepository.hentSakGittSaksnummer(any())).thenReturn(Optional.ofNullable(fagsak));
+
         sendVedtaksbrev = new SendVedtaksbrevFrisinn(behandlingRepository,
+            fagsakRepository,
             repositoryProvider.getBehandlingVedtakRepository(),
             vedtakVarselRepository,
             dokumentBestillerApplikasjonTjeneste);
@@ -117,6 +128,23 @@ public class SendVedtaksbrevFrisinnTest {
     public void sender_ikke_brev_dersom_førstegangsøknad_som_er_migrert_fra_infotrygd() {
         behandling = scenario.lagre(repositoryProvider);
         behandling.setMigrertKilde(Fagsystem.INFOTRYGD);
+
+        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
+
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
+    }
+
+    @Test
+    public void senderIkkeBrevForHenlagtTilInfotrygd() {
+        fagsak.setSkalTilInfotrygd(true);
+        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN).medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+
+        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
+        behandling = scenario.lagre(repositoryProvider);
+
+        VedtakVarsel varsel = new VedtakVarsel();
+        varsel.setVedtaksbrev(Vedtaksbrev.AUTOMATISK);
+        vedtakVarselRepository.lagre(behandling.getId(), varsel);
 
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
 

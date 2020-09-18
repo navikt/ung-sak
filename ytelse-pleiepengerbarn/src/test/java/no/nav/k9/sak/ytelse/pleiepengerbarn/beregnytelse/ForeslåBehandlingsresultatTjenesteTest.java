@@ -129,7 +129,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
                 .medUtledetSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
                 .medFørsteUttaksdato(SKJÆRINGSTIDSPUNKT.plusDays(1))
                 .build());
-        tjeneste.foreslåVedtakVarsel(ref, lagKontekst(behandling));
+        tjeneste.foreslåBehandlingsresultatType(ref, lagKontekst(behandling));
     }
 
     private BehandlingskontrollKontekst lagKontekst(Behandling behandling) {
@@ -148,7 +148,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(Mockito.any(), any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(Mockito.any());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
         foreslåBehandlingsresultat(revurdering);
 
         // Assert
-        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any(), any(), anyBoolean());
+        verify(revurderingBehandlingsresultatutleder).bestemBehandlingsresultatForRevurdering(any());
     }
 
     private Behandling lagRevurdering(Behandling originalBehandling) {

@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,7 @@ public class SendVedtaksbrev {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrev.class);
 
     private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
 
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -40,10 +42,12 @@ public class SendVedtaksbrev {
 
     @Inject
     public SendVedtaksbrev(BehandlingRepository behandlingRepository,
+                           FagsakRepository fagsakRepository,
                            BehandlingVedtakRepository behandlingVedtakRepository,
                            VedtakVarselRepository vedtakvarselRepository,
                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
         this.behandlingRepository = behandlingRepository;
+        this.fagsakRepository = fagsakRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.vedtakvarselRepository = vedtakvarselRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
@@ -90,6 +94,11 @@ public class SendVedtaksbrev {
             }
         }
 
+        if (skalTilInfoTrygd(ref)) {
+            log.info("Sender ikke vedtaksbrev for behandlinger som er henlag og overført til infortrygd. BehandlingId {}", behandlingId); //$NON-NLS-1$
+            return false;
+        }
+
         if (erBehandlingEtterKlage(behandling)) {
             log.info("Sender ikke vedtaksbrev for vedtak fra omgjøring fra klageinstansen på behandling {}, gjelder medhold fra klageinstans", behandlingId); //$NON-NLS-1$
             return false;
@@ -103,5 +112,10 @@ public class SendVedtaksbrev {
 
     protected boolean erBehandlingEtterKlage(Behandling behandling) {
         return BehandlingÅrsakType.årsakerEtterKlageBehandling().stream().anyMatch(behandling::harBehandlingÅrsak);
+    }
+
+    private boolean skalTilInfoTrygd(BehandlingReferanse ref) {
+        var fagsak = fagsakRepository.hentSakGittSaksnummer(ref.getSaksnummer()).orElseThrow();
+        return fagsak.getSkalTilInfotrygd();
     }
 }

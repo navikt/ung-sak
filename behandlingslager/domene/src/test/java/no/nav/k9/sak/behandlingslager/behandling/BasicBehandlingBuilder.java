@@ -6,8 +6,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -23,28 +21,26 @@ public class BasicBehandlingBuilder {
     private final AktørId aktørId = AktørId.dummy();
     private EntityManager em;
     private Fagsak fagsak;
-    private VedtakVarselRepository behandlingsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     public BasicBehandlingBuilder(EntityManager em) {
         this.em = em;
         behandlingRepository = new BehandlingRepository(em);
-        behandlingsresultatRepository = new VedtakVarselRepository(em);
         vilkårResultatRepository = new VilkårResultatRepository(em);
     }
 
     public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse, BehandlingStatus startStatus) {
         Fagsak fagsak = opprettFagsak(ytelse);
-        
+
         var builder = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(startStatus);
         Behandling behandling = builder.build();
-        
+
         lagreBehandling(behandling);
-        
+
         em.flush();
         return behandling;
     }
-    
+
     public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse) {
         Fagsak fagsak = opprettFagsak(ytelse);
         return opprettOgLagreFørstegangssøknad(fagsak);
@@ -58,10 +54,6 @@ public class BasicBehandlingBuilder {
 
         em.flush();
         return behandling;
-    }
-
-    public void lagreBehandlingsresultat(Long behandlingId, VedtakVarsel resultat) {
-        behandlingsresultatRepository.lagre(behandlingId, resultat);
     }
 
     private void lagreBehandling(Behandling behandling) {
