@@ -149,7 +149,6 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                                                     LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
                                                     LocalDateSegment<Uttaksplanperiode> uttPeriode) {
         var ut = uttPeriode == null ? null : uttPeriode.getValue();
-        var innvilget = (InnvilgetUttaksplanperiode) ut;
         brpDto.getValue().getAndeler().forEach(a -> {
             if (ut != null) {
                 // setter uttak rett på andel 'a' - Ok her
@@ -157,6 +156,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                 a.setUttak(List.of(new UttakDto(periode, ut.getUtfall(), BigDecimal.ZERO))); // default uttak, overskrives under
                 if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
                     var key = toUttakArbeidsforhold(a);
+                    var innvilget = (InnvilgetUttaksplanperiode) ut;
                     innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> {
                         a.setUttak(List.of(new UttakDto(periode, innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
                     });
