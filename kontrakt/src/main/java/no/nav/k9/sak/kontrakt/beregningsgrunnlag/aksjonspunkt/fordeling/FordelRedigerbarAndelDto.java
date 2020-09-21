@@ -36,7 +36,7 @@ public class FordelRedigerbarAndelDto {
     private Long andelsnr;
 
     @JsonProperty(value = "arbeidsforholdId")
-    @Pattern(regexp = "^[\\p{XDigit}_]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
 
     @JsonProperty(value = "arbeidsforholdType", required = true)
