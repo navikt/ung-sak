@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
@@ -51,9 +50,6 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
-
-    @Inject
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     @Inject
     private TilbakekrevingRepository tilbakekrevingRepository;

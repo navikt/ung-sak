@@ -1,8 +1,15 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.time.LocalDate;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,6 +20,9 @@ import javax.inject.Inject;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -69,15 +79,15 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
 
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
 
-        var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
+        var perioderTilBeregning = new ArrayList<DatoIntervallEntitet>();
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode())) {
                 avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode);
             } else {
-                aksjonspunktResultater.addAll(utførBeregningForPeriode(kontekst, ref, periode));
+                perioderTilBeregning.add(periode);
             }
         }
-
+        var aksjonspunktResultater = utførBeregningForPeriode(kontekst, ref, perioderTilBeregning);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 
@@ -85,17 +95,39 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         return !vilkårPeriode.overlapper(fagsakPeriode);
     }
 
-    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+    private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<DatoIntervallEntitet> vilkårsperioder) {
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        var skjæringstidspunktForPeriode = vilkårsperiode.getFomDato();
-        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-        var kalkulusResultat = kalkulusTjeneste.startBeregning(ref, ytelseGrunnlag, skjæringstidspunktForPeriode);
-        Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
-        if (vilkårOppfylt != null && !vilkårOppfylt) {
-            return avslåVilkår(kontekst, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat), vilkårsperiode);
-        } else {
-            return kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
+
+        Map<LocalDate, YtelsespesifiktGrunnlagDto> stpTilYtelseGrunnlag = vilkårsperioder.stream()
+            .map(p -> new AbstractMap.SimpleEntry<>(p.getFomDato(), mapper.lagYtelsespesifiktGrunnlag(ref, p)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+        var resultat = kalkulusTjeneste.startBeregning(ref, stpTilYtelseGrunnlag);
+        var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
+        for (var entry : resultat.getResultater().entrySet()) {
+            var kalkulusResultat = entry.getValue();
+            Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
+            if (vilkårOppfylt != null && !vilkårOppfylt) {
+                var bgReferanse = entry.getKey();
+                avslå(kontekst, vilkårsperioder, resultat, kalkulusResultat, bgReferanse);
+            } else {
+                aksjonspunktResultater.addAll(aksjonspunkter(kalkulusResultat));
+            }
         }
+
+        return Collections.unmodifiableList(aksjonspunktResultater);
+    }
+
+    private List<AksjonspunktResultat> aksjonspunkter(KalkulusResultat kalkulusResultat) {
+        return kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
+    }
+
+    private void avslå(BehandlingskontrollKontekst kontekst, List<DatoIntervallEntitet> vilkårsperioder, SamletKalkulusResultat resultat, KalkulusResultat kalkulusResultat,
+                                                 UUID bgReferanse) {
+        var stp = resultat.getSkjæringstidspunkter().get(bgReferanse);
+        var vilkårsperiode = vilkårsperioder.stream().filter(p -> Objects.equals(stp, p.getFomDato())).findFirst()
+            .orElseThrow(() -> new IllegalStateException("Finner ikke vilkårsperiode for stp [" + stp + "] for bgReferanse [" + bgReferanse + "]"));
+        beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsperiode, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat));
     }
 
     private List<AksjonspunktResultat> avslåVilkår(BehandlingskontrollKontekst kontekst,
@@ -104,20 +136,23 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         return List.of();
     }
 
-
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING.equals(tilSteg)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             var ref = BehandlingReferanse.fra(behandling);
-            beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false)
-                .forEach(periode -> deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, periode));
+            NavigableSet<DatoIntervallEntitet> perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
+            deaktiverResultatOgSettPeriodeTilVurdering(ref, kontekst, perioderTilVurdering);
         }
     }
 
-    private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periode) {
-        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, periode);
-        kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, periode.getFomDato());
+    private void deaktiverResultatOgSettPeriodeTilVurdering(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
+        if (perioder.isEmpty()) {
+            return;
+        }
+        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, perioder);
+        List<LocalDate> skjæringstidspunkter = perioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toList());
+        kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, skjæringstidspunkter);
     }
 
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {

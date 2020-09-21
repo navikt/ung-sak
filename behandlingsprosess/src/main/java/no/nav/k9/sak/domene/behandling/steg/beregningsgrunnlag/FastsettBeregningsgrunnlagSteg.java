@@ -7,7 +7,7 @@ import java.util.Collections;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjeneste.FortsettBeregningResultatCallback;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("*")
@@ -25,8 +26,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
-    private BeregningTjeneste kalkulusTjeneste;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
+    private BeregningStegTjeneste beregningStegTjeneste;
 
     protected FastsettBeregningsgrunnlagSteg() {
         // for CDI proxy
@@ -34,27 +35,30 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public FastsettBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
-                                          BeregningTjeneste kalkulusTjeneste,
+                                          BeregningStegTjeneste beregningStegTjeneste,
                                           BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
 
-        this.kalkulusTjeneste = kalkulusTjeneste;
+        this.beregningStegTjeneste = beregningStegTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        var ref = BehandlingReferanse.fra(behandling);
 
-        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, true);
-
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            var kalkulusResultat = kalkulusTjeneste.fortsettBeregning(ref, periode.getFomDato(), FASTSETT_BEREGNINGSGRUNNLAG);
-            if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
-                vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
+        class HåndterResultat implements FortsettBeregningResultatCallback {
+            @Override
+            public void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode) {
+                if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
+                    vilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
+                }
             }
         }
+
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var ref = BehandlingReferanse.fra(behandling);
+        var callback = new HåndterResultat();
+        beregningStegTjeneste.fortsettBeregning(ref, FASTSETT_BEREGNINGSGRUNNLAG, callback);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
     }

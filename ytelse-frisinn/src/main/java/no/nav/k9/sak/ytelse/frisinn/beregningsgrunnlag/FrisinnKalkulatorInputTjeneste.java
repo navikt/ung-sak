@@ -12,7 +12,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregning
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -25,10 +25,9 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     private Boolean toggletVilkårsperioder;
 
     @Inject
-    public FrisinnKalkulatorInputTjeneste(InntektArbeidYtelseTjeneste iayTjeneste,
-                                          @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
+    public FrisinnKalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                           @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
-        super(iayTjeneste, opptjeningForBeregningTjeneste);
+        super(opptjeningForBeregningTjeneste);
         this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
@@ -37,7 +36,8 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     }
 
     /**
-     * Mapper IAY til kalkuluskontrakt for frisinn. Mapper informasjon for oppgitt vilkårsperiode i tillegg til informasjon før skjæringstidspunktet.
+     * Mapper IAY til kalkuluskontrakt for frisinn. Mapper informasjon for oppgitt vilkårsperiode i tillegg til informasjon før
+     * skjæringstidspunktet.
      *
      * @param referanse Behandlingreferanse
      * @param vilkårsperiode Vilkårsperiode
@@ -46,11 +46,14 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
      * @return IAY-grunnlag mappet til kalkuluskontrakt
      */
     @Override
-    protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse, DatoIntervallEntitet vilkårsperiode, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, OppgittOpptjening oppgittOpptjening) {
+    protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse, DatoIntervallEntitet vilkårsperiode,
+                                                               InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
+                                                               SakInntektsmeldinger sakInntektsmeldinger,
+                                                               OppgittOpptjening oppgittOpptjening) {
         if (toggletVilkårsperioder) {
             return new FrisinnTilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
         } else {
-            return super.mapIAYTilKalkulus(referanse, vilkårsperiode, inntektArbeidYtelseGrunnlag, oppgittOpptjening);
+            return super.mapIAYTilKalkulus(referanse, vilkårsperiode, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, oppgittOpptjening);
         }
     }
 
