@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -68,6 +69,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     @Override
     public SamletKalkulusResultat startBeregning(BehandlingReferanse ref, List<StartBeregningInput> startBeregningInput) {
 
+        var sortertInput = startBeregningInput.stream().sorted(Comparator.comparing(StartBeregningInput::getSkjæringstidspunkt)).collect(Collectors.toList());
         Map<UUID, KalkulusResultat> uuidKalkulusResulat = new LinkedHashMap<>();
         Map<UUID, KalkulatorInputDto> sendTilKalkulus = new LinkedHashMap<>();
         Map<UUID, LocalDate> uuidTilStp = new LinkedHashMap<>();
@@ -77,7 +79,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
         var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
 
-        for (var input : startBeregningInput) {
+        for (var input : sortertInput) {
             var ytelseGrunnlag = input.getYtelseGrunnlag();
             var bgReferanse = input.getBgReferanse();
             var skjæringstidspunkt = input.getSkjæringstidspunkt();
@@ -93,19 +95,19 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {
                     throw new IllegalStateException("forventet bare et resultat for startberegning, fikk: " + inputPerRef.size());
-                }
-                var kalkulatorInput = inputPerRef.values().iterator().next();
-                if (kalkulatorInput.getOpptjeningAktiviteter().getPerioder().isEmpty()) {
-                    if (erSøktFrilansISistePeriode(frisinnGrunnlag.getPerioderMedSøkerInfo())) {
-                        uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT));
-                    } else {
-                        uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
-                    }
                 } else {
-                    // hacky, men denne klassen skulle aldri eksistert. Slettes snarest Frisinn er ferdig.
-                    sendTilKalkulus.putAll(inputPerRef);
+                    var kalkulatorInput = inputPerRef.values().iterator().next();
+                    if (kalkulatorInput.getOpptjeningAktiviteter().getPerioder().isEmpty()) {
+                        if (erSøktFrilansISistePeriode(frisinnGrunnlag.getPerioderMedSøkerInfo())) {
+                            uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT));
+                        } else {
+                            uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
+                        }
+                    } else {
+                        // hacky, men denne klassen skulle aldri eksistert. Slettes snarest Frisinn er ferdig.
+                        sendTilKalkulus.putAll(inputPerRef);
+                    }
                 }
-
             }
 
         }
