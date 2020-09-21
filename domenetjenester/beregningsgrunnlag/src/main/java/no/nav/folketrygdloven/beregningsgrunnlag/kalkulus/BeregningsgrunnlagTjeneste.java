@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,7 +74,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
+    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
         var sortert = new TreeSet<>(skjæringstidspunkter);
         Map<UUID, LocalDate> bgReferanser = sortert.stream()
             .map(stp -> {
@@ -206,7 +207,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter) {
+    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
         var sortert = new TreeSet<>(skjæringstidspunkter);
         List<UUID> bgReferanser = sortert.stream()
             .map(stp -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), stp, true, false))

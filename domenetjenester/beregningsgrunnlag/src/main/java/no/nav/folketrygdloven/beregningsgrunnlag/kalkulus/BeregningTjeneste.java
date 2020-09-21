@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public interface BeregningTjeneste {
      * @param stegType {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
@@ -82,7 +83,7 @@ public interface BeregningTjeneste {
      * @param ref Behandlingreferanse
      * @param skjæringstidspunkt
      */
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter);
+    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
      *
