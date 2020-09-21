@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,8 +61,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag) {
-        
-        var beregningInput = ytelseGrunnlag.entrySet().stream().map(e -> {
+        var sortert = new TreeMap<>(ytelseGrunnlag);
+        var beregningInput = sortert.entrySet().stream().map(e -> {
             var skjæringstidspunkt = e.getKey();
             UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
             grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, skjæringstidspunkt));
@@ -72,7 +74,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
-        Map<UUID, LocalDate> bgReferanser = skjæringstidspunkter.stream()
+        var sortert = new TreeSet<>(skjæringstidspunkter);
+        Map<UUID, LocalDate> bgReferanser = sortert.stream()
             .map(stp -> {
                 var bgRef = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), stp, true, false);
                 return new AbstractMap.SimpleEntry<>(bgRef, stp);
@@ -92,10 +95,12 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref) {
-        Map<UUID, LocalDate> referanseTilStpMap = håndterMap.keySet().stream()
+        var sortertMap = new TreeMap<>(håndterMap);
+        Map<UUID, LocalDate> referanseTilStpMap = sortertMap.keySet().stream()
             .collect(Collectors.toMap(v -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), v, true, false), v -> v));
-        Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-        Map<UUID, HåndterBeregningDto> referanseTilDtoMap = håndterMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
+
+        Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (e1, e2) -> e1, TreeMap::new));
+        Map<UUID, HåndterBeregningDto> referanseTilDtoMap = sortertMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
         List<OppdaterBeregningsgrunnlagResultat> resultatListe = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregningListe(ref, referanseTilDtoMap);
         resultatListe.forEach(e -> e.setSkjæringstidspunkt(referanseTilStpMap.get(e.getReferanse())));
         return resultatListe;
@@ -202,8 +207,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter) {
-
-        List<UUID> bgReferanser = skjæringstidspunkter.stream()
+        var sortert = new TreeSet<>(skjæringstidspunkter);
+        List<UUID> bgReferanser = sortert.stream()
             .map(stp -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), stp, true, false))
             .collect(Collectors.toList());
         if (!bgReferanser.isEmpty()) {
