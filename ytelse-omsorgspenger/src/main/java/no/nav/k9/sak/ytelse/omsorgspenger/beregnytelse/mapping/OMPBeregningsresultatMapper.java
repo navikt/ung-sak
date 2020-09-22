@@ -37,6 +37,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
@@ -225,6 +226,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
     private void settArbeidsgiverfelter(Arbeidsgiver arb, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder) {
         ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arb);
         if (opplysninger != null) {
+            dtoBuilder.medArbeidsgiver(new ArbeidsgiverDto(opplysninger.getIdentifikator(), opplysninger.getIdentifikatorGUI(), opplysninger.getNavn()));
             dtoBuilder.medArbeidsgiverNavn(opplysninger.getNavn());
             if (!arb.erAktørId()) {
                 dtoBuilder.medArbeidsgiverOrgnr(new OrgNummer(arb.getOrgnr()));
