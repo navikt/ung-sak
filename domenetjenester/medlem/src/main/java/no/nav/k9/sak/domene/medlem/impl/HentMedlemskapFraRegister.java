@@ -38,11 +38,9 @@ public class HentMedlemskapFraRegister {
 
     public List<Medlemskapsperiode> finnMedlemskapPerioder(AktørId aktørId, LocalDate fom, LocalDate tom) {
         try {
-            var mups = restKlient.finnMedlemsunntak(aktørId.getId(), fom, tom).stream()
+            return restKlient.finnMedlemsunntak(aktørId.getId(), fom, tom).stream()
                 .map(this::mapFraMedlemsunntak)
                 .collect(Collectors.toList());
-            LOG.info("MEDL2 REST RS {}", mups);
-            return mups;
         } catch (Exception e) {
             throw MedlemFeil.FACTORY.feilVedKallTilMedlem(e).toException();
         }
