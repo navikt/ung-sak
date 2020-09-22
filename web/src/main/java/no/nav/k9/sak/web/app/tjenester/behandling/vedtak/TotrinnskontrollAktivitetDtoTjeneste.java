@@ -16,8 +16,8 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
@@ -32,26 +32,29 @@ import no.nav.k9.sak.typer.OrgNummer;
 
 @ApplicationScoped
 public class TotrinnskontrollAktivitetDtoTjeneste {
-    private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private VirksomhetTjeneste virksomhetTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
 
     protected TotrinnskontrollAktivitetDtoTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public TotrinnskontrollAktivitetDtoTjeneste(OpptjeningsperioderTjeneste forSaksbehandlingTjeneste,
+    public TotrinnskontrollAktivitetDtoTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                                 VilkårResultatRepository vilkårResultatRepository,
                                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                                 VirksomhetTjeneste virksomhetTjeneste,
+                                                InntektArbeidYtelseTjeneste iayTjeneste,
                                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
-        this.forSaksbehandlingTjeneste = forSaksbehandlingTjeneste;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
+        this.iayTjeneste = iayTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
@@ -59,13 +62,19 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
                                                                                Behandling behandling,
                                                                                Optional<UUID> iayGrunnlagUuid) {
         if (AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
+            Long behandlingId = behandling.getId();
             List<OpptjeningsperiodeForSaksbehandling> aktivitetPerioder = new ArrayList<>();
-            LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
+            LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
             BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-            var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+            var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
             if (vilkår.isPresent()) {
-                for (VilkårPeriode opptjening : vilkår.get().getPerioder()) {
-                    aktivitetPerioder.addAll(forSaksbehandlingTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlagUuid.orElse(null), opptjening.getFom()));
+                var iayGrunnlag = iayTjeneste.hentGrunnlag(iayGrunnlagUuid.get());
+                var opptjeningsresultat = opptjeningsperioderTjeneste.hentOpptjeningResultat(behandlingId);
+
+                for (var opptjeningperiode : vilkår.get().getPerioder()) {
+                    LocalDate stp = opptjeningperiode.getFom();
+                    var opptjening = opptjeningsresultat.finnOpptjening(stp).orElseThrow(() -> new IllegalStateException("Mangler opptjening for stp:" + stp));
+                    aktivitetPerioder.addAll(opptjeningsperioderTjeneste.hentRelevanteOpptjeningAktiveterForSaksbehandling(behandlingReferanse, iayGrunnlag, opptjening, stp));
                 }
             }
             return aktivitetPerioder.stream()

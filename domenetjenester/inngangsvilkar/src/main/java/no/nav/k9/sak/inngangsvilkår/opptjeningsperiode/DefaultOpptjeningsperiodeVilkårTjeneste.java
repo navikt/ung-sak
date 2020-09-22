@@ -1,11 +1,15 @@
 package no.nav.k9.sak.inngangsvilkår.opptjeningsperiode;
 
 import java.time.Period;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -20,25 +24,33 @@ import no.nav.k9.sak.inngangsvilkår.opptjeningsperiode.regelmodell.RegelFastset
 @FagsakYtelseTypeRef
 public class DefaultOpptjeningsperiodeVilkårTjeneste implements OpptjeningsperiodeVilkårTjeneste {
 
+    private static final int DAGER_OPPTJENING = 28;
     private Period antallDagerOpptjeningsperiode;
 
     @Inject
     public DefaultOpptjeningsperiodeVilkårTjeneste() {
-        this.antallDagerOpptjeningsperiode = Period.ofDays(28);
+        this.antallDagerOpptjeningsperiode = Period.ofDays(DAGER_OPPTJENING);
     }
 
     @Override
-    public VilkårData vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
-        OpptjeningsperiodeGrunnlag grunnlag = new OpptjeningsperiodeGrunnlag();
+    public NavigableMap<DatoIntervallEntitet, VilkårData> vurderOpptjeningsperiodeVilkår(BehandlingReferanse behandlingReferanse, Collection<DatoIntervallEntitet> perioder) {
+        if (perioder.isEmpty()) {
+            return Collections.emptyNavigableMap();
+        }
+        NavigableMap<DatoIntervallEntitet, VilkårData> resultater = new TreeMap<>();
+        for (var periode : new TreeSet<>(perioder)) {
+            var grunnlag = new OpptjeningsperiodeGrunnlag();
 
-        grunnlag.setFørsteUttaksDato(periode.getFomDato());
-        grunnlag.setPeriodeLengde(antallDagerOpptjeningsperiode);
+            grunnlag.setFørsteUttaksDato(periode.getFomDato());
+            grunnlag.setPeriodeLengde(antallDagerOpptjeningsperiode);
 
-        final OpptjeningsPeriode data = new OpptjeningsPeriode();
-        Evaluation evaluation = new RegelFastsettOpptjeningsperiode().evaluer(grunnlag, data);
+            var outputContainer = new OpptjeningsPeriode();
+            var evaluation = new RegelFastsettOpptjeningsperiode().evaluer(grunnlag, outputContainer);
 
-        VilkårData resultat = new VilkårUtfallOversetter().oversett(VilkårType.OPPTJENINGSPERIODEVILKÅR, evaluation, grunnlag, periode);
-        resultat.setEkstraVilkårresultat(data);
-        return resultat;
+            var resultat = new VilkårUtfallOversetter().oversett(VilkårType.OPPTJENINGSPERIODEVILKÅR, evaluation, grunnlag, periode);
+            resultat.setEkstraVilkårresultat(outputContainer);
+            resultater.put(periode, resultat);
+        }
+        return Collections.unmodifiableNavigableMap(resultater);
     }
 }

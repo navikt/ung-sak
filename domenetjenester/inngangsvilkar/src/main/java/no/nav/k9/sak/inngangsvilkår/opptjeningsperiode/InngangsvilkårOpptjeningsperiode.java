@@ -1,5 +1,8 @@
 package no.nav.k9.sak.inngangsvilkår.opptjeningsperiode;
 
+import java.util.Collection;
+import java.util.NavigableMap;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -28,7 +31,8 @@ public class InngangsvilkårOpptjeningsperiode implements Inngangsvilkår {
     }
 
     @Override
-    public VilkårData vurderVilkår(BehandlingReferanse ref, DatoIntervallEntitet periode) {
+    public NavigableMap<DatoIntervallEntitet, VilkårData> vurderVilkår(BehandlingReferanse ref, Collection<DatoIntervallEntitet> periode) {
         return opptjeningsperiodeVilkårTjeneste.vurderOpptjeningsperiodeVilkår(ref, periode);
     }
+
 }
