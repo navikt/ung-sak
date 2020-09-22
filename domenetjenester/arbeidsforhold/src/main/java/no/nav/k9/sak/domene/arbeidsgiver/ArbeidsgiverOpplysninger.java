@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.arbeidsgiver;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class ArbeidsgiverOpplysninger {
 
@@ -21,6 +22,14 @@ public class ArbeidsgiverOpplysninger {
 
     public String getIdentifikator() {
         return identifikator;
+    }
+
+    public String getIdentifikatorGUI() {
+        if (fødselsdato == null) {
+            return identifikator;
+        } else {
+            return fødselsdato.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        }
     }
 
     public String getNavn() {
