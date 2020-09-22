@@ -1,11 +1,16 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,8 +22,8 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.BeregningsgrunnlagPrReferanse;
@@ -56,18 +61,29 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt) {
-        UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
-        grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, skjæringstidspunkt));
-
-        return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, ytelseGrunnlag, bgReferanse, skjæringstidspunkt);
+    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag) {
+        var sortert = new TreeMap<>(ytelseGrunnlag);
+        var beregningInput = sortert.entrySet().stream().map(e -> {
+            var skjæringstidspunkt = e.getKey();
+            UUID bgReferanse = finnBeregningsgrunnlagsReferanseFor(referanse.getBehandlingId(), skjæringstidspunkt, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
+            grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgReferanse, skjæringstidspunkt));
+            return new StartBeregningInput(bgReferanse, skjæringstidspunkt, e.getValue());
+        }).collect(Collectors.toList());
+        
+        return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, beregningInput);
     }
 
     @Override
-    public KalkulusResultat fortsettBeregning(BehandlingReferanse ref, LocalDate skjæringstidspunkt, BehandlingStegType stegType) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false);
+    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
+        var sortert = new TreeSet<>(skjæringstidspunkter);
+        Map<UUID, LocalDate> bgReferanser = sortert.stream()
+            .map(stp -> {
+                var bgRef = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), stp, true, false);
+                return new AbstractMap.SimpleEntry<>(bgRef, stp);
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        return finnTjeneste(ref.getFagsakYtelseType()).fortsettBeregning(ref.getFagsakYtelseType(), bgReferanse, stegType);
+        KalkulusApiTjeneste tjeneste = finnTjeneste(ref.getFagsakYtelseType());
+        return tjeneste.fortsettBeregning(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser, stegType);
     }
 
     @Override
@@ -80,15 +96,16 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref) {
-        Map<UUID, LocalDate> referanseTilStpMap = håndterMap.keySet().stream()
+        var sortertMap = new TreeMap<>(håndterMap);
+        Map<UUID, LocalDate> referanseTilStpMap = sortertMap.keySet().stream()
             .collect(Collectors.toMap(v -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), v, true, false), v -> v));
-        Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-        Map<UUID, HåndterBeregningDto> referanseTilDtoMap = håndterMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
+
+        Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (e1, e2) -> e1, TreeMap::new));
+        Map<UUID, HåndterBeregningDto> referanseTilDtoMap = sortertMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
         List<OppdaterBeregningsgrunnlagResultat> resultatListe = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregningListe(ref, referanseTilDtoMap);
         resultatListe.forEach(e -> e.setSkjæringstidspunkt(referanseTilStpMap.get(e.getReferanse())));
         return resultatListe;
     }
-
 
     @Override
     public Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
@@ -190,9 +207,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false);
-        bgReferanse.ifPresent(bgRef -> finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), bgRef));
+    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
+        var sortert = new TreeSet<>(skjæringstidspunkter);
+        List<UUID> bgReferanser = sortert.stream()
+            .map(stp -> finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), stp, true, false))
+            .collect(Collectors.toList());
+        if (!bgReferanser.isEmpty()) {
+            finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
+        }
     }
 
     @Override

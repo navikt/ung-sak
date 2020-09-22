@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -21,16 +23,18 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
  */
 public interface BeregningTjeneste {
 
-    /** Starter en ny beregning eller starter en beregning på nytt fra starten av
+    /**
+     * Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
+     * 
      * @param referanse {@link BehandlingReferanse}
-     * @param ytelseGrunnlag - ytelsespesifikt grunnlag
-     * @param skjæringstidspunkt - key for å finne bgReferanse mot kalkulus
-     * @return KalkulusResultat {@link KalkulusResultat}
+     * @param ytelseGrunnlag - ytelsespesifikt grunnlag per skjæringstidspunkt
+     * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, LocalDate skjæringstidspunkt);
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag);
 
-    /** Kjører en beregning videre fra gitt steg <br>
+    /**
+     * Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
      * Steg 4. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
@@ -39,9 +43,9 @@ public interface BeregningTjeneste {
      * @param ref {@link BehandlingReferanse}
      * @param skjæringstidspunkt - skjæringstidspunktet
      * @param stegType {@link BehandlingStegType}
-     * @return KalkulusResultat {@link KalkulusResultat}
+     * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat fortsettBeregning(BehandlingReferanse ref, LocalDate skjæringstidspunkt, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
@@ -77,9 +81,9 @@ public interface BeregningTjeneste {
      * Deaktivering skal kun kalles i første steg i beregning.
      *
      * @param ref Behandlingreferanse
-     * @param skjæringstidspunkt skjæringstidspunkt
+     * @param skjæringstidspunkt
      */
-    void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
      *

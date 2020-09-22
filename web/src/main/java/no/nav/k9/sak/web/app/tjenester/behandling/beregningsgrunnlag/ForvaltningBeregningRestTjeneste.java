@@ -28,12 +28,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
-import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -55,6 +55,8 @@ public class ForvaltningBeregningRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
 
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+
     public ForvaltningBeregningRestTjeneste() {
     }
 
@@ -62,10 +64,12 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(@Any Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste,
                                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                             BehandlingRepository behandlingRepository,
+                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.kalkulatorInputTjeneste = kalkulatorInputTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
+        this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
@@ -80,10 +84,22 @@ public class ForvaltningBeregningRestTjeneste {
         var behandlingId = behandlingIdDto.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
+        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
+
+        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
+
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+
         List<KalkulatorInputPrVilkårperiodeDto> inputListe = perioderTilVurdering.stream()
             .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode()))
-            .map(periode -> new KalkulatorInputPrVilkårperiodeDto(periode, hentInputForPeriode(ref, periode)))
+            .map(vilkårsperiode -> {
+                var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
+                var kalkulatorInput = getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, ytelseGrunnlag, vilkårsperiode);
+                return new KalkulatorInputPrVilkårperiodeDto(vilkårsperiode, kalkulatorInput);
+            })
             .collect(Collectors.toList());
 
         CacheControl cc = new CacheControl();
@@ -93,12 +109,6 @@ public class ForvaltningBeregningRestTjeneste {
         cc.setPrivate(true);
 
         return Response.ok(inputListe, JSON).cacheControl(cc).build();
-    }
-
-    private KalkulatorInputDto hentInputForPeriode(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
-        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-        var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-        return getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, ytelseGrunnlag, vilkårsperiode);
     }
 
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {

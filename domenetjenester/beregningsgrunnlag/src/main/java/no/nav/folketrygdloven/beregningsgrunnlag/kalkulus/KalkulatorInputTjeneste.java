@@ -16,7 +16,7 @@ import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
@@ -26,13 +26,10 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @FagsakYtelseTypeRef("*")
 public class KalkulatorInputTjeneste {
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
 
     @Inject
-    public KalkulatorInputTjeneste(InntektArbeidYtelseTjeneste iayTjeneste,
-                                   @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
-        this.iayTjeneste = Objects.requireNonNull(iayTjeneste, "iayTjeneste");
+    public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
     }
 
@@ -40,21 +37,24 @@ public class KalkulatorInputTjeneste {
         // for CDI proxy
     }
 
-    public KalkulatorInputDto byggDto(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+    public KalkulatorInputDto byggDto(BehandlingReferanse referanse,
+                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                      SakInntektsmeldinger sakInntektsmeldinger,
+                                      List<RefusjonskravDato> refusjonskravDatoer,
+                                      YtelsespesifiktGrunnlagDto ytelseGrunnlag,
+                                      DatoIntervallEntitet vilkårsperiode) {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
-        var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
 
-        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, inntektArbeidYtelseGrunnlag, tjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag).orElse(null));
-        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, inntektArbeidYtelseGrunnlag, vilkårsperiode);
+        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, tjeneste.finnOppgittOpptjening(iayGrunnlag).orElse(null));
+        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
-        List<RefusjonskravDato> refusjonskravDatoes = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
-        if (!refusjonskravDatoes.isEmpty()) {
-            kalkulatorInputDto.medRefusjonskravDatoer(TilKalkulusMapper.mapTilDto(refusjonskravDatoes));
+        if (!refusjonskravDatoer.isEmpty()) {
+            kalkulatorInputDto.medRefusjonskravDatoer(TilKalkulusMapper.mapTilDto(refusjonskravDatoer));
         }
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
@@ -64,8 +64,8 @@ public class KalkulatorInputTjeneste {
     protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse,
                                                                DatoIntervallEntitet vilkårsperiode,
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
+                                                               SakInntektsmeldinger sakInntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening) {
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
         return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
     }
 

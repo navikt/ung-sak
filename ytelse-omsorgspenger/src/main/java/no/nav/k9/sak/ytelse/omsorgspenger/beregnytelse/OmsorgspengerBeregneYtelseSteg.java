@@ -25,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
@@ -45,7 +44,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private boolean brukerutbetalingEnabled;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
@@ -59,12 +57,10 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           BeregningTjeneste kalkulusTjeneste,
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
                                           @KonfigVerdi(value = "BRUKERUTBETALING_ENABLED", required = false) boolean brukerutbetalingEnabled,
                                           @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();

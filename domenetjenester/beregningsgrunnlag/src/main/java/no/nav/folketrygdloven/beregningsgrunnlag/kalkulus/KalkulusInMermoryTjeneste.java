@@ -19,23 +19,25 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). (Ønsker at denne kunne blitt fjernet)
  * NB: Skal kun brukes for tester.
  * <p>
- * Definer som alternative i beans.xml (i src/test/resources/META-INF) i modul som skal bruke<p>
+ * Definer som alternative i beans.xml (i src/test/resources/META-INF) i modul som skal bruke
  * <p>
- * Legg inn i fil <code>src/test/resources/META-INF</code> for å aktivere for enhetstester: <p>
+ * <p>
+ * Legg inn i fil <code>src/test/resources/META-INF</code> for å aktivere for enhetstester:
+ * <p>
  */
 @RequestScoped
 @Alternative
@@ -51,12 +53,12 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt) {
+    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public KalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, UUID behandlingUuid, BehandlingStegType stegType) {
+    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Map<UUID, LocalDate> bgReferanser, BehandlingStegType stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
@@ -129,8 +131,9 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
         grunnlag.add(beregningsgrunnlagGrunnlag);
     }
 
+
     @Override
-    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
+    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse) {
     }
 
     @Override
@@ -142,7 +145,6 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     public Grunnbeløp hentGrunnbeløp(LocalDate dato) {
         return null;
     }
-
 
     private Optional<BeregningsgrunnlagGrunnlag> getAktivtInntektArbeidGrunnlag(Long behandlingId) {
         var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(UUID.randomUUID(), k -> new LinkedList<>());
@@ -159,4 +161,3 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
             .findFirst().orElseThrow();
     }
 }
-

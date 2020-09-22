@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -24,7 +25,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -46,7 +46,6 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     @Inject
     public BeregningsgrunnlagVilkårTjeneste(BehandlingRepository behandlingRepository,
-                                            VedtakVarselRepository behandlingsresultatRepository,
                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                             VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
@@ -120,9 +119,13 @@ public class BeregningsgrunnlagVilkårTjeneste {
             () -> new UnsupportedOperationException("Har ikke " + VilkårsPerioderTilVurderingTjeneste.class.getName() + " for ytelsetype=" + behandling.getFagsakYtelseType()));
     }
 
-
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {
         settVilkårutfallTilIkkeVurdert(kontekst.getBehandlingId(), vilkårsPeriode);
+        nullstillBehandlingsresultat(kontekst);
+    }
+
+    public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, Collection<DatoIntervallEntitet> vilkårsPerioder) {
+        vilkårsPerioder.forEach(vp -> settVilkårutfallTilIkkeVurdert(kontekst.getBehandlingId(), vp));
         nullstillBehandlingsresultat(kontekst);
     }
 

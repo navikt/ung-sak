@@ -12,41 +12,44 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * KalkulusApiTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
  */
 public interface KalkulusApiTjeneste {
 
-    /** Starter en ny beregning eller starter en beregning på nytt fra starten av
+    /**
+     * Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
+     * 
      * @param referanse {@link BehandlingReferanse}
-     * @param ytelseGrunnlag - ytelsespesifikt grunnlag
-     * @param bgReferanse
-     * @param skjæringstidspunkt
+     * @param startBeregningInput - ytelsespesifikt grunnlag
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat startBeregning(BehandlingReferanse referanse, YtelsespesifiktGrunnlagDto ytelseGrunnlag, UUID bgReferanse, LocalDate skjæringstidspunkt);
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<StartBeregningInput> startBeregningInput);
 
-    /** Kjører en beregning videre fra gitt steg <br>
+    /**
+     * Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
      * Steg 4. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 5. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
      * @param fagsakYtelseType
-     * @param behandlingUuid
+     * @param saksnummer
+     * @param bgReferanse per skjæringstidspunkt
      * @param stegType {@link BehandlingStegType}
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    KalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, UUID behandlingUuid, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Map<UUID, LocalDate> bgReferanser, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
@@ -79,7 +82,7 @@ public interface KalkulusApiTjeneste {
      * @param fagsakYtelseType Fagsakytelsetype
      * @param bgReferanse koblingreferanse
      */
-    void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
+    void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse);
 
     Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2);
 
