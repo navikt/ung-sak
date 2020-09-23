@@ -20,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
@@ -105,8 +106,8 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     @NotNull
     private Optional<List<Aktivitet>> hentUttaksplan(BehandlingReferanse ref) {
-        var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
-        return Optional.ofNullable(fullUttaksplan).map(FullUttaksplan::getAktiviteter);
+        var fullUttaksplan = årskvantumTjeneste.hentUttaksplanForBehandling(ref.getSaksnummer(), ref.getBehandlingUuid());
+        return Optional.ofNullable(fullUttaksplan).map(FullUttaksplanForBehandlinger::getAktiviteter);
     }
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat, Optional<List<Aktivitet>> uttaksplan) {

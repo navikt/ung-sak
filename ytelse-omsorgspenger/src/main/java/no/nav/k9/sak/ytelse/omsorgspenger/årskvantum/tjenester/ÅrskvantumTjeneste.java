@@ -26,6 +26,7 @@ import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.BarnType;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
@@ -302,6 +303,22 @@ public class ÅrskvantumTjeneste {
 
     public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
         return årskvantumKlient.hentPeriodeForFagsak(saksnummer);
+    }
+
+    public FullUttaksplanForBehandlinger hentUttaksplanForBehandling(Saksnummer saksnummer, UUID behandlingUuid) {
+        var alleBehandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
+
+        var relevantBehandling = alleBehandlinger.stream().filter(it -> it.getUuid().equals(behandlingUuid)).findAny().orElseThrow();
+
+        var relevanteBehandlinger = alleBehandlinger.stream()
+            .filter(Behandling::erYtelseBehandling)
+            .filter(it -> !it.erHenlagt())
+            .filter(it -> it.getOpprettetTidspunkt().isBefore(relevantBehandling.getOpprettetTidspunkt())
+                || it.getOpprettetTidspunkt().isEqual(relevantBehandling.getOpprettetTidspunkt()))
+            .map(Behandling::getUuid)
+            .collect(Collectors.toList());
+
+        return årskvantumKlient.hentFullUttaksplanForBehandling(relevanteBehandlinger);
     }
 
 }

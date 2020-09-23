@@ -2,8 +2,10 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
@@ -139,6 +141,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public FullUttaksplanForBehandlinger hentFullUttaksplanForBehandling(List<UUID> behandlinger) {
+        var request = new FullUttaksplanRequest(behandlinger.stream().map(UUID::toString).collect(Collectors.toList()));
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/uttaksplan");
+            return restKlient.post(endpoint, request, FullUttaksplanForBehandlinger.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.klarteIkkeHenteUttaksplanForBehandlinger(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentUtbetalingGrunnlag");
@@ -166,9 +179,6 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         @TekniskFeil(feilkode = "K9SAK-AK-1000089", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Årskvantum For Fagsak: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilhentÅrskvantumForFagsak(String feilmelding, Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-AK-1000090", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hente Resterende Kvantum: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilhentResterendeKvantum(String feilmelding, Throwable t);
-
         @TekniskFeil(feilkode = "K9SAK-AK-1000091", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke deaktivere Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilDeaktiverUttak(String feilmelding, Throwable t);
 
@@ -184,6 +194,8 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         @TekniskFeil(feilkode = "K9SAK-AK-1000095", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hentUtbetalingGrunnlag: %s", logLevel = LogLevel.WARN)
         Feil feilKallHentUtbetalingGrunnlag(String feilmelding, Throwable t);
 
+        @TekniskFeil(feilkode = "K9SAK-AK-1000096", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
+        Feil klarteIkkeHenteUttaksplanForBehandlinger(String feilmelding, Throwable t);
     }
 
 }
