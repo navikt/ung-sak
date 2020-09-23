@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -15,12 +16,13 @@ import java.util.UUID;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -58,12 +60,12 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Map<UUID, LocalDate> bgReferanser, BehandlingStegType stegType) {
+    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID behandlingUuid) {
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BgRef bgRef) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
@@ -73,8 +75,8 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
+    public Optional<Beregningsgrunnlag> hentFastsatt(BgRef bgReferanse, FagsakYtelseType fagsakYtelseType) {
+        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse.getRef(), k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
             return Optional.empty();
         }
@@ -92,21 +94,29 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse, k -> new LinkedList<>());
-        if (behGrunnlag.isEmpty()) {
-            throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
+    public List<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser) {
+
+        Map<BgRef, Beregningsgrunnlag> resultater = new LinkedHashMap<>();
+        for (var bgRef : bgReferanser) {
+            var ref = bgRef.getRef();
+            var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(ref, k -> new LinkedList<>());
+            if (behGrunnlag.isEmpty()) {
+                throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgRef);
+            }
+
+            Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(0L, grId))
+                .filter(BeregningsgrunnlagGrunnlag::getAktiv)
+                .findFirst();
+
+            if (first.isPresent()) {
+                var beregningsgrunnlagGrunnlag = first.get();
+                beregningsgrunnlagGrunnlag.getBeregningsgrunnlag().ifPresent(b -> resultater.put(bgRef, b));
+            } else {
+                throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgRef);
+            }
         }
 
-        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(0L, grId))
-            .filter(BeregningsgrunnlagGrunnlag::getAktiv)
-            .findFirst();
-
-        if (first.isPresent()) {
-            BeregningsgrunnlagGrunnlag beregningsgrunnlagGrunnlag = first.get();
-            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag();
-        }
-        throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgReferanse);
+        return List.copyOf(resultater.values());
     }
 
     @Override
@@ -115,8 +125,8 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, UUID uuid) {
-        return Optional.empty();
+    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser) {
+        return List.of();
     }
 
     @Override
@@ -131,13 +141,12 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
         grunnlag.add(beregningsgrunnlagGrunnlag);
     }
 
-
     @Override
     public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse) {
     }
 
     @Override
-    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2) {
+    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, BgRef bgRefeanse1, FagsakYtelseType fagsakYtelseType2, BgRef bgReferanse2) {
         return false;
     }
 

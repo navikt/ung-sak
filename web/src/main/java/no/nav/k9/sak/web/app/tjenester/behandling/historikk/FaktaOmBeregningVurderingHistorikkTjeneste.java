@@ -15,11 +15,11 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.output.ErMottattYtelseEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.ErTidsbegrensetArbeidsforholdEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.FaktaOmBeregningVurderinger;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.RefusjonskravGyldighetEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.ToggleEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.ErMottattYtelseEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.ErTidsbegrensetArbeidsforholdEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.FaktaOmBeregningVurderinger;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonskravGyldighetEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.ToggleEndring;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;

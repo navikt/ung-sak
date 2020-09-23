@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.output;
+package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
 public class ToggleEndring {
 

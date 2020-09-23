@@ -1,18 +1,20 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -22,7 +24,8 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
- * KalkulusApiTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
+ * KalkulusApiTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
+ * (https://github.com/navikt/ft-kalkulus/)
  */
 public interface KalkulusApiTjeneste {
 
@@ -49,14 +52,14 @@ public interface KalkulusApiTjeneste {
      * @param stegType {@link BehandlingStegType}
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Map<UUID, LocalDate> bgReferanser, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType);
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
      * @param behandlingUuid
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
-    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, UUID behandlingUuid);
+    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BgRef behandlingUuid);
 
     /**
      * @param behandlingReferanse Behandlingreferanse
@@ -65,17 +68,18 @@ public interface KalkulusApiTjeneste {
      */
     List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap);
 
-    Optional<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, UUID bgReferanse);
+    List<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanse);
 
     BeregningsgrunnlagListe hentBeregningsgrunnlagListeDto(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser);
 
-    Optional<Beregningsgrunnlag> hentFastsatt(UUID bgReferanse, FagsakYtelseType fagsakYtelseType);
+    Optional<Beregningsgrunnlag> hentFastsatt(BgRef bgReferanse, FagsakYtelseType fagsakYtelseType);
 
-    Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, UUID uuid);
+    List<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser);
 
     void lagreBeregningsgrunnlag(BehandlingReferanse referanse, Beregningsgrunnlag beregningsgrunnlag, BeregningsgrunnlagTilstand opprettet);
 
-    /** Deaktiverer beregningsgrunnlag og kalkulatorinput.
+    /**
+     * Deaktiverer beregningsgrunnlag og kalkulatorinput.
      *
      * Skal kun kalles fra første beregningssteg.
      *
@@ -84,7 +88,7 @@ public interface KalkulusApiTjeneste {
      */
     void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse);
 
-    Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, UUID bgRefeanse1, FagsakYtelseType fagsakYtelseType2, UUID bgReferanse2);
+    Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, BgRef bgRefeanse1, FagsakYtelseType fagsakYtelseType2, BgRef bgReferanse2);
 
     /**
      * Henter grunnbeløp (GVERDI)

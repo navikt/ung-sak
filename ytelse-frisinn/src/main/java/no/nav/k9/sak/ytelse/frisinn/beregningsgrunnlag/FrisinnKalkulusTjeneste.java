@@ -1,9 +1,10 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
-import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,12 +14,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.StartBeregningInput;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -62,7 +64,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Map<UUID, LocalDate> bgReferanser, BehandlingStegType stegType) {
+    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
         return super.fortsettBeregning(fagsakYtelseType, saksnummer, bgReferanser, stegType);
     }
 
@@ -72,8 +74,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         var sortertInput = startBeregningInput.stream().sorted(Comparator.comparing(StartBeregningInput::getSkjæringstidspunkt)).collect(Collectors.toList());
         Map<UUID, KalkulusResultat> uuidKalkulusResulat = new LinkedHashMap<>();
         Map<UUID, KalkulatorInputDto> sendTilKalkulus = new LinkedHashMap<>();
-        Map<UUID, LocalDate> uuidTilStp = new LinkedHashMap<>();
-        startBeregningInput.stream().forEach(input -> uuidTilStp.put(input.getBgReferanse(), input.getSkjæringstidspunkt()));
+        Collection<BgRef> bgReferanser = startBeregningInput.stream().map(input -> new BgRef(input.getBgReferanse(), input.getSkjæringstidspunkt()))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
@@ -112,21 +114,21 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         }
 
-        var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, uuidTilStp);
+        var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser);
         uuidKalkulusResulat.putAll(fraBeregningResponse.getResultater());
 
-        return new SamletKalkulusResultat(uuidKalkulusResulat, uuidTilStp);
+        return new SamletKalkulusResultat(uuidKalkulusResulat, bgReferanser);
 
     }
 
-    private SamletKalkulusResultat beregnKalkulus(BehandlingReferanse ref, Map<UUID, KalkulatorInputDto> sendTilKalkulus, Map<UUID, LocalDate> uuidTilStp) {
+    private SamletKalkulusResultat beregnKalkulus(BehandlingReferanse ref, Map<UUID, KalkulatorInputDto> sendTilKalkulus, Collection<BgRef> bgReferanser) {
         // samlet request til beregning
         var startBeregningRequest = new StartBeregningListeRequest(sendTilKalkulus,
             ref.getSaksnummer().getVerdi(),
             new AktørIdPersonident(ref.getAktørId().getId()),
             YtelseTyperKalkulusStøtterKontrakt.FRISINN);
         List<TilstandResponse> tilstandResponse = getKalkulusRestTjeneste().startBeregning(startBeregningRequest);
-        var fraBeregningResponse = mapFraTilstand(tilstandResponse, uuidTilStp);
+        var fraBeregningResponse = mapFraTilstand(tilstandResponse, bgReferanser);
         return fraBeregningResponse;
     }
 

@@ -6,8 +6,8 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.InntektEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.InntektEndring;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
