@@ -49,6 +49,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
@@ -192,8 +193,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public List<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanse) {
-        return hentGrunnlag(fagsakYtelseType, bgReferanse).stream()
+    public List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<BgRef> bgReferanser) {
+        List<BeregningsgrunnlagGrunnlag> grunnlag = hentGrunnlag(ref, bgReferanser);
+        if (grunnlag.isEmpty()) {
+            return Collections.emptyList();
+        }
+        boolean alleFastsatt = grunnlag.stream().allMatch(v -> Objects.equals(BeregningsgrunnlagTilstand.FASTSATT, v.getBeregningsgrunnlagTilstand()));
+        if (!alleFastsatt) {
+            throw new IllegalStateException("Fått beregningsgrunnlag som ikke er fastsatt for angitte referanser: " + bgReferanser);
+        }
+        return grunnlag
+            .stream()
             .map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -245,19 +255,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser) {
-        var ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
+    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<BgRef> bgReferanser) {
+        var ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(ref.getFagsakYtelseType().getKode());
 
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
-        for (var bgRef : bgReferanser) {
-            // FIXME trenger bolk tjeneste her
-            var request = new HentBeregningsgrunnlagRequest(bgRef.getRef(), ytelseSomSkalBeregnes, false);
-            var beregningsgrunnlagGrunnlagDto = restTjeneste.hentBeregningsgrunnlagGrunnlag(request);
-            if (beregningsgrunnlagGrunnlagDto != null) {
-                var mapped = FraKalkulusMapper.mapBeregningsgrunnlagGrunnlag(beregningsgrunnlagGrunnlagDto);
-                resultater.add(mapped);
-            }
-        }
+
+        List<HentBeregningsgrunnlagRequest> requests = new ArrayList<>();
+        bgReferanser.forEach(bgRef -> requests.add(new HentBeregningsgrunnlagRequest(bgRef.getRef(), ytelseSomSkalBeregnes, false)));
+        var dtoer = restTjeneste.hentBeregningsgrunnlagGrunnlag(new HentBeregningsgrunnlagListeRequest(requests, ref.getBehandlingUuid(), false));
+
+        dtoer.forEach(dto -> resultater.add(FraKalkulusMapper.mapBeregningsgrunnlagGrunnlag(dto)));
         return Collections.unmodifiableList(resultater);
     }
 

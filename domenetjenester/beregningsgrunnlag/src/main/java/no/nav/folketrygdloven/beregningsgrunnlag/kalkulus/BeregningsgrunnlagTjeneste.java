@@ -110,9 +110,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseMap(ref.getBehandlingId(), skjæringstidspunkter, true, false);
+        var bgReferanser = finnBeregningsgrunnlagsReferanseMap(ref.getBehandlingId(), skjæringstidspunkter, true, false);
 
-        return finnTjeneste(ref.getFagsakYtelseType()).hentEksaktFastsatt(ref.getFagsakYtelseType(), bgReferanse);
+        return finnTjeneste(ref.getFagsakYtelseType()).hentEksaktFastsatt(ref, bgReferanser);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             return Optional.empty();
         }
         var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-        var grunnlag = tjeneste.hentGrunnlag(ref.getFagsakYtelseType(), List.of(bgReferanse.get()));
+        var grunnlag = tjeneste.hentGrunnlag(ref, List.of(bgReferanse.get()));
         if(grunnlag.size()==1) {
             return Optional.of(grunnlag.get(0));
         } else if(grunnlag.isEmpty()) {

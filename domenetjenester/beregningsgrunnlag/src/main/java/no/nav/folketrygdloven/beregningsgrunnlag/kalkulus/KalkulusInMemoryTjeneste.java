@@ -43,7 +43,7 @@ import no.nav.k9.sak.typer.Saksnummer;
  */
 @RequestScoped
 @Alternative
-public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
+public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
 
     private final Map<UUID, Deque<UUID>> indeksBehandlingTilGrunnlag = new LinkedHashMap<>();
     private final List<BeregningsgrunnlagGrunnlag> grunnlag = new ArrayList<>();
@@ -51,7 +51,7 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     /**
      * CDI ctor for proxies.
      */
-    public KalkulusInMermoryTjeneste() {
+    public KalkulusInMemoryTjeneste() {
     }
 
     @Override
@@ -94,12 +94,11 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public List<Beregningsgrunnlag> hentEksaktFastsatt(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser) {
+    public List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<BgRef> bgReferanser) {
 
         Map<BgRef, Beregningsgrunnlag> resultater = new LinkedHashMap<>();
         for (var bgRef : bgReferanser) {
-            var ref = bgRef.getRef();
-            var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(ref, k -> new LinkedList<>());
+            var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgRef.getRef(), k -> new LinkedList<>());
             if (behGrunnlag.isEmpty()) {
                 throw new IllegalStateException("Mangler Beregningsgrunnlag for behandling " + bgRef);
             }
@@ -125,7 +124,7 @@ public class KalkulusInMermoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(FagsakYtelseType fagsakYtelseType, Collection<BgRef> bgReferanser) {
+    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<BgRef> bgReferanser) {
         return List.of();
     }
 

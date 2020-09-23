@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -26,6 +27,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest
 import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
@@ -60,6 +62,8 @@ public class KalkulusRestTjeneste {
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader booleanReader = kalkulusMapper.readerFor(Boolean.class);
     private final ObjectReader grunnlagReader = kalkulusMapper.readerFor(BeregningsgrunnlagGrunnlagDto.class);
+    private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
+    });
     private final ObjectReader fastSattReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto.class);
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
 
@@ -71,7 +75,10 @@ public class KalkulusRestTjeneste {
     private URI oppdaterListeEndpoint;
     private URI fastsattEndpoint;
     private URI beregningsgrunnlagListeDtoEndpoint;
+
+    @Deprecated(forRemoval = true)
     private URI beregningsgrunnlagGrunnlagEndpoint;
+    private URI beregningsgrunnlagGrunnlagBolkEndpoint;
     private URI erEndringIBeregningEndpoint;
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
@@ -93,6 +100,7 @@ public class KalkulusRestTjeneste {
         this.fastsattEndpoint = toUri("/api/kalkulus/v1/fastsatt");
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
         this.beregningsgrunnlagGrunnlagEndpoint = toUri("/api/kalkulus/v1/grunnlag");
+        this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.erEndringIBeregningEndpoint = toUri("/api/kalkulus/v1/erEndring");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
 
@@ -148,11 +156,21 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    public no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto hentBeregningsgrunnlagGrunnlag(HentBeregningsgrunnlagRequest request) {
+    public BeregningsgrunnlagGrunnlagDto hentBeregningsgrunnlagGrunnlag(HentBeregningsgrunnlagRequest request) {
         var endpoint = beregningsgrunnlagGrunnlagEndpoint;
 
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), grunnlagReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public List<BeregningsgrunnlagGrunnlagDto> hentBeregningsgrunnlagGrunnlag(HentBeregningsgrunnlagListeRequest req) {
+        var endpoint = beregningsgrunnlagGrunnlagBolkEndpoint;
+
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(req), grunnlagListReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
@@ -302,4 +320,5 @@ public class KalkulusRestTjeneste {
         @TekniskFeil(feilkode = "F-FT-K-1000003", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
     }
+
 }
