@@ -59,7 +59,8 @@ jobs:
         run: |
           mvn package --batch-mode --file pom.xml -DtrimStackTrace=false
         env:
-          GITHUB_TOKEN: ${{ steps.get-token.outputs.token }} 
+#          GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
 
