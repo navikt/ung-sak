@@ -79,13 +79,13 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(3), skjæringstidspunkt.minusDays(1));
 
         Virksomhet virksomhet = new Virksomhet.Builder()
-                .medOrgnr(NAV_ORG_NUMMER)
-                .medNavn("Virksomheten")
-                .medRegistrert(LocalDate.now())
-                .medOppstart(LocalDate.now())
-                .build();
+            .medOrgnr(NAV_ORG_NUMMER)
+            .medNavn("Virksomheten")
+            .medRegistrert(LocalDate.now())
+            .medOppstart(LocalDate.now())
+            .build();
         when(virksomhetTjeneste.finnOrganisasjon(NAV_ORG_NUMMER)).thenReturn(Optional.of(virksomhet));
-            
+
         OppgittOpptjeningBuilder oppgitt = OppgittOpptjeningBuilder.ny();
         oppgitt.leggTilEgneNæringer(Collections.singletonList(OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
             .medVirksomhet(NAV_ORG_NUMMER)
@@ -97,11 +97,11 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgitt);
 
         repositoryProvider.getOpptjeningRepository().lagreOpptjeningsperiode(behandling, periode.getFomDato(), periode.getTomDato(), false);
-        
-        
+
         // Assert
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt))
+        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, List.of(DatoIntervallEntitet.fraOgMed(skjæringstidspunkt)))
+            .firstEntry().getValue()
             .stream().filter(p -> p.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.NÆRING)).collect(Collectors.toList());
 
         assertThat(perioder).hasSize(1);
@@ -134,10 +134,9 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        var perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, List.of(DatoIntervallEntitet.fraOgMed(skjæringstidspunkt)));
         assertThat(perioder).hasSize(1);
-        assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_GODKJENT)).collect(Collectors.toList()))
-            .hasSize(1);
+        assertThat(perioder.firstEntry().getValue().stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_GODKJENT)).collect(Collectors.toList())).hasSize(1);
     }
 
     @Test
@@ -166,9 +165,9 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
         // Act
         BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
-        List<OpptjeningAktivitetPeriode> perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, DatoIntervallEntitet.fraOgMed(skjæringstidspunkt));
+        var perioder = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, List.of(DatoIntervallEntitet.fraOgMed(skjæringstidspunkt)));
         assertThat(perioder).hasSize(1);
-        assertThat(perioder.stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_UNDERKJENT)).collect(Collectors.toList()))
+        assertThat(perioder.firstEntry().getValue().stream().filter(p -> p.getVurderingsStatus().equals(VurderingsStatus.FERDIG_VURDERT_UNDERKJENT)).collect(Collectors.toList()))
             .hasSize(1);
     }
 

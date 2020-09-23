@@ -2,7 +2,11 @@ package no.nav.k9.sak.inngangsvilkår.søknad;
 
 import static java.util.Collections.singletonList;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -36,29 +40,36 @@ public class InngangsvilkårSøkersOpplysningsplikt implements Inngangsvilkår {
     }
 
     @Override
-    public VilkårData vurderVilkår(BehandlingReferanse ref, DatoIntervallEntitet periode) {
+    public NavigableMap<DatoIntervallEntitet, VilkårData> vurderVilkår(BehandlingReferanse ref, Collection<DatoIntervallEntitet> periode) {
         return vurderOpplysningspliktOppfyltAutomatisk(ref, periode);
     }
 
-    private VilkårData vurderOpplysningspliktOppfyltAutomatisk(BehandlingReferanse ref, DatoIntervallEntitet periode) {
-        VilkårData oppfylt = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.OPPFYLT, Collections.emptyList());
-
-        VilkårData manuellVurdering = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_VURDERT,
-            singletonList(AksjonspunktDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU));
-
-        FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        BehandlingType behandlingType = ref.getBehandlingType();
-        if (BehandlingType.REVURDERING.equals(behandlingType)) {
-            // For revurdering skal det ikke utføres vilkårskontroll om opplysningsplikt (NOOP)
-            return oppfylt;
+    private NavigableMap<DatoIntervallEntitet, VilkårData> vurderOpplysningspliktOppfyltAutomatisk(BehandlingReferanse ref, Collection<DatoIntervallEntitet> perioder) {
+        if (perioder.isEmpty()) {
+            return Collections.emptyNavigableMap();
         }
 
-        boolean søknadKomplett = this.kompletthetsjekkerProvider.finnKompletthetsjekkerFor(ytelseType, behandlingType).erForsendelsesgrunnlagKomplett(ref);
-        if (søknadKomplett) {
-            return oppfylt;
+        NavigableMap<DatoIntervallEntitet, VilkårData> resultater = new TreeMap<>();
+
+        for (var periode : new TreeSet<>(perioder)) {
+            FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
+            BehandlingType behandlingType = ref.getBehandlingType();
+
+            VilkårData oppfylt = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.OPPFYLT, Collections.emptyList());
+            if (BehandlingType.REVURDERING.equals(behandlingType)) {
+                // For revurdering skal det ikke utføres vilkårskontroll om opplysningsplikt (NOOP)
+                resultater.put(periode, oppfylt);
+            } else {
+                boolean søknadKomplett = this.kompletthetsjekkerProvider.finnKompletthetsjekkerFor(ytelseType, behandlingType).erForsendelsesgrunnlagKomplett(ref);
+                if (søknadKomplett) {
+                    resultater.put(periode, oppfylt);
+                } else {
+                    VilkårData manuellVurdering = new VilkårData(periode, VilkårType.SØKERSOPPLYSNINGSPLIKT, Utfall.IKKE_VURDERT, singletonList(AksjonspunktDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU));
+                    resultater.put(periode, manuellVurdering);
+                }
+            }
         }
 
-        return manuellVurdering;
+        return Collections.unmodifiableNavigableMap(resultater);
     }
 }
-

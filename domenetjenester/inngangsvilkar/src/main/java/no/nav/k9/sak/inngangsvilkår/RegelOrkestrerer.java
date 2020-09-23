@@ -7,9 +7,11 @@ import static no.nav.k9.sak.inngangsvilkår.RegelintegrasjonFeil.FEILFACTORY;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
@@ -56,7 +58,7 @@ public class RegelOrkestrerer {
         validerMaksEttVilkår(matchendeVilkårPåBehandling);
 
         Vilkår vilkår = matchendeVilkårPåBehandling.isEmpty() ? null : matchendeVilkårPåBehandling.get(0);
-        if (vilkår == null) {
+        if (vilkår == null || perioder.isEmpty()) {
             // Intet vilkår skal eksekveres i regelmotor
             return new RegelResultat(vilkårene, emptyList(), emptyMap());
         }
@@ -64,21 +66,21 @@ public class RegelOrkestrerer {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater = new HashMap<>();
 
-        for (DatoIntervallEntitet periode : perioder) {
-            if (!erPeriodenOverstyrt(vilkår, periode)) {
-                VilkårData vilkårDataResultat = kjørRegelmotor(ref, vilkår, periode);
-                // Ekstraresultat
-                if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
-                    final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
-                    ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
-                    ekstraResultater.put(vilkårDataResultat.getVilkårType(), ekstradataMap);
-                }
-
-                // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
-                vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårDataResultat, vilkårene);
-                // Aksjonspunkter
-                aksjonspunktDefinisjoner.addAll(vilkårDataResultat.getApDefinisjoner());
+        var kjørPerioder = perioder.stream().filter(p -> !erPeriodenOverstyrt(vilkår, p)).collect(Collectors.toList());
+        var regelResultat = kjørRegelmotor(ref, vilkår, kjørPerioder);
+        for (var entry : regelResultat.entrySet()) {
+            // Ekstraresultat
+            var vilkårDataResultat = entry.getValue();
+            if (vilkårDataResultat.getEkstraVilkårresultat() != null) {
+                final var ekstradataMap = ekstraResultater.getOrDefault(vilkårDataResultat.getVilkårType(), new HashMap<>());
+                ekstradataMap.put(vilkårDataResultat.getPeriode(), vilkårDataResultat.getEkstraVilkårresultat());
+                ekstraResultater.put(vilkårDataResultat.getVilkårType(), ekstradataMap);
             }
+
+            // Inngangsvilkårutfall utledet fra alle vilkårsutfallene
+            vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårDataResultat, vilkårene);
+            // Aksjonspunkter
+            aksjonspunktDefinisjoner.addAll(vilkårDataResultat.getApDefinisjoner());
         }
 
         return new RegelResultat(vilkårene, aksjonspunktDefinisjoner, ekstraResultater);
@@ -99,13 +101,16 @@ public class RegelOrkestrerer {
                 "Her angis vilkår: " + vilkårSomSkalBehandle.stream().map(v -> v.getVilkårType().getKode()).collect(Collectors.joining(",")));
     }
 
-    protected VilkårData vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref, DatoIntervallEntitet periode) {
+    protected NavigableMap<DatoIntervallEntitet, VilkårData> vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref, List<DatoIntervallEntitet> periode) {
         Inngangsvilkår inngangsvilkår = inngangsvilkårTjeneste.finnVilkår(vilkårType, ref.getFagsakYtelseType());
         return inngangsvilkår.vurderVilkår(ref, periode);
     }
 
-    private VilkårData kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår, DatoIntervallEntitet periode) {
-        return vurderVilkår(vilkår.getVilkårType(), ref, periode);
+    private NavigableMap<DatoIntervallEntitet, VilkårData> kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår, List<DatoIntervallEntitet> perioder) {
+        if (perioder.isEmpty()) {
+            return Collections.emptyNavigableMap();
+        }
+        return vurderVilkår(vilkår.getVilkårType(), ref, perioder);
     }
 
     public VilkårResultatType utledInngangsvilkårUtfall(Collection<Utfall> vilkårene) {
