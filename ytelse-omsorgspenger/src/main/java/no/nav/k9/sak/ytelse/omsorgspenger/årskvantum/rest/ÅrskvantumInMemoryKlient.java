@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.RequestScoped;
@@ -46,6 +47,11 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
 
     @Override
     public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
+        return null;
+    }
+
+    @Override
+    public FullUttaksplanForBehandlinger hentFullUttaksplanForBehandling(List<UUID> behandlinger) {
         return null;
     }
 

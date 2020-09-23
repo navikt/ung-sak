@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
+import java.util.List;
 import java.util.UUID;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
@@ -21,6 +22,15 @@ public interface ÅrskvantumKlient {
     Periode hentPeriodeForFagsak(Saksnummer saksnummer);
 
     FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer);
+
+    /**
+     * Henter ut uttaksplanen slik den ser ut for et sett med behandlinger
+     *
+     * @param behandlinger behandlinger
+     *
+     * @return uttaksplanen for behandlingene
+     */
+    FullUttaksplanForBehandlinger hentFullUttaksplanForBehandling(List<UUID> behandlinger);
 
     ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag);
 }
