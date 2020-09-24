@@ -236,6 +236,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     @Override
     public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<BgRef> bgReferanser) {
+        if (bgReferanser.isEmpty()) {
+            return List.of();
+        }
         var ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(ref.getFagsakYtelseType().getKode());
 
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();

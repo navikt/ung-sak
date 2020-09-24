@@ -40,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
@@ -285,7 +286,12 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                                             Collection<LocalDate> skjæringstidspunkter,
                                                             boolean kreverEksisterendeReferanse,
                                                             boolean skalLageNyVedLikSomInitiell) {
-        var bgReferanser = finnBeregningsgrunnlagsReferanseFor(behandlingId, skjæringstidspunkter, skalLageNyVedLikSomInitiell);
+        var grunnlagOptional = grunnlagRepository.hentGrunnlag(behandlingId);
+        if (grunnlagOptional.isEmpty()) {
+            return List.of();
+        }
+
+        var bgReferanser = finnBeregningsgrunnlagsReferanseFor(behandlingId, grunnlagOptional.get(), skjæringstidspunkter, skalLageNyVedLikSomInitiell);
 
         if (bgReferanser.isEmpty() && !skjæringstidspunkter.isEmpty()) {
             throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + skjæringstidspunkter);
@@ -298,30 +304,28 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return bgReferanser;
     }
 
-    private List<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId, Collection<LocalDate> skjæringstidspunkter, boolean skalLageNyVedLikSomInitiell) {
-        var grunnlagOptional = grunnlagRepository.hentGrunnlag(behandlingId);
+    private List<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId,
+                                                            BeregningsgrunnlagPerioderGrunnlag grunnlag,
+                                                            Collection<LocalDate> skjæringstidspunkter,
+                                                            boolean skalLageNyVedLikSomInitiell) {
 
-        if (grunnlagOptional.isPresent()) {
-            var grunnlagInitiellVersjon = grunnlagRepository.getInitiellVersjon(behandlingId);
-            var grunnlag = grunnlagOptional.get();
-            var resultater = new TreeSet<BgRef>();
+        var grunnlagInitiellVersjon = grunnlagRepository.getInitiellVersjon(behandlingId);
+        var resultater = new TreeSet<BgRef>();
 
-            for (var stp : new TreeSet<>(skjæringstidspunkter)) {
-                var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(stp);
-                var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
-                if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
-                    if (grunnlagInitiellVersjon.isPresent()) {
-                        var initReferanse = grunnlagInitiellVersjon.get().finnFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse);
-                        if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {
-                            grunnlagReferanse = Optional.empty();
-                        }
+        for (var stp : new TreeSet<>(skjæringstidspunkter)) {
+            var beregningsgrunnlagPeriodeOpt = grunnlag.finnFor(stp);
+            var grunnlagReferanse = beregningsgrunnlagPeriodeOpt.map(BeregningsgrunnlagPeriode::getEksternReferanse);
+            if (grunnlagReferanse.isPresent() && skalLageNyVedLikSomInitiell) {
+                if (grunnlagInitiellVersjon.isPresent()) {
+                    var initReferanse = grunnlagInitiellVersjon.get().finnFor(stp).map(BeregningsgrunnlagPeriode::getEksternReferanse);
+                    if (initReferanse.isPresent() && grunnlagReferanse.get().equals(initReferanse.get())) {
+                        grunnlagReferanse = Optional.empty();
                     }
                 }
-
-                resultater.add(new BgRef(grunnlagReferanse.orElse(null), stp));
             }
-            return List.copyOf(resultater);
+
+            resultater.add(new BgRef(grunnlagReferanse.orElse(null), stp));
         }
-        return Collections.emptyList();
+        return List.copyOf(resultater);
     }
 }

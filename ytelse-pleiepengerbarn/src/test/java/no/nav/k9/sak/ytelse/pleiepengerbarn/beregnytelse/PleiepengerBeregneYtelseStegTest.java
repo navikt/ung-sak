@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -134,20 +133,6 @@ public class PleiepengerBeregneYtelseStegTest {
         // Assert
         Optional<BeregningsresultatEntitet> resultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
         assertThat(resultat).isNotPresent();
-    }
-
-    @Test
-    public void skalKasteFeilNårBeregningsgrunnlagMangler() {
-        Assert.assertThrows("Mangler Beregningsgrunnlag for behandling", IllegalStateException.class, () -> {
-            // Assert
-
-            // Arrange
-            Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(false, true);
-            BehandlingskontrollKontekst kontekst = behandlingKontekst.getElement2();
-
-            // Act
-            steg.utførSteg(kontekst);
-        });
     }
 
     private Tuple<Behandling, BehandlingskontrollKontekst> byggGrunnlag(boolean medBeregningsgrunnlag, boolean medUttaksPlanResultat) {
