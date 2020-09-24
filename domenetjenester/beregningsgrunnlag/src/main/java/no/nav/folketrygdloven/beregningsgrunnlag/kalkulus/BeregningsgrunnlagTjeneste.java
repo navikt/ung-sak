@@ -63,7 +63,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag) {
         var skjæringstidspunkter = new TreeSet<>(ytelseGrunnlag.keySet());
-        var bgReferanser = finnBeregningsgrunnlagsReferanseMap(referanse.getBehandlingId(), skjæringstidspunkter, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
+        var bgReferanser = finnBeregningsgrunnlagsReferanser(referanse.getBehandlingId(), skjæringstidspunkter, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
 
         var beregningInput = bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
@@ -78,23 +78,27 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
-        var bgReferanser = finnBeregningsgrunnlagsReferanseMap(ref.getBehandlingId(), skjæringstidspunkter, true, false);
+        var bgReferanser = finnBeregningsgrunnlagsReferanser(ref.getBehandlingId(), skjæringstidspunkter, true, false);
         var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
         return tjeneste.fortsettBeregning(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser, stegType);
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, true, false)
-            .orElseThrow(() -> new IllegalStateException("Mangler bgReferanse for stp:" + skjæringstidspunkt));
-        OppdaterBeregningsgrunnlagResultat oppdaterBeregningsgrunnlagResultat = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregning(håndterBeregningDto, bgReferanse);
-        oppdaterBeregningsgrunnlagResultat.setSkjæringstidspunkt(skjæringstidspunkt);
-        return oppdaterBeregningsgrunnlagResultat;
+    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto dto, BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
+        var resultater = oppdaterBeregningListe(Map.of(skjæringstidspunkt, dto), ref);
+        if (resultater.size() == 1) {
+            var res = resultater.get(0);
+            res.setSkjæringstidspunkt(skjæringstidspunkt);
+            return res;
+        } else {
+            // skal ikke kunne skje
+            throw new IllegalStateException("Forventet å få 1 resultat, fikk: " + resultater.size() + " for stp=" + skjæringstidspunkt);
+        }
     }
 
     @Override
-    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref) {
-        var sortertMap = new TreeMap<>(håndterMap);
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap, BehandlingReferanse ref) {
+        var sortertMap = new TreeMap<>(stpTilDtoMap);
 
         var bgReferanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortertMap.keySet(), true, false);
         Map<UUID, LocalDate> referanseTilStpMap = bgReferanser.stream().collect(Collectors.toMap(v -> v.getRef(), v -> v.getStp()));
@@ -109,8 +113,8 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter) {
-        var bgReferanser = finnBeregningsgrunnlagsReferanseMap(ref.getBehandlingId(), skjæringstidspunkter, true, false);
+    public List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
+        var bgReferanser = finnBeregningsgrunnlagsReferanser(ref.getBehandlingId(), skjæringstidspunkter, true, false);
 
         return finnTjeneste(ref.getFagsakYtelseType()).hentEksaktFastsatt(ref, bgReferanser);
     }
@@ -177,16 +181,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false, false);
-
-        if (bgReferanse.isEmpty()) {
-            return Optional.empty();
-        }
-        return finnTjeneste(ref.getFagsakYtelseType()).hentFastsatt(bgReferanse.get(), ref.getFagsakYtelseType());
-    }
-
-    @Override
     public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
         var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false, false);
         if (bgReferanse.isEmpty()) {
@@ -194,14 +188,24 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
         var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
         var grunnlag = tjeneste.hentGrunnlag(ref, List.of(bgReferanse.get()));
-        if(grunnlag.size()==1) {
+        if (grunnlag.size() == 1) {
             return Optional.of(grunnlag.get(0));
-        } else if(grunnlag.isEmpty()) {
+        } else if (grunnlag.isEmpty()) {
             return Optional.empty();
         } else {
             throw new IllegalStateException("For mange grunnlag returnert, forventet kun 1: " + grunnlag);
         }
 
+    }
+
+    @Override
+    public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
+        var bgReferanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
+        if (bgReferanser.isEmpty()) {
+            return List.of();
+        }
+        var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
+        return tjeneste.hentGrunnlag(ref, bgReferanser);
     }
 
     @Override
@@ -270,10 +274,10 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste for " + fagsakYtelseType));
     }
 
-    private List<BgRef> finnBeregningsgrunnlagsReferanseMap(Long behandlingId,
-                                                            Collection<LocalDate> skjæringstidspunkter,
-                                                            boolean kreverEksisterendeReferanse,
-                                                            boolean skalLageNyVedLikSomInitiell) {
+    private List<BgRef> finnBeregningsgrunnlagsReferanser(Long behandlingId,
+                                                          Collection<LocalDate> skjæringstidspunkter,
+                                                          boolean kreverEksisterendeReferanse,
+                                                          boolean skalLageNyVedLikSomInitiell) {
         return finnBeregningsgrunnlagsReferanseFor(behandlingId, skjæringstidspunkter, kreverEksisterendeReferanse, skalLageNyVedLikSomInitiell);
     }
 

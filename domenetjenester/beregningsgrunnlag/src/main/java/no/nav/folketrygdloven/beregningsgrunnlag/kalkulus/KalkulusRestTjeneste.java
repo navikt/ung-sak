@@ -28,10 +28,8 @@ import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
@@ -39,7 +37,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -57,27 +54,20 @@ public class KalkulusRestTjeneste {
     private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
-    private final ObjectReader oppdaterReader = kalkulusMapper.readerFor(OppdateringRespons.class);
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader booleanReader = kalkulusMapper.readerFor(Boolean.class);
-    private final ObjectReader grunnlagReader = kalkulusMapper.readerFor(BeregningsgrunnlagGrunnlagDto.class);
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
-    private final ObjectReader fastSattReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto.class);
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
 
     private OidcRestClient oidcRestClient;
     private URI kalkulusEndpoint;
     private URI startEndpoint;
     private URI fortsettEndpoint;
-    private URI oppdaterEndpoint;
     private URI oppdaterListeEndpoint;
-    private URI fastsattEndpoint;
     private URI beregningsgrunnlagListeDtoEndpoint;
 
-    @Deprecated(forRemoval = true)
-    private URI beregningsgrunnlagGrunnlagEndpoint;
     private URI beregningsgrunnlagGrunnlagBolkEndpoint;
     private URI erEndringIBeregningEndpoint;
     private URI deaktiverBeregningsgrunnlag;
@@ -95,11 +85,8 @@ public class KalkulusRestTjeneste {
         this.startEndpoint = toUri("/api/kalkulus/v1/start/bolk");
         this.fortsettEndpoint = toUri("/api/kalkulus/v1/fortsett/bolk");
         this.deaktiverBeregningsgrunnlag = toUri("/api/kalkulus/v1/deaktiver/bolk");
-        this.oppdaterEndpoint = toUri("/api/kalkulus/v1/oppdater");
         this.oppdaterListeEndpoint = toUri("/api/kalkulus/v1/oppdaterListe");
-        this.fastsattEndpoint = toUri("/api/kalkulus/v1/fastsatt");
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
-        this.beregningsgrunnlagGrunnlagEndpoint = toUri("/api/kalkulus/v1/grunnlag");
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.erEndringIBeregningEndpoint = toUri("/api/kalkulus/v1/erEndring");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
@@ -129,16 +116,6 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    public OppdateringRespons oppdaterBeregning(HåndterBeregningRequest request) {
-        var endpoint = oppdaterEndpoint;
-
-        try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), oppdaterReader);
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
     public OppdateringListeRespons oppdaterBeregningListe(HåndterBeregningListeRequest request) {
         try {
             return getResponse(oppdaterListeEndpoint, kalkulusJsonWriter.writeValueAsString(request), oppdaterListeReader);
@@ -151,16 +128,6 @@ public class KalkulusRestTjeneste {
         var endpoint = deaktiverBeregningsgrunnlag;
         try {
             deaktiver(endpoint, kalkulusJsonWriter.writeValueAsString(request));
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
-    public BeregningsgrunnlagGrunnlagDto hentBeregningsgrunnlagGrunnlag(HentBeregningsgrunnlagRequest request) {
-        var endpoint = beregningsgrunnlagGrunnlagEndpoint;
-
-        try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), grunnlagReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
@@ -222,19 +189,6 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    private no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto getBeregningsgrunnlagFastsattDtoResponse(URI endpoint, String json) {
-        return getResponse(endpoint, json, fastSattReader);
-    }
-
-    public no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.fastsatt.BeregningsgrunnlagDto hentFastsatt(HentBeregningsgrunnlagRequest request) {
-        var endpoint = fastsattEndpoint;
-        try {
-            return getBeregningsgrunnlagFastsattDtoResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request));
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
     private void utfør(URI endpoint, String json) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
@@ -257,7 +211,6 @@ public class KalkulusRestTjeneste {
             throw re;
         }
     }
-
 
     private <T> T utførOgHent(URI endpoint, String json, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler

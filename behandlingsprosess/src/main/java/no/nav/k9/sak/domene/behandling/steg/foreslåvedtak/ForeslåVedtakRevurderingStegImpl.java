@@ -2,6 +2,9 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -54,20 +57,22 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         Behandling revurdering = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         Behandling orginalBehandling = getOriginalBehandling(revurdering);
         var revurderingRef = BehandlingReferanse.fra(revurdering);
-        var orginalRef = BehandlingReferanse.fra(orginalBehandling);
+        var originalRef = BehandlingReferanse.fra(orginalBehandling);
         BehandleStegResultat behandleStegResultat = foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekst);
 
         //Oppretter aksjonspunkt dersom revurdering har mindre beregningsgrunnlag enn orginal
-        var skjæringstidspunkter = vilkårResultatRepository.hent(revurdering.getId())
+        NavigableSet<LocalDate> skjæringstidspunkter = vilkårResultatRepository.hent(revurdering.getId())
             .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .map(Vilkår::getPerioder)
             .orElse(List.of())
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(() -> new TreeSet<>()));
 
-        for (LocalDate skjæringstidspunkt : skjæringstidspunkter) {
-            if (erRevurderingensBeregningsgrunnlagMindreEnnOrginal(orginalRef, revurderingRef, skjæringstidspunkt)) {
+        var vurderUgunst = erRevurderingensBeregningsgrunnlagMindreEnnOrginal(originalRef, revurderingRef, skjæringstidspunkter);
+        for (LocalDate stp : skjæringstidspunkter) {
+            if (vurderUgunst.containsKey(stp) && vurderUgunst.get(stp)) {
+                // stopp på første som har aksjonspunkt
                 List<AksjonspunktDefinisjon> aksjonspunkter = behandleStegResultat.getAksjonspunktResultater().stream()
                     .map(AksjonspunktResultat::getAksjonspunktDefinisjon).collect(Collectors.toList());
                 aksjonspunkter.add(AksjonspunktDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST);
@@ -83,7 +88,8 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         return behandlingRepository.hentBehandling(originalBehandlingId);
     }
 
-    private boolean erRevurderingensBeregningsgrunnlagMindreEnnOrginal(BehandlingReferanse orginalBehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
+    private Map<LocalDate, Boolean> erRevurderingensBeregningsgrunnlagMindreEnnOrginal(BehandlingReferanse orginalBehandling, BehandlingReferanse revurdering,
+                                                                                       NavigableSet<LocalDate> skjæringstidspuntk) {
         var endringIBeregningTjeneste = FagsakYtelseTypeRef.Lookup.find(endringIBeregningTjenester, revurdering.getFagsakYtelseType())
             .orElseThrow();
 

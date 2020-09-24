@@ -23,7 +23,6 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.MapFraKalkulusTilK9;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -60,7 +59,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAksjonspunktDefinisjon;
@@ -176,13 +174,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BgRef bgReferanse) {
-        HåndterBeregningRequest håndterBeregningRequest = new HåndterBeregningRequest(håndterBeregningDto, bgReferanse.getRef());
-        OppdateringRespons oppdateringRespons = restTjeneste.oppdaterBeregning(håndterBeregningRequest);
-        return MapEndringsresultat.mapFraOppdateringRespons(oppdateringRespons, bgReferanse.getRef());
-    }
-
-    @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterberegningMap) {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
         OppdateringListeRespons oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe, behandlingReferanse.getBehandlingUuid()));
@@ -241,17 +232,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .collect(Collectors.toList());
 
         return new HentBeregningsgrunnlagDtoListeForGUIRequest(requestListe, referanse.getBehandlingUuid());
-    }
-
-    @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(BgRef bgReferanse, FagsakYtelseType fagsakYtelseType) {
-        var ytelse = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
-        var hentBeregningsgrunnlagRequest = new HentBeregningsgrunnlagRequest(bgReferanse.getRef(), ytelse, false);
-        var beregningsgrunnlagDto = restTjeneste.hentFastsatt(hentBeregningsgrunnlagRequest);
-        if (beregningsgrunnlagDto == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(MapFraKalkulusTilK9.mapBeregningsgrunnlag(beregningsgrunnlagDto));
     }
 
     @Override

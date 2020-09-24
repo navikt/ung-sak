@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -55,13 +54,6 @@ public interface KalkulusApiTjeneste {
     SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType);
 
     /**
-     * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
-     * @param behandlingUuid
-     * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
-     */
-    OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BgRef behandlingUuid);
-
-    /**
      * @param behandlingReferanse Behandlingreferanse
      * @param håndterMap Map med dto for håndtering av beregning aksjonspunkt
      * @return Liste av OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
@@ -71,8 +63,6 @@ public interface KalkulusApiTjeneste {
     List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<BgRef> bgReferanse);
 
     BeregningsgrunnlagListe hentBeregningsgrunnlagListeDto(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser);
-
-    Optional<Beregningsgrunnlag> hentFastsatt(BgRef bgReferanse, FagsakYtelseType fagsakYtelseType);
 
     List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<BgRef> bgReferanser);
 
@@ -97,4 +87,5 @@ public interface KalkulusApiTjeneste {
      * @return Sats-objekt med verdi og periode for grunnbeløp
      */
     Grunnbeløp hentGrunnbeløp(LocalDate dato);
+
 }

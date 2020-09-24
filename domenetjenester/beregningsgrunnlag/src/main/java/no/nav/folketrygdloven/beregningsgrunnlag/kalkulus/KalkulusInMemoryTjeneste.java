@@ -65,32 +65,8 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BgRef bgRef) {
-        throw new IllegalStateException("Skal ALDRI bli implementert");
-    }
-
-    @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap) {
         return List.of();
-    }
-
-    @Override
-    public Optional<Beregningsgrunnlag> hentFastsatt(BgRef bgReferanse, FagsakYtelseType fagsakYtelseType) {
-        var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(bgReferanse.getRef(), k -> new LinkedList<>());
-        if (behGrunnlag.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Optional<BeregningsgrunnlagGrunnlag> first = behGrunnlag.stream().map(grId -> hentGrunnlagForGrunnlagId(0L, grId))
-            .filter(BeregningsgrunnlagGrunnlag::getAktiv)
-            .findFirst();
-
-        if (first.isPresent()) {
-
-            BeregningsgrunnlagGrunnlag beregningsgrunnlagGrunnlag = first.get();
-            return beregningsgrunnlagGrunnlag.getBeregningsgrunnlag();
-        }
-        return Optional.empty();
     }
 
     @Override

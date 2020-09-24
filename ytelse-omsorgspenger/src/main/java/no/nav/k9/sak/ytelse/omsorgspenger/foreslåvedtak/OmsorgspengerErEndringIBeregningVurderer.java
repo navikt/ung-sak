@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.foreslåvedtak;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -16,7 +19,8 @@ public class OmsorgspengerErEndringIBeregningVurderer implements ErEndringIBereg
     }
 
     @Override
-    public boolean vurderUgunst(BehandlingReferanse orginalBeregning, BehandlingReferanse revurdering, LocalDate skjæringstidspuntk) {
-        return false;
+    public Map<LocalDate, Boolean> vurderUgunst(BehandlingReferanse orginalBeregning, BehandlingReferanse revurdering, NavigableSet<LocalDate> skjæringstidspunkter) {
+        // mapper om output
+        return skjæringstidspunkter.stream().collect(Collectors.toMap(v -> v, v -> false));
     }
 }

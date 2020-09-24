@@ -36,9 +36,9 @@ public class Beregningsgrunnlag {
 
     public List<BeregningsgrunnlagPeriode> getBeregningsgrunnlagPerioder() {
         return beregningsgrunnlagPerioder
-                .stream()
-                .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
-                .collect(Collectors.toUnmodifiableList());
+            .stream()
+            .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public Sammenligningsgrunnlag getSammenligningsgrunnlag() {
@@ -61,6 +61,7 @@ public class Beregningsgrunnlag {
             beregningsgrunnlagPerioder.add(bgPeriode);
         }
     }
+
     public Hjemmel getHjemmel() {
         if (aktivitetStatuser.isEmpty()) {
             return Hjemmel.UDEFINERT;
@@ -69,22 +70,22 @@ public class Beregningsgrunnlag {
             return aktivitetStatuser.get(0).getHjemmel();
         }
         Optional<BeregningsgrunnlagAktivitetStatus> dagpenger = aktivitetStatuser.stream()
-                .filter(as -> Hjemmel.F_14_7_8_49.equals(as.getHjemmel()))
-                .findFirst();
+            .filter(as -> Hjemmel.F_14_7_8_49.equals(as.getHjemmel()))
+            .findFirst();
         if (dagpenger.isPresent()) {
             return dagpenger.get().getHjemmel();
         }
         Optional<BeregningsgrunnlagAktivitetStatus> gjelder = aktivitetStatuser.stream()
-                .filter(as -> !Hjemmel.F_14_7.equals(as.getHjemmel()))
-                .findFirst();
+            .filter(as -> !Hjemmel.F_14_7.equals(as.getHjemmel()))
+            .findFirst();
         return gjelder.isPresent() ? gjelder.get().getHjemmel() : Hjemmel.F_14_7;
     }
 
     public List<FaktaOmBeregningTilfelle> getFaktaOmBeregningTilfeller() {
         return faktaOmBeregningTilfeller
-                .stream()
-                .map(BeregningsgrunnlagFaktaOmBeregningTilfelle::getFaktaOmBeregningTilfelle)
-                .collect(Collectors.toUnmodifiableList());
+            .stream()
+            .map(BeregningsgrunnlagFaktaOmBeregningTilfelle::getFaktaOmBeregningTilfelle)
+            .collect(Collectors.toUnmodifiableList());
     }
 
     public List<SammenligningsgrunnlagPrStatus> getSammenligningsgrunnlagPrStatusListe() {
@@ -113,10 +114,11 @@ public class Beregningsgrunnlag {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" //$NON-NLS-1$
-                + "skjæringstidspunkt=" + skjæringstidspunkt + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "grunnbeløp=" + grunnbeløp + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + ">"; //$NON-NLS-1$
+        return getClass().getSimpleName() + "<"
+            + "skjæringstidspunkt=" + skjæringstidspunkt + ", "
+            + ", grunnbeløp=" + grunnbeløp
+            + ", beregningsgrunnlagPerioder=" + this.beregningsgrunnlagPerioder
+            + ">";
     }
 
     public static Builder builder() {
@@ -221,7 +223,7 @@ public class Beregningsgrunnlag {
         }
 
         private void verifiserKanModifisere() {
-            if(built) {
+            if (built) {
                 throw new IllegalStateException("Er allerede bygd, kan ikke oppdatere videre: " + this.kladd);
             }
         }

@@ -62,7 +62,7 @@ public interface BeregningTjeneste {
      */
     List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref);
 
-    List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, List<LocalDate> skjæringstidspunkter);
+    List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref);
 
@@ -70,9 +70,9 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
 
-    Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
-
     Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+
+    List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     List<BeregningsgrunnlagKobling> hentKoblinger(BehandlingReferanse ref);
 
@@ -94,4 +94,6 @@ public interface BeregningTjeneste {
     void gjenopprettInitiell(BehandlingReferanse ref);
 
     Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);
+
+
 }

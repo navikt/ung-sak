@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -111,8 +110,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_ikke_opprette_aksjonspunkt_når_samme_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentEksaktFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(List.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentEksaktFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(List.of(buildBeregningsgrunnlag(1000L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingSteg.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe()).isEmpty();
@@ -120,8 +119,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
 
     @Test
     public void skal_opprette_aksjonspunkt_når_revurdering_har_mindre_beregningsgrunnlag() {
-        when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(1000L)));
-        when(beregningsgrunnlagTjeneste.hentFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(Optional.of(buildBeregningsgrunnlag(900L)));
+        when(beregningsgrunnlagTjeneste.hentEksaktFastsatt(eq(BehandlingReferanse.fra(orginalBehandling)), any())).thenReturn(List.of(buildBeregningsgrunnlag(1000L)));
+        when(beregningsgrunnlagTjeneste.hentEksaktFastsatt(eq(BehandlingReferanse.fra(revurdering)), any())).thenReturn(List.of(buildBeregningsgrunnlag(100L)));
 
         BehandleStegResultat behandleStegResultat = foreslåVedtakRevurderingSteg.utførSteg(kontekstRevurdering);
         assertThat(behandleStegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST);

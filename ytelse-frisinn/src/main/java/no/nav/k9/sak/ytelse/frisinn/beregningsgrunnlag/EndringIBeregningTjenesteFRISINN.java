@@ -3,7 +3,10 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -47,15 +50,18 @@ public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurd
      * @return revurdering er til ugunst (redusert tilkjent ytelse)
      */
     @Override
-    public boolean vurderUgunst(BehandlingReferanse orginalbehandling, BehandlingReferanse revurdering, LocalDate skjæringstidspunkt) {
-        UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(orginalbehandling.getBehandlingId());
+    public Map<LocalDate, Boolean> vurderUgunst(BehandlingReferanse original, BehandlingReferanse revurdering, NavigableSet<LocalDate> skjæringstidspunkter) {
+        UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(original.getBehandlingId());
 
-        Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(orginalbehandling.getId());
+        Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(original.getId());
         Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBeregningsresultat(revurdering.getId());
 
-        return ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, orginaltUttak)
+        boolean erEndring = ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, orginaltUttak)
             .stream()
             .anyMatch(endring -> endring.equals(UGUNST));
+
+        // mapper om output
+        return skjæringstidspunkter.stream().collect(Collectors.toMap(v -> v, v -> erEndring));
     }
 
 }
