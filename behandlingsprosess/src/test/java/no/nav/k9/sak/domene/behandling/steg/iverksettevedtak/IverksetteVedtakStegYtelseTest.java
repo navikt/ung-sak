@@ -84,15 +84,15 @@ public class IverksetteVedtakStegYtelseTest {
     private InfotrygdFeedService infotrygdFeedService;
 
 
-    private IverksetteVedtakStegFørstegang iverksetteVedtakSteg;
+    private IverksetteVedtakSteg iverksetteVedtakSteg;
 
     @Before
     public void setup() {
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService));
-        iverksetteVedtakSteg = new IverksetteVedtakStegFørstegang(repositoryProvider,
+        iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
-            vurderBehandlingerUnderIverksettelse,
-            iverksettingSkalIkkeStoppesAvOverlappendeYtelse);
+            iverksettingSkalIkkeStoppesAvOverlappendeYtelse,
+            vurderBehandlingerUnderIverksettelse);
         behandling = opprettBehandling();
     }
 
