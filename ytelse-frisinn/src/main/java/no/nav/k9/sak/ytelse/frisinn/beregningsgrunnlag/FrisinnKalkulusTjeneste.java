@@ -114,9 +114,11 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         }
 
-        var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser);
-        uuidKalkulusResulat.putAll(fraBeregningResponse.getResultater());
-
+        if (!sendTilKalkulus.isEmpty()) {
+            var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser);
+            uuidKalkulusResulat.putAll(fraBeregningResponse.getResultater());
+        }
+        
         return new SamletKalkulusResultat(uuidKalkulusResulat, bgReferanser);
 
     }
