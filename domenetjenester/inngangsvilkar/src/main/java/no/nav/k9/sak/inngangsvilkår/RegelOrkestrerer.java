@@ -3,10 +3,7 @@ package no.nav.k9.sak.inngangsvilkår;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static no.nav.k9.sak.inngangsvilkår.RegelintegrasjonFeil.FEILFACTORY;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +18,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -111,30 +106,6 @@ public class RegelOrkestrerer {
             return Collections.emptyNavigableMap();
         }
         return vurderVilkår(vilkår.getVilkårType(), ref, perioder);
-    }
-
-    public VilkårResultatType utledInngangsvilkårUtfall(Collection<Utfall> vilkårene) {
-        boolean oppfylt = vilkårene.stream()
-            .anyMatch(utfall -> utfall.equals(Utfall.OPPFYLT));
-        boolean ikkeOppfylt = vilkårene.stream()
-            .anyMatch(vilkår -> vilkår.equals(Utfall.IKKE_OPPFYLT));
-        boolean ikkeVurdert = vilkårene.stream()
-            .anyMatch(vilkår -> vilkår.equals(Utfall.IKKE_VURDERT));
-
-        // Enkeltutfallene per vilkår sammenstilles til et samlet vilkårsresultat.
-        // Høyest rangerte enkeltutfall ift samlet vilkårsresultat sjekkes først, deretter nest høyeste osv.
-        VilkårResultatType resultatType;
-        if (ikkeOppfylt) {
-            resultatType = VilkårResultatType.AVSLÅTT;
-        } else if (ikkeVurdert) {
-            resultatType = VilkårResultatType.IKKE_FASTSATT;
-        } else if (oppfylt) {
-            resultatType = VilkårResultatType.INNVILGET;
-        } else {
-            throw FEILFACTORY.kanIkkeUtledeVilkårsresultatFraRegelmotor().toException();
-        }
-
-        return resultatType;
     }
 
     private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {

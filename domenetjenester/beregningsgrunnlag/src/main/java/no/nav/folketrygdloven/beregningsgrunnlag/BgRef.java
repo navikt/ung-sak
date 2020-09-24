@@ -21,6 +21,11 @@ public class BgRef implements Comparable<BgRef> {
         }
     }
 
+    /** genererer ny ref for angitt skjæringstidspunkt. */
+    public BgRef(LocalDate stp) {
+        this(null, stp);
+    }
+
     public LocalDate getStp() {
         return stp;
     }
