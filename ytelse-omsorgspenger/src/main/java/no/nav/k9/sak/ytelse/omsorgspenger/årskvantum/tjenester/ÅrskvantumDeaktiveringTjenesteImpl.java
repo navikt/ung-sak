@@ -8,7 +8,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.task.ÅrskvantumDeaktiveri
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
-
 @ApplicationScoped
 public class ÅrskvantumDeaktiveringTjenesteImpl {
 
@@ -24,9 +23,11 @@ public class ÅrskvantumDeaktiveringTjenesteImpl {
     }
 
     public void meldIfraOmIverksetting(Behandling behandling) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE);
+        if (ÅrskvantumDeaktiveringTask.skalDeaktivere(behandling)) {
+            ProsessTaskData prosessTaskData = new ProsessTaskData(ÅrskvantumDeaktiveringTask.TASKTYPE);
 
-        prosessTaskData.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(),behandling.getAktørId().getId());
-        prosessTaskRepository.lagre(prosessTaskData);
+            prosessTaskData.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
+            prosessTaskRepository.lagre(prosessTaskData);
+        }
     }
 }

@@ -9,9 +9,9 @@ import java.util.Optional;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -62,7 +62,7 @@ public interface BeregningTjeneste {
      */
     List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref);
 
-    Optional<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+    List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref);
 
@@ -70,9 +70,9 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
 
-    Optional<Beregningsgrunnlag> hentFastsatt(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
-
     Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt);
+
+    List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
     List<BeregningsgrunnlagKobling> hentKoblinger(BehandlingReferanse ref);
 
@@ -94,4 +94,6 @@ public interface BeregningTjeneste {
     void gjenopprettInitiell(BehandlingReferanse ref);
 
     Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);
+
+
 }

@@ -168,7 +168,7 @@
 			<dependency>
 				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
 				<artifactId>kontrakt</artifactId>
-				<version>1.1-2020.09.21.185040-9673ae3</version>
+				<version>1.1-2020.09.23.125100-b3e5277</version>
 			</dependency>
 
 			<dependency>

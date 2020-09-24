@@ -2,6 +2,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vedtak;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -33,19 +37,22 @@ public class TotrinnsBeregningDtoTjeneste {
 
     List<TotrinnsBeregningDto> hentBeregningDto(Totrinnsvurdering aksjonspunkt,
                                                 Behandling behandling,
-                                                List<BeregningsgrunnlagToTrinn> beregningsgrunnlagGrunnlagUuid) {
-        if (beregningsgrunnlagGrunnlagUuid.isEmpty()) {
+                                                List<BeregningsgrunnlagToTrinn> beregningsgrunnlagTotrinn) {
+        if (beregningsgrunnlagTotrinn.isEmpty()) {
             return null;
         }
         var ref = BehandlingReferanse.fra(behandling);
         var dtoer = new ArrayList<TotrinnsBeregningDto>();
-        for (BeregningsgrunnlagToTrinn beregningsgrunnlagToTrinn : beregningsgrunnlagGrunnlagUuid) {
+
+        var totrinnTilBeregningsgrunnlagMap = hentBeregningsgrunnlag(ref, beregningsgrunnlagTotrinn);
+
+        for (var bgTotrinn : beregningsgrunnlagTotrinn) {
+            Beregningsgrunnlag bg = totrinnTilBeregningsgrunnlagMap.get(bgTotrinn);
             TotrinnsBeregningDto dto = new TotrinnsBeregningDto();
             if (aksjonspunkt.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE)) {
-                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(ref, beregningsgrunnlagToTrinn));
+                dto.setFastsattVarigEndringNaering(erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(bgTotrinn, bg));
             }
             if (AksjonspunktDefinisjon.VURDER_FAKTA_FOR_ATFL_SN.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
-                Beregningsgrunnlag bg = hentBeregningsgrunnlag(ref, beregningsgrunnlagToTrinn);
                 List<FaktaOmBeregningTilfelle> tilfeller = bg.getFaktaOmBeregningTilfeller();
                 dto.setFaktaOmBeregningTilfeller(tilfeller);
                 dto.setSkjæringstidspunkt(bg.getSkjæringstidspunkt());
@@ -55,17 +62,21 @@ public class TotrinnsBeregningDtoTjeneste {
         return dtoer;
     }
 
-    private Beregningsgrunnlag hentBeregningsgrunnlag(BehandlingReferanse referanse, BeregningsgrunnlagToTrinn beregningsgrunnlagId) {
-        return tjeneste.hentGrunnlag(referanse, beregningsgrunnlagId.getSkjæringstidspunkt())
-            .flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
-            .orElseThrow(() -> new IllegalStateException("Fant ikkje beregningsgrunnlag med id " + beregningsgrunnlagId));
+    private Map<BeregningsgrunnlagToTrinn, Beregningsgrunnlag> hentBeregningsgrunnlag(BehandlingReferanse ref, List<BeregningsgrunnlagToTrinn> beregningsgrunnlagTotrinn) {
+        var skjæringstidspunkter = beregningsgrunnlagTotrinn.stream().collect(Collectors.toMap(v -> v.getSkjæringstidspunkt(), v -> v));
+
+        var beregningsgrunnlag = tjeneste.hentGrunnlag(ref, skjæringstidspunkter.keySet())
+            .stream()
+            .map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toMap(bg -> skjæringstidspunkter.get(bg.getSkjæringstidspunkt()), bg -> bg));
+        return beregningsgrunnlag;
     }
 
-    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BehandlingReferanse referanse, BeregningsgrunnlagToTrinn beregningsgrunnlagGrunnlagId) {
-        Beregningsgrunnlag beregningsgrunnlag = tjeneste.hentGrunnlag(referanse, beregningsgrunnlagGrunnlagId.getSkjæringstidspunkt())
-            .flatMap(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
-            .orElseThrow(() ->
-                new IllegalStateException("Fant ingen beregningsgrunnlag med id " + beregningsgrunnlagGrunnlagId.toString()));
+    private boolean erVarigEndringFastsattForSelvstendingNæringsdrivendeGittGrunnlag(BeregningsgrunnlagToTrinn bgTotrinn, Beregningsgrunnlag beregningsgrunnlag) {
+        Objects.requireNonNull(beregningsgrunnlag, "Fant ingen beregningsgrunnlag for " + bgTotrinn);
+
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
             .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))

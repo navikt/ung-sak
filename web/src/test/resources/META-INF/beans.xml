@@ -5,6 +5,6 @@
 	bean-discovery-mode="all">
 	<alternatives>
         <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
-        <class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste</class>
+        <class>no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste</class>
     </alternatives>
 </beans>

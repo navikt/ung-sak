@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,7 +22,7 @@ import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMermoryTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -68,7 +67,7 @@ public class PleiepengerBeregneYtelseStegTest {
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
     @Inject
-    private KalkulusInMermoryTjeneste kalkulusTjeneste;
+    private KalkulusInMemoryTjeneste kalkulusTjeneste;
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
@@ -134,20 +133,6 @@ public class PleiepengerBeregneYtelseStegTest {
         // Assert
         Optional<BeregningsresultatEntitet> resultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
         assertThat(resultat).isNotPresent();
-    }
-
-    @Test
-    public void skalKasteFeilNårBeregningsgrunnlagMangler() {
-        Assert.assertThrows("Mangler Beregningsgrunnlag for behandling", IllegalStateException.class, () -> {
-            // Assert
-
-            // Arrange
-            Tuple<Behandling, BehandlingskontrollKontekst> behandlingKontekst = byggGrunnlag(false, true);
-            BehandlingskontrollKontekst kontekst = behandlingKontekst.getElement2();
-
-            // Act
-            steg.utførSteg(kontekst);
-        });
     }
 
     private Tuple<Behandling, BehandlingskontrollKontekst> byggGrunnlag(boolean medBeregningsgrunnlag, boolean medUttaksPlanResultat) {

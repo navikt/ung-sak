@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -20,8 +19,8 @@ import javax.inject.Inject;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -87,8 +86,13 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
                 perioderTilBeregning.add(periode);
             }
         }
-        var aksjonspunktResultater = utførBeregningForPeriode(kontekst, ref, perioderTilBeregning);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
+
+        if (perioderTilBeregning.isEmpty()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        } else {
+            var aksjonspunktResultater = utførBeregningForPeriode(kontekst, ref, perioderTilBeregning);
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
+        }
     }
 
     private boolean periodeErUtenforFagsaksIntervall(DatoIntervallEntitet vilkårPeriode, DatoIntervallEntitet fagsakPeriode) {
@@ -99,8 +103,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
 
         Map<LocalDate, YtelsespesifiktGrunnlagDto> stpTilYtelseGrunnlag = vilkårsperioder.stream()
-            .map(p -> new AbstractMap.SimpleEntry<>(p.getFomDato(), mapper.lagYtelsespesifiktGrunnlag(ref, p)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+            .collect(Collectors.toMap(v -> v.getFomDato(), v -> mapper.lagYtelsespesifiktGrunnlag(ref, v), (e1, e2) -> e1, LinkedHashMap::new));
 
         var resultat = kalkulusTjeneste.startBeregning(ref, stpTilYtelseGrunnlag);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
@@ -123,17 +126,16 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     }
 
     private void avslå(BehandlingskontrollKontekst kontekst, List<DatoIntervallEntitet> vilkårsperioder, SamletKalkulusResultat resultat, KalkulusResultat kalkulusResultat,
-                                                 UUID bgReferanse) {
-        var stp = resultat.getSkjæringstidspunkter().get(bgReferanse);
+                       UUID bgReferanse) {
+        var stp = resultat.getStp(bgReferanse);
         var vilkårsperiode = vilkårsperioder.stream().filter(p -> Objects.equals(stp, p.getFomDato())).findFirst()
             .orElseThrow(() -> new IllegalStateException("Finner ikke vilkårsperiode for stp [" + stp + "] for bgReferanse [" + bgReferanse + "]"));
         beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsperiode, Objects.requireNonNull(kalkulusResultat.getAvslagsårsak(), "mangler avslagsårsak: " + kalkulusResultat));
     }
 
-    private List<AksjonspunktResultat> avslåVilkår(BehandlingskontrollKontekst kontekst,
-                                                   Avslagsårsak avslagsårsak, DatoIntervallEntitet vilkårsPeriode) {
+    private void avslåVilkår(BehandlingskontrollKontekst kontekst,
+                             Avslagsårsak avslagsårsak, DatoIntervallEntitet vilkårsPeriode) {
         beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, vilkårsPeriode, avslagsårsak);
-        return List.of();
     }
 
     @Override

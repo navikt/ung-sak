@@ -12,7 +12,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -54,7 +54,7 @@ public class BeregningStegTjeneste {
         for (var resultat : kalkulusResultat.getResultater().entrySet()) {
             var eksternReferanse = resultat.getKey();
             var delResultat = resultat.getValue();
-            var stp = kalkulusResultat.getSkjæringstidspunkter().get(eksternReferanse);
+            var stp = kalkulusResultat.getStp(eksternReferanse);
             var periode = stpTilPeriode.get(stp);
             resultatCallback.håndter(delResultat, periode);
         }

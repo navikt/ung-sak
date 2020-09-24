@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.produksjonsstyring.totrinn.BeregningsgrunnlagToTrinn;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
@@ -52,13 +53,16 @@ public class OpprettToTrinnsgrunnlag {
     }
 
     private List<BeregningsgrunnlagToTrinn> opprettBeregningToTrinn(BehandlingReferanse referanse) {
-        return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(referanse, false)
-            .stream()
-            .map(it -> beregningsgrunnlagTjeneste.hentGrunnlag(referanse, it.getFomDato())
-                .map(at -> new BeregningsgrunnlagToTrinn(it.getFomDato()))
-                .orElse(null))
+
+        var skjæringstidspunkter = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(referanse, false).stream()
+            .map(DatoIntervallEntitet::getFomDato).collect(Collectors.toList());
+
+        var beregningsgrunnlag = beregningsgrunnlagTjeneste.hentGrunnlag(referanse, skjæringstidspunkter);
+        return beregningsgrunnlag.stream()
+            .map(bgg -> bgg.getBeregningsgrunnlag().orElse(null))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .map(bg -> new BeregningsgrunnlagToTrinn(bg.getSkjæringstidspunkt())).collect(Collectors.toList());
+
     }
 
 }

@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.output;
+package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
 import java.util.List;
 import java.util.UUID;

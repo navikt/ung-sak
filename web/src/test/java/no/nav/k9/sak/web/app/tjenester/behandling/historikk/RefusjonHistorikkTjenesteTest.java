@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.output.BeregningsgrunnlagPrStatusOgAndelEndring;
-import no.nav.folketrygdloven.beregningsgrunnlag.output.RefusjonEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.RefusjonEndring;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
