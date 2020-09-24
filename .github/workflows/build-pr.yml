@@ -56,15 +56,16 @@ jobs:
 #          key: ${{ runner.os }}-maven-${{ env.CACHE_KEY }}
 #          restore-keys: |
 #            ${{ runner.os }}-maven-${{ env.PREVIOUS_CACHE_KEY }}
-      - name: Build
-        shell: bash
-        run: |
-          mvn package --batch-mode --file pom.xml -DtrimStackTrace=false
-        env:
+
+#      - name: Build
+#        shell: bash
+#        run: |
+#          mvn package --batch-mode --file pom.xml -DtrimStackTrace=false
+#        env:
 #          GITHUB_TOKEN: ${{ steps.get-token.outputs.token }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }} 
-          DATASOURCE_HOST: localhost
-          DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }} 
+#          DATASOURCE_HOST: localhost
+#          DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
 
       - name: Trigger verdikjede test
         shell: bash
