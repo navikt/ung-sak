@@ -189,12 +189,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (grunnlag.isEmpty()) {
             return Collections.emptyList();
         }
-        boolean alleFastsatt = grunnlag.stream().allMatch(v -> Objects.equals(BeregningsgrunnlagTilstand.FASTSATT, v.getBeregningsgrunnlagTilstand()));
-        if (!alleFastsatt) {
-            throw new IllegalStateException("Fått beregningsgrunnlag som ikke er fastsatt for angitte referanser: " + bgReferanser);
-        }
         return grunnlag
             .stream()
+            .filter(v -> Objects.equals(BeregningsgrunnlagTilstand.FASTSATT, v.getBeregningsgrunnlagTilstand()))
             .map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .filter(Optional::isPresent)
             .map(Optional::get)

@@ -64,11 +64,16 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag) {
+        if(ytelseGrunnlag == null || ytelseGrunnlag.isEmpty()){
+            throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
+        }
         var skjæringstidspunkter = new TreeSet<>(ytelseGrunnlag.keySet());
         var bgReferanser = finnReferanseEllerLagNy(referanse.getBehandlingId(), skjæringstidspunkter, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
 
         if (bgReferanser.size() != skjæringstidspunkter.size()) {
             throw new IllegalStateException("Mismatch størrelse bgReferanser: " + bgReferanser + ", skjæringstidspunkter:" + skjæringstidspunkter);
+        } else if (bgReferanser.isEmpty()){
+            throw new IllegalArgumentException("Forventer minst en bgReferanse");
         }
 
         var beregningInput = bgReferanser.stream().map(e -> {
@@ -84,6 +89,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
+        if(skjæringstidspunkter == null || skjæringstidspunkter.isEmpty()){
+            throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
+        }
         var bgReferanser = finnReferanseEllerLagNy(ref.getBehandlingId(), skjæringstidspunkter, true, false);
         if (bgReferanser.size() != skjæringstidspunkter.size()) {
             throw new IllegalStateException("Mismatch størrelse bgReferanser: " + bgReferanser + ", skjæringstidspunkter:" + skjæringstidspunkter);
@@ -94,6 +102,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto dto, BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
+        Objects.requireNonNull(skjæringstidspunkt, "skjæringstidspunkt");
         var resultater = oppdaterBeregningListe(Map.of(skjæringstidspunkt, dto), ref);
         if (resultater.size() == 1) {
             var res = resultater.get(0);
@@ -107,6 +116,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap, BehandlingReferanse ref) {
+        if(stpTilDtoMap == null || stpTilDtoMap.isEmpty()){
+            throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
+        }
         var sortertMap = new TreeMap<>(stpTilDtoMap);
 
         var bgReferanser = finnReferanseEllerLagNy(ref.getBehandlingId(), sortertMap.keySet(), true, false);
@@ -275,7 +287,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                                                 boolean skalLageNyVedLikSomInitiell) {
         var resultater = finnBeregningsgrunnlagsReferanseFor(behandlingId, List.of(skjæringstidspunkt), kreverEksisterendeReferanse, skalLageNyVedLikSomInitiell);
         if (resultater.isEmpty()) {
-            return Optional.empty();
+            if (kreverEksisterendeReferanse) {
+                throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + skjæringstidspunkt);
+            } else {
+                return Optional.empty();
+            }
         } else if (resultater.size() == 1) {
             return Optional.of(resultater.get(0));
         } else {
