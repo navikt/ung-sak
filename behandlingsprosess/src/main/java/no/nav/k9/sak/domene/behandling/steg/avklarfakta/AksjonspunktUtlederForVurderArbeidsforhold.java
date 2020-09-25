@@ -5,19 +5,14 @@ import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettList
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -31,18 +26,14 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private ArbeidsforholdUtenRelevantOppgittOpptjening arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste;
 
-    private BehandlingRepository behandlingRepository;
-
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     AksjonspunktUtlederForVurderArbeidsforhold() {
     }
 
     @Inject
-    public AksjonspunktUtlederForVurderArbeidsforhold(BehandlingRepository behandlingRepository,
-                                                      InntektArbeidYtelseTjeneste iayTjeneste,
+    public AksjonspunktUtlederForVurderArbeidsforhold(InntektArbeidYtelseTjeneste iayTjeneste,
                                                       VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste) {
-        this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
         this.arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste = new ArbeidsforholdUtenRelevantOppgittOpptjening();
