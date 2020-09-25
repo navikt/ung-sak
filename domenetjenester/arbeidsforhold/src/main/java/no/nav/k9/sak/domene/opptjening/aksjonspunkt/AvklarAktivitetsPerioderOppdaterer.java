@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -87,8 +89,10 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
     public OppdateringResultat oppdater(AvklarAktivitetsPerioderHolderDto dto, AksjonspunktOppdaterParameter param) {
         boolean erEndret = false;
 
+        var opptjeningResultat = opptjeningRepository.finnOpptjening(param.getBehandlingId());
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         for (AvklarAktivitetsPerioderDto avklarAktivitetsPerioderDto : dto.getOpptjeningListe()) {
-            boolean erEndretPeriode = oppdater(avklarAktivitetsPerioderDto, param);
+            boolean erEndretPeriode = oppdater(avklarAktivitetsPerioderDto, param, opptjeningResultat, inntektArbeidYtelseGrunnlag);
             if (erEndretPeriode) {
                 erEndret = true;
             }
@@ -97,13 +101,13 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
         return OppdateringResultat.utenTransisjon().medTotrinnHvis(erEndret).build();
     }
 
-    private boolean oppdater(AvklarAktivitetsPerioderDto dto, AksjonspunktOppdaterParameter param) {
+    private boolean oppdater(AvklarAktivitetsPerioderDto dto, AksjonspunktOppdaterParameter param, Optional<OpptjeningResultat> opptjeningResultat, InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag) {
         var behandlingId = param.getBehandlingId();
         if (dto.getOpptjeningAktivitetList().stream().anyMatch(oa -> oa.getErGodkjent() == null)) {
             throw new IllegalStateException("AvklarAktivitetsPerioder: Uavklarte aktiviteter til oppdaterer");
         }
-        List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId).getArbeidsforholdInformasjon().map(ArbeidsforholdInformasjon::getOverstyringer).orElse(Collections.emptyList());
-        var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom()))).orElseThrow();
+        List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon().map(ArbeidsforholdInformasjon::getOverstyringer).orElse(Collections.emptyList());
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(DatoIntervallEntitet.fraOgMedTilOgMed(dto.getOpptjeningFom(), dto.getOpptjeningTom()))).orElseThrow();
         List<BekreftOpptjeningPeriodeDto> bekreftOpptjeningPerioder = map(dto.getOpptjeningAktivitetList(), opptjening, overstyringer);
 
         AktørId aktørId = param.getAktørId();
