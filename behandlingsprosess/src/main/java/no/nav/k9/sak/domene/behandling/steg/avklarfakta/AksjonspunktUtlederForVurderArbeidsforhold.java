@@ -67,14 +67,7 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforholdTilVurdering(AksjonspunktUtlederInput param,
                                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag) {
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder;
-        boolean taStillingTilEndringerIArbeidsforhold = skalTaStillingTilEndringerIArbeidsforhold(param.getRef());
-        var sakInntektsmeldinger = taStillingTilEndringerIArbeidsforhold ? iayTjeneste.hentInntektsmeldinger(param.getSaksnummer()) : null;
-        vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef(), iayGrunnlag, sakInntektsmeldinger, taStillingTilEndringerIArbeidsforhold);
+        vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef(), iayGrunnlag);
         return vurder;
-    }
-
-    private boolean skalTaStillingTilEndringerIArbeidsforhold(BehandlingReferanse behandlingReferanse) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
-        return !Objects.equals(behandlingReferanse.getBehandlingType(), BehandlingType.FØRSTEGANGSSØKNAD) || behandling.harSattStartpunkt();
     }
 }

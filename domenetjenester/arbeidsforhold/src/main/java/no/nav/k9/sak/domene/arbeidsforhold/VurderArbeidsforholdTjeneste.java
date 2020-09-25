@@ -1,15 +1,12 @@
 package no.nav.k9.sak.domene.arbeidsforhold;
 
-import static java.util.stream.Collectors.flatMapping;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.FORENKLET_OPPGJØRSORDNING;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,8 +28,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.EndringIArbeidsforholdId;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -41,7 +36,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -78,15 +72,11 @@ public class VurderArbeidsforholdTjeneste {
      *
      * @param behandlingReferanse                    behandlingen
      * @param iayGrunnlag                            - grunnlag for behandlingen
-     * @param sakInntektsmeldinger                   - alle inntektsmeldinger for saken behandlingen tilhører
-     * @param skalTaStillingTilEndringArbeidsforhold skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder(BehandlingReferanse behandlingReferanse,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                  SakInntektsmeldinger sakInntektsmeldinger,
-                                                                  boolean skalTaStillingTilEndringArbeidsforhold) {
-        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse, iayGrunnlag, sakInntektsmeldinger, skalTaStillingTilEndringArbeidsforhold);
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse, iayGrunnlag);
         return arbeidsgiverSetMap.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, VurderArbeidsforholdTjeneste::mapTilArbeidsforholdRef));
     }
@@ -102,20 +92,12 @@ public class VurderArbeidsforholdTjeneste {
      *
      * @param ref                                    behandlingen
      * @param iayGrunnlag                            I(nntekt)A(rbeid)Y(telse) grunnlaget
-     * @param skalTaStillingTilEndringArbeidsforhold skal ta stilling til endring i arbeidsforholdRef i inntektsmeldingen
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurderMedÅrsak(BehandlingReferanse ref,
-                                                                         InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                         SakInntektsmeldinger sakInntektsmeldinger,
-                                                                         boolean skalTaStillingTilEndringArbeidsforhold) {
+                                                                         InntektArbeidYtelseGrunnlag iayGrunnlag) {
 
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result = new HashMap<>();
-
-        if (skalTaStillingTilEndringArbeidsforhold) {
-            Objects.requireNonNull(sakInntektsmeldinger, "sakInntektsmeldinger");
-            vurderOmArbeidsforholdKanGjenkjennes(result, sakInntektsmeldinger, iayGrunnlag, ref);
-        }
 
         // Ikke relevant å sjekke permisjonen da dette går til avslag ..
         //VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
@@ -143,93 +125,12 @@ public class VurderArbeidsforholdTjeneste {
         return tjeneste.orElseThrow(() -> new IllegalStateException("Finner ikke implementasjon for PåkrevdeInntektsmeldingerTjeneste for behandling " + ref.getBehandlingUuid()));
     }
 
-    /**
-     * Gir forskjellen i inntektsmeldinger mellom to versjoner av inntektsmeldinger.
-     * Benyttes for å markere arbeidsforhold det må tas stilling til å hva saksbehandler skal gjøre.
-     *
-     * @param behandlingReferanse behandlingen
-     * @return Endringene i inntektsmeldinger
-     */
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> endringerIInntektsmelding(BehandlingReferanse behandlingReferanse,
-                                                                                    InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                    SakInntektsmeldinger sakInntektsmeldinger) {
-        Objects.requireNonNull(iayGrunnlag, "iayGrunnlag");
-        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result = new HashMap<>();
-        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> yrkesaktiviteterPerArbeidsgiver = mapYrkesaktiviteterPerArbeidsgiver(behandlingReferanse, iayGrunnlag);
-        Optional<InntektArbeidYtelseGrunnlag> eksisterendeGrunnlag = hentForrigeVersjonAvInntektsmeldingForBehandling(sakInntektsmeldinger, behandlingReferanse.getBehandlingId());
-        Optional<InntektsmeldingAggregat> nyAggregat = iayGrunnlag.getInntektsmeldinger();
-
-        final Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> eksisterende = inntektsmeldingerPerArbeidsgiver(eksisterendeGrunnlag
-            .flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger));
-        final Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> ny = inntektsmeldingerPerArbeidsgiver(nyAggregat);
-
-        if (!eksisterende.equals(ny)) {
-            // Klassifiser endringssjekk
-            for (Map.Entry<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsgiverSetEntry : ny.entrySet()) {
-                EndringIArbeidsforholdId.vurderMedÅrsak(result, arbeidsgiverSetEntry, eksisterende, iayGrunnlag, yrkesaktiviteterPerArbeidsgiver);
-            }
-        }
-        return result;
-    }
-
-
-    private List<Yrkesaktivitet> getAlleArbeidsforhold(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag) {
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
-
-        return filter.getAlleYrkesaktiviteter()
-            .stream()
-            .filter(Yrkesaktivitet::erArbeidsforhold)
-            .distinct()
-            .collect(Collectors.toList());
-    }
-
     private void erMottattInntektsmeldingUtenArbeidsforhold(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
                                                             BehandlingReferanse behandlingReferanse,
                                                             YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
 
         var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erMottattInntektsmeldingUtenArbeidsforhold(behandlingReferanse);
         resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
-    }
-
-    private void vurderOmArbeidsforholdKanGjenkjennes(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
-                                                      SakInntektsmeldinger sakInntektsmeldinger,
-                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                      BehandlingReferanse behandlingReferanse) {
-        Objects.requireNonNull(sakInntektsmeldinger, "sakInntektsmeldinger");
-        Objects.requireNonNull(iayGrunnlag, "iayGrunnlag");
-        var eksisterendeGrunnlag = hentForrigeVersjonAvInntektsmeldingForBehandling(sakInntektsmeldinger, behandlingReferanse.getId());
-        var nyAggregat = iayGrunnlag.getInntektsmeldinger();
-        var yrkesaktiviteterPerArbeidsgiver = mapYrkesaktiviteterPerArbeidsgiver(behandlingReferanse, iayGrunnlag);
-
-        final Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> eksisterendeIM = inntektsmeldingerPerArbeidsgiver(eksisterendeGrunnlag
-            .flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger));
-        final Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> ny = inntektsmeldingerPerArbeidsgiver(nyAggregat);
-
-        if (!eksisterendeIM.isEmpty() && !eksisterendeIM.equals(ny)) {
-            // Klassifiser endringssjekk
-            for (Map.Entry<Arbeidsgiver, Set<InternArbeidsforholdRef>> nyIM : ny.entrySet()) {
-                EndringIArbeidsforholdId.vurderMedÅrsak(result, nyIM, eksisterendeIM, iayGrunnlag, yrkesaktiviteterPerArbeidsgiver);
-            }
-        }
-    }
-
-    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> mapYrkesaktiviteterPerArbeidsgiver(BehandlingReferanse behandlingReferanse,
-                                                                                               InntektArbeidYtelseGrunnlag grunnlag) {
-        List<Yrkesaktivitet> yrkesaktiviteter = getAlleArbeidsforhold(behandlingReferanse.getAktørId(), grunnlag);
-        return yrkesaktiviteter.stream()
-            .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,
-                flatMapping(ya -> Stream.of(ya.getArbeidsforholdRef()), Collectors.toSet())));
-    }
-
-    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> inntektsmeldingerPerArbeidsgiver(Optional<InntektsmeldingAggregat> inntektsmeldingAggregat) {
-        if (inntektsmeldingAggregat.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return inntektsmeldingAggregat.get()
-            .getInntektsmeldingerSomSkalBrukes()
-            .stream()
-            .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver,
-                flatMapping(im -> Stream.of(im.getArbeidsforholdRef()), Collectors.toSet())));
     }
 
     private void erRapportertNormalInntektUtenArbeidsforhold(InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
@@ -291,19 +192,6 @@ public class VurderArbeidsforholdTjeneste {
             .stream()
             .noneMatch(it -> Objects.equals(it.getArbeidsgiver(), inntekt.getArbeidsgiver())
                 && Objects.equals(it.getHandling(), ArbeidsforholdHandlingType.IKKE_BRUK));
-    }
-
-    /**
-     * Henter ut forrige versjon av inntektsmeldinger
-     *
-     * @param behandlingId iden til behandlingen
-     * @return Liste med inntektsmeldinger {@link Inntektsmelding}
-     */
-    private Optional<InntektArbeidYtelseGrunnlag> hentForrigeVersjonAvInntektsmeldingForBehandling(SakInntektsmeldinger sakInntektsmeldinger, Long behandlingId) {
-        Objects.requireNonNull(sakInntektsmeldinger, "sakInntektsmeldiner");
-        // litt rar - returnerer forrige grunnlag som har en inntektsmelding annen enn siste benyttede inntektsmelding
-        var grunnlagEksternReferanse = sakInntektsmeldinger.getSisteGrunnlagReferanseDerInntektsmeldingerForskjelligFraNyeste(behandlingId);
-        return grunnlagEksternReferanse.flatMap(grunnlagUuid -> sakInntektsmeldinger.finnGrunnlag(behandlingId, grunnlagUuid));
     }
 
 }

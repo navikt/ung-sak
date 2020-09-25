@@ -18,7 +18,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
@@ -117,7 +116,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         arbeidsforholdRefSet.add(ARBEIDSFORHOLD_ID);
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsgiverSetMap = new HashMap<>();
         arbeidsgiverSetMap.put(arbeidsgiver, arbeidsforholdRefSet);
-        when(vurderArbeidsforholdTjeneste.vurder(any(), any(), any(), Mockito.anyBoolean())).thenReturn(arbeidsgiverSetMap);
+        when(vurderArbeidsforholdTjeneste.vurder(any(), any())).thenReturn(arbeidsgiverSetMap);
 
         ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         arbeidsforholdTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste,
@@ -195,7 +194,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
     private Set<ArbeidsforholdWrapper> hentArbeidsforholdFerdigUtledet(Behandling behandling) {
         BehandlingReferanse ref = lagRef(behandling);
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
-        return arbeidsforholdTjeneste.hentArbeidsforholdFerdigUtledet(ref, iayGrunnlag, null, new UtledArbeidsforholdParametere(true));
+        return arbeidsforholdTjeneste.hentArbeidsforholdFerdigUtledet(ref, iayGrunnlag, new UtledArbeidsforholdParametere(true));
     }
 
     @Test

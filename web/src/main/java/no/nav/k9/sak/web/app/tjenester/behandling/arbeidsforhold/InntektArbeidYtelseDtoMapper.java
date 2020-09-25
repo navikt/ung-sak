@@ -85,15 +85,15 @@ public class InntektArbeidYtelseDtoMapper {
         InntektArbeidYtelseDto dto = new InntektArbeidYtelseDto();
         mapRelaterteYtelser(dto, ref, iayGrunnlag);
 
-        mapArbeidsforhold(dto, ref, param, iayGrunnlag, sakInntektsmeldinger);
+        mapArbeidsforhold(dto, ref, param, iayGrunnlag);
         dto.setInntektsmeldinger(lagInntektsmeldingDto(ref, iayGrunnlag));
         return dto;
     }
 
     private void mapArbeidsforhold(InntektArbeidYtelseDto dto, BehandlingReferanse ref, UtledArbeidsforholdParametere param,
-                                   InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger) {
+                                   InntektArbeidYtelseGrunnlag iayGrunnlag) {
         Set<ArbeidsforholdWrapper> arbeidsforholdSet = arbeidsforholdAdministrasjonTjeneste.hentArbeidsforholdFerdigUtledet(ref, iayGrunnlag,
-            sakInntektsmeldinger, param);
+                param);
         dto.setSkalKunneLeggeTilNyeArbeidsforhold(skalKunneLeggeTilNyeArbeidsforhold(arbeidsforholdSet));
         dto.setSkalKunneLageArbeidsforholdBasrtPåInntektsmelding(skalKunneLageArbeidsforholdFraInntektsmelding(arbeidsforholdSet));
         dto.setArbeidsforhold(arbeidsforholdSet.stream().map(this::mapArbeidsforhold).collect(Collectors.toList()));
@@ -189,7 +189,7 @@ public class InntektArbeidYtelseDtoMapper {
         dto.setInnsendingstidspunkt(inntektsmelding.getInnsendingstidspunkt());
         dto.setKanalreferanse(inntektsmelding.getKanalreferanse());
         dto.setKildesystem(inntektsmelding.getKildesystem());
-        
+
         List<UtsettelsePeriode> utsettelser = inntektsmelding.getUtsettelsePerioder();
         if (utsettelser != null) {
             dto.setUtsettelsePerioder(utsettelser
