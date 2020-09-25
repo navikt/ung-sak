@@ -239,13 +239,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(ref.getFagsakYtelseType().getKode());
 
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
+        List<HentBeregningsgrunnlagRequest> requests = bgReferanser.stream().map(bgRef -> new HentBeregningsgrunnlagRequest(bgRef.getRef(), ytelseSomSkalBeregnes, false)).collect(Collectors.toList());
 
-        List<HentBeregningsgrunnlagRequest> requests = new ArrayList<>();
-        bgReferanser.forEach(bgRef -> requests.add(new HentBeregningsgrunnlagRequest(bgRef.getRef(), ytelseSomSkalBeregnes, false)));
         var dtoer = restTjeneste.hentBeregningsgrunnlagGrunnlag(new HentBeregningsgrunnlagListeRequest(requests, ref.getBehandlingUuid(), false));
 
-        dtoer.forEach(dto -> resultater.add(FraKalkulusMapper.mapBeregningsgrunnlagGrunnlag(dto)));
-        return Collections.unmodifiableList(resultater);
+        if (dtoer == null || dtoer.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            dtoer.forEach(dto -> resultater.add(FraKalkulusMapper.mapBeregningsgrunnlagGrunnlag(dto)));
+            return Collections.unmodifiableList(resultater);
+        }
     }
 
     @Override
