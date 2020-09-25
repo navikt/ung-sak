@@ -63,7 +63,6 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
 
     @Spy
     private AksjonspunktUtlederForVurderArbeidsforhold utleder = new AksjonspunktUtlederForVurderArbeidsforhold(
-        repositoryProvider.getBehandlingRepository(),
         iayTjeneste,
         tjeneste);
 

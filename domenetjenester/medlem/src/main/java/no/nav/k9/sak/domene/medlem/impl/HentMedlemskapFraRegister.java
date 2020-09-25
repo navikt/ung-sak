@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
@@ -22,8 +19,6 @@ import no.nav.vedtak.felles.integrasjon.medl2.MedlemsunntakRestKlient;
 
 @ApplicationScoped
 public class HentMedlemskapFraRegister {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HentMedlemskapFraRegister.class);
 
     private MedlemsunntakRestKlient restKlient;
 

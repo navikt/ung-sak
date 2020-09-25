@@ -207,24 +207,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public Optional<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, LocalDate skjæringstidspunkt) {
-        var bgReferanse = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkt, false, false);
-        if (bgReferanse.isEmpty()) {
-            return Optional.empty();
-        }
-        var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-        var grunnlag = tjeneste.hentGrunnlag(ref, List.of(bgReferanse.get()));
-        if (grunnlag.size() == 1) {
-            return Optional.of(grunnlag.get(0));
-        } else if (grunnlag.isEmpty()) {
-            return Optional.empty();
-        } else {
-            throw new IllegalStateException("For mange grunnlag returnert, forventet kun 1: " + grunnlag);
-        }
-
-    }
-
-    @Override
     public List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
         var bgReferanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), skjæringstidspunkter, false, false);
         if (bgReferanser.isEmpty()) {
