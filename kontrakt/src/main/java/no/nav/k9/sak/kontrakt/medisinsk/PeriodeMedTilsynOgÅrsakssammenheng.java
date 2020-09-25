@@ -18,7 +18,7 @@ public class PeriodeMedTilsynOgÅrsakssammenheng {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonProperty("periode")
@@ -27,7 +27,7 @@ public class PeriodeMedTilsynOgÅrsakssammenheng {
 
     @JsonProperty(value = "årsaksammenhengBegrunnelse", required = true)
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String årsaksammenhengBegrunnelse;
 
     @JsonProperty(value = "årsaksammenheng", required = true)
@@ -35,9 +35,9 @@ public class PeriodeMedTilsynOgÅrsakssammenheng {
 
 
     public PeriodeMedTilsynOgÅrsakssammenheng(@JsonProperty(value = "periode", required = true) @Valid Periode periode,
-                                              @JsonProperty(value = "begrunnelse", required = true) @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+                                              @JsonProperty(value = "begrunnelse", required = true) @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
                                               @JsonProperty(value = "årsaksammenheng", required = true) Boolean årsaksammenheng,
-                                              @JsonProperty(value = "årsaksammenhengBegrunnelse", required = true) @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String årsaksammenhengBegrunnelse) {
+                                              @JsonProperty(value = "årsaksammenhengBegrunnelse", required = true) @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String årsaksammenhengBegrunnelse) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.årsaksammenhengBegrunnelse = årsaksammenhengBegrunnelse;

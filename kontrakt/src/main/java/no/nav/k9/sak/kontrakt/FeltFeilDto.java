@@ -14,7 +14,6 @@ public class FeltFeilDto implements Serializable {
     @NotNull
     @Size(max = 2000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-
     private String melding;
 
     @JsonProperty(value = "metainformasjon")
