@@ -309,6 +309,7 @@ public class BehandlingDtoTjeneste {
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
         lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
         lagTilgjengeligeVedtakbrevlink(behandling).ifPresent(dto::leggTil);
+        lagDokumentdatalink(behandling).ifPresent(dto::leggTil);
 
         lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
     }
@@ -419,6 +420,14 @@ public class BehandlingDtoTjeneste {
             "tilgjengelige-vedtaksbrev",
             Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString(),
                 "sakstype", behandling.getFagsakYtelseType().getKode())));
+    }
+
+    private Optional<ResourceLink> lagDokumentdatalink(Behandling behandling) {
+        return Optional.of(ResourceLink.post(
+            "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
+            "dokumentdata-lagre",
+            null
+        ));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
