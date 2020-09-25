@@ -78,12 +78,10 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         InntektArbeidYtelseGrunnlag grunnlag2 = iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2);
 
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
-        boolean skalTaStillingTilEndringerIArbeidsforhold = skalTaStillingTilEndringerIArbeidsforhold(ref);
 
         InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId()); // TODO burde ikke være nødvendig (bør velge grunnlagId1, grunnlagId2)
-        SakInntektsmeldinger sakInntektsmeldinger = skalTaStillingTilEndringerIArbeidsforhold ? iayTjeneste.hentInntektsmeldinger(ref.getSaksnummer()) : null /* ikke hent opp */;
 
-        boolean erPåkrevdManuelleAvklaringer = !vurderArbeidsforholdTjeneste.vurder(ref, iayGrunnlag, sakInntektsmeldinger, skalTaStillingTilEndringerIArbeidsforhold).isEmpty();
+        boolean erPåkrevdManuelleAvklaringer = !vurderArbeidsforholdTjeneste.vurder(ref, iayGrunnlag).isEmpty();
 
         IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
         boolean erAktørArbeidEndretForSøker = iayGrunnlagDiff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
@@ -121,12 +119,6 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
     private boolean erInntektsmeldingEndret(BehandlingReferanse ref, IAYGrunnlagDiff iayGrunnlagDiff, StartpunktType startpunktType) {
         return startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref) ? !StartpunktType.UDEFINERT.equals(startpunktType) : iayGrunnlagDiff.erEndringPåInntektsmelding();
-    }
-
-    private boolean skalTaStillingTilEndringerIArbeidsforhold(BehandlingReferanse behandlingReferanse) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
-        return !Objects.equals(behandlingReferanse.getBehandlingType(), BehandlingType.FØRSTEGANGSSØKNAD)
-            || behandling.harSattStartpunkt();
     }
 
     /*

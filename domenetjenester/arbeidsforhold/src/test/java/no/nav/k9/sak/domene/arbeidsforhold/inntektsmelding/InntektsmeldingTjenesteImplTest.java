@@ -124,7 +124,7 @@ public class InntektsmeldingTjenesteImplTest {
         arbeidsforholdRefSet.add(ARBEIDSFORHOLD_ID);
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsgiverSetMap = new HashMap<>();
         arbeidsgiverSetMap.put(arbeidsgiver2, arbeidsforholdRefSet);
-        when(vurderArbeidsforholdTjeneste.vurder(any(), any(), any(), Mockito.anyBoolean())).thenReturn(arbeidsgiverSetMap);
+        when(vurderArbeidsforholdTjeneste.vurder(any(), any())).thenReturn(arbeidsgiverSetMap);
         var foreldrepengerFilter = new InntektsmeldingFilterYtelseImpl();
 
         this.inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste,

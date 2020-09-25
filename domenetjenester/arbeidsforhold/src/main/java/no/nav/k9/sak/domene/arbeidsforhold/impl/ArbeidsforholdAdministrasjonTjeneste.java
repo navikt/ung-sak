@@ -96,13 +96,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
      */
     public Set<ArbeidsforholdWrapper> hentArbeidsforholdFerdigUtledet(BehandlingReferanse ref,
                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      SakInntektsmeldinger sakInntektsmeldinger,
                                                                       UtledArbeidsforholdParametere param) {
         AktørId aktørId = ref.getAktørId();
         LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
 
-        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderArbeidsforholdTjeneste.endringerIInntektsmelding(ref, iayGrunnlag,
-            sakInntektsmeldinger);
+        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = Map.of();
 
         var inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref.getAktørId(), skjæringstidspunkt, iayGrunnlag);
 
@@ -131,17 +129,16 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         arbeidsforhold.addAll(utledArbeidsforholdFraArbeidsforholdInformasjon(filter,
             overstyringer, alleYrkesaktiviteter, inntektsmeldingerForGrunnlag, skjæringstidspunkt));
 
-        sjekkHarAksjonspunktForVurderArbeidsforhold(ref, arbeidsforhold, iayGrunnlag, sakInntektsmeldinger, param.getVurderArbeidsforhold());
+        sjekkHarAksjonspunktForVurderArbeidsforhold(ref, arbeidsforhold, iayGrunnlag, param.getVurderArbeidsforhold());
 
         return arbeidsforhold;
     }
 
     private void sjekkHarAksjonspunktForVurderArbeidsforhold(BehandlingReferanse ref, Set<ArbeidsforholdWrapper> arbeidsforhold,
-                                                             InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger,
+                                                             InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                              boolean vurderArbeidsforhold) {
         if (vurderArbeidsforhold && !arbeidsforhold.isEmpty()) {
-            final Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag, sakInntektsmeldinger,
-                true);
+            final Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
             for (ArbeidsforholdWrapper arbeidsforholdWrapper : arbeidsforhold) {
                 for (Map.Entry<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetEntry : vurder.entrySet()) {
                     if (erAksjonspunktPå(arbeidsforholdWrapper, arbeidsgiverSetEntry)) {
@@ -227,8 +224,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         wrapper.setErNyttArbeidsforhold(erNyttArbeidsforhold);
         wrapper.setFortsettBehandlingUtenInntektsmelding(false);
         wrapper.setIkkeRegistrertIAaRegister(yrkesaktiviteter.isEmpty());
-        wrapper.setVurderOmSkalErstattes(
-            erNyttOgIkkeTattStillingTil(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef(), arbeidsgiverSetMap));
+        wrapper.setVurderOmSkalErstattes(erNyttOgIkkeTattStillingTil(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef(), arbeidsgiverSetMap));
         wrapper.setHarErsattetEttEllerFlere(!inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold());
         wrapper.setErstatterArbeidsforhold(harErstattetEtEllerFlereArbeidsforhold(arbeidsgiver, inntektsmelding.getArbeidsforholdRef(), overstyringer));
         wrapper.setErEndret(sjekkOmFinnesIOverstyr(overstyringer, inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef()));
