@@ -53,7 +53,8 @@ public class KalkulatorInputTjeneste {
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty()) {
-            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse);
+            OppgittOpptjening oppgittOpptjening = iayGrunnlag.getOppgittOpptjening().orElse(null);
+            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get());

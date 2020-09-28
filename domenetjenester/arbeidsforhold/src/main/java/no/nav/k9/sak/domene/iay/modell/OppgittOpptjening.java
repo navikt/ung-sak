@@ -135,12 +135,13 @@ public class OppgittOpptjening {
         OppgittOpptjening that = (OppgittOpptjening) o;
         return Objects.equals(oppgittArbeidsforhold, that.oppgittArbeidsforhold) &&
             Objects.equals(egenNæring, that.egenNæring) &&
-            Objects.equals(annenAktivitet, that.annenAktivitet);
+            Objects.equals(annenAktivitet, that.annenAktivitet) &&
+            Objects.equals(frilans, that.frilans);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittArbeidsforhold, egenNæring, annenAktivitet);
+        return Objects.hash(oppgittArbeidsforhold, egenNæring, annenAktivitet, frilans);
     }
 
     @Override
@@ -148,6 +149,7 @@ public class OppgittOpptjening {
         return "OppgittOpptjeningEntitet{" +
             "oppgittArbeidsforhold=" + oppgittArbeidsforhold +
             ", egenNæring=" + egenNæring +
+            ", frilans=" + frilans +
             ", annenAktivitet=" + annenAktivitet +
             '}';
     }
