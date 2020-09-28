@@ -7,9 +7,10 @@ where prosess_task_id in (
 10437426,
 10359786
 ) 
- and exists (select 1 from prosess_task p where p.id=fs.prosess_task_id and p.status='FEILET';
+ and exists (select 1 from prosess_task p where p.id=fs.prosess_task_id and p.status='FEILET');
 
-delete from prosess_task
+update prosess_task
+ set status='KJOERT'
  where task_type='grunnlag.diffOgReposisjoner'
   and id in (
 10359357,
@@ -22,7 +23,8 @@ delete from prosess_task
  and status='FEILET';
 
 --rydd fortsett behandling
-delete from prosess_task
+update prosess_task
+  set status='KJOERT'
  where task_type='behandlingskontroll.fortsettBehandling'
  and id in (
 9551300,
