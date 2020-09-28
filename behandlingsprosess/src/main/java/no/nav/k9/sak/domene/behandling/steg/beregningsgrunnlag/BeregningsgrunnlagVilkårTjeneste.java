@@ -15,6 +15,8 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -35,6 +37,8 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
 public class BeregningsgrunnlagVilkårTjeneste {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(BeregningsgrunnlagVilkårTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -169,7 +173,12 @@ public class BeregningsgrunnlagVilkårTjeneste {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
-        perioder.addAll(utvidetTilVUrdering);
+
+        if (!utvidetTilVUrdering.isEmpty()) {
+            // FIXME kan fjerne denne loggingen etter hvert når årskvantum har stabilisert
+            log.info("Fikk utvidet perioder til vurdering {}, i tillegg til vilkårsperioder: {}", utvidetTilVUrdering, perioder);
+            perioder.addAll(utvidetTilVUrdering);
+        }
 
         if (vilkår.isPresent() && skalIgnorereAvslåttePerioder) {
             var avslåttePerioder = vilkår.get()

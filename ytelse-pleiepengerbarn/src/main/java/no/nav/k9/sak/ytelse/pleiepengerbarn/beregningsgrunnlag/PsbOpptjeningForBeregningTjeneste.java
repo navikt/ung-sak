@@ -60,8 +60,7 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                               InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                                               LocalDate stp) {
-        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = finnOpptjeningsperioderUtenOverstyringTjeneste(behandlingReferanse);
 
         Long behandlingId = behandlingReferanse.getId();
 
@@ -77,6 +76,11 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
             .collect(Collectors.toList());
+    }
+
+    private OpptjeningsperioderUtenOverstyringTjeneste finnOpptjeningsperioderUtenOverstyringTjeneste(BehandlingReferanse behandlingReferanse) {
+        return FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
     }
 
     @Override
@@ -96,14 +100,10 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     @Override
-    public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
+    public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
-
-        if (opptjeningAktiviteter.isEmpty()) {
-            throw new IllegalStateException("Forventer opptjening!!!");
-        }
-        return opptjeningAktiviteter.get();
+        return opptjeningAktiviteter;
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {
