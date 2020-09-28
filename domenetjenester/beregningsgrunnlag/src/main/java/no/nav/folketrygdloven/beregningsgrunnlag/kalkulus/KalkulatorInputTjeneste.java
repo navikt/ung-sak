@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -38,6 +39,7 @@ public class KalkulatorInputTjeneste {
     }
 
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse,
+                                      UUID bgReferanse,
                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                       SakInntektsmeldinger sakInntektsmeldinger,
                                       List<RefusjonskravDato> refusjonskravDatoer,
@@ -49,7 +51,12 @@ public class KalkulatorInputTjeneste {
 
         var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, tjeneste.finnOppgittOpptjening(iayGrunnlag).orElse(null));
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
-        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter);
+
+        if (opptjeningAktiviteter.isEmpty()) {
+            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse);
+        }
+
+        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get());
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
@@ -76,7 +83,7 @@ public class KalkulatorInputTjeneste {
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse referanse) {
         FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
-                .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
         return tjeneste;
     }
 }

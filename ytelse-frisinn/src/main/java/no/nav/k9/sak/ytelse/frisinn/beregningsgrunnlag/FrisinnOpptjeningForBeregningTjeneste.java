@@ -61,7 +61,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     }
 
     @Override
-    public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
+    public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         LocalDate stp;
         if (toggletVilkårsperioder) {
@@ -75,7 +75,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
         if (opptjeningAktiviteter.getOpptjeningPerioder().isEmpty()) {
             log.debug("Har ikke opptjening.ref={}, stp={}, fom={}", ref, stp, fom);
         }
-        return opptjeningAktiviteter;
+        return Optional.of(opptjeningAktiviteter);
     }
 
     @Override

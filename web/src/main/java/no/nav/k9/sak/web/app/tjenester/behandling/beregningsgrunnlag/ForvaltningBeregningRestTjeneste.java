@@ -97,7 +97,7 @@ public class ForvaltningBeregningRestTjeneste {
             .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode()))
             .map(vilkårsperiode -> {
                 var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-                var kalkulatorInput = getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, ytelseGrunnlag, vilkårsperiode);
+                var kalkulatorInput = getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, null, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, ytelseGrunnlag, vilkårsperiode);
                 return new KalkulatorInputPrVilkårperiodeDto(vilkårsperiode, kalkulatorInput);
             })
             .collect(Collectors.toList());

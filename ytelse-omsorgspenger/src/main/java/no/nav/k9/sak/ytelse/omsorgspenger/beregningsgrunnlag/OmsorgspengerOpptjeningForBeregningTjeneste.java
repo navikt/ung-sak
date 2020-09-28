@@ -35,7 +35,6 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
 
-
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
@@ -50,18 +49,18 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
     }
 
-
     /**
      * Henter aktiviteter vurdert i opptjening som er relevant for beregning.
      *
      * @param behandlingReferanse Aktuell behandling referanse
-     * @param iayGrunnlag         {@link InntektArbeidYtelseGrunnlag}
+     * @param iayGrunnlag {@link InntektArbeidYtelseGrunnlag}
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
-                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                              LocalDate stp) {
-        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
+                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                                      LocalDate stp) {
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup
+            .find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
 
         Long behandlingId = behandlingReferanse.getId();
@@ -72,7 +71,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
 
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null));
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(),
+            finnOppgittOpptjening(iayGrunnlag).orElse(null));
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
@@ -86,8 +86,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                      LocalDate stp) {
+                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                       LocalDate stp) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp).stream()
             .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
         if (opptjeningsPerioder.isEmpty()) {
@@ -97,14 +97,10 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     @Override
-    public OpptjeningAktiviteter hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
+    public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
-
-        if (opptjeningAktiviteter.isEmpty()) {
-            throw new IllegalStateException("Forventer opptjening!!!");
-        }
-        return opptjeningAktiviteter.get();
+        return opptjeningAktiviteter;
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {

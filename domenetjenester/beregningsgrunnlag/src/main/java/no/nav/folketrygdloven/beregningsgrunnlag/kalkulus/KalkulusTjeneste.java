@@ -291,21 +291,21 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return restTjeneste;
     }
 
-    protected StartBeregningListeRequest initStartRequest(BehandlingReferanse referanse,
+    protected StartBeregningListeRequest initStartRequest(BehandlingReferanse behandlingReferanse,
                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                           SakInntektsmeldinger sakInntektsmeldinger,
                                                           List<RefusjonskravDato> refusjonskravDatoer,
                                                           List<StartBeregningInput> startBeregningInput) {
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
+        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(behandlingReferanse.getFagsakId());
 
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
-        Vilkår vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
 
         Map<UUID, KalkulatorInputDto> input = startBeregningInput.stream().map(entry -> {
             UUID bgReferanse = entry.getBgReferanse();
             var vilkårsPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getSkjæringstidspunkt()).getPeriode();
             var newEntry = new AbstractMap.SimpleEntry<>(bgReferanse,
-                kalkulatorInputTjeneste.byggDto(referanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, entry.getYtelseGrunnlag(), vilkårsPeriode));
+                kalkulatorInputTjeneste.byggDto(behandlingReferanse, bgReferanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, entry.getYtelseGrunnlag(), vilkårsPeriode));
             return newEntry;
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
@@ -313,7 +313,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             input,
             fagsak.getSaksnummer().getVerdi(),
             aktør,
-            new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode()));
+            new YtelseTyperKalkulusStøtterKontrakt(behandlingReferanse.getFagsakYtelseType().getKode()));
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {
