@@ -7,6 +7,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -30,7 +33,6 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 
 @FagsakYtelseTypeRef("OMP")
@@ -39,13 +41,14 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
+    private static final Logger log = LoggerFactory.getLogger(OmsorgspengerBeregneYtelseSteg.class);
+
     private BehandlingRepository behandlingRepository;
     private BeregningTjeneste kalkulusTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
-    private boolean brukerutbetalingEnabled;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     protected OmsorgspengerBeregneYtelseSteg() {
@@ -58,7 +61,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @KonfigVerdi(value = "BRUKERUTBETALING_ENABLED", required = false) boolean brukerutbetalingEnabled,
                                           @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -66,7 +68,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
-        this.brukerutbetalingEnabled = brukerutbetalingEnabled;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
@@ -88,8 +89,8 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-        if (!brukerutbetalingEnabled && harUtbetalingTilBruker(behandlingId, beregningsresultat)) {
-            throw new IllegalStateException("Utbetaling til bruker er midlertidig deaktivert.");
+        if (harUtbetalingTilBruker(behandlingId, beregningsresultat)) {
+            log.info("Har utbetaling til bruker: {}", beregningsresultat);
         }
 
         // Beregn feriepenger

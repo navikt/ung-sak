@@ -190,8 +190,6 @@ spec:
       value: "false"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
-    - name: "BRUKERUTBETALING_ENABLED"
-      value: "true"
     - name: "AKSJONSPUNKT_7035_ENABLED"
       value: "false"
     - name: K9TILBAKE_AKTIVERT

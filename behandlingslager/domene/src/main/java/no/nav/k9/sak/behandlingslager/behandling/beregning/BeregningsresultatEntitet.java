@@ -120,6 +120,11 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<perioder=" + beregningsresultatPerioder + ", feriepenger=" + beregningsresultatFeriepenger + ">";
+    }
+
     public static Builder builder() {
         return new Builder();
     }
