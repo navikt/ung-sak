@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -44,10 +45,12 @@ public class TilbakeTilStartBeregningTask extends BehandlingProsessTask {
 
     @Inject
     public TilbakeTilStartBeregningTask(BehandlingRepository behandlingRepository,
+                                        BehandlingLåsRepository behandlingLåsRepository,
                                         HistorikkRepository historikkRepository,
                                         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         FagsakProsessTaskRepository prosessTaskRepository) {
+        super(behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.historikkRepository = historikkRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
