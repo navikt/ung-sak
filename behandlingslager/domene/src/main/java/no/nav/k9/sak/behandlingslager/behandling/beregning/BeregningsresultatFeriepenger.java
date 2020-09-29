@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,6 +99,12 @@ public class BeregningsresultatFeriepenger extends BaseEntitet {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<periode=[" + feriepengerPeriodeFom + ", " + feriepengerPeriodeTom + "]"
+            + ", prÅrListe=[" + beregningsresultatFeriepengerPrÅrListe.size() + "]>";
     }
 
     public static Builder builder() {

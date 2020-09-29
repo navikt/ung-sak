@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -62,8 +61,8 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
+            @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
+            @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
     })
     private DatoIntervallEntitet periode;
 
@@ -111,7 +110,8 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
         Objects.requireNonNull(beregningsresultatAndel, "beregningsresultatAndel");
-        if (!beregningsresultatAndelList.contains(beregningsresultatAndel)) { // NOSONAR Class defines List based fields but uses them like Sets: Ingening å tjene på å bytte til Set ettersom det er små lister
+        if (!beregningsresultatAndelList.contains(beregningsresultatAndel)) { // NOSONAR Class defines List based fields but uses them like Sets: Ingening å tjene på å bytte til Set ettersom det er
+                                                                              // små lister
             beregningsresultatAndelList.add(beregningsresultatAndel);
         }
     }
@@ -131,8 +131,12 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         }
         BeregningsresultatPeriode other = (BeregningsresultatPeriode) obj;
         return Objects.equals(this.getBeregningsresultatPeriodeFom(), other.getBeregningsresultatPeriodeFom())
-            && Objects.equals(this.getBeregningsresultatPeriodeTom(), other.getBeregningsresultatPeriodeTom())
-            ;
+            && Objects.equals(this.getBeregningsresultatPeriodeTom(), other.getBeregningsresultatPeriodeTom());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<periode=" + periode + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
     }
 
     @Override
@@ -173,4 +177,3 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     }
 
 }
-
