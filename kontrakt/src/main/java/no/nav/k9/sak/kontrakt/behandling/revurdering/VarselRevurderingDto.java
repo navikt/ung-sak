@@ -27,7 +27,7 @@ public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "fritekst", required = true)
     @NotNull
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fritekst;
 
     @JsonProperty(value = "sendVarsel", required = true)
