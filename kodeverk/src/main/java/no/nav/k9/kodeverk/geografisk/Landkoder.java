@@ -130,7 +130,7 @@ public class Landkoder implements Kodeverdi {
 
         // ISO transitional codes.
         // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Transitional_reservations
-        List.of("ANT", "BUR", "BYS", "CSK", "ROM", "SCG", "TMP", "YUG", "ZAR")
+        List.of("ANT", "BUR", "BYS", "CSK", "ROM", "SCG", "TMP", "YUG", "ZAR", "SUN")
             .forEach(c -> map.put(c, new Landkoder(c)));
 
         return Collections.unmodifiableMap(map);
