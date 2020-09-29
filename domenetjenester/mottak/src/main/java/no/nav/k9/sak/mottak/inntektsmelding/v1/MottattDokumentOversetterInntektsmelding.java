@@ -88,7 +88,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapFerie(wrapper, builder);
         mapRefusjon(wrapper, builder);
 
-        builder.medOppgittFravær(validator.validerOppgittFravær(mottattDokument.getMottattDato(), wrapper.getOppgittFravær()));
+        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær()));
         return builder;
     }
 
