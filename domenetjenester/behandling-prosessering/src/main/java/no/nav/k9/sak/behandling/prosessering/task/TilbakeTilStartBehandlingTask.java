@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -54,12 +55,14 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
     @Inject
     public TilbakeTilStartBehandlingTask(BehandlingRepository behandlingRepository,
+                                         BehandlingLåsRepository behandlingLåsRepository,
                                          HistorikkRepository historikkRepository,
                                          ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                          FagsakProsessTaskRepository prosessTaskRepository,
                                          VilkårResultatRepository vilkårResultatRepository,
                                          OpptjeningRepository opptjeningRepository) {
+        super(behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.historikkRepository = historikkRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
