@@ -188,10 +188,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @POST
     @Path("/manuell-revurdering")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(description = "Oppretter manuell revurdering med prosessfeil som årsak.",
-               summary = ("Oppretter manuell revurdering med prosessfeil som årsak."), tags = "forvaltning")
+    @Operation(description = "Oppretter manuell revurdering med annet som årsak.",
+               summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void revurderAlleSomProsessFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
+    public void revurderAlleSomAnnenFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
         final ProsessTaskData taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
         taskData.setCallIdFraEksisterende();
         taskData.setPayload(opprettManuellRevurdering.getSaksnumre());

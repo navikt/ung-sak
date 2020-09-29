@@ -95,7 +95,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
             
             if (Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_MANUELT_OPPRETTET))) {
-                BehandlingÅrsak.builder(BehandlingÅrsakType.RE_FEIL_PROSESSUELL).medManueltOpprettet(true).buildFor(behandling);
+                BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ANNET).medManueltOpprettet(true).buildFor(behandling);
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
             

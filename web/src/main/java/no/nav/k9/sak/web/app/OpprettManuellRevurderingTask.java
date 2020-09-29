@@ -77,7 +77,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     public void revurder(Saksnummer saksnummer) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
-        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_FEIL_PROSESSUELL;
+        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ANNET;
         
         final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
