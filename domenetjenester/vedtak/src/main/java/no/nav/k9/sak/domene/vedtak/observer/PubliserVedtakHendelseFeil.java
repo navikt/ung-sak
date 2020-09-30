@@ -8,8 +8,8 @@ import no.nav.vedtak.feil.LogLevel;
 import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 
-public interface PubliserVedtattYtelseHendelseFeil extends DeklarerteFeil {
-    PubliserVedtattYtelseHendelseFeil FEILFACTORY = FeilFactory.create(PubliserVedtattYtelseHendelseFeil.class); //$NON-NLS-1$
+public interface PubliserVedtakHendelseFeil extends DeklarerteFeil {
+    PubliserVedtakHendelseFeil FEILFACTORY = FeilFactory.create(PubliserVedtakHendelseFeil.class); //$NON-NLS-1$
 
     @TekniskFeil(feilkode = "FP-190495", feilmelding = "Kunne ikke serialisere til json.", logLevel = LogLevel.WARN)
     Feil kanIkkeSerialisere(JsonProcessingException e);
