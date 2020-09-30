@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>6.5.6</version><!--$NO-MVN-MAN-VER$ -->
+            <version>7.0.0</version><!--$NO-MVN-MAN-VER$ -->
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
