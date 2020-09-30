@@ -15,20 +15,11 @@ public class OpptjeningsaktiviteterPerYtelse {
         this.ekskluderteAktiviteter = Objects.requireNonNull(ekskluderteAktiviteter, "ekskluderteAktiviteter");
     }
 
-    public boolean erRelevantAktivitet(OpptjeningAktivitetType opptjeningAktivitetType, InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        if (OpptjeningAktivitetType.FRILANS.equals(opptjeningAktivitetType)) {
-            return harOppgittFrilansISøknad(iayGrunnlag);
-        }
+    public boolean erRelevantAktivitet(OpptjeningAktivitetType opptjeningAktivitetType) {
         return erInkludert(opptjeningAktivitetType);
     }
 
     public boolean erInkludert(OpptjeningAktivitetType opptjeningAktivitetType) {
         return !ekskluderteAktiviteter.contains(opptjeningAktivitetType);
-    }
-
-    private boolean harOppgittFrilansISøknad(InntektArbeidYtelseGrunnlag grunnlag) {
-        return grunnlag.getOppgittOpptjening().stream()
-                .flatMap(oppgittOpptjening -> oppgittOpptjening.getAnnenAktivitet().stream())
-                .anyMatch(annenAktivitet -> annenAktivitet.getArbeidType().equals(ArbeidType.FRILANSER));
     }
 }
