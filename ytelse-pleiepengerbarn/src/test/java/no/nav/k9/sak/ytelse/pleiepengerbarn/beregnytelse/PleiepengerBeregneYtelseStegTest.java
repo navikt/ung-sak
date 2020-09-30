@@ -79,7 +79,7 @@ public class PleiepengerBeregneYtelseStegTest {
 
     @Before
     public void setup() {
-        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), behandlingRepository, repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository);
+        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository);
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")

@@ -44,7 +44,6 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
@@ -261,21 +260,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var bgRequests = bgReferanse.stream().map(BeregningsgrunnlagRequest::new).collect(Collectors.toList());
         var request = new BeregningsgrunnlagListeRequest(saksnummer.getVerdi(), bgRequests);
         restTjeneste.deaktiverBeregningsgrunnlag(request);
-    }
-
-    @Override
-    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, BgRef bgReferanse1, FagsakYtelseType fagsakYtelseType2, BgRef bgReferanse2) {
-
-        if (!fagsakYtelseType1.equals(fagsakYtelseType2)) {
-            throw new IllegalArgumentException("Kan ikkje sjekke endring for forskjellige ytelsetyper");
-        }
-
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType1.getKode());
-        ErEndringIBeregningRequest request = new ErEndringIBeregningRequest(
-            bgReferanse1.getRef(),
-            bgReferanse2.getRef(),
-            ytelseSomSkalBeregnes);
-        return restTjeneste.erEndringIBeregning(request);
     }
 
     @Override

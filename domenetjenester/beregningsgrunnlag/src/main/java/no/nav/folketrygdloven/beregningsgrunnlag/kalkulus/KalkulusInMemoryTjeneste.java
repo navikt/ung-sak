@@ -121,11 +121,6 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, BgRef bgRefeanse1, FagsakYtelseType fagsakYtelseType2, BgRef bgReferanse2) {
-        return false;
-    }
-
-    @Override
     public Grunnbeløp hentGrunnbeløp(LocalDate dato) {
         return null;
     }
