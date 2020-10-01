@@ -36,7 +36,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -47,17 +46,14 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnla
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     private Instance<KalkulusApiTjeneste> kalkulusTjenester;
-    private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
 
     @Inject
     public BeregningsgrunnlagTjeneste(@Any Instance<KalkulusApiTjeneste> kalkulusTjenester,
-                                      BehandlingRepository behandlingRepository,
                                       VilkårResultatRepository vilkårResultatRepository,
                                       BeregningPerioderGrunnlagRepository grunnlagRepository) {
         this.kalkulusTjenester = kalkulusTjenester;
-        this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.grunnlagRepository = grunnlagRepository;
     }
@@ -246,21 +242,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public void gjenopprettInitiell(BehandlingReferanse ref) {
         grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
-    }
-
-    @Override
-    public Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt) {
-        var behandling1 = behandlingRepository.hentBehandling(behandlingId1);
-        var behandling2 = behandlingRepository.hentBehandling(behandlingId2);
-        var bgReferanse1 = finnBeregningsgrunnlagsReferanseFor(behandlingId1, skjæringstidspunkt, false, false);
-        var bgReferanse2 = finnBeregningsgrunnlagsReferanseFor(behandlingId2, skjæringstidspunkt, false, false);
-
-        if (bgReferanse1.isEmpty() || bgReferanse2.isEmpty()) {
-            return false;
-        }
-
-        return finnTjeneste(behandling1.getFagsakYtelseType()).erEndringIBeregning(behandling1.getFagsakYtelseType(), bgReferanse1.orElseThrow(), behandling2.getFagsakYtelseType(),
-            bgReferanse2.orElseThrow());
     }
 
     private Optional<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId,

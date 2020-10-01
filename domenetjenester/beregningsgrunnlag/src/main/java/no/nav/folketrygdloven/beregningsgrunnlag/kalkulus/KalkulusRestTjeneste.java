@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.ErEndringIBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.FortsettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
@@ -56,7 +55,6 @@ public class KalkulusRestTjeneste {
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
-    private final ObjectReader booleanReader = kalkulusMapper.readerFor(Boolean.class);
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
@@ -69,7 +67,6 @@ public class KalkulusRestTjeneste {
     private URI beregningsgrunnlagListeDtoEndpoint;
 
     private URI beregningsgrunnlagGrunnlagBolkEndpoint;
-    private URI erEndringIBeregningEndpoint;
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
 
@@ -88,7 +85,6 @@ public class KalkulusRestTjeneste {
         this.oppdaterListeEndpoint = toUri("/api/kalkulus/v1/oppdaterListe");
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
-        this.erEndringIBeregningEndpoint = toUri("/api/kalkulus/v1/erEndring");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
 
     }
@@ -148,16 +144,6 @@ public class KalkulusRestTjeneste {
 
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), dtoListeReader);
-        } catch (JsonProcessingException e) {
-            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
-    public Boolean erEndringIBeregning(ErEndringIBeregningRequest request) {
-        var endpoint = erEndringIBeregningEndpoint;
-
-        try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), booleanReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
@@ -262,7 +248,7 @@ public class KalkulusRestTjeneste {
     }
 
     interface RestTjenesteFeil extends DeklarerteFeil {
-        static final KalkulusRestTjeneste.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.RestTjenesteFeil.class);
+        KalkulusRestTjeneste.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.RestTjenesteFeil.class);
 
         @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilKalkulus(String feilmelding);

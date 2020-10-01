@@ -31,7 +31,7 @@ public interface KalkulusApiTjeneste {
     /**
      * Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
-     * 
+     *
      * @param referanse {@link BehandlingReferanse}
      * @param startBeregningInput - ytelsespesifikt grunnlag
      * @return KalkulusResultat {@link KalkulusResultat}
@@ -77,8 +77,6 @@ public interface KalkulusApiTjeneste {
      * @param bgReferanse koblingreferanse
      */
     void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse);
-
-    Boolean erEndringIBeregning(FagsakYtelseType fagsakYtelseType1, BgRef bgRefeanse1, FagsakYtelseType fagsakYtelseType2, BgRef bgReferanse2);
 
     /**
      * Henter grunnbeløp (GVERDI)

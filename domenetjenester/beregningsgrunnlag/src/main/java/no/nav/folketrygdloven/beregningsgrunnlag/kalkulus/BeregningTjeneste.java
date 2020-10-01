@@ -25,7 +25,7 @@ public interface BeregningTjeneste {
     /**
      * Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
-     * 
+     *
      * @param referanse {@link BehandlingReferanse}
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag per skjæringstidspunkt
      * @return SamletKalkulusResultat {@link KalkulusResultat}
@@ -89,8 +89,5 @@ public interface BeregningTjeneste {
      * @param ref Behandlingreferanse
      */
     void gjenopprettInitiell(BehandlingReferanse ref);
-
-    Boolean erEndringIBeregning(Long behandlingId1, Long behandlingId2, LocalDate skjæringstidspunkt);
-
 
 }
