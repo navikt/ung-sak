@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,6 +55,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
@@ -353,7 +355,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
         final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
-        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
+        leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeFør, periodeFør);
         leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, ARBEIDSFORHOLD_ID, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
 
@@ -365,21 +367,23 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
         // Assert
         assertThat(wrapperList).hasSize(1);
-        assertThat(wrapperList.iterator().next().getFomDato()).isEqualTo(I_DAG.minusYears(1));
-        assertThat(wrapperList.iterator().next().getTomDato()).isEqualTo(I_DAG);
+        var wrapper = wrapperList.iterator().next();
+        assertThat(wrapper.getFomDato()).isEqualTo(I_DAG.minusYears(1));
+        assertThat(wrapper.getTomDato()).isEqualTo(I_DAG);
     }
 
     @Test
     public void skal_bruke_datoer_for_yrkesaktivitet_som_kommer_etter_skjæringstidspunktet_med_inntektsmelding() {
         // Arrange
         Behandling behandling = opprettBehandling();
+        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        informasjonBuilder.leggTilNyReferanse(new ArbeidsforholdReferanse(arbeidsgiver, ARBEIDSFORHOLD_ID, EKSTERN_ARBEIDSFORHOLD_ID));
         lagreInntektsmelding(I_DAG.minusDays(3), behandling, ARBEIDSFORHOLD_ID, EKSTERN_ARBEIDSFORHOLD_ID);
         DatoIntervallEntitet periodeFør = DatoIntervallEntitet.fraOgMedTilOgMed(I_DAG.minusYears(1), I_DAG.minusDays(1));
         DatoIntervallEntitet periodeEtter = DatoIntervallEntitet.fraOgMedTilOgMed(I_DAG.plusDays(1), I_DAG.plusYears(1));
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder
             .oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
-        final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
         leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.FORENKLET_OPPGJØRSORDNING, BigDecimal.valueOf(100), periodeFør, periodeFør);
         leggTilYrkesaktivitet(aktørArbeidBuilder, informasjonBuilder, InternArbeidsforholdRef.nyRef(), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, BigDecimal.valueOf(100), periodeEtter, periodeEtter);
         builder.leggTilAktørArbeid(aktørArbeidBuilder);
@@ -388,9 +392,13 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         // Act
         Set<ArbeidsforholdWrapper> wrapperList = hentArbeidsforholdFerdigUtledet(behandling);
         // Assert
-        assertThat(wrapperList).hasSize(1);
-        assertThat(wrapperList.iterator().next().getFomDato()).isEqualTo(I_DAG.plusDays(1));
-        assertThat(wrapperList.iterator().next().getTomDato()).isEqualTo(I_DAG.plusYears(1));
+        assertThat(wrapperList).hasSize(2);
+        var iterator = wrapperList.iterator();
+        var wrapper = iterator.next();
+        assertThat(wrapper.getKilde()).isEqualTo(ArbeidsforholdKilde.INNTEKTSMELDING);
+        wrapper = iterator.next();
+        assertThat(wrapper.getFomDato()).isEqualTo(I_DAG.plusDays(1));
+        assertThat(wrapper.getTomDato()).isEqualTo(I_DAG.plusYears(1));
     }
 
     @Test
