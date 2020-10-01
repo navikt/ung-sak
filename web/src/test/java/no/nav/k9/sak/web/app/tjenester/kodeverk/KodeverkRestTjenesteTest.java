@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.kodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class KodeverkRestTjenesteTest {
             .contains(FagsakStatus.class.getSimpleName(), Avslagsårsak.class.getSimpleName(), Landkoder.class.getSimpleName(), Region.class.getSimpleName());
 
         assertThat(gruppertKodeliste.keySet())
-            .containsAll(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.keySet().stream().collect(Collectors.toSet()));
+            .containsAll(new HashSet<>(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.keySet()));
 
         assertThat(gruppertKodeliste.keySet()).hasSize(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.size());
 
@@ -60,9 +61,9 @@ public class KodeverkRestTjenesteTest {
         assertThat(fagsakStatuser.stream().map(k -> k.get("kode")).collect(Collectors.toList())).isNotEmpty();
 
         var map = (Map<String, List<?>>) gruppertKodeliste.get(Avslagsårsak.class.getSimpleName());
-        assertThat(map.keySet()).contains(VilkårType.OPPTJENINGSPERIODEVILKÅR.getKode(), VilkårType.MEDLEMSKAPSVILKÅRET.getKode());
+        assertThat(map.keySet()).contains(VilkårType.OPPTJENINGSVILKÅRET.getKode(), VilkårType.MEDLEMSKAPSVILKÅRET.getKode());
 
-        var avslagsårsaker = (List<Map<String, String>>) map.get(VilkårType.OPPTJENINGSPERIODEVILKÅR.getKode());
+        var avslagsårsaker = (List<Map<String, String>>) map.get(VilkårType.OPPTJENINGSVILKÅRET.getKode());
         assertThat(avslagsårsaker.stream().map(k -> ((Map) k).get("kode")).collect(Collectors.toList())).isNotEmpty();
     }
 
@@ -73,7 +74,7 @@ public class KodeverkRestTjenesteTest {
         ObjectMapper om = jsonConfig.getObjectMapper();
 
         String json = om.writer().withDefaultPrettyPrinter().writeValueAsString(AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
-        
+
         assertThat(json).isNotEmpty();
     }
 
