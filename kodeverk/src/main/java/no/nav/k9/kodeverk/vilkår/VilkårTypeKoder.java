@@ -27,6 +27,4 @@ public final class VilkårTypeKoder {
     public static final String PSB_VK_2b = "PSB_VK_2_b";
     public static final String PSB_VK_3 = "PSB_VK_3";
 
-    public static final String OMS_VK_1 = "OMS_VK_1"; //årskvantum
-
 }
