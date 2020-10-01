@@ -102,11 +102,9 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = Map.of();
 
-        var inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref.getAktørId(), skjæringstidspunkt, iayGrunnlag);
+        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(ref.getSaksnummer()).getAlleInntektsmeldinger();
 
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(aktørId));
-        var filterFør = filter.før(skjæringstidspunkt);
-        var filterEtter = filter.etter(skjæringstidspunkt);
 
         var overstyringer = iayGrunnlag.getArbeidsforholdOverstyringer();
 
@@ -121,10 +119,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             inntektsmeldinger, alleYrkesaktiviteter, overstyringer, arbeidsgiverSetMap, skjæringstidspunkt, iayGrunnlag.getArbeidsforholdInformasjon()));
 
         arbeidsforhold.addAll(utledArbeidsforholdFraYrkesaktivitet(
-            filterFør, overstyringer, inntektsmeldinger, iayGrunnlag.getArbeidsforholdInformasjon(), skjæringstidspunkt));
-
-        arbeidsforhold.addAll(utledArbeidsforholdFraYrkesaktivitet(
-            filterEtter, overstyringer, inntektsmeldinger, iayGrunnlag.getArbeidsforholdInformasjon(), skjæringstidspunkt));
+            filter, overstyringer, inntektsmeldinger, iayGrunnlag.getArbeidsforholdInformasjon(), skjæringstidspunkt));
 
         arbeidsforhold.addAll(utledArbeidsforholdFraArbeidsforholdInformasjon(filter,
             overstyringer, alleYrkesaktiviteter, inntektsmeldingerForGrunnlag, skjæringstidspunkt));
@@ -167,7 +162,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             && entry.getValue().stream().map(ArbeidsforholdMedÅrsak::getRef).anyMatch(arbeidsforholdRef::gjelderFor);
     }
 
-    private List<ArbeidsforholdWrapper> utledArbeidsforholdFraInntektsmeldinger(YrkesaktivitetFilter filter, List<Inntektsmelding> inntektsmeldinger,
+    private List<ArbeidsforholdWrapper> utledArbeidsforholdFraInntektsmeldinger(YrkesaktivitetFilter filter, Set<Inntektsmelding> inntektsmeldinger,
                                                                                 Collection<Yrkesaktivitet> alleYrkesaktiviteter,
                                                                                 List<ArbeidsforholdOverstyring> overstyringer,
                                                                                 Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap,
@@ -376,7 +371,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     private List<ArbeidsforholdWrapper> utledArbeidsforholdFraYrkesaktivitet(YrkesaktivitetFilter filter,
                                                                              List<ArbeidsforholdOverstyring> overstyringer,
-                                                                             List<Inntektsmelding> inntektsmeldinger,
+                                                                             Set<Inntektsmelding> inntektsmeldinger,
                                                                              Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon,
                                                                              LocalDate skjæringstidspunkt) {
         DatoIntervallEntitet stp = DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt, skjæringstidspunkt);
@@ -495,7 +490,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             .orElse(null);
     }
 
-    private boolean harIkkeFåttInntektsmelding(Yrkesaktivitet yr, List<Inntektsmelding> inntektsmeldinger) {
+    private boolean harIkkeFåttInntektsmelding(Yrkesaktivitet yr, Set<Inntektsmelding> inntektsmeldinger) {
         return inntektsmeldinger.stream().noneMatch(i -> yr.gjelderFor(i.getArbeidsgiver(), i.getArbeidsforholdRef()));
     }
 
