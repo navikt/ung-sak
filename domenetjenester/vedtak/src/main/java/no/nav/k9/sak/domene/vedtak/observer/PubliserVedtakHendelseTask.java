@@ -98,11 +98,13 @@ public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
 
         final VedtakHendelse vedtakHendelse = new VedtakHendelse();
             vedtakHendelse.setBehandlingId(behandling.getUuid());
-            vedtakHendelse.setType(behandling.getFagsakYtelseType());
+            vedtakHendelse.setBehandlingType(behandling.getType());
+            vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
             vedtakHendelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             vedtakHendelse.setStatus(behandling.getFagsak().getStatus());
             vedtakHendelse.setFagsystem(no.nav.k9.kodeverk.Fagsystem.K9SAK);
             vedtakHendelse.setAktør(behandling.getAktørId());
+            vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
             vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
             vedtakHendelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
 

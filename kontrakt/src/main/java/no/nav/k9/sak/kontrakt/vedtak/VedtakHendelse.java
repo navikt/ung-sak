@@ -9,6 +9,8 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
@@ -21,8 +23,12 @@ public class VedtakHendelse {
     private UUID behandlingId;
 
     @NotNull
-    @JsonProperty("type")
-    private FagsakYtelseType type;
+    @JsonProperty("behandlingType")
+    private BehandlingType behandlingType;
+
+    @NotNull
+    @JsonProperty("fagsakYtelseType")
+    private FagsakYtelseType fagsakYtelseType;
 
     @Pattern(
         regexp = "^(-?[1-9]|[a-z0])[a-z0-9_:-]*$",
@@ -45,7 +51,12 @@ public class VedtakHendelse {
     private AktørId aktør;
 
     @NotNull
+    @JsonProperty("vedtakResultatType")
     private VedtakResultatType vedtakResultatType;
+
+    @NotNull
+    @JsonProperty("behandlingResultatType")
+    private BehandlingResultatType behandlingResultatType;
 
     @NotNull
     @Valid
@@ -68,12 +79,12 @@ public class VedtakHendelse {
         this.vedtattTidspunkt = vedtattTidspunkt;
     }
 
-    public FagsakYtelseType getType() {
-        return type;
+    public FagsakYtelseType getFagsakYtelseType() {
+        return fagsakYtelseType;
     }
 
-    public void setType(FagsakYtelseType type) {
-        this.type = type;
+    public void setFagsakYtelseType(FagsakYtelseType fagsakYtelseType) {
+        this.fagsakYtelseType = fagsakYtelseType;
     }
 
     public String getSaksnummer() {
@@ -114,5 +125,25 @@ public class VedtakHendelse {
 
     public void setVedtakResultat(VedtakResultatType vedtakResultatType) {
         this.vedtakResultatType = vedtakResultatType;
+    }
+
+    public BehandlingType getBehandlingType() {
+        return behandlingType;
+    }
+
+    public void setBehandlingType(BehandlingType behandlingType) {
+        this.behandlingType = behandlingType;
+    }
+
+    public void setVedtakResultatType(VedtakResultatType vedtakResultatType) {
+        this.vedtakResultatType = vedtakResultatType;
+    }
+
+    public BehandlingResultatType getBehandlingResultatType() {
+        return behandlingResultatType;
+    }
+
+    public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
+        this.behandlingResultatType = behandlingResultatType;
     }
 }
