@@ -86,7 +86,10 @@ public class JettyServer extends AbstractJettyServer {
 
     @Override
     protected void konfigurerJndi() throws Exception {
-        new EnvEntry("jdbc/defaultDS", DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 14));
+        // må være << antall db connectdions. Summen av runner threads + kall fra ulike løsninger bør ikke overgå antall conns (vi isåfall kunne
+        // medføre connection timeouts)
+        System.setProperty("task.manager.runner.threads", "7");
+        new EnvEntry("jdbc/defaultDS", DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
     }
 
     @Override
@@ -94,7 +97,7 @@ public class JettyServer extends AbstractJettyServer {
         EnvironmentClass environmentClass = getEnvironmentClass();
         String initSql = String.format("SET ROLE \"%s\"", DatasourceUtil.getDbRole("defaultDS", DatasourceRole.ADMIN));
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            //  TODO: Ønsker egentlig ikke dette, men har ikke satt opp skjema lokalt
+            // TODO: Ønsker egentlig ikke dette, men har ikke satt opp skjema lokalt
             // til å ha en admin bruker som gjør migrering og en annen som gjør CRUD operasjoner
             initSql = null;
         }
