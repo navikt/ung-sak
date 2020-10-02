@@ -104,7 +104,7 @@ spec:
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: privat-familie-vedtakFattet-v1-q1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
-      value: privat-k9-vedtakhendelse-q1
+      value: privat-k9-vedtakhendelse
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
