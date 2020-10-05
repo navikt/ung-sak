@@ -10,3 +10,6 @@ VALUES ('vedtak.publiserVedtakhendelse',
         60,
         'DEFAULT',
         'Publiserer vedtak på kø.');
+
+
+ALTER TABLE BEHANDLING_VEDTAK ADD column ER_PUBLISERT boolean default false not null;

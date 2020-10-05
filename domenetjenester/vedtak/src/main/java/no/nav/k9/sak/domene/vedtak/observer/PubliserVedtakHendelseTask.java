@@ -68,17 +68,22 @@ public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
             long behandlingId = Long.parseLong(behandingIdString);
 
             Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+
             behandlingOptional.ifPresent((behandling) -> {
-                BehandlingProsessTask.logContext(behandling);
-                String payload = generatePayload(behandling);
-                producer.sendJson(payload);
+                    final BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
+                    if (!vedtak.getErPublisert()) {
+                        BehandlingProsessTask.logContext(behandling);
+                        String payload = generatePayload(behandling, vedtak);
+                        producer.sendJson(payload);
+                        vedtak.setErPublisert();
+                    }
                 }
             );
         }
     }
 
-    private String generatePayload(Behandling behandling) {
-        var vedtakHendelse= genererVedtakHendelse(behandling);
+    private String generatePayload(Behandling behandling, BehandlingVedtak vedtak) {
+        var vedtakHendelse = genererVedtakHendelse(behandling, vedtak);
 
         Set<ConstraintViolation<VedtakHendelse>> violations = validator.validate(vedtakHendelse);
         if (!violations.isEmpty()) {
@@ -89,25 +94,23 @@ public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
                 .collect(Collectors.toList());
             throw new IllegalArgumentException("Vedtakhendelse valideringsfeil \n " + allErrors);
         }
+
         return JacksonJsonConfig.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
     }
 
 
-    private VedtakHendelse genererVedtakHendelse(Behandling behandling) {
-        final BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
-
+    private VedtakHendelse genererVedtakHendelse(Behandling behandling, BehandlingVedtak vedtak) {
         final VedtakHendelse vedtakHendelse = new VedtakHendelse();
-            vedtakHendelse.setBehandlingId(behandling.getUuid());
-            vedtakHendelse.setBehandlingType(behandling.getType());
-            vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
-            vedtakHendelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
-            vedtakHendelse.setStatus(behandling.getFagsak().getStatus());
-            vedtakHendelse.setFagsystem(no.nav.k9.kodeverk.Fagsystem.K9SAK);
-            vedtakHendelse.setAktør(behandling.getAktørId());
-            vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
-            vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
-            vedtakHendelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
-
-            return vedtakHendelse;
+        vedtakHendelse.setBehandlingId(behandling.getUuid());
+        vedtakHendelse.setBehandlingType(behandling.getType());
+        vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
+        vedtakHendelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        vedtakHendelse.setStatus(behandling.getFagsak().getStatus());
+        vedtakHendelse.setFagsystem(no.nav.k9.kodeverk.Fagsystem.K9SAK);
+        vedtakHendelse.setAktør(behandling.getAktørId());
+        vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
+        vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
+        vedtakHendelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
+        return vedtakHendelse;
     }
 }
