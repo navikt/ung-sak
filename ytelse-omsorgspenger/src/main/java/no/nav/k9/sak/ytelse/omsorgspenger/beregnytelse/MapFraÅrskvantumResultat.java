@@ -11,7 +11,6 @@ import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
@@ -41,9 +40,10 @@ class MapFraÅrskvantumResultat {
         } else if (arb.getAktørId() != null) {
             arbeidsforholdBuilder.medAktørId(arb.getAktørId());
         }
-        arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId() == null ? InternArbeidsforholdRef.nullRef() : InternArbeidsforholdRef.ref(arb.getArbeidsforholdId()));
+        arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId());
 
-        return arbeidsforholdBuilder.build();
+        var arbeidsforhold = arbeidsforholdBuilder.build();
+        return arbeidsforhold;
     }
 
     private static List<UttakResultatPeriode> getInnvilgetTimeline(List<Aktivitet> aktiviteter) {

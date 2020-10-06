@@ -12,7 +12,6 @@ import org.junit.Test;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
@@ -28,7 +27,7 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
     private static final LocalDate STP = LocalDate.now();
     private static final LocalDateInterval PERIODE = LocalDateInterval.withPeriodAfterDate(STP, Period.ofMonths(10));
     public static final String ORGNR = "910909088";
-    private static final Arbeidsforhold ARBEIDSFORHOLD = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(ORGNR, InternArbeidsforholdRef.nullRef());
+    private static final Arbeidsforhold ARBEIDSFORHOLD = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(ORGNR, null);
     private static final long DAGSATS = 500L;
     private static final long DAGSATS_FRA_BG = 500L;
     private static final BigDecimal UTBETALINGSGRAD = BigDecimal.valueOf(100);
