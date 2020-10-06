@@ -46,11 +46,15 @@ public final class ArbeidsforholdMapper {
     }
 
     private static Arbeidsforhold lagArbeidsforholdHosVirksomhet(Arbeidsgiver arbgiver, Optional<InternArbeidsforholdRef> arbeidsforholdRef) {
-        return Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbgiver.getIdentifikator(), arbeidsforholdRef.orElse(InternArbeidsforholdRef.nullRef()));
+        return arbeidsforholdRef.isPresent()
+            ? Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbgiver.getIdentifikator(), arbeidsforholdRef.get().getReferanse())
+            : Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbgiver.getIdentifikator());
     }
 
     private static Arbeidsforhold lagArbeidsforholdHosPrivatperson(Arbeidsgiver arbgiver, Optional<InternArbeidsforholdRef> arbeidsforholdRef) {
-        return Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbgiver.getIdentifikator(), arbeidsforholdRef.orElse(InternArbeidsforholdRef.nullRef()));
+        return arbeidsforholdRef.isPresent()
+            ? Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbgiver.getIdentifikator(), arbeidsforholdRef.get().getReferanse())
+            : Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbgiver.getIdentifikator());
     }
 
 }

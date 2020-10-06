@@ -2,13 +2,11 @@ package no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag;
 
 import java.util.Objects;
 
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-
 public class Arbeidsforhold {
     private String orgnr;
     private String aktørId;
     private ReferanseType referanseType;
-    private InternArbeidsforholdRef arbeidsforholdId = InternArbeidsforholdRef.nullRef();
+    private String arbeidsforholdId;
     private boolean frilanser;
 
     Arbeidsforhold() {
@@ -21,7 +19,7 @@ public class Arbeidsforhold {
         return orgnr;
     }
 
-    public InternArbeidsforholdRef getArbeidsforholdId() {
+    public String getArbeidsforholdId() {
         return arbeidsforholdId;
     }
 
@@ -57,7 +55,7 @@ public class Arbeidsforhold {
                 + "orgnr=" + orgnr + ", "
                 + "referanseType=" + referanseType + ", "
                 + "arbeidsforholdId=" + arbeidsforholdId + ", "
-                + "frilanser=" + frilanser
+                + "frilanser=" + frilanser 
                 + ">";
     }
 
@@ -86,8 +84,7 @@ public class Arbeidsforhold {
             return this;
         }
 
-        public Builder medArbeidsforholdId(InternArbeidsforholdRef arbeidsforholdId) {
-            Objects.requireNonNull(arbeidsforholdId, "Bruk InternArbeidsforholdRef#nullRef hvis null");
+        public Builder medArbeidsforholdId(String arbeidsforholdId) {
             arbeidsforhold.arbeidsforholdId = arbeidsforholdId;
             return this;
         }
@@ -108,7 +105,6 @@ public class Arbeidsforhold {
                 arbeidsforhold.arbeidsforholdId = null;
             } else {
                 Objects.requireNonNull(arbeidsforhold.referanseType);
-                Objects.requireNonNull(arbeidsforhold.arbeidsforholdId, "Bruk InternArbeidsforholdRef#nullRef hvis null");
             }
             if (arbeidsforhold.referanseType == ReferanseType.ORG_NR) {
                 Objects.requireNonNull(arbeidsforhold.orgnr, "orgnummer");
@@ -130,16 +126,18 @@ public class Arbeidsforhold {
     }
 
     public static Arbeidsforhold nyttArbeidsforholdHosVirksomhet(String orgnr) {
-        return Arbeidsforhold.builder().medOrgnr(orgnr).medArbeidsforholdId(InternArbeidsforholdRef.nullRef()).build();
+        return Arbeidsforhold.builder().medOrgnr(orgnr).build();
     }
 
-    public static Arbeidsforhold nyttArbeidsforholdHosVirksomhet(String orgnr, InternArbeidsforholdRef arbeidsforholdId) {
-        Objects.requireNonNull(arbeidsforholdId, "Bruk InternArbeidsforholdRef#nullRef hvis null");
+    public static Arbeidsforhold nyttArbeidsforholdHosVirksomhet(String orgnr, String arbeidsforholdId) {
         return Arbeidsforhold.builder().medOrgnr(orgnr).medArbeidsforholdId(arbeidsforholdId).build();
     }
 
-    public static Arbeidsforhold nyttArbeidsforholdHosPrivatperson(String aktørId, InternArbeidsforholdRef arbeidsforholdId) {
-        Objects.requireNonNull(arbeidsforholdId, "Bruk InternArbeidsforholdRef#nullRef hvis null");
+    public static Arbeidsforhold nyttArbeidsforholdHosPrivatperson(String aktørId) {
+        return Arbeidsforhold.builder().medAktørId(aktørId).build();
+    }
+
+    public static Arbeidsforhold nyttArbeidsforholdHosPrivatperson(String aktørId, String arbeidsforholdId) {
         return Arbeidsforhold.builder().medAktørId(aktørId).medArbeidsforholdId(arbeidsforholdId).build();
     }
 

@@ -1,21 +1,20 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class MapUttakFrisinnTilRegel {
 
@@ -52,7 +51,7 @@ public final class MapUttakFrisinnTilRegel {
         }
         Arbeidsgiver arbeidsgiver = periode.getArbeidsgiver();
         if (arbeidsgiver != null) {
-            var arbeidsforholdRef = periode.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : periode.getArbeidsforholdRef();
+            String arbeidsforholdRef = periode.getArbeidsforholdRef() == null ? null : periode.getArbeidsforholdRef().getReferanse();
             if (arbeidsgiver.erAktørId()) {
                 return Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbeidsgiver.getIdentifikator(), arbeidsforholdRef);
             } else if (arbeidsgiver.getErVirksomhet()) {

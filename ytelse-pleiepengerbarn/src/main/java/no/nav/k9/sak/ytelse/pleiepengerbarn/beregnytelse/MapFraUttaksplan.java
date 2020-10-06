@@ -13,12 +13,11 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakUtbetalingsgrad;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakAktivitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 
-class MapFraUttaksplan {
+class MapFraUttaksplan  {
 
     private static UttakResultatPeriode toUttakResultatPeriode(LocalDate fom, LocalDate tom, Uttaksplanperiode uttak) {
         switch (uttak.getUtfall()) {
@@ -49,20 +48,9 @@ class MapFraUttaksplan {
         } else if (arb.getAktørId() != null) {
             arbeidsforholdBuilder.medAktørId(arb.getAktørId().getId());
         }
-        if (arb.getArbeidsforholdId() != null) {
-            arbeidsforholdBuilder.medArbeidsforholdId(InternArbeidsforholdRef.ref(arb.getArbeidsforholdId()));
-        }
 
         var arbeidsforhold = arbeidsforholdBuilder.build();
         return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, data.getArbeidsforhold().getType(), erGradering);
-    }
-
-    private static LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
-        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
-    }
-
-    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
-        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
 
     List<UttakResultatPeriode> mapFra(Uttaksplan uttaksplan) {
@@ -73,6 +61,14 @@ class MapFraUttaksplan {
             res.add(toUttakResultatPeriode(seg.getFom(), seg.getTom(), seg.getValue()));
         });
         return res;
+    }
+
+    private static LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
+        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
+    }
+
+    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
+        return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
 
 
