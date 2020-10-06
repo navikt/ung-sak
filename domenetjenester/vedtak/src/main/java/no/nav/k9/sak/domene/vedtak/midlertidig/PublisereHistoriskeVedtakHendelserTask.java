@@ -2,10 +2,12 @@ package no.nav.k9.sak.domene.vedtak.midlertidig;
 
 import static no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask.TASKTYPE;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
@@ -31,14 +33,12 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(100);
+        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(1);
         if (vedtakSomSkalPubliseres.isEmpty()) {
             return;
         }
 
         for (BehandlingVedtak vedtak : vedtakSomSkalPubliseres) {
-            var behandlingId = vedtak.getBehandlingId();
-
             opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
         }
 
@@ -47,6 +47,7 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private void opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask() {
         final ProsessTaskData taskData = new ProsessTaskData(TASKTYPE);
+        taskData.setNesteKjøringEtter(LocalDateTime.now().plus(100, ChronoUnit.MILLIS));
         prosessTaskRepository.lagre(taskData);
     }
 

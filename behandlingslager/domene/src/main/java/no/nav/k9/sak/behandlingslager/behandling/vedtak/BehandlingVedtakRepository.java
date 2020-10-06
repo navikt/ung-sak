@@ -59,7 +59,7 @@ public class BehandlingVedtakRepository {
 
     public List<BehandlingVedtak> hentBehandlingVedtakSomIkkeErPublisert(int maksAntall) {
         TypedQuery<BehandlingVedtak> query = getEntityManager()
-            .createQuery("Select bv from BehandlingVedtak bv where bv.erPublisert=false", BehandlingVedtak.class)
+            .createQuery("Select bv from BehandlingVedtak bv where bv.erPublisert=false order by bv.vedtakstidspunkt", BehandlingVedtak.class)
             .setMaxResults(maksAntall);
 
         return query.getResultList();
