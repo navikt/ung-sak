@@ -34,14 +34,17 @@ public class VedtakFattetEventObserver {
         this.vedtakRepository = vedtakRepository;
     }
 
-    public void observerStegOvergang(@Observes BehandlingVedtakEvent event) {
-        if (erBehandlingAvRettType(event.getBehandlingId())
-            && IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
+    public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
+        if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
             opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
+
+            if (erBehandlingAvRettTypeForAbakus(event.getBehandlingId())) {
+                opprettTaskForPubliseringAvVedtakMedYtelse(event.getBehandlingId());
+            }
         }
     }
 
-    private boolean erBehandlingAvRettType(Long behandlingId) {
+    private boolean erBehandlingAvRettTypeForAbakus(Long behandlingId) {
         final Optional<Behandling> optBehandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
         if (optBehandling.isPresent()) {
             final Behandling behandling = optBehandling.get();
@@ -56,11 +59,17 @@ public class VedtakFattetEventObserver {
         return false;
     }
 
-    private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
+    private void opprettTaskForPubliseringAvVedtakMedYtelse(Long behandlingId) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
         taskData.setProperty(PubliserVedtattYtelseHendelseTask.KEY, behandlingId.toString());
         taskData.setCallIdFraEksisterende();
         taskRepository.lagre(taskData);
     }
 
+    private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
+        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
+        taskData.setProperty(PubliserVedtakHendelseTask.KEY, behandlingId.toString());
+        taskData.setCallIdFraEksisterende();
+        taskRepository.lagre(taskData);
+    }
 }

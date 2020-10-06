@@ -43,6 +43,10 @@ public class BehandlingVedtak extends BaseEntitet {
     @Column(name = "behandling_id", updatable = false, nullable = false, unique =true)
     private Long behandlingId;
 
+    // Flagg for å avgjøre om vedtakfattet-event må etterfylles på topic
+    @Column(name = "er_publisert", nullable = false)
+    private Boolean erPublisert = false;
+
     /**
      * Hvorvidt vedtaket er et "beslutningsvedtak". Et beslutningsvedtak er et vedtak med samme utfall som forrige vedtak.
      *
@@ -113,6 +117,14 @@ public class BehandlingVedtak extends BaseEntitet {
         this.iverksettingStatus = iverksettingStatus == null ? IverksettingStatus.UDEFINERT : iverksettingStatus;
     }
 
+    public Boolean getErPublisert() {
+        return erPublisert;
+    }
+
+    public void setErPublisert() {
+        this.erPublisert = true;
+    }
+
     public static class Builder {
         private LocalDateTime vedtakstidspunkt = LocalDateTime.now();
         private String ansvarligSaksbehandler;
@@ -149,7 +161,7 @@ public class BehandlingVedtak extends BaseEntitet {
             this.beslutning = beslutning;
             return this;
         }
-        
+
         public Builder medBehandling(Long behandlingId) {
             this.behandlingId = behandlingId;
             return this;
@@ -177,7 +189,7 @@ public class BehandlingVedtak extends BaseEntitet {
     public static Builder builder(Long behandlingId) {
         return new Builder(behandlingId);
     }
-    
+
     public static Builder builder() {
         return new Builder(null);
     }

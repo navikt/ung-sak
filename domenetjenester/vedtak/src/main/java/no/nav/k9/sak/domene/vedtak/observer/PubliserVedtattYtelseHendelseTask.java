@@ -69,7 +69,7 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
             if (behandlingOptional.isPresent()) {
                 var behandling = behandlingOptional.get();
                 BehandlingProsessTask.logContext(behandling);
-                
+
                 String payload = generatePayload(behandling);
                 producer.sendJson(payload);
             }
@@ -88,7 +88,7 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
                 .collect(Collectors.toList());
             throw new IllegalArgumentException("Vedtatt-ytelse valideringsfeil \n " + allErrors);
         }
-        return JacksonJsonConfig.toJson(ytelse, PubliserVedtattYtelseHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
+        return JacksonJsonConfig.toJson(ytelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
     }
 
 
