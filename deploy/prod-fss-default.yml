@@ -194,7 +194,7 @@ spec:
     - name: "AKSJONSPUNKT_7035_ENABLED"
       value: "true"
     - name: K9TILBAKE_AKTIVERT
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
