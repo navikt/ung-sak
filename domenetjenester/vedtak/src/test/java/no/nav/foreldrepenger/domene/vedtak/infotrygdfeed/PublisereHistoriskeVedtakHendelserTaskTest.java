@@ -18,8 +18,6 @@ import org.mockito.ArgumentCaptor;
 
 public class PublisereHistoriskeVedtakHendelserTaskTest {
 
-    private BehandlingLåsRepository behandlingLåsRepository;
-
     private BehandlingVedtakRepository vedtakRepository;
 
     private ProsessTaskRepository prosessTaskRepository;
@@ -31,9 +29,8 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
     @BeforeEach
     public void setup() {
         vedtakRepository = mock(BehandlingVedtakRepository.class);
-        behandlingLåsRepository = mock(BehandlingLåsRepository.class);
         prosessTaskRepository = mock(ProsessTaskRepository.class);
-        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, prosessTaskRepository, behandlingLåsRepository);
+        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, prosessTaskRepository);
     }
 
     @Test

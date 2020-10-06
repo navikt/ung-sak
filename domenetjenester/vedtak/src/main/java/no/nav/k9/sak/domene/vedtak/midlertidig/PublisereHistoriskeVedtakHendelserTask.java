@@ -21,15 +21,12 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private BehandlingVedtakRepository vedtakRepository;
     private ProsessTaskRepository prosessTaskRepository;
-    private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
     public PublisereHistoriskeVedtakHendelserTask(BehandlingVedtakRepository vedtakRepository,
-                                                  ProsessTaskRepository prosessTaskRepository,
-                                                  BehandlingLåsRepository behandlingLåsRepository) {
+                                                  ProsessTaskRepository prosessTaskRepository) {
         this.vedtakRepository = vedtakRepository;
         this.prosessTaskRepository = prosessTaskRepository;
-        this.behandlingLåsRepository = behandlingLåsRepository;
     }
 
     @Override
@@ -42,9 +39,6 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
         for (BehandlingVedtak vedtak : vedtakSomSkalPubliseres) {
             var behandlingId = vedtak.getBehandlingId();
 
-            if (behandlingLåsRepository != null) {
-                behandlingLåsRepository.taLås(behandlingId);
-            }
             opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
         }
 
