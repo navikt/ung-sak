@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.regler;
 
+import static no.nav.k9.kodeverk.uttak.UttakArbeidType.ARBEIDSTAKER;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.LinkedHashMap;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -105,7 +108,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             return;
         }
         Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedBeregningsgrunnlagPrStatus(beregningsgrunnlagPrStatus, uttakResultatPeriode.getUttakAktiviteter());
-        if (!uttakAktivitetOpt.isPresent()) {
+        if (uttakAktivitetOpt.isEmpty()) {
             return;
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
@@ -152,7 +155,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             return;
         }
         Optional<UttakAktivitet> uttakAktivitetOpt = matchUttakAktivitetMedArbeidsforhold(uttakResultatPeriode.getUttakAktiviteter(), arbeidsforhold);
-        if (!uttakAktivitetOpt.isPresent()) {
+        if (uttakAktivitetOpt.isEmpty()) {
             return;
         }
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
@@ -202,14 +205,16 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     private Optional<UttakAktivitet> matchUttakAktivitetMedArbeidsforhold(List<UttakAktivitet> uttakAktiviteter, BeregningsgrunnlagPrArbeidsforhold arbeidsforhold) {
         return uttakAktiviteter
             .stream()
-            .filter(uttakAktivitet -> Objects.equals(uttakAktivitet.getArbeidsforhold(), arbeidsforhold.getArbeidsforhold()))
+            .filter(it -> UttakArbeidType.ATFL.contains(it.getType()))
+            .filter(uttakAktivitet -> uttakAktivitet.gjelderSamme(arbeidsforhold.getArbeidsforhold()))
             .findFirst();
     }
 
     private LocalDateTimeline<BeregningsgrunnlagPeriode> mapGrunnlagTimeline(List<Beregningsgrunnlag> grunnlag) {
         var grunnlagTimeline = new LocalDateTimeline<BeregningsgrunnlagPeriode>(List.of());
         for (Beregningsgrunnlag beregningsgrunnlag : grunnlag) {
-            List<LocalDateSegment<BeregningsgrunnlagPeriode>> grunnlagPerioder = beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+            List<LocalDateSegment<BeregningsgrunnlagPeriode>> grunnlagPerioder = beregningsgrunnlag.getBeregningsgrunnlagPerioder()
+                .stream()
                 .map(p -> new LocalDateSegment<>(p.getBeregningsgrunnlagPeriode().getFom(), p.getBeregningsgrunnlagPeriode().getTom(), p))
                 .collect(Collectors.toList());
             grunnlagTimeline = grunnlagTimeline.combine(new LocalDateTimeline<>(grunnlagPerioder), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

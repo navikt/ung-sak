@@ -69,7 +69,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     private static Arbeidsforhold mapArbeidsforhold(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel andel) {
         if (andel.getAktivitetStatus().erFrilanser()) {
             return Arbeidsforhold.frilansArbeidsforhold();
-        } else if (!andel.getArbeidsgiver().isPresent()) {
+        } else if (andel.getArbeidsgiver().isEmpty()) {
             return null;
         } else {
             return lagArbeidsforholdHosArbeidsgiver(andel.getArbeidsgiver().get(), andel.getArbeidsforholdRef());
@@ -78,13 +78,9 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
 
     private static Arbeidsforhold lagArbeidsforholdHosArbeidsgiver(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
         if (arbeidsgiver.erAktørId()) {
-            return arbeidsforholdRef == null
-                    ? Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbeidsgiver.getIdentifikator())
-                    : Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbeidsgiver.getIdentifikator(), arbeidsforholdRef.getReferanse());
+            return Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbeidsgiver.getIdentifikator(), arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef);
         } else if (arbeidsgiver.getErVirksomhet()) {
-            return arbeidsforholdRef == null
-                    ? Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbeidsgiver.getIdentifikator())
-                    : Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbeidsgiver.getIdentifikator(), arbeidsforholdRef.getReferanse());
+            return Arbeidsforhold.nyttArbeidsforholdHosVirksomhet(arbeidsgiver.getIdentifikator(), arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef);
         }
         throw new IllegalStateException("Arbeidsgiver har ingen av de forventede identifikatorene");
     }

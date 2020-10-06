@@ -6,6 +6,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
@@ -51,7 +52,7 @@ public final class MapUttakFrisinnTilRegel {
         }
         Arbeidsgiver arbeidsgiver = periode.getArbeidsgiver();
         if (arbeidsgiver != null) {
-            String arbeidsforholdRef = periode.getArbeidsforholdRef() == null ? null : periode.getArbeidsforholdRef().getReferanse();
+            var arbeidsforholdRef = periode.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : periode.getArbeidsforholdRef();
             if (arbeidsgiver.erAktørId()) {
                 return Arbeidsforhold.nyttArbeidsforholdHosPrivatperson(arbeidsgiver.getIdentifikator(), arbeidsforholdRef);
             } else if (arbeidsgiver.getErVirksomhet()) {

@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFer
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
 public class MapBeregningsresultatFeriepengerFraRegelTilVL {
@@ -50,10 +51,10 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVL {
         }
         AktivitetStatus regelAndelAktivitetStatus = AktivitetStatusMapper.fraRegelTilVl(regelAndel);
         String regelArbeidsgiverId = regelAndel.getArbeidsforhold() == null ? null : regelAndel.getArbeidsgiverId();
-        String regelArbeidsforholdId = regelAndel.getArbeidsforhold() != null ? regelAndel.getArbeidsforhold().getArbeidsforholdId() : null;
+        var regelArbeidsforholdId = regelAndel.getArbeidsforhold() != null ? regelAndel.getArbeidsforhold().getArbeidsforholdId() : InternArbeidsforholdRef.nullRef();
         BeregningsresultatAndel andel = vlBeregningsresultatPeriode.getBeregningsresultatAndelList().stream()
             .filter(vlAndel -> {
-                String vlArbeidsforholdRef = vlAndel.getArbeidsforholdRef() == null ? null : vlAndel.getArbeidsforholdRef().getReferanse();
+                var vlArbeidsforholdRef = vlAndel.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : vlAndel.getArbeidsforholdRef();
                 return Objects.equals(vlAndel.getAktivitetStatus(), regelAndelAktivitetStatus)
                     && Objects.equals(vlAndel.getArbeidsgiver().map(Arbeidsgiver::getIdentifikator).orElse(null), regelArbeidsgiverId)
                     && Objects.equals(vlArbeidsforholdRef, regelArbeidsforholdId)
