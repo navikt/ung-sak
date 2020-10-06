@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.vedtak;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -150,5 +151,54 @@ public class VedtakHendelse {
 
     public void setBehandlingResultatType(BehandlingResultatType behandlingResultatType) {
         this.behandlingResultatType = behandlingResultatType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        VedtakHendelse that = (VedtakHendelse) o;
+        return behandlingId.equals(that.behandlingId) &&
+            behandlingType == that.behandlingType &&
+            fagsakYtelseType == that.fagsakYtelseType &&
+            saksnummer.equals(that.saksnummer) &&
+            status == that.status &&
+            fagsystem == that.fagsystem &&
+            aktør.equals(that.aktør) &&
+            vedtakResultatType == that.vedtakResultatType &&
+            behandlingResultatType == that.behandlingResultatType &&
+            vedtattTidspunkt.equals(that.vedtattTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            behandlingId,
+            behandlingType,
+            fagsakYtelseType,
+            saksnummer,
+            status,
+            fagsystem,
+            aktør,
+            vedtakResultatType,
+            behandlingResultatType,
+            vedtattTidspunkt
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "VedtakHendelse{" +
+            "behandlingId=" + behandlingId +
+            ", behandlingType=" + behandlingType +
+            ", fagsakYtelseType=" + fagsakYtelseType +
+            ", saksnummer=" + saksnummer +
+            ", status=" + status +
+            ", fagsystem=" + fagsystem +
+            ", vedtakResultatType=" + vedtakResultatType +
+            ", behandlingResultatType=" + behandlingResultatType +
+            ", vedtattTidspunkt=" + vedtattTidspunkt +
+            '}';
     }
 }

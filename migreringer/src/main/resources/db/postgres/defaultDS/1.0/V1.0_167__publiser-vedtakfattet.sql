@@ -13,3 +13,17 @@ VALUES ('vedtak.publiserVedtakhendelse',
 
 
 ALTER TABLE BEHANDLING_VEDTAK ADD column ER_PUBLISERT boolean default false not null;
+
+
+INSERT INTO PROSESS_TASK_TYPE (KODE,
+                               NAVN,
+                               FEIL_MAKS_FORSOEK,
+                               FEIL_SEK_MELLOM_FORSOEK,
+                               FEILHANDTERING_ALGORITME,
+                               BESKRIVELSE)
+VALUES ('vedtak.etterfyllHistoriske',
+        'Etterfyller historiske vedtakhendelser',
+        3,
+        60,
+        'DEFAULT',
+        'Publiserer allerede fattede vedtak på kø.');

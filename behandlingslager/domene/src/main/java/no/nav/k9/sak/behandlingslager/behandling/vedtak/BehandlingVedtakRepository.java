@@ -49,13 +49,22 @@ public class BehandlingVedtakRepository {
         query.setParameter("behandlingId", behandlingId); // $NON-NLS-1$
         return optionalFirstVedtak(query.getResultList());
     }
-    
+
     public Optional<BehandlingVedtak> hentBehandlingVedtakFor(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, "behandlingUuid"); // NOSONAR //$NON-NLS-1$
         TypedQuery<BehandlingVedtak> query = getEntityManager().createQuery("Select bv from BehandlingVedtak bv INNER JOIN Behandling b ON b.id=bv.behandlingId where b.uuid=:uuid", BehandlingVedtak.class);
         query.setParameter("uuid", behandlingUuid); // $NON-NLS-1$
         return optionalFirstVedtak(query.getResultList());
     }
+
+    public List<BehandlingVedtak> hentBehandlingVedtakSomIkkeErPublisert(int maksAntall) {
+        TypedQuery<BehandlingVedtak> query = getEntityManager()
+            .createQuery("Select bv from BehandlingVedtak bv where bv.erPublisert=false", BehandlingVedtak.class)
+            .setMaxResults(maksAntall);
+
+        return query.getResultList();
+    }
+
 
     public BehandlingVedtak hentBehandlingVedtakFraRevurderingensOriginaleBehandling(Behandling behandling) {
         if (!behandling.erRevurdering()) {
@@ -125,7 +134,7 @@ public class BehandlingVedtakRepository {
             BehandlingVedtak vedtak = hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
             if (sistEndretVedtak == null || vedtak.getOpprettetTidspunkt().isAfter(sistEndretVedtak.getOpprettetTidspunkt())) {
                 sistEndretVedtak = vedtak;
-                sistEndretVedtakBehandling = behandling; 
+                sistEndretVedtakBehandling = behandling;
             }
         }
         return sistEndretVedtakBehandling;
@@ -141,6 +150,6 @@ public class BehandlingVedtakRepository {
         return behandlinger.isEmpty() ? Optional.empty() : Optional.of(behandlinger.get(0));
     }
 
-    
+
 
 }
