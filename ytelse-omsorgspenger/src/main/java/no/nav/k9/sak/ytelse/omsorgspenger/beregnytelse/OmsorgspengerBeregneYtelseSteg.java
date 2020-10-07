@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -11,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -80,16 +86,20 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 
         var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(ref.getSaksnummer());
+        var vurdertePerioder = vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var aktiviteter = fullUttaksplan.getAktiviteter();
         var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(aktiviteter));
 
+        if (harBådeNullArbeidsforholdsIdOgSpesifikkId(vurdertePerioder, fullUttaksplan)) {
+            throw new IllegalStateException("Sammenhengende periode har både spesifikk arbeidsforholdsId og null. Saken må rulle tilbake til start hvor det forventes aksjonspunkt og arbeidsgiver må kontaktes for å sende inn ny inntektsmeldinger.");
+        }
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 
         // Verifiser beregningsresultat
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-        if (harUtbetalingTilBruker(behandlingId, beregningsresultat)) {
+        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
             log.info("Har utbetaling til bruker: {}", beregningsresultat);
         }
 
@@ -103,15 +113,43 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harUtbetalingTilBruker(Long behandlingId, BeregningsresultatEntitet beregningsresultat) {
-        NavigableSet<DatoIntervallEntitet> vurdertePerioder = vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+    private boolean harBådeNullArbeidsforholdsIdOgSpesifikkId(NavigableSet<DatoIntervallEntitet> vurdertePerioder, FullUttaksplan fullUttaksplan) {
+        var aktiviteter = fullUttaksplan.getAktiviteter();
+
+        var arbeidsgiverMap = new HashMap<String, Set<String>>();
+        for (DatoIntervallEntitet periode : vurdertePerioder) {
+
+            aktiviteter.stream()
+                .filter(it -> UttakArbeidType.fraKode(it.getArbeidsforhold().getType()).erArbeidstakerEllerFrilans())
+                .filter(it -> it.getUttaksperioder()
+                    .stream()
+                    .anyMatch(at -> periode.overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
+                .map(Aktivitet::getArbeidsforhold)
+                .forEach(it -> {
+                    var utledetKey = utledKey(it);
+                    var idSet = arbeidsgiverMap.getOrDefault(utledetKey, new HashSet<>());
+                    idSet.add(it.getArbeidsforholdId());
+                    arbeidsgiverMap.put(utledetKey, idSet);
+                });
+        }
+
+        return arbeidsgiverMap.entrySet()
+            .stream()
+            .anyMatch(it -> it.getValue().contains(null) && it.getValue().size() > 1);
+    }
+
+    private String utledKey(no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold it) {
+        return it.getOrganisasjonsnummer() == null ? it.getAktørId() : it.getOrganisasjonsnummer();
+    }
+
+    private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat, NavigableSet<DatoIntervallEntitet> vurdertePerioder) {
         return beregningsresultat.getBeregningsresultatPerioder().stream()
             .filter(p -> vurdertePerioder.stream().anyMatch(vp -> vp.overlapper(p.getPeriode())))
             .anyMatch(p -> {
-                    return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {
-                        return a.erBrukerMottaker() && a.getDagsats() > 0;
-                    });
+                return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {
+                    return a.erBrukerMottaker() && a.getDagsats() > 0;
                 });
+            });
     }
 
     @Override
