@@ -22,6 +22,8 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
 
     private ProsessTaskRepository prosessTaskRepository;
 
+    private BehandlingLåsRepository behandlingLåsRepository;
+
     ProsessTaskData prosessTaskData = new ProsessTaskData(PublisereHistoriskeVedtakHendelserTask.TASKTYPE);
 
     PublisereHistoriskeVedtakHendelserTask task;
@@ -30,7 +32,9 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
     public void setup() {
         vedtakRepository = mock(BehandlingVedtakRepository.class);
         prosessTaskRepository = mock(ProsessTaskRepository.class);
-        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, prosessTaskRepository);
+        behandlingLåsRepository = mock(BehandlingLåsRepository.class);
+
+        task = new PublisereHistoriskeVedtakHendelserTask(vedtakRepository, behandlingLåsRepository, prosessTaskRepository);
     }
 
     @Test

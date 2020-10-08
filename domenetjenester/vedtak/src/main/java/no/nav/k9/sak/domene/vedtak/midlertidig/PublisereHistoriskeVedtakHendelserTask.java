@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
@@ -23,11 +24,14 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private BehandlingVedtakRepository vedtakRepository;
     private ProsessTaskRepository prosessTaskRepository;
+    private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
     public PublisereHistoriskeVedtakHendelserTask(BehandlingVedtakRepository vedtakRepository,
+                                                  BehandlingLåsRepository behandlingLåsRepository,
                                                   ProsessTaskRepository prosessTaskRepository) {
         this.vedtakRepository = vedtakRepository;
+        this.behandlingLåsRepository = behandlingLåsRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -39,6 +43,7 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
         }
 
         for (BehandlingVedtak vedtak : vedtakSomSkalPubliseres) {
+            behandlingLåsRepository.taLås(vedtak.getBehandlingId());
             opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
         }
 

@@ -21,16 +21,15 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
+public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserHendelse";
-    public static final String KEY = "vedtattBehandlingId";
+    public static final String KEY = "behandlingId";
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
@@ -60,7 +59,7 @@ public class PubliserVedtattYtelseHendelseTask implements ProsessTaskHandler {
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
+    protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandingIdString = prosessTaskData.getPropertyValue(KEY);
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
