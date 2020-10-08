@@ -33,7 +33,6 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserVedtakhendelse";
-    public static final String KEY = "behandlingId";
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -67,7 +66,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        String behandingIdString = prosessTaskData.getPropertyValue(KEY);
+        String behandingIdString = prosessTaskData.getBehandlingId();
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
 

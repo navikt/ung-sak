@@ -37,17 +37,14 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(1);
-        if (vedtakSomSkalPubliseres.isEmpty()) {
-            return;
-        }
+        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(1).stream().findFirst();
 
-        for (BehandlingVedtak vedtak : vedtakSomSkalPubliseres) {
+        vedtakSomSkalPubliseres.ifPresent((vedtak) -> {
             behandlingLåsRepository.taLås(vedtak.getBehandlingId());
             opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
-        }
 
-        opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask();
+            opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask();
+        });
     }
 
     private void opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask() {
@@ -58,7 +55,7 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
-        taskData.setProperty(PubliserVedtakHendelseTask.KEY, behandlingId.toString());
+        taskData.setProperty("behandlingId", behandlingId.toString());
         prosessTaskRepository.lagre(taskData);
     }
 }
