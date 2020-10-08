@@ -50,19 +50,20 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        
+
         Optional<String> hendelse = Optional.ofNullable(prosessTaskData.getPropertyValue(ProsessTaskData.HENDELSE_PROPERTY));
-        if (hendelse.isPresent() && !prosessTaskData.getPropertyValue(OPPDATERT_GRUNNLAG_KEY).isEmpty()) {
+        var propertyValue = Optional.ofNullable(prosessTaskData.getPropertyValue(OPPDATERT_GRUNNLAG_KEY));
+        if (hendelse.isPresent() && propertyValue.isPresent() && !propertyValue.get().isEmpty()) {
             validerHendelse(prosessTaskData);
             return;
         }
 
-        if (hendelse.isEmpty()) {
+        if (hendelse.isEmpty() || propertyValue.isEmpty()) {
             boolean overstyr = prosessTaskData.getPropertyValue(OVERSTYR_KEY) != null && OVERSTYR_VALUE.equals(prosessTaskData.getPropertyValue(OVERSTYR_KEY));
             Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-            
+
             precondition(behandling);
-            
+
             if (overstyr) {
                 registerdataInnhenter.innhentFullIAYIAbakus(behandling);
                 return;
@@ -74,7 +75,7 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
 
     private void precondition(Behandling behandling) {
         BehandlingProsessTask.logContext(behandling);
-        
+
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
@@ -101,5 +102,5 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
-    
+
 }
