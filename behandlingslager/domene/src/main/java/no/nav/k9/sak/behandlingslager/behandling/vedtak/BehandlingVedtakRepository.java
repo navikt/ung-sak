@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.vedtak;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -58,8 +59,11 @@ public class BehandlingVedtakRepository {
     }
 
     public List<BehandlingVedtak> hentBehandlingVedtakSomIkkeErPublisert(int maksAntall) {
+        var sistEndretGrense = LocalDateTime.now().minus(2, ChronoUnit.HOURS);
+
         TypedQuery<BehandlingVedtak> query = getEntityManager()
-            .createQuery("Select bv from BehandlingVedtak bv where bv.erPublisert=false order by bv.vedtakstidspunkt", BehandlingVedtak.class)
+            .createQuery("Select bv from BehandlingVedtak bv where bv.iverksettingStatus='IVERKSATT' and bv.endretTidspunkt<:sistEndretGrense  and bv.erPublisert=false order by bv.vedtakstidspunkt", BehandlingVedtak.class)
+            .setParameter("sistEndretGrense", sistEndretGrense)
             .setMaxResults(maksAntall);
 
         return query.getResultList();
