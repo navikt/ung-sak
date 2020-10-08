@@ -14,6 +14,7 @@ import javax.validation.ValidatorFactory;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -29,10 +30,9 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 @ProsessTask(PubliserVedtakHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
+public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserVedtakhendelse";
-    public static final String KEY = "vedtattBehandlingId";
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -46,11 +46,14 @@ public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
     @Inject
     public PubliserVedtakHendelseTask(BehandlingRepositoryProvider repositoryProvider,
                                       BehandlingVedtakRepository behandlingVedtakRepository,
+                                      BehandlingLåsRepository behandlingLåsRepository,
                                       @KonfigVerdi("kafka.vedtakhendelse.topic") String topic,
                                       @KonfigVerdi("bootstrap.servers") String bootstrapServers,
                                       @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
                                       @KonfigVerdi("systembruker.username") String username,
                                       @KonfigVerdi("systembruker.password") String password) {
+        super(behandlingLåsRepository);
+
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.producer = new HendelseProducer(topic, bootstrapServers, schemaRegistryUrl, username, password);
@@ -62,8 +65,8 @@ public class PubliserVedtakHendelseTask implements ProsessTaskHandler {
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-        String behandingIdString = prosessTaskData.getPropertyValue(KEY);
+    protected void prosesser(ProsessTaskData prosessTaskData) {
+        String behandingIdString = prosessTaskData.getBehandlingId();
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
 

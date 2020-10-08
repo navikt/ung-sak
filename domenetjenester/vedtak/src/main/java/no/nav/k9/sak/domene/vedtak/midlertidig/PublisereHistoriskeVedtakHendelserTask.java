@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
@@ -23,26 +24,27 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private BehandlingVedtakRepository vedtakRepository;
     private ProsessTaskRepository prosessTaskRepository;
+    private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
     public PublisereHistoriskeVedtakHendelserTask(BehandlingVedtakRepository vedtakRepository,
+                                                  BehandlingLåsRepository behandlingLåsRepository,
                                                   ProsessTaskRepository prosessTaskRepository) {
         this.vedtakRepository = vedtakRepository;
+        this.behandlingLåsRepository = behandlingLåsRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(1);
-        if (vedtakSomSkalPubliseres.isEmpty()) {
-            return;
-        }
+        var vedtakSomSkalPubliseres = vedtakRepository.hentBehandlingVedtakSomIkkeErPublisert(1).stream().findFirst();
 
-        for (BehandlingVedtak vedtak : vedtakSomSkalPubliseres) {
+        vedtakSomSkalPubliseres.ifPresent((vedtak) -> {
+            behandlingLåsRepository.taLås(vedtak.getBehandlingId());
             opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
-        }
 
-        opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask();
+            opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask();
+        });
     }
 
     private void opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask() {
@@ -53,7 +55,7 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
     private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
-        taskData.setProperty(PubliserVedtakHendelseTask.KEY, behandlingId.toString());
+        taskData.setProperty("behandlingId", behandlingId.toString());
         prosessTaskRepository.lagre(taskData);
     }
 }
