@@ -164,7 +164,6 @@ public class KompletthetsjekkerTest {
 
         DokumentTypeId dokumentType = DokumentTypeId.finnForKodeverkEiersKode(KODE_INNTEKTSMELDING);
         Set<DokumentTypeId> dokumentTypeIds = singleton(dokumentType);
-        when(dokumentArkivTjeneste.hentDokumentTypeIdForSak(any(), any())).thenReturn(dokumentTypeIds);
 
         opprettSøknadMedPåkrevdVedlegg(behandling);
 

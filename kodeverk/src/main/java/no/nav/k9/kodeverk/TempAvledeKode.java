@@ -23,7 +23,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 public class TempAvledeKode {
 
     @SuppressWarnings("rawtypes")
-    public static String getVerdi(Class<? extends Enum> enumCls, Object node, String key) {
+    public static String getVerdi(Class<?> cls, Object node, String key) {
         // TODO logge hvilke enum so sendes inn på gammelt format og hvor hen
         String kode;
         if (node instanceof String) {
@@ -36,7 +36,7 @@ public class TempAvledeKode {
             } else if (node instanceof Map) {
                 kode = (String) ((Map) node).get(key);
             } else {
-                throw new IllegalArgumentException("Støtter ikke node av type: " + node.getClass() + " for enum:" + enumCls.getName());
+                throw new IllegalArgumentException("Støtter ikke node av type: " + node.getClass() + " for klasse:" + cls.getName());
             }
         }
         return kode;

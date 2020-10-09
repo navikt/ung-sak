@@ -21,7 +21,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -68,14 +67,6 @@ public class BeregningsgrunnlagRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BeregningsgrunnlagDto hentBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
-            // behandlinger for ytelse FRISINN har ikke opptjening
-            return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
-        }
-        var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
-        if (opptjening.isEmpty()) {
-            return null;
-        }
         return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)).stream().findFirst().orElse(null);
     }
 
@@ -86,14 +77,6 @@ public class BeregningsgrunnlagRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagene(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
-            // behandlinger for ytelse FRISINN har ikke opptjening
-            return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
-        }
-        var opptjening = opptjeningRepository.finnOpptjening(behandling.getId());
-        if (opptjening.isEmpty()) {
-            return null;
-        }
         return kalkulusTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling));
     }
 

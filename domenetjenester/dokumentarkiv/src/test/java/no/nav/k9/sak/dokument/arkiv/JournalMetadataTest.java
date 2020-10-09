@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.dokument.arkiv.journal.JournalMetadata;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -24,7 +23,6 @@ public class JournalMetadataTest {
         builder.medJournalpostId(new JournalpostId("jpId"));
         builder.medDokumentId("dokId");
         builder.medVariantFormat(VariantFormat.ARKIV);
-        builder.medDokumentKategori(DokumentKategori.ELEKTRONISK_SKJEMA);
         builder.medArkivFilType(ArkivFilType.PDFA);
         builder.medJournaltilstand(JournalMetadata.Journaltilstand.ENDELIG);
         builder.medErHoveddokument(true);
@@ -43,7 +41,6 @@ public class JournalMetadataTest {
         assertThat(jmd.getJournalpostId().getVerdi()).isEqualTo("jpId");
         assertThat(jmd.getDokumentId()).isEqualTo("dokId");
         assertThat(jmd.getVariantFormat()).isEqualTo(VariantFormat.ARKIV);
-        assertThat(jmd.getDokumentKategori()).isEqualTo(DokumentKategori.ELEKTRONISK_SKJEMA);
         assertThat(jmd.getArkivFilType()).isEqualTo(ArkivFilType.PDFA);
         assertThat(jmd.getJournaltilstand()).isEqualTo(JournalMetadata.Journaltilstand.ENDELIG);
         assertThat(jmd.getErHoveddokument()).isTrue();

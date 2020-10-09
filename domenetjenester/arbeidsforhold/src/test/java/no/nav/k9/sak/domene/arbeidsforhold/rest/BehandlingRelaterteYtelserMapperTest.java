@@ -1,14 +1,12 @@
 package no.nav.k9.sak.domene.arbeidsforhold.rest;
 
-import static no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -31,6 +29,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlingRelaterteYtelserMapperTest {
+    private static final Set<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER;
     private static final LocalDate I_DAG = LocalDate.now();
     private static final Saksnummer SAKSNUMMER_42 = new Saksnummer("42");
     private Fagsak fagsakFødsel = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, AktørId.dummy(), new Saksnummer("66"));
@@ -83,19 +82,6 @@ public class BehandlingRelaterteYtelserMapperTest {
         assertThat(tilgrensendeYtelserDto.getPeriodeTilDato()).isEqualTo(I_DAG.minusDays(5));
         assertThat(tilgrensendeYtelserDto.getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(5));
         assertThat(tilgrensendeYtelserDto.getSaksNummer()).isEqualTo("66");
-    }
-
-    @Test
-    public void skal_returnerer_6_tom_tilgrensende_ytelser_for_soker() {
-        @SuppressWarnings("unchecked")
-        List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(Collections.EMPTY_LIST,
-            RELATERT_YTELSE_TYPER_FOR_SØKER);
-
-        assertThat(resultatListe).hasSize(RELATERT_YTELSE_TYPER_FOR_SØKER.size());
-        IntStream.range(0, RELATERT_YTELSE_TYPER_FOR_SØKER.size()).forEach(i -> {
-            assertThat(resultatListe.get(i).getRelatertYtelseType()).isEqualTo(RELATERT_YTELSE_TYPER_FOR_SØKER.get(i).getKode());
-            assertThat(resultatListe.get(i).getTilgrensendeYtelserListe()).isEmpty();
-        });
     }
 
     @Test

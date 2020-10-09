@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -23,7 +22,6 @@ public class JournalMetadata {
     private VariantFormat variantFormat;
     private Journaltilstand journaltilstand;
     private DokumentTypeId dokumentType;
-    private DokumentKategori dokumentKategori;
     private ArkivFilType arkivFilType;
     private boolean erHoveddokument;
     private LocalDate forsendelseMottatt;
@@ -51,10 +49,6 @@ public class JournalMetadata {
 
     public DokumentTypeId getDokumentType() {
         return dokumentType;
-    }
-
-    public DokumentKategori getDokumentKategori() {
-        return dokumentKategori;
     }
 
     public ArkivFilType getArkivFilType() {
@@ -85,7 +79,6 @@ public class JournalMetadata {
         private String dokumentId;
         private VariantFormat variantFormat;
         private DokumentTypeId dokumentType;
-        private DokumentKategori dokumentKategori;
         private ArkivFilType arkivFilType;
         private Journaltilstand journaltilstand;
         private boolean erHoveddokument;
@@ -109,11 +102,6 @@ public class JournalMetadata {
 
         public Builder medDokumentType(DokumentTypeId dokumentType) {
             this.dokumentType = dokumentType;
-            return this;
-        }
-
-        public Builder medDokumentKategori(DokumentKategori dokumentKategori) {
-            this.dokumentKategori = dokumentKategori;
             return this;
         }
 
@@ -148,7 +136,6 @@ public class JournalMetadata {
             jmd.dokumentId = this.dokumentId;
             jmd.variantFormat = this.variantFormat;
             jmd.dokumentType = this.dokumentType;
-            jmd.dokumentKategori = this.dokumentKategori;
             jmd.arkivFilType = this.arkivFilType;
             jmd.journaltilstand = this.journaltilstand;
             jmd.erHoveddokument = this.erHoveddokument;

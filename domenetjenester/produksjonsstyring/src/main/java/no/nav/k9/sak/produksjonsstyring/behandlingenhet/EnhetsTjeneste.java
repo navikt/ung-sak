@@ -1,6 +1,7 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,33 +32,22 @@ public class EnhetsTjeneste {
         OrganisasjonsEnhet enhetKlage;
         List<OrganisasjonsEnhet> alleBehandlendeEnheter;
         LocalDate sisteInnhenting = LocalDate.MIN;
-        
+
         Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(String enhetId) {
             return alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
         }
     }
-    
+
     private static final String DISKRESJON_K6 = Diskresjonskode.KODE6.getOffisiellKode(); // Kodeverk Diskresjonskoder
     private static final String NK_ENHET_ID = "4292";
-    private static final OrganisasjonsEnhet KLAGE_ENHET =  new OrganisasjonsEnhet(NK_ENHET_ID, "NAV Klageinstans Midt-Norge");
-
-    private static final Map<FagsakYtelseType, String> TEMAER = Map.of(
-        FagsakYtelseType.OMSORGSPENGER, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
-        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
-        FagsakYtelseType.OPPLÆRINGSPENGER, "OMS", // Alt på gammelt Infotrygd Tema 'OMS'
-        FagsakYtelseType.FRISINN, "FRI" // Ny korona ytelse
-    );
+    private static final OrganisasjonsEnhet KLAGE_ENHET = new OrganisasjonsEnhet(NK_ENHET_ID, "NAV Klageinstans Midt-Norge");
 
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
 
-    private Map<FagsakYtelseType, EnhetsTjenesteData> cache = Map.of(
-        FagsakYtelseType.OMSORGSPENGER, new EnhetsTjenesteData(),
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN, new EnhetsTjenesteData(),
-        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, new EnhetsTjenesteData(),
-        FagsakYtelseType.OPPLÆRINGSPENGER, new EnhetsTjenesteData(),
-        FagsakYtelseType.FRISINN, new EnhetsTjenesteData());
+    private Map<FagsakYtelseType, EnhetsTjenesteData> cache = Arrays.asList(FagsakYtelseType.values())
+        .stream()
+        .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
 
     public EnhetsTjeneste() {
         // For CDI proxy
@@ -89,9 +79,9 @@ public class EnhetsTjeneste {
         return Optional.empty();
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(FagsakYtelseType ytelseType, 
-                                                                         String enhetId, 
-                                                                         AktørId hovedAktør, 
+    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(FagsakYtelseType ytelseType,
+                                                                         String enhetId,
+                                                                         AktørId hovedAktør,
                                                                          Collection<AktørId> alleAktører) {
         var cacheEntry = oppdaterEnhetCache(ytelseType);
         if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || NK_ENHET_ID.equals(enhetId)) {
@@ -105,7 +95,7 @@ public class EnhetsTjeneste {
         }
         return Optional.empty();
     }
-    
+
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr);
@@ -119,7 +109,7 @@ public class EnhetsTjeneste {
         }
         return enhetSak1;
     }
-    
+
     private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører) {
         return aktører.stream()
             .map(tpsTjeneste::hentFnrForAktør)
@@ -128,7 +118,7 @@ public class EnhetsTjeneste {
             .filter(Objects::nonNull)
             .anyMatch(DISKRESJON_K6::equalsIgnoreCase);
     }
-    
+
     private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType) {
         var cacheEntry = cache.get(ytelseType);
         if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
@@ -147,7 +137,7 @@ public class EnhetsTjeneste {
     OrganisasjonsEnhet getEnhetKlage() {
         return KLAGE_ENHET;
     }
-    
+
     Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(FagsakYtelseType ytelseType, String enhetId) {
         var cacheEntry = oppdaterEnhetCache(ytelseType);
         return cacheEntry.alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
@@ -156,7 +146,7 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(TEMAER.get(ytelseType))
+            .medTema(ytelseType.getInfotrygdBehandlingstema())
             .medTemagruppe("FMLI") // dekker OMS, PSB, FRISINN (fra Temagruppe offisielt kodeverk)
             .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk

@@ -27,7 +27,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@DokumentGruppeRef(Brevkode.INNTEKTSMELDING)
+@DokumentGruppeRef(Brevkode.INNTEKTSMELDING_KODE)
 public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private Behandlingsoppretter behandlingsoppretter;

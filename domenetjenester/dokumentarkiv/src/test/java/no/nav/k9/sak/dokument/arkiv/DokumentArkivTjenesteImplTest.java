@@ -12,7 +12,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,7 +19,6 @@ import org.junit.Test;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -153,8 +151,6 @@ public class DokumentArkivTjenesteImplTest {
 
         assertThat(arkivDokuments).hasSize(1);
         ArkivJournalPost post = arkivDokuments.get(0);
-        assertThat(post.getHovedDokument().getDokumentType()).isEqualTo(DokumentTypeId.INNTEKTSMELDING);
-        assertThat(post.getAndreDokument().get(0).getDokumentType()).isEqualTo(DokumentTypeId.UDEFINERT);
     }
 
     @Test
@@ -189,37 +185,6 @@ public class DokumentArkivTjenesteImplTest {
         assertThat(arkivDokuments.get(0).getKommunikasjonsretning()).isEqualTo(Kommunikasjonsretning.UT);
         assertThat(arkivDokuments.get(1).getTidspunkt()).isEqualTo(TID_JOURNALFØRT.minusDays(1));
         assertThat(arkivDokuments.get(1).getKommunikasjonsretning()).isEqualTo(Kommunikasjonsretning.INN);
-    }
-
-    @Test
-    public void skalRetunereAlleDokumentTyper() {
-        Journalpost journalpost = byggJournalpostMedFlereDokumenter(List.of(
-            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING), // hoveddokument
-            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UDEFINERT) // annet dokument
-        ));
-        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
-            .thenReturn(dokumentoversikt);
-
-        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, LocalDate.MIN);
-
-        assertThat(arkivDokumentTypeIds).containsExactlyInAnyOrder(DokumentTypeId.INNTEKTSMELDING, DokumentTypeId.UDEFINERT);
-    }
-
-    @Test
-    public void skalRetunereDokumentTyperSiden() {
-        List<Journalpost> journalposter = List.of(
-            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING, TID_REGISTRERT, TID_JOURNALFØRT, Journalposttype.U),
-            byggJournalpost(ArkivFilType.PDFA, Variantformat.ARKIV, Brevkode.UDEFINERT, TID_REGISTRERT, TID_JOURNALFØRT.minusDays(1), Journalposttype.I)
-        );
-
-        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(journalposter, null);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
-            .thenReturn(dokumentoversikt);
-
-        Set<DokumentTypeId> arkivDokumentTypeIds = dokumentApplikasjonTjeneste.hentDokumentTypeIdForSak(KJENT_SAK, TID_JOURNALFØRT.toLocalDate());
-
-        assertThat(arkivDokumentTypeIds).containsExactlyInAnyOrder(DokumentTypeId.INNTEKTSMELDING);
     }
 
     @Test
@@ -273,16 +238,6 @@ public class DokumentArkivTjenesteImplTest {
 
     private Journalpost byggJournalpostMedFlereDokumenter(List<DokumentInfo> dokumentInfoer) {
         return byggJournalpost(TID_JOURNALFØRT, TID_JOURNALFØRT, Journalposttype.U, dokumentInfoer);
-    }
-
-    private Journalpost byggJournalpost(ArkivFilType arkivFilType,
-                                        Variantformat variantFormat,
-                                        Brevkode brevkode,
-                                        LocalDateTime registrertTid,
-                                        LocalDateTime journalførtTid,
-                                        Journalposttype journalposttype) {
-        return byggJournalpost(registrertTid, journalførtTid, journalposttype,
-            List.of(byggDokumentInfo(arkivFilType, variantFormat, brevkode)));
     }
 
     private Journalpost byggJournalpost(ArkivFilType arkivFilType,

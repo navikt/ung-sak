@@ -34,6 +34,8 @@ public class InfotrygdFeedService {
     }
 
     public void publiserHendelse(Behandling behandling) {
+
+        // FIXME FagsakYtelseType: Ikke branch på ytelsetype i generelle moduler
         if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
             return;
         }

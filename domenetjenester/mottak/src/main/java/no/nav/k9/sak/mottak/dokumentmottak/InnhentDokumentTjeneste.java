@@ -44,7 +44,7 @@ public class InnhentDokumentTjeneste {
 
     private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
         String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
-        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode));
+        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode.getKode()));
 
         return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
             .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));

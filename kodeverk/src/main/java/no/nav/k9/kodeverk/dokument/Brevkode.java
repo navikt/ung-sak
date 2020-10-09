@@ -12,87 +12,68 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
  * Brevkode er et kodeverk som forvaltes av Kodeverkforvaltning.
  */
-@JsonFormat(shape = Shape.OBJECT)
+@JsonFormat(shape = Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum Brevkode implements Kodeverdi {
+public class Brevkode implements Kodeverdi {
+
+    public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
 
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
-    INNTEKTSMELDING("INNTEKTSMELDING", "4936"),
-    LEGEERKLÆRING("LEGEERKLÆRING", "I000023"), // Brevkode ikke avklart
-
-    // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.Dokumentkategori}
-    KLAGE_ELLER_ANKE("KLGA", "KA"), // Brevkode ikke avklart
-    IKKE_TOLKBART_SKJEMA("ITSKJ", "IS"), // Brevkode ikke avklart
-    SØKNAD("SOKN", "SOK"), // Brevkode ikke avklart
-    ELEKTRONISK_SKJEMA("ESKJ", "ES"), // Brevkode ikke avklart
-    BRV("BRV", "B"), // Brevkode ikke avklart
-    EDIALOG("EDIALOG", "ELEKTRONISK_DIALOG"), // Brevkode ikke avklart
-    FNOT("FNOT", "FORVALTNINGSNOTAT"), // Brevkode ikke avklart
-    IBRV("IBRV", "IB"), // Brevkode ikke avklart
-    KONVEARK("KONVEARK", "KD"), // Brevkode ikke avklart
-    KONVSYS("KONVSYS", "KS"), // Brevkode ikke avklart
-    PUBEOS("PUBEOS", "PUBL_BLANKETT_EOS"), // Brevkode ikke avklart
-    SEDOK("SEDOK", "SED"), // Brevkode ikke avklart
-    TSKJ("TSKJ", "TS"), // Brevkode ikke avklart
-    VBRV("VBRV", "VB"), // Brevkode ikke avklart
-    INNTEKTKOMP_FRILANS("INNTEKTKOMP_FRILANS", "NAV 00-03.02"),
-    SØKNAD_DAGP_PERM("SOKNAD_DAGP_PERM", "NAV 04-01.04"),
-    AVSLAG("AVSLAG", "AVSLAG"),
-    INNVILGELSE("INNVILGELSE", "INNVILGELSE"),
-
+    public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
+    public static final Brevkode LEGEERKLÆRING =new Brevkode("LEGEERKLÆRING", "I000023");
+    public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02");
     // Default
-    UDEFINERT("-", null),
-    ;
+    public static final Brevkode UDEFINERT = new Brevkode("-", null);
 
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
     private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
-    static {
-        for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
-            if (KODER.putIfAbsent(v.offisiellKode, v) != null && !Objects.equals(v.offisiellKode, v.kode)) {
-                throw new IllegalArgumentException("Duplikat : " + v.offisiellKode);
-            }
+    private String offisiellKode;
+
+    @JsonValue
+    private String kode;
+
+    /** intern ctor for registrerte koder. */
+    private Brevkode(String kode, String offisiellKode) {
+        this(kode);
+        this.offisiellKode = offisiellKode;
+
+        if (KODER.putIfAbsent(kode, this) != null) {
+            throw new IllegalArgumentException("Duplikat : " + kode);
+        }
+        if (KODER.putIfAbsent(offisiellKode, this) != null && !Objects.equals(offisiellKode, kode)) {
+            throw new IllegalArgumentException("Duplikat : " + offisiellKode);
         }
     }
 
-    @JsonIgnore
-    private String navn;
-
-    @JsonIgnore
-    private String offisiellKode;
-
-    private String kode;
-
-    private Brevkode(String kode, String offisiellKode) {
-        this.kode = kode;
-        this.offisiellKode = offisiellKode;
-
+    /** value object ctor. */
+    protected Brevkode(String kode) {
+        this.kode = Objects.requireNonNull(kode, "kode");
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
-    public static Brevkode  fraKode(Object node)  {
+    public static Brevkode fraKode(Object node) {
         if (node == null) {
             return null;
         }
         String kode = TempAvledeKode.getVerdi(Brevkode.class, node, "kode");
+        Objects.requireNonNull(kode, "kode");
         var ad = KODER.get(kode);
 
         if (ad == null) {
             // midlertidig fallback til vi endrer til offisille kodeverdier
             ad = finnForKodeverkEiersKode(kode);
             if (ad == null) {
-                throw new IllegalArgumentException("Ukjent DokumentTypeId: " + kode);
+                // returnerer ny kode hvis ikke finnes blant offisielt registrete kodeverdier
+                return new Brevkode(kode);
             }
         }
         return ad;
@@ -110,7 +91,7 @@ public enum Brevkode implements Kodeverdi {
         }
     }
 
-    public static Map<String, Brevkode> kodeMap() {
+    public static Map<String, Brevkode> registrerteKoder() {
         return Collections.unmodifiableMap(KODER);
     }
 
@@ -119,13 +100,11 @@ public enum Brevkode implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
     @Override
     public String getKode() {
         return kode;

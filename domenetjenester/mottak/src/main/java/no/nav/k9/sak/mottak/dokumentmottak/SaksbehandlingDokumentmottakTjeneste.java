@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -105,7 +104,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private boolean valider(MottattDokument m, FagsakYtelseType ytelseType) {
         boolean valid = true;
-        var dokumentmottaker = finnMottaker(m.getType(), ytelseType);
+        var dokumentmottaker = finnMottaker(m.getType().getKode(), ytelseType);
         try {
             dokumentmottaker.validerDokument(m, ytelseType);
         } catch (MottattInntektsmeldingException e) {
@@ -129,7 +128,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
     }
 
-    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
+    private Dokumentmottaker finnMottaker(String brevkode, FagsakYtelseType fagsakYtelseType) {
         String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
         Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode));
 

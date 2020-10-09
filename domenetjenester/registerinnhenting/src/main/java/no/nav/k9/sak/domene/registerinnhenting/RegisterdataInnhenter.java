@@ -165,7 +165,8 @@ public class RegisterdataInnhenter {
         informasjonBuilder.tilbakestill(behandling.getAktørId());
 
         // Historikk for søker
-        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), behandling.getFagsakYtelseType(), true);
+        var fagsakYtelseType = behandling.getFagsakYtelseType();
+        var opplysningsperioden = skjæringstidspunktTjeneste.utledOpplysningsperiode(behandling.getId(), fagsakYtelseType, true);
         var personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(søkerPersonInfo.getAktørId(), opplysningsperioden);
         if (personhistorikkinfo != null) {
             mapAdresser(personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, søkerPersonInfo);
@@ -175,7 +176,7 @@ public class RegisterdataInnhenter {
 
         mapTilPersonopplysning(søkerPersonInfo, informasjonBuilder, true, false, behandling);
 
-        if (erIkkeFRISINN(behandling)) {
+        if (fagsakYtelseType.harRelatertePersoner()) {
             // legg til pleietrengende
             leggTilPleietrengende(informasjonBuilder, behandling);
             // Ektefelle
@@ -183,10 +184,6 @@ public class RegisterdataInnhenter {
         }
 
         return informasjonBuilder;
-    }
-
-    private boolean erIkkeFRISINN(Behandling behandling) {
-        return !FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType());
     }
 
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {

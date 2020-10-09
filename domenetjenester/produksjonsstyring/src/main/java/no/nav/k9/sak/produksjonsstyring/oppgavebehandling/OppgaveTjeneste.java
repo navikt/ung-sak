@@ -3,7 +3,6 @@ package no.nav.k9.sak.produksjonsstyring.oppgavebehandling;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -34,7 +33,6 @@ import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 public class OppgaveTjeneste {
-    public static final Set<FagsakYtelseType> OMS_YTELSER = Set.of(FagsakYtelseType.OMP, FagsakYtelseType.PSB, FagsakYtelseType.OPPLÆRINGSPENGER, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjeneste.class);
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
 
@@ -81,8 +79,9 @@ public class OppgaveTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         Fagsak fagsak = behandling.getFagsak();
 
-        var request = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
+        var request = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
+            mapYtelseTypeTilTema(fagsak.getYtelseType()))
+                .medOppgavetype(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
         var response = restKlient.opprettetOppgave(request);
         return response.getId().toString();
     }
@@ -111,12 +110,12 @@ public class OppgaveTjeneste {
     }
 
     private String mapYtelseTypeTilTema(FagsakYtelseType ytelseType) {
-        if (OMS_YTELSER.contains(ytelseType)) {
-            return "OMS";
-        } else if (FagsakYtelseType.FRISINN.equals(ytelseType)) {
-            return "FRI";
+        var tema = ytelseType.getInfotrygdBehandlingstema();
+        if (tema != null) {
+            return tema;
+        } else {
+            throw new UnsupportedOperationException("Støtter ikke ytelsestype " + ytelseType);
         }
-        throw new UnsupportedOperationException("Støtter ikke ytelsestype " + ytelseType);
     }
 
     public Optional<ProsessTaskData> opprettTaskAvsluttOppgave(Behandling behandling) {
@@ -191,9 +190,10 @@ public class OppgaveTjeneste {
     public String opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(Long fagsakId, OppgaveÅrsak oppgaveÅrsak, String enhetsId, String beskrivelse, boolean høyPrioritet) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
 
-        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), enhetsId, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
-            .medOppgavetype(oppgaveÅrsak.getKode());
+        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), enhetsId, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
+            mapYtelseTypeTilTema(fagsak.getYtelseType()))
+                .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
+                .medOppgavetype(oppgaveÅrsak.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest);
         logger.info("GOSYS opprettet VURDER VL oppgave {}", oppgave);
         return oppgave.getId().toString();
@@ -217,8 +217,8 @@ public class OppgaveTjeneste {
 
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), SAK_MÅ_FLYTTES_TIL_INFOTRYGD,
             Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
-            .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK_IT.getKode());
+                .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
+                .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK_IT.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest);
         logger.info("GOSYS opprettet BEH/IT oppgave {}", oppgave);
         return oppgave.getId().toString();
@@ -234,12 +234,13 @@ public class OppgaveTjeneste {
 
     private String opprettOkonomiSettPåVent(String beskrivelse, Behandling behandling) {
         var fagsak = behandling.getFagsak();
-        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, Prioritet.HOY, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medTildeltEnhetsnr(NØS_ANSVARLIG_ENHETID)
-            .medTemagruppe(null)
-            .medTema(NØS_TEMA)
-            .medBehandlingstema(NØS_BEH_TEMA)
-            .medOppgavetype(OppgaveÅrsak.SETTVENT.getKode());
+        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, Prioritet.HOY, DEFAULT_OPPGAVEFRIST_DAGER,
+            mapYtelseTypeTilTema(fagsak.getYtelseType()))
+                .medTildeltEnhetsnr(NØS_ANSVARLIG_ENHETID)
+                .medTemagruppe(null)
+                .medTema(NØS_TEMA)
+                .medBehandlingstema(NØS_BEH_TEMA)
+                .medOppgavetype(OppgaveÅrsak.SETTVENT.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest);
         logger.info("GOSYS opprettet NØS oppgave {}", oppgave);
         return oppgave.getId().toString();

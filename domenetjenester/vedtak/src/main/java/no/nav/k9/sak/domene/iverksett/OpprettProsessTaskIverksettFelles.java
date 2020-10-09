@@ -90,6 +90,7 @@ public abstract class OpprettProsessTaskIverksettFelles implements OpprettProses
 
     private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
 
+
         // varsle Arena for andre ytelser enn FRISINN
         // FIXME K9: varsler heller ikke Arena dersom Omsorgspenger (ennå sålenge) - til VARIANT FILTERT åpnes.
         var skipYtelser = Set.of(FagsakYtelseType.FRISINN, FagsakYtelseType.OMSORGSPENGER);
