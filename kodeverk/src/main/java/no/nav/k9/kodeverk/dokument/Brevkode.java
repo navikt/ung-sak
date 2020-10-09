@@ -25,6 +25,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public class Brevkode implements Kodeverdi {
 
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
+    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
     public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
@@ -34,7 +35,6 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode UDEFINERT = new Brevkode("-", null);
 
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
-    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
     private String offisiellKode;
 
@@ -54,7 +54,7 @@ public class Brevkode implements Kodeverdi {
         }
     }
 
-    /** value object ctor. */
+    /** value object ctor - brukes f.eks av Jax-Rs dersom spesifiseres direkte. */
     protected Brevkode(String kode) {
         this.kode = Objects.requireNonNull(kode, "kode");
     }
