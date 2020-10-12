@@ -35,6 +35,7 @@ import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.RegelData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -114,8 +115,8 @@ public class PleiepengerBeregneYtelseStegTest {
         Optional<BeregningsresultatEntitet> beregningsresultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
         assertThat(beregningsresultat).hasValueSatisfying(resultat -> {
             assertThat(resultat).isNotNull();
-            assertThat(resultat.getRegelInput()).as("regelInput").isEqualTo("regelInput");
-            assertThat(resultat.getRegelSporing()).as("regelSporing").isEqualTo("regelSporing");
+            assertThat(resultat.getRegelInput()).as("regelInput").isEqualTo(new RegelData("regelInput"));
+            assertThat(resultat.getRegelSporing()).as("regelSporing").isEqualTo(new RegelData("regelSporing"));
         });
     }
 

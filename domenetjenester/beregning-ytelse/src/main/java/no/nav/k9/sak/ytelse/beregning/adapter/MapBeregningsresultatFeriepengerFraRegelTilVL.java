@@ -24,8 +24,6 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVL {
         }
 
         BeregningsresultatFeriepenger.builder(beregningsresultatFeriepenger)
-            .medFeriepengerPeriodeFom(regelModell.getFeriepengerPeriode().getFomDato())
-            .medFeriepengerPeriodeTom(regelModell.getFeriepengerPeriode().getTomDato())
             .medFeriepengerRegelInput("Ferieregelinput")
             .medFeriepengerRegelSporing("Ferieregelsporing")
             .build(resultat);

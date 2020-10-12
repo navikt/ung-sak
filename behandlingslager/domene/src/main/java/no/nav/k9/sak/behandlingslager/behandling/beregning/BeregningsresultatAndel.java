@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ import no.nav.k9.sak.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter
 import no.nav.k9.sak.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.økonomioppdrag.InntektskategoriKlassekodeMapper;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -93,7 +95,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
     BeregningsresultatAndel() {
         //
     }
-    
+
     public Long getId() {
         return id;
     }
@@ -149,6 +151,8 @@ public class BeregningsresultatAndel extends BaseEntitet {
     public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
         if (beregningsresultatFeriepengerPrÅrListe == null) {
             return Collections.emptyList();
+        } else if (beregningsresultatFeriepengerPrÅrListe.size() > 1) {
+            throw new IllegalArgumentException(String.format("Kun 1 feriepenger per andel, har registrert %s", beregningsresultatFeriepengerPrÅrListe));
         }
         return Collections.unmodifiableList(beregningsresultatFeriepengerPrÅrListe);
     }
@@ -159,6 +163,18 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return beregningsresultatPeriode.getPeriode();
+    }
+
+    public LocalDate getFom() {
+        return getPeriode().getFomDato();
+    }
+
+    public LocalDate getTom() {
+        return getPeriode().getTomDato();
     }
 
     /**
@@ -189,7 +205,12 @@ public class BeregningsresultatAndel extends BaseEntitet {
             "brukerErMottaker=" + brukerErMottaker +
             ", arbeidsgiver=" + arbeidsgiver +
             ", arbeidsforholdRef=" + arbeidsforholdRef +
+            ", arbeidsforholdType=" + arbeidsforholdType +
             ", dagsats=" + dagsats +
+            ", stillingsprosent=" + stillingsprosent +
+            ", utbetalingsgrad=" + utbetalingsgrad +
+            ", dagsatsFraBg=" + dagsatsFraBg +
+            ", beregningsresultatFeriepengerPrÅrListe=" + beregningsresultatFeriepengerPrÅrListe +
             ", aktivitetStatus=" + aktivitetStatus +
             ", inntektskategori=" + inntektskategori +
             '}';
@@ -220,7 +241,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, inntektskategori);
+        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, inntektskategori);
     }
 
     public static Builder builder() {
@@ -311,7 +332,12 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
         public Builder leggTilBeregningsresultatFeriepengerPrÅr(BeregningsresultatFeriepengerPrÅr beregningsresultatFeriepengerPrÅr) {
-            beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅr);
+            if (beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe.isEmpty()) {
+                beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅr);
+            } else {
+                throw new IllegalArgumentException(
+                    String.format("Kun 1 feriepenger per andel, har %s, fikk %s", beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe, beregningsresultatFeriepengerPrÅr));
+            }
             return this;
         }
 

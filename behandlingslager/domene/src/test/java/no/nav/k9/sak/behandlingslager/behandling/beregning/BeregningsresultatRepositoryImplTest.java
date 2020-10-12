@@ -222,8 +222,6 @@ public class BeregningsresultatRepositoryImplTest {
         // Arrange
         BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
         BeregningsresultatFeriepenger feriepenger = BeregningsresultatFeriepenger.builder()
-            .medFeriepengerPeriodeFom(LocalDate.now())
-            .medFeriepengerPeriodeTom(LocalDate.now())
             .medFeriepengerRegelInput("-")
             .medFeriepengerRegelSporing("-")
             .build(beregningsresultat);

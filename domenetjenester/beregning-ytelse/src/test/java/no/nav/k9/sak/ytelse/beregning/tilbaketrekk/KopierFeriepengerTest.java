@@ -97,8 +97,6 @@ public class KopierFeriepengerTest {
         var feriepenger = BeregningsresultatFeriepenger.builder()
             .medFeriepengerRegelInput("input")
             .medFeriepengerRegelSporing("sporing")
-            .medFeriepengerPeriodeFom(fom)
-            .medFeriepengerPeriodeTom(LocalDate.of(2020,5,31))
             .build(bgBeregningsresultatFP);
         BeregningsresultatFeriepengerPrÅr.builder().medOpptjeningsår(SKJÆRINGSTIDSPUNKT)
             .medÅrsbeløp(200L)

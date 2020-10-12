@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +22,7 @@ public class KopierFeriepenger {
         }
 
         BeregningsresultatFeriepenger bgFeriepenger = bgFeriepengerOpt.get();
-        List<BeregningsresultatFeriepengerPrÅr> bgFeriepengerPrÅrListe = bgFeriepengerOpt
-            .map(BeregningsresultatFeriepenger::getBeregningsresultatFeriepengerPrÅrListe)
-            .orElse(Collections.emptyList());
+        List<BeregningsresultatFeriepengerPrÅr> bgFeriepengerPrÅrListe = revurderingTY.getBeregningsresultatFeriepengerPrÅrListe();
 
         BeregningsresultatFeriepenger beregningsresultatFeriepenger = kopierBeregningsresultatFeriepenger(utbetBR, bgFeriepenger);
 
@@ -35,8 +32,7 @@ public class KopierFeriepenger {
             BeregningsresultatPeriode beregningsresultatPeriode = utbetBR.getBeregningsresultatPerioder().stream()
                 .filter(brp -> brp.getBeregningsresultatPeriodeFom().equals(fom))
                 .findFirst()
-                .orElseThrow(() ->
-                    new IllegalStateException("Utviklerfeil: Fant ikke korresponderende utbet-periode for behandling " + behandlingId));
+                .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Fant ikke korresponderende utbet-periode for behandling " + behandlingId));
 
             List<BeregningsresultatAndel> haystack = beregningsresultatPeriode.getBeregningsresultatAndelList();
 
@@ -44,8 +40,7 @@ public class KopierFeriepenger {
                 .orElseGet(() -> BeregningsresultatAndel.builder(Kopimaskin.deepCopy(bgAndel))
                     .medDagsats(0)
                     .medDagsatsFraBg(0)
-                    .build(beregningsresultatPeriode)
-                );
+                    .build(beregningsresultatPeriode));
 
             BeregningsresultatFeriepengerPrÅr.builder()
                 .medOpptjeningsår(prÅr.getOpptjeningsår())
@@ -56,8 +51,6 @@ public class KopierFeriepenger {
 
     private static BeregningsresultatFeriepenger kopierBeregningsresultatFeriepenger(BeregningsresultatEntitet utbetBR, BeregningsresultatFeriepenger bgFeriepenger) {
         return BeregningsresultatFeriepenger.builder()
-            .medFeriepengerPeriodeFom(bgFeriepenger.getFeriepengerPeriodeFom())
-            .medFeriepengerPeriodeTom(bgFeriepenger.getFeriepengerPeriodeTom())
             .medFeriepengerRegelSporing(bgFeriepenger.getFeriepengerRegelSporing())
             .medFeriepengerRegelInput(bgFeriepenger.getFeriepengerRegelInput())
             .build(utbetBR);

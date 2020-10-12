@@ -7,17 +7,13 @@ import java.util.Set;
 import no.nav.fpsak.nare.doc.RuleDocumentationGrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Dekningsgrad;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 
 @RuleDocumentationGrunnlag
 public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
-    private Dekningsgrad dekningsgrad;
-    private Set<Inntektskategori> inntektskategorierAnnenPart;
     private LocalDateInterval feriepengerPeriode;
-    private List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder;
     private int antallDagerFeriepenger;
 
 
@@ -31,18 +27,6 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public List<BeregningsresultatPeriode> getBeregningsresultatPerioder() {
         return beregningsresultatPerioder;
-    }
-
-    public List<BeregningsresultatPeriode> getAnnenPartsBeregningsresultatPerioder() {
-        return annenPartsBeregningsresultatPerioder;
-    }
-
-    public Set<Inntektskategori> getInntektskategorierAnnenPart() {
-        return inntektskategorierAnnenPart;
-    }
-
-    public Dekningsgrad getDekningsgrad() {
-        return dekningsgrad;
     }
 
     public LocalDateInterval getFeriepengerPeriode() {
@@ -79,21 +63,6 @@ public class BeregningsresultatFeriepengerRegelModell {
 
         public Builder medBeregningsresultatPerioder(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
             kladd.beregningsresultatPerioder = beregningsresultatPerioder;
-            return this;
-        }
-
-        public Builder medAnnenPartsBeregningsresultatPerioder(List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder) {
-            kladd.annenPartsBeregningsresultatPerioder = annenPartsBeregningsresultatPerioder;
-            return this;
-        }
-
-        public Builder medDekningsgrad(Dekningsgrad dekningsgrad) {
-            kladd.dekningsgrad = dekningsgrad;
-            return this;
-        }
-
-        public Builder medAnnenPartsInntektskategorier(Set<Inntektskategori> inntektskategorierAnnenPart) {
-            kladd.inntektskategorierAnnenPart = inntektskategorierAnnenPart;
             return this;
         }
 

@@ -6,20 +6,15 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Dekningsgrad;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
-import no.nav.vedtak.konfig.Tid;
 
 class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
     public static final String ID = "FP_BR 8.3";
     public static final String BESKRIVELSE = "Finner brukers feriepengeperiode.";
-
 
     FinnBrukersFeriepengePeriode() {
         super(ID, BESKRIVELSE);
@@ -28,14 +23,13 @@ class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatF
     @Override
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
-        List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder = regelModell.getAnnenPartsBeregningsresultatPerioder();
-        LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(beregningsresultatPerioder, annenPartsBeregningsresultatPerioder);
+        LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(beregningsresultatPerioder);
         LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
 
         BeregningsresultatFeriepengerRegelModell.builder(regelModell)
             .medFeriepengerPeriode(feriepengePeriodeFom, feriepengePeriodeTom);
 
-        //Regelsporing
+        // Regelsporing
         Map<String, Object> resultater = new LinkedHashMap<>();
         resultater.put("FeriepengePeriode.fom", feriepengePeriodeFom);
         resultater.put("FeriepengePeriode.tom", feriepengePeriodeTom);
@@ -44,14 +38,12 @@ class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatF
 
     private LocalDate finnFeriepengerPeriodeTom(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
         List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
-        List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder = regelModell.getAnnenPartsBeregningsresultatPerioder();
-        int maksAntallDager = antallDagerFeriepenger(regelModell.getDekningsgrad(), regelModell.getAntallDagerFeriepenger());
-        boolean annenpartRettPåFeriepenger = regelModell.getInntektskategorierAnnenPart().stream().anyMatch(Inntektskategori::erArbeidstakerEllerSjømann);
-        LocalDate sisteUttaksdag = finnSisteUttaksdag(beregningsresultatPerioder, annenPartsBeregningsresultatPerioder);
+        int maksAntallDager = antallDagerFeriepenger(regelModell.getAntallDagerFeriepenger());
+        LocalDate sisteUttaksdag = finnSisteUttaksdag(beregningsresultatPerioder);
         int antallDager = 0;
 
         for (LocalDate dato = feriepengePeriodeFom; !dato.isAfter(sisteUttaksdag); dato = dato.plusDays(1)) {
-            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, annenPartsBeregningsresultatPerioder, annenpartRettPåFeriepenger, dato);
+            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, dato);
             antallDager += antallDagerSomLeggesTilFeriepengeperioden;
             if (antallDager == maksAntallDager) {
                 return dato;
@@ -63,25 +55,16 @@ class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatF
         return sisteUttaksdag;
     }
 
-    private int antallDagerFeriepenger(Dekningsgrad dekningsgrad, int antallDagerFeriepenger) {
-        switch (dekningsgrad) {
-            case DEKNINGSGRAD_100:
-                return antallDagerFeriepenger;
-            case DEKNINGSGRAD_80:
-                return (int) (antallDagerFeriepenger / dekningsgrad.getVerdi());
-            default:
-                throw new IllegalArgumentException("Ukjent dekningsgrad [" + dekningsgrad + "].");
-
-        }
+    private int antallDagerFeriepenger(int antallDagerFeriepenger) {
+        return antallDagerFeriepenger;
     }
 
-    private int finnAntallDagerSomSkalLeggesTil(List<BeregningsresultatPeriode> beregningsresultatPerioder, List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder, boolean annenpartRettPåFeriepenger, LocalDate dato) {
+    private int finnAntallDagerSomSkalLeggesTil(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato) {
         if (erHelg(dato)) {
             return 0;
         }
         int brukerHarUttakDager = harUttak(beregningsresultatPerioder, dato) ? 1 : 0;
-        int annenpartUttakOgRettDager = annenpartRettPåFeriepenger && harUttak(annenPartsBeregningsresultatPerioder, dato) ? 1 : 0;
-        return brukerHarUttakDager + annenpartUttakOgRettDager;
+        return brukerHarUttakDager;
     }
 
     private boolean harUttak(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato) {
@@ -94,33 +77,19 @@ class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatF
         return dato.getDayOfWeek().getValue() > DayOfWeek.FRIDAY.getValue();
     }
 
-    private LocalDate finnFørsteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder, List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder) {
-        LocalDate førsteUttaksdagBruker = finnFørsteUttaksdag(beregningsresultatPerioder)
-            .orElseThrow(() -> new IllegalStateException("Fant ingen perioder med utbetaling for bruker"));
-        LocalDate førsteUttaksdagAnnenPart = finnFørsteUttaksdag(annenPartsBeregningsresultatPerioder)
-            .orElse(Tid.TIDENES_ENDE);
-        return førsteUttaksdagBruker.isBefore(førsteUttaksdagAnnenPart) ? førsteUttaksdagBruker : førsteUttaksdagAnnenPart;
-    }
-
-    private Optional<LocalDate> finnFørsteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
+    private LocalDate finnFørsteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
         return beregningsresultatPerioder.stream()
             .filter(periode -> periode.getBeregningsresultatAndelList().stream().anyMatch(andel -> andel.getDagsats() > 0))
             .map(BeregningsresultatPeriode::getFom)
-            .min(Comparator.naturalOrder());
-    }
-
-    private LocalDate finnSisteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder, List<BeregningsresultatPeriode> annenPartsBeregningsresultatPerioder) {
-        LocalDate sisteUttaksdagBruker = finnSisteUttaksdag(beregningsresultatPerioder)
+            .min(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Fant ingen perioder med utbetaling for bruker"));
-        LocalDate sisteUttaksdagAnnenPart = finnSisteUttaksdag(annenPartsBeregningsresultatPerioder)
-            .orElse(Tid.TIDENES_BEGYNNELSE);
-        return sisteUttaksdagBruker.isAfter(sisteUttaksdagAnnenPart) ? sisteUttaksdagBruker : sisteUttaksdagAnnenPart;
     }
 
-    private Optional<LocalDate> finnSisteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
+    private LocalDate finnSisteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
         return beregningsresultatPerioder.stream()
             .filter(periode -> periode.getBeregningsresultatAndelList().stream().anyMatch(andel -> andel.getDagsats() > 0))
             .map(BeregningsresultatPeriode::getTom)
-            .max(Comparator.naturalOrder());
+            .max(Comparator.naturalOrder())
+            .orElseThrow(() -> new IllegalStateException("Fant ingen perioder med utbetaling for bruker"));
     }
 }
