@@ -89,7 +89,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                 // Lagre beregningsresultat
                 beregningsresultatRepository.lagre(behandling, beregningsresultat);
             } else {
-                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build());
+                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build());
             }
         } else {
             var originalBehandlingId = behandling.getOriginalBehandlingId();
@@ -121,7 +121,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
                 // Lagre beregningsresultat
                 beregningsresultatRepository.lagre(behandling, beregningsresultat);
             } else {
-                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build());
+                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build());
             }
         }
 

@@ -216,11 +216,17 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         }
 
         public Builder medRegelInput(String regelInput) {
+            if (regelInput == null || regelInput.isBlank()) {
+                throw new IllegalArgumentException("kan ikke ha null eller empty string");
+            }
             mal.regelInput = RegelData.createProxy(regelInput);
             return this;
         }
 
         public Builder medRegelSporing(String regelSporing) {
+            if (regelSporing == null || regelSporing.isBlank()) {
+                throw new IllegalArgumentException("kan ikke ha null eller empty string");
+            }
             mal.regelSporing = RegelData.createProxy(regelSporing);
             return this;
         }
