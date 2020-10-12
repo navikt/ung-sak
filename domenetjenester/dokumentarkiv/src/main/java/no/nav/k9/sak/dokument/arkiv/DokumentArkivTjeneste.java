@@ -2,7 +2,6 @@ package no.nav.k9.sak.dokument.arkiv;
 
 import static java.util.stream.Collectors.toList;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
@@ -133,31 +131,6 @@ public class DokumentArkivTjeneste {
         return journalPosts.stream().filter(jpost -> journalpostId.equals(jpost.getJournalpostId())).findFirst();
     }
 
-    public Set<DokumentTypeId> hentDokumentTypeIdForSak(Saksnummer saksnummer, LocalDate mottattEtterDato) {
-        List<ArkivJournalPost> journalPosts = hentAlleJournalposterForSak(saksnummer);
-        Set<DokumentTypeId> etterDato = new HashSet<>();
-        journalPosts.stream().filter(jpost -> (LocalDate.MIN.equals(mottattEtterDato)) || (jpost.getTidspunkt() != null && !jpost.getTidspunkt().toLocalDate().isBefore(mottattEtterDato)))
-            .forEach(jpost -> {
-                ekstraherDTID(etterDato, jpost.getHovedDokument());
-                jpost.getAndreDokument().forEach(dok -> ekstraherDTID(etterDato, dok));
-            });
-        return etterDato;
-    }
-
-    private void ekstraherDTID(Set<DokumentTypeId> eksisterende, ArkivDokument dokument) {
-        if (dokument == null) {
-            return;
-        }
-        if (!eksisterende.contains(dokument.getDokumentType())) {
-            eksisterende.add(dokument.getDokumentType());
-        }
-        for (ArkivDokumentVedlegg vedlegg : dokument.getInterneVedlegg()) {
-            if (!eksisterende.contains(vedlegg.getDokumentTypeId())) {
-                eksisterende.add(vedlegg.getDokumentTypeId());
-            }
-        }
-    }
-
     private ArkivJournalPost.Builder opprettArkivJournalPost(Saksnummer saksnummer, Journalpost journalpost) {
         Optional<LocalDateTime> datoRegistrert = hentRelevantDato(journalpost, Datotype.DATO_REGISTRERT);
         Optional<LocalDateTime> datoJournalFørt = hentRelevantDato(journalpost, Datotype.DATO_JOURNALFOERT);
@@ -187,9 +160,7 @@ public class DokumentArkivTjeneste {
     private ArkivDokument.Builder opprettArkivDokument(DokumentInfo dokumentInfo) {
         ArkivDokument.Builder builder = ArkivDokument.Builder.ny()
             .medDokumentId(dokumentInfo.getDokumentInfoId())
-            .medTittel(dokumentInfo.getTittel())
-            .medDokumentTypeId(mapTilDokumentTypeId(dokumentInfo.getBrevkode()))
-            .medDokumentKategori(mapTilDokumentKategori(dokumentInfo.getBrevkode()));
+            .medTittel(dokumentInfo.getTittel());
 
         dokumentInfo.getDokumentvarianter().stream()
             .filter(innhold -> innhold.getSaksbehandlerHarTilgang())
@@ -209,7 +180,7 @@ public class DokumentArkivTjeneste {
         Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
 
         DokumentTypeId dokumentTypeId = Arrays.stream(DokumentTypeId.values())
-            .filter(typeId -> typeId.name().equals(brevKode.name()))
+            .filter(typeId -> typeId.name().equals(brevKode.getKode()))
             .findFirst()
             .orElse(DokumentTypeId.UDEFINERT);
 
@@ -224,18 +195,6 @@ public class DokumentArkivTjeneste {
             brevKode = Brevkode.UDEFINERT;
         }
         return brevKode;
-    }
-
-    // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentKategori
-    private DokumentKategori mapTilDokumentKategori(String brevkodeVerdi) {
-        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
-
-        DokumentKategori dokumentKategori = Arrays.stream(DokumentKategori.values())
-            .filter(typeId -> typeId.name().equals(brevKode.name()))
-            .findFirst()
-            .orElse(DokumentKategori.UDEFINERT);
-
-        return dokumentKategori;
     }
 
     private Optional<LocalDateTime> hentRelevantDato(Journalpost journalpost, Datotype datotype) {

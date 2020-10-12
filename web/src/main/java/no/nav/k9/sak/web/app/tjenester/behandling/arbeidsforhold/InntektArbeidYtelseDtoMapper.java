@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 
-import static no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
 import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
 
 import java.time.LocalDate;
@@ -17,6 +16,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
@@ -214,7 +214,7 @@ public class InntektArbeidYtelseDtoMapper {
     }
 
     private List<RelaterteYtelserDto> mapTilDtoSøker(List<TilgrensendeYtelserDto> tilgrensendeYtelserDtos) {
-        return BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(tilgrensendeYtelserDtos, RELATERT_YTELSE_TYPER_FOR_SØKER);
+        return BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(tilgrensendeYtelserDtos, FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER);
     }
 
     private List<TilgrensendeYtelserDto> hentRelaterteYtelser(InntektArbeidYtelseGrunnlag grunnlag, AktørId aktørId) {

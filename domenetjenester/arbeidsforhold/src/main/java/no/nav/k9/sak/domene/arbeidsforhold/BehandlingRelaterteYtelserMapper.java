@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -15,20 +16,6 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
 import no.nav.vedtak.konfig.Tid;
 
 public class BehandlingRelaterteYtelserMapper {
-
-    public static final List<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = List.of(
-        FagsakYtelseType.FORELDREPENGER,
-        FagsakYtelseType.ENGANGSTØNAD,
-        FagsakYtelseType.SYKEPENGER,
-        FagsakYtelseType.ENSLIG_FORSØRGER,
-        FagsakYtelseType.DAGPENGER,
-        FagsakYtelseType.ARBEIDSAVKLARINGSPENGER,
-        FagsakYtelseType.SVANGERSKAPSPENGER,
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
-        FagsakYtelseType.OPPLÆRINGSPENGER,
-        FagsakYtelseType.OMSORGSPENGER,
-        FagsakYtelseType.FRISINN);
 
     private BehandlingRelaterteYtelserMapper() {
     }
@@ -63,7 +50,7 @@ public class BehandlingRelaterteYtelserMapper {
         return Tid.TIDENES_ENDE.equals(tomDato) ? null : tomDato;
     }
 
-    public static List<RelaterteYtelserDto> samleYtelserBasertPåYtelseType(List<TilgrensendeYtelserDto> tilgrensendeYtelser, List<FagsakYtelseType> ytelsesTyper) {
+    public static List<RelaterteYtelserDto> samleYtelserBasertPåYtelseType(List<TilgrensendeYtelserDto> tilgrensendeYtelser, Set<FagsakYtelseType> ytelsesTyper) {
         List<RelaterteYtelserDto> dtos = new LinkedList<>();
         for (FagsakYtelseType relatertYtelseType : ytelsesTyper) {
             dtos.add(new RelaterteYtelserDto(relatertYtelseType.getKode(), sortTilgrensendeYtelser(tilgrensendeYtelser, relatertYtelseType.getKode())));

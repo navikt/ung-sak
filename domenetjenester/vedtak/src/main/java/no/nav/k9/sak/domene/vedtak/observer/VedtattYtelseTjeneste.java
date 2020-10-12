@@ -115,14 +115,8 @@ public class VedtattYtelseTjeneste {
 
 
     private YtelseType map(FagsakYtelseType type) {
-        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN.equals(type)) {
-            return YtelseType.PLEIEPENGER_SYKT_BARN;
-        } else if (FagsakYtelseType.OMSORGSPENGER.equals(type)) {
-            return YtelseType.OMSORGSPENGER;
-        } else if (FagsakYtelseType.FRISINN.equals(type)) {
-            return YtelseType.FRISINN;
-        }
-        throw new IllegalStateException("Ukjent ytelsestype " + type);
+        // bruker samme kodeverk i YtelseType og FagsakYtelseType for relevante ytelser.
+        return YtelseType.fraKode(type.getKode());
     }
 
     private YtelseStatus map(FagsakStatus kode) {

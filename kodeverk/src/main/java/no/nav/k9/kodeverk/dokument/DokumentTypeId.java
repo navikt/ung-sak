@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -25,9 +26,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentTypeId implements Kodeverdi {
 
-    INNTEKTSMELDING("INNTEKTSMELDING", "I000067", DokumentGruppe.INNTEKTSMELDING),
-    LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG),
-    UDEFINERT("-", null, null),
+    INNTEKTSMELDING("INNTEKTSMELDING", "I000067", DokumentGruppe.INNTEKTSMELDING, Brevkode.INNTEKTSMELDING),
+    LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG, Brevkode.LEGEERKLÆRING),
+    UDEFINERT("-", null, null, null),
     ;
 
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
@@ -55,10 +56,14 @@ public enum DokumentTypeId implements Kodeverdi {
     @JsonIgnore
     private DokumentGruppe dokumentGruppe;
 
-    private DokumentTypeId(String kode, String offisiellKode, DokumentGruppe dokumentGruppe) {
+    @JsonIgnore
+    private Brevkode brevkode;
+
+    private DokumentTypeId(String kode, String offisiellKode, DokumentGruppe dokumentGruppe, Brevkode brevkode) {
         this.kode = kode;
         this.offisiellKode = offisiellKode;
         this.dokumentGruppe = dokumentGruppe;
+        this.brevkode = brevkode;
 
     }
 
@@ -116,6 +121,10 @@ public enum DokumentTypeId implements Kodeverdi {
     @Override
     public String getKode() {
         return kode;
+    }
+
+    public Brevkode getBrevkode() {
+        return brevkode;
     }
 
     @Override

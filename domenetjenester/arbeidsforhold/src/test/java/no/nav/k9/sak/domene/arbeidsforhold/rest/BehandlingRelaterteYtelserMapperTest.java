@@ -1,14 +1,13 @@
 package no.nav.k9.sak.domene.arbeidsforhold.rest;
 
-import static no.nav.k9.sak.domene.arbeidsforhold.BehandlingRelaterteYtelserMapper.RELATERT_YTELSE_TYPER_FOR_SØKER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -31,6 +30,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public class BehandlingRelaterteYtelserMapperTest {
+    private static final Set<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER;
     private static final LocalDate I_DAG = LocalDate.now();
     private static final Saksnummer SAKSNUMMER_42 = new Saksnummer("42");
     private Fagsak fagsakFødsel = Fagsak.opprettNy(FagsakYtelseType.ENGANGSTØNAD, AktørId.dummy(), new Saksnummer("66"));
@@ -86,19 +86,6 @@ public class BehandlingRelaterteYtelserMapperTest {
     }
 
     @Test
-    public void skal_returnerer_6_tom_tilgrensende_ytelser_for_soker() {
-        @SuppressWarnings("unchecked")
-        List<RelaterteYtelserDto> resultatListe = BehandlingRelaterteYtelserMapper.samleYtelserBasertPåYtelseType(Collections.EMPTY_LIST,
-            RELATERT_YTELSE_TYPER_FOR_SØKER);
-
-        assertThat(resultatListe).hasSize(RELATERT_YTELSE_TYPER_FOR_SØKER.size());
-        IntStream.range(0, RELATERT_YTELSE_TYPER_FOR_SØKER.size()).forEach(i -> {
-            assertThat(resultatListe.get(i).getRelatertYtelseType()).isEqualTo(RELATERT_YTELSE_TYPER_FOR_SØKER.get(i).getKode());
-            assertThat(resultatListe.get(i).getTilgrensendeYtelserListe()).isEmpty();
-        });
-    }
-
-    @Test
     public void skal_returnerer_sortert_tilgrensende_ytelser_for_soker() {
         List<TilgrensendeYtelserDto> tilgrensendeYtelserDtos = List.of(
             opprettTilgrensendeYtelserDto(SAKSNUMMER_42, FagsakYtelseType.FORELDREPENGER, RelatertYtelseTilstand.AVSLUTTET, I_DAG.minusDays(365),
@@ -120,10 +107,13 @@ public class BehandlingRelaterteYtelserMapperTest {
             RELATERT_YTELSE_TYPER_FOR_SØKER);
 
         assertThat(resultatListe).hasSize(RELATERT_YTELSE_TYPER_FOR_SØKER.size());
-        assertThat(resultatListe.get(0).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.FORELDREPENGER.getKode());
-        assertThat(resultatListe.get(0).getTilgrensendeYtelserListe()).hasSize(1);
-        assertThat(resultatListe.get(2).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.SYKEPENGER.getKode());
-        final List<TilgrensendeYtelserDto> sykepengerYtelserListe = resultatListe.get(2).getTilgrensendeYtelserListe();
+
+        var ytelse1 = resultatListe.stream().filter(r -> Objects.equals(r.getRelatertYtelseType(), FagsakYtelseType.FORELDREPENGER.getKode())).findFirst().orElseThrow();
+        assertThat(ytelse1.getTilgrensendeYtelserListe()).hasSize(1);
+
+        var ytelse2 = resultatListe.stream().filter(r -> Objects.equals(r.getRelatertYtelseType(), FagsakYtelseType.SYKEPENGER.getKode())).findFirst().orElseThrow();
+
+        final List<TilgrensendeYtelserDto> sykepengerYtelserListe = ytelse2.getTilgrensendeYtelserListe();
         assertThat(sykepengerYtelserListe).hasSize(6);
         assertThat(sykepengerYtelserListe.get(0).getPeriodeFraDato()).isNull();
         assertThat(sykepengerYtelserListe.get(1).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(5));
@@ -131,8 +121,9 @@ public class BehandlingRelaterteYtelserMapperTest {
         assertThat(sykepengerYtelserListe.get(3).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(165));
         assertThat(sykepengerYtelserListe.get(4).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(265));
         assertThat(sykepengerYtelserListe.get(5).getPeriodeFraDato()).isEqualTo(I_DAG.minusDays(365));
-        assertThat(resultatListe.get(5).getRelatertYtelseType()).isEqualTo(FagsakYtelseType.ARBEIDSAVKLARINGSPENGER.getKode());
-        assertThat(resultatListe.get(5).getTilgrensendeYtelserListe()).hasSize(1);
+
+        var ytelse3 = resultatListe.stream().filter(r -> Objects.equals(r.getRelatertYtelseType(), FagsakYtelseType.ARBEIDSAVKLARINGSPENGER.getKode())).findFirst().orElseThrow();
+        assertThat(ytelse3.getTilgrensendeYtelserListe()).hasSize(1);
     }
 
 

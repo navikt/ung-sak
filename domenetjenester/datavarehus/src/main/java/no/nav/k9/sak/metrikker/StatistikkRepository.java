@@ -69,7 +69,7 @@ public class StatistikkRepository {
     static final List<String> VILKÅRTYPER = VilkårType.kodeMap().values().stream().filter(p -> !VilkårType.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> AVSLAGSÅRSAKER = Avslagsårsak.kodeMap().values().stream().filter(p -> !Avslagsårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> VENT_ÅRSAKER = Venteårsak.kodeMap().values().stream().filter(p -> !Venteårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> BREVKODER = Brevkode.kodeMap().values().stream().filter(p -> !Brevkode.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
+    static final List<String> BREVKODER = Brevkode.registrerteKoder().values().stream().filter(p -> !Brevkode.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
 
     private static final ObjectMapper OM = new ObjectMapper();
 

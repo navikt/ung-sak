@@ -75,7 +75,6 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 /**
  * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
- * ENDRINGER I DENNE KLASSEN SKAL KLARERES OG KODE-REVIEWES MED ANSVARLIG APPLIKASJONSARKITEKT.
  */
 @Path("")
 @ApplicationScoped
@@ -114,6 +113,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
 
+    /**
+     * @deprecated Bør fjernes når FRISINN nedlegges.
+     */
+    @Deprecated(forRemoval = true)
     @POST
     @Path("/frisinn/opprett-manuell-frisinn/TO_BE_REMOVED")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -155,6 +158,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
     
+    /**
+     * @deprecated Bør fjernes når Omsorgspenger er ajour med behandlinger ifht korona backlogg.
+     */
+    @Deprecated(forRemoval = true)
     @GET
     @Path("/uttrekk-aksjonspunkt-9003")
     @Operation(description = "Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt.", summary = ("Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt."), tags = "forvaltning", responses = {

@@ -125,10 +125,12 @@ public class MapYtelseperioderTjeneste {
     }
 
     private OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
-        if (FagsakYtelseType.PÅRØRENDESYKDOM.equals(ytelse.getYtelseType())) {
+
+        if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
             return OpptjeningAktivitetType.hentFraTemaUnderkategori()
                 .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
         }
+
         return OpptjeningAktivitetType.hentFraFagsakYtelseTyper()
             .getOrDefault(ytelse.getYtelseType(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
     }

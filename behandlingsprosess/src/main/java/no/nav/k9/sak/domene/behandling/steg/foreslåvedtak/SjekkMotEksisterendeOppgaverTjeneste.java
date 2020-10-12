@@ -44,6 +44,7 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         List<Historikkinnslag> historikkInnslagFraRepo = historikkRepository.hentHistorikk(behandling.getId());
         List<AksjonspunktDefinisjon> aksjonspunktliste = new ArrayList<>();
 
+        // FIXME FagsakYtelseType: Ikke branch på ytelsetype i generelle moduler
         if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
             return List.of();
         }

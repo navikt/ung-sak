@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentKategori;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class InngåendeSaksdokument {
@@ -18,7 +17,6 @@ public class InngåendeSaksdokument {
     private Boolean elektroniskSøknad;
     private String payload;
     private UUID forsendelseId;
-    private DokumentKategori dokumentKategori;
     private String kanalreferanse;
     private String journalEnhet;
     private Brevkode type;
@@ -58,10 +56,6 @@ public class InngåendeSaksdokument {
 
     public UUID getForsendelseId() {
         return forsendelseId;
-    }
-
-    public DokumentKategori getDokumentKategori() {
-        return dokumentKategori;
     }
 
     public String getKanalreferanse() {
