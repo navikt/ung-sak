@@ -1,9 +1,11 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
+import java.sql.Clob;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +21,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -28,6 +32,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "Beregningsresultat")
 @Table(name = "BR_BEREGNINGSRESULTAT")
@@ -54,11 +59,23 @@ public class BeregningsresultatEntitet extends BaseEntitet {
 
     @Lob
     @Column(name = "regel_input", nullable = false)
-    private String regelInput;
+    @DiffIgnore
+    private Clob regelInput;
 
     @Lob
     @Column(name = "regel_sporing", nullable = false)
-    private String regelSporing;
+    @DiffIgnore
+    private Clob regelSporing;
+
+    @Lob
+    @Column(name = "feriepenger_regel_input")
+    @DiffIgnore
+    private Clob feriepengerRegelInput;
+
+    @Lob
+    @Column(name = "feriepenger_regel_sporing")
+    @DiffIgnore
+    private Clob feriepengerRegelSporing;
 
     @Column(name = "endringsdato")
     private LocalDate endringsdato;
@@ -67,13 +84,51 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return id;
     }
 
-    public String getRegelInput() {
-        return regelInput;
+    public RegelData getRegelInput() {
+        return regelInput == null ? null : new RegelData(regelInput);
     }
 
-    public String getRegelSporing() {
-        return regelSporing;
+    public RegelData getRegelSporing() {
+        return regelSporing == null ? null : new RegelData(regelSporing);
     }
+
+    public RegelData getFeriepengerRegelInput() {
+        return feriepengerRegelInput == null ? null : new RegelData(feriepengerRegelInput);
+    }
+
+    public RegelData getFeriepengerRegelSporing() {
+        return feriepengerRegelSporing == null ? null : new RegelData(feriepengerRegelSporing);
+    }
+
+    @PrePersist
+    protected void onBeregningsresultatCreate() {
+        // kun mens vi migrerer
+        if (getBeregningsresultatFeriepenger().isPresent()) {
+            var br = getBeregningsresultatFeriepenger().get();
+            if (feriepengerRegelInput == null) {
+                feriepengerRegelInput = Optional.ofNullable(br.getFeriepengerRegelInput()).map(r -> r.clob).orElseGet(null);
+            }
+            if (feriepengerRegelSporing == null) {
+                feriepengerRegelSporing = Optional.ofNullable(br.getFeriepengerRegelSporing()).map(r -> r.clob).orElseGet(null);
+            }
+        }
+    }
+
+    @PreUpdate
+    protected void onBeregningsresultatUpdate() {
+        // kun mens vi migrerer
+        if (getBeregningsresultatFeriepenger().isPresent()) {
+            var br = getBeregningsresultatFeriepenger().get();
+            if (feriepengerRegelInput == null) {
+                feriepengerRegelInput = Optional.ofNullable(br.getFeriepengerRegelInput()).map(r -> r.clob).orElseGet(null);
+            }
+            if (feriepengerRegelSporing == null) {
+                feriepengerRegelSporing = Optional.ofNullable(br.getFeriepengerRegelSporing()).map(r -> r.clob).orElseGet(null);
+            }
+        }
+
+    }
+
 
     public Optional<LocalDate> getEndringsdato() {
         return Optional.ofNullable(endringsdato);
@@ -83,6 +138,22 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return Collections.unmodifiableList(beregningsresultatPerioder);
     }
 
+    public LocalDateTimeline<List<BeregningsresultatAndel>> getBeregningsresultatAndelTimeline() {
+        var perioder = getBeregningsresultatPerioder().stream()
+            .map(v -> new LocalDateSegment<>(v.getBeregningsresultatPeriodeFom(), v.getBeregningsresultatPeriodeTom(), v.getBeregningsresultatAndelList()))
+            .collect(Collectors.toList());
+        return new LocalDateTimeline<>(perioder);
+    }
+
+    public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
+        return List.copyOf(getBeregningsresultatAndelTimeline().toSegments().stream()
+            .flatMap(s -> s.getValue().stream())
+            .flatMap(a -> a.getBeregningsresultatFeriepengerPrÅrListe().stream())
+            .collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    /** @deprecated Bruk {@link #getBeregningsresultatAndelTimeline()} i stedet. */
+    @Deprecated(forRemoval = true)
     public LocalDateTimeline<BeregningsresultatPeriode> getBeregningsresultatTimeline() {
         var perioder = getBeregningsresultatPerioder().stream()
             .map(v -> new LocalDateSegment<>(v.getBeregningsresultatPeriodeFom(), v.getBeregningsresultatPeriodeTom(), v))
@@ -134,46 +205,80 @@ public class BeregningsresultatEntitet extends BaseEntitet {
     }
 
     public static class Builder {
-        private BeregningsresultatEntitet beregningsresultatFPMal;
+        private BeregningsresultatEntitet mal;
 
-        public Builder() {
-            this.beregningsresultatFPMal = new BeregningsresultatEntitet();
+        Builder() {
+            this.mal = new BeregningsresultatEntitet();
         }
 
-        public Builder(BeregningsresultatEntitet beregningsresultat) {
-            this.beregningsresultatFPMal = beregningsresultat;
+        Builder(BeregningsresultatEntitet beregningsresultat) {
+            this.mal = beregningsresultat;
         }
 
         public Builder medRegelInput(String regelInput) {
-            beregningsresultatFPMal.regelInput = regelInput;
+            mal.regelInput = RegelData.createProxy(regelInput);
             return this;
         }
 
         public Builder medRegelSporing(String regelSporing) {
-            beregningsresultatFPMal.regelSporing = regelSporing;
+            mal.regelSporing = RegelData.createProxy(regelSporing);
+            return this;
+        }
+
+        public Builder medRegelInput(RegelData regelInput) {
+            mal.regelInput = regelInput == null ? null : regelInput.clob;
+            return this;
+        }
+
+        public Builder medRegelSporing(RegelData regelSporing) {
+            mal.regelSporing = regelSporing == null ? null : regelSporing.clob;
+            return this;
+        }
+
+        public Builder medFeriepengerRegelInput(String regelInput) {
+            mal.feriepengerRegelInput = RegelData.createProxy(regelInput);
+            return this;
+        }
+
+        public Builder medFeriepengerRegelSporing(String regelSporing) {
+            mal.feriepengerRegelSporing = RegelData.createProxy(regelSporing);
+            return this;
+        }
+
+        public Builder medFeriepengerRegelInput(RegelData regelInput) {
+            mal.feriepengerRegelInput = regelInput == null ? null : regelInput.clob;
+            return this;
+        }
+
+        public Builder medFeriepengerRegelSporing(RegelData regelSporing) {
+            mal.feriepengerRegelSporing = regelSporing == null ? null : regelSporing.clob;
             return this;
         }
 
         public Builder medBeregningsresultatFeriepenger(BeregningsresultatFeriepenger beregningsresultatFeriepenger) {
-            beregningsresultatFPMal.beregningsresultatFeriepenger.clear();
-            beregningsresultatFPMal.beregningsresultatFeriepenger.add(beregningsresultatFeriepenger);
+            mal.beregningsresultatFeriepenger.clear();
+            mal.beregningsresultatFeriepenger.add(beregningsresultatFeriepenger);
+
+            medFeriepengerRegelInput(beregningsresultatFeriepenger.getFeriepengerRegelInput());
+            medFeriepengerRegelSporing(beregningsresultatFeriepenger.getFeriepengerRegelSporing());
             return this;
         }
 
         public Builder medEndringsdato(LocalDate endringsdato) {
-            beregningsresultatFPMal.endringsdato = endringsdato;
+            mal.endringsdato = endringsdato;
             return this;
         }
 
         public BeregningsresultatEntitet build() {
             verifyStateForBuild();
-            return beregningsresultatFPMal;
+            return mal;
         }
 
         private void verifyStateForBuild() {
-            Objects.requireNonNull(beregningsresultatFPMal.beregningsresultatPerioder, "beregningsresultatPerioder");
-            Objects.requireNonNull(beregningsresultatFPMal.regelInput, "regelInput");
-            Objects.requireNonNull(beregningsresultatFPMal.regelSporing, "regelSporing");
+            Objects.requireNonNull(mal.beregningsresultatPerioder, "beregningsresultatPerioder");
+            Objects.requireNonNull(mal.regelInput, "regelInput");
+            Objects.requireNonNull(mal.regelSporing, "regelSporing");
         }
     }
+
 }

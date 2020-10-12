@@ -19,6 +19,9 @@ class MapBeregningsresultat {
         BeregningsresultatEntitet.Builder builder = BeregningsresultatEntitet.builder();
         builder.medRegelInput(resultat.getRegelInput());
         builder.medRegelSporing(resultat.getRegelSporing());
+        builder.medFeriepengerRegelInput(resultat.getFeriepengerRegelInput());
+        builder.medFeriepengerRegelSporing(resultat.getFeriepengerRegelSporing());
+
         resultat.getEndringsdato().ifPresent(builder::medEndringsdato);
         BeregningsresultatEntitet nyttResultat = builder.build();
         finnPerioderForNySøknad(resultat, sisteSøknadsperiode, nyttResultat);

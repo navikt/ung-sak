@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.beregning.adapter;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,7 +11,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Dekningsgrad;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
@@ -31,9 +29,6 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
 
         return BeregningsresultatFeriepengerRegelModell.builder()
                 .medBeregningsresultatPerioder(beregningsresultatPerioder)
-                .medAnnenPartsInntektskategorier(Collections.emptySet())
-                .medDekningsgrad(Dekningsgrad.DEKNINGSGRAD_100)
-                .medAnnenPartsBeregningsresultatPerioder(Collections.emptyList())
                 .medInntektskategorier(inntektskategorier)
                 .medAntallDagerFeriepenger(antallDagerFeriepenger)
                 .build();

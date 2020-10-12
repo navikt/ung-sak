@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
-import java.time.LocalDate;
+import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +24,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "BeregningsresultatFeriepenger")
 @Table(name = "BR_FERIEPENGER")
@@ -46,38 +48,26 @@ public class BeregningsresultatFeriepenger extends BaseEntitet {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatFeriepenger", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = new ArrayList<>();
 
-    @Column(name = "feriepenger_periode_fom")
-    private LocalDate feriepengerPeriodeFom;
-
-    @Column(name = "feriepenger_periode_tom")
-    private LocalDate feriepengerPeriodeTom;
+    @Lob
+    @Column(name = "feriepenger_regel_input")
+    @DiffIgnore
+    private Clob feriepengerRegelInput;
 
     @Lob
-    @Column(name = "feriepenger_regel_input", nullable = false)
-    private String feriepengerRegelInput;
-
-    @Lob
-    @Column(name = "feriepenger_regel_sporing", nullable = false)
-    private String feriepengerRegelSporing;
+    @Column(name = "feriepenger_regel_sporing")
+    @DiffIgnore
+    private Clob feriepengerRegelSporing;
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getFeriepengerPeriodeFom() {
-        return feriepengerPeriodeFom;
+    public RegelData getFeriepengerRegelInput() {
+        return feriepengerRegelInput == null ? null : new RegelData(feriepengerRegelInput);
     }
 
-    public LocalDate getFeriepengerPeriodeTom() {
-        return feriepengerPeriodeTom;
-    }
-
-    public String getFeriepengerRegelInput() {
-        return feriepengerRegelInput;
-    }
-
-    public String getFeriepengerRegelSporing() {
-        return feriepengerRegelSporing;
+    public RegelData getFeriepengerRegelSporing() {
+        return feriepengerRegelSporing == null ? null : new RegelData(feriepengerRegelSporing);
     }
 
     public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
@@ -103,8 +93,7 @@ public class BeregningsresultatFeriepenger extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<periode=[" + feriepengerPeriodeFom + ", " + feriepengerPeriodeTom + "]"
-            + ", prÅrListe=[" + beregningsresultatFeriepengerPrÅrListe.size() + "]>";
+        return getClass().getSimpleName() + "<" + beregningsresultatFeriepengerPrÅrListe.size() + ">";
     }
 
     public static Builder builder() {
@@ -116,53 +105,51 @@ public class BeregningsresultatFeriepenger extends BaseEntitet {
     }
 
     public static class Builder {
-        private BeregningsresultatFeriepenger beregningsresultatFPMal;
+        private BeregningsresultatFeriepenger mal;
 
         public Builder() {
-            beregningsresultatFPMal = new BeregningsresultatFeriepenger();
+            mal = new BeregningsresultatFeriepenger();
         }
 
         public Builder(BeregningsresultatFeriepenger beregningsresultatFeriepenger) {
-            beregningsresultatFPMal = beregningsresultatFeriepenger;
+            mal = beregningsresultatFeriepenger;
         }
 
         public Builder leggTilBeregningsresultatFeriepengerPrÅr(BeregningsresultatFeriepengerPrÅr beregningsresultatFeriepengerPrÅrMal) {
-            beregningsresultatFPMal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅrMal);
+            mal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅrMal);
             return this;
         }
 
         public Builder medFeriepengerRegelInput(String regelInput) {
-            beregningsresultatFPMal.feriepengerRegelInput = regelInput;
+            mal.feriepengerRegelInput = RegelData.createProxy(regelInput);
             return this;
         }
 
         public Builder medFeriepengerRegelSporing(String regelSporing) {
-            beregningsresultatFPMal.feriepengerRegelSporing = regelSporing;
+            mal.feriepengerRegelSporing = RegelData.createProxy(regelSporing);
             return this;
         }
 
-        public Builder medFeriepengerPeriodeFom(LocalDate feriepengerPeriodeFom) {
-            beregningsresultatFPMal.feriepengerPeriodeFom = feriepengerPeriodeFom;
+        public Builder medFeriepengerRegelInput(RegelData regelInput) {
+            mal.feriepengerRegelInput = regelInput == null ? null : regelInput.clob;
             return this;
         }
 
-        public Builder medFeriepengerPeriodeTom(LocalDate feriepengerPeriodeTom) {
-            beregningsresultatFPMal.feriepengerPeriodeTom = feriepengerPeriodeTom;
+        public Builder medFeriepengerRegelSporing(RegelData regelSporing) {
+            mal.feriepengerRegelSporing = regelSporing == null ? null : regelSporing.clob;
             return this;
         }
 
         public BeregningsresultatFeriepenger build(BeregningsresultatEntitet beregningsresultat) {
-            beregningsresultatFPMal.beregningsresultat = beregningsresultat;
-            BeregningsresultatEntitet.builder(beregningsresultat).medBeregningsresultatFeriepenger(beregningsresultatFPMal);
+            mal.beregningsresultat = beregningsresultat;
+            BeregningsresultatEntitet.builder(beregningsresultat).medBeregningsresultatFeriepenger(mal);
             verifyStateForBuild();
-            return beregningsresultatFPMal;
+            return mal;
         }
 
         public void verifyStateForBuild() {
-            Objects.requireNonNull(beregningsresultatFPMal.beregningsresultat, "beregningsresultat");
-            Objects.requireNonNull(beregningsresultatFPMal.beregningsresultatFeriepengerPrÅrListe, "beregningsresultatFeriepengerPrÅrListe");
-            Objects.requireNonNull(beregningsresultatFPMal.feriepengerRegelInput, "feriepengerRegelInput");
-            Objects.requireNonNull(beregningsresultatFPMal.feriepengerRegelSporing, "feriepengerRegelSporing");
+            Objects.requireNonNull(mal.beregningsresultat, "beregningsresultat");
+            Objects.requireNonNull(mal.beregningsresultatFeriepengerPrÅrListe, "beregningsresultatFeriepengerPrÅrListe");
         }
     }
 }

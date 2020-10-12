@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,7 +35,10 @@ class MapBRAndelSammenligningTidslinje {
     }
 
     private static LocalDateTimeline<List<BeregningsresultatAndel>> identifiserUtbetaltPeriode(LocalDate utbetaltTom) {
-        LocalDate alleredeUtbetaltTom = FinnAlleredeUtbetaltTom.finn(utbetaltTom);
+        LocalDate alleredeUtbetaltTom = utbetaltTom.getDayOfMonth() > 15
+            ? utbetaltTom.with(TemporalAdjusters.lastDayOfMonth())
+            : utbetaltTom.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+
         return new LocalDateTimeline<>(
             Tid.TIDENES_BEGYNNELSE,
             alleredeUtbetaltTom,
@@ -48,8 +52,7 @@ class MapBRAndelSammenligningTidslinje {
                 p.getBeregningsresultatPeriodeFom(),
                 p.getBeregningsresultatPeriodeTom(),
                 p.getBeregningsresultatAndelList()))
-            .collect(Collectors.toList())
-        );
+            .collect(Collectors.toList()));
     }
 
     private static LocalDateSegment<BRAndelSammenligning> combine(LocalDateInterval interval,

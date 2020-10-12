@@ -244,24 +244,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         grunnlagRepository.gjenopprettInitiell(ref.getBehandlingId());
     }
 
-    private Optional<BgRef> finnBeregningsgrunnlagsReferanseFor(Long behandlingId,
-                                                                LocalDate skjæringstidspunkt,
-                                                                boolean kreverEksisterendeReferanse,
-                                                                boolean skalLageNyVedLikSomInitiell) {
-        var resultater = finnBeregningsgrunnlagsReferanseFor(behandlingId, List.of(skjæringstidspunkt), kreverEksisterendeReferanse, skalLageNyVedLikSomInitiell);
-        if (resultater.isEmpty()) {
-            if (kreverEksisterendeReferanse) {
-                throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + skjæringstidspunkt);
-            } else {
-                return Optional.empty();
-            }
-        } else if (resultater.size() == 1) {
-            return Optional.of(resultater.get(0));
-        } else {
-            throw new IllegalStateException("Fikk flere resultater enn angitt: " + resultater + ", for skjæringstidspunkter:" + skjæringstidspunkt);
-        }
-    }
-
     private KalkulusApiTjeneste finnTjeneste(FagsakYtelseType fagsakYtelseType) {
         return FagsakYtelseTypeRef.Lookup.find(kalkulusTjenester, fagsakYtelseType)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke kalkulustjeneste for " + fagsakYtelseType));

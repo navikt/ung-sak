@@ -22,8 +22,8 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 
 public class ErEndringIBeregningsresultatFRISINNTest {
 
-    private BeregningsresultatEntitet orginaltResultat = BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build();
-    private BeregningsresultatEntitet revurderingResultat = BeregningsresultatEntitet.builder().medRegelInput("").medRegelSporing("").build();
+    private BeregningsresultatEntitet orginaltResultat = BeregningsresultatEntitet.builder().medRegelInput("input").medRegelSporing("sporing").build();
+    private BeregningsresultatEntitet revurderingResultat = BeregningsresultatEntitet.builder().medRegelInput("input").medRegelSporing("sporing").build();
 
     @Test
     public void like_perioder_og_dagsats_gir_ikke_ugunst() {
