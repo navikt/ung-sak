@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -221,16 +220,12 @@ public class BeregningsresultatRepositoryImplTest {
     public void lagreBeregningsresultatOgFeriepenger() {
         // Arrange
         BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
-        BeregningsresultatFeriepenger feriepenger = BeregningsresultatFeriepenger.builder()
-            .medFeriepengerRegelInput("-")
-            .medFeriepengerRegelSporing("-")
-            .build(beregningsresultat);
 
         BeregningsresultatAndel andel = beregningsresultat.getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0);
         BeregningsresultatFeriepengerPrÅr.builder()
             .medOpptjeningsår(LocalDate.now().withMonth(12).withDayOfMonth(31))
             .medÅrsbeløp(300L)
-            .build(feriepenger, andel);
+            .buildFor(andel);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -239,16 +234,15 @@ public class BeregningsresultatRepositoryImplTest {
         repository.flushAndClear();
         BeregningsresultatEntitet hentetResultat = repository.hent(BeregningsresultatEntitet.class, beregningsresultat.getId());
         assertThat(hentetResultat).isNotNull();
-        assertThat(hentetResultat.getBeregningsresultatFeriepenger()).isPresent();
-        assertThat(hentetResultat.getBeregningsresultatFeriepenger()).hasValueSatisfying(this::assertFeriepenger);
+        assertThat(hentetResultat.getBeregningsresultatFeriepengerPrÅrListe()).isNotEmpty();
+        assertThat(hentetResultat.getBeregningsresultatFeriepengerPrÅrListe()).allSatisfy(this::assertFeriepenger);
     }
 
-    private void assertFeriepenger(BeregningsresultatFeriepenger hentetFeriepenger) {
-        List<BeregningsresultatFeriepengerPrÅr> prÅrListe = hentetFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
-        assertThat(prÅrListe).hasOnlyOneElementSatisfying(beregningsresultatFeriepengerPrÅr -> {
-            assertThat(beregningsresultatFeriepengerPrÅr.getBeregningsresultatAndel()).isNotNull();
-            assertThat(beregningsresultatFeriepengerPrÅr.getOpptjeningsår()).isNotNull();
-            assertThat(beregningsresultatFeriepengerPrÅr.getÅrsbeløp()).isNotNull();
+    private void assertFeriepenger(BeregningsresultatFeriepengerPrÅr prÅr) {
+        assertThat(prÅr).satisfies(val -> {
+            assertThat(val.getBeregningsresultatAndel()).isNotNull();
+            assertThat(val.getOpptjeningsår()).isNotNull();
+            assertThat(val.getÅrsbeløp()).isNotNull();
         });
     }
 
@@ -320,7 +314,7 @@ public class BeregningsresultatRepositoryImplTest {
             .medStillingsprosent(BigDecimal.valueOf(100))
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
-            .build(beregningsresultatPeriode);
+            .buildFor(beregningsresultatPeriode);
     }
 
     private BeregningsresultatPeriode buildBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat) {

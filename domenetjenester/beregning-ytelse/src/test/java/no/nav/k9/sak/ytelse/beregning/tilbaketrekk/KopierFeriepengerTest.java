@@ -12,7 +12,6 @@ import org.junit.Test;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -29,7 +28,7 @@ public class KopierFeriepengerTest {
         BeregningsresultatPeriode bgBrPeriode = lagBeregningsresultatPeriode(SKJÆRINGSTIDSPUNKT, SLUTTDATO);
         lagAndel(bgBrPeriode, false, 1000);
 
-        BeregningsresultatEntitet utbetTY = lagBeregningsresultatFP();
+        BeregningsresultatEntitet utbetTY = lagBeregningsresultat();
         BeregningsresultatPeriode utbetP0 = BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(SKJÆRINGSTIDSPUNKT, LocalDate.of(2019, Month.JANUARY, 31))
             .build(utbetTY);
@@ -41,13 +40,13 @@ public class KopierFeriepengerTest {
         lagAndel(utbetP1, false, 1000);
 
         // Act
-        KopierFeriepenger.kopier(1L, bgBrPeriode.getBeregningsresultat(), utbetTY);
+        KopierFeriepenger.kopierFraTil(1L, bgBrPeriode.getBeregningsresultat(), utbetTY);
 
         // Assert
-        assertThat(utbetTY.getBeregningsresultatFeriepenger()).isEmpty();
+        assertThat(utbetTY.getBeregningsresultatFeriepengerPrÅrListe()).isEmpty();
     }
 
-    private BeregningsresultatEntitet lagBeregningsresultatFP() {
+    private BeregningsresultatEntitet lagBeregningsresultat() {
         return BeregningsresultatEntitet.builder()
             .medRegelInput("input")
             .medRegelSporing("sporing")
@@ -60,9 +59,11 @@ public class KopierFeriepengerTest {
         BeregningsresultatPeriode bgBrPeriode = lagBeregningsresultatPeriode(SKJÆRINGSTIDSPUNKT, SLUTTDATO);
         BeregningsresultatEntitet bgBeregningsresultatFP = bgBrPeriode.getBeregningsresultat();
         var andel = lagAndel(bgBrPeriode, false, 1000);
-        lagBeregningsresultatFeriepenger(bgBeregningsresultatFP, andel);
+        BeregningsresultatFeriepengerPrÅr.builder().medOpptjeningsår(SKJÆRINGSTIDSPUNKT)
+            .medÅrsbeløp(200L)
+        .buildFor(andel);
 
-        BeregningsresultatEntitet utbetTY = lagBeregningsresultatFP();
+        BeregningsresultatEntitet utbetTY = lagBeregningsresultat();
         BeregningsresultatPeriode utbetP0 = BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(SKJÆRINGSTIDSPUNKT, LocalDate.of(2019, Month.JANUARY, 31))
             .build(utbetTY);
@@ -74,7 +75,7 @@ public class KopierFeriepengerTest {
         lagAndel(utbetP1, false, 1000);
 
         // Act
-        KopierFeriepenger.kopier(1L, bgBeregningsresultatFP, utbetTY);
+        KopierFeriepenger.kopierFraTil(1L, bgBeregningsresultatFP, utbetTY);
 
         // Assert
         List<BeregningsresultatPeriode> beregningsresultatPerioder = utbetTY.getBeregningsresultatPerioder();
@@ -84,28 +85,15 @@ public class KopierFeriepengerTest {
         assertThat(utbetP0Andeler.get(0).getBeregningsresultatFeriepengerPrÅrListe()).isEmpty();
         BeregningsresultatAndel utbetP0AndelArbeidsgiver = utbetP0Andeler.get(1);
         assertThat(utbetP0AndelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1);
-        assertThat(utbetTY.getBeregningsresultatFeriepenger()).isPresent();
-        BeregningsresultatFeriepenger beregningsresultatFeriepenger = utbetTY.getBeregningsresultatFeriepenger().get();
-        assertThat(beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1);
-        assertThat(beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe().get(0)).satisfies(prÅr ->
+        assertThat(utbetTY.getBeregningsresultatFeriepengerPrÅrListe()).isNotEmpty();
+        assertThat(utbetTY.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1);
+        assertThat(utbetTY.getBeregningsresultatFeriepengerPrÅrListe().get(0)).satisfies(prÅr ->
             assertThat(prÅr.getBeregningsresultatAndel()).isSameAs(utbetP0AndelArbeidsgiver)
         );
     }
 
-    private void lagBeregningsresultatFeriepenger(BeregningsresultatEntitet bgBeregningsresultatFP, BeregningsresultatAndel andel) {
-        LocalDate fom = LocalDate.of(2020, 5, 1);
-        var feriepenger = BeregningsresultatFeriepenger.builder()
-            .medFeriepengerRegelInput("input")
-            .medFeriepengerRegelSporing("sporing")
-            .build(bgBeregningsresultatFP);
-        BeregningsresultatFeriepengerPrÅr.builder().medOpptjeningsår(SKJÆRINGSTIDSPUNKT)
-            .medÅrsbeløp(200L)
-        .build(feriepenger, andel);
-
-    }
-
     private BeregningsresultatPeriode lagBeregningsresultatPeriode(LocalDate fom, LocalDate tom) {
-        BeregningsresultatEntitet br = lagBeregningsresultatFP();
+        BeregningsresultatEntitet br = lagBeregningsresultat();
         return BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(fom, tom)
             .build(br);
@@ -120,6 +108,6 @@ public class KopierFeriepengerTest {
             .medDagsatsFraBg(dagsats)
             .medDagsats(dagsats)
             .medArbeidsgiver(ARBEIDSGIVER)
-            .build(brPeriode);
+            .buildFor(brPeriode);
     }
 }

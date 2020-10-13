@@ -93,7 +93,7 @@ public class VurderTilbaketrekkOppdatererTest {
             .medStillingsprosent(BigDecimal.valueOf(100))
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
-            .build(beregningsresultatPeriode);
+            .buildFor(beregningsresultatPeriode);
     }
 
     private BeregningsresultatPeriode buildBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat) {

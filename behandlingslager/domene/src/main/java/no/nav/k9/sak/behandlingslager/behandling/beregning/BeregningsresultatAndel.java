@@ -341,7 +341,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
             return this;
         }
 
-        public BeregningsresultatAndel build(BeregningsresultatPeriode beregningsresultatPeriode) {
+        public BeregningsresultatAndel buildFor(BeregningsresultatPeriode beregningsresultatPeriode) {
             beregningsresultatAndelMal.beregningsresultatPeriode = beregningsresultatPeriode;
             verifyStateForBuild();
             beregningsresultatAndelMal.getBeregningsresultatPeriode().addBeregningsresultatAndel(beregningsresultatAndelMal);

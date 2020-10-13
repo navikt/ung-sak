@@ -305,7 +305,7 @@ public class SjekkOmPerioderInneholderSammeAndelerImplTest {
             .medDagsats(dagsats)
             .medDagsatsFraBg(dagsatsFraBg)
             .medArbeidsforholdType(opptjeningAktivitetType)
-            .build(beregningsresultatPeriode);
+            .buildFor(beregningsresultatPeriode);
     }
 
 }

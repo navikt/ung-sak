@@ -30,11 +30,11 @@ class HindreTilbaketrekkBeregningsresultatPeriode {
                 BeregningsresultatAndel.builder(Kopimaskin.deepCopy(andel))
                     .medDagsats(andel.getDagsats())
                     .medDagsatsFraBg(andel.getDagsatsFraBg())
-                    .build(beregningsresultatPeriode)
+                    .buildFor(beregningsresultatPeriode)
             );
         } else {
             List<BeregningsresultatAndel.Builder> builders = OmfordelUtbetaltYtelseV2.omfordel(forrigeAndeler, bgAndeler);
-            builders.forEach(builder -> builder.build(beregningsresultatPeriode));
+            builders.forEach(builder -> builder.buildFor(beregningsresultatPeriode));
             postcondition(bgDagsats, beregningsresultatPeriode);
         }
         return beregningsresultatPeriode;

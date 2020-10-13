@@ -1,11 +1,9 @@
 
 
 update br_beregningsresultat res
-  set feriepenger_regel_input = f.feriepenger_regel_input,
-      feriepenger_regel_sporing = f.feriepenger_regel_sporing
-      
-  from br_feriepenger f 
-  where f.beregningsresultat_fp_id = res.id
-    and res.feriepenger_regel_input IS NULL
-    
+  set feriepenger_regel_input = null,
+      feriepenger_regel_sporing = null
+      where feriepenger_regel_input is not null or feriepenger_regel_sporing is not null
   ;
+  
+alter table BR_FERIEPENGER_PR_AAR ALTER  column br_feriepenger_id DROP NOT NULL;

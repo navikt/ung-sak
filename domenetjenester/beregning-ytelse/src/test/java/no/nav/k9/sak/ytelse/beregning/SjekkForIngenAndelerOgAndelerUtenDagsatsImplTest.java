@@ -190,7 +190,7 @@ public class SjekkForIngenAndelerOgAndelerUtenDagsatsImplTest {
             .medUtbetalingsgrad(BigDecimal.valueOf(100))
             .medDagsats(dagsats)
             .medDagsatsFraBg(dagsats)
-            .build(beregningsresultatPeriode);
+            .buildFor(beregningsresultatPeriode);
     }
 
 }

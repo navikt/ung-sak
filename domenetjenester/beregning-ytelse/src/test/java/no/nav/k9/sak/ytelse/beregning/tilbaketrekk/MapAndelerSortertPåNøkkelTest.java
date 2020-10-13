@@ -183,7 +183,7 @@ public class MapAndelerSortertPåNøkkelTest {
             .medDagsatsFraBg(900)
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(ref)
-            .build(periode);
+            .buildFor(periode);
     }
 
     private BeregningsresultatPeriode lagResultatMedPeriode() {

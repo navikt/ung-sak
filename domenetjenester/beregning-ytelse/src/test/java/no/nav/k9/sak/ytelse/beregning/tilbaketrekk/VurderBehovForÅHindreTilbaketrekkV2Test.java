@@ -371,7 +371,7 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
             .medArbeidsforholdRef(internRef)
             .medDagsats(dagsats)
             .medDagsatsFraBg(dagsats)
-            .build(brp);
+            .buildFor(brp);
     }
 
 }

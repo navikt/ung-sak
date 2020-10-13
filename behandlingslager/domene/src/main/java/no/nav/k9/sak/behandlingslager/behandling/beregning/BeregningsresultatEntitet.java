@@ -4,12 +4,10 @@ import java.sql.Clob;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
@@ -21,8 +19,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -50,12 +46,6 @@ public class BeregningsresultatEntitet extends BaseEntitet {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultat", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BeregningsresultatPeriode> beregningsresultatPerioder = new ArrayList<>();
-
-    /**
-     * Er egentlig OneToOne, men må mappes slik da JPA/Hibernate ikke støtter OneToOne på annet enn shared PK.
-     */
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultat", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private Set<BeregningsresultatFeriepenger> beregningsresultatFeriepenger = new HashSet<>(1);
 
     @Lob
     @Column(name = "regel_input", nullable = false)
@@ -96,39 +86,53 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return feriepengerRegelInput == null ? null : new RegelData(feriepengerRegelInput);
     }
 
+    public void setFeriepengerRegelInput(String data) {
+        setFeriepengerRegelInput(data == null ? null : new RegelData(data));
+    }
+
+    public void setFeriepengerRegelSporing(String data) {
+        setFeriepengerRegelInput(data == null ? null : new RegelData(data));
+    }
+
+    public void setFeriepengerRegelInput(RegelData data) {
+        if (this.feriepengerRegelInput != null) {
+            throw new IllegalStateException("regelInput allerede satt, kan ikke sette på nytt: " + data);
+        }
+        this.feriepengerRegelInput = data == null ? null : data.getClob();
+    }
+
+    public void setFeriepengerRegelSporing(RegelData data) {
+        if (this.feriepengerRegelSporing != null) {
+            throw new IllegalStateException("regelSporing allerede satt, kan ikke sette på nytt: " + regelInput);
+        }
+        this.feriepengerRegelSporing = data == null ? null : data.getClob();
+    }
+
+    public void setRegelInput(String data) {
+        setRegelInput(data == null ? null : new RegelData(data));
+    }
+
+    public void setRegelSporing(String data) {
+        setRegelSporing(data == null ? null : new RegelData(data));
+    }
+
+    public void setRegelInput(RegelData data) {
+        if (this.regelInput != null) {
+            throw new IllegalStateException("regelInput allerede satt, kan ikke sette på nytt: " + data);
+        }
+        this.regelInput = data == null ? null : data.getClob();
+    }
+
+    public void setRegelSporing(RegelData data) {
+        if (this.regelSporing != null) {
+            throw new IllegalStateException("regelSporing allerede satt, kan ikke sette på nytt: " + regelInput);
+        }
+        this.regelSporing = data == null ? null : data.getClob();
+    }
+
     public RegelData getFeriepengerRegelSporing() {
         return feriepengerRegelSporing == null ? null : new RegelData(feriepengerRegelSporing);
     }
-
-    @PrePersist
-    protected void onBeregningsresultatCreate() {
-        // kun mens vi migrerer
-        if (getBeregningsresultatFeriepenger().isPresent()) {
-            var br = getBeregningsresultatFeriepenger().get();
-            if (feriepengerRegelInput == null) {
-                feriepengerRegelInput = Optional.ofNullable(br.getFeriepengerRegelInput()).map(r -> r.clob).orElseGet(null);
-            }
-            if (feriepengerRegelSporing == null) {
-                feriepengerRegelSporing = Optional.ofNullable(br.getFeriepengerRegelSporing()).map(r -> r.clob).orElseGet(null);
-            }
-        }
-    }
-
-    @PreUpdate
-    protected void onBeregningsresultatUpdate() {
-        // kun mens vi migrerer
-        if (getBeregningsresultatFeriepenger().isPresent()) {
-            var br = getBeregningsresultatFeriepenger().get();
-            if (feriepengerRegelInput == null) {
-                feriepengerRegelInput = Optional.ofNullable(br.getFeriepengerRegelInput()).map(r -> r.clob).orElseGet(null);
-            }
-            if (feriepengerRegelSporing == null) {
-                feriepengerRegelSporing = Optional.ofNullable(br.getFeriepengerRegelSporing()).map(r -> r.clob).orElseGet(null);
-            }
-        }
-
-    }
-
 
     public Optional<LocalDate> getEndringsdato() {
         return Optional.ofNullable(endringsdato);
@@ -139,14 +143,20 @@ public class BeregningsresultatEntitet extends BaseEntitet {
     }
 
     public LocalDateTimeline<List<BeregningsresultatAndel>> getBeregningsresultatAndelTimeline() {
-        var perioder = getBeregningsresultatPerioder().stream()
+        List<BeregningsresultatPeriode> brPerioder = getBeregningsresultatPerioder();
+        var perioder = brPerioder.stream()
             .map(v -> new LocalDateSegment<>(v.getBeregningsresultatPeriodeFom(), v.getBeregningsresultatPeriodeTom(), v.getBeregningsresultatAndelList()))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(perioder);
     }
 
     public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
-        return List.copyOf(getBeregningsresultatAndelTimeline().toSegments().stream()
+        var andelTimeline = getBeregningsresultatAndelTimeline();
+        if (andelTimeline.isEmpty()) {
+            return List.of();
+        }
+
+        return List.copyOf(andelTimeline.toSegments().stream()
             .flatMap(s -> s.getValue().stream())
             .flatMap(a -> a.getBeregningsresultatFeriepengerPrÅrListe().stream())
             .collect(Collectors.toCollection(LinkedHashSet::new)));
@@ -168,13 +178,6 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         }
     }
 
-    public Optional<BeregningsresultatFeriepenger> getBeregningsresultatFeriepenger() {
-        if (this.beregningsresultatFeriepenger.size() > 1) {
-            throw new IllegalStateException("Utviklerfeil: Det finnes flere BeregningsresultatFeriepenger");
-        }
-        return beregningsresultatFeriepenger.isEmpty() ? Optional.empty() : Optional.of(beregningsresultatFeriepenger.iterator().next());
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -193,7 +196,7 @@ public class BeregningsresultatEntitet extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<perioder=" + beregningsresultatPerioder + ", feriepenger=" + beregningsresultatFeriepenger + ">";
+        return getClass().getSimpleName() + "<perioder=" + beregningsresultatPerioder + ">";
     }
 
     public static Builder builder() {
@@ -258,15 +261,6 @@ public class BeregningsresultatEntitet extends BaseEntitet {
 
         public Builder medFeriepengerRegelSporing(RegelData regelSporing) {
             mal.feriepengerRegelSporing = regelSporing == null ? null : regelSporing.clob;
-            return this;
-        }
-
-        public Builder medBeregningsresultatFeriepenger(BeregningsresultatFeriepenger beregningsresultatFeriepenger) {
-            mal.beregningsresultatFeriepenger.clear();
-            mal.beregningsresultatFeriepenger.add(beregningsresultatFeriepenger);
-
-            medFeriepengerRegelInput(beregningsresultatFeriepenger.getFeriepengerRegelInput());
-            medFeriepengerRegelSporing(beregningsresultatFeriepenger.getFeriepengerRegelSporing());
             return this;
         }
 

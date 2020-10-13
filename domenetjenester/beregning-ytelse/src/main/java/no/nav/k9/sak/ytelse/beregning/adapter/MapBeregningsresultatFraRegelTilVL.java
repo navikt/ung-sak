@@ -49,7 +49,7 @@ public class MapBeregningsresultatFraRegelTilVL {
             .medArbeidsforholdRef(bra.getArbeidsforhold() == null
                 ? null : bra.getArbeidsforhold().getArbeidsforholdId())
             .medInntektskategori(InntektskategoriMapper.fraRegelTilVL(bra.getInntektskategori()))
-            .build(brp);
+            .buildFor(brp);
     }
 
     private Arbeidsgiver finnArbeidsgiver(no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel bra) {

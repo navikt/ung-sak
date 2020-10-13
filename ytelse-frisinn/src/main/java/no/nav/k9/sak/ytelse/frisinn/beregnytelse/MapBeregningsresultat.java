@@ -70,7 +70,7 @@ class MapBeregningsresultat {
                 .medAktivitetStatus(a.getAktivitetStatus())
                 .medArbeidsforholdRef(a.getArbeidsforholdRef())
                 .medArbeidsforholdType(a.getArbeidsforholdType())
-                .build(nyPeriode));
+                .buildFor(nyPeriode));
     }
 
 }

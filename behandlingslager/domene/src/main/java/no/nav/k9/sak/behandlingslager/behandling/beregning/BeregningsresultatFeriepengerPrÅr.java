@@ -40,10 +40,6 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
     private long versjon;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "br_feriepenger_id", nullable = false, updatable = false)
-    private BeregningsresultatFeriepenger beregningsresultatFeriepenger;
-
-    @ManyToOne(optional = false)
     @JoinColumn(name = "beregningsresultat_andel_id", nullable = false, updatable = false)
     private BeregningsresultatAndel beregningsresultatAndel;
 
@@ -57,10 +53,6 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
 
     public Long getId() {
         return id;
-    }
-
-    public BeregningsresultatFeriepenger getBeregningsresultatFeriepenger() {
-        return beregningsresultatFeriepenger;
     }
 
     public BeregningsresultatAndel getBeregningsresultatAndel() {
@@ -98,36 +90,33 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
     }
 
     public static class Builder {
-        private BeregningsresultatFeriepengerPrÅr beregningsresultatFeriepengerPrÅrMal;
+        private BeregningsresultatFeriepengerPrÅr mal;
 
         public Builder() {
-            beregningsresultatFeriepengerPrÅrMal = new BeregningsresultatFeriepengerPrÅr();
+            mal = new BeregningsresultatFeriepengerPrÅr();
         }
 
         public Builder medOpptjeningsår(LocalDate opptjeningsår) {
-            beregningsresultatFeriepengerPrÅrMal.opptjeningsår = opptjeningsår;
+            mal.opptjeningsår = opptjeningsår;
             return this;
         }
 
         public Builder medÅrsbeløp(Long årsbeløp) {
-            beregningsresultatFeriepengerPrÅrMal.årsbeløp = new Beløp(BigDecimal.valueOf(årsbeløp));
+            mal.årsbeløp = new Beløp(BigDecimal.valueOf(årsbeløp));
             return this;
         }
 
-        public BeregningsresultatFeriepengerPrÅr build(BeregningsresultatFeriepenger beregningsresultatFeriepenger, BeregningsresultatAndel beregningsresultatAndel) {
-            beregningsresultatFeriepengerPrÅrMal.beregningsresultatFeriepenger = beregningsresultatFeriepenger;
-            BeregningsresultatFeriepenger.builder(beregningsresultatFeriepenger).leggTilBeregningsresultatFeriepengerPrÅr(beregningsresultatFeriepengerPrÅrMal);
-            beregningsresultatFeriepengerPrÅrMal.beregningsresultatAndel = beregningsresultatAndel;
-            BeregningsresultatAndel.builder(beregningsresultatAndel).leggTilBeregningsresultatFeriepengerPrÅr(beregningsresultatFeriepengerPrÅrMal);
+        public BeregningsresultatFeriepengerPrÅr buildFor(BeregningsresultatAndel beregningsresultatAndel) {
+            mal.beregningsresultatAndel = beregningsresultatAndel;
+            BeregningsresultatAndel.builder(beregningsresultatAndel).leggTilBeregningsresultatFeriepengerPrÅr(mal);
             verifyStateForBuild();
-            return beregningsresultatFeriepengerPrÅrMal;
+            return mal;
         }
 
         public void verifyStateForBuild() {
-            Objects.requireNonNull(beregningsresultatFeriepengerPrÅrMal.beregningsresultatFeriepenger, "beregningsresultatFeriepenger");
-            Objects.requireNonNull(beregningsresultatFeriepengerPrÅrMal.beregningsresultatAndel, "beregningsresultatAndel");
-            Objects.requireNonNull(beregningsresultatFeriepengerPrÅrMal.opptjeningsår, "opptjeningsår");
-            Objects.requireNonNull(beregningsresultatFeriepengerPrÅrMal.årsbeløp, "årsbeløp");
+            Objects.requireNonNull(mal.beregningsresultatAndel, "beregningsresultatAndel");
+            Objects.requireNonNull(mal.opptjeningsår, "opptjeningsår");
+            Objects.requireNonNull(mal.årsbeløp, "årsbeløp");
         }
     }
 }
