@@ -86,11 +86,11 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         return feriepengerRegelInput == null ? null : new RegelData(feriepengerRegelInput);
     }
 
-    public void setFeriepengerRegelInput(String data) {
-        setFeriepengerRegelInput(data == null ? null : new RegelData(data));
+    public RegelData getFeriepengerRegelSporing() {
+        return feriepengerRegelSporing == null ? null : new RegelData(feriepengerRegelSporing);
     }
 
-    public void setFeriepengerRegelSporing(String data) {
+    public void setFeriepengerRegelInput(String data) {
         setFeriepengerRegelInput(data == null ? null : new RegelData(data));
     }
 
@@ -99,6 +99,10 @@ public class BeregningsresultatEntitet extends BaseEntitet {
             throw new IllegalStateException("regelInput allerede satt, kan ikke sette på nytt: " + data);
         }
         this.feriepengerRegelInput = data == null ? null : data.getClob();
+    }
+
+    public void setFeriepengerRegelSporing(String data) {
+        setFeriepengerRegelSporing(data == null ? null : new RegelData(data));
     }
 
     public void setFeriepengerRegelSporing(RegelData data) {
@@ -112,10 +116,6 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         setRegelInput(data == null ? null : new RegelData(data));
     }
 
-    public void setRegelSporing(String data) {
-        setRegelSporing(data == null ? null : new RegelData(data));
-    }
-
     public void setRegelInput(RegelData data) {
         if (this.regelInput != null) {
             throw new IllegalStateException("regelInput allerede satt, kan ikke sette på nytt: " + data);
@@ -123,15 +123,15 @@ public class BeregningsresultatEntitet extends BaseEntitet {
         this.regelInput = data == null ? null : data.getClob();
     }
 
-    public void setRegelSporing(RegelData data) {
-        if (this.regelSporing != null) {
-            throw new IllegalStateException("regelSporing allerede satt, kan ikke sette på nytt: " + regelInput);
-        }
-        this.regelSporing = data == null ? null : data.getClob();
+    public void setRegelSporing(String data) {
+        setRegelSporing(data == null ? null : new RegelData(data));
     }
 
-    public RegelData getFeriepengerRegelSporing() {
-        return feriepengerRegelSporing == null ? null : new RegelData(feriepengerRegelSporing);
+    public void setRegelSporing(RegelData data) {
+        if (this.regelSporing != null) {
+            throw new IllegalStateException("regelSporing allerede satt, kan ikke sette på nytt: " + data);
+        }
+        this.regelSporing = data == null ? null : data.getClob();
     }
 
     public Optional<LocalDate> getEndringsdato() {
