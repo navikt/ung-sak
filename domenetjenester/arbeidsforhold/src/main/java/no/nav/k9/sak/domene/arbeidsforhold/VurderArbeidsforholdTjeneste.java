@@ -101,13 +101,18 @@ public class VurderArbeidsforholdTjeneste {
 
         // Ikke relevant å sjekke permisjonen da dette går til avslag ..
         //VurderPermisjonTjeneste.leggTilArbeidsforholdMedRelevantPermisjon(ref, result, iayGrunnlag);
+        erRapportertNormalInntektUtenArbeidsforhold(iayGrunnlag, ref);
         var ytelsespesifikkeInntektsmeldingTjeneste = finnPåkrevdeInntektsmeldingerTjeneste(ref);
         leggTilManglendePåkrevdeInntektsmeldinger(ref, result, ytelsespesifikkeInntektsmeldingTjeneste);
-        erRapportertNormalInntektUtenArbeidsforhold(iayGrunnlag, ref);
         erMottattInntektsmeldingUtenArbeidsforhold(result, ref, ytelsespesifikkeInntektsmeldingTjeneste);
+        erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(result, ref, ytelsespesifikkeInntektsmeldingTjeneste);
 
         return result;
+    }
 
+    private void erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, BehandlingReferanse ref, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
+        var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(ref);
+        resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
     private void leggTilManglendePåkrevdeInntektsmeldinger(BehandlingReferanse ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
