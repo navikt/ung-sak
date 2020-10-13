@@ -10,9 +10,7 @@ import java.util.List;
 import org.junit.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepenger;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
@@ -21,7 +19,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskat
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
-public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
+public class BeregnFeriepengerTjenesteTest {
 
 
     private static final LocalDate STP = LocalDate.now();
@@ -42,13 +40,12 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
             .medBeregningsresultatPerioder(List.of(periode))
             .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
-        BeregningsresultatFeriepenger beregningsresultatFeriepenger = new BeregningsresultatFeriepenger();
 
         // Act
-        MapBeregningsresultatFeriepengerFraRegelTilVL.mapFra(beregningsresultat, regelmodell, beregningsresultatFeriepenger);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
-        List<no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
+        var beregningsresultatFeriepengerPrÅrListe = beregningsresultat.getBeregningsresultatFeriepengerPrÅrListe();
         assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(0);
     }
 
@@ -61,13 +58,12 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
             .medBeregningsresultatPerioder(List.of(periode))
             .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
-        BeregningsresultatFeriepenger beregningsresultatFeriepenger = new BeregningsresultatFeriepenger();
 
         // Act
-        MapBeregningsresultatFeriepengerFraRegelTilVL.mapFra(beregningsresultat, regelmodell, beregningsresultatFeriepenger);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
-        List<no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe = beregningsresultatFeriepenger.getBeregningsresultatFeriepengerPrÅrListe();
+        var beregningsresultatFeriepengerPrÅrListe = beregningsresultat.getBeregningsresultatFeriepengerPrÅrListe();
         assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(1);
     }
 
@@ -89,7 +85,7 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
             .medUtbetalingsgrad(UTBETALINGSGRAD)
             .medAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER)
             .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
-            .medStillingsprosent(BigDecimal.valueOf(100)).build(vlBeregningsresultatPeriode);
+            .medStillingsprosent(BigDecimal.valueOf(100)).buildFor(vlBeregningsresultatPeriode);
         return beregningsresultat;
     }
 

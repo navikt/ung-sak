@@ -41,6 +41,6 @@ public  class LagBeregningsresultatTjeneste {
             .medUtbetalingsgrad(BigDecimal.valueOf(100))
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
-            .build(beregningsresultatPeriode);
+            .buildFor(beregningsresultatPeriode);
     }
 }

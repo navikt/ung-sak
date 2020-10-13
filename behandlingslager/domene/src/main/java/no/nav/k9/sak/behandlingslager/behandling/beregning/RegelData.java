@@ -26,7 +26,7 @@ public class RegelData {
         this.ref.set(str);
     }
 
-    public String asString() {
+    public String asJsonString() {
         var str = ref.get();
         if (str != null && !str.isBlank()) {
             return str; // quick return, deserialisert tidligere
@@ -54,21 +54,30 @@ public class RegelData {
     }
 
     @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<" + asJsonString() + ">";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == this)
             return true;
         if (obj == null || !obj.getClass().equals(this.getClass()))
             return false;
         var other = (RegelData) obj;
-        return Objects.equals(asString(), other.asString());
+        return Objects.equals(asJsonString(), other.asJsonString());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(asString());
+        return Objects.hash(asJsonString());
     }
 
     static Clob createProxy(String input) {
         return input.isEmpty() ? null : ClobProxy.generateProxy(input);
+    }
+
+    public Clob getClob() {
+        return clob;
     }
 }

@@ -395,7 +395,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .medDagsatsFraBg(10)
             .medBrukerErMottaker(true)
-            .build(brPeriode);
+            .buildFor(brPeriode);
         return brPeriode;
     }
 }

@@ -1,5 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregnytelse;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -18,9 +21,6 @@ import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BRAndelSammenligning;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.BeregningsresultatTidslinjetjeneste;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.HindreTilbaketrekkNårAlleredeUtbetalt;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @BehandlingStegRef(kode = "BERYT_OPPDRAG")
 @BehandlingTypeRef("BT-004")
@@ -60,10 +60,11 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
             LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = beregningsresultatTidslinjetjeneste.lagTidslinjeForRevurdering(BehandlingReferanse.fra(behandling));
             BeregningsresultatEntitet utbetBR = hindreTilbaketrekkNårAlleredeUtbetalt.reberegn(revurderingTY, brAndelTidslinje);
 
-            KopierFeriepenger.kopier(behandlingId, revurderingTY, utbetBR);
+            KopierFeriepenger.kopierFraTil(behandlingId, revurderingTY, utbetBR);
 
             beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBR);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
+
 }

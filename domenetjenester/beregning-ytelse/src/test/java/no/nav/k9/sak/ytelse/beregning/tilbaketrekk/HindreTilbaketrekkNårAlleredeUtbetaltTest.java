@@ -331,7 +331,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .medDagsats(dagsats)
             .medDagsatsFraBg(dagsats)
-            .build(brp);
+            .buildFor(brp);
     }
 
 }

@@ -55,11 +55,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1500);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -79,7 +79,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel).isNotSameAs(bgAndeler.get(0));
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isTrue();
@@ -106,11 +106,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -136,11 +136,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(300);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -166,11 +166,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1200);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -196,11 +196,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1300);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -224,7 +224,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -250,11 +250,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(100);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2000);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -281,11 +281,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -312,11 +312,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -342,11 +342,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1000);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -372,11 +372,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1000);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -402,11 +402,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1300);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -432,11 +432,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -462,11 +462,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1300);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -492,11 +492,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(700);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -522,7 +522,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -548,11 +548,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(700);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -578,7 +578,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -600,7 +600,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -626,11 +626,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(500);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -656,11 +656,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(900);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -686,11 +686,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -716,11 +716,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1000);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(400);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -746,7 +746,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -772,11 +772,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1000);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -802,11 +802,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -832,7 +832,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -858,11 +858,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1300);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -888,11 +888,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -918,7 +918,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -944,11 +944,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(200);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -974,7 +974,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1400);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -1000,11 +1000,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1030,11 +1030,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1200);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1060,11 +1060,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1090,11 +1090,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(600);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(800);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1120,11 +1120,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(1800);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(200);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1151,11 +1151,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(0);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1183,7 +1183,7 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2100);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
@@ -1213,11 +1213,11 @@ public class OmfordelUtbetaltYtelseV2Test {
 
         // Assert
         assertThat(resultat).hasSize(2);
-        assertThat(resultat.get(0).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(0).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(2000);
             assertThat(andel.erBrukerMottaker()).isTrue();
         });
-        assertThat(resultat.get(1).build(bgBrPeriode)).satisfies(andel -> {
+        assertThat(resultat.get(1).buildFor(bgBrPeriode)).satisfies(andel -> {
             assertThat(andel.getDagsats()).isEqualTo(100);
             assertThat(andel.erBrukerMottaker()).isFalse();
         });
@@ -1248,7 +1248,7 @@ public class OmfordelUtbetaltYtelseV2Test {
             .medDagsats(dagsats)
             .medArbeidsgiver(ARBEIDSGIVER)
             .medArbeidsforholdRef(ref)
-            .build(bgBrPeriode);
+            .buildFor(bgBrPeriode);
     }
 
 }

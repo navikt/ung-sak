@@ -217,7 +217,7 @@ public class ErEndringIBeregningsresultatFRISINNTest {
             .medDagsatsFraBg(dagsats)
             .medBrukerErMottaker(true)
             .medInntektskategori(Inntektskategori.FRILANSER)
-            .build(periode);
+            .buildFor(periode);
     }
 
 }
