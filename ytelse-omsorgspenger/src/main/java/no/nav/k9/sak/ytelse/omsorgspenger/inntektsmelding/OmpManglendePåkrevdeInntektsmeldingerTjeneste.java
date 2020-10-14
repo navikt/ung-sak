@@ -2,7 +2,9 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
 import static java.util.stream.Collectors.flatMapping;
 
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -25,6 +28,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
@@ -34,6 +39,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements YtelsespesifikkeInntektsmeldingTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(OmpManglendePåkrevdeInntektsmeldingerTjeneste.class);
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BehandlingRepository behandlingRepository;
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
@@ -41,10 +47,12 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     @Inject
     public OmpManglendePåkrevdeInntektsmeldingerTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                          BehandlingRepository behandlingRepository,
+                                                         @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                          TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
     @Override
@@ -89,5 +97,40 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         }
 
         return result;
+    }
+
+    @Override
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(BehandlingReferanse behandlingReferanse) {
+        var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
+        var fraværFraInntektsmeldingerPåFagsak = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandling);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+
+        var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
+        var arbeidsgiverMap = new HashMap<Arbeidsgiver, Set<InternArbeidsforholdRef>>();
+
+        for (DatoIntervallEntitet periode : perioderTilVurdering) {
+
+            fraværFraInntektsmeldingerPåFagsak.stream()
+                .filter(this::erIkkeNullTimer)
+                .filter(it -> it.getAktivitetType().erArbeidstakerEllerFrilans())
+                .filter(it -> periode.overlapper(it.getPeriode()))
+                .forEach(it -> {
+                    var key = it.getArbeidsgiver();
+                    var idSet = arbeidsgiverMap.getOrDefault(key, new HashSet<>());
+                    idSet.add(it.getArbeidsforholdRef());
+                    arbeidsgiverMap.put(key, idSet);
+                });
+        }
+
+         arbeidsgiverMap.entrySet()
+             .stream()
+             .filter(it -> it.getValue().contains(InternArbeidsforholdRef.nullRef()) && it.getValue().size() > 1)
+             .forEach(it -> LeggTilResultat.leggTil(result, AksjonspunktÅrsak.OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE, it.getKey(), it.getValue()));
+
+        return result;
+    }
+
+    private boolean erIkkeNullTimer(no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode it) {
+        return !Duration.ZERO.equals(it.getFraværPerDag());
     }
 }

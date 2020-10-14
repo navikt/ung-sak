@@ -90,6 +90,11 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
         return result;
     }
 
+    @Override
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(BehandlingReferanse ref) {
+        return Map.of();
+    }
+
     private long antallArbeidsfor(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, YrkesaktivitetFilter filter) {
         return filter.getYrkesaktiviteter()
             .stream()
