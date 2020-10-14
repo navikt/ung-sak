@@ -54,8 +54,8 @@ jobs:
 
       - name: Set cache key
         run: |
-          echo "::set-env name=CACHE_KEY::$(date +%U)"
-          echo "::set-env name=TIMESTAMP::$(date +%Y%m%d%H%M%S)"
+          echo "CACHE_KEY=$(expr $(date +%U))" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
 
       - uses: actions/cache@v2
         with:
@@ -70,9 +70,9 @@ jobs:
           # har ikke tilgang til sonarcloud sålenge dette er private repo, kommenterer derfor ut neste linje
           # mvn jacoco:report sonar:sonar -e --batch-mode --file pom.xml -Djacoco.dataFile=$(pwd)/target/jacoco.exec -Dsonar.projectKey="navikt_k9-sak" -Dsonar.host.url='https://sonarcloud.io' -Dsonar.organization=navit -Dsonar.login=${SONAR_TOKEN}
           echo "Deployed artifacts"
-          echo "::set-env name=TAG::$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)"
-          echo "::set-env name=IMAGE::$IMAGE_BASE:$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)"
-          echo "::set-env name=MVN_VERSION::$(mvn help:evaluate -e --batch-mode --file .flattened -Dexpression=project.version -q -DforceStdout)"
+          echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE_BASE:$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          echo "MVN_VERSION=$(mvn help:evaluate -e --batch-mode --file .flattened -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
