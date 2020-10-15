@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -95,6 +96,35 @@ public class AksjonspunktRepository {
             + " where a.aksjonspunkt_status IN (:statuser)";
         List<Behandling> list = em
             .createNativeQuery(sql, Behandling.class)
+            .setParameter("statuser", statusList.stream().map(AksjonspunktStatus::getKode).collect(Collectors.toSet()))
+            .getResultList();
+
+        Map<Behandling, List<Aksjonspunkt>> map = new LinkedHashMap<>();
+        for (Behandling b : list) {
+            if (skipBehandling(b)) {
+                continue;
+            }
+            Set<Aksjonspunkt> aksjonspunkter = b.getAksjonspunkter()
+                .stream()
+                .filter(a -> statusList.contains(a.getStatus()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            map.put(b, List.copyOf(aksjonspunkter));
+        }
+
+        return map;
+    }
+
+    /** Returnerer alle aksjonspunkter og tilknyttede behandlinger som er opprettet innenfor periode. */
+    @SuppressWarnings("unchecked")
+    public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(LocalDate fom, LocalDate tom, AksjonspunktStatus... statuser) {
+        List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
+        String sql = "select distinct b.* from behandling b"
+            + " inner join aksjonspunkt a on a.behandling_id=b.id"
+            + " where a.aksjonspunkt_status IN (:statuser) and a.opprettet_tid between :fom and :tom";
+        List<Behandling> list = em
+            .createNativeQuery(sql, Behandling.class)
+            .setParameter("fom", fom)
+            .setParameter("tom", tom)
             .setParameter("statuser", statusList.stream().map(AksjonspunktStatus::getKode).collect(Collectors.toSet()))
             .getResultList();
 

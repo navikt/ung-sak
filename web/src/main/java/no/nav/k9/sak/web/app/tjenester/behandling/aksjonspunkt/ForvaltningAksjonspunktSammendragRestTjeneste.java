@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +38,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BehandlingAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.k9.søknad.felles.Periode;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -68,15 +70,26 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAksjonspunkter(@QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto,
+    public Response getAksjonspunkter(@QueryParam("saksnummer") @Parameter(description = "Valgfritt saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto,
+                                      @QueryParam("opprettetPeriode") @Parameter(description = "Valgfri periode for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) String opprettetPeriode,
+                                      @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
                                       @Context Request request) { // NOSONAR
+
+        var aksjonspunktStatuser = medUtforte
+            ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
+            : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
+        var periode = opprettetPeriode != null
+            ? new Periode(opprettetPeriode)
+            : null;
 
         Map<Behandling, List<Aksjonspunkt>> map;
         if (saksnummerDto != null) {
             var saksnummer = saksnummerDto.getVerdi();
-            map = aksjonspunktRepository.hentAksjonspunkter(saksnummer, AksjonspunktStatus.OPPRETTET);
+            map = aksjonspunktRepository.hentAksjonspunkter(saksnummer, aksjonspunktStatuser);
+        } else if (opprettetPeriode != null) {
+            map = aksjonspunktRepository.hentAksjonspunkter(periode.fraOgMed, periode.tilOgMed, aksjonspunktStatuser);
         } else {
-            map = aksjonspunktRepository.hentAksjonspunkter(AksjonspunktStatus.OPPRETTET);
+            map = aksjonspunktRepository.hentAksjonspunkter(aksjonspunktStatuser);
         }
 
         CacheControl cc = new CacheControl();
@@ -127,7 +140,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
                 var kl = a.getKanLoses() == null ? "" : a.getKanLoses();
                 var tt = a.getToTrinnsBehandling() == null ? "" : a.getToTrinnsBehandling();
                 var ttg = a.getToTrinnsBehandlingGodkjent() == null ? "" : a.getToTrinnsBehandlingGodkjent();
-                
+
                 Object[] args = new Object[] { yt, sn, fs, uuid, bt, bs, ad, at, vt, as, vå, ft, kl, tt, ttg };
                 String fmt = "%s,".repeat(args.length);
                 var s = String.format(fmt.substring(0, fmt.length() - 1), args);
