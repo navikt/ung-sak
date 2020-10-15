@@ -11,6 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -65,31 +66,20 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = BehandlingAksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON)),
-            @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
+        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = BehandlingAksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON)),
+        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAksjonspunkter(@QueryParam("saksnummer") @Parameter(description = "Valgfritt saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto,
-                                      @QueryParam("opprettetPeriode") @Parameter(description = "Valgfri periode for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) String opprettetPeriode,
-                                      @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
+    public Response getAksjonspunkter(@QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto,
                                       @Context Request request) { // NOSONAR
-
-        var aksjonspunktStatuser = medUtforte
-            ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
-            : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
-        var periode = opprettetPeriode != null
-            ? new Periode(opprettetPeriode)
-            : null;
 
         Map<Behandling, List<Aksjonspunkt>> map;
         if (saksnummerDto != null) {
             var saksnummer = saksnummerDto.getVerdi();
-            map = aksjonspunktRepository.hentAksjonspunkter(saksnummer, aksjonspunktStatuser);
-        } else if (opprettetPeriode != null) {
-            map = aksjonspunktRepository.hentAksjonspunkter(periode.fraOgMed, periode.tilOgMed, aksjonspunktStatuser);
+            map = aksjonspunktRepository.hentAksjonspunkter(saksnummer, AksjonspunktStatus.OPPRETTET);
         } else {
-            map = aksjonspunktRepository.hentAksjonspunkter(aksjonspunktStatuser);
+            map = aksjonspunktRepository.hentAksjonspunkter(AksjonspunktStatus.OPPRETTET);
         }
 
         CacheControl cc = new CacheControl();
@@ -109,6 +99,76 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
         } else {
             return Response.notAcceptable(reqVariants).build();
         }
+    }
+
+    @GET
+    @Path("/sammendrag_periode")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response getAksjonspunkterSammendrag(@QueryParam("opprettetPeriode") @Parameter(description = "Tidsrom for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @NotNull String opprettetPeriode,
+                                      @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
+                                      @Context Request request) { // NOSONAR
+
+        var aksjonspunktStatuser = medUtforte
+            ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
+            : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
+        var periode = new Periode(opprettetPeriode);
+
+        var map = aksjonspunktRepository.hentAksjonspunkter(periode.fraOgMed, periode.tilOgMed, aksjonspunktStatuser);
+
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+        cc.setNoStore(true);
+        cc.setMaxAge(0);
+        cc.setPrivate(true);
+
+        String csv = mapToCsv(map);
+        return Response.ok(csv, TEXT).cacheControl(cc).build();
+    }
+
+    private String mapToCsv(Map<Behandling, List<Aksjonspunkt>> map) {
+        var sb = new StringBuilder(2048);
+
+        // quick and dirt til csv. Kan godt forbedres. Ingen av feltene trenger escaping
+
+        // headere, pass på rekkefølge her!
+        sb.append("ytelseType,saksnummer,fagsakStatus,behandlingUuid,behandlingType,behandlingStatus,"
+            + "aksjonspunktDef,aksjonspunktType,vilkårType,aksjonspunktStatus,venteårsak,fristTid,"
+            + "kanLøses,totrinnsbehandling,opprettetTid,endretTid\n");
+        for (var entry : map.entrySet()) {
+            var b = entry.getKey();
+            var f = b.getFagsak();
+            String yt = f.getYtelseType().getKode();
+            String sn = f.getSaksnummer().getVerdi();
+            String fs = f.getStatus().getKode();
+            String uuid = b.getUuid().toString();
+            String bt = b.getType().getKode();
+            String bs = b.getStatus().getKode();
+
+            for (var a : b.getAksjonspunkter()) {
+                var ad = a.getAksjonspunktDefinisjon().getKode();
+                var at = a.getAksjonspunktDefinisjon().getAksjonspunktType().getKode();
+                var vt = a.getAksjonspunktDefinisjon().getVilkårType() == null || a.getAksjonspunktDefinisjon().getVilkårType() == VilkårType.UDEFINERT ? "" : a.getAksjonspunktDefinisjon().getVilkårType(); // NOSONAR
+                var as = a.getStatus() == null ? "" : a.getStatus().getKode();
+                var vå = a.getVenteårsak() == null || a.getVenteårsak() == Venteårsak.UDEFINERT ? "" : a.getVenteårsak().getKode(); // NOSONAR
+                var ft = a.getFristTid();
+                var kl = AksjonspunktDtoMapper.kanLøses(a.getAksjonspunktDefinisjon(), b) == null ? "" : AksjonspunktDtoMapper.kanLøses(a.getAksjonspunktDefinisjon(), b);
+                var tt = a.isToTrinnsBehandling() || a.getAksjonspunktDefinisjon().getDefaultTotrinnBehandling();
+                var ot = a.getOpprettetTidspunkt();
+                var et = a.getEndretTidspunkt();
+
+                Object[] args = new Object[] { yt, sn, fs, uuid, bt, bs, ad, at, vt, as, vå, ft, kl, tt, ot, et };
+                String fmt = "%s,".repeat(args.length);
+                var s = String.format(fmt.substring(0, fmt.length() - 1), args);
+                sb.append(s).append('\n');
+            }
+        }
+
+        return sb.toString();
     }
 
     private String mapToCsv(List<BehandlingAksjonspunktDto> dtos) {

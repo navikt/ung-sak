@@ -78,7 +78,7 @@ class AksjonspunktDtoMapper {
         return aksjonspunktDefinisjon.getVilkårType();
     }
 
-    private static Boolean kanLøses(AksjonspunktDefinisjon def, Behandling behandling) {
+    public static Boolean kanLøses(AksjonspunktDefinisjon def, Behandling behandling) {
         if (behandling.getBehandlingStegStatus() == null) {
             // Stegstatus ikke satt, kan derfor ikke sette noen aksjonspunkt som løsbart
             return false;
