@@ -109,16 +109,15 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getAksjonspunkterSammendrag(@QueryParam("opprettetPeriode") @Parameter(description = "Tidsrom for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @NotNull String opprettetPeriode,
+    public Response getAksjonspunkterSammendrag(@QueryParam("opprettetPeriode") @Parameter(description = "Tidsrom for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @NotNull Periode opprettetPeriode,
                                       @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
                                       @Context Request request) { // NOSONAR
 
         var aksjonspunktStatuser = medUtforte
             ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
             : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
-        var periode = new Periode(opprettetPeriode);
 
-        var map = aksjonspunktRepository.hentAksjonspunkter(periode.fraOgMed, periode.tilOgMed, aksjonspunktStatuser);
+        var map = aksjonspunktRepository.hentAksjonspunkter(opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed, aksjonspunktStatuser);
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
