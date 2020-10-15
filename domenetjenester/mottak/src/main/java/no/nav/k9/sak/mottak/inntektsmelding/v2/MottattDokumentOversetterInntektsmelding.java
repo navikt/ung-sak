@@ -13,6 +13,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.NaturalytelseKodeliste;
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakInnsendingKodeliste;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
@@ -38,10 +41,13 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.EndringIRefusjonsListe;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.NaturalytelseDetaljer;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Periode;
+import no.seres.xsd.nav.inntektsmelding_m._20181211.Skjemainnhold;
 
 @NamespaceRef(InntektsmeldingConstants.NAMESPACE)
 @ApplicationScoped
 public class MottattDokumentOversetterInntektsmelding implements MottattInntektsmeldingOversetter<MottattDokumentWrapperInntektsmelding> {
+
+    private static final Logger log = LoggerFactory.getLogger(MottattDokumentOversetterInntektsmelding.class);
 
     private static final LocalDate TIDENES_BEGYNNELSE = LocalDate.of(1, Month.JANUARY, 1);
 
@@ -71,7 +77,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     @Override
     public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument) {
-        String aarsakTilInnsending = wrapper.getSkjema().getSkjemainnhold().getAarsakTilInnsending();
+        Skjemainnhold skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
+        String aarsakTilInnsending = skjemainnhold.getAarsakTilInnsending();
         InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
 
@@ -94,10 +101,30 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapArbeidsforholdOgBeløp(wrapper, builder);
         mapNaturalYtelser(wrapper, builder);
         mapFerie(wrapper, builder);
-        mapRefusjon(wrapper, builder);
-        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær()));
-
+        boolean ikkeFravær = markertIkkeFravær(skjemainnhold);
+        if (ikkeFravær) {
+            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), mottattDokument.getJournalpostId());
+        } else {
+            mapRefusjon(wrapper, builder);
+        }
+        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
         return builder;
+    }
+
+    private boolean markertIkkeFravær(Skjemainnhold skjemainnhold) {
+        String begrunnelseForReduksjonIkkeUtbetalt = getBegrunnelseForReduksjonIkkeUtbetalt(skjemainnhold);
+        return "IkkeFravaer".equals(begrunnelseForReduksjonIkkeUtbetalt); // magic constant i IM spesifikasjon
+    }
+
+    private String getBegrunnelseForReduksjonIkkeUtbetalt(Skjemainnhold skjemainnhold) {
+        var sykepenger = skjemainnhold.getSykepengerIArbeidsgiverperioden();
+        if (sykepenger != null && sykepenger.getValue() != null) {
+            var sykepengerIArbeisgiverPerioden = sykepenger.getValue();
+            return sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt() == null ? null
+                : sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt().getValue();
+        } else {
+            return null;
+        }
     }
 
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
@@ -159,7 +186,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 .orElse(Collections.emptyList())
                 .stream()
                 .forEach(eir -> builder.leggTil(
-                    new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()), eir.getEndringsdato().getValue())));
+                    new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()),
+                        eir.getEndringsdato().getValue())));
 
         }
     }
