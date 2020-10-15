@@ -109,7 +109,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         var mottattTidspunkt = LocalDateTime.now();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", mottattTidspunkt);
 
-        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
+        final MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getJournalpostId(),
+            mottattDokument.getPayload());
 
         persisterInntektsmelding(behandling, mottattDokument, wrapper);
 
@@ -132,7 +133,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         final Behandling behandling = opprettBehandling();
         var mottattTidspunkt = LocalDateTime.now();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", mottattTidspunkt);
-        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
+        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getJournalpostId(),
+            mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
 
@@ -167,7 +169,8 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         // Arrange
         final Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, "inntektsmelding.xml", LocalDateTime.now());
-        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
+        MottattDokumentWrapperInntektsmelding wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getJournalpostId(),
+            mottattDokument.getPayload());
 
         MottattDokumentWrapperInntektsmelding wrapperSpied = Mockito.spy(wrapper);
 
@@ -210,7 +213,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
         Behandling behandling = opprettBehandling();
         MottattDokument mottattDokument = opprettDokument(behandling, inntektsmeldingFilnavn, LocalDateTime.now());
 
-        var wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getPayload());
+        var wrapper = (MottattDokumentWrapperInntektsmelding) MottattDokumentXmlParser.unmarshallXml(mottattDokument.getJournalpostId(), mottattDokument.getPayload());
 
         var innhold = oversetter.trekkUtData(wrapper, mottattDokument);
 

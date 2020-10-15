@@ -9,9 +9,10 @@ import java.util.Optional;
 import javax.xml.bind.JAXBElement;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.mottak.inntektsmelding.MapYtelseTypeFraInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.seres.xsd.nav.inntektsmelding_m._201812.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Arbeidsgiver;
@@ -32,8 +33,8 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.UtsettelseAvForeldrepengerLi
 
 public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldingWrapper<InntektsmeldingM> {
 
-    public MottattDokumentWrapperInntektsmelding(InntektsmeldingM skjema) {
-        super(skjema, InntektsmeldingConstants.NAMESPACE);
+    public MottattDokumentWrapperInntektsmelding(JournalpostId journalpostId, InntektsmeldingM skjema) {
+        super(journalpostId, skjema, InntektsmeldingConstants.NAMESPACE);
     }
 
     public FagsakYtelseType getYtelse() {
@@ -61,7 +62,7 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
             return Collections.emptyList();
         }
         var oms = omsorgspenger.get();
-        return new MapOmsorgspengerFravær(oms).getAndeler();
+        return new MapOmsorgspengerFravær(getJournalpostId(), oms).getAndeler();
 
     }
 

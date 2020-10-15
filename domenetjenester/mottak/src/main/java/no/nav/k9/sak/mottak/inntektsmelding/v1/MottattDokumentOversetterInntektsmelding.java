@@ -13,6 +13,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.NaturalytelseKodeliste;
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakInnsendingKodeliste;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
@@ -36,10 +39,13 @@ import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.EndringIRefusjonsListe;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.NaturalytelseDetaljer;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Periode;
+import no.seres.xsd.nav.inntektsmelding_m._20180924.Skjemainnhold;
 
 @NamespaceRef(InntektsmeldingConstants.NAMESPACE)
 @ApplicationScoped
 public class MottattDokumentOversetterInntektsmelding implements MottattInntektsmeldingOversetter<MottattDokumentWrapperInntektsmelding> {
+
+    private static final Logger log = LoggerFactory.getLogger(MottattDokumentOversetterInntektsmelding.class);
 
     private static final LocalDate TIDENES_BEGYNNELSE = LocalDate.of(1, Month.JANUARY, 1);
     private static Map<ÅrsakInnsendingKodeliste, InntektsmeldingInnsendingsårsak> innsendingsårsakMap;
@@ -64,13 +70,15 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     @Override
     public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument) {
-        String aarsakTilInnsending = wrapper.getSkjema().getSkjemainnhold().getAarsakTilInnsending();
+        var skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
+        String aarsakTilInnsending = skjemainnhold.getAarsakTilInnsending();
         InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
 
         InntektsmeldingBuilder builder = InntektsmeldingBuilder.builder();
 
         builder.medYtelse(wrapper.getYtelse());
+
 
         mapInnsendingstidspunkt(mottattDokument, builder);
         builder.medMottattDato(mottattDokument.getMottattDato());
@@ -86,10 +94,30 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapArbeidsforholdOgBeløp(wrapper, builder);
         mapNaturalYtelser(wrapper, builder);
         mapFerie(wrapper, builder);
-        mapRefusjon(wrapper, builder);
-
-        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær()));
+        boolean ikkeFravær = markertIkkeFravær(skjemainnhold);
+        if (ikkeFravær) {
+            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), mottattDokument.getJournalpostId());
+        } else {
+            mapRefusjon(wrapper, builder);
+        }
+        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
         return builder;
+    }
+
+    private boolean markertIkkeFravær(Skjemainnhold skjemainnhold) {
+        String begrunnelseForReduksjonIkkeUtbetalt = getBegrunnelseForReduksjonIkkeUtbetalt(skjemainnhold);
+        return "IkkeFravaer".equals(begrunnelseForReduksjonIkkeUtbetalt); // magic constant i IM spesifikasjon
+    }
+
+    private String getBegrunnelseForReduksjonIkkeUtbetalt(Skjemainnhold skjemainnhold) {
+        var sykepenger = skjemainnhold.getSykepengerIArbeidsgiverperioden();
+        if (sykepenger != null && sykepenger.getValue() != null) {
+            var sykepengerIArbeisgiverPerioden = sykepenger.getValue();
+            return sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt() == null ? null
+                : sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt().getValue();
+        } else {
+            return null;
+        }
     }
 
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {

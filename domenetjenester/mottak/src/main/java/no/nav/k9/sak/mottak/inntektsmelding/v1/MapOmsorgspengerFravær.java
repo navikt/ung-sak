@@ -11,6 +11,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.DelvisFravaer;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.DelvisFravaersListe;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.FravaersPeriodeListe;
@@ -20,8 +21,10 @@ import no.seres.xsd.nav.inntektsmelding_m._20180924.Periode;
 public class MapOmsorgspengerFravær {
 
     private Omsorgspenger omsorgspenger;
+    private JournalpostId journalpostId;
 
-    public MapOmsorgspengerFravær(Omsorgspenger omsorgspenger) {
+    public MapOmsorgspengerFravær(JournalpostId journalpostId, Omsorgspenger omsorgspenger) {
+        this.journalpostId = journalpostId;
         this.omsorgspenger = omsorgspenger;
     }
 
@@ -65,8 +68,8 @@ public class MapOmsorgspengerFravær {
             if (lhs.getValue() == null || rhs.getValue() == null) {
                 return new LocalDateSegment<>(di, null);
             } else {
-                var dur = lhs.getValue().plus(rhs.getValue());
-                return new LocalDateSegment<>(di, dur);
+                // har overlapp - tillater ikke det
+                throw new IllegalArgumentException(String.format("har overlapp mellom fravær og delvisfravær i samme inntektsmelding [journalpostId=%s]: [%s] ∩ [%s]. ", journalpostId, lhs, rhs));
             }
         }
     }

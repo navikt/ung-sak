@@ -7,6 +7,7 @@ import java.util.Map;
 
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingFeil;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.integrasjon.felles.ws.JaxbHelper;
 
 public final class MottattDokumentXmlParser {
@@ -26,7 +27,7 @@ public final class MottattDokumentXmlParser {
     }
 
     @SuppressWarnings("rawtypes")
-    public static MottattInntektsmeldingWrapper unmarshallXml(String xml) {
+    public static MottattInntektsmeldingWrapper unmarshallXml(JournalpostId journalpostId, String xml) {
         final Object mottattDokument;
         final String namespace = hentNamespace(xml);
 
@@ -36,7 +37,7 @@ public final class MottattDokumentXmlParser {
                 throw MottattInntektsmeldingFeil.FACTORY.ukjentNamespace(namespace).toException();
             }
             mottattDokument = JaxbHelper.unmarshalAndValidateXMLWithStAX(dokumentParserKonfig.jaxbClass, xml, dokumentParserKonfig.xsdLocation);
-            return MottattInntektsmeldingWrapper.tilXmlWrapper(mottattDokument);
+            return MottattInntektsmeldingWrapper.tilXmlWrapper(journalpostId, mottattDokument);
         } catch (Exception e) {
             throw MottattInntektsmeldingFeil.FACTORY.uventetFeilVedParsingAvXml(namespace, e).toException();
         }
