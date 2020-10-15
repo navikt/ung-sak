@@ -42,11 +42,9 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
                 .collect(Collectors.toSet());
     }
 
-    private static BeregningsresultatPeriode mapBeregningsresultatPerioder(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode beregningsresultatPerioder) {
-        BeregningsresultatPeriode periode = BeregningsresultatPeriode.builder()
-                .medPeriode(new LocalDateInterval(beregningsresultatPerioder.getBeregningsresultatPeriodeFom(), beregningsresultatPerioder.getBeregningsresultatPeriodeTom()))
-                .build();
-        beregningsresultatPerioder.getBeregningsresultatAndelList().forEach(andel -> mapBeregningsresultatAndel(andel, periode));
+    private static BeregningsresultatPeriode mapBeregningsresultatPerioder(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode perioder) {
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(perioder.getBeregningsresultatPeriodeFom(), perioder.getBeregningsresultatPeriodeTom());
+        perioder.getBeregningsresultatAndelList().forEach(andel -> mapBeregningsresultatAndel(andel, periode));
         return periode;
     }
 

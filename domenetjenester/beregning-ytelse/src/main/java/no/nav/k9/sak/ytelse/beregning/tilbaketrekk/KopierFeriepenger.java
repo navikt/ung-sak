@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAnd
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.typer.Beløp;
 
 public class KopierFeriepenger {
     private KopierFeriepenger() {
@@ -37,15 +39,18 @@ public class KopierFeriepenger {
 
             List<BeregningsresultatAndel> haystack = beregningsresultatPeriode.getBeregningsresultatAndelList();
 
+            BigDecimal feriepengerÅrsbeløp = prÅr.getÅrsbeløp().getVerdi();
             BeregningsresultatAndel utbetAndel = finnKorresponderendeAndel(haystack, bgAndel, bgAndel.erBrukerMottaker())
                 .orElseGet(() -> BeregningsresultatAndel.builder(Kopimaskin.deepCopy(bgAndel) /* FIXME: bytt ut med copy ctor istdf. reflection her. */)
                     .medDagsats(0)
                     .medDagsatsFraBg(0)
+                    .medPeriode(beregningsresultatPeriode.getPeriode())
+                    .medFeriepengerÅrsbeløp(new Beløp(feriepengerÅrsbeløp))
                     .buildFor(beregningsresultatPeriode));
 
             BeregningsresultatFeriepengerPrÅr.builder()
                 .medOpptjeningsår(prÅr.getOpptjeningsår())
-                .medÅrsbeløp(prÅr.getÅrsbeløp().getVerdi().longValue())
+                .medÅrsbeløp(feriepengerÅrsbeløp.longValue())
                 .buildFor(utbetAndel);
         });
     }

@@ -2,11 +2,15 @@ package no.nav.k9.sak.ytelse.beregning.regler;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -72,10 +76,17 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater) {
-        final int[] i = {0}; // Periode-teller til regelsporing
-        return grunnlagTimeline.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
-            BeregningsresultatPeriode resultatPeriode = BeregningsresultatPeriode.builder()
-                .medPeriode(dateInterval).build();
+
+        var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);
+
+        // stopper periodisering her for å unngå 'evigvarende' ekspansjon
+        var maksDato = new TreeSet<>(Set.of(grunnlagTimeline.getMaxLocalDate(), uttakTimeline.getMaxLocalDate(), LocalDate.now().plusYears(1))).first();
+        Period splittPeriode = Period.ofYears(1);
+        var grunnlagTimelinePeriodisertÅr = grunnlagTimeline.splitAtRegular(startFørsteÅr, maksDato, splittPeriode);
+
+        final int[] i = { 0 }; // Periode-teller til regelsporing
+        return grunnlagTimelinePeriodisertÅr.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
+            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval);
 
             // Regelsporing
             String periodeNavn = "BeregningsresultatPeriode[" + i[0] + "]";

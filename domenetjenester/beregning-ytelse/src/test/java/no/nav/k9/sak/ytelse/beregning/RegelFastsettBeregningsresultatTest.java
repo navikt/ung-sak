@@ -34,16 +34,16 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Periode;
 import no.nav.k9.sak.ytelse.beregning.regler.RegelFastsettBeregningsresultat;
 
 public class RegelFastsettBeregningsresultatTest {
-    private static final LocalDate TRE_UKER_FØR_FØDSEL_DT = LocalDate.now().minusWeeks(3);
-    private static final LocalDate FØDSELSDATO = LocalDate.now();
-    private static final LocalDate DAGEN_ETTER_FØDSEL = LocalDate.now().plusDays(1);
-    private static final LocalDate TI_UKER_ETTER_FØDSEL_DT = LocalDate.now().plusWeeks(10);
-    private static final LocalDate FØRTI_SEKS_UKER_ETTER_FØDSEL_DT = LocalDate.now().plusWeeks(46);
-    private static final LocalDateInterval FELLESPERIODE_FØR_FØDSEL = new LocalDateInterval(TRE_UKER_FØR_FØDSEL_DT, FØDSELSDATO);
-    private static final LocalDateInterval MØDREKVOTE_PERIODE = new LocalDateInterval(DAGEN_ETTER_FØDSEL, TI_UKER_ETTER_FØDSEL_DT);
-    private static final LocalDateInterval FELLESPERIODE = new LocalDateInterval(TI_UKER_ETTER_FØDSEL_DT.plusDays(1), FØRTI_SEKS_UKER_ETTER_FØDSEL_DT);
-    private static final LocalDateInterval BG_PERIODE_1 = new LocalDateInterval(TRE_UKER_FØR_FØDSEL_DT, FØDSELSDATO.plusWeeks(4));
-    private static final LocalDateInterval BG_PERIODE_2 = new LocalDateInterval(DAGEN_ETTER_FØDSEL.plusWeeks(4), LocalDate.MAX);
+    private static final LocalDate DT = LocalDate.parse("2020-10-08");
+    private static final LocalDate DT_MINUS_3W = DT.minusWeeks(3);
+    private static final LocalDate DT_PLUS_1D = DT.plusDays(1);
+    private static final LocalDate DT_PLUS_10W = DT.plusWeeks(10);
+    private static final LocalDate DT_PLUS_15W = DT.plusWeeks(15);
+    private static final LocalDateInterval PERIODE_TIL_DT_01 = new LocalDateInterval(DT_MINUS_3W, DT);
+    private static final LocalDateInterval PERIODE_ETTER_DT_01 = new LocalDateInterval(DT_PLUS_1D, DT_PLUS_10W);
+    private static final LocalDateInterval PERIODE_ETTER_DT_02 = new LocalDateInterval(DT_PLUS_10W.plusDays(1), DT_PLUS_15W);
+    private static final LocalDateInterval BG_PERIODE_1 = new LocalDateInterval(DT_MINUS_3W, DT.plusWeeks(4));
+    private static final LocalDateInterval BG_PERIODE_2 = new LocalDateInterval(DT_PLUS_1D.plusWeeks(4), LocalDate.MAX);
     private static final Arbeidsforhold ANONYMT_ARBEIDSFORHOLD = null;
     private static final Arbeidsforhold ARBEIDSFORHOLD_1 = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet("111", "123");
     private static final Arbeidsforhold ARBEIDSFORHOLD_2 = Arbeidsforhold.nyttArbeidsforholdHosVirksomhet("222", "312");
@@ -71,8 +71,8 @@ public class RegelFastsettBeregningsresultatTest {
         List<BeregningsresultatPeriode> perioder = output.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(1);
         BeregningsresultatPeriode periode = perioder.get(0);
-        assertThat(periode.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL);
-        assertThat(periode.getTom()).isEqualTo(TI_UKER_ETTER_FØDSEL_DT);
+        assertThat(periode.getFom()).isEqualTo(DT_PLUS_1D);
+        assertThat(periode.getTom()).isEqualTo(DT_PLUS_10W);
         List<BeregningsresultatAndel> andelList = periode.getBeregningsresultatAndelList();
         assertThat(andelList).hasSize(2);
 
@@ -91,8 +91,8 @@ public class RegelFastsettBeregningsresultatTest {
     public void skalPeriodisereFlereUttaksPerioder() {
         // Arrange
         List<LocalDateInterval> intervalList = List.of(
-            FELLESPERIODE_FØR_FØDSEL,
-            MØDREKVOTE_PERIODE
+            PERIODE_TIL_DT_01,
+            PERIODE_ETTER_DT_01
         );
         BeregningsresultatRegelmodell modell = opprettRegelmodell(intervalList, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER);
         Beregningsresultat output = new Beregningsresultat();
@@ -104,12 +104,12 @@ public class RegelFastsettBeregningsresultatTest {
         List<BeregningsresultatPeriode> perioder = output.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(2);
         BeregningsresultatPeriode periode0 = perioder.get(0);
-        assertThat(periode0.getFom()).isEqualTo(TRE_UKER_FØR_FØDSEL_DT);
-        assertThat(periode0.getTom()).isEqualTo(FØDSELSDATO);
+        assertThat(periode0.getFom()).isEqualTo(DT_MINUS_3W);
+        assertThat(periode0.getTom()).isEqualTo(DT);
 
         BeregningsresultatPeriode periode1 = perioder.get(1);
-        assertThat(periode1.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL);
-        assertThat(periode1.getTom()).isEqualTo(TI_UKER_ETTER_FØDSEL_DT);
+        assertThat(periode1.getFom()).isEqualTo(DT_PLUS_1D);
+        assertThat(periode1.getTom()).isEqualTo(DT_PLUS_10W);
     }
 
     @Test
@@ -129,8 +129,8 @@ public class RegelFastsettBeregningsresultatTest {
         List<BeregningsresultatPeriode> perioder = output.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(1);
         BeregningsresultatPeriode periode = perioder.get(0);
-        assertThat(periode.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL);
-        assertThat(periode.getTom()).isEqualTo(TI_UKER_ETTER_FØDSEL_DT);
+        assertThat(periode.getFom()).isEqualTo(DT_PLUS_1D);
+        assertThat(periode.getTom()).isEqualTo(DT_PLUS_10W);
 
         List<BeregningsresultatAndel> andelList = periode.getBeregningsresultatAndelList();
         assertThat(andelList).hasSize(5);
@@ -164,8 +164,8 @@ public class RegelFastsettBeregningsresultatTest {
         List<BeregningsresultatPeriode> perioder = output.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(1);
         BeregningsresultatPeriode periode = perioder.get(0);
-        assertThat(periode.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL);
-        assertThat(periode.getTom()).isEqualTo(TI_UKER_ETTER_FØDSEL_DT);
+        assertThat(periode.getFom()).isEqualTo(DT_PLUS_1D);
+        assertThat(periode.getTom()).isEqualTo(DT_PLUS_10W);
 
         List<BeregningsresultatAndel> andelList = periode.getBeregningsresultatAndelList();
         assertThat(andelList).hasSize(3);
@@ -192,11 +192,11 @@ public class RegelFastsettBeregningsresultatTest {
 
         // Assert
         List<BeregningsresultatPeriode> perioder = output.getBeregningsresultatPerioder();
-        assertThat(perioder).hasSize(4);
+        assertThat(perioder).hasSize(5);
 
         BeregningsresultatPeriode periode1 = perioder.get(0);
-        assertThat(periode1.getFom()).isEqualTo(TRE_UKER_FØR_FØDSEL_DT);
-        assertThat(periode1.getTom()).isEqualTo(FØDSELSDATO);
+        assertThat(periode1.getFom()).isEqualTo(DT_MINUS_3W);
+        assertThat(periode1.getTom()).isEqualTo(DT);
         assertThat(periode1.getBeregningsresultatAndelList()).hasSize(2);
         assertThat(periode1.getBeregningsresultatAndelList().stream().filter(BeregningsresultatAndel::erBrukerMottaker)
             .collect(Collectors.toList()).get(0).getDagsats()).isEqualTo(1000);
@@ -204,8 +204,8 @@ public class RegelFastsettBeregningsresultatTest {
             .collect(Collectors.toList()).get(0).getDagsats()).isEqualTo(800);
 
         BeregningsresultatPeriode periode2 = perioder.get(1);
-        assertThat(periode2.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL);
-        assertThat(periode2.getTom()).isEqualTo(FØDSELSDATO.plusWeeks(4));
+        assertThat(periode2.getFom()).isEqualTo(DT_PLUS_1D);
+        assertThat(periode2.getTom()).isEqualTo(DT.plusWeeks(4));
         assertThat(periode2.getBeregningsresultatAndelList()).hasSize(2);
         assertThat(periode2.getBeregningsresultatAndelList().stream().filter(BeregningsresultatAndel::erBrukerMottaker)
             .collect(Collectors.toList()).get(0).getDagsats()).isEqualTo(1000);
@@ -213,15 +213,15 @@ public class RegelFastsettBeregningsresultatTest {
             .collect(Collectors.toList()).get(0).getDagsats()).isEqualTo(800);
 
         BeregningsresultatPeriode periode3 = perioder.get(2);
-        assertThat(periode3.getFom()).isEqualTo(DAGEN_ETTER_FØDSEL.plusWeeks(4));
-        assertThat(periode3.getTom()).isEqualTo(MØDREKVOTE_PERIODE.getTomDato());
+        assertThat(periode3.getFom()).isEqualTo(DT_PLUS_1D.plusWeeks(4));
+        assertThat(periode3.getTom()).isEqualTo(PERIODE_ETTER_DT_01.getTomDato());
         assertThat(periode3.getBeregningsresultatAndelList()).hasSize(1);
         assertThat(periode3.getBeregningsresultatAndelList().get(0).getDagsats()).isEqualTo(2000);
         assertThat(periode3.getBeregningsresultatAndelList().get(0).erBrukerMottaker()).isTrue();
 
         BeregningsresultatPeriode periode4 = perioder.get(3);
-        assertThat(periode4.getFom()).isEqualTo(FELLESPERIODE.getFomDato());
-        assertThat(periode4.getTom()).isEqualTo(FELLESPERIODE.getTomDato());
+        assertThat(periode4.getFom()).isEqualTo(PERIODE_ETTER_DT_02.getFomDato());
+        assertThat(periode4.getTom()).isEqualTo(PERIODE_ETTER_DT_02.getFomDato().plusYears(1).withDayOfYear(1).minusDays(1)); // årsslutt
         assertThat(periode4.getBeregningsresultatAndelList()).hasSize(1);
         assertThat(periode4.getBeregningsresultatAndelList().get(0).getDagsats()).isEqualTo(2000);
         assertThat(periode3.getBeregningsresultatAndelList().get(0).erBrukerMottaker()).isTrue();
@@ -259,7 +259,7 @@ public class RegelFastsettBeregningsresultatTest {
 
 
     private BeregningsresultatRegelmodell opprettRegelmodellEnPeriode() {
-        List<LocalDateInterval> perioder = Collections.singletonList(MØDREKVOTE_PERIODE);
+        List<LocalDateInterval> perioder = Collections.singletonList(PERIODE_ETTER_DT_01);
         return opprettRegelmodell(perioder, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER);
     }
 
@@ -272,9 +272,9 @@ public class RegelFastsettBeregningsresultatTest {
     private BeregningsresultatRegelmodell opprettRegelmodellMedFlereBGOgUttakPerioder() {
         Beregningsgrunnlag beregningsgrunnlag = opprettBeregningsgrunnlagForFlerePerioder();
         List<LocalDateInterval> uttakPerioder = List.of(
-            FELLESPERIODE_FØR_FØDSEL,
-            MØDREKVOTE_PERIODE,
-            FELLESPERIODE
+            PERIODE_TIL_DT_01,
+            PERIODE_ETTER_DT_01,
+            PERIODE_ETTER_DT_02
         );
         List<Arbeidsforhold> arbeidsforholdList = List.of(ARBEIDSFORHOLD_1, ARBEIDSFORHOLD_2);
         UttakResultat uttakResultat = opprettUttak(uttakPerioder, AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER, arbeidsforholdList);
@@ -284,7 +284,7 @@ public class RegelFastsettBeregningsresultatTest {
     private BeregningsresultatRegelmodell opprettRegelmodellMedArbeidsforhold(BeregningsgrunnlagPrArbeidsforhold... arbeidsforhold) {
         Beregningsgrunnlag beregningsgrunnlag = opprettBeregningsgrunnlag(arbeidsforhold);
         List<Arbeidsforhold> arbeidsforholdList = Arrays.stream(arbeidsforhold).map(BeregningsgrunnlagPrArbeidsforhold::getArbeidsforhold).collect(Collectors.toList());
-        UttakResultat uttakResultat = opprettUttak(Collections.singletonList(MØDREKVOTE_PERIODE), AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER, arbeidsforholdList);
+        UttakResultat uttakResultat = opprettUttak(Collections.singletonList(PERIODE_ETTER_DT_01), AktivitetStatus.ATFL, UttakArbeidType.ARBEIDSTAKER, arbeidsforholdList);
         return new BeregningsresultatRegelmodell(beregningsgrunnlag, uttakResultat);
     }
 
@@ -309,7 +309,7 @@ public class RegelFastsettBeregningsresultatTest {
 
         BeregningsgrunnlagPrStatus prStatus = prStatusBuilder.build();
         BeregningsgrunnlagPeriode periode = BeregningsgrunnlagPeriode.builder()
-            .medPeriode(Periode.of(TRE_UKER_FØR_FØDSEL_DT, LocalDate.MAX))
+            .medPeriode(Periode.of(DT_MINUS_3W, LocalDate.MAX))
             .medBeregningsgrunnlagPrStatus(prStatus)
             .build();
         return Beregningsgrunnlag.builder()

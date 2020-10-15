@@ -127,7 +127,6 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         sjekk_alle_kolonner_mappet();
     }
 
-    @SuppressWarnings("unchecked")
     private void sjekk_alle_kolonner_mappet() throws Exception {
         for (var namespace : MetadataExtractorIntegrator.INSTANCE
             .getDatabase()
@@ -142,7 +141,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
                     continue;
                 }
                 
-                List<Column> columns = (List<Column>) StreamSupport.stream(
+                List<Column> columns = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(
                         table.getColumnIterator(),
                         Spliterator.ORDERED),

@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Kopimaskin {
         return deepCopy(object, null);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T, P> T deepCopy(T object, P parent) {
         if (object instanceof Collection) {
             Collection collection = (Collection) object;
@@ -48,7 +49,9 @@ public class Kopimaskin {
             ctor.setAccessible(true);
             T newObject = (T) ctor.newInstance();
             for (Field field : objectClass.getDeclaredFields()) {
-                if (COMMON_FIELD_NAMES.contains(field.getName()) || field.getAnnotation(JsonIgnore.class) != null) {
+                if (Modifier.isStatic(field.getModifiers())
+                    || COMMON_FIELD_NAMES.contains(field.getName())
+                    || field.getAnnotation(JsonIgnore.class) != null) {
                     continue;
                 }
                 AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -70,20 +73,19 @@ public class Kopimaskin {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static <T, P> T deepCopyMap(Map map, P parent) {
         Map newMap = new HashMap<>();
         map.keySet().forEach(key -> newMap.put(deepCopy(key, parent), deepCopy(map.get(key), parent)));
         return (T) newMap;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static <T, P> T deepCopyCollection(Collection collection, P parent) {
         Collection newCollection = createNewCollection(collection);
         collection.forEach(element -> newCollection.add(deepCopy(element, parent)));
         return (T) newCollection;
     }
-
 
     private static <V> Collection<V> createNewCollection(Collection<V> collection) {
         if (collection instanceof Set) {
