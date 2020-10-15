@@ -13,6 +13,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.DelvisFravaer;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.DelvisFravaersListe;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.FravaersPeriodeListe;
@@ -22,8 +23,10 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.Periode;
 public class MapOmsorgspengerFravær {
 
     private Omsorgspenger omsorgspenger;
+    private JournalpostId journalpostId;
 
-    public MapOmsorgspengerFravær(Omsorgspenger omsorgspenger) {
+    public MapOmsorgspengerFravær(JournalpostId journalpostId, Omsorgspenger omsorgspenger) {
+        this.journalpostId = journalpostId;
         this.omsorgspenger = omsorgspenger;
     }
 
@@ -66,11 +69,11 @@ public class MapOmsorgspengerFravær {
         } else if (rhs == null && lhs != null) {
             return new LocalDateSegment<>(di, lhs.getValue());
         } else {
-            if (lhs.getValue() == null || rhs.getValue() == null) {
+            if (lhs.getValue() == null && rhs.getValue() == null) {
                 return new LocalDateSegment<>(di, null);
             } else {
-                var dur = lhs.getValue().plus(rhs.getValue());
-                return new LocalDateSegment<>(di, dur);
+                // har overlapp - tillater ikke det
+                throw new IllegalArgumentException(String.format("har overlapp mellom fravær og delvisfravær i samme inntektsmelding [journalpostId=%s]: [%s] ∩ [%s]", journalpostId, lhs, rhs));
             }
         }
     }

@@ -49,7 +49,7 @@ public class InntektsmeldingParser {
     }
 
     public MottattInntektsmeldingWrapper xmlTilWrapper(MottattDokument dokument) {
-        return MottattDokumentXmlParser.unmarshallXml(dokument.getPayload());
+        return MottattDokumentXmlParser.unmarshallXml(dokument.getJournalpostId(), dokument.getPayload());
     }
 
     private MottattInntektsmeldingOversetter<?> getDokumentOversetter(String namespace) {
