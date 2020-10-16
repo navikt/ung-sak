@@ -29,7 +29,7 @@ public class Brevkode implements Kodeverdi {
 
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
     public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
-    public static final Brevkode LEGEERKLÆRING =new Brevkode("LEGEERKLÆRING", "I000023");
+    public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023");
     public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02");
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null);
@@ -77,6 +77,26 @@ public class Brevkode implements Kodeverdi {
             }
         }
         return ad;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || !getClass().equals(obj.getClass()))
+            return false;
+        var other = (Brevkode) obj;
+        return Objects.equals(kode, other.kode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(kode);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<kode=" + kode + ">";
     }
 
     public static Brevkode finnForKodeverkEiersKode(String offisiellDokumentType) {
