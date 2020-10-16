@@ -69,7 +69,7 @@ public class Brevkode implements Kodeverdi {
         var ad = KODER.get(kode);
 
         if (ad == null) {
-            // midlertidig fallback til vi endrer til offisille kodeverdier
+            // midlertidig fallback til vi endrer til offisielle kodeverdier
             ad = finnForKodeverkEiersKode(kode);
             if (ad == null) {
                 // returnerer ny kode hvis ikke finnes blant offisielt registrete kodeverdier
@@ -99,7 +99,7 @@ public class Brevkode implements Kodeverdi {
         return getClass().getSimpleName() + "<kode=" + kode + ">";
     }
 
-    public static Brevkode finnForKodeverkEiersKode(String offisiellDokumentType) {
+    private static Brevkode finnForKodeverkEiersKode(String offisiellDokumentType) {
         if (offisiellDokumentType == null || offisiellDokumentType.isBlank())
             return Brevkode.UDEFINERT;
 
@@ -107,7 +107,7 @@ public class Brevkode implements Kodeverdi {
         if (dokId.isPresent()) {
             return dokId.get();
         } else {
-            throw new IllegalArgumentException("Ukjent offisiellDokumentType: " + offisiellDokumentType);
+            return new Brevkode(offisiellDokumentType);
         }
     }
 

@@ -190,8 +190,9 @@ public class DokumentArkivTjeneste {
     private Brevkode finnBrevKodeFraKodeverk(String brevkodeVerdi) {
         Brevkode brevKode;
         try {
-            brevKode = Brevkode.finnForKodeverkEiersKode(brevkodeVerdi);
+            brevKode = Brevkode.fraKode(brevkodeVerdi);
         } catch (Exception e) {
+            LOG.warn("Fant ikke brevkode", e);
             brevKode = Brevkode.UDEFINERT;
         }
         return brevKode;
