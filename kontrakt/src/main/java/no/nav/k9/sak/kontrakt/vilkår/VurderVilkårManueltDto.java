@@ -26,7 +26,7 @@ public class VurderVilkårManueltDto extends BekreftetAksjonspunktDto {
     @Size(max = 4000)
     @NotNull
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    String fritekst;
+    private String fritekst;
 
     @JsonProperty(value = "behandlingResultatType")
     @Valid

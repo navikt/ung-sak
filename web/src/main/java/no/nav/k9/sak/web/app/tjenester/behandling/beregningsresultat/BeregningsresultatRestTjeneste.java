@@ -29,7 +29,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
-import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -51,7 +50,6 @@ public class BeregningsresultatRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatTjeneste beregningsresultatTjeneste;
-    private TilkjentYtelseTjeneste tilkjentYtelseTjeneste;
 
     public BeregningsresultatRestTjeneste() {
         // for resteasy
@@ -59,11 +57,9 @@ public class BeregningsresultatRestTjeneste {
 
     @Inject
     public BeregningsresultatRestTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                          BeregningsresultatTjeneste beregningsresultatMedUttaksplanTjeneste,
-                                          TilkjentYtelseTjeneste tilkjentYtelseTjeneste) {
+                                          BeregningsresultatTjeneste beregningsresultatMedUttaksplanTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatTjeneste = beregningsresultatMedUttaksplanTjeneste;
-        this.tilkjentYtelseTjeneste = tilkjentYtelseTjeneste;
     }
 
     // FIXME K9 Erstatt denne tjenesten
@@ -141,15 +137,5 @@ public class BeregningsresultatRestTjeneste {
     public BeregningsresultatMedUtbetaltePeriodeDto hentBeregningsresultatMedUtbetaling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return beregningsresultatTjeneste.lagBeregningsresultatMedUtbetaltePerioder(behandling).orElse(null);
-    }
-
-    @GET
-    @Path(TILKJENT_YTELSE)
-    @Operation(description = "Hent tilkjent ytelse for foreldrepenger behandling", summary = ("Returnerer beregningsresultat med uttaksplan for behandling."), tags = "beregningsresultat")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public TilkjentYtelseDto hentTilkjentYtelse(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return tilkjentYtelseTjeneste.hentilkjentYtelse(behandling);
     }
 }

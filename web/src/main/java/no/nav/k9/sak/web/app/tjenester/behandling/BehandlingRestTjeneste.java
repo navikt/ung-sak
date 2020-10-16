@@ -387,9 +387,8 @@ public class BehandlingRestTjeneste {
             throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
         }
 
-        Fagsak fagsak = funnetFagsak.get();
-
         if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode)) {
+            Fagsak fagsak = funnetFagsak.get();
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);

@@ -32,9 +32,8 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_OMS);
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
-            /*BehandlingStegType.INIT_PERIODER,
-            BehandlingStegType.INIT_VILKÅR,*/
             BehandlingStegType.INNHENT_REGISTEROPP,
+            BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.MANUELL_VILKÅRSVURDERING,
             BehandlingStegType.MANUELL_TILKJENNING_YTELSE,
             BehandlingStegType.SIMULER_OPPDRAG,
@@ -52,9 +51,8 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_FRISINN);
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
-            BehandlingStegType.INIT_PERIODER,
-            BehandlingStegType.INIT_VILKÅR,
             BehandlingStegType.INNHENT_REGISTEROPP,
+            BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.MANUELL_VILKÅRSVURDERING,
             BehandlingStegType.MANUELL_TILKJENNING_YTELSE,
             BehandlingStegType.SIMULER_OPPDRAG,
@@ -72,9 +70,8 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_PSB);
         modellBuilder.medSteg(
             BehandlingStegType.START_STEG,
-            BehandlingStegType.INIT_PERIODER,
-            BehandlingStegType.INIT_VILKÅR,
             BehandlingStegType.INNHENT_REGISTEROPP,
+            BehandlingStegType.KONTROLLER_FAKTA,
             BehandlingStegType.MANUELL_VILKÅRSVURDERING,
             BehandlingStegType.MANUELL_TILKJENNING_YTELSE,
             BehandlingStegType.SIMULER_OPPDRAG,
