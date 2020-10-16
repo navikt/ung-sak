@@ -7,6 +7,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -36,10 +37,11 @@ public class StartpunktTjenesteImpl implements StartpunktTjeneste {
     public StartpunktType utledStartpunktForDiffBehandlingsgrunnlag(BehandlingReferanse revurdering, EndringsresultatDiff differanse) {
         var behandling = behandlingRepository.hentBehandling(revurdering.getBehandlingId());
         var fagsakYtelseType = behandling.getFagsakYtelseType();
+        var behandlingType = behandling.getType();
 
         StartpunktType startpunktType = differanse.hentKunDelresultater().stream()
             .map(diff -> {
-                var utleder = finnUtleder(diff.getGrunnlag(), fagsakYtelseType);
+                var utleder = finnUtleder(diff.getGrunnlag(), fagsakYtelseType, behandlingType);
                 return utleder.erBehovForStartpunktUtledning(diff) ? utleder.utledStartpunkt(revurdering, diff.getGrunnlagId1(), diff.getGrunnlagId2()) : StartpunktType.UDEFINERT;
             })
             .min(Comparator.comparing(StartpunktType::getRangering))
@@ -47,8 +49,8 @@ public class StartpunktTjenesteImpl implements StartpunktTjeneste {
         return startpunktType;
     }
 
-    private StartpunktUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType fagsakYtelseType) {
-        return GrunnlagRef.Lookup.find(StartpunktUtleder.class, fagsakYtelseType, utledere, aggregat).orElseThrow();
+    private StartpunktUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
+        return GrunnlagRef.Lookup.find(StartpunktUtleder.class, fagsakYtelseType, behandlingType, utledere, aggregat).orElseThrow();
     }
 
 }

@@ -22,6 +22,7 @@
 		<module>ytelse-omsorgspenger</module>
 		<module>ytelse-pleiepengerbarn</module>
 		<module>ytelse-frisinn</module>
+		<module>ytelse-unntaksbehandling</module>
 
 		<!-- Web klient og server -->
 		<module>web</module>
@@ -330,6 +331,11 @@
 			<dependency>
 				<groupId>no.nav.k9.sak.ytelse</groupId>
 				<artifactId>ytelse-pleiepengerbarn</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+            <dependency>
+				<groupId>no.nav.k9.sak.ytelse</groupId>
+				<artifactId>ytelse-unntaksbehandling</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

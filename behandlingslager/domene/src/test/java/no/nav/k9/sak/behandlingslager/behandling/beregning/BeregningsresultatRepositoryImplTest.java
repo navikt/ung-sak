@@ -41,7 +41,7 @@ public class BeregningsresultatRepositoryImplTest {
     private AktørId aktørId;
 
     private final BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
-    
+
     @Before
     public void setup() {
         aktørId = AktørId.dummy();
@@ -51,7 +51,7 @@ public class BeregningsresultatRepositoryImplTest {
     private Behandling opprettBehandling() {
         return behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
     }
-    
+
     @Test
     public void lagreOgHentBeregningsresultatAggregat() {
         // Arrange
@@ -112,7 +112,7 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
 
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
     }
@@ -295,7 +295,7 @@ public class BeregningsresultatRepositoryImplTest {
         BeregningsresultatAndel hentetBRAndel = repoRule.getEntityManager().find(BeregningsresultatAndel.class, beregningsresultatAndel.getId());
         assertThat(hentetBRAndel).isNotNull();
 
-        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         Optional<BehandlingBeregningsresultatEntitet> deaktivertKobling = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(deaktivertBeregningsresultat).isNotPresent();
         assertThat(deaktivertKobling).isNotPresent();

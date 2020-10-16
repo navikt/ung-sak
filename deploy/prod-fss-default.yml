@@ -197,6 +197,8 @@ spec:
       value: "true"
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+  - name: UNNTAKSBEHANDLING
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

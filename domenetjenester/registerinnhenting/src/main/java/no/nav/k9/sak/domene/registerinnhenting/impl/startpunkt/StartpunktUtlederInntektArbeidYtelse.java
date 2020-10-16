@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
 class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 

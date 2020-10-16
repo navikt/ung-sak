@@ -39,11 +39,10 @@ public class RevurderingTjenesteFelles {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
-    public Behandling opprettRevurderingsbehandling(BehandlingÅrsakType revurderingÅrsakType,
+    public Behandling opprettRevurderingsbehandling(BehandlingType behandlingType, BehandlingÅrsakType revurderingÅrsakType,
                                                     Behandling opprinneligBehandling,
                                                     boolean manueltOpprettet,
                                                     OrganisasjonsEnhet enhet) {
-        BehandlingType behandlingType = BehandlingType.REVURDERING;
         BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(revurderingÅrsakType)
             .medManueltOpprettet(manueltOpprettet);
         Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)

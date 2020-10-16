@@ -69,6 +69,7 @@ import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.felles.jpa.TomtResultatException;
+import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -82,6 +83,7 @@ public class BehandlingRestTjeneste {
     public static final String BEHANDLING_PATH = "/behandling";
     public static final String BEHANDLINGER_ALLE = "/behandlinger/alle";
     public static final String BEHANDLINGER_PATH = "/behandlinger";
+    public static final String BEHANDLINGER_UNNTAK_PATH = "/behandlinger/unntak";
     public static final String BEHANDLINGER_STATUS = "/behandlinger/status";
     public static final String FAGSAK_BEHANDLING_PATH = "/fagsak/behandling";
     public static final String REVURDERING_ORGINAL_PATH = "/behandling/revurdering-original";
@@ -100,6 +102,7 @@ public class BehandlingRestTjeneste {
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
+    private Boolean unntaksbehandlingTogglet;
 
     public BehandlingRestTjeneste() {
         // for resteasy
@@ -112,7 +115,8 @@ public class BehandlingRestTjeneste {
                                   FagsakTjeneste fagsakTjeneste,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
-                                  SjekkProsessering sjekkProsessering) {
+                                  SjekkProsessering sjekkProsessering,
+                                  @KonfigVerdi(value = "UNNTAKSBEHANDLING", defaultVerdi = "true") Boolean unntaksbehandlingTogglet) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
@@ -120,6 +124,7 @@ public class BehandlingRestTjeneste {
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
         this.sjekkProsessering = sjekkProsessering;
+        this.unntaksbehandlingTogglet = unntaksbehandlingTogglet;
     }
 
     @POST
@@ -358,6 +363,40 @@ public class BehandlingRestTjeneste {
             // return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + kode);
+        }
+
+    }
+
+    @PUT
+    @Path(BEHANDLINGER_UNNTAK_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Opprette ny unntaksbehandling", tags = "behandlinger", responses = {
+            @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
+    })
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response opprettNyUnntakskehandling(@Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto) {
+        if (!unntaksbehandlingTogglet) {
+            throw new UnsupportedOperationException("Unntaksbehandling er ikke aktivert");
+        }
+        Saksnummer saksnummer = dto.getSaksnummer();
+        Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+        String kode = dto.getBehandlingType().getKode();
+
+        if (funnetFagsak.isEmpty()) {
+            throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
+        }
+
+        Fagsak fagsak = funnetFagsak.get();
+
+        if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode)) {
+            BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
+            Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
+            String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
+            return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
+
+        } else {
+            throw new IllegalArgumentException("Støtter ikke opprette ny unntaksbehandling for behandlingType:" + kode);
         }
 
     }

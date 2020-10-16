@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
-class FellesStartpunktUtlederLogger {
+public class FellesStartpunktUtlederLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FellesStartpunktUtlederLogger.class);
 
@@ -15,7 +15,7 @@ class FellesStartpunktUtlederLogger {
         // For CDI
     }
 
-    static void loggEndringSomFørteTilStartpunkt(String klasseNavn, StartpunktType startpunkt, String endring, Object id1, Object id2) {
+    public static void loggEndringSomFørteTilStartpunkt(String klasseNavn, StartpunktType startpunkt, String endring, Object id1, Object id2) {
         skrivLoggMedStartpunkt(klasseNavn, startpunkt, endring, id1.toString(), id2.toString());
     }
 

@@ -1,13 +1,17 @@
 package no.nav.k9.sak.behandling.revurdering;
 
+import java.util.Objects;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -15,8 +19,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @ApplicationScoped
-public class RevurderingTjeneste {
+public class RevurderingTjeneste implements NyBehandlingTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
@@ -35,7 +40,9 @@ public class RevurderingTjeneste {
         this.grunnlagKopierere = grunnlagKopierere;
     }
 
-    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+    @Override
+    public Behandling opprettManuellRevurdering(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+        Objects.requireNonNull(origBehandling, "origBehandling");
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
@@ -59,7 +66,7 @@ public class RevurderingTjeneste {
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
         // Opprett revurderingsbehandling
-        Behandling revurdering = revurderingTjenesteFelles.opprettRevurderingsbehandling(revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
+        Behandling revurdering = revurderingTjenesteFelles.opprettRevurderingsbehandling(BehandlingType.REVURDERING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
 
@@ -73,6 +80,7 @@ public class RevurderingTjeneste {
         getGrunnlagKopierer(original.getFagsakYtelseType()).kopierGrunnlagVedManuellOpprettelse(original, ny);
     }
 
+    @Override
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
         return revurderingTjenesteFelles.kanRevurderingOpprettes(fagsak);
     }

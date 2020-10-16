@@ -4,13 +4,18 @@ import static no.nav.vedtak.feil.LogLevel.ERROR;
 import static no.nav.vedtak.feil.LogLevel.INFO;
 
 import java.util.Objects;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -49,16 +54,37 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         Boolean kanRevurderingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
+        // TODO: Også guarde mot at revurdering ikke kan opprettes dersom siste behandling er manuell behandling
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
 
-        // TODO (essv): Behandling til revurdering skal mottas fra GUI, ikke utledes backend
         Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
 
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet);
+        return revurderingTjeneste.opprettManuellRevurdering(fagsak, origBehandling, behandlingÅrsakType, enhet);
+    }
+
+    public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+        NyBehandlingTjeneste revurderingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
+        Boolean kanUnntaksbehandlingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
+        // TODO: Egen guard for manuell behandling
+        if (!kanUnntaksbehandlingOpprettes) {
+            throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
+        }
+
+        Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
+            .orElse(null);
+
+        OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        return revurderingTjeneste.opprettManuellRevurdering(fagsak, origBehandling, behandlingÅrsakType, enhet);
+    }
+
+    private NyBehandlingTjeneste getRevurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(NyBehandlingTjeneste.class, ytelseType, behandlingType)
+            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + NyBehandlingTjeneste.class.getSimpleName() +
+                " for ytelsetype " + ytelseType + " , behandlingstype " + behandlingType));
     }
 
     interface BehandlingsoppretterApplikasjonTjenesteFeil extends DeklarerteFeil {
@@ -66,6 +92,9 @@ public class BehandlingsoppretterApplikasjonTjeneste {
 
         @FunksjonellFeil(feilkode = "FP-663487", feilmelding = "Fagsak med saksnummer %s oppfyller ikke kravene for revurdering", løsningsforslag = "", logLevel = INFO)
         Feil kanIkkeOppretteRevurdering(Saksnummer saksnummer);
+
+        @FunksjonellFeil(feilkode = "FP-407002", feilmelding = "Fagsak med saksnummer %s oppfyller ikke kravene for unntaksbehandling", løsningsforslag = "", logLevel = INFO)
+        Feil kanIkkeOppretteUnntaksbehandling(Saksnummer saksnummer);
 
         @FunksjonellFeil(feilkode = "FP-909861", feilmelding = "Det eksisterer allerede en åpen ytelsesbehandling eller det eksisterer ingen avsluttede behandlinger for fagsakId %s", løsningsforslag = "", logLevel = ERROR)
         Feil kanIkkeOppretteNyFørstegangsbehandling(Long fagsakId);

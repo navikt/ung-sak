@@ -26,12 +26,28 @@ public class BehandlingBeregningsresultatBuilder {
     }
 
     public BehandlingBeregningsresultatBuilder medBgBeregningsresultat(BeregningsresultatEntitet beregningsresultat) {
+        if (kladd.getOverstyrtBeregningsresultat() != null) {
+            throw new IllegalStateException("Utviklerfeil: Er ikke lov å endre beregnet dersom overstyrt!");
+        }
         kladd.setBgBeregningsresultatFP(beregningsresultat);
         return this;
     }
 
     public BehandlingBeregningsresultatBuilder medUtbetBeregningsresultat(BeregningsresultatEntitet beregningsresultat) {
         kladd.setUtbetBeregningsresultatFP(beregningsresultat);
+        return this;
+    }
+
+    public BehandlingBeregningsresultatBuilder medOverstyrtBeregningsresultat(BeregningsresultatEntitet overstyrtBeregningsresultat) {
+        if (kladd.getBgBeregningsresultat() == null) {
+            // Sett tom verdi for beregnet resultat. Kan ikke oppdateres senere når først overstyrt.
+            var bgBeregningsresultat = BeregningsresultatEntitet.builder()
+                .medRegelInput(overstyrtBeregningsresultat.getRegelInput())
+                .medRegelSporing(overstyrtBeregningsresultat.getRegelSporing())
+                .build();
+            kladd.setBgBeregningsresultatFP(bgBeregningsresultat);
+        }
+        kladd.setOverstyrtBeregningsresultatFP(overstyrtBeregningsresultat);
         return this;
     }
 
@@ -49,11 +65,11 @@ public class BehandlingBeregningsresultatBuilder {
         kladd.setBehandling(behandling.getId());
         return kladd;
     }
-    
+
     public BehandlingBeregningsresultatEntitet build(Long behandlingId) {
         Objects.requireNonNull(behandlingId);
         kladd.setBehandling(behandlingId);
         return kladd;
     }
-    
+
 }

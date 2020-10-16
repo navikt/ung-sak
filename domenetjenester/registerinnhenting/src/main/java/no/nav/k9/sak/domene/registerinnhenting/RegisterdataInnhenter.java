@@ -38,7 +38,7 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -446,7 +446,7 @@ public class RegisterdataInnhenter {
     }
 
     private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(utledInformasjonselementer, fagsakYtelseType).map(utleder -> utleder.utled(behandlingType))
+        return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, utledInformasjonselementer, fagsakYtelseType, behandlingType).map(utleder -> utleder.utled(behandlingType))
             .orElse(FILTER.get(behandlingType));
     }
 }

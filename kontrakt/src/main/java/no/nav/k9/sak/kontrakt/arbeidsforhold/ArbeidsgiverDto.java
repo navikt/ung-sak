@@ -32,9 +32,9 @@ public class ArbeidsgiverDto {
     private String navn;
 
     @JsonCreator
-    public ArbeidsgiverDto(@Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String identifikator,
-                           @Size(max = 100) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String identifikatorGUI,
-                           String navn) {
+    public ArbeidsgiverDto(@Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") @JsonProperty(value = "identifikator") String identifikator,
+                           @Size(max = 100) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")     @JsonProperty(value = "identifikatorGUI")  String identifikatorGUI,
+                           @JsonProperty(value = "navn") String navn) {
         this.identifikator = identifikator;
         this.identifikatorGUI = identifikatorGUI;
         this.navn = navn;
