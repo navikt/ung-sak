@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.vladmihalcea.hibernate.type.range.Range;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -96,12 +97,8 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatAndel", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "fom")),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "tom"))
-    })
-    private DatoIntervallEntitet periode;
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "verdi", column = @Column(name = "feriepenger_beloep")))
@@ -125,10 +122,11 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @PrePersist
     protected void onCreateMigrate() {
         if (this.periode == null) {
-            this.periode = getBeregningsresultatPeriode().getPeriode();
-            if (periode.getFomDato().getYear() != periode.getTomDato().getYear()) {
-                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", periode));
+            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
+                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
             }
+            this.periode = datoIntervall.toRange();
         }
 
         if (this.beregningsresultat == null) {
@@ -145,10 +143,11 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @PreUpdate
     protected void onUpdateMigrate() {
         if (this.periode == null) {
-            this.periode = getBeregningsresultatPeriode().getPeriode();
-            if (periode.getFomDato().getYear() != periode.getTomDato().getYear()) {
-                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %", periode));
+            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
+                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
             }
+            this.periode = datoIntervall.toRange();
         }
         if (this.beregningsresultat == null) {
             this.beregningsresultat = getBeregningsresultatPeriode().getBeregningsresultat();
@@ -240,7 +239,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
     }
 
     public DatoIntervallEntitet getPeriode() {
-        return beregningsresultatPeriode.getPeriode();
+        return this.periode != null ? DatoIntervallEntitet.fra(periode) : beregningsresultatPeriode.getPeriode();
     }
 
     public LocalDate getFom() {
@@ -390,7 +389,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
             if (periode.getFomDato().getYear() != periode.getTomDato().getYear()) {
                 throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", periode));
             }
-            mal.periode = periode;
+            mal.periode = periode.toRange();
             return this;
         }
 
@@ -434,7 +433,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
         public BeregningsresultatAndel buildFor(BeregningsresultatPeriode beregningsresultatPeriode) {
             mal.beregningsresultatPeriode = beregningsresultatPeriode;
-            mal.periode = beregningsresultatPeriode.getPeriode();
+            mal.periode = beregningsresultatPeriode.getPeriode().toRange();
             mal.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
             verifyStateForBuild();
             mal.getBeregningsresultatPeriode().addBeregningsresultatAndel(mal);

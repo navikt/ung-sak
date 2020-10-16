@@ -60,7 +60,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     private BeregningsresultatEntitet beregningsresultat;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    @OrderBy("periode.fomDato, periode.tomDato, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
+    @OrderBy("periode, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
 
     @Embedded
