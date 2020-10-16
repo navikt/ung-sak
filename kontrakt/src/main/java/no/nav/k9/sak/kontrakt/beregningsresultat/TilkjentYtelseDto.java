@@ -1,6 +1,5 @@
 package no.nav.k9.sak.kontrakt.beregningsresultat;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,41 +22,20 @@ public class TilkjentYtelseDto {
     @Valid
     private List<TilkjentYtelsePeriodeDto> perioder;
 
-    private TilkjentYtelseDto(Builder builder) {
-        this.perioder = List.copyOf(builder.perioder);
-    }
 
-    protected TilkjentYtelseDto() {
+    private TilkjentYtelseDto() {
         //
     }
 
-    public static Builder build() {
-        return new Builder();
+    public TilkjentYtelseDto(List<TilkjentYtelsePeriodeDto> perioder) {
+        this.perioder = perioder;
     }
 
     public List<TilkjentYtelsePeriodeDto> getPerioder() {
         return Collections.unmodifiableList(perioder);
     }
 
-
     public void setPerioder(List<TilkjentYtelsePeriodeDto> perioder) {
         this.perioder = List.copyOf(perioder);
-    }
-
-    public static class Builder {
-        private List<TilkjentYtelsePeriodeDto> perioder;
-
-        private Builder() {
-            perioder = new ArrayList<>();
-        }
-
-        public TilkjentYtelseDto create() {
-            return new TilkjentYtelseDto(this);
-        }
-
-        public Builder medPerioder(List<TilkjentYtelsePeriodeDto> perioder) {
-            this.perioder = perioder;
-            return this;
-        }
     }
 }

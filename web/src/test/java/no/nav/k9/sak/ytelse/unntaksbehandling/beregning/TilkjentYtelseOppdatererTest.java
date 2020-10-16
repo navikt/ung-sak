@@ -80,9 +80,7 @@ public class TilkjentYtelseOppdatererTest {
         var ytelsePeriode = TilkjentYtelsePeriodeDto.build(fom, tom)
             .medAndeler(List.of(andelBruker, andelArbeidsgiver))
             .create();
-        var tilkjentYtelseDto = TilkjentYtelseDto.build()
-            .medPerioder(List.of(ytelsePeriode))
-            .create();
+        var tilkjentYtelseDto = new TilkjentYtelseDto(List.of(ytelsePeriode));
 
         var dto = new BekreftTilkjentYtelseDto();
         dto.setTilkjentYtelseDto(tilkjentYtelseDto);
