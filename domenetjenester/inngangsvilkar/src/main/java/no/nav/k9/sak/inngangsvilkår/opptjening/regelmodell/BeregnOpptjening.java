@@ -73,7 +73,7 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
         Map<Aktivitet, LocalDateTimeline<Boolean>> aktivitetTidslinjer = data.getAktivitetTidslinjer(medAntattGodkjent, false);
         for (Map.Entry<Aktivitet, LocalDateTimeline<Boolean>> entry : aktivitetTidslinjer
             .entrySet()) {
-            if (!unntak.contains(entry.getKey())) {
+            if (!unntak.contains(entry.getKey()) && !entry.getValue().isEmpty()) {
                 tidslinje = tidslinje.crossJoin(entry.getValue(), StandardCombinators::alwaysTrueForMatch);
             }
         }

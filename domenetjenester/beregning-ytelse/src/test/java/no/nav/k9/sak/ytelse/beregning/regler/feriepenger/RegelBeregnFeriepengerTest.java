@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
@@ -31,8 +30,8 @@ public class RegelBeregnFeriepengerTest {
     //Eksempel 1 Mor
     @Test
     public void skalBeregneFeriepengerForSøker() {
-        BeregningsresultatPeriode periode1 = byggBRPeriode(LocalDate.of(2018, 1, 6), LocalDate.of(2018, 3, 9));
-        BeregningsresultatPeriode periode2 = byggBRPeriode(LocalDate.of(2018, 3, 10), LocalDate.of(2018, 3, 16));
+        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 1, 6), LocalDate.of(2018, 3, 9));
+        BeregningsresultatPeriode periode2 = new BeregningsresultatPeriode(LocalDate.of(2018, 3, 10), LocalDate.of(2018, 3, 16));
         byggAndelerForPeriode(periode1, 350, 600, arbeidsforhold1);
         byggAndelerForPeriode(periode1, 100, 500, arbeidsforhold2);
         byggAndelerForPeriode(periode2, 150, 400, arbeidsforhold1);
@@ -71,9 +70,9 @@ public class RegelBeregnFeriepengerTest {
     //Eksempel 1X Mor med avslag i første periode
     @Test
     public void skalBeregneFeriepengerForSøkerMedAvslagIFørstePeriode() {
-        BeregningsresultatPeriode periode0 = byggBRPeriode(LocalDate.of(2018, 1, 5), LocalDate.of(2018, 1, 5));
-        BeregningsresultatPeriode periode1 = byggBRPeriode(LocalDate.of(2018, 1, 6), LocalDate.of(2018, 3, 9));
-        BeregningsresultatPeriode periode2 = byggBRPeriode(LocalDate.of(2018, 3, 10), LocalDate.of(2018, 3, 23));
+        BeregningsresultatPeriode periode0 = new BeregningsresultatPeriode(LocalDate.of(2018, 1, 5), LocalDate.of(2018, 1, 5));
+        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 1, 6), LocalDate.of(2018, 3, 9));
+        BeregningsresultatPeriode periode2 = new BeregningsresultatPeriode(LocalDate.of(2018, 3, 10), LocalDate.of(2018, 3, 23));
         byggAndelerForPeriode(periode0, 0, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode1, 350, 600, arbeidsforhold1);
         byggAndelerForPeriode(periode1, 100, 500, arbeidsforhold2);
@@ -120,15 +119,15 @@ public class RegelBeregnFeriepengerTest {
     //Eksempel 2 Mor
     @Test
     public void skalBeregneFeriepengerForSøkerEksempel2() {
-        BeregningsresultatPeriode periode1 = byggBRPeriode(LocalDate.of(2018, 1, 17), LocalDate.of(2018, 3, 20));
-        BeregningsresultatPeriode periode2 = byggBRPeriode(LocalDate.of(2018, 3, 21), LocalDate.of(2018, 3, 28));
-        BeregningsresultatPeriode periode3 = byggBRPeriode(LocalDate.of(2018, 3, 29), LocalDate.of(2018, 4, 8));
+        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 1, 17), LocalDate.of(2018, 3, 20));
+        BeregningsresultatPeriode periode2 = new BeregningsresultatPeriode(LocalDate.of(2018, 3, 21), LocalDate.of(2018, 3, 28));
+        BeregningsresultatPeriode periode3 = new BeregningsresultatPeriode(LocalDate.of(2018, 3, 29), LocalDate.of(2018, 4, 8));
         byggAndelerForPeriode(periode1, 350, 600, arbeidsforhold1);
         byggAndelerForPeriode(periode1, 100, 500, arbeidsforhold2);
         byggAndelerForPeriode(periode2, 0, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode3, 350, 600, arbeidsforhold1);
 
-        BeregningsresultatPeriode periode1annenPart = byggBRPeriode(LocalDate.of(2018, 3, 21),  LocalDate.of(2018, 4, 15));
+        BeregningsresultatPeriode periode1annenPart = new BeregningsresultatPeriode(LocalDate.of(2018, 3, 21), LocalDate.of(2018, 4, 15));
         byggAndelerForPeriode(periode1annenPart, 500, 0, arbeidsforhold1);
 
         BeregningsresultatFeriepengerRegelModell regelModell = BeregningsresultatFeriepengerRegelModell.builder()
@@ -168,9 +167,9 @@ public class RegelBeregnFeriepengerTest {
 
     @Test
     public void skalBeregneFeriepengerOverFlereÅr() {
-        BeregningsresultatPeriode periode1 = byggBRPeriode(LocalDate.of(2018, 11, 1), LocalDate.of(2019, 1, 5)); //47 ukedager
-        BeregningsresultatPeriode periode2 = byggBRPeriode(LocalDate.of(2019, 1, 6), LocalDate.of(2019, 2, 5)); // 22 ukedager
-        BeregningsresultatPeriode periode3 = byggBRPeriode(LocalDate.of(2019, 2, 6), LocalDate.of(2019, 4, 16)); // 50 ukedager
+        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 11, 1), LocalDate.of(2019, 1, 5)); // 47 ukedager
+        BeregningsresultatPeriode periode2 = new BeregningsresultatPeriode(LocalDate.of(2019, 1, 6), LocalDate.of(2019, 2, 5)); // 22 ukedager
+        BeregningsresultatPeriode periode3 = new BeregningsresultatPeriode(LocalDate.of(2019, 2, 6), LocalDate.of(2019, 4, 16)); // 50 ukedager
         byggAndelerForPeriode(periode1, 1000, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode2, 0, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode3, 500, 500, arbeidsforhold1);
@@ -203,12 +202,6 @@ public class RegelBeregnFeriepengerTest {
         assertThat(andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(663));
     }
 
-
-    private BeregningsresultatPeriode byggBRPeriode(LocalDate fom, LocalDate tom) {
-        return BeregningsresultatPeriode.builder()
-            .medPeriode(new LocalDateInterval(fom, tom))
-            .build();
-    }
 
     private void byggAndelerForPeriode(BeregningsresultatPeriode periode, int dagsats, int refusjon, Arbeidsforhold arbeidsforhold1) {
         BeregningsresultatAndel.builder()

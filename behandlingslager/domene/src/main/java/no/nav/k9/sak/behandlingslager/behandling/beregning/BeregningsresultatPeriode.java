@@ -46,19 +46,23 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         .thenComparing(ba -> ba.getArbeidsforholdRef().getReferanse(), Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(ba -> ba.getAktivitetStatus(), Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(ba -> ba.getInntektskategori(), Comparator.nullsLast(Comparator.naturalOrder()));
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BR_PERIODE")
     private Long id;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "BEREGNINGSRESULTAT_FP_ID", nullable = false, updatable = false)
-    @JsonBackReference
     private BeregningsresultatEntitet beregningsresultat;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    @OrderBy("arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
+    @OrderBy("periode, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),

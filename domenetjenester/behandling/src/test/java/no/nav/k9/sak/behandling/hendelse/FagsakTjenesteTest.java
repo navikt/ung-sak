@@ -28,7 +28,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 
-@SuppressWarnings("deprecation")
 public class FagsakTjenesteTest {
 
     private final AktørId forelderAktørId = AktørId.dummy();

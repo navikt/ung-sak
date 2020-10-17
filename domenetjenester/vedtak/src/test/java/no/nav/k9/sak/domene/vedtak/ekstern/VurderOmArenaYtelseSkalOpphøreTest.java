@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.vedtak.ekstern;
 
-import static java.time.LocalDate.now;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,9 +63,9 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
     private static Long MELDEKORTPERIODE = 14L;
 
+    private final LocalDate stp = LocalDate.parse("2020-08-08");
     private final TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private final VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(
@@ -85,8 +84,8 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     @Test
     public void skal_teste_arena_ytelser_finnes_ikke() {
         // Arrange
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(7);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate vedtaksDato = stp.minusDays(7);
+        LocalDate startDato = stp;
         byggScenarioUtenYtelseIArena();
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -101,11 +100,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_før_T1() {
         // Arrange
         // Startdato før T1 , vedtaksdato etter T1
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(2);
+        LocalDate meldekortT1 = stp.plusDays(2);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(36);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate ytelseVedtakTOM = stp.plusDays(MELDEKORTPERIODE * 2);
+        LocalDate vedtaksDato = stp.plusDays(36);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -133,11 +132,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_etter_T2() {
         // Arrange
         // Startdato før T2, vedtaksdato etter T2
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(64);
+        LocalDate meldekortT1 = stp.minusDays(64);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(19);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(49);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate ytelseVedtakTOM = stp.plusDays(19);
+        LocalDate vedtaksDato = stp.minusDays(49);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -149,11 +148,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_etter_T1() {
         // Arrange
         // startdato mellom T1 og T2, vedtaksdato mellom T1 og (T1 + 8 dager)
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(5);
+        LocalDate meldekortT1 = stp.minusDays(5);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(4);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate ytelseVedtakTOM = stp.plusDays(MELDEKORTPERIODE * 2);
+        LocalDate vedtaksDato = stp.minusDays(4);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -165,11 +164,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_mellom_T1_T2_vedtaksdato_mindre_enn_8_dager_før_T2() {
         // Arrange
         // startdato mellom T1 og T2, vedtaksdato mellom (T2 - 8 dager) og T2
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(8);
+        LocalDate meldekortT1 = stp.minusDays(8);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(4);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate ytelseVedtakTOM = stp.plusDays(MELDEKORTPERIODE * 2);
+        LocalDate vedtaksDato = stp.plusDays(4);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -181,11 +180,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_Arena_ytelse_interval_før_vedtaksdato_fom_overlapper_() {
         // Arrange
         // Arena ytelser etter startdato men før vedtaksdato .
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE + 7);
+        LocalDate meldekortT1 = stp.plusDays(MELDEKORTPERIODE + 7);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(47);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate vedtaksDato = stp.plusDays(47);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -197,11 +196,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_er_like_T1_og_T2_er_null() {
         // Arrange
         // Arena ytelser før vedtaksdato og mellom startdato og sluttdato .
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT;
-        LocalDate ytelseVedtakFOM = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE * 2);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.minusDays(1);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(47);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT.minusDays(1);
+        LocalDate meldekortT1 = stp;
+        LocalDate ytelseVedtakFOM = stp.minusDays(MELDEKORTPERIODE * 2);
+        LocalDate ytelseVedtakTOM = stp.minusDays(1);
+        LocalDate vedtaksDato = stp.plusDays(47);
+        LocalDate startDato = stp.minusDays(1);
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -213,11 +212,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_vedtaksdato_er_like_T2() {
         // Arrange
         // Arena ytelser før vedtaksdato og mellom startdato og sluttdato .
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE);
+        LocalDate meldekortT1 = stp.minusDays(MELDEKORTPERIODE);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT;
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT.plusDays(10);
+        LocalDate ytelseVedtakTOM = stp.plusDays(MELDEKORTPERIODE * 2);
+        LocalDate vedtaksDato = stp;
+        LocalDate startDato = stp.plusDays(10);
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -229,11 +228,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_før_T1_og__overlapper_ikke_ARENA_ytelse() {
         // Arrange
         // Arena ytelser før vedtaksdato og utenfor startdato og sluttdato .
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(7);
+        LocalDate meldekortT1 = stp.plusDays(7);
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE);
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusDays(MELDEKORTPERIODE * 2);
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(54);
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT;
+        LocalDate ytelseVedtakTOM = stp.plusDays(MELDEKORTPERIODE * 2);
+        LocalDate vedtaksDato = stp.plusDays(54);
+        LocalDate startDato = stp;
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -245,11 +244,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void skal_teste_startdato_for_5910() {
         // Arrange
         // Arena ytelser før vedtaksdato og utenfor startdato og sluttdato .
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(5); // 2019-02-03
+        LocalDate meldekortT1 = stp.minusDays(5); // 2019-02-03
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE); // 2019-01-21
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.plusMonths(6);// 2019-10-01
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(7); // 2019-02-15
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        LocalDate ytelseVedtakTOM = stp.plusMonths(6);// 2019-10-01
+        LocalDate vedtaksDato = stp.plusDays(7); // 2019-02-15
+        LocalDate startDato = stp; // 2019-02-08
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -261,11 +260,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void ytelse_avsluttet_før_stp_siste_meldekort_rett_etter() {
         // Arrange
         // Siste meldekort vil som regel komme rett etter perioden og med prosent <200
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.plusDays(2); // 2019-02-03
-        LocalDate ytelseVedtakFOM = SKJÆRINGSTIDSPUNKT.minusDays(MELDEKORTPERIODE * 2 - 1); // 2019-01-21
-        LocalDate ytelseVedtakTOM = SKJÆRINGSTIDSPUNKT.minusDays(1);// 2019-10-01
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.plusDays(7); // 2019-02-15
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        LocalDate meldekortT1 = stp.plusDays(2); // 2019-02-03
+        LocalDate ytelseVedtakFOM = stp.minusDays(MELDEKORTPERIODE * 2 - 1); // 2019-01-21
+        LocalDate ytelseVedtakTOM = stp.minusDays(1);// 2019-10-01
+        LocalDate vedtaksDato = stp.plusDays(7); // 2019-02-15
+        LocalDate startDato = stp; // 2019-02-08
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -277,11 +276,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void vanlig_case_vedtak_før_start() {
         // Arrange
         // Gir arena nok tid til å avslutte løpende ytelse
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(16); // 2019-02-03
+        LocalDate meldekortT1 = stp.minusDays(16); // 2019-02-03
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE * 8); // 2019-01-21
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE * 8);// 2019-10-01
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(14); // 2019-02-15
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        LocalDate vedtaksDato = stp.minusDays(14); // 2019-02-15
+        LocalDate startDato = stp; // 2019-02-08
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -293,11 +292,11 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     public void vanlig_case_vedtak_rett_før_start() {
         // Arrange
         // Potensielt for liten tid til å avslutte løpende ytelse
-        LocalDate meldekortT1 = SKJÆRINGSTIDSPUNKT.minusDays(10); // 2019-02-03
+        LocalDate meldekortT1 = stp.minusDays(10); // 2019-02-03
         LocalDate ytelseVedtakFOM = meldekortT1.minusDays(MELDEKORTPERIODE * 8); // 2019-01-21
         LocalDate ytelseVedtakTOM = meldekortT1.plusDays(MELDEKORTPERIODE * 8);// 2019-10-01
-        LocalDate vedtaksDato = SKJÆRINGSTIDSPUNKT.minusDays(4); // 2019-02-15
-        LocalDate startDato = SKJÆRINGSTIDSPUNKT; // 2019-02-08
+        LocalDate vedtaksDato = stp.minusDays(4); // 2019-02-15
+        LocalDate startDato = stp; // 2019-02-08
         byggScenario(ytelseVedtakFOM, ytelseVedtakTOM, meldekortT1, vedtaksDato, startDato, Fagsystem.ARENA);
         // Act
         boolean resultat = vurdereOmArenaYtelseSkalOpphør.vurderArenaYtelserOpphøres(behandling.getId(), behandling.getAktørId(), startDato, vedtaksDato);
@@ -306,17 +305,25 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     }
 
     private void byggScenarioUtenYtelseIArena() {
-        byggScenario(now(), now().plusDays(15), now(), now(), now(), Fagsystem.INFOTRYGD);
+        byggScenario(stp, stp.plusDays(15), stp, stp, stp, Fagsystem.INFOTRYGD);
     }
 
-    private void byggScenario(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, LocalDate vedtaksdato,
-                              LocalDate startdato, Fagsystem fagsystem) {
+    private void byggScenario(LocalDate ytelserFom,
+                              LocalDate ytelserTom,
+                              LocalDate t1,
+                              LocalDate vedtaksdato,
+                              LocalDate startdato,
+                              Fagsystem fagsystem) {
         byggScenario(ytelserFom, ytelserTom, t1, vedtaksdato.atStartOfDay(),
             DatoIntervallEntitet.fraOgMedTilOgMed(startdato, startdato.plusDays(90)), fagsystem);
     }
 
-    private void byggScenario(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, LocalDateTime vedtakstidspunkt,
-                              DatoIntervallEntitet fpIntervall, Fagsystem fagsystem) {
+    private void byggScenario(LocalDate ytelserFom,
+                              LocalDate ytelserTom,
+                              LocalDate t1,
+                              LocalDateTime vedtakstidspunkt,
+                              DatoIntervallEntitet intervall,
+                              Fagsystem fagsystem) {
         scenario.medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         behandling = lagre(scenario);
 
@@ -330,7 +337,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         // Legg til beregningresultat
         beregningsresultatBuilder = BeregningsresultatEntitet.builder();
         brPeriodebuilder = BeregningsresultatPeriode.builder();
-        BeregningsresultatEntitet beregningsresultat = byggBeregningsresultat(fpIntervall.getFomDato(), fpIntervall.getTomDato());
+        BeregningsresultatEntitet beregningsresultat = byggBeregningsresultat(intervall.getFomDato(), intervall.getTomDato());
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         // Legg til behandling resultat
@@ -345,7 +352,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         behandlingVedtakRepository.lagre(behandlingVedtak, behandlingRepository.taSkriveLås(behandling));
     }
 
-    private YtelseBuilder byggYtelser(LocalDate ytelserFom, LocalDate ytelserTom, LocalDate t1, Fagsystem fagsystem) {
+    private YtelseBuilder byggYtelser(LocalDate ytelserFom,
+                                      LocalDate ytelserTom,
+                                      LocalDate t1,
+                                      Fagsystem fagsystem) {
         YtelseBuilder ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty())
             .medKilde(fagsystem)
             .medSaksnummer(new Saksnummer(SAK_ID))
@@ -360,7 +370,10 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         return ytelseBuilder;
     }
 
-    private List<YtelseAnvist> byggYtelserAnvist(LocalDate yaFom, @SuppressWarnings("unused") LocalDate yaTom, LocalDate t1, YtelseBuilder ytelseBuilder) {
+    private List<YtelseAnvist> byggYtelserAnvist(LocalDate yaFom,
+                                                 @SuppressWarnings("unused") LocalDate yaTom,
+                                                 LocalDate t1,
+                                                 YtelseBuilder ytelseBuilder) {
         // Man må sende meldekort hver 2 uker.
         final long ytelseDagerMellomrom = 13;
         List<YtelseAnvist> ytelseAnvistList = new ArrayList<>();
@@ -402,6 +415,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .medDagsatsFraBg(10)
             .medBrukerErMottaker(true)
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .buildFor(brPeriode);
         return brPeriode;
     }

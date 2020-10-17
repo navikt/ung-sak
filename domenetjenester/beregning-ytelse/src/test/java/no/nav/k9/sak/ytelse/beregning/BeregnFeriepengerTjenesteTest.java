@@ -90,7 +90,7 @@ public class BeregnFeriepengerTjenesteTest {
     }
 
     private BeregningsresultatPeriode lagPeriodeMedAndel(BigDecimal årsbeløp) {
-        BeregningsresultatPeriode periode = BeregningsresultatPeriode.builder().medPeriode(PERIODE).build();
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE);
         BeregningsresultatAndel andel = BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.ATFL)
             .medBrukerErMottaker(true)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
