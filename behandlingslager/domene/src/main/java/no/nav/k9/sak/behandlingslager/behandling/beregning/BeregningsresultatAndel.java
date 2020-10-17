@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -20,22 +22,27 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vladmihalcea.hibernate.type.range.Range;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.økonomioppdrag.InntektskategoriKlassekodeMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @Entity(name = "BeregningsresultatAndel")
@@ -50,10 +57,17 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    /** @deprecated fjernes og erstattes med {@link #beregningsresultat}. */
+    @JsonBackReference
+    @Deprecated(forRemoval = true)
     @ManyToOne(optional = false)
     @JoinColumn(name = "br_periode_id", nullable = false, updatable = false)
-    @JsonBackReference
     private BeregningsresultatPeriode beregningsresultatPeriode;
+
+    @JsonBackReference
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "BEREGNINGSRESULTAT_ID", nullable = false /* , updatable = false */)
+    private BeregningsresultatEntitet beregningsresultat;
 
     @Column(name = "bruker_er_mottaker", nullable = false)
     private Boolean brukerErMottaker = Boolean.FALSE;
@@ -80,9 +94,16 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "dagsats_fra_bg", nullable = false)
     private int dagsatsFraBg;
 
-    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatAndel", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe;
+
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "verdi", column = @Column(name = "feriepenger_beloep")))
+    @ChangeTracked
+    private Beløp feriepengerBeløp;
 
     @Convert(converter = AktivitetStatusKodeverdiConverter.class)
     @Column(name = "aktivitet_status", nullable = false)
@@ -94,6 +115,47 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     BeregningsresultatAndel() {
         //
+    }
+
+    /** @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort). */
+    @Deprecated(forRemoval = true)
+    @PrePersist
+    protected void onCreateMigrate() {
+        if (this.periode == null) {
+            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
+                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
+            }
+            this.periode = datoIntervall.toRange();
+        }
+
+        if (this.beregningsresultat == null) {
+            this.beregningsresultat = getBeregningsresultatPeriode().getBeregningsresultat();
+        }
+        if (this.feriepengerBeløp == null) {
+            var feriepenger = getBeregningsresultatFeriepengerPrÅrListe();
+            this.feriepengerBeløp = feriepenger.isEmpty() ? null : feriepenger.iterator().next().getÅrsbeløp();
+        }
+    }
+
+    /** @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort). */
+    @Deprecated(forRemoval = true)
+    @PreUpdate
+    protected void onUpdateMigrate() {
+        if (this.periode == null) {
+            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
+                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
+            }
+            this.periode = datoIntervall.toRange();
+        }
+        if (this.beregningsresultat == null) {
+            this.beregningsresultat = getBeregningsresultatPeriode().getBeregningsresultat();
+        }
+        if (this.feriepengerBeløp == null) {
+            var feriepenger = getBeregningsresultatFeriepengerPrÅrListe();
+            this.feriepengerBeløp = feriepenger.isEmpty() ? null : feriepenger.iterator().next().getÅrsbeløp();
+        }
     }
 
     public Long getId() {
@@ -136,6 +198,10 @@ public class BeregningsresultatAndel extends BaseEntitet {
         return dagsats;
     }
 
+    public Beløp getFeriepengerÅrsbeløp() {
+        return feriepengerBeløp;
+    }
+
     public BigDecimal getStillingsprosent() {
         return stillingsprosent;
     }
@@ -146,6 +212,13 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     public int getDagsatsFraBg() {
         return dagsatsFraBg;
+    }
+
+    public void setFeriepengerBeløp(Beløp feriepengerÅrsbeløp) {
+        if (this.feriepengerBeløp != null) {
+            throw new IllegalArgumentException("Kan ikke endre feriepengerBeløp");
+        }
+        this.feriepengerBeløp = feriepengerÅrsbeløp;
     }
 
     public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
@@ -166,7 +239,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
     }
 
     public DatoIntervallEntitet getPeriode() {
-        return beregningsresultatPeriode.getPeriode();
+        return this.periode != null ? DatoIntervallEntitet.fra(periode) : beregningsresultatPeriode.getPeriode();
     }
 
     public LocalDate getFom() {
@@ -232,7 +305,8 @@ public class BeregningsresultatAndel extends BaseEntitet {
             && Objects.equals(this.getDagsats(), other.getDagsats())
             && equals(this.getStillingsprosent(), other.getStillingsprosent())
             && equals(this.getUtbetalingsgrad(), other.getUtbetalingsgrad())
-            && Objects.equals(this.getDagsatsFraBg(), other.getDagsatsFraBg());
+            && Objects.equals(this.getDagsatsFraBg(), other.getDagsatsFraBg())
+            && Objects.equals(this.getFeriepengerÅrsbeløp(), other.getFeriepengerÅrsbeløp());
     }
 
     private boolean equals(BigDecimal a, BigDecimal b) {
@@ -241,7 +315,8 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, inntektskategori);
+        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, inntektskategori,
+            feriepengerBeløp);
     }
 
     public static Builder builder() {
@@ -254,29 +329,29 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     public static class Builder {
 
-        private BeregningsresultatAndel beregningsresultatAndelMal;
+        private BeregningsresultatAndel mal;
         private Integer dagsats;
         private Integer dagsatsFraBg;
 
         public Builder() {
-            beregningsresultatAndelMal = new BeregningsresultatAndel();
-            beregningsresultatAndelMal.arbeidsforholdType = OpptjeningAktivitetType.UDEFINERT;
+            mal = new BeregningsresultatAndel();
+            mal.arbeidsforholdType = OpptjeningAktivitetType.UDEFINERT;
         }
 
         public Builder(BeregningsresultatAndel eksisterendeBeregningsresultatAndel) {
             if (eksisterendeBeregningsresultatAndel.getBeregningsresultatFeriepengerPrÅrListe().isEmpty()) {
                 eksisterendeBeregningsresultatAndel.beregningsresultatFeriepengerPrÅrListe = new ArrayList<>();
             }
-            beregningsresultatAndelMal = eksisterendeBeregningsresultatAndel;
+            mal = eksisterendeBeregningsresultatAndel;
         }
 
         public Builder medBrukerErMottaker(boolean brukerErMottaker) {
-            beregningsresultatAndelMal.brukerErMottaker = brukerErMottaker;
+            mal.brukerErMottaker = brukerErMottaker;
             return this;
         }
 
         public Builder medArbeidsgiver(Arbeidsgiver arbeidsgiver) {
-            beregningsresultatAndelMal.arbeidsgiver = arbeidsgiver;
+            mal.arbeidsgiver = arbeidsgiver;
             return this;
         }
 
@@ -285,81 +360,99 @@ public class BeregningsresultatAndel extends BaseEntitet {
          */
         @Deprecated(forRemoval = true)
         public Builder medArbeidsforholdRef(String arbeidsforholdRef) {
-            beregningsresultatAndelMal.arbeidsforholdRef = arbeidsforholdRef == null ? null : InternArbeidsforholdRef.ref(arbeidsforholdRef);
+            mal.arbeidsforholdRef = arbeidsforholdRef == null ? null : InternArbeidsforholdRef.ref(arbeidsforholdRef);
             return this;
         }
 
         public Builder medArbeidsforholdRef(InternArbeidsforholdRef arbeidsforholdRef) {
-            beregningsresultatAndelMal.arbeidsforholdRef = arbeidsforholdRef;
+            mal.arbeidsforholdRef = arbeidsforholdRef;
             return this;
         }
 
         public Builder medArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-            beregningsresultatAndelMal.arbeidsforholdType = arbeidsforholdType;
+            mal.arbeidsforholdType = arbeidsforholdType;
             return this;
         }
 
         public Builder medDagsats(int dagsats) {
             this.dagsats = dagsats;
-            beregningsresultatAndelMal.dagsats = dagsats;
+            mal.dagsats = dagsats;
             return this;
         }
 
         public Builder medStillingsprosent(BigDecimal stillingsprosent) {
-            beregningsresultatAndelMal.stillingsprosent = stillingsprosent;
+            mal.stillingsprosent = stillingsprosent;
+            return this;
+        }
+
+        public Builder medPeriode(DatoIntervallEntitet periode) {
+            if (periode.getFomDato().getYear() != periode.getTomDato().getYear()) {
+                throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", periode));
+            }
+            mal.periode = periode.toRange();
+            return this;
+        }
+
+        public Builder medPeriode(LocalDateInterval periode) {
+            return this.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()));
+        }
+
+        public Builder medFeriepengerÅrsbeløp(Beløp beløp) {
+            mal.feriepengerBeløp = beløp;
             return this;
         }
 
         public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
-            beregningsresultatAndelMal.utbetalingsgrad = utbetalingsgrad;
+            mal.utbetalingsgrad = utbetalingsgrad;
             return this;
         }
 
         public Builder medDagsatsFraBg(int dagsatsFraBg) {
             this.dagsatsFraBg = dagsatsFraBg;
-            beregningsresultatAndelMal.dagsatsFraBg = dagsatsFraBg;
+            mal.dagsatsFraBg = dagsatsFraBg;
             return this;
         }
 
         public Builder medAktivitetStatus(AktivitetStatus aktivitetStatus) {
-            beregningsresultatAndelMal.aktivitetStatus = aktivitetStatus;
+            mal.aktivitetStatus = aktivitetStatus;
             return this;
         }
 
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
-            beregningsresultatAndelMal.inntektskategori = inntektskategori;
+            mal.inntektskategori = inntektskategori;
             return this;
         }
 
         public Builder leggTilBeregningsresultatFeriepengerPrÅr(BeregningsresultatFeriepengerPrÅr beregningsresultatFeriepengerPrÅr) {
-            if (beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe.isEmpty()) {
-                beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅr);
-            } else {
-                throw new IllegalArgumentException(
-                    String.format("Kun 1 feriepenger per andel, har %s, fikk %s", beregningsresultatAndelMal.beregningsresultatFeriepengerPrÅrListe, beregningsresultatFeriepengerPrÅr));
+            if (beregningsresultatFeriepengerPrÅr != null) {
+                mal.beregningsresultatFeriepengerPrÅrListe.clear();
+                mal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅr);
             }
             return this;
         }
 
         public BeregningsresultatAndel buildFor(BeregningsresultatPeriode beregningsresultatPeriode) {
-            beregningsresultatAndelMal.beregningsresultatPeriode = beregningsresultatPeriode;
+            mal.beregningsresultatPeriode = beregningsresultatPeriode;
+            mal.periode = beregningsresultatPeriode.getPeriode().toRange();
+            mal.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
             verifyStateForBuild();
-            beregningsresultatAndelMal.getBeregningsresultatPeriode().addBeregningsresultatAndel(beregningsresultatAndelMal);
-            return beregningsresultatAndelMal;
+            mal.getBeregningsresultatPeriode().addBeregningsresultatAndel(mal);
+            return mal;
         }
 
         public void verifyStateForBuild() {
-            Objects.requireNonNull(beregningsresultatAndelMal.beregningsresultatPeriode, "beregningsresultatPeriode");
-            Objects.requireNonNull(beregningsresultatAndelMal.brukerErMottaker, "brukerErMottaker");
-            Objects.requireNonNull(beregningsresultatAndelMal.stillingsprosent, "stillingsprosent");
-            verifyUtbetalingsgrad(beregningsresultatAndelMal.utbetalingsgrad);
-            Objects.requireNonNull(beregningsresultatAndelMal.inntektskategori, "inntektskategori");
+            Objects.requireNonNull(mal.brukerErMottaker, "brukerErMottaker");
+            Objects.requireNonNull(mal.stillingsprosent, "stillingsprosent");
+            verifyUtbetalingsgrad(mal.utbetalingsgrad);
+            Objects.requireNonNull(mal.inntektskategori, "inntektskategori");
             Objects.requireNonNull(dagsatsFraBg, "dagsatsFraBg");
             Objects.requireNonNull(dagsats, "dagsats");
-            if (!beregningsresultatAndelMal.brukerErMottaker) {
-                Objects.requireNonNull(beregningsresultatAndelMal.arbeidsgiver, "virksomhet");
+            Objects.requireNonNull(mal.beregningsresultat, "beregningsresultat");
+            Objects.requireNonNull(mal.periode, "periode");
+            if (!mal.brukerErMottaker) {
+                Objects.requireNonNull(mal.arbeidsgiver, "virksomhet");
             }
-            InntektskategoriKlassekodeMapper.verifyInntektskategori(beregningsresultatAndelMal.inntektskategori);
+            InntektskategoriKlassekodeMapper.verifyInntektskategori(mal.inntektskategori);
         }
 
         private void verifyUtbetalingsgrad(BigDecimal utbetalingsgrad) {
@@ -372,4 +465,5 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
     }
+
 }

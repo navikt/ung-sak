@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
@@ -98,7 +100,10 @@ public abstract class BeregnFeriepengerTjeneste {
             .stream()
             .filter(BeregnFeriepengerTjeneste::erAvrundetÅrsbeløpUlik0)
             .forEach(prÅr -> {
-                long årsbeløp = prÅr.getÅrsbeløp().setScale(0, RoundingMode.HALF_UP).longValue();
+                BigDecimal feriepengerÅrsbeløp = prÅr.getÅrsbeløp().setScale(0, RoundingMode.HALF_UP);
+                andel.setFeriepengerBeløp(new Beløp(feriepengerÅrsbeløp));
+
+                long årsbeløp = feriepengerÅrsbeløp.longValue();
                 BeregningsresultatFeriepengerPrÅr.builder()
                     .medOpptjeningsår(prÅr.getOpptjeningÅr())
                     .medÅrsbeløp(årsbeløp)

@@ -21,6 +21,8 @@ import javax.persistence.Version;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.typer.Beløp;
@@ -39,6 +41,7 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    @JsonBackReference
     @ManyToOne(optional = false)
     @JoinColumn(name = "beregningsresultat_andel_id", nullable = false, updatable = false)
     private BeregningsresultatAndel beregningsresultatAndel;
@@ -75,14 +78,19 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
             return false;
         }
         BeregningsresultatFeriepengerPrÅr other = (BeregningsresultatFeriepengerPrÅr) obj;
-        return Objects.equals(this.getId(), other.getId())
+        return Objects.equals(this.beregningsresultatAndel, other.beregningsresultatAndel)
             && Objects.equals(this.getOpptjeningsår(), other.getOpptjeningsår())
             && Objects.equals(this.getÅrsbeløp(), other.getÅrsbeløp());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, opptjeningsår, årsbeløp);
+        return Objects.hash(beregningsresultatAndel, opptjeningsår, årsbeløp);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<opptjeningsår=" + opptjeningsår + ", årsbeløp=" + årsbeløp + ">F";
     }
 
     public static Builder builder() {
@@ -110,7 +118,10 @@ public class BeregningsresultatFeriepengerPrÅr extends BaseEntitet {
             mal.beregningsresultatAndel = beregningsresultatAndel;
             BeregningsresultatAndel.builder(beregningsresultatAndel).leggTilBeregningsresultatFeriepengerPrÅr(mal);
             verifyStateForBuild();
-            return mal;
+            
+            var m = mal;
+            this.mal = null;
+            return m;
         }
 
         public void verifyStateForBuild() {

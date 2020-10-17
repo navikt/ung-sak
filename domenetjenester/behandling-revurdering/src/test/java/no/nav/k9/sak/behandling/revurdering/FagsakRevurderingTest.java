@@ -42,7 +42,6 @@ public class FagsakRevurderingTest {
         behandlingRepository = mock(BehandlingRepository.class);
     }
 
-    @SuppressWarnings("deprecation")
     @Before
     public void opprettBehandlinger() {
         fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakSaksnummer).build();

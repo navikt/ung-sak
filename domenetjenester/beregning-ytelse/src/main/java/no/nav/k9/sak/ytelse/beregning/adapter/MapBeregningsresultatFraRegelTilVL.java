@@ -4,6 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagUtil;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -31,11 +32,12 @@ public class MapBeregningsresultatFraRegelTilVL {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode nyPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(resultatPeriode.getFom(), resultatPeriode.getTom())
             .build(eksisterendeResultat);
-        resultatPeriode.getBeregningsresultatAndelList().forEach(bra -> mapFraAndel(bra, nyPeriode));
+        resultatPeriode.getBeregningsresultatAndelList().forEach(bra -> mapFraAndel(bra, nyPeriode, resultatPeriode.getPeriode()));
         return nyPeriode;
     }
 
-    private BeregningsresultatAndel mapFraAndel(no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel bra, no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode brp) {
+    private BeregningsresultatAndel mapFraAndel(no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel bra,
+                                                no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode brp, LocalDateInterval periode) {
         int dagsats = BeregningsgrunnlagUtil.nullSafeLong(bra.getDagsats()).intValue();
         int dagsatsFraBg = BeregningsgrunnlagUtil.nullSafeLong(bra.getDagsatsFraBg()).intValue();
         return BeregningsresultatAndel.builder()
@@ -44,6 +46,7 @@ public class MapBeregningsresultatFraRegelTilVL {
             .medDagsats(dagsats)
             .medStillingsprosent(bra.getStillingsprosent())
             .medUtbetalingsgrad(bra.getUtbetalingsgrad())
+            .medPeriode(periode)
             .medDagsatsFraBg(dagsatsFraBg)
             .medAktivitetStatus(AktivitetStatusMapper.fraRegelTilVl(bra))
             .medArbeidsforholdRef(bra.getArbeidsforhold() == null

@@ -30,6 +30,8 @@ class HindreTilbaketrekkBeregningsresultatPeriode {
                 BeregningsresultatAndel.builder(Kopimaskin.deepCopy(andel))
                     .medDagsats(andel.getDagsats())
                     .medDagsatsFraBg(andel.getDagsatsFraBg())
+                    .medPeriode(segment.getLocalDateInterval())
+                    .medFeriepengerÅrsbeløp(andel.getFeriepengerÅrsbeløp())
                     .buildFor(beregningsresultatPeriode)
             );
         } else {
