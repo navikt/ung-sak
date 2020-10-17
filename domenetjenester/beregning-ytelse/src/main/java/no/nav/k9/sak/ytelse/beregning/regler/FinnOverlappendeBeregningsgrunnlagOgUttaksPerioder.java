@@ -9,9 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -34,6 +33,9 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
 
 class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecification<BeregningsresultatRegelmodellMellomregning> {
+    private static final Period MAKS_FREMTID = Period.parse("P1Y");
+    private static final Period SPLITT_PERIODE = Period.parse("P1Y");
+
     public static final String ID = "FP_BR 20_1";
     public static final String BESKRIVELSE = "FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder";
 
@@ -74,15 +76,27 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater) {
 
-        var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);
+        if (grunnlagTimeline.isEmpty() || uttakTimeline.isEmpty()) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        }
 
-        // stopper periodisering her for å unngå 'evigvarende' ekspansjon
-        var maksDato = new TreeSet<>(Set.of(grunnlagTimeline.getMaxLocalDate(), uttakTimeline.getMaxLocalDate(), LocalDate.now().plusYears(1))).first();
-        Period splittPeriode = Period.ofYears(1);
-        var grunnlagTimelinePeriodisertÅr = grunnlagTimeline.splitAtRegular(startFørsteÅr, maksDato, splittPeriode);
+        var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);
+        var grunnlagMaksDato = grunnlagTimeline.getMaxLocalDate();
+        var uttakMaksDato = uttakTimeline.getMaxLocalDate();
+
+        if (uttakMaksDato.isAfter(LocalDate.now().plus(MAKS_FREMTID))) {
+            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid");
+        }
+
+        // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
+        // tar første av potensielle maks datoer som berører intersection av de to tidslinjene.
+        var minsteMaksDato = Stream.of(grunnlagMaksDato, uttakMaksDato).sorted().findFirst().orElseThrow();
+
+        var grunnlagTimelinePeriodisertÅr = grunnlagTimeline.splitAtRegular(startFørsteÅr, minsteMaksDato, SPLITT_PERIODE);
 
         final int[] i = { 0 }; // Periode-teller til regelsporing
         return grunnlagTimelinePeriodisertÅr.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
