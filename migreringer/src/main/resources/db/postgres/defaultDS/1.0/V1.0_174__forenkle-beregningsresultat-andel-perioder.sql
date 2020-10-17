@@ -11,6 +11,7 @@ alter table br_andel add constraint br_andel_ikke_overlapp_periode_ag EXCLUDE US
         arbeidsgiver_aktor_id WITH =,
         inntektskategori WITH =,
         arbeidsforhold_type WITH =,
+        aktivitet_status WITH =,
         periode WITH &&
     ) where (bruker_er_mottaker=true);  
     
@@ -22,6 +23,7 @@ alter table br_andel add constraint br_andel_ikke_overlapp_periode_bruker EXCLUD
         arbeidsgiver_aktor_id WITH =,
         inntektskategori WITH =,
         arbeidsforhold_type WITH =,
+        aktivitet_status WITH =,
         periode WITH &&
     ) where (bruker_er_mottaker=false);  
     
