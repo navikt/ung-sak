@@ -1,3 +1,7 @@
+alter table br_andel drop constraint if exists chk_br_andel_samme_aar  ;
+-- upper gir dato etter tom (alltid exclusive i db)
+alter table br_andel add constraint chk_br_andel_samme_aar check (periode is null OR date_part('year'::text, lower(periode)) = date_part('year'::text, upper(periode) - interval '1 day'));
+
 update br_andel a 
  set beregningsresultat_id=b.BEREGNINGSRESULTAT_FP_ID,
      periode = daterange(b.br_periode_fom, b.br_periode_tom, '[]')
