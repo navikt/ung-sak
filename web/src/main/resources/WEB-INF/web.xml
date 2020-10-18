@@ -22,10 +22,6 @@
         <param-value>false</param-value>
     </context-param>
 
-    <listener>
-        <listener-class>no.nav.k9.sak.web.server.startupinfo.AppStartupServletContextListener</listener-class>
-    </listener>
-
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Ubeskyttet</web-resource-name>
