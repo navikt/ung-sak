@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
@@ -20,24 +21,14 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
         this.vurderBekreftetOpptjening = vurderBekreftetOpptjening;
     }
 
-    @Override
-    public VurderingsStatus vurderStatus(OpptjeningAktivitetType type,
-                                         BehandlingReferanse behandlingReferanse,
-                                         Yrkesaktivitet overstyrtAktivitet,
-                                         InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                         boolean harVærtSaksbehandlet,
-                                         DatoIntervallEntitet opptjeningPeriode) {
-        return vurderStatus(type, behandlingReferanse, null, overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
-    }
-
-    @Override
     public VurderingsStatus vurderStatus(OpptjeningAktivitetType type,
                                          BehandlingReferanse behandlingReferanse,
                                          Yrkesaktivitet registerAktivitet,
                                          Yrkesaktivitet overstyrtAktivitet,
                                          InntektArbeidYtelseGrunnlag iayGrunnlag,
                                          boolean harVærtSaksbehandlet,
-                                         DatoIntervallEntitet opptjeningPeriode) {
+                                         DatoIntervallEntitet opptjeningPeriode,
+                                         SakInntektsmeldinger inntektsmeldinger) {
 
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
         if (OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(type)) {
@@ -45,7 +36,7 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
         } else if (OpptjeningAktivitetType.NÆRING.equals(type)) {
             return vurderNæring(behandlingReferanse.getAktørId(), overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
         } else if (OpptjeningAktivitetType.ARBEID.equals(type)) {
-            return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, harVærtSaksbehandlet, opptjeningPeriode);
+            return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, harVærtSaksbehandlet, opptjeningPeriode, inntektsmeldinger);
         }
         return VurderingsStatus.GODKJENT;
     }
@@ -54,11 +45,15 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
      * @param registerAktivitet    aktiviteten
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode
+     * @param opptjeningPeriode opptjeningsperioder
+     * @param inntektsmeldinger inntektsmeldinger
      * @return vurderingsstatus
      */
-    private VurderingsStatus vurderArbeid(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
-        if (vurderBekreftetOpptjening.girAksjonspunktForArbeidsforhold(filter, registerAktivitet, overstyrtAktivitet, opptjeningPeriode)) {
+    private VurderingsStatus vurderArbeid(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet,
+                                          boolean harVærtSaksbehandlet,
+                                          DatoIntervallEntitet opptjeningPeriode,
+                                          SakInntektsmeldinger inntektsmeldinger) {
+        if (vurderBekreftetOpptjening.girAksjonspunktForArbeidsforhold(filter, registerAktivitet, overstyrtAktivitet, opptjeningPeriode, inntektsmeldinger)) {
             if (overstyrtAktivitet != null) {
                 return VurderingsStatus.GODKJENT;
             }
@@ -87,10 +82,10 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
 
     /**
      *
-     * @param aktørId
+     * @param aktørId aktør
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode
+     * @param opptjeningPeriode opptjeningsperiode
      * @return vurderingsstatus
      */
     private VurderingsStatus vurderNæring(AktørId aktørId, Yrkesaktivitet overstyrtAktivitet, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
@@ -104,5 +99,16 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
             return VurderingsStatus.TIL_VURDERING;
         }
         return VurderingsStatus.GODKJENT;
+    }
+
+    @Override
+    public VurderingsStatus vurderStatus(VurderStatusInput input) {
+        return vurderStatus(input.getType(), input.getBehandlingReferanse(),
+            input.getRegisterAktivitet(),
+            input.getOverstyrtAktivitet(),
+            input.getIayGrunnlag(),
+            input.getHarVærtSaksbehandlet(),
+            input.getOpptjeningPeriode(),
+            input.getInntektsmeldinger());
     }
 }

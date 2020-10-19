@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -60,7 +61,8 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
                                                                                   DatoIntervallEntitet opptjeningPeriode,
-                                                                                  OppgittOpptjening oppgittOpptjening) {
+                                                                                  OppgittOpptjening oppgittOpptjening,
+                                                                                  SakInntektsmeldinger inntektsmeldinger) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
@@ -68,8 +70,7 @@ public class OpptjeningsperioderUtenOverstyringTjeneste {
         var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteterForBeregning()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(
-                behandlingReferanse, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, null, opptjeningPeriode);
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(behandlingReferanse, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, null, opptjeningPeriode, inntektsmeldinger);
             perioder.addAll(opptjeningsperioder);
         }
 

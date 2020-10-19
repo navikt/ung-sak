@@ -22,6 +22,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
@@ -35,18 +36,19 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
 public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
-    /** alle må starte et sted. */
+    /**
+     * alle må starte et sted.
+     */
     private static final LocalDate THE_FOM = LocalDate.of(2017, 3, 1);
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2020, 3, 1);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
-    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
-
     private final OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD));
+    private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
     private Boolean toggletVilkårsperioder;
 
     protected FrisinnOpptjeningForBeregningTjeneste() {
@@ -62,7 +64,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
 
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         LocalDate stp;
         if (toggletVilkårsperioder) {
             stp = SKJÆRINGSTIDSPUNKT;
@@ -89,8 +91,13 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
                                                                                                              LocalDate stp, LocalDate fomDato) {
 
         Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(iayGrunnlag);
-        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class, opptjeningsperioderTjenesteInstanser, behandlingReferanse.getFagsakYtelseType())            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null));
+        OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class,
+            opptjeningsperioderTjenesteInstanser,
+            behandlingReferanse.getFagsakYtelseType())
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningsperioderUtenOverstyringTjeneste.class.getSimpleName() + " for " + behandlingReferanse.getBehandlingUuid()));
+        // Sender med tom da denne bare brukes til utledning av aksjonspunkt og dermed ikke trengs for beregning
+        var inntektsmeldinger = new SakInntektsmeldinger(behandlingReferanse.getSaksnummer());
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, DatoIntervallEntitet.fraOgMed(fomDato), oppgittOpptjening.orElse(null), inntektsmeldinger);
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(fomDato))
@@ -99,9 +106,9 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     }
 
     private OpptjeningAktiviteter hentOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                       LocalDate stp,
-                                                                       LocalDate fom) {
+                                                             InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                             LocalDate stp,
+                                                             LocalDate fom) {
         var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregningFrisinn(ref, iayGrunnlag, stp, fom).stream()
             .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
         return new OpptjeningAktiviteter(opptjeningsPerioder);

@@ -67,7 +67,7 @@ public class Yrkesaktivitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef, arbeidType };
+        Object[] keyParts = {arbeidsgiver, arbeidsforholdRef, arbeidType};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -116,7 +116,7 @@ public class Yrkesaktivitet implements IndexKey {
     /**
      * Identifiser om yrkesaktiviteten gjelder for arbeidsgiver og arbeidsforholdRef.
      *
-     * @param arbeidsgiver en {@link Arbeidsgiver}
+     * @param arbeidsgiver      en {@link Arbeidsgiver}
      * @param arbeidsforholdRef et {@link InternArbeidsforholdRef}
      * @return true hvis arbeidsgiver og arbeidsforholdRef macther
      */
@@ -147,9 +147,17 @@ public class Yrkesaktivitet implements IndexKey {
         return Collections.unmodifiableSet(aktivitetsAvtale);
     }
 
+    public Collection<AktivitetsAvtale> getAnsettelsesPeriode() {
+        return getAlleAktivitetsAvtaler()
+            .stream()
+            .filter(AktivitetsAvtale::erAnsettelsesPeriode)
+            .collect(Collectors.toList());
+    }
+
     /**
      * Gir stillingsprosent hvis det finnes for den gitte dagen
      * Kaster feil hvis det blir gitt overlappene stillingsprosent
+     *
      * @param dato {@link LocalDate}
      * @return Stillingsprosent {@link Stillingsprosent}
      */
