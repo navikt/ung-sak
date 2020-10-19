@@ -357,7 +357,7 @@
 			<dependency>
 				<groupId>no.nav.fpsak.tidsserie</groupId>
 				<artifactId>fpsak-tidsserie</artifactId>
-				<version>2.3-20201015193634-6a40086</version>
+				<version>2.3-20201019093601-b2584db</version>
 			</dependency>
 			<dependency>
 				<groupId>no.nav.fpsak.nare</groupId>
