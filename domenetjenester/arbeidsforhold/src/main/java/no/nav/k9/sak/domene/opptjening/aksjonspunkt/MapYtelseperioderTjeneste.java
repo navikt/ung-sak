@@ -103,11 +103,15 @@ public class MapYtelseperioderTjeneste {
             .collect(Collectors.toList());
 
         ytelse.getYtelseAnvist().forEach(ytelseAnvist -> {
+            var input = new VurderStatusInput(type, behandlingReferanse);
+            input.setGrunnlag(iayGrunnlag);
+            input.setOpptjeningPeriode(opptjeningPeriode);
+            input.setHarVærtSaksbehandlet(false);
             if (orgnumre.isEmpty()) {
                 OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                     .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
                     .medOpptjeningAktivitetType(type)
-                    .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false, opptjeningPeriode));
+                    .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
                 ytelserAnvist.add(builder.build());
             } else {
                 orgnumre.forEach(orgnr -> {
@@ -116,7 +120,7 @@ public class MapYtelseperioderTjeneste {
                         .medOpptjeningAktivitetType(type)
                         .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))
                         .medOpptjeningsnøkkel(Opptjeningsnøkkel.forOrgnummer(orgnr))
-                        .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(type, behandlingReferanse, null, iayGrunnlag, false, opptjeningPeriode));
+                        .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
                     ytelserAnvist.add(builder.build());
                 });
             }

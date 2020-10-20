@@ -2,13 +2,17 @@ package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -23,14 +27,19 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -72,9 +81,85 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
         Yrkesaktivitet overstyrt = filter.getYrkesaktiviteter().iterator().next();
         // Act
-        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, null, overstyrt, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt));
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, null, overstyrt, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer()));
         // Assert
         assertThat(girAksjonspunkt).isTrue();
+    }
+
+    @Test
+    public void skal_gi_aksjonspunkt_arbeidsforhold_0_prosent_ingen_IM() {
+        // Arrange
+        Behandling behandling = opprettBehandling(skjæringstidspunkt);
+        var builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
+
+        var aabuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
+        var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
+        var yaBuilder = aabuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(arbeidsforholdId, arbeidsgiver), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        yaBuilder.medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsgiver(arbeidsgiver)
+            .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusYears(2)), true));
+        yaBuilder.leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusYears(2)), false)
+            .medProsentsats(Stillingsprosent.ZERO)
+            .medSisteLønnsendringsdato(LocalDate.now().minusYears(2))
+            .medBeskrivelse("ASDF"));
+        aabuilder.leggTilYrkesaktivitet(yaBuilder);
+        builder.leggTilAktørArbeid(aabuilder);
+
+        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+
+        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.finnGrunnlag(behandling.getId()).orElseThrow();
+        var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId()));
+        Yrkesaktivitet register = filter.getAlleYrkesaktiviteter().iterator().next();
+        // Act
+        var inntektsmeldinger = new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer());
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), inntektsmeldinger);
+        // Assert
+        assertThat(girAksjonspunkt).isTrue();
+    }
+
+    @Test
+    public void skal_ikke_gi_aksjonspunkt_arbeidsforhold_0_prosent_ved_IM() {
+        // Arrange
+        Behandling behandling = opprettBehandling(skjæringstidspunkt);
+        var builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
+
+        var aabuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
+        var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
+        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
+        var yaBuilder = aabuilder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(arbeidsforholdId, arbeidsgiver), ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        yaBuilder.medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsgiver(arbeidsgiver)
+            .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusYears(2)), true));
+        yaBuilder.leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusYears(2)), false)
+            .medProsentsats(Stillingsprosent.ZERO)
+            .medSisteLønnsendringsdato(LocalDate.now().minusYears(2))
+            .medBeskrivelse("ASDF"));
+        aabuilder.leggTilYrkesaktivitet(yaBuilder);
+        builder.leggTilAktørArbeid(aabuilder);
+
+        iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+
+        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.finnGrunnlag(behandling.getId()).orElseThrow();
+        var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId()));
+        Yrkesaktivitet register = filter.getAlleYrkesaktiviteter().iterator().next();
+        // Act
+        var inntektsmeldinger = new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer());
+        var inntektsmelding = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(arbeidsgiver)
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
+            .medJournalpostId("1")
+            .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25))))
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        inntektsmeldinger.leggTil(behandling.getId(), iayGrunnlag.getEksternReferanse(), iayGrunnlag.getOpprettetTidspunkt(), inntektsmelding);
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), inntektsmeldinger);
+        // Assert
+        assertThat(girAksjonspunkt).isFalse();
     }
 
     private Behandling opprettBehandling(LocalDate iDag) {

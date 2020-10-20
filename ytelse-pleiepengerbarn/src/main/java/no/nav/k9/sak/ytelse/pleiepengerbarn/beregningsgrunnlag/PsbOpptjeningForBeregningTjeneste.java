@@ -20,6 +20,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
@@ -58,8 +59,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
-                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                              LocalDate stp) {
+                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                                      LocalDate stp) {
         OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = finnOpptjeningsperioderUtenOverstyringTjeneste(behandlingReferanse);
 
         Long behandlingId = behandlingReferanse.getId();
@@ -68,9 +69,10 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         if (opptjeningResultat.isEmpty()) {
             return Collections.emptyList();
         }
-        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(behandlingReferanse.getSkjæringstidspunktOpptjening())).orElseThrow();
-
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null));
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
+        // Sender med tom da denne bare brukes til utledning av aksjonspunkt og dermed ikke trengs for beregning
+        var inntektsmeldinger = new SakInntektsmeldinger(behandlingReferanse.getSaksnummer());
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), finnOppgittOpptjening(iayGrunnlag).orElse(null), inntektsmeldinger);
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
@@ -101,7 +103,7 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
         return opptjeningAktiviteter;
     }
