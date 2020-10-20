@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-export JAVA_OPTS="${JAVA_OPTS:-} -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo"
+export JAVA_OPTS="${JAVA_OPTS:-} -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo"
 export STARTUP_CLASS=${STARTUP_CLASS:-"no.nav.k9.sak.web.server.jetty.JettyServer"}
 
 if test -f /var/run/secrets/nais.io/serviceuser/username
