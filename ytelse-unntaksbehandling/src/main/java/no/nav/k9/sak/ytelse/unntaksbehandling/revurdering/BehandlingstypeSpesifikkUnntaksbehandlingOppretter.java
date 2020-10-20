@@ -93,7 +93,7 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
         // Opprett revurderingsbehandling
-        Behandling manuellBehandling = revurderingTjenesteFelles.opprettRevurderingsbehandling(BehandlingType.UNNTAKSBEHANDLING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
+        Behandling manuellBehandling = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.UNNTAKSBEHANDLING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(manuellBehandling);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, manuellBehandling);
 

@@ -39,18 +39,18 @@ public class RevurderingTjenesteFelles {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
-    public Behandling opprettRevurderingsbehandling(BehandlingType behandlingType, BehandlingÅrsakType revurderingÅrsakType,
-                                                    Behandling opprinneligBehandling,
-                                                    boolean manueltOpprettet,
-                                                    OrganisasjonsEnhet enhet) {
-        BehandlingÅrsak.Builder revurderingÅrsak = BehandlingÅrsak.builder(revurderingÅrsakType)
+    public Behandling opprettNyBehandling(BehandlingType behandlingType, BehandlingÅrsakType nyBehandlingÅrsakType,
+                                          Behandling opprinneligBehandling,
+                                          boolean manueltOpprettet,
+                                          OrganisasjonsEnhet enhet) {
+        BehandlingÅrsak.Builder nyBehandlingÅrsak = BehandlingÅrsak.builder(nyBehandlingÅrsakType)
             .medManueltOpprettet(manueltOpprettet);
-        Behandling revurdering = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
+        Behandling nyBehandling = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlendeEnhet(enhet)
             .medBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()))
-            .medBehandlingÅrsak(revurderingÅrsak).build();
-        revurderingHistorikk.opprettHistorikkinnslagOmRevurdering(revurdering, revurderingÅrsakType, manueltOpprettet);
-        return revurdering;
+            .medBehandlingÅrsak(nyBehandlingÅrsak).build();
+        revurderingHistorikk.opprettHistorikkinnslagOmRevurdering(nyBehandling, nyBehandlingÅrsakType, manueltOpprettet);
+        return nyBehandling;
     }
 
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
