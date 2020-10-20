@@ -10,8 +10,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -26,21 +26,21 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 @FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-010")
 @ApplicationScoped
-public class UnntaksbehandlingRevurderingTjeneste implements NyBehandlingTjeneste {
+public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements UnntaksbehandlingOppretterTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
 
-    public UnntaksbehandlingRevurderingTjeneste() {
+    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter() {
         // for CDI proxy
     }
 
     @Inject
-    public UnntaksbehandlingRevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                RevurderingTjenesteFelles revurderingTjenesteFelles,
-                                                BehandlingRepositoryProvider behandlingRepositoryProvider) {
+    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                                              RevurderingTjenesteFelles revurderingTjenesteFelles,
+                                                              BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
@@ -48,7 +48,7 @@ public class UnntaksbehandlingRevurderingTjeneste implements NyBehandlingTjenest
     }
 
     @Override
-    public Behandling opprettManuellRevurdering(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType behandlingÅrsak, OrganisasjonsEnhet enhet) {
+    public Behandling opprettNyBehandling(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType behandlingÅrsak, OrganisasjonsEnhet enhet) {
         Behandling nyBehandling;
         if (origBehandling == null) {
             nyBehandling = opprettFørsteBehandling(fagsak, behandlingÅrsak, enhet);
@@ -101,7 +101,7 @@ public class UnntaksbehandlingRevurderingTjeneste implements NyBehandlingTjenest
     }
 
     @Override
-    public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
+    public Boolean kanNyBehandlingOpprettes(Fagsak fagsak) {
         return behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).isEmpty();
     }
 

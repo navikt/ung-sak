@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
 @ApplicationScoped
-public class RevurderingTjeneste implements NyBehandlingTjeneste {
+public class RevurderingTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
@@ -40,7 +40,6 @@ public class RevurderingTjeneste implements NyBehandlingTjeneste {
         this.grunnlagKopierere = grunnlagKopierere;
     }
 
-    @Override
     public Behandling opprettManuellRevurdering(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
         Objects.requireNonNull(origBehandling, "origBehandling");
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
@@ -80,7 +79,6 @@ public class RevurderingTjeneste implements NyBehandlingTjeneste {
         getGrunnlagKopierer(original.getFagsakYtelseType()).kopierGrunnlagVedManuellOpprettelse(original, ny);
     }
 
-    @Override
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
         return revurderingTjenesteFelles.kanRevurderingOpprettes(fagsak);
     }

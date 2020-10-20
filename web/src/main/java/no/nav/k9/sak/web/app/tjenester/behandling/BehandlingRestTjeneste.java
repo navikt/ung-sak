@@ -375,7 +375,7 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprettNyUnntakskehandling(@Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto) {
+    public Response opprettNyUnntaksbehandling(@Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto) {
         if (!unntaksbehandlingTogglet) {
             throw new UnsupportedOperationException("Unntaksbehandling er ikke aktivert");
         }

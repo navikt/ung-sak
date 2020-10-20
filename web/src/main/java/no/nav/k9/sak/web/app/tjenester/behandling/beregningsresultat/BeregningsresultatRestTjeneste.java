@@ -45,7 +45,6 @@ public class BeregningsresultatRestTjeneste {
     public static final String HAR_SAMME_RESULTAT = "/har-samme-resultat";
     static public final String HAR_SAMME_RESULTAT_PATH = BASE_PATH + HAR_SAMME_RESULTAT;
     public static final String UTBETALT = "/utbetalt";
-    public static final String TILKJENT_YTELSE = "/tilkjent_ytelse";
     static public final String BEREGNINGSRESULTAT_UTBETALT_PATH = BASE_PATH + UTBETALT;
 
     private BehandlingRepository behandlingRepository;

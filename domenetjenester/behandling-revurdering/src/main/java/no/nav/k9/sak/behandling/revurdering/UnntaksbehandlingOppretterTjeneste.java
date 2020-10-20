@@ -6,8 +6,7 @@ import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
-public interface NyBehandlingTjeneste {
-    Behandling opprettManuellRevurdering(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet);
-
-    Boolean kanRevurderingOpprettes(Fagsak fagsak);
+public interface UnntaksbehandlingOppretterTjeneste {
+    Behandling opprettNyBehandling(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet);
+    Boolean kanNyBehandlingOpprettes(Fagsak fagsak);
 }

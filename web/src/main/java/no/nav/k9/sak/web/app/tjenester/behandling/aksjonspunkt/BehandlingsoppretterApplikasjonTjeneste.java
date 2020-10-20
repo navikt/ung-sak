@@ -12,9 +12,9 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -67,10 +67,8 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     }
 
     public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        NyBehandlingTjeneste revurderingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
-        Boolean kanUnntaksbehandlingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
-        // TODO: Egen guard for manuell behandling
-        if (!kanUnntaksbehandlingOpprettes) {
+        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
+        if (!unntaksbehandlingOppretterTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
         }
 
@@ -78,12 +76,12 @@ public class BehandlingsoppretterApplikasjonTjeneste {
             .orElse(null);
 
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return revurderingTjeneste.opprettManuellRevurdering(fagsak, origBehandling, behandlingÅrsakType, enhet);
+        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
-    private NyBehandlingTjeneste getRevurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(NyBehandlingTjeneste.class, ytelseType, behandlingType)
-            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + NyBehandlingTjeneste.class.getSimpleName() +
+    private UnntaksbehandlingOppretterTjeneste getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, ytelseType, behandlingType)
+            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretterTjeneste.class.getSimpleName() +
                 " for ytelsetype " + ytelseType + " , behandlingstype " + behandlingType));
     }
 
