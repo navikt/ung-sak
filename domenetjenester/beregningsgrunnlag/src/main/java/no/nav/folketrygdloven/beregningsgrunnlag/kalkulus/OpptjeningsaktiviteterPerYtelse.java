@@ -3,7 +3,9 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.util.Objects;
 import java.util.Set;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 
 public class OpptjeningsaktiviteterPerYtelse {
 
