@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
@@ -29,6 +31,7 @@ import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 @Provider
+@Produces({ MediaType.APPLICATION_JSON })
 public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper objectMapper;
@@ -47,6 +50,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         om.registerModule(new Jdk8Module());
         om.registerModule(new JavaTimeModule());
         om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        om.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         om.registerModule(simpleModule);
 

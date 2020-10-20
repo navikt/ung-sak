@@ -29,7 +29,12 @@ public class ApplicationConfig extends Application {
 
     public static final String API_URI = "/api";
 
+    private Set<Object> singletons;
+
     public ApplicationConfig() {
+
+        singletons = Set.of(new JacksonJsonConfig());
+
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
             .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
@@ -69,5 +74,10 @@ public class ApplicationConfig extends Application {
         classes.add(JacksonJsonConfig.class);
 
         return Collections.unmodifiableSet(classes);
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
+        return singletons;
     }
 }
