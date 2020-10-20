@@ -79,7 +79,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
-            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
+            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
             .collect(Collectors.toList());
     }
 
@@ -91,10 +91,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                        LocalDate stp) {
-        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
-            .stream()
-            .map(this::mapOpptjeningPeriode)
-            .collect(Collectors.toList());
+        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp).stream()
+            .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
         if (opptjeningsPerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -104,7 +102,8 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        return hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode.getFomDato());
+        return opptjeningAktiviteter;
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {
