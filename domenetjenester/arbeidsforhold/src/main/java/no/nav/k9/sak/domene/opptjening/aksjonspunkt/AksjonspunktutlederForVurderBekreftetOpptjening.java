@@ -7,7 +7,9 @@ import static no.nav.k9.sak.behandling.aksjonspunkt.Utfall.NEI;
 import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettListeForAksjonspunkt;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Inntektspost;
@@ -63,13 +66,14 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
             return INGEN_AKSJONSPUNKTER;
         }
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseGrunnlagOptional.get();
+        var inntektsmeldinger = iayTjeneste.hentInntektsmeldinger(param.getSaksnummer());
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
             DatoIntervallEntitet opptjeningPeriode = opptjening.getOpptjeningPeriode();
 
             LocalDate skjæringstidspunkt = opptjening.getSkjæringstidspunkt();
-            if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
+            if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, inntektsmeldinger, opptjeningPeriode, skjæringstidspunkt) == JA) {
                 logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}", behandlingId);
                 return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
             }
@@ -107,7 +111,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
     }
 
     private Utfall finnesDetArbeidsforholdMedStillingsprosentLik0(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag,
-                                                                  DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
+                                                                  SakInntektsmeldinger inntektsmeldinger, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
 
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
 
@@ -115,7 +119,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
         if (!yrkesaktiviteter.isEmpty()) {
             for (Yrkesaktivitet yrkesaktivitet : yrkesaktiviteter.stream()
                 .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType())).collect(Collectors.toList())) {
-                if (girAksjonspunkt(filter, opptjeningPeriode, yrkesaktivitet)) {
+                if (girAksjonspunkt(filter, opptjeningPeriode, yrkesaktivitet, inntektsmeldinger)) {
                     return JA;
                 }
             }
@@ -123,18 +127,45 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
         return NEI;
     }
 
-    private boolean girAksjonspunkt(YrkesaktivitetFilter filter, DatoIntervallEntitet opptjeningPeriode, Yrkesaktivitet yrkesaktivitet) {
+    private boolean girAksjonspunkt(YrkesaktivitetFilter filter, DatoIntervallEntitet opptjeningPeriode, Yrkesaktivitet yrkesaktivitet, SakInntektsmeldinger inntektsmeldinger) {
         if (filter.getAnsettelsesPerioder(yrkesaktivitet).stream().noneMatch(asp -> opptjeningPeriode.overlapper(asp.getPeriode()))) {
             return false;
         }
         var avtaler = filter.getAktivitetsAvtalerForArbeid(yrkesaktivitet);
         for (var aktivitetsAvtale : avtaler) {
             if ((aktivitetsAvtale.getProsentsats() == null || aktivitetsAvtale.getProsentsats().getVerdi().compareTo(BigDecimal.ZERO) == 0)
-                && opptjeningPeriode.overlapper(aktivitetsAvtale.getPeriode())) {
+                && opptjeningPeriode.overlapper(aktivitetsAvtale.getPeriode())
+                && erIkkeBekreftetFraArbeidsgiver(yrkesaktivitet, inntektsmeldinger, opptjeningPeriode.getTomDato().plusDays(1))) {
                 return true;
             }
         }
         return yrkesaktivitet.getArbeidsgiver().getErVirksomhet() && OrgNummer.erKunstig(yrkesaktivitet.getArbeidsgiver().getOrgnr());
+    }
+
+    private boolean erIkkeBekreftetFraArbeidsgiver(Yrkesaktivitet yrkesaktivitet, SakInntektsmeldinger inntektsmeldinger, LocalDate skjæringstidspunkt) {
+        var harIkkeVartLengeNok = harArbeidsforholdetVartIMindreEnn28dager(yrkesaktivitet, skjæringstidspunkt);
+        var harIkkeMottattInntektsmeldingFor = harIkkeMottattInntektsmeldingFor(yrkesaktivitet, inntektsmeldinger);
+
+        if (harIkkeMottattInntektsmeldingFor && harIkkeVartLengeNok) {
+            return true;
+        }
+        return harIkkeMottattInntektsmeldingFor;
+    }
+
+    private boolean harIkkeMottattInntektsmeldingFor(Yrkesaktivitet yrkesaktivitet, SakInntektsmeldinger inntektsmeldinger) {
+        if (inntektsmeldinger == null || inntektsmeldinger.getAlleInntektsmeldinger() == null) {
+            return true;
+        }
+        return inntektsmeldinger.getAlleInntektsmeldinger()
+            .stream()
+            .noneMatch(it -> it.getArbeidsgiver().equals(yrkesaktivitet.getArbeidsgiver()) && it.getArbeidsforholdRef().gjelderFor(yrkesaktivitet.getArbeidsforholdRef()));
+    }
+
+    private boolean harArbeidsforholdetVartIMindreEnn28dager(Yrkesaktivitet yrkesaktivitet, LocalDate skjæringstidspunkt) {
+        return yrkesaktivitet.getAnsettelsesPeriode()
+            .stream()
+            .filter(it -> it.getPeriode().overlapper(skjæringstidspunkt, skjæringstidspunkt))
+            .noneMatch(it -> it.getPeriode().tilIntervall().toDuration().compareTo(Duration.of(28, ChronoUnit.DAYS)) > 0);
     }
 
     private Utfall finnesDetBekreftetFrilans(AktørId aktørId, InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet opptjeningPeriode,
@@ -168,13 +199,13 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
         return opptjeningsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(ip.getPeriode().getFomDato(), ip.getPeriode().getTomDato()));
     }
 
-    boolean girAksjonspunktForArbeidsforhold(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
+    boolean girAksjonspunktForArbeidsforhold(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, SakInntektsmeldinger inntektsmeldinger) {
         if (overstyrtAktivitet != null && overstyrtAktivitet.getArbeidsgiver() != null && OrgNummer.erKunstig(overstyrtAktivitet.getArbeidsgiver().getOrgnr())) {
             return true;
         }
         if (opptjeningPeriode == null || registerAktivitet == null) {
             return false;
         }
-        return girAksjonspunkt(filter, opptjeningPeriode, registerAktivitet);
+        return girAksjonspunkt(filter, opptjeningPeriode, registerAktivitet, inntektsmeldinger);
     }
 }
