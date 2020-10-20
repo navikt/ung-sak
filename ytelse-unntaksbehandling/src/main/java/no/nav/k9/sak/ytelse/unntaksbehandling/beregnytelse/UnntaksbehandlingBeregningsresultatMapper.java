@@ -72,7 +72,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBeregningsresultat()))
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getOverstyrtBeregningsresultat()))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }

@@ -110,7 +110,7 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
 
                 if (erNySøknadsperiode) {
                     Behandling origBehandling = behandlingRepository.hentBehandling(originalBehandlingId.get());
-                    Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(origBehandling.getId());
+                    Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(origBehandling.getId());
                     beregningsresultat = MapBeregningsresultat.mapResultatFraForrige(beregningsresultat, origBeregningsresultat, sisteSøknadsperiode);
                 }
 

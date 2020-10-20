@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
@@ -21,32 +23,35 @@ import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
-    private BeregningsresultatRepository tilkjentYtelseRepository;
+    private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
+
 
     public VedtattYtelseTjeneste() {
     }
 
     @Inject
-    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository, BeregningsresultatRepository tilkjentYtelseRepository) {
+    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository,
+                                 @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
         this.vedtakRepository = vedtakRepository;
-        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.beregningsresultatProvidere = beregningsresultatProvidere;
     }
 
     public Ytelse genererYtelse(Behandling behandling) {
         final BehandlingVedtak vedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
-        Optional<BeregningsresultatEntitet> berResultat = tilkjentYtelseRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> berResultat = getBeregningsresultatProvider(behandling).hentBeregningsresultat(behandling.getId());
 
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
@@ -133,5 +138,10 @@ public class VedtattYtelseTjeneste {
             typeKode = YtelseStatus.OPPRETTET;
         }
         return typeKode;
+    }
+
+    private BeregningsresultatProvider getBeregningsresultatProvider(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(BeregningsresultatProvider.class, beregningsresultatProvidere, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 }

@@ -43,7 +43,7 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
     private BeregningsresultatEntitet utbetBeregningsresultat;
 
     @OneToOne
-    @JoinColumn(name = "overstyrt_beregningsresultat_fp_id", updatable = false, unique = true)
+    @JoinColumn(name = "overstyrt_beregningsresultat_id", updatable = false, unique = true)
     private BeregningsresultatEntitet overstyrtBeregningsresultat;
 
     @Column(name = "hindre_tilbaketrekk")
@@ -75,11 +75,6 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
     public BeregningsresultatEntitet getOverstyrtBeregningsresultat() {
         return overstyrtBeregningsresultat;
-    }
-
-    public BeregningsresultatEntitet getBeregningsresultat() {
-        // Returnerer gjeldende beregningsgrunnlag
-        return overstyrtBeregningsresultat != null ? overstyrtBeregningsresultat : bgBeregningsresultat;
     }
 
     public Optional<Boolean> skalHindreTilbaketrekk() {

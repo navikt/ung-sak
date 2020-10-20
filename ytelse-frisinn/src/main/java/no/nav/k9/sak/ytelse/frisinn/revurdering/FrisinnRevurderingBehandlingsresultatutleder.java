@@ -92,8 +92,8 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     private boolean erEndringIBeregning(Behandling revurdering, Behandling originalBehandling) {
         UttakAktivitet orginaltUttak = uttakRepository.hentFastsattUttak(originalBehandling.getId());
 
-        Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBeregningsresultat(originalBehandling.getId());
-        Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBeregningsresultat(revurdering.getId());
+        Optional<BeregningsresultatEntitet> orginaltResultat = beregningsresultatRepository.hentBgBeregningsresultat(originalBehandling.getId());
+        Optional<BeregningsresultatEntitet> revurderingResultat = beregningsresultatRepository.hentBgBeregningsresultat(revurdering.getId());
 
         return ErEndringIBeregningsresultatFRISINN.finnEndringerIUtbetalinger(revurderingResultat, orginaltResultat, orginaltUttak)
             .stream()

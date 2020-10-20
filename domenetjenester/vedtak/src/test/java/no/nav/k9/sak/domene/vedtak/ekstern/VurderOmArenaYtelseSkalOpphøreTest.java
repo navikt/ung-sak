@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.enterprise.inject.Instance;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -42,6 +44,9 @@ import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
+import no.nav.k9.sak.ytelse.beregning.beregningsresultat.DefaultBeregningsresultatProvider;
+import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
@@ -55,6 +60,8 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private final Repository repository = repoRule.getRepository();
     private final BeregningsresultatRepository beregningsresultatRepository = new BeregningsresultatRepository(repoRule.getEntityManager());
 
+    private Instance<BeregningsresultatProvider> beregningsresultatProvidere = new UnitTestLookupInstanceImpl<>(new DefaultBeregningsresultatProvider(repositoryProvider));
+
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
@@ -63,8 +70,8 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private final TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private final VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(
-        beregningsresultatRepository,
-        iayTjeneste, behandlingVedtakRepository, null);
+        behandlingRepository,
+        iayTjeneste, behandlingVedtakRepository, null, beregningsresultatProvidere);
 
     private Behandling behandling;
 

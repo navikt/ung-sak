@@ -36,16 +36,8 @@ public class BeregningsresultatRepository {
         return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
-    public Optional<BeregningsresultatEntitet> hentBeregningsresultat(Long behandlingId) {
-        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBeregningsresultat);
-    }
-
     public Optional<BeregningsresultatEntitet> hentUtbetBeregningsresultat(Long behandlingId) {
-        Optional<BehandlingBeregningsresultatEntitet> aggregat = hentBeregningsresultatAggregat(behandlingId);
-        Optional<BeregningsresultatEntitet> utbet = aggregat
-            .map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
-
-        return utbet.isPresent() ? utbet : aggregat.map(BehandlingBeregningsresultatEntitet::getBeregningsresultat);
+        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
     }
 
     public Optional<BehandlingBeregningsresultatEntitet> hentBeregningsresultatAggregat(Long behandlingId) {
