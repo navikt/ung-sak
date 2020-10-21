@@ -38,8 +38,8 @@ jobs:
       - uses: navikt/github-app-token-generator@v1
         id: get-token
         with:
-          private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
-          app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
+          private-key: ${{ secrets.REPO_CLONER_PRIVATE_KEY }}
+          app-id: ${{ secrets.REPO_CLONER_APP_ID }}
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
