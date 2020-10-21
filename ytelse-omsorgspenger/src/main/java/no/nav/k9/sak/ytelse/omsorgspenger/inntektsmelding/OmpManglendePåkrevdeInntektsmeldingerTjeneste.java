@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 import static java.util.stream.Collectors.flatMapping;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -106,26 +107,33 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
 
         var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
-        var arbeidsgiverMap = new HashMap<Arbeidsgiver, Set<InternArbeidsforholdRef>>();
+        var arbeidsgiverMap = new HashMap<DatoIntervallEntitet, Map<Arbeidsgiver, Set<InternArbeidsforholdRef>>>();
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
 
+            var arbeidsgiverSetHashMap = new HashMap<Arbeidsgiver, Set<InternArbeidsforholdRef>>();
             fraværFraInntektsmeldingerPåFagsak.stream()
                 .filter(this::erIkkeNullTimer)
                 .filter(it -> it.getAktivitetType().erArbeidstakerEllerFrilans())
                 .filter(it -> periode.overlapper(it.getPeriode()))
                 .forEach(it -> {
                     var key = it.getArbeidsgiver();
-                    var idSet = arbeidsgiverMap.getOrDefault(key, new HashSet<>());
+                    var idSet = arbeidsgiverSetHashMap.getOrDefault(key, new HashSet<>());
                     idSet.add(it.getArbeidsforholdRef());
-                    arbeidsgiverMap.put(key, idSet);
+                    arbeidsgiverSetHashMap.put(key, idSet);
                 });
+            arbeidsgiverMap.put(periode, arbeidsgiverSetHashMap);
         }
 
-         arbeidsgiverMap.entrySet()
-             .stream()
-             .filter(it -> it.getValue().contains(InternArbeidsforholdRef.nullRef()) && it.getValue().size() > 1)
-             .forEach(it -> LeggTilResultat.leggTil(result, AksjonspunktÅrsak.OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE, it.getKey(), it.getValue()));
+        arbeidsgiverMap.values()
+            .stream()
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
+            .filter(it -> it.getValue().contains(InternArbeidsforholdRef.nullRef()) && it.getValue().size() > 1)
+            .forEach(it -> {
+                logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsforholdRef={}", it.getValue());
+                LeggTilResultat.leggTil(result, AksjonspunktÅrsak.OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE, it.getKey(), it.getValue());
+            });
 
         return result;
     }
