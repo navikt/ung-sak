@@ -309,7 +309,8 @@ public class BehandlingDtoTjeneste {
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
         lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
         lagTilgjengeligeVedtakbrevlink(behandling).ifPresent(dto::leggTil);
-        lagDokumentdatalink(behandling).ifPresent(dto::leggTil);
+        lagLagreDokumentdatalink(behandling).ifPresent(dto::leggTil);
+        lagHenteDokumentdatalink(behandling).ifPresent(dto::leggTil);
 
         lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
     }
@@ -422,10 +423,18 @@ public class BehandlingDtoTjeneste {
                 "sakstype", behandling.getFagsakYtelseType().getKode())));
     }
 
-    private Optional<ResourceLink> lagDokumentdatalink(Behandling behandling) {
+    private Optional<ResourceLink> lagLagreDokumentdatalink(Behandling behandling) {
         return Optional.of(ResourceLink.post(
             "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
             "dokumentdata-lagre",
+            null
+        ));
+    }
+
+    private Optional<ResourceLink> lagHenteDokumentdatalink(Behandling behandling) {
+        return Optional.of(ResourceLink.get(
+            "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
+            "dokumentdata-hente",
             null
         ));
     }
