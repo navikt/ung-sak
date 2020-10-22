@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @GrunnlagRef("MedlemskapAggregat")
 class StartpunktUtlederMedlemskap implements StartpunktUtleder {
 

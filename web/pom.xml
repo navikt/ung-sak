@@ -95,6 +95,10 @@
             <groupId>no.nav.k9.sak.ytelse</groupId>
             <artifactId>ytelse-omsorgspenger</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak.ytelse</groupId>
+            <artifactId>ytelse-unntaksbehandling</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

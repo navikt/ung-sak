@@ -112,7 +112,7 @@ public class PleiepengerBeregneYtelseStegTest {
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
 
-        Optional<BeregningsresultatEntitet> beregningsresultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         assertThat(beregningsresultat).hasValueSatisfying(resultat -> {
             assertThat(resultat).isNotNull();
             assertThat(resultat.getRegelInput()).as("regelInput").isEqualTo(new RegelData("regelInput"));
@@ -132,7 +132,7 @@ public class PleiepengerBeregneYtelseStegTest {
         steg.vedHoppOverBakover(kontekst, null, null, null);
 
         // Assert
-        Optional<BeregningsresultatEntitet> resultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> resultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         assertThat(resultat).isNotPresent();
     }
 

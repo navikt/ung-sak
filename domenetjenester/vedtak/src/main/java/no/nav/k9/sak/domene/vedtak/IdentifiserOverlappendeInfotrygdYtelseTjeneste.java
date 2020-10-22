@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,10 +23,10 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygd;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotrygdRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -36,6 +38,7 @@ import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelse;
 import no.nav.k9.sak.domene.vedtak.infotrygd.InfotrygdHendelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.infotrygd.Meldingstype;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 
 @ApplicationScoped
 public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
@@ -43,22 +46,22 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     private static final Logger log = LoggerFactory.getLogger(IdentifiserOverlappendeInfotrygdYtelseTjeneste.class);
     private InfotrygdHendelseTjeneste infotrygdHendelseTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private BeregningsresultatRepository beregningsresultatRepository;
     private BehandlingOverlappInfotrygdRepository overlappRepository;
+    private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
 
     IdentifiserOverlappendeInfotrygdYtelseTjeneste() {
         // for CDI
     }
 
     @Inject
-    public IdentifiserOverlappendeInfotrygdYtelseTjeneste(BeregningsresultatRepository beregningsresultatRepository,
-                                                          InfotrygdHendelseTjeneste infotrygdHendelseTjeneste,
+    public IdentifiserOverlappendeInfotrygdYtelseTjeneste(InfotrygdHendelseTjeneste infotrygdHendelseTjeneste,
                                                           InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                          BehandlingOverlappInfotrygdRepository overlappRepository) {
+                                                          BehandlingOverlappInfotrygdRepository overlappRepository,
+                                                          @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
         this.infotrygdHendelseTjeneste = infotrygdHendelseTjeneste;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
-        this.beregningsresultatRepository = beregningsresultatRepository;
         this.overlappRepository = overlappRepository;
+        this.beregningsresultatProvidere = beregningsresultatProvidere;
     }
 
     public void vurderOgLagreEventueltOverlapp(Behandling behandling, BehandlingVedtak behandlingVedtak) {
@@ -68,7 +71,7 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
 
     public Optional<BehandlingOverlappInfotrygd> vurder(Behandling behandling, BehandlingVedtak behandlingVedtak) {
         Long behandlingId = behandling.getId();
-        Optional<ÅpenDatoIntervallEntitet> periodeVLOpt = fastsettPeriodeVL(behandlingId);
+        Optional<ÅpenDatoIntervallEntitet> periodeVLOpt = fastsettPeriodeVL(behandling);
 
         //FIXME (K9) legg inn ny kode her
         if (true) {
@@ -92,8 +95,8 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
         return vurderHendelse(behandling, nyesteHendelse, ytelseList, periodeVL);
     }
 
-    private Optional<ÅpenDatoIntervallEntitet> fastsettPeriodeVL(Long behandlingId) {
-        var beregningsresultatOpt = beregningsresultatRepository.hentUtbetBeregningsresultat(behandlingId);
+    private Optional<ÅpenDatoIntervallEntitet> fastsettPeriodeVL(Behandling behandling) {
+        var beregningsresultatOpt = getBeregningsresultatProvider(behandling).hentUtbetBeregningsresultat(behandling.getId());
         var beregningsresultatPerioder = beregningsresultatOpt.map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
                 .orElse(Collections.emptyList());
         List<BeregningsresultatPeriode> perioderMedInnvilgetYtelse = beregningsresultatPerioder.stream()
@@ -272,4 +275,8 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
         return Optional.of(behandlingOverlappInfotrygd);
     }
 
+    private BeregningsresultatProvider getBeregningsresultatProvider(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(BeregningsresultatProvider.class, beregningsresultatProvidere, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    }
 }

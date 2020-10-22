@@ -9,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @GrunnlagRef("PersonInformasjon")
 class StartpunktUtlederPersonopplysning implements StartpunktUtleder {
 

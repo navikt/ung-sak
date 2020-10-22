@@ -41,7 +41,7 @@ public class BeregningsresultatRepositoryImplTest {
     private AktørId aktørId;
 
     private final BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
-    
+
     @Before
     public void setup() {
         aktørId = AktørId.dummy();
@@ -51,7 +51,7 @@ public class BeregningsresultatRepositoryImplTest {
     private Behandling opprettBehandling() {
         return behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
     }
-    
+
     @Test
     public void lagreOgHentBeregningsresultatAggregat() {
         // Arrange
@@ -64,21 +64,6 @@ public class BeregningsresultatRepositoryImplTest {
         Optional<BehandlingBeregningsresultatEntitet> brKoblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(brKoblingOpt).hasValueSatisfying(brKobling ->
             assertThat(brKobling.getBgBeregningsresultat()).isSameAs(beregningsresultat)
-        );
-    }
-
-    @Test
-    public void lagreOgHentUtbetBeregningsresultatAggregatNårUTBETIkkeEksisterer() {
-        // Arrange
-        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
-
-        // Act
-        beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
-
-        // Assert
-        var utbetBROpt = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
-        assertThat(utbetBROpt).hasValueSatisfying(beregningsresultat ->
-            assertThat(beregningsresultat).isSameAs(bgBeregningsresultat)
         );
     }
 
@@ -112,7 +97,7 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
 
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
     }
@@ -150,7 +135,7 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         repository.flushAndClear();
-        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
         assertThat(beregningsresultatLest).isPresent();
         Arbeidsgiver arbeidsgiver = beregningsresultatLest.get().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0).getArbeidsgiver().get();//NOSONAR
@@ -265,8 +250,8 @@ public class BeregningsresultatRepositoryImplTest {
         beregningsresultatRepository.lagre(behandling2, beregningsresultat);
 
         // Assert
-        Optional<BeregningsresultatEntitet> beregningsresultat1 = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
-        Optional<BeregningsresultatEntitet> beregningsresultat2 = beregningsresultatRepository.hentBeregningsresultat(behandling2.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultat1 = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> beregningsresultat2 = beregningsresultatRepository.hentBgBeregningsresultat(behandling2.getId());
         assertThat(beregningsresultat1).isPresent();
         assertThat(beregningsresultat2).isPresent();
         assertThat(beregningsresultat1).hasValueSatisfying(b -> assertThat(b).isSameAs(beregningsresultat2.get())); //NOSONAR
@@ -295,7 +280,7 @@ public class BeregningsresultatRepositoryImplTest {
         BeregningsresultatAndel hentetBRAndel = repoRule.getEntityManager().find(BeregningsresultatAndel.class, beregningsresultatAndel.getId());
         assertThat(hentetBRAndel).isNotNull();
 
-        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         Optional<BehandlingBeregningsresultatEntitet> deaktivertKobling = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(deaktivertBeregningsresultat).isNotPresent();
         assertThat(deaktivertKobling).isNotPresent();

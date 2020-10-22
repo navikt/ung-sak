@@ -143,6 +143,16 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
         UTEN_VILKÅR, UTEN_SKJERMLENKE,
         ENTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+    MANUELL_TILKJENT_YTELSE(
+        AksjonspunktKodeDefinisjon.MANUELL_TILKJENT_YTELSE_KODE, AksjonspunktType.MANUELL,
+        "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
+        UTEN_VILKÅR, UTEN_SKJERMLENKE,
+        TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+    MANUELL_VURDERING_VILKÅR(
+        AksjonspunktKodeDefinisjon.MANUELL_VURDERING_VILKÅR_KODE, AksjonspunktType.MANUELL,
+        "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN,
+        UTEN_VILKÅR, UTEN_SKJERMLENKE,
+        TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     VURDER_FAKTA_FOR_ATFL_SN(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE,
         AksjonspunktType.MANUELL, "Vurder fakta for arbeidstaker, frilans og selvstendig næringsdrivende", BehandlingStatus.UTREDES,
         BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),

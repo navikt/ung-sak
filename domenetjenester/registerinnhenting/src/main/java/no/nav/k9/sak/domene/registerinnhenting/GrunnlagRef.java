@@ -19,7 +19,9 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.persistence.Entity;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
@@ -67,11 +69,11 @@ public @interface GrunnlagRef {
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
          * injected med riktig forventet klassetype og @Any qualifier.
          */
-        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType fagsakYtelseType, Instance<I> instances, Class<?> aggregatClass) {
-            return find(cls, instances, getName(aggregatClass), fagsakYtelseType.getKode());
+        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, Instance<I> instances, Class<?> aggregatClass) {
+            return find(cls, instances, getName(aggregatClass), fagsakYtelseType.getKode(), behandlingType.getKode());
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName, String fagsakYtelseType) {
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName, String fagsakYtelseType, String behandlingType) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
             for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
@@ -79,20 +81,26 @@ public @interface GrunnlagRef {
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    for (var grunnlagLiteral : coalesce(aggregatClassName, "*")) {
-                        var ginst = select(cls, inst, new GrunnlagRefLiteral(grunnlagLiteral));
-                        if (ginst.isResolvable()) {
-                            return Optional.of(getInstance(ginst));
-                        } else {
-                            if (ginst.isAmbiguous()) {
-                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() +
-                                    ", aggegatKlasse=" + aggregatClassName + ", fagsakType=" + fagsakYtelseType);
+                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
+                        var binst = select(cls, inst, new BehandlingTypeRef.BehandlingTypeRefLiteral(behandlingLiteral));
+                        if (binst.isUnsatisfied()) {
+                            continue;
+                        }
+                        for (var grunnlagLiteral : coalesce(aggregatClassName, "*")) {
+                            var ginst = select(cls, inst, new GrunnlagRefLiteral(grunnlagLiteral));
+                            if (ginst.isResolvable()) {
+                                return Optional.of(getInstance(ginst));
+                            } else {
+                                if (ginst.isAmbiguous()) {
+                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() +
+                                        ", aggegatKlasse=" + aggregatClassName + ", fagsakType=" + fagsakYtelseType);
+                                }
                             }
                         }
                     }
                 }
-            }
 
+            }
             return Optional.empty();
         }
 

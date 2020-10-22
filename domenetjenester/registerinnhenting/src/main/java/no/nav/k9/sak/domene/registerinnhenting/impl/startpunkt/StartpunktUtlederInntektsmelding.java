@@ -164,7 +164,7 @@ class StartpunktUtlederInntektsmelding {
             return false;
         }
 
-        Optional<BeregningsresultatEntitet> originalBeregningsresultat = beregningsresultatRepository.hentBeregningsresultat(originalBehandlingId);
+        Optional<BeregningsresultatEntitet> originalBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(originalBehandlingId);
 
         return originalBeregningsresultat.filter(StartpunktutlederHjelper::finnesAktivitetHvorAlleHarDagsatsNull).isPresent();
     }
