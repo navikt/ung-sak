@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
@@ -116,9 +118,11 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private boolean harBådeNullArbeidsforholdsIdOgSpesifikkId(NavigableSet<DatoIntervallEntitet> vurdertePerioder, FullUttaksplan fullUttaksplan) {
         var aktiviteter = fullUttaksplan.getAktiviteter();
 
-        var arbeidsgiverMap = new HashMap<String, Set<String>>();
+        var arbeidsgiverMap = new HashMap<DatoIntervallEntitet, Map<String, Set<String>>>();
+
         for (DatoIntervallEntitet periode : vurdertePerioder) {
 
+            var arbeidsgiverSetHashMap = new HashMap<String, Set<String>>();
             aktiviteter.stream()
                 .filter(it -> UttakArbeidType.fraKode(it.getArbeidsforhold().getType()).erArbeidstakerEllerFrilans())
                 .filter(it -> it.getUttaksperioder()
@@ -127,14 +131,17 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                 .map(Aktivitet::getArbeidsforhold)
                 .forEach(it -> {
                     var utledetKey = utledKey(it);
-                    var idSet = arbeidsgiverMap.getOrDefault(utledetKey, new HashSet<>());
+                    var idSet = arbeidsgiverSetHashMap.getOrDefault(utledetKey, new HashSet<>());
                     idSet.add(it.getArbeidsforholdId());
-                    arbeidsgiverMap.put(utledetKey, idSet);
+                    arbeidsgiverSetHashMap.put(utledetKey, idSet);
                 });
+            arbeidsgiverMap.put(periode, arbeidsgiverSetHashMap);
         }
 
-        return arbeidsgiverMap.entrySet()
+        return arbeidsgiverMap.values()
             .stream()
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
             .anyMatch(it -> it.getValue().contains(null) && it.getValue().size() > 1);
     }
 
