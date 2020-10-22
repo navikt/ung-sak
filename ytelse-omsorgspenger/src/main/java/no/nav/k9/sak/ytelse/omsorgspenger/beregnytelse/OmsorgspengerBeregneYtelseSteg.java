@@ -152,11 +152,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat, NavigableSet<DatoIntervallEntitet> vurdertePerioder) {
         return beregningsresultat.getBeregningsresultatPerioder().stream()
             .filter(p -> vurdertePerioder.stream().anyMatch(vp -> vp.overlapper(p.getPeriode())))
-            .anyMatch(p -> {
-                return p.getBeregningsresultatAndelList().stream().anyMatch(a -> {
-                    return a.erBrukerMottaker() && a.getDagsats() > 0;
-                });
-            });
+            .anyMatch(p -> p.getBeregningsresultatAndelList().stream().anyMatch(a -> a.erBrukerMottaker() && a.getDagsats() > 0));
     }
 
     @Override

@@ -70,8 +70,8 @@ public class VurderArbeidsforholdTjeneste {
      * saksbehandler må ta stilling til.
      * <p>
      *
-     * @param behandlingReferanse                    behandlingen
-     * @param iayGrunnlag                            - grunnlag for behandlingen
+     * @param behandlingReferanse behandlingen
+     * @param iayGrunnlag         - grunnlag for behandlingen
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder(BehandlingReferanse behandlingReferanse,
@@ -90,8 +90,8 @@ public class VurderArbeidsforholdTjeneste {
      * Legger også på en årsak for hvorfor arbeidsforholdet har fått et aksjonspunkt.
      * <p>
      *
-     * @param ref                                    behandlingen
-     * @param iayGrunnlag                            I(nntekt)A(rbeid)Y(telse) grunnlaget
+     * @param ref         behandlingen
+     * @param iayGrunnlag I(nntekt)A(rbeid)Y(telse) grunnlaget
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurderMedÅrsak(BehandlingReferanse ref,
@@ -168,18 +168,18 @@ public class VurderArbeidsforholdTjeneste {
         }
 
         if (ingenFør && ingenEtter) {
-            Set<InternArbeidsforholdRef> arbeidsforholdRefs = Stream.of(InternArbeidsforholdRef.nullRef()).collect(Collectors.toSet());
             Optional<InntektsmeldingAggregat> inntektsmeldinger = grunnlag.getInntektsmeldinger();
             if (inntektsmeldinger.isPresent()) {
-                arbeidsforholdRefs = inntektsmeldinger.get()
+                var arbeidsforholdRefs = inntektsmeldinger.get()
                     .getInntektsmeldingerFor(inntekt.getArbeidsgiver())
                     .stream()
                     .map(Inntektsmelding::getArbeidsforholdRef)
                     .collect(Collectors.toSet());
+                if (!arbeidsforholdRefs.isEmpty()) {
+                    logger.info("Inntekter uten kjent arbeidsforhold og mottatt inntektsmelding: arbeidsforholdRef={}", arbeidsforholdRefs);
+                }
             }
-            logger.info("Inntekter uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
         }
-
     }
 
     private boolean ikkeArbeidsforholdRegisterert(Inntekt inntekt, YrkesaktivitetFilter filter) {
@@ -192,11 +192,10 @@ public class VurderArbeidsforholdTjeneste {
 
         return filter.getYrkesaktiviteter()
             .stream()
-            .noneMatch(yr -> ARBEIDSFORHOLD_TYPER.contains(yr.getArbeidType()) && yr.getArbeidsgiver().equals(inntekt.getArbeidsgiver()))
-            && filter.getArbeidsforholdOverstyringer()
-            .stream()
-            .noneMatch(it -> Objects.equals(it.getArbeidsgiver(), inntekt.getArbeidsgiver())
-                && Objects.equals(it.getHandling(), ArbeidsforholdHandlingType.IKKE_BRUK));
+            .noneMatch(yr -> ARBEIDSFORHOLD_TYPER.contains(yr.getArbeidType()) && yr.getArbeidsgiver().equals(inntekt.getArbeidsgiver())) &&
+            filter.getArbeidsforholdOverstyringer().stream()
+                .noneMatch(it -> Objects.equals(it.getArbeidsgiver(), inntekt.getArbeidsgiver())
+                    && Objects.equals(it.getHandling(), ArbeidsforholdHandlingType.IKKE_BRUK));
     }
 
 }
