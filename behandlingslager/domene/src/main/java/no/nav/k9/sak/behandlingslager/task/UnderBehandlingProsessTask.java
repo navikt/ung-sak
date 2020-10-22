@@ -28,7 +28,7 @@ public abstract class UnderBehandlingProsessTask extends BehandlingProsessTask {
 
         logContext(behandling);
         
-        if (behandling.erSaksbehandlingAvsluttet()) {
+        if (behandling.erAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
                 + ", startpunkt=" + behandling.getStartpunkt()
