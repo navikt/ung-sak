@@ -70,6 +70,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     NYTT_REFUSJONSKRAV("NYTT_REFUSJONSKRAV", "Nytt refusjonskrav"),
     NY_REFUSJONSFRIST("NY_REFUSJONSFRIST", "Ny refusjonsfrist"),
 
+    VALG("VALG", "Valg"),
     UDEFINERT("-", "Ikke definert"),
     ;
 

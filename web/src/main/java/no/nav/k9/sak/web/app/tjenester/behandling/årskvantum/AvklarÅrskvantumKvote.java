@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.årskvantum;
 
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -39,18 +40,19 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
 
         if (fortsettBehandling) {
             //Bekreft uttaksplan og fortsett behandling
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK);
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
             årskvantumTjeneste.bekreftUttaksplan(behandlingId);
         } else {
             // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET);
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
         }
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType) {
+    private void opprettHistorikkInnslag(AvklarÅrskvantumDto dto, Long behandlingId, HistorikkinnslagType historikkinnslagType, String valg) {
         HistorikkInnslagTekstBuilder builder = historikkTjenesteAdapter.tekstBuilder();
+        builder.medEndretFelt(HistorikkEndretFeltType.VALG, null, valg);
         builder.medBegrunnelse(dto.getBegrunnelse());
         historikkTjenesteAdapter.opprettHistorikkInnslag(behandlingId, historikkinnslagType);
     }
