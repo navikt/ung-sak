@@ -9,14 +9,13 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.medlem.MedlemEndringIdentifiserer;
-import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktUtlederLogger;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-010")
-@GrunnlagRef("MedlemskapAggregat")
+//@GrunnlagRef("MedlemskapAggregat")
 class StartpunktUtlederMedlemskapUnntaksbehandling implements StartpunktUtleder {
 
     private MedlemskapRepository medlemskapRepository;
