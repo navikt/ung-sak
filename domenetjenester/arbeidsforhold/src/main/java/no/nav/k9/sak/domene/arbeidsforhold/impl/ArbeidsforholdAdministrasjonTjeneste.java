@@ -25,7 +25,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -53,7 +52,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     ArbeidsforholdAdministrasjonTjeneste() {
@@ -63,12 +61,10 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     @Inject
     public ArbeidsforholdAdministrasjonTjeneste(VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste,
                                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                                InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                                 InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
-        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
     }
 
     /**

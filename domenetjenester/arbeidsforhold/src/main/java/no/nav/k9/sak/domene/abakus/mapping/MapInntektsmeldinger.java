@@ -1,8 +1,12 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -29,6 +33,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.typer.AktørId;
@@ -36,7 +41,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 
 public class MapInntektsmeldinger {
     private static final Comparator<RefusjonDto> COMP_ENDRINGER_REFUSJON = Comparator
@@ -241,12 +245,27 @@ public class MapInntektsmeldinger {
 
     public static class MapFraDto {
 
+        private List<String> inntektsmeldingJournalpostIder = new ArrayList<>();
+
         public InntektsmeldingAggregat map(ArbeidsforholdInformasjonBuilder arbeidsforholdInformasjon, InntektsmeldingerDto dto) {
+            if (!inntektsmeldingJournalpostIder.isEmpty()) {
+                throw new IllegalStateException("Kan ikke gjenbruke " + getClass().getSimpleName() + ", lag ny instans for hver mapping");
+            }
             if (dto == null) {
                 return null;
             }
             var inntektsmeldinger = dto.getInntektsmeldinger().stream().map(im -> mapInntektsmelding(arbeidsforholdInformasjon, im)).collect(Collectors.toList());
+            verifiserIngenDuplikatInntektsmeldinger();
             return new InntektsmeldingAggregat(inntektsmeldinger);
+        }
+
+        private void verifiserIngenDuplikatInntektsmeldinger() {
+            var duplikater = inntektsmeldingJournalpostIder.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().filter(e -> e.getValue() > 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getKey));
+            if (!duplikater.isEmpty()) {
+                throw new IllegalStateException("Fikk duplikate inntektsmeldinger fra abakus for journalposter: " + duplikater);
+            }
         }
 
         private Inntektsmelding mapInntektsmelding(ArbeidsforholdInformasjonBuilder arbeidsforholdInformasjon, InntektsmeldingDto dto) {
@@ -266,6 +285,9 @@ public class MapInntektsmeldinger {
             }
 
             var journalpostId = dto.getJournalpostId().getId();
+
+            inntektsmeldingJournalpostIder.add(journalpostId);
+
             var innsendingstidspunkt = dto.getInnsendingstidspunkt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
             var innsendingsårsak = KodeverkMapper.mapInntektsmeldingInnsendingsårsakFraDto(dto.getInnsendingsårsak());
 

@@ -364,7 +364,7 @@ public class Inntektsmelding implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getArbeidsgiver(), getArbeidsforholdRef(), getJournalpostId());
+        return Objects.hash(getArbeidsgiver(), getArbeidsforholdRef(), getKanalreferanse(), getJournalpostId());
     }
 
     @Override

@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,7 +36,6 @@ import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
@@ -71,7 +69,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 public class AvklarArbeidsforholdOppdatererTest {
 
     private static final String NAV_ORGNR = "889640782";
-    
+
     private static final InternArbeidsforholdRef ARBEIDSFORHOLD_REF = InternArbeidsforholdRef.namedRef("TEST-REF");
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
@@ -87,18 +85,15 @@ public class AvklarArbeidsforholdOppdatererTest {
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private AvklarArbeidsforholdOppdaterer oppdaterer;
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
     private String randomId = UUID.randomUUID().toString();
     private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
 
     @Before
     public void oppsett() {
-        initMocks(this);
         var arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
             vurderArbeidsforholdTjeneste,
             arbeidsgiverTjeneste,
-            inntektsmeldingTjeneste,
             iayTjeneste);
         var arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
         ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
