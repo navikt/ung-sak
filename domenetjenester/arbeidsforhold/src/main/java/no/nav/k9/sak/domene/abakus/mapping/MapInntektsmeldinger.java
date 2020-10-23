@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -245,26 +245,26 @@ public class MapInntektsmeldinger {
 
     public static class MapFraDto {
 
-        private List<String> inntektsmeldingJournalpostIder = new ArrayList<>();
-
         public InntektsmeldingAggregat map(ArbeidsforholdInformasjonBuilder arbeidsforholdInformasjon, InntektsmeldingerDto dto) {
-            if (!inntektsmeldingJournalpostIder.isEmpty()) {
-                throw new IllegalStateException("Kan ikke gjenbruke " + getClass().getSimpleName() + ", lag ny instans for hver mapping");
-            }
             if (dto == null) {
                 return null;
             }
             var inntektsmeldinger = dto.getInntektsmeldinger().stream().map(im -> mapInntektsmelding(arbeidsforholdInformasjon, im)).collect(Collectors.toList());
-            verifiserIngenDuplikatInntektsmeldinger();
+            verifiserIngenDuplikatInntektsmeldinger(inntektsmeldinger);
             return new InntektsmeldingAggregat(inntektsmeldinger);
         }
 
-        private void verifiserIngenDuplikatInntektsmeldinger() {
-            var duplikater = inntektsmeldingJournalpostIder.stream()
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream().filter(e -> e.getValue() > 1)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getKey));
+        private void verifiserIngenDuplikatInntektsmeldinger(List<Inntektsmelding> inntektsmeldinger) {
+            var duplikater = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream().filter(e -> e.getValue() > 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
             if (!duplikater.isEmpty()) {
-                throw new IllegalStateException("Fikk duplikate inntektsmeldinger fra abakus for journalposter: " + duplikater);
+                var ims = inntektsmeldinger.stream().filter(im -> duplikater.containsKey(im.getJournalpostId()))
+                    .map(im -> new AbstractMap.SimpleEntry<>(im.getJournalpostId(), im.getIndexKey()))
+                    .collect(Collectors.toList());
+                throw new IllegalStateException("Fikk duplikate inntektsmeldinger fra abakus for journalposter: " + duplikater + ", inntektsmeldinger: " + ims);
             }
         }
 
@@ -277,16 +277,16 @@ public class MapInntektsmeldinger {
             EksternArbeidsforholdRef eksternRef = arbeidsforholdRef == null || arbeidsforholdRef.getEksternReferanse() == null ? null
                 : EksternArbeidsforholdRef.ref(arbeidsforholdRef.getEksternReferanse());
 
+            var journalpostId = dto.getJournalpostId().getId();
             if ((internRef.getReferanse() != null && eksternRef == null) || (internRef.getReferanse() == null && eksternRef != null)) {
                 throw new IllegalStateException(
-                    "Både internRef og eksternRef må enten være satt eller begge null, fikk intern=" + internRef + ", ekstern=" + eksternRef);
+                    "Både internRef og eksternRef må enten være satt eller begge null, fikk intern="
+                        + internRef + ", ekstern=" + eksternRef
+                        + ", for journalpost=" + journalpostId + ", arbeidsgiver="
+                        + arbeidsgiver);
             } else if (!InternArbeidsforholdRef.nullRef().equals(internRef)) {
                 arbeidsforholdInformasjon.leggTilNyReferanse(new ArbeidsforholdReferanse(arbeidsgiver, internRef, eksternRef));
             }
-
-            var journalpostId = dto.getJournalpostId().getId();
-
-            inntektsmeldingJournalpostIder.add(journalpostId);
 
             var innsendingstidspunkt = dto.getInnsendingstidspunkt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
             var innsendingsårsak = KodeverkMapper.mapInntektsmeldingInnsendingsårsakFraDto(dto.getInnsendingsårsak());
