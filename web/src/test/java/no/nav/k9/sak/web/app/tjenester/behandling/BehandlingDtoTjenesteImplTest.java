@@ -95,6 +95,9 @@ public class BehandlingDtoTjenesteImplTest {
         if (dtoLink.getRel().equals("dokumentdata-lagre")) {
             return true;
         }
+        if (dtoLink.getRel().equals("dokumentdata-hente")) {
+            return true;
+        }
         for (ResourceLink routeLink : existingRoutes) {
             if (dtoLink.getHref().getPath().equals(routeLink.getHref().getPath()) && dtoLink.getType().equals(routeLink.getType())) {
                 linkEksists = true;
