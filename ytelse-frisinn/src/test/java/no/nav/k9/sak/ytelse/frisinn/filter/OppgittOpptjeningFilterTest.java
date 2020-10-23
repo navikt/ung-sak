@@ -17,7 +17,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class OppgittOpptjeningFilterTest {
 
-    private final DatoIntervallEntitet periodeApril = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 4, 1), LocalDate.of(2020, 4, 30));
+    private final DatoIntervallEntitet periodeApril = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
     private final DatoIntervallEntitet periodeMai = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
 
     @Test
@@ -87,7 +87,7 @@ public class OppgittOpptjeningFilterTest {
         var maiOppdrag = OppgittFrilansOppdragBuilder.ny();
         maiOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeMai);
 
-        frilans.medFrilansOppdrag(List.of(aprilOppdrag.build(), maiOppdrag.build()));
+        frilans.medFrilansOppdrag(List.of(aprilOppdrag.build()));
         oppgittOpptjening.leggTilFrilansOpplysninger(frilans.build());
 
         var mai = EgenNæringBuilder.ny();
