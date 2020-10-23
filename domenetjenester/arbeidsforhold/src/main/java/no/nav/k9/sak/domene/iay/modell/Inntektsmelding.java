@@ -108,7 +108,7 @@ public class Inntektsmelding implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef, journalpostId, kanalreferanse };
         return IndexKeyComposer.createKey(keyParts);
     }
 
