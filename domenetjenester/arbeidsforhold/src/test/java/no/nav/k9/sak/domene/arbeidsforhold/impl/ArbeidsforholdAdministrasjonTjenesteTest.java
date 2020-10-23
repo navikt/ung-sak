@@ -120,8 +120,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         when(vurderArbeidsforholdTjeneste.vurder(any(), any())).thenReturn(arbeidsgiverSetMap);
 
         ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
-        arbeidsforholdTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste,
-            arbeidsgiverTjeneste, inntektsmeldingTjeneste, iayTjeneste);
+        arbeidsforholdTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste, arbeidsgiverTjeneste, iayTjeneste);
     }
 
     @Test

@@ -13,8 +13,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
@@ -42,7 +40,6 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<OmsorgspengerGrunnlag> {
 
-    private static final Logger log = LoggerFactory.getLogger(OmsorgspengerYtelsesspesifiktGrunnlagMapper.class);
     private static final Comparator<Uttaksperiode> COMP_PERIODE = comparing(uttaksperiode -> uttaksperiode.getPeriode().getFom());
 
     private Boolean hentFullUttaksplan;
@@ -128,9 +125,6 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @NotNull
     private BigDecimal mapUtbetalingsgrad(Uttaksperiode p) {
         if (!Utfall.INNVILGET.equals(p.getUtfall()) && BigDecimal.ZERO.compareTo(p.getUtbetalingsgrad()) != 0) {
-            log.warn("Uttaksperiode med utfall={} og utbetalingsgrad({}) er ikke 0 som forventet",
-                p.getUtfall(),
-                p.getUtbetalingsgrad());
             throw new IllegalStateException("Uttaksperiode med utfall=" + p.getUtfall()
                 + " og utbetalingsgrad(" + p.getUtbetalingsgrad()
                 + ") er ikke 0 som forventet");

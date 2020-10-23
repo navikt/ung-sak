@@ -37,13 +37,13 @@ public class TrekkUtFraværTjeneste {
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     @Inject
-    public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository, BehandlingRepository behandlingRepository, MottatteDokumentRepository mottatteDokumentRepository, InntektArbeidYtelseTjeneste iayTjeneste) {
+    public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository, BehandlingRepository behandlingRepository, MottatteDokumentRepository mottatteDokumentRepository,
+                                 InntektArbeidYtelseTjeneste iayTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
     }
-
 
     OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
 
@@ -117,17 +117,32 @@ public class TrekkUtFraværTjeneste {
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        if (inntektsmeldinger.size() != inntektsmeldingerJournalposter.size()) {
-            var journalposterSomMangler = inntektsmeldingerJournalposter.stream()
-                .filter(it -> inntektsmeldinger.stream()
-                    .map(Inntektsmelding::getJournalpostId)
-                    .noneMatch(it::equals))
-                .collect(Collectors.toSet());
-            log.warn("Fant inntektsmeldinger '{}' knyttet til behandlingen men følgende mangler '{}'", inntektsmeldingerJournalposter, journalposterSomMangler);
-            throw new IllegalStateException("Har inntektsmeldinger som er knyttet til behandlingen, men finner ikke disse i abakus");
-        }
+        sjekkOmInntektsmeldingerMatcher(inntektsmeldingerJournalposter, inntektsmeldinger);
 
         return trekkUtFravær(inntektsmeldinger);
+    }
+
+    private void sjekkOmInntektsmeldingerMatcher(Set<JournalpostId> inntektsmeldingerJournalposter, LinkedHashSet<Inntektsmelding> inntektsmeldinger) {
+        var abakusJournalposter = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
+        var abakusJournalposterSomMangler = new LinkedHashSet<>(abakusJournalposter);
+        abakusJournalposterSomMangler.removeAll(inntektsmeldingerJournalposter);
+
+        if (!abakusJournalposterSomMangler.isEmpty()) {
+            throw new IllegalStateException(
+                "Har inntektsmeldinger i abakus " + abakusJournalposterSomMangler
+                    + " som er knyttet til behandlingen, men har ikke knyttet disse i til behandling (har følgende knyttet til behandling: "
+                    + inntektsmeldingerJournalposter + ", mangler: " + abakusJournalposterSomMangler + ")");
+        }
+
+        var journalposterSomMangler = new LinkedHashSet<>(inntektsmeldingerJournalposter);
+        journalposterSomMangler.removeAll(abakusJournalposter);
+
+        if (!journalposterSomMangler.isEmpty()) {
+            throw new IllegalStateException(
+                "Har inntektsmeldinger " + inntektsmeldingerJournalposter
+                    + " som er knyttet til behandlingen, men finner ikke disse i abakus (har følgende i abakus: "
+                    + abakusJournalposter + ", mangler " + journalposterSomMangler + ")");
+        }
     }
 
     List<OppgittFraværPeriode> trekkUtFravær(Set<Inntektsmelding> inntektsmeldinger) {

@@ -5,6 +5,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,7 +34,7 @@ import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.KopierFeriepenger;
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class HindreTilbaketrekkSteg implements BehandlingSteg {
-
+    private static Logger log = LoggerFactory.getLogger(HindreTilbaketrekkSteg.class);
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
     private HindreTilbaketrekkNårAlleredeUtbetalt hindreTilbaketrekkNårAlleredeUtbetalt;
@@ -70,6 +73,7 @@ public class HindreTilbaketrekkSteg implements BehandlingSteg {
 
             KopierFeriepenger.kopierFraTil(behandlingId, revurderingTY, utbetBR);
 
+            log.info("Skal forhindre tilbaketrekk, nytt utbetal beregningsresultat");
             beregningsresultatRepository.lagreUtbetBeregningsresultat(behandling, utbetBR);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();

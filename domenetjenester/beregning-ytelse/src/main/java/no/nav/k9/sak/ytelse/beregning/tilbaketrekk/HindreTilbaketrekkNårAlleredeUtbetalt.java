@@ -4,7 +4,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.resultat.Beregningsgrunnlag;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat;
@@ -34,7 +33,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetalt {
             .medFeriepengerRegelSporing(beregningsgrunnlagTY.getFeriepengerRegelSporing())
             .build();
 
-        for (LocalDateSegment<BRAndelSammenligning> segment : tidslinje.toSegments()) {
+        for (var segment : tidslinje) {
             HindreTilbaketrekkBeregningsresultatPeriode.omfordelPeriodeVedBehov(utbetaltTY, segment);
         }
         return utbetaltTY;
