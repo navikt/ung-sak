@@ -179,12 +179,10 @@ public class BehandlingDtoTjeneste {
         }
 
         // Totrinnsbehandlin
+        dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", uuidQueryParams));
+        dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", uuidQueryParams));
         if (BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus())) {
-            dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_PATH, "totrinnskontroll-arsaker", uuidQueryParams));
-            dto.leggTil(
-                post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
-        } else if (BehandlingStatus.UTREDES.equals(behandling.getStatus())) {
-            dto.leggTil(getFraMap(TotrinnskontrollRestTjeneste.ARSAKER_READ_ONLY_PATH, "totrinnskontroll-arsaker-readOnly", uuidQueryParams));
+            dto.leggTil(post(TotrinnskontrollRestTjeneste.BEKREFT_AKSJONSPUNKT_PATH, "bekreft-totrinnsaksjonspunkt", new BehandlingIdDto(behandling.getUuid())));
         }
 
         // Brev
@@ -427,16 +425,14 @@ public class BehandlingDtoTjeneste {
         return Optional.of(ResourceLink.post(
             "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
             "dokumentdata-lagre",
-            null
-        ));
+            null));
     }
 
     private Optional<ResourceLink> lagHenteDokumentdatalink(Behandling behandling) {
         return Optional.of(ResourceLink.get(
             "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
             "dokumentdata-hente",
-            null
-        ));
+            null));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
