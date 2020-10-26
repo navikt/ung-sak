@@ -23,16 +23,13 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
-import no.nav.k9.sak.skjæringstidspunkt.YtelseOpphørtidspunktTjeneste;
 import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -47,7 +44,6 @@ public class TilkjentYtelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private Instance<YtelseOpphørtidspunktTjeneste> tilkjentYtelse;
     private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
 
     TilkjentYtelseTjeneste() {
@@ -58,12 +54,10 @@ public class TilkjentYtelseTjeneste {
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
-                                  @Any Instance<YtelseOpphørtidspunktTjeneste> tilkjentYtelse,
                                   @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.tilkjentYtelse = tilkjentYtelse;
         this.beregningsresultatProvidere = beregningsresultatProvidere;
     }
 
@@ -77,17 +71,9 @@ public class TilkjentYtelseTjeneste {
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
-
         MapperForTilkjentYtelse mapper = new MapperForTilkjentYtelse(behandling.getFagsakYtelseType());
         List<TilkjentYtelsePeriodeV1> perioder = mapper.mapTilkjentYtelse(hentTilkjentYtelsePerioder(behandling).orElse(null));
-
-        var tjeneste = FagsakYtelseTypeRef.Lookup.find(tilkjentYtelse, ref.getFagsakYtelseType()).orElseThrow();
-        boolean erOpphør = tjeneste.erOpphør(ref);
-        Boolean erOpphørEtterSkjæringstidspunktet = tjeneste.erOpphørEtterSkjæringstidspunkt(ref);
-        return new TilkjentYtelse(null, perioder)
-            .setErOpphørEtterSkjæringstidspunkt(erOpphørEtterSkjæringstidspunktet)
-            .setErOpphør(erOpphør);
+        return new TilkjentYtelse(perioder);
     }
 
     public TilkjentYtelseOppdrag hentTilkjentYtelseOppdrag(Long behandlingId) {
