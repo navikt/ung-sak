@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -72,60 +73,68 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         if (toggletVilkårsperioder) {
             var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
 
-            if (!beregningsgrunnlag.isEmpty()) {
-                UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
-                UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
+            BeregningsresultatEntitet beregningsresultat = beregningsgrunnlag.isEmpty()
+                ? BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build() // tomt beregningresultat
+                : fastsettBeregningsresultat(behandlingId, behandling, beregningsgrunnlag);
 
-                // Kalle regeltjeneste
-                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
+            // Verifiser beregningsresultat
+            BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-                var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
+            // Beregner ikke feriepenger for frisinn
 
-                // Verifiser beregningsresultat
-                BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-
-                // Beregner ikke feriepenger for frisinn
-
-                // Lagre beregningsresultat
-                beregningsresultatRepository.lagre(behandling, beregningsresultat);
-            } else {
-                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build());
-            }
+            // Lagre beregningsresultat
+            beregningsresultatRepository.lagre(behandling, beregningsresultat);
         } else {
             var originalBehandlingId = behandling.getOriginalBehandlingId();
 
             var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
 
-            if (!beregningsgrunnlag.isEmpty()) {
-                UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
-                UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
+            BeregningsresultatEntitet beregningsresultat = beregningsgrunnlag.isEmpty()
+                ? BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build() // tomt beregningresultat
+                : fastsettBeregningsresultat(behandlingId, behandling, beregningsgrunnlag);
 
-                DatoIntervallEntitet sisteSøknadsperiode = uttakRepository.hentGrunnlag(behandlingId).map(UttakGrunnlag::getOppgittSøknadsperioder).map(Søknadsperioder::getMaksPeriode)
-                    .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
-                Boolean erNySøknadsperiode = originalBehandlingId.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
-
-                beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
-
-                var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
-
-                if (erNySøknadsperiode) {
-                    Behandling origBehandling = behandlingRepository.hentBehandling(originalBehandlingId.get());
-                    Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(origBehandling.getId());
-                    beregningsresultat = MapBeregningsresultat.mapResultatFraForrige(beregningsresultat, origBeregningsresultat, sisteSøknadsperiode);
-                }
-
-                // Verifiser beregningsresultat
-                BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-                // Beregner ikke feriepenger for frisinn
-
-                // Lagre beregningsresultat
-                beregningsresultatRepository.lagre(behandling, beregningsresultat);
-            } else {
-                beregningsresultatRepository.lagre(behandling, BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build());
+            Boolean erNySøknadsperiode = originalBehandlingId.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
+            if (erNySøknadsperiode) {
+                beregningsresultat = mergeMedOrigBeregningsresultat(beregningsresultat, behandlingId, originalBehandlingId);
             }
+
+            // Verifiser beregningsresultat
+            BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
+            // Beregner ikke feriepenger for frisinn
+
+            // Lagre beregningsresultat
+            beregningsresultatRepository.lagre(behandling, beregningsresultat);
         }
 
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    /**
+     * Ved ny søknadsperiode mappes kun siste periode av {@link Beregningsgrunnlag} i Frisinn inn i
+     * {@link BeregningsresultatEntitet}. De foregående periodene kopieres fra forrige behandlings
+     * {@link BeregningsresultatEntitet}
+     */
+    private BeregningsresultatEntitet mergeMedOrigBeregningsresultat(BeregningsresultatEntitet beregningsresultat, Long behandlingId, Optional<Long> originalBehandlingId) {
+        Behandling origBehandling = behandlingRepository.hentBehandling(originalBehandlingId.get());
+        Optional<BeregningsresultatEntitet> origBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(origBehandling.getId());
+
+        DatoIntervallEntitet sisteSøknadsperiode = uttakRepository.hentGrunnlag(behandlingId)
+            .map(UttakGrunnlag::getOppgittSøknadsperioder)
+            .map(Søknadsperioder::getMaksPeriode)
+            .orElseThrow(() -> new IllegalStateException("Forventer uttaksgrunnlag"));
+
+        return MapBeregningsresultat.mapResultatFraForrige(beregningsresultat, origBeregningsresultat, sisteSøknadsperiode);
+    }
+
+    private BeregningsresultatEntitet fastsettBeregningsresultat(Long behandlingId, Behandling behandling, List<Beregningsgrunnlag> beregningsgrunnlag) {
+        UttakAktivitet fastsattUttak = uttakRepository.hentFastsattUttak(behandlingId);
+        UttakResultat uttakResultat = MapUttakFrisinnTilRegel.map(fastsattUttak, behandling.getFagsakYtelseType());
+
+        // Trim/juster beregningsgrunnlag før fastsetting (regelkall)
+        beregningsgrunnlag = MapTilBeregningsgrunnlag.mapBeregningsgrunnlag(beregningsgrunnlag);
+
+        return fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttakResultat);
     }
 
 
