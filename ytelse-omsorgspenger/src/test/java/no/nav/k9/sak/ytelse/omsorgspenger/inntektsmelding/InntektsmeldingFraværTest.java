@@ -78,8 +78,8 @@ public class InntektsmeldingFraværTest {
         var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(sakInntektsmeldinger.getAlleInntektsmeldinger());
 
         assertThat(oppgittFraværPeriode).hasSize(3);
-        assertThat(oppgittFraværPeriode.stream().filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000"))).hasSize(2);
-        assertThat(oppgittFraværPeriode.stream().filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000001"))).hasSize(1);
+        assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000"))).hasSize(2);
+        assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000001"))).hasSize(1);
     }
 
     @Test
@@ -115,15 +115,18 @@ public class InntektsmeldingFraværTest {
         var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(sakInntektsmeldinger.getAlleInntektsmeldinger());
 
         assertThat(oppgittFraværPeriode).hasSize(2);
-        assertThat(oppgittFraværPeriode.stream().filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
+        assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))
             .map(OppgittFraværPeriode::getPeriode))
             .contains(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(29)));
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(InternArbeidsforholdRef.nullRef())))
             .hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(InternArbeidsforholdRef.nullRef()))
             .map(OppgittFraværPeriode::getPeriode))
             .contains(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(28), LocalDate.now().minusDays(25)));
@@ -162,12 +165,16 @@ public class InntektsmeldingFraværTest {
         var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(sakInntektsmeldinger.getAlleInntektsmeldinger());
 
         assertThat(oppgittFraværPeriode).hasSize(1);
-        assertThat(oppgittFraværPeriode.stream().filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
+            .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
+        assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))
             .map(OppgittFraværPeriode::getPeriode))
             .contains(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25)));
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(InternArbeidsforholdRef.nullRef())))
             .hasSize(0);
     }
@@ -205,15 +212,20 @@ public class InntektsmeldingFraværTest {
         var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(sakInntektsmeldinger.getAlleInntektsmeldinger());
 
         assertThat(oppgittFraværPeriode).hasSize(2);
-        assertThat(oppgittFraværPeriode.stream().filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
+            .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
+        assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))
             .map(OppgittFraværPeriode::getPeriode))
             .contains(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25)));
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(InternArbeidsforholdRef.nullRef())))
             .hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
             .filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(InternArbeidsforholdRef.nullRef()))
             .map(OppgittFraværPeriode::getPeriode))
             .contains(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(24), LocalDate.now().minusDays(22)));

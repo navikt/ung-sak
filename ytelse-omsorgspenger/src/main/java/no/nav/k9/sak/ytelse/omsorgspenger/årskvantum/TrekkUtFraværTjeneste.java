@@ -23,6 +23,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.InntektsmeldingFravær;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -85,10 +86,20 @@ public class TrekkUtFraværTjeneste {
 
         log.info("Fant inntektsmeldinger knyttet til behandlingen: {}", inntektsmeldingerJournalposter);
 
-        return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
+        return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter)
+            .stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
+            .collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
+        return fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(behandling)
+            .stream()
+            .map(WrappedOppgittFraværPeriode::getPeriode)
+            .collect(Collectors.toList());
+    }
+
+    public List<WrappedOppgittFraværPeriode> fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
             .stream()
             .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
@@ -101,7 +112,7 @@ public class TrekkUtFraværTjeneste {
         return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
     }
 
-    List<OppgittFraværPeriode> trekkUtPerioderFraInntektsmeldinger(Behandling behandling, Set<JournalpostId> inntektsmeldingerJournalposter) {
+    List<WrappedOppgittFraværPeriode> trekkUtPerioderFraInntektsmeldinger(Behandling behandling, Set<JournalpostId> inntektsmeldingerJournalposter) {
         if (inntektsmeldingerJournalposter.isEmpty()) {
             return List.of();
         }
@@ -145,7 +156,7 @@ public class TrekkUtFraværTjeneste {
         }
     }
 
-    List<OppgittFraværPeriode> trekkUtFravær(Set<Inntektsmelding> inntektsmeldinger) {
+    List<WrappedOppgittFraværPeriode> trekkUtFravær(Set<Inntektsmelding> inntektsmeldinger) {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
     }
 }

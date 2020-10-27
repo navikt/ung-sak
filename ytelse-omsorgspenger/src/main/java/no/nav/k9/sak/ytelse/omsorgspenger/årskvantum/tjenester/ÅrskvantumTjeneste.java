@@ -160,18 +160,18 @@ public class ÅrskvantumTjeneste {
             barna);
     }
 
-    private Set<OppgittFraværPeriode> utledPerioderRelevantForBehandling(Behandling behandling, OppgittFravær grunnlag) {
+    private Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioderRelevantForBehandling(Behandling behandling, OppgittFravær grunnlag) {
         var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
-        var fagsakFravær = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandling);
+        var fagsakFravær = trekkUtFraværTjeneste.fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(behandling);
 
         var behandlingFravær = grunnlag.getPerioder();
         return utledPerioder(vilkårsperioder, fagsakFravær, behandlingFravær);
     }
 
-    Set<OppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder, List<OppgittFraværPeriode> fagsakFravær, Set<OppgittFraværPeriode> behandlingFravær) {
+    Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder, List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær, Set<OppgittFraværPeriode> behandlingFravær) {
         return fagsakFravær.stream()
-            .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode())) || (Duration.ZERO.equals(it.getFraværPerDag()) &&
-                behandlingFravær.stream().anyMatch(at -> at.getPeriode().equals(it.getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()))))
+            .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) || (Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
+                behandlingFravær.stream().anyMatch(at -> at.getPeriode().equals(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()))))
             .collect(Collectors.toSet());
     }
 
@@ -192,7 +192,7 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
-    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger, Set<OppgittFraværPeriode> perioder, Behandling behandling) {
+    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder, Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, behandling.getFagsak().getPeriode(), perioder)
             .values()

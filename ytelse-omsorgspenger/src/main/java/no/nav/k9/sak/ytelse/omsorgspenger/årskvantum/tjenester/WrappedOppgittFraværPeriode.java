@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -7,13 +8,15 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class WrappedOppgittFraværPeriode {
     private OppgittFraværPeriode periode;
+    private LocalDateTime innsendingstidspunkt;
     private Aktivitet aktivitet;
     private Boolean iPermisjon;
     private Boolean ikkeIArbeid;
     private Boolean avslåttInngangsvilkår;
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, Boolean iPermisjon, Boolean ikkeIArbeid, Boolean avslåttInngangsvilkår) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, Boolean iPermisjon, Boolean ikkeIArbeid, Boolean avslåttInngangsvilkår) {
         this.periode = periode;
+        this.innsendingstidspunkt = innsendingstidspunkt;
         this.iPermisjon = iPermisjon;
         this.ikkeIArbeid = ikkeIArbeid;
         if (periode != null && periode.getAktivitetType() != null) {
@@ -22,6 +25,10 @@ class WrappedOppgittFraværPeriode {
             this.aktivitet = null;
         }
         this.avslåttInngangsvilkår = avslåttInngangsvilkår;
+    }
+
+    public LocalDateTime getInnsendingstidspunkt() {
+        return innsendingstidspunkt;
     }
 
     public OppgittFraværPeriode getPeriode() {
