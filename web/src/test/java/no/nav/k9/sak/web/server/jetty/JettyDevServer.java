@@ -33,21 +33,11 @@ public class JettyDevServer extends JettyServer {
     private static final String KEYSTORE_PASSW_PROP = "no.nav.modig.security.appcert.password";
     private static final String KEYSTORE_PATH_PROP = "no.nav.modig.security.appcert.keystore";
 
-    private static final String VTP_ARGUMENT = "--vtp";
-    private static boolean vtp;
-
     public JettyDevServer() {
         super(new JettyDevKonfigurasjon());
     }
 
     public static void main(String[] args) throws Exception {
-        for (String arg : args) {
-            if (arg.equals(VTP_ARGUMENT)) {
-                vtp = true;
-                break;
-            }
-        }
-
         JettyDevServer devServer = new JettyDevServer();
         devServer.bootStrap();
     }
@@ -109,7 +99,7 @@ public class JettyDevServer extends JettyServer {
     @Override
     protected void konfigurerMiljø() throws Exception {
         System.setProperty("develop-local", "true");
-        PropertiesUtils.initProperties(JettyDevServer.vtp);
+        PropertiesUtils.initProperties();
 
         JettyDevDbKonfigurasjon konfig = new JettyDevDbKonfigurasjon();
         System.setProperty("defaultDS.url", konfig.getUrl());
@@ -118,9 +108,10 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected void konfigurerSikkerhet() {
-        System.setProperty("conf", "src/main/resources/jetty/");
-        super.konfigurerSikkerhet();
+    protected void konfigurerSikkerhet(File jaspiConf) {
+        // overstyrer angitt dir for lokal testing
+        File alternativeJaspiConf = new File("src/main/resources/jetty/jaspi-conf.xml");
+        super.konfigurerSikkerhet(alternativeJaspiConf);
 
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
         initCryptoStoreConfig("truststore", TRUSTSTORE_PATH_PROP, TRUSTSTORE_PASSW_PROP, "changeit");

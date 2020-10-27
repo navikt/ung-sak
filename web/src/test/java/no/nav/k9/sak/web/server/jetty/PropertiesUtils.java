@@ -9,7 +9,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PropertiesUtils {
+class PropertiesUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesUtils.class);
 
@@ -19,11 +19,9 @@ public class PropertiesUtils {
     private PropertiesUtils() {
     }
 
-    static void initProperties(boolean vtp) {
+    static void initProperties() {
         loadPropertyFile(new File(DEV_FILNAVN_LOCAL));
-        if (vtp) {
-            loadPropertyFile(new File(VTP_FILNAVN_LOCAL));
-        }
+        loadPropertyFile(new File(VTP_FILNAVN_LOCAL));
     }
 
     private static void loadPropertyFile(File devFil) {
