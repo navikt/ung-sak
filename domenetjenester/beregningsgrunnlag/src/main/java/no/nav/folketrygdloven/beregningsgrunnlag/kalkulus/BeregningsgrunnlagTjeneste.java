@@ -232,9 +232,12 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     @Override
     public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter) {
         var sortert = new TreeSet<>(skjæringstidspunkter);
-        var referanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, true, false);
+        var referanser = finnBeregningsgrunnlagsReferanseFor(ref.getBehandlingId(), sortert, false, false);
         if (!referanser.isEmpty()) {
-            var bgReferanser = referanser.stream().map(BgRef::getRef).collect(Collectors.toList());
+            var bgReferanser = referanser.stream()
+                .filter(it -> !it.erGenerertReferanse())
+                .map(BgRef::getRef)
+                .collect(Collectors.toList());
             finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser);
         }
     }
@@ -280,7 +283,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         if (bgReferanser.isEmpty() && !skjæringstidspunkter.isEmpty()) {
             throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + skjæringstidspunkter);
         } else if (kreverEksisterendeReferanse) {
-            var first = bgReferanser.stream().filter(r -> r.erGenerertReferanse()).findFirst();
+            var first = bgReferanser.stream().filter(BgRef::erGenerertReferanse).findFirst();
             if (first.isPresent()) {
                 throw new IllegalStateException("Forventer at referansen eksisterer for skjæringstidspunkt=" + first.get().getStp());
             }
