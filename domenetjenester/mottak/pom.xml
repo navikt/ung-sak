@@ -34,10 +34,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>skjaeringstidspunkt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>
         </dependency>
         <dependency>
@@ -45,16 +41,8 @@
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingslager-domene</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter</groupId>
             <artifactId>inntektsmelding-v1</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>felles-integrasjon-rest-klient</artifactId>
         </dependency>
 
         <!-- Test avhengigheter -->

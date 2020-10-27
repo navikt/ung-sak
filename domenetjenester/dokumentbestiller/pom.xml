@@ -61,12 +61,6 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>uttak</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-core</artifactId>
