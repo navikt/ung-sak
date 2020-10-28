@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -18,12 +17,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
 import no.nav.k9.sak.web.app.JettyTestApplication;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;
@@ -39,21 +33,11 @@ public class JettyDevServer extends JettyServer {
     private static final String KEYSTORE_PASSW_PROP = "no.nav.modig.security.appcert.password";
     private static final String KEYSTORE_PATH_PROP = "no.nav.modig.security.appcert.keystore";
 
-    private static final String VTP_ARGUMENT = "--vtp";
-    private static boolean vtp;
-
     public JettyDevServer() {
         super(new JettyDevKonfigurasjon());
     }
 
     public static void main(String[] args) throws Exception {
-        for (String arg : args) {
-            if (arg.equals(VTP_ARGUMENT)) {
-                vtp = true;
-                break;
-            }
-        }
-
         JettyDevServer devServer = new JettyDevServer();
         devServer.bootStrap();
     }
@@ -108,59 +92,26 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected void konfigurer() throws Exception {
-        konfigurerLogback();
-        super.konfigurer();
-    }
-
-    @Override
     protected EnvironmentClass getEnvironmentClass() {
         return EnvironmentClass.LOCALHOST;
-    }
-
-    protected void konfigurerLogback() throws IOException {
-        new File("./logs").mkdirs();
-        System.setProperty("APP_LOG_HOME", "./logs");
-        File logbackConfig = PropertiesUtils.lagLogbackConfig();
-
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-        try {
-            JoranConfigurator configurator = new JoranConfigurator();
-            configurator.setContext(context);
-            // Call context.reset() to clear any previous configuration, e.g. default
-            // configuration. For multi-step configuration, omit calling context.reset().
-            context.reset();
-            configurator.doConfigure(logbackConfig.getAbsolutePath());
-        } catch (JoranException je) {
-            // StatusPrinter will handle this
-        }
-        StatusPrinter.printInCaseOfErrorsOrWarnings(context);
     }
 
     @Override
     protected void konfigurerMiljø() throws Exception {
         System.setProperty("develop-local", "true");
-        PropertiesUtils.initProperties(JettyDevServer.vtp);
+        PropertiesUtils.initProperties();
 
-        List<JettyDevDbKonfigurasjon> konfigs = PropertiesUtils.getDBConnectionProperties()
-            .stream()
-            .filter(jettyDevDbKonfigurasjon -> jettyDevDbKonfigurasjon.getDatasource().equals("defaultDS"))
-            .collect(Collectors.toList());
-        if (konfigs.size() == 1) {
-            final JettyDevDbKonfigurasjon konfig = konfigs.get(0);
-            System.setProperty("defaultDS.url", konfig.getUrl());
-            System.setProperty("defaultDS.username", konfig.getUser()); // benyttes kun hvis vault.enable=false
-            System.setProperty("defaultDS.password", konfig.getPassword()); // benyttes kun hvis vault.enable=false
-        } else {
-            throw new RuntimeException("forventet én datasourc-konfiger med defaultDS, men fant " + konfigs.size());
-        }
+        JettyDevDbKonfigurasjon konfig = new JettyDevDbKonfigurasjon();
+        System.setProperty("defaultDS.url", konfig.getUrl());
+        System.setProperty("defaultDS.username", konfig.getUser()); // benyttes kun hvis vault.enable=false
+        System.setProperty("defaultDS.password", konfig.getPassword()); // benyttes kun hvis vault.enable=false
     }
 
     @Override
-    protected void konfigurerSikkerhet() {
-        System.setProperty("conf", "src/main/resources/jetty/");
-        super.konfigurerSikkerhet();
+    protected void konfigurerSikkerhet(File jaspiConf) {
+        // overstyrer angitt dir for lokal testing
+        File alternativeJaspiConf = new File("src/main/resources/jetty/jaspi-conf.xml");
+        super.konfigurerSikkerhet(alternativeJaspiConf);
 
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
         initCryptoStoreConfig("truststore", TRUSTSTORE_PATH_PROP, TRUSTSTORE_PASSW_PROP, "changeit");

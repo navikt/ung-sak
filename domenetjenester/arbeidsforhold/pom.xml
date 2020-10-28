@@ -28,25 +28,13 @@
 			<artifactId>weld-web</artifactId>
 		</dependency>
 
-
 		<!-- Modul interne avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandling</artifactId>
 		</dependency>
 
-		<!-- Interne avhengigheter -->
-		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>behandlingslager-domene</artifactId>
-		</dependency>
-
 		<!-- Integrasjon avhengigheter -->
-		<dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>felles-integrasjon-rest-klient</artifactId>
-        </dependency>
-		
 		<dependency>
 			<groupId>no.nav.foreldrepenger.kontrakter</groupId>
 			<artifactId>fp-feed-vedtak-tjenestespesifikasjon</artifactId>
@@ -70,11 +58,6 @@
 			<artifactId>person-klient</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-core</artifactId>
