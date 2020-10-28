@@ -93,8 +93,8 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
         if (erPåkrevdManuelleAvklaringer) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        } else {
-            ryddOppAksjonspunktHvisEksisterer(ref);
+        } else if (harAksjonspunkt5080(ref)) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
         }
         if (erAktørArbeidEndretForSøker) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktørarbeid");
@@ -116,24 +116,17 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         return startpunkter;
     }
 
-    private boolean erInntektsmeldingEndret(BehandlingReferanse ref, IAYGrunnlagDiff iayGrunnlagDiff, StartpunktType startpunktType) {
-        return startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref) ? !StartpunktType.UDEFINERT.equals(startpunktType) : iayGrunnlagDiff.erEndringPåInntektsmelding();
+    private boolean harAksjonspunkt5080(BehandlingReferanse ref) {
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getId());
+
+        return behandling.getAksjonspunkter()
+            .stream()
+            .filter(Aksjonspunkt::erÅpentAksjonspunkt)
+            .anyMatch(ap -> ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
     }
 
-    /*
-    Kontroller arbeidsforhold skal ikke lenger være aktiv hvis tilstanden i saken ikke tilsier det
-    Setter dermed aksjonspunktet til utført hvis det står til opprettet.
-     */
-    private void ryddOppAksjonspunktHvisEksisterer(BehandlingReferanse behandlingReferanse) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getId());
-        List<Aksjonspunkt> aksjonspunkter = behandling.getAksjonspunkter().stream()
-            .filter(ap -> ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD)
-                || ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID))
-            .filter(Aksjonspunkt::erÅpentAksjonspunkt)
-            .collect(Collectors.toList());
-
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, behandling.getAktivtBehandlingSteg(), aksjonspunkter);
+    private boolean erInntektsmeldingEndret(BehandlingReferanse ref, IAYGrunnlagDiff iayGrunnlagDiff, StartpunktType startpunktType) {
+        return startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref) ? !StartpunktType.UDEFINERT.equals(startpunktType) : iayGrunnlagDiff.erEndringPåInntektsmelding();
     }
 
     private void leggTilStartpunkt(List<StartpunktType> startpunkter, UUID grunnlagId1, UUID grunnlagId2, StartpunktType startpunkt, String endringLoggtekst) {
