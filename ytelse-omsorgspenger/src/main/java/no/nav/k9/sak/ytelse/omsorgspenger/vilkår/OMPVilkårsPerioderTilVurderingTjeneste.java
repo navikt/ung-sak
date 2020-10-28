@@ -105,8 +105,14 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var vilkårType = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
         var behandlingId = referanse.getBehandlingId();
         var perioder = utled(behandlingId, vilkårType);
-        var vilkårsPerioder = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType)).orElseThrow()
-            .getPerioder().stream().map(VilkårPeriode::getPeriode)
+        var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
+            .flatMap(it -> it.getVilkår(vilkårType));
+
+        if (vilkår.isEmpty()) {
+            return new TreeSet<>();
+        }
+
+        var vilkårsPerioder = vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
         var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(referanse.getSaksnummer());
 
