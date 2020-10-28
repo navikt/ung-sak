@@ -44,7 +44,7 @@ public class StartpunktTjenesteImplTest {
 
     @Before
     public void before() {
-        tjeneste = new StartpunktTjenesteImpl(startpunktUtledere, repositoryProvider);
+        tjeneste = new StartpunktTjenesteImpl(startpunktUtledere);
     }
 
     @Test

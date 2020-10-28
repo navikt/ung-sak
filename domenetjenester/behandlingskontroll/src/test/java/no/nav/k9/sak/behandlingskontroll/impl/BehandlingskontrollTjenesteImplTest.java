@@ -27,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class BehandlingskontrollTjenesteImplTest {
@@ -113,10 +114,10 @@ public class BehandlingskontrollTjenesteImplTest {
         assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
 
         assertThat(behandling.getBehandlingStegTilstand(steg2)).isPresent();
-        
+
         em.persist(behandling); // lagre for å sjekke BehandlingStegTilstand i db.
         em.flush();
-        
+
         assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
 
         sjekkBehandlingStegTilstandHistorikk(behandling, steg3,
@@ -158,12 +159,12 @@ public class BehandlingskontrollTjenesteImplTest {
 
         em.persist(behandling);
         em.flush();
-        
+
         assertThat(getBehandlingStegTilstand(behandling)).hasSize(1);
 
         assertThat(behandling.getBehandlingStegTilstand(steg3)).isPresent();
         assertThat(behandling.getBehandlingStegTilstand(steg4)).isNotPresent();
-        
+
     }
 
     @Test
@@ -264,14 +265,14 @@ public class BehandlingskontrollTjenesteImplTest {
 
     @Test
     public void skal_returnere_true_når_aksjonspunktet_skal_løses_i_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), steg2,
+        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.KONTROLLER_FAKTA,
             steg3.getAksjonspunktDefinisjonerUtgang().get(0)))
                 .isTrue();
     }
 
     @Test
     public void skal_returnere_false_når_aksjonspunktet_skal_løses_før_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), steg4,
+        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.BEREGNING,
             steg2.getAksjonspunktDefinisjonerUtgang().get(0)))
                 .isFalse();
     }

@@ -19,11 +19,6 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.persistence.Entity;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-
 /**
  * Marker type som implementerer interface {@link StartpunktUtleder}.
  */
@@ -55,7 +50,7 @@ public @interface GrunnlagRef {
     }
 
 
-    public static final class Lookup {
+    final class Lookup {
 
         private Lookup() {
         }
@@ -69,38 +64,32 @@ public @interface GrunnlagRef {
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
          * injected med riktig forventet klassetype og @Any qualifier.
          */
-        public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, Instance<I> instances, Class<?> aggregatClass) {
-            return find(cls, instances, getName(aggregatClass), fagsakYtelseType.getKode(), behandlingType.getKode());
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggregatClass) {
+            return find(cls, instances, getName(aggregatClass));
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName, String fagsakYtelseType, String behandlingType) { // NOSONAR
+        /**
+         * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
+         * injected med riktig forventet klassetype og @Any qualifier.
+         */
+        public static <I> Optional<I> find(Instance<I> instances, Class<?> aggregatClass) {
+            return find(null, instances, getName(aggregatClass));
+        }
+
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName) {
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
-                var inst = select(cls, instances, new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(fagsakLiteral));
-                if (inst.isUnsatisfied()) {
-                    continue;
+            for (var fagsakLiteral : coalesce(aggregatClassName, "*")) {
+                var inst = select(cls, instances, new GrunnlagRefLiteral(fagsakLiteral));
+                if (inst.isResolvable()) {
+                    return Optional.of(getInstance(inst));
                 } else {
-                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
-                        var binst = select(cls, inst, new BehandlingTypeRef.BehandlingTypeRefLiteral(behandlingLiteral));
-                        if (binst.isUnsatisfied()) {
-                            continue;
-                        }
-                        for (var grunnlagLiteral : coalesce(aggregatClassName, "*")) {
-                            var ginst = select(cls, inst, new GrunnlagRefLiteral(grunnlagLiteral));
-                            if (ginst.isResolvable()) {
-                                return Optional.of(getInstance(ginst));
-                            } else {
-                                if (ginst.isAmbiguous()) {
-                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() +
-                                        ", aggegatKlasse=" + aggregatClassName + ", fagsakType=" + fagsakYtelseType);
-                                }
-                            }
-                        }
+                    if (inst.isAmbiguous()) {
+                        throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral);
                     }
                 }
-
             }
+
             return Optional.empty();
         }
 

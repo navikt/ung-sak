@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
 public class ProsessModell {
@@ -23,36 +24,36 @@ public class ProsessModell {
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
-        modellBuilder.medSteg(
-            BehandlingStegType.START_STEG,
-            BehandlingStegType.VURDER_UTLAND,
-            BehandlingStegType.VURDER_KOMPLETTHET,
-            BehandlingStegType.INIT_PERIODER,
-            BehandlingStegType.INIT_VILKÅR,
-            BehandlingStegType.INNHENT_REGISTEROPP,
-            BehandlingStegType.VARIANT_FILTER,
-            BehandlingStegType.INREG_AVSL,
-            BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD,
-            BehandlingStegType.KONTROLLER_FAKTA,
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
-            BehandlingStegType.VURDER_OPPTJENING_FAKTA,
-            BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-            BehandlingStegType.VURDER_UTTAK,
-            BehandlingStegType.PRECONDITION_BEREGNING,
-            BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
-            BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
-            BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.BEREGN_YTELSE,
-            BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT,
-            BehandlingStegType.SIMULER_OPPDRAG,
-            BehandlingStegType.VURDER_FARESIGNALER,
-            BehandlingStegType.FORESLÅ_VEDTAK,
-            BehandlingStegType.FATTE_VEDTAK,
-            BehandlingStegType.IVERKSETT_VEDTAK);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.VURDER_UTLAND)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.VARIANT_FILTER)
+            .medSteg(BehandlingStegType.INREG_AVSL)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
+            .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
+            .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
+            .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
+            .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK)
+            .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
+            .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, StartpunktType.BEREGNING)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
+            .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.VURDER_FARESIGNALER)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
     }
 
@@ -62,37 +63,37 @@ public class ProsessModell {
     @ApplicationScoped
     public BehandlingModell revurdering() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, YTELSE_TYPE);
-        modellBuilder.medSteg(
-            BehandlingStegType.START_STEG,
-            BehandlingStegType.VARSEL_REVURDERING,
-            BehandlingStegType.VURDER_UTLAND,
-            BehandlingStegType.VURDER_KOMPLETTHET,
-            BehandlingStegType.INIT_PERIODER,
-            BehandlingStegType.INIT_VILKÅR,
-            BehandlingStegType.INNHENT_REGISTEROPP,
-            BehandlingStegType.INREG_AVSL,
-            BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD,
-            BehandlingStegType.KONTROLLER_FAKTA,
-            BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-            BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE,
-            BehandlingStegType.VURDER_OPPTJENING_FAKTA,
-            BehandlingStegType.VURDER_OPPTJENINGSVILKÅR,
-            BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-            BehandlingStegType.VURDER_UTTAK,
-            BehandlingStegType.PRECONDITION_BEREGNING,
-            BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
-            BehandlingStegType.KONTROLLER_FAKTA_BEREGNING,
-            BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG,
-            BehandlingStegType.BEREGN_YTELSE,
-            BehandlingStegType.VURDER_TILBAKETREKK,
-            BehandlingStegType.HINDRE_TILBAKETREKK,
-            BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT,
-            BehandlingStegType.SIMULER_OPPDRAG,
-            BehandlingStegType.FORESLÅ_VEDTAK,
-            BehandlingStegType.FATTE_VEDTAK,
-            BehandlingStegType.IVERKSETT_VEDTAK);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.VARSEL_REVURDERING)
+            .medSteg(BehandlingStegType.VURDER_UTLAND)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.INREG_AVSL)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
+            .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
+            .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
+            .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
+            .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK)
+            .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
+            .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, StartpunktType.BEREGNING)
+            .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
+            .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.VURDER_TILBAKETREKK)
+            .medSteg(BehandlingStegType.HINDRE_TILBAKETREKK)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
     }
 

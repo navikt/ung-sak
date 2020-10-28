@@ -63,10 +63,10 @@ public class KontrollerArbeidsforholdTjenesteImpl implements KontrollerFaktaAksj
 
     private boolean skalBeholdeAksjonspunkt(BehandlingReferanse referanse, StartpunktType startpunkt, AksjonspunktDefinisjon apDef) {
         boolean skalBeholde = behandlingskontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(
-            referanse.getFagsakYtelseType(), referanse.getBehandlingType(), startpunkt.getBehandlingSteg(), apDef);
+            referanse.getFagsakYtelseType(), referanse.getBehandlingType(), startpunkt, apDef);
         if (!skalBeholde) {
-            logger.debug("Fjerner aksjonspunkt {} da det skal løses før startsteg {}.",
-                apDef.getKode(), startpunkt.getBehandlingSteg().getKode()); // NOSONAR
+            logger.debug("Fjerner aksjonspunkt {} da det skal løses før startpunkt {}.",
+                apDef.getKode(), startpunkt.getKode()); // NOSONAR
         }
         return skalBeholde;
     }

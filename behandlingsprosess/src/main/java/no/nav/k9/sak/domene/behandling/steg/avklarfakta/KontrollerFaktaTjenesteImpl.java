@@ -56,10 +56,10 @@ public abstract class KontrollerFaktaTjenesteImpl implements KontrollerFaktaAksj
 
     private boolean skalBeholdeAksjonspunkt(BehandlingReferanse ref, StartpunktType startpunkt, AksjonspunktDefinisjon apDef) {
         boolean skalBeholde = behandlingskontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(
-            ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt.getBehandlingSteg(), apDef);
+            ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt, apDef);
         if (!skalBeholde) {
-            logger.debug("Fjerner aksjonspunkt {} da det skal løses før startsteg {}.",
-                apDef.getKode(), startpunkt.getBehandlingSteg().getKode()); // NOSONAR
+            logger.debug("Fjerner aksjonspunkt {} da det skal løses før startpunkt {}.",
+                apDef.getKode(), startpunkt.getKode()); // NOSONAR
         }
         return skalBeholde;
     }
