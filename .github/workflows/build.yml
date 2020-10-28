@@ -56,7 +56,9 @@ jobs:
           java-version: 1.11
 
       - name: Set cache key
-        run: echo "::set-env name=CACHE_KEY::$(expr $(date +%V) - 1 + 1)"
+        run: |
+          echo "CACHE_KEY=$(expr $(date +%V) - 1 + 1)" >> $GITHUB_ENV
+          echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
       - uses: actions/cache@v2
         with:
           path: ~/.m2
