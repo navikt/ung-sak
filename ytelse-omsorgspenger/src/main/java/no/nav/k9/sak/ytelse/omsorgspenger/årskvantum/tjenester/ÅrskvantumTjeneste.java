@@ -225,7 +225,8 @@ public class ÅrskvantumTjeneste {
                 fraværPeriode.getFraværPerDag(),
                 true,
                 kreverRefusjon,
-                utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode));
+                utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
+                wrappedOppgittFraværPeriode.getInnsendingstidspunkt());
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
