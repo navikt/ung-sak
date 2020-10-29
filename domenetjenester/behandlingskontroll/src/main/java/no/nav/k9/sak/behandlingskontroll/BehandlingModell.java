@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 /**
  * Definerer metoder for å inspisere state-machine for en gitt behandling type.
@@ -64,6 +65,8 @@ public interface BehandlingModell {
     Stream<BehandlingStegModell> hvertSteg();
 
     Stream<BehandlingStegModell> hvertStegEtter(BehandlingStegType stegType);
+
+    BehandlingStegType finnBehandlingSteg(StartpunktType startpunkt);
 
     Stream<BehandlingStegModell> hvertStegFraOgMed(BehandlingStegType fraOgMedSteg);
 

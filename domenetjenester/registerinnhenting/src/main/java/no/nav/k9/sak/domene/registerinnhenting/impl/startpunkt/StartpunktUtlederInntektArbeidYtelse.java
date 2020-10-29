@@ -5,17 +5,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -31,8 +26,6 @@ import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef
-@BehandlingTypeRef
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
 class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
@@ -42,7 +35,6 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
     private StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger;
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private BehandlingRepository behandlingRepository;
-    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
@@ -50,7 +42,6 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
     @Inject
     StartpunktUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste iayTjeneste, // NOSONAR - ingen enkel måte å unngå mange parametere her
-                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                          BehandlingRepositoryProvider repositoryProvider,
                                          StartpunktUtlederInntektsmelding startpunktUtlederInntektsmelding,
                                          StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger,
@@ -60,7 +51,6 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         this.startpunktUtlederInntektsmelding = startpunktUtlederInntektsmelding;
         this.startpunktUtlederInntektsmeldinger = startpunktUtlederInntektsmeldinger;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
-        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
     @Override

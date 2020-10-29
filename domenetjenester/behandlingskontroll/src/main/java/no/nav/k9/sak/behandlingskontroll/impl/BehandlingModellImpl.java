@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +41,7 @@ import no.nav.k9.sak.behandlingskontroll.impl.transisjoner.Transisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 /**
  * Modell av behandlingssteg, vurderingspunkter og aksjonspunkter som brukes i evaluering av en prosess for behandling.
@@ -54,6 +57,8 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     private List<BehandlingStegModellImpl> steg = new ArrayList<>();
     private TriFunction<BehandlingStegType, BehandlingType, FagsakYtelseType, BehandlingStegModellImpl> lookup;
     private boolean destroyOnClose;
+
+    private Map<StartpunktType, BehandlingStegType> startpunktTilSteg = new HashMap<>();
 
     private FagsakYtelseType fagsakYtelseType;
 
@@ -227,6 +232,21 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     @Override
     public List<BehandlingStegType> getAlleBehandlingStegTyper() {
         return steg.stream().map(s -> s.getBehandlingStegType()).collect(Collectors.toList());
+    }
+
+    @Override
+    public BehandlingStegType finnBehandlingSteg(StartpunktType startpunkt) {
+        return startpunktTilSteg.getOrDefault(startpunkt, finnTidligsteStegMedStartpunkt());
+    }
+
+    private BehandlingStegType finnTidligsteStegMedStartpunkt() {
+        // Steg er sortet i stigende rekkefølge - finn første med startpunkt
+        return steg.stream()
+            .map(BehandlingStegModellImpl::getBehandlingStegType)
+            .filter(s -> startpunktTilSteg.values().stream()
+                .anyMatch(startpunktSteg -> startpunktSteg.equals(s)))
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Behandlingsmodell har ingen startpunkt"));
     }
 
     /**
@@ -465,6 +485,16 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
         return Transisjoner.finnTransisjon(transisjonIdentifikator);
     }
 
+    private void leggTilStartpunkt(StartpunktType startpunkt, BehandlingStegType stegType) {
+        Objects.requireNonNull(startpunkt, "startpunkt");
+        Objects.requireNonNull(stegType, "stegType");
+        if (startpunktTilSteg.containsKey(startpunkt)) {
+            throw new IllegalArgumentException("Utviklerfeil: Startpunkt [" + startpunkt.getKode() + "] er allerede definert for modell");
+        }
+
+        startpunktTilSteg.put(startpunkt, stegType);
+    }
+
     @FunctionalInterface
     public interface TriFunction<T, U, V, R> {
         /**
@@ -509,8 +539,11 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
             return b;
         }
 
-        public BehandlingModellBuilder medSteg(BehandlingStegType... stegTyper) {
-            modell.leggTil(stegTyper);
+        public BehandlingModellBuilder medSteg(BehandlingStegType stegType, StartpunktType... startpunkter) {
+            modell.leggTil(stegType);
+            for (StartpunktType startpunkt : startpunkter) {
+                modell.leggTilStartpunkt(startpunkt, stegType);
+            }
             return this;
         }
     }

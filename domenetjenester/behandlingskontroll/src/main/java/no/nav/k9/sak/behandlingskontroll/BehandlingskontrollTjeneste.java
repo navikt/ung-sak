@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 public interface BehandlingskontrollTjeneste {
 
@@ -66,6 +67,8 @@ public interface BehandlingskontrollTjeneste {
     boolean erStegPassert(Long behandlingId, BehandlingStegType stegType);
 
     Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg, boolean medInngangOgså);
+
+    BehandlingStegType finnBehandlingSteg(StartpunktType startpunktType, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType);
 
     void fremoverTransisjon(TransisjonIdentifikator transisjonId, BehandlingskontrollKontekst kontekst);
 
@@ -239,14 +242,15 @@ public interface BehandlingskontrollTjeneste {
                                               Venteårsak venteårsak, String venteårsakVariant);
 
     /**
-     * Sjekker i behandlingsmodellen om aksjonspunktet skal løses i eller etter det angitte steget.
+     * Sjekker i behandlingsmodellen om aksjonspunktet skal løses i eller etter det angitte startpunktet.
      *
-     * @param behandling
-     * @param behandlingSteg steget som aksjonspunktet skal sjekkes mot
+     * @param ytelseType
+     * @param behandlingType
+     * @param startpunkt startpunkt som angir steget som aksjonspunktet skal sjekkes mot
      * @param aksjonspunktDefinisjon aksjonspunktet som skal sjekkes
      * @return true dersom aksjonspunktet skal løses i eller etter det angitte steget.
      */
-    boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, BehandlingStegType behandlingSteg,
+    boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, StartpunktType startpunkt,
                                                  AksjonspunktDefinisjon aksjonspunktDefinisjon);
 
     /**

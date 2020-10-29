@@ -59,6 +59,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
@@ -229,6 +230,12 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return sammenlignRekkefølge(behandling.getFagsakYtelseType(), behandling.getType(),
             behandling.getAktivtBehandlingSteg(), behandlingSteg) >= 0;
+    }
+
+    @Override
+    public BehandlingStegType finnBehandlingSteg(StartpunktType startpunktType, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
+        BehandlingModell modell = getModell(behandlingType, fagsakYtelseType);
+        return modell.finnBehandlingSteg(startpunktType);
     }
 
     @Override
@@ -560,9 +567,10 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
     @Override
     public boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType,
-                                                        BehandlingStegType behandlingSteg, AksjonspunktDefinisjon apDef) {
+                                                        StartpunktType startpunkt, AksjonspunktDefinisjon apDef) {
 
         BehandlingModell modell = getModell(behandlingType, ytelseType);
+        BehandlingStegType behandlingSteg = finnBehandlingSteg(startpunkt, ytelseType, behandlingType);
         BehandlingStegType apLøsesteg = Optional.ofNullable(modell
             .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
             .map(BehandlingStegModell::getBehandlingStegType)

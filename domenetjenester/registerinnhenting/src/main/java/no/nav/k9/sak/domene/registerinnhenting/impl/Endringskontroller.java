@@ -88,7 +88,7 @@ public class Endringskontroller {
 
     private void doSpolTilStartpunkt(BehandlingReferanse ref, Behandling behandling, StartpunktType startpunktType) {
         BehandlingStegType fraSteg = behandling.getAktivtBehandlingSteg();
-        BehandlingStegType tilSteg = startpunktType.getBehandlingSteg();
+        BehandlingStegType tilSteg = behandlingskontrollTjeneste.finnBehandlingSteg(startpunktType, behandling.getFagsakYtelseType(), behandling.getType());
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
         // Inkluderer tilbakeføring samme steg UTGANG->INNGANG
