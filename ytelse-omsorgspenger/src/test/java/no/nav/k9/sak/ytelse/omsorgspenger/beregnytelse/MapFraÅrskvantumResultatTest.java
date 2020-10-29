@@ -95,13 +95,13 @@ public class MapFraÅrskvantumResultatTest {
 
     private Uttaksperiode innvilget(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad, Periodetype.NY);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.INNVILGET, new VurderteVilkår(emptyVurderteVilkår), hjemler, utbetalingsgrad, Periodetype.NY, tom.atStartOfDay());
 
     }
 
     private Uttaksperiode avslått(LocalDate fom, LocalDate tom) {
         Map<Vilkår, Utfall> emptyVurderteVilkår = new HashMap<>();
-        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO, Periodetype.NY);
+        return new Uttaksperiode(new LukketPeriode(fom, tom), Duration.ofHours(1), Utfall.AVSLÅTT, new VurderteVilkår(emptyVurderteVilkår), hjemler, BigDecimal.ZERO, Periodetype.NY, tom.atStartOfDay());
 
     }
 }
