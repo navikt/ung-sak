@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,9 +104,9 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
 
     @GET
     @Path("/sammendrag_periode")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
+        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -117,7 +118,8 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
             : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
 
-        var map = aksjonspunktRepository.hentAksjonspunkter(opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed, aksjonspunktStatuser);
+        var map = aksjonspunktRepository.hentAksjonspunkter(
+            opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed.plusDays(1), aksjonspunktStatuser);
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
@@ -126,7 +128,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
         cc.setPrivate(true);
 
         String csv = mapToCsv(map);
-        return Response.ok(csv, TEXT).cacheControl(cc).build();
+        return Response.ok(csv, MediaType.APPLICATION_OCTET_STREAM).cacheControl(cc).build();
     }
 
     private String mapToCsv(Map<Behandling, List<Aksjonspunkt>> map) {
@@ -135,9 +137,9 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
         // quick and dirt til csv. Kan godt forbedres. Ingen av feltene trenger escaping
 
         // headere, pass på rekkefølge her!
-        sb.append("ytelseType,saksnummer,fagsakStatus,behandlingUuid,behandlingType,behandlingStatus,"
-            + "aksjonspunktDef,aksjonspunktType,vilkårType,aksjonspunktStatus,venteårsak,fristTid,"
-            + "kanLøses,totrinnsbehandling,opprettetTid,endretTid\n");
+        sb.append("ytelseType,saksnummer,fagsakStatus,behandlingUuid,behandlingId,behandlingType,behandlingStatus,"
+            + "behandlingOpprettet,behandlingAvsluttet,aksjonspunktDef,aksjonspunktType,vilkårType,aksjonspunktStatus,"
+            + "venteårsak,fristTid,kanLøses,totrinnsbehandling,opprettetTid,endretTid\n");
         for (var entry : map.entrySet()) {
             var b = entry.getKey();
             var f = b.getFagsak();
@@ -145,8 +147,11 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             String sn = f.getSaksnummer().getVerdi();
             String fs = f.getStatus().getKode();
             String uuid = b.getUuid().toString();
+            String bid = Long.toString(b.getId());
             String bt = b.getType().getKode();
             String bs = b.getStatus().getKode();
+            LocalDateTime bo = b.getOpprettetDato();
+            LocalDateTime ba = b.getAvsluttetDato();
 
             for (var a : b.getAksjonspunkter()) {
                 var ad = a.getAksjonspunktDefinisjon().getKode();
@@ -160,7 +165,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
                 var ot = a.getOpprettetTidspunkt();
                 var et = a.getEndretTidspunkt();
 
-                Object[] args = new Object[] { yt, sn, fs, uuid, bt, bs, ad, at, vt, as, vå, ft, kl, tt, ot, et };
+                Object[] args = new Object[] { yt, sn, fs, uuid, bid, bt, bs, bo, ba, ad, at, vt, as, vå, ft, kl, tt, ot, et };
                 String fmt = "%s,".repeat(args.length);
                 var s = String.format(fmt.substring(0, fmt.length() - 1), args);
                 sb.append(s).append('\n');
