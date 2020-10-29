@@ -76,7 +76,7 @@ public class JettyDevServer extends JettyServer {
         try {
             super.migrerDatabaser();
         } catch (IllegalStateException e) {
-            log.info("Migreringer feilet, cleaner og prøver på nytt.");
+            log.info("Migreringer feilet, cleaner og prøver på nytt for lokal db.");
             DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 1);
             try {
                 DevDatabaseScript.clean(migreringDs);
