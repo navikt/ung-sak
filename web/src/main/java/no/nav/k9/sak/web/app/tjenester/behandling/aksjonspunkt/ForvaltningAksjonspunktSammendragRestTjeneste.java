@@ -118,7 +118,8 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
             : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
 
-        var map = aksjonspunktRepository.hentAksjonspunkter(opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed, aksjonspunktStatuser);
+        var map = aksjonspunktRepository.hentAksjonspunkter(
+            opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed.plusDays(1), aksjonspunktStatuser);
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
