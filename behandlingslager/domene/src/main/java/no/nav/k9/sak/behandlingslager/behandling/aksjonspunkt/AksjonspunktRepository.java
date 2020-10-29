@@ -135,6 +135,8 @@ public class AksjonspunktRepository {
             }
             Set<Aksjonspunkt> aksjonspunkter = b.getAksjonspunkter()
                 .stream()
+                .filter(a -> a.getOpprettetTidspunkt().isAfter(fom.atStartOfDay())
+                    && a.getOpprettetTidspunkt().isBefore(tom.atStartOfDay()))
                 .filter(a -> statusList.contains(a.getStatus()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
             map.put(b, List.copyOf(aksjonspunkter));
