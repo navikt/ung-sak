@@ -171,8 +171,15 @@ public class ÅrskvantumTjeneste {
     Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder, List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær, Set<OppgittFraværPeriode> behandlingFravær) {
         return fagsakFravær.stream()
             .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) || (Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
-                behandlingFravær.stream().anyMatch(at -> at.getPeriode().equals(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()))))
+                behandlingFravær.stream().anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at))))
             .collect(Collectors.toSet());
+    }
+
+    private boolean matcherArbeidsforhold(OppgittFraværPeriode periode, OppgittFraværPeriode at) {
+        if (periode.getAktivitetType().erArbeidstakerEllerFrilans() && at.getAktivitetType().erArbeidstakerEllerFrilans()) {
+            return periode.getArbeidsgiver().equals(at.getArbeidsgiver()) && periode.getArbeidsforholdRef().equals(at.getArbeidsforholdRef());
+        }
+        return periode.getAktivitetType().equals(at.getAktivitetType());
     }
 
     public ÅrskvantumResultat beregnÅrskvantumUttak(BehandlingReferanse ref) {
