@@ -43,9 +43,9 @@ public class AsyncInntektArbeidYtelseTjeneste {
         enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         enkeltTask.setSaksnummer(saksnummer.getVerdi());
         enkeltTask.setCallIdFraEksisterende();
-        
+
         AsyncAbakusLagreTask.initPayload(enkeltTask, Action.LAGRE_OPPGITT_OPPTJENING, request);
-        
+
         prosessTaskRepository.lagre(enkeltTask);
     }
 

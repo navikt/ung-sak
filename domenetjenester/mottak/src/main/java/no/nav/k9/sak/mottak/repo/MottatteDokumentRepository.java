@@ -1,5 +1,6 @@
 package no.nav.k9.sak.mottak.repo;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,14 +11,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class MottatteDokumentRepository {
 
     private EntityManager entityManager;
-
-    private static final String PARAM_KEY = "param";
 
     public MottatteDokumentRepository() {
         // for CDI proxy
@@ -39,7 +39,8 @@ public class MottatteDokumentRepository {
     public Optional<MottattDokument> hentMottattDokument(long mottattDokumentId) {
         TypedQuery<MottattDokument> query = entityManager.createQuery(
             "select m from MottattDokument m where m.id = :param", MottattDokument.class)
-            .setParameter(PARAM_KEY, mottattDokumentId);
+            .setParameter("param", mottattDokumentId) // NOSONAR
+        ;
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
@@ -52,8 +53,18 @@ public class MottatteDokumentRepository {
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status=:gyldig)";
         return entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
-            .setParameter(PARAM_KEY, fagsakId)
-            .setParameter("gyldig", DokumentStatus.GYLDIG)
+            .setParameter("param", fagsakId) // NOSONAR
+            .setParameter("gyldig", DokumentStatus.GYLDIG) // NOSONAR
+            .getResultList();
+    }
+
+    public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder) {
+        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status=:gyldig) AND m.journalpostId IN (:journalpostIder)";
+        return entityManager.createQuery(
+            strQueryTemplate, MottattDokument.class)
+            .setParameter("param", fagsakId) // NOSONAR
+            .setParameter("journalpostIder", journalpostIder)
+            .setParameter("gyldig", DokumentStatus.GYLDIG) // NOSONAR
             .getResultList();
     }
 

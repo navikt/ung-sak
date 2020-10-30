@@ -9,7 +9,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -32,16 +34,27 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
 
     public enum Action {
         LAGRE_OPPGITT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
+        LAGRE_INNTEKTSMELDINGER(InntektsmeldingerMottattRequest.class),
+        LAGRE_INNTEKTSMELDINGER_FRA_MOTTATT_DOKUMENT(InntektsmeldingerMottattRequest.class),
+        LAGRE_IAY_GRUNNLAG(InntektArbeidYtelseGrunnlagDto.class),
+        LAGRE_OVERSTYRT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
         ;
 
-        private final Class<?> forventetType;
+        @SuppressWarnings("rawtypes")
+        private final Class forventetType;
 
-        Action(Class<?> forventetType) {
+        @SuppressWarnings("rawtypes")
+        Action(Class forventetType) {
             this.forventetType = forventetType;
         }
-        
+
+        @SuppressWarnings("unchecked")
+        public <V> Class<V> getForventetType() {
+            return forventetType;
+        }
+
         void validerForventetType(Object obj) {
-            if(!forventetType.isInstance(obj)) {
+            if (!forventetType.isInstance(obj)) {
                 throw new IllegalArgumentException("Angitt objekt er ikke av type " + forventetType.getName() + ": " + obj);
             }
         }
@@ -64,10 +77,19 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
         Action action = Action.valueOf(input.getPropertyValue(KEY));
         String payload = input.getPayloadAsString();
 
+
         try {
+            var ref = behandling.getUuid();
             switch (action) {
                 case LAGRE_OPPGITT_OPPTJENING:
-                    abakusTjeneste.lagreOppgittOpptjening(behandling.getUuid(), payload);
+                    abakusTjeneste.lagreOppgittOpptjening(ref, payload);
+                case LAGRE_OVERSTYRT_OPPTJENING:
+                    abakusTjeneste.lagreOverstyrtOppgittOpptjening(ref, payload);
+                case LAGRE_INNTEKTSMELDINGER:
+                    abakusTjeneste.lagreInntektsmeldinger(ref, payload);
+                case LAGRE_IAY_GRUNNLAG:
+                    // parser en ekstra gang
+                    abakusTjeneste.lagreGrunnlag(MAPPER.readValue(payload, action.getForventetType()));
                 default:
                     throw new UnsupportedOperationException("Støtter ikke action: " + action);
             }
