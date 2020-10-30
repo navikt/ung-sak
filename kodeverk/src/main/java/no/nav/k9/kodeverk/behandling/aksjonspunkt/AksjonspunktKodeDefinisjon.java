@@ -85,7 +85,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_PERIODER_MED_OPPTJENING_KODE = "5051";
     public static final String VURDER_ARBEIDSFORHOLD_KODE = "5080";
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
-    public static final String VURDER_INNTREKK_KODE = "5085";
     public static final String VURDER_OPPTJENINGSVILKÅRET_KODE = "5089";
 
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";

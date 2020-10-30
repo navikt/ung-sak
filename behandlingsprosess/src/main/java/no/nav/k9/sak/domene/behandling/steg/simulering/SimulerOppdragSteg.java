@@ -24,7 +24,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.økonomi.simulering.SimulerOppdragAksjonspunktTjeneste;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -109,17 +108,15 @@ public class SimulerOppdragSteg implements BehandlingSteg {
         }
         Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
         if (simuleringResultatDto.isPresent()) {
-            tilbakekrevingRepository.lagre(behandling, simuleringResultatDto.get().isSlåttAvInntrekk());
-            Optional<AksjonspunktDefinisjon> utledetAksjonspunkt = SimulerOppdragAksjonspunktTjeneste.utledAksjonspunkt(simuleringResultatDto.get());
+            SimuleringResultatDto resultatDto = simuleringResultatDto.get();
+            tilbakekrevingRepository.lagre(behandling, resultatDto.isSlåttAvInntrekk());
 
-            if (utledetAksjonspunkt.isPresent()) {
-                AksjonspunktDefinisjon aksjonspunktDefinisjon = utledetAksjonspunkt.get();
-                //(Team Tonic) Midlertidig løsning for automatisk inntrekk inntil vi har funksjonalitet for å slå det av
-                if (aksjonspunktDefinisjon.equals(AksjonspunktDefinisjon.VURDER_INNTREKK)) {
-                    lagreTilbakekrevingValg(behandling, TilbakekrevingValg.medAutomatiskInntrekk());
-                    return BehandleStegResultat.utførtUtenAksjonspunkter();
-                }
-                return BehandleStegResultat.utførtMedAksjonspunkter(singletonList(aksjonspunktDefinisjon));
+            if (resultatDto.harFeilutbetaling()) {
+                return BehandleStegResultat.utførtMedAksjonspunkter(singletonList(AksjonspunktDefinisjon.VURDER_FEILUTBETALING));
+            }
+            if (resultatDto.harInntrekkmulighet()) {
+                lagreTilbakekrevingValg(behandling, TilbakekrevingValg.medAutomatiskInntrekk());
+                return BehandleStegResultat.utførtUtenAksjonspunkter();
             }
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
