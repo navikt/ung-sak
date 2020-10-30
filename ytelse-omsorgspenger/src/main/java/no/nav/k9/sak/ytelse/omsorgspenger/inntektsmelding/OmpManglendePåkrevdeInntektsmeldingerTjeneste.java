@@ -80,7 +80,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
 
-        var arbeidsgiverArbeidsforholdMap = yrkesaktivitetFilter.getAlleYrkesaktiviteter()
+        var arbeidsgiverArbeidsforholdMap = yrkesaktivitetFilter.getYrkesaktiviteter()
             .stream()
             .filter(Yrkesaktivitet::erArbeidsforhold)
             .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,
