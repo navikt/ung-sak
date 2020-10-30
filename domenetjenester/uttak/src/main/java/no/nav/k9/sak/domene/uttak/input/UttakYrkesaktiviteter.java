@@ -22,7 +22,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 public class UttakYrkesaktiviteter {
     private static final Comparator<AktivitetsAvtale> COMP_AKTIVTET_PERIODE = Comparator.comparing(aktivitetsAvtale -> aktivitetsAvtale.getPeriode().getFomDato(),
         Comparator.nullsFirst(Comparator.naturalOrder()));
-    
+
     private UttakInput input;
 
     public UttakYrkesaktiviteter(UttakInput input) {
@@ -110,7 +110,7 @@ public class UttakYrkesaktiviteter {
         var filter = new YrkesaktivitetFilter(null, yaMedAnsettelsesperiodePåDato).etter(skjæringstidspunkt.getUtledetSkjæringstidspunkt());
 
         BigDecimal sum = BigDecimal.ZERO;
-        for (Yrkesaktivitet ya : filter.getAlleYrkesaktiviteter()) {
+        for (Yrkesaktivitet ya : filter.getYrkesaktiviteter()) {
             var aktivitetsAvtaler = filter.getAktivitetsAvtalerForArbeid(ya);
             if (aktivitetsAvtaler.isEmpty()) {
                 String melding = "Forventer minst en aktivitetsavtale ved dato " + dato.toString() +
