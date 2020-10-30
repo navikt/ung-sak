@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -209,16 +210,18 @@ public class AbakusTjeneste {
     public void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto dto) throws IOException {
 
         var json = iayJsonWriter.writeValueAsString(dto);
+        String koblngReferanse = dto.getKoblingReferanse();
+        String grunnlagReferanse = dto.getGrunnlagReferanse();
 
         HttpPut httpPut = new HttpPut(endpointGrunnlag);
         httpPut.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-        log.info("Lagre IAY grunnlag (behandlingUUID={}) i Abakus", dto.getKoblingReferanse());
+        log.info("Lagre IAY grunnlag (behandlingUUID={}, iayGrunnlagReferanse={}) i Abakus", koblngReferanse, grunnlagReferanse);
         try (var httpResponse = oidcRestClient.execute(httpPut)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke lagre IAY grunnlag: " + dto.getGrunnlagReferanse() + " til abakus: " + httpPut.getURI()
+                String feilmelding = "Kunne ikke lagre IAY grunnlag: " + grunnlagReferanse + " til abakus: " + httpPut.getURI()
                     + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
 
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
@@ -231,18 +234,20 @@ public class AbakusTjeneste {
     }
 
     public void lagreInntektsmeldinger(InntektsmeldingerMottattRequest dto) throws IOException {
-
         var json = iayJsonWriter.writeValueAsString(dto);
+        lagreInntektsmeldinger(dto.getKoblingReferanse(), json);
+    }
 
+    public void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
         HttpPost httpPost = new HttpPost(endpointMottaInntektsmeldinger);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-        log.info("Lagre mottatte inntektsmeldinger (behandlingUUID={}) i Abakus", dto.getKoblingReferanse());
+        log.info("Lagre mottatte inntektsmeldinger (behandlingUUID={}) i Abakus", referanse);
         try (var httpResponse = oidcRestClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke lagre mottatte inntektsmeldinger for behandling: " + dto.getKoblingReferanse() + " til abakus: " + httpPost.getURI()
+                String feilmelding = "Kunne ikke lagre mottatte inntektsmeldinger for behandling: " + referanse + " til abakus: " + httpPost.getURI()
                     + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
 
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {

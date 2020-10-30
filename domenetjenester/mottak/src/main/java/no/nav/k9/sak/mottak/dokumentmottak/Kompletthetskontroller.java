@@ -28,6 +28,7 @@ import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 /**
  * Denne klassen evaluerer hvilken effekt en ekstern hendelse (dokument, forretningshendelse) har på en åpen behandlings
@@ -41,6 +42,7 @@ public class Kompletthetskontroller {
     private KompletthetModell kompletthetModell;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private ProsessTaskRepository prosessTaskRepository;
 
     public Kompletthetskontroller() {
         // For CDI proxy
@@ -51,25 +53,34 @@ public class Kompletthetskontroller {
                                   MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                   KompletthetModell kompletthetModell,
                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
+                                  ProsessTaskRepository prosessTaskRepository,
                                   SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.kompletthetModell = kompletthetModell;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
+        this.prosessTaskRepository = prosessTaskRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     public void persisterDokumentOgVurderKompletthet(Behandling behandling, Collection<MottattDokument> mottattDokument) {
-        // Ta snapshot av gjeldende grunnlag-id-er før oppdateringer
-        Long behandlingId = behandling.getId();
-
         preconditionIkkeAksepterKobling(behandling);
 
         // ta snapshot før lagre inntektsmelding
+        // Ta snapshot av gjeldende grunnlag-id-er før oppdateringer
         EndringsresultatSnapshot grunnlagSnapshot = behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling);
 
         // Persister dokument (dvs. knytt dokument til behandlingen)
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
+
+        // gjør komplethetsjekk i en senere task (etter at inntektsmeldinger er lagret til abakus)
+        var kompletthetskontrollerTask = KompletthetskontrollerVurderKompletthetTask.init(behandling, grunnlagSnapshot);
+        prosessTaskRepository.lagre(kompletthetskontrollerTask);
+
+    }
+
+    public void vurderKompletthetOgFortsett(Behandling behandling, Long behandlingId, EndringsresultatSnapshot grunnlagSnapshot) {
+        preconditionIkkeAksepterKobling(behandling);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
         var kompletthetResultat = vurderBehandlingKomplett(behandling);
@@ -83,7 +94,6 @@ public class Kompletthetskontroller {
                 behandlingProsesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
             }
         }
-
     }
 
     private void preconditionIkkeAksepterKobling(Behandling behandling) {
@@ -116,10 +126,6 @@ public class Kompletthetskontroller {
         vurderKompletthetForKøetBehandling(behandling);
     }
 
-    public void oppdaterKompletthetForKøetBehandling(Behandling behandling) {
-        vurderKompletthetForKøetBehandling(behandling);
-    }
-
     private void vurderKompletthetForKøetBehandling(Behandling behandling) {
         List<AksjonspunktDefinisjon> autoPunkter = kompletthetModell.rangerKompletthetsfunksjonerKnyttetTilAutopunkt(behandling.getFagsakYtelseType(),
             behandling.getType());
@@ -137,11 +143,7 @@ public class Kompletthetskontroller {
         }
     }
 
-    public void vurderNyForretningshendelse(Behandling behandling) {
-        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
-    }
-
-    void spolKomplettBehandlingTilStartpunkt(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
+    private void spolKomplettBehandlingTilStartpunkt(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
         // Behandling er komplett - nullstill venting
         if (behandling.isBehandlingPåVent()) {
             behandlingProsesseringTjeneste.taBehandlingAvVent(behandling);
@@ -153,7 +155,7 @@ public class Kompletthetskontroller {
         }
     }
 
-    public KompletthetResultat vurderBehandlingKomplett(Behandling behandling) {
+    private KompletthetResultat vurderBehandlingKomplett(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
         var åpneAksjonspunkter = behandling.getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT).stream()
             .map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList());

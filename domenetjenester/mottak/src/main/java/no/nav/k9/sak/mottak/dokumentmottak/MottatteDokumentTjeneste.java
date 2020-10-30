@@ -3,8 +3,11 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -12,16 +15,21 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
@@ -31,11 +39,15 @@ public class MottatteDokumentTjeneste {
 
     private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
+
+    private BehandlingRepository behandlingRepository;
+
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+
+    private ProsessTaskRepository prosessTaskRepository;
 
     protected MottatteDokumentTjeneste() {
         // for CDI proxy
@@ -47,17 +59,18 @@ public class MottatteDokumentTjeneste {
      */
     @Inject
     public MottatteDokumentTjeneste(@KonfigVerdi(value = "sak.frist.innsending.dok", defaultVerdi = "P6W") Period fristForInnsendingAvDokumentasjon,
-                                    InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                     MottatteDokumentRepository mottatteDokumentRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     UttakRepository uttakRepository,
+                                    ProsessTaskRepository prosessTaskRepository,
                                     BehandlingRepositoryProvider behandlingRepositoryProvider) {
         this.fristForInnsendingAvDokumentasjon = fristForInnsendingAvDokumentasjon;
-        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.uttakRepository = uttakRepository;
-        this.behandlingRepositoryProvider = behandlingRepositoryProvider;
+        this.prosessTaskRepository = prosessTaskRepository;
+        this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.behandlingVedtakRepository = behandlingRepositoryProvider.getBehandlingVedtakRepository();
     }
 
     public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
@@ -65,6 +78,7 @@ public class MottatteDokumentTjeneste {
         if (!harPayload) {
             return; // quick return
         }
+        Long behandlingId = behandling.getId();
 
         var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokumenter);
         for (var dokument : dokumenter) {
@@ -72,15 +86,32 @@ public class MottatteDokumentTjeneste {
             InntektsmeldingBuilder im = inntektsmeldinger.get(0);
             var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
-            dokument.setBehandlingId(behandling.getId());
+            dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
             mottatteDokumentRepository.lagre(dokument);// oppdaterer
 
         }
-        
-        // gjør etter alle andre lagringer i db da dette medfører remote kall til abakus (bør egentlig flyttes til egen task)
-        inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
+
+        var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
+
+        lagreInntektsmeldinger(behandlingId, journalpostder);
+    }
+
+    /** Lagrer inntektsmeldinger til abakus fra mottatt dokument. */
+    private void lagreInntektsmeldinger(Long behandlingId, Collection<JournalpostId> mottatteDokumenter) {
+
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        AktørId aktørId = behandling.getAktørId();
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+
+        var enkeltTask = new ProsessTaskData(LagreMottattInntektsmeldingerTask.TASKTYPE);
+        enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
+        enkeltTask.setSaksnummer(saksnummer.getVerdi());
+        enkeltTask.setCallIdFraEksisterende();
+        List<String> journalpostIder = mottatteDokumenter.stream().map(j -> j.getVerdi()).collect(Collectors.toList());
+        enkeltTask.setProperty(LagreMottattInntektsmeldingerTask.MOTTATT_DOKUMENT, String.join(",", journalpostIder));
+        prosessTaskRepository.lagre(enkeltTask);
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
@@ -94,7 +125,7 @@ public class MottatteDokumentTjeneste {
 
     boolean erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
-        Optional<Behandling> behandling = behandlingRepositoryProvider.getBehandlingRepository().finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
+        Optional<Behandling> behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
         return behandling.map(this::erAvsluttetPgaManglendeDokumentasjon).orElse(Boolean.FALSE);
     }
 
@@ -103,8 +134,8 @@ public class MottatteDokumentTjeneste {
      */
     boolean harFristForInnsendingAvDokGåttUt(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
-        Optional<Behandling> behandlingOptional = behandlingRepositoryProvider.getBehandlingRepository().finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
-        return behandlingOptional.flatMap(b -> behandlingRepositoryProvider.getBehandlingVedtakRepository().hentBehandlingVedtakForBehandlingId(b.getId()))
+        Optional<Behandling> behandlingOptional = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
+        return behandlingOptional.flatMap(b -> behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(b.getId()))
             .map(BehandlingVedtak::getVedtaksdato)
             .map(dato -> dato.isBefore(LocalDate.now().minus(fristForInnsendingAvDokumentasjon))).orElse(Boolean.FALSE);
     }

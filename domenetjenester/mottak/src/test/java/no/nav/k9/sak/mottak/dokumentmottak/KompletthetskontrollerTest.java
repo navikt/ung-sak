@@ -28,7 +28,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
@@ -38,6 +37,8 @@ import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 @RunWith(CdiRunner.class)
@@ -66,6 +67,9 @@ public class KompletthetskontrollerTest {
     @Mock
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
 
+    @Mock
+    private ProsessTaskRepository prosessTaskRepository;
+
     private Kompletthetskontroller kompletthetskontroller;
     private Behandling behandling;
     private MottattDokument mottattDokument;
@@ -83,10 +87,12 @@ public class KompletthetskontrollerTest {
         KompletthetModell modell = new KompletthetModell(behandlingskontrollTjeneste, kompletthetsjekkerProvider);
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
 
+
         kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
             mottatteDokumentTjeneste,
             modell,
             behandlingProsesseringTjeneste,
+            prosessTaskRepository,
             skjæringstidspunktTjeneste);
 
         mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);
@@ -130,11 +136,23 @@ public class KompletthetskontrollerTest {
         // Arrange 2
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
 
+        primeProsessTaskRepositoryKompletthetskontroller(behandling);
+
         // Act 2
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
 
         // Assert 2
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
+    }
+
+    private void primeProsessTaskRepositoryKompletthetskontroller(Behandling behandling) {
+        when(prosessTaskRepository.lagre(any(ProsessTaskData.class))).then(a -> {
+            var data = a.getArgument(0, ProsessTaskData.class);
+            if (data.getTaskType().equals(KompletthetskontrollerVurderKompletthetTask.TASKTYPE)) {
+                new KompletthetskontrollerVurderKompletthetTask(null, null, kompletthetskontroller).doProsesser(data, behandling);
+            }
+            return null;
+        });
     }
 
     @Test
@@ -144,21 +162,11 @@ public class KompletthetskontrollerTest {
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_KOMPLETTHET)).thenReturn(false);
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
+        primeProsessTaskRepositoryKompletthetskontroller(behandling);
+
         kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, List.of(mottattDokument));
 
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
-    }
-
-    public void skal_gjenoppta_behandling_ved_mottak_av_ny_forretningshendelse() {
-        // Arrange
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.oppfylt());
-        EndringsresultatSnapshot endringsresultatSnapshot = EndringsresultatSnapshot.opprett();
-        when(behandlingProsesseringTjeneste.taSnapshotAvBehandlingsgrunnlag(behandling)).thenReturn(endringsresultatSnapshot);
-
-        kompletthetskontroller.vurderNyForretningshendelse(behandling);
-
-        verify(behandlingProsesseringTjeneste).finnGrunnlagsEndring(behandling, endringsresultatSnapshot);
-        verify(behandlingProsesseringTjeneste).opprettTasksForGjenopptaOppdaterFortsett(behandling, eq(false));
     }
 
     @Test
