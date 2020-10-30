@@ -13,13 +13,28 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 // Bruker en primitiv variant av Composite for å kunne vurderes enkeltvis (løvnode) og sammensatt (rotnode)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class EndringsresultatSnapshot {
 
+    @JsonProperty(value = "grunnlagId")
     private Long grunnlagId;
+
+    @JsonProperty(value = "grunnlagUuid")
     private UUID grunnlagUuid;
+
+    @JsonProperty(value = "grunnlagKlasse", required = true)
     private Class<?> grunnlagKlasse;
 
+    @JsonProperty(value = "children", required = true)
     private List<EndringsresultatSnapshot> children = emptyList();
 
     // Brukes som Composite-rotnode
