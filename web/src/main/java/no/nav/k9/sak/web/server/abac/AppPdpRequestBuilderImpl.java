@@ -94,8 +94,8 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
 
-        addToPdpRequest(pdpRequest, AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
-        addToPdpRequest(pdpRequest, AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
+        addToPdpRequest(attributter, pdpRequest, AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
+        addToPdpRequest(attributter, pdpRequest, AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
 
         if (!aktører.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
@@ -109,9 +109,9 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         return pdpRequest;
     }
 
-    private void addToPdpRequest(PdpRequest pdpRequest, String key, String val) {
+    private void addToPdpRequest(AbacAttributtSamling attributter, PdpRequest pdpRequest, String key, String val) {
         String v = val == null || (val = val.trim()).isEmpty() ? null : val;
-        pdpRequest.put(key, Objects.requireNonNull(v, "Fikk null eller empty verdi for : " + key));
+        pdpRequest.put(key, Objects.requireNonNull(v, "Fikk null eller empty verdi for : " + key + ", attributter=" + attributter));
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType,

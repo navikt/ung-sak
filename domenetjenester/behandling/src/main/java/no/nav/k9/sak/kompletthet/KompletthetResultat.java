@@ -25,7 +25,7 @@ public class KompletthetResultat {
     public static KompletthetResultat ikkeOppfylt(LocalDateTime ventefrist, Venteårsak venteårsak) {
         return ikkeOppfylt(ventefrist, venteårsak, null);
     }
-    
+
     public static KompletthetResultat ikkeOppfylt(LocalDateTime ventefrist, Venteårsak venteårsak, String venteårsakVariant) {
         return new KompletthetResultat(false, ventefrist, venteårsak, venteårsakVariant);
     }
@@ -41,7 +41,7 @@ public class KompletthetResultat {
     public Venteårsak getVenteårsak() {
         return venteårsak;
     }
-    
+
     public String getVenteårsakVariant() {
         return venteårsakVariant;
     }
@@ -52,5 +52,12 @@ public class KompletthetResultat {
 
     public boolean erFristUtløpt() {
         return !erOppfylt && ventefrist == null;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<erOppfylt=" + erOppfylt
+            + (erOppfylt ? "" : ", ventefrist=" + ventefrist + ", venteårsak=" + venteårsak + ", variant=" + venteårsakVariant)
+            + ">";
     }
 }

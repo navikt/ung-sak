@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.arbeidsforhold.impl;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -99,10 +100,10 @@ public class InntektsmeldingRegisterTjeneste {
             }
         }
 
+        var kopiPåkrevd = new LinkedHashMap<>(påkrevdeInntektsmeldinger);
+        filtrerUtMottatteInntektsmeldinger(referanse, kopiPåkrevd, erEndringssøknad, new FinnEksternReferanse());
 
-        filtrerUtMottatteInntektsmeldinger(referanse, påkrevdeInntektsmeldinger, erEndringssøknad, new FinnEksternReferanse());
-
-        return filtrerInntektsmeldingerForYtelse(referanse, Optional.empty(), påkrevdeInntektsmeldinger);
+        return filtrerInntektsmeldingerForYtelse(referanse, Optional.empty(), kopiPåkrevd);
     }
 
     private void logInntektsmeldinger(BehandlingReferanse referanse, Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> påkrevdeInntektsmeldinger, String filtrert) {
