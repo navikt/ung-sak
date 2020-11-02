@@ -24,10 +24,10 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -127,7 +127,7 @@ public class OpptjeningsperioderTjeneste {
 
         AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
-        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(behandlingReferanse.getSaksnummer());
+        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
 
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
 
@@ -288,7 +288,8 @@ public class OpptjeningsperioderTjeneste {
                                    InntektArbeidYtelseGrunnlag grunnlag,
                                    OpptjeningAktivitetVurdering vurderForSaksbehandling,
                                    Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
-                                   DatoIntervallEntitet opptjeningPeriode, SakInntektsmeldinger inntektsmeldinger) {
+                                   DatoIntervallEntitet opptjeningPeriode,
+                                   Set<Inntektsmelding> inntektsmeldinger) {
         AktørId aktørId = behandlingReferanse.getAktørId();
         var filter = new YrkesaktivitetFilter(null, grunnlag.getBekreftetAnnenOpptjening(aktørId));
 

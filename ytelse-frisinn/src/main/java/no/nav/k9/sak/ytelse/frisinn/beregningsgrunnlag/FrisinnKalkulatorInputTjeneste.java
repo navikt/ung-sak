@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -12,8 +13,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregning
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -48,7 +49,7 @@ public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
     @Override
     protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse, DatoIntervallEntitet vilkårsperiode,
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
-                                                               SakInntektsmeldinger sakInntektsmeldinger,
+                                                               Collection<Inntektsmelding> sakInntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening) {
         if (toggletVilkårsperioder) {
             return new FrisinnTilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);

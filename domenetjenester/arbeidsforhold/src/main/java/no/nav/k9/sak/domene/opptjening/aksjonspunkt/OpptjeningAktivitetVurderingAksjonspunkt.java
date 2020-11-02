@@ -1,9 +1,11 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import java.util.Set;
+
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
@@ -28,7 +30,7 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
                                          InntektArbeidYtelseGrunnlag iayGrunnlag,
                                          boolean harVærtSaksbehandlet,
                                          DatoIntervallEntitet opptjeningPeriode,
-                                         SakInntektsmeldinger inntektsmeldinger) {
+                                         Set<Inntektsmelding> inntektsmeldinger) {
 
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
         if (OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(type)) {
@@ -52,7 +54,7 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
     private VurderingsStatus vurderArbeid(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet,
                                           boolean harVærtSaksbehandlet,
                                           DatoIntervallEntitet opptjeningPeriode,
-                                          SakInntektsmeldinger inntektsmeldinger) {
+                                          Set<Inntektsmelding> inntektsmeldinger) {
         if (vurderBekreftetOpptjening.girAksjonspunktForArbeidsforhold(filter, registerAktivitet, overstyrtAktivitet, opptjeningPeriode, inntektsmeldinger)) {
             if (overstyrtAktivitet != null) {
                 return VurderingsStatus.GODKJENT;

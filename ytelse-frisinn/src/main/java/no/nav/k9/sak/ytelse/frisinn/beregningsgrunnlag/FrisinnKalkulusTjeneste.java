@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -79,7 +80,6 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
 
         for (var input : sortertInput) {
             var ytelseGrunnlag = input.getYtelseGrunnlag();
@@ -91,8 +91,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                 uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN));
             } else {
                 // tar en og en
-                var startBeregningRequest = initStartRequest(ref, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer,
-                    List.of(new StartBeregningInput(bgReferanse, skjæringstidspunkt, ytelseGrunnlag)));
+                var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
+                    , refusjonskravDatoer, List.of(new StartBeregningInput(bgReferanse, skjæringstidspunkt, ytelseGrunnlag)));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {
@@ -118,7 +118,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             var fraBeregningResponse = beregnKalkulus(ref, sendTilKalkulus, bgReferanser);
             uuidKalkulusResulat.putAll(fraBeregningResponse.getResultater());
         }
-        
+
         return new SamletKalkulusResultat(uuidKalkulusResulat, bgReferanser);
 
     }

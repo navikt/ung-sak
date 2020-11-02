@@ -86,7 +86,7 @@ public class ForvaltningBeregningRestTjeneste {
         var ref = BehandlingReferanse.fra(behandling);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
         var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
 
         var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());

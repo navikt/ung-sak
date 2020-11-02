@@ -1,11 +1,12 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import java.util.Objects;
+import java.util.Set;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -17,7 +18,7 @@ public class VurderStatusInput {
     private InntektArbeidYtelseGrunnlag iayGrunnlag;
     private boolean harVærtSaksbehandlet;
     private DatoIntervallEntitet opptjeningPeriode;
-    private SakInntektsmeldinger inntektsmeldinger;
+    private Set<Inntektsmelding> inntektsmeldinger;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
         this.type = Objects.requireNonNull(type);
@@ -64,11 +65,11 @@ public class VurderStatusInput {
         this.opptjeningPeriode = opptjeningPeriode;
     }
 
-    public SakInntektsmeldinger getInntektsmeldinger() {
+    public Set<Inntektsmelding> getInntektsmeldinger() {
         return inntektsmeldinger;
     }
 
-    public void setInntektsmeldinger(SakInntektsmeldinger inntektsmeldinger) {
+    public void setInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger) {
         this.inntektsmeldinger = inntektsmeldinger;
     }
 

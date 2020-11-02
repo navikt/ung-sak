@@ -23,7 +23,7 @@ public class TilkjentYtelseDto {
     private List<TilkjentYtelsePeriodeDto> perioder;
 
 
-    private TilkjentYtelseDto() {
+    TilkjentYtelseDto() {
         //
     }
 

@@ -22,9 +22,7 @@ class StartpunktUtlederInntektsmeldinger {
     StartpunktType utledStartpunkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag1) {
 
         if (inntektsmeldingErSøknad(ref)) {
-            var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
-
-            var nyeInntektsmeldinger = sakInntektsmeldinger.hentInntektsmeldingerSidenRef(ref.getBehandlingId(), grunnlag1.getEksternReferanse());
+            var nyeInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldingerSidenRef(ref.getSaksnummer(), ref.getBehandlingId(), grunnlag1.getEksternReferanse());
 
             // TODO: Validere at det faktisk blir endring i periodene
             if (!nyeInntektsmeldinger.isEmpty()) {

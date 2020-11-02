@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
@@ -141,23 +141,32 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
-    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
-        return new ArrayList<>(hentInntektsmeldinger(saksnummer).getAlleInntektsmeldinger());
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
+        Set<Inntektsmelding> inntektsmeldinger = new LinkedHashSet<>();
+        for (var iayg : grunnlag) {
+            var ims = iayg.getInntektsmeldinger();
+            if (ims.isPresent()) {
+                inntektsmeldinger.addAll(ims.get().getAlleInntektsmeldinger());
+            }
+        }
+        return inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
-    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
-        return new ArrayList<>(hentInntektsmeldinger(saksnummer).getAlleInntektsmeldinger());
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
+        return hentUnikeInntektsmeldingerForSak(saksnummer);
     }
 
     @Override
     public List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer) {
-        return hentInntektsmeldinger(saksnummer).getAlleInntektsmeldinger().stream()
+        return hentUnikeInntektsmeldingerForSak(saksnummer).stream()
             .filter(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || !im.getEndringerRefusjon().isEmpty())
             .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver)).entrySet().stream()
             .map(entry -> {
-                // FIXME (Espen Velsvik) TSF-1102:  innsendingstidspunktet her blir feil for april-august 2020. Kan ikke brukes til å vurdere dato krav ble fremstatt vs. refusjonsdato for omsorgspenger/pleiepenger.
-                // for OMP/PSB må innsending av refusjon dato knyttes til perioden det bes om refusjon for, ikke kun første tidspunkte.  Må løses i k9-sak istdf. kalkulus antagelig.
+                // FIXME (Espen Velsvik) TSF-1102: innsendingstidspunktet her blir feil for april-august 2020. Kan ikke brukes til å vurdere dato krav ble
+                // fremstatt vs. refusjonsdato for omsorgspenger/pleiepenger.
+                // for OMP/PSB må innsending av refusjon dato knyttes til perioden det bes om refusjon for, ikke kun første tidspunkte. Må løses i k9-sak
+                // istdf. kalkulus antagelig.
                 LocalDate førsteInnsendingAvRefusjon = entry.getValue().stream().map(Inntektsmelding::getInnsendingstidspunkt).min(Comparator.naturalOrder()).map(LocalDateTime::toLocalDate)
                     .orElse(TIDENES_ENDE);
                 LocalDate førsteDatoForRefusjon = entry.getValue().stream()
@@ -291,9 +300,9 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
-    public SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
+    public Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse) {
         List<InntektArbeidYtelseGrunnlag> alleGrunnlag = grunnlag;
-        var resultat = new SakInntektsmeldinger(saksnummer);
+        var resultat = new SakInntektsmeldinger();
         for (var iayg : alleGrunnlag) {
             var ims = iayg.getInntektsmeldinger();
             if (ims.isPresent()) {
@@ -304,7 +313,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
                 }
             }
         }
-        return resultat;
+        return resultat.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
 
     @Override

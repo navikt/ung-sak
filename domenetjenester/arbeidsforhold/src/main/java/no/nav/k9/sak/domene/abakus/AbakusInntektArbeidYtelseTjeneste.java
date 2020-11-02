@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +44,6 @@ import no.nav.k9.sak.domene.abakus.mapping.MapInntektsmeldinger;
 import no.nav.k9.sak.domene.abakus.mapping.MapRefusjonskravDatoer;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -181,7 +181,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
-    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
 
         if (fagsakOpt.isPresent()) {
@@ -190,11 +190,11 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), ytelseType);
 
         }
-        return List.of();
+        return Set.of();
     }
 
     @Override
-    public List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
 
         if (fagsakOpt.isPresent()) {
@@ -203,7 +203,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             return hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
 
         }
-        return List.of();
+        return Set.of();
     }
 
     @Override
@@ -219,9 +219,8 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return List.of();
     }
 
-    @Override
-    public SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
-        SakInntektsmeldinger sakInntektsmeldinger = new SakInntektsmeldinger(saksnummer);
+    private SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
+        SakInntektsmeldinger sakInntektsmeldinger = new SakInntektsmeldinger();
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
 
         if (fagsakOpt.isPresent()) {
@@ -245,6 +244,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             });
         }
         return sakInntektsmeldinger;
+    }
+
+    @Override
+    public Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse) {
+        var sakInntektsmeldinger = hentInntektsmeldinger(saksnummer); // TODO: Fjern denne, hent direkte fra abakus?
+        return sakInntektsmeldinger.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
 
     @Override
@@ -470,10 +475,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private List<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+    private Set<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
         var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
         var dto = hentUnikeInntektsmeldinger(request);
-        return mapResult(dto).getAlleInntektsmeldinger();
+        var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+
+        var sorted = inntektsmeldinger.stream()
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        return sorted;
     }
 
     private List<RefusjonskravDato> hentOgMapAlleRefusjonskravDatoer(Fagsak fagsak) {
