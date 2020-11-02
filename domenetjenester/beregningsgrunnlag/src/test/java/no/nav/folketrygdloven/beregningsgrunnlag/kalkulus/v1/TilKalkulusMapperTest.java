@@ -6,18 +6,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 import org.junit.Test;
 
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.Saksnummer;
 
 public class TilKalkulusMapperTest {
 
@@ -28,7 +26,6 @@ public class TilKalkulusMapperTest {
 
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode() {
-        var sakInntektsmeldinger = new SakInntektsmeldinger(new Saksnummer("123123123"));
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
@@ -74,10 +71,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
 
-        sakInntektsmeldinger.leggTil(1L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding1);
-        sakInntektsmeldinger.leggTil(2L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding2);
-        sakInntektsmeldinger.leggTil(3L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding3);
-        sakInntektsmeldinger.leggTil(4L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding4);
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
 
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
 
@@ -89,7 +83,6 @@ public class TilKalkulusMapperTest {
 
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode_2() {
-        var sakInntektsmeldinger = new SakInntektsmeldinger(new Saksnummer("123123123"));
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
             .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
@@ -135,10 +128,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
 
-        sakInntektsmeldinger.leggTil(1L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding1);
-        sakInntektsmeldinger.leggTil(2L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding2);
-        sakInntektsmeldinger.leggTil(3L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding3);
-        sakInntektsmeldinger.leggTil(4L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding4);
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
 
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
 
@@ -150,7 +140,6 @@ public class TilKalkulusMapperTest {
 
     @Test
     public void skal_prioritere_inntektsmelding_nærmest_skjøringstidspunktet() {
-        var sakInntektsmeldinger = new SakInntektsmeldinger(new Saksnummer("123123123"));
         var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
         var ref = EksternArbeidsforholdRef.ref("123");
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
@@ -176,8 +165,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
 
-        sakInntektsmeldinger.leggTil(1L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding1);
-        sakInntektsmeldinger.leggTil(2L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding2);
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode3);
 
@@ -186,7 +174,6 @@ public class TilKalkulusMapperTest {
 
     @Test
     public void skal_prioritere_inntektsmelding_nærmest_skjøringstidspunktet_2() {
-        var sakInntektsmeldinger = new SakInntektsmeldinger(new Saksnummer("123123123"));
         var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
         var ref = EksternArbeidsforholdRef.ref("123");
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
@@ -212,8 +199,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
 
-        sakInntektsmeldinger.leggTil(1L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding1);
-        sakInntektsmeldinger.leggTil(2L, UUID.randomUUID(), LocalDateTime.now(), inntektsmelding2);
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode4);
 

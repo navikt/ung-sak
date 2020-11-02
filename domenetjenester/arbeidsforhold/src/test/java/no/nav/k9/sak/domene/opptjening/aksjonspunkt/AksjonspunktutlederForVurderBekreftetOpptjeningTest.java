@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -81,7 +81,8 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
         Yrkesaktivitet overstyrt = filter.getYrkesaktiviteter().iterator().next();
         // Act
-        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, null, overstyrt, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer()));
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, null, overstyrt,
+            DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), Set.of());
         // Assert
         assertThat(girAksjonspunkt).isTrue();
     }
@@ -112,8 +113,8 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId()));
         Yrkesaktivitet register = filter.getAlleYrkesaktiviteter().iterator().next();
         // Act
-        var inntektsmeldinger = new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer());
-        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), inntektsmeldinger);
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null,
+            DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), Set.of());
         // Assert
         assertThat(girAksjonspunkt).isTrue();
     }
@@ -144,7 +145,6 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId()));
         Yrkesaktivitet register = filter.getAlleYrkesaktiviteter().iterator().next();
         // Act
-        var inntektsmeldinger = new SakInntektsmeldinger(behandling.getFagsak().getSaksnummer());
         var inntektsmelding = InntektsmeldingBuilder.builder()
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
@@ -156,8 +156,8 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
             .medOppgittFravær(List.of(new PeriodeAndel(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25))))
             .medRefusjon(BigDecimal.TEN)
             .build();
-        inntektsmeldinger.leggTil(behandling.getId(), iayGrunnlag.getEksternReferanse(), iayGrunnlag.getOpprettetTidspunkt(), inntektsmelding);
-        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null, DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), inntektsmeldinger);
+        boolean girAksjonspunkt = aksjonspunktutleder.girAksjonspunktForArbeidsforhold(filter, register, null,
+            DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusMonths(10), skjæringstidspunkt), Set.of(inntektsmelding));
         // Assert
         assertThat(girAksjonspunkt).isFalse();
     }

@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -62,11 +61,11 @@ public interface InntektArbeidYtelseTjeneste {
     InntektArbeidYtelseAggregatBuilder opprettBuilderForRegister(Long behandlingId);
 
     /**
-    *
-    * @param behandlingUuid
-    * @return Register inntekt og arbeid (Opprett for å endre eller legge til registeropplysning)
-    */
-   InntektArbeidYtelseAggregatBuilder opprettBuilderForRegister(UUID behandlingUuid, UUID angittReferanse, LocalDateTime angittOpprettetTidspunkt);
+     *
+     * @param behandlingUuid
+     * @return Register inntekt og arbeid (Opprett for å endre eller legge til registeropplysning)
+     */
+    InntektArbeidYtelseAggregatBuilder opprettBuilderForRegister(UUID behandlingUuid, UUID angittReferanse, LocalDateTime angittOpprettetTidspunkt);
 
     /**
      * @param behandlingId
@@ -89,13 +88,14 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder);
 
     /**
-     * @deprecated Denne blir lett misbrukt, siden man antagelig ønsker å gjøre mer enn kun fjerne saksbehandlet versjon. Bruk derfor heller {@link #lagreIayAggregat(Long, InntektArbeidYtelseAggregatBuilder)} etter du er ferdig med alle endringer du trenger å gjøre
+     * @deprecated Denne blir lett misbrukt, siden man antagelig ønsker å gjøre mer enn kun fjerne saksbehandlet versjon. Bruk derfor heller
+     *             {@link #lagreIayAggregat(Long, InntektArbeidYtelseAggregatBuilder)} etter du er ferdig med alle endringer du trenger å gjøre
      */
     @Deprecated
     void fjernSaksbehandletVersjon(Long behandlingId);
 
     /**
-     * Lagre nytt grunnlag for Oppgitt Opptjening.  Builder bør ikke gjenbrukes etter kall her.
+     * Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
      */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
@@ -105,7 +105,8 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
-     * Lagre nytt grunnlag for ArbeidsforholdInformasjon.  Builder bør ikke gjenbrukes etter kall her.
+     * Lagre nytt grunnlag for ArbeidsforholdInformasjon. Builder bør ikke gjenbrukes etter kall her.
+     * 
      * @param behandlingId - Behandling Id
      * @param aktørId - Aktør Id
      * @param builder - {@link ArbeidsforholdInformasjonBuilder}
@@ -114,6 +115,7 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Kopier IAY grunnlag fra en behandling til en annen.
+     * 
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling
      */
@@ -121,32 +123,30 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Kopier IAY grunnlag fra en behandling til en annen.
+     * 
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling
      * @param dataset - aggregatene som skal kopieres
      */
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
 
-    List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
+    Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
 
-    List<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
+    Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
 
     List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer);
-
-    /**
-     * Hent alle inntektsmeldinger registrert på saksnummer, indeksert på behandling, grunnlag.
-     * @param saksnummer - Saksnummer
-     */
-    SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer);
 
     Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId);
 
     /**
      * Lagre en eller flere inntektsmeldinger på en behandling for en sak.
+     * 
      * @param saksnummer - Saksnummer
      * @param behandlingId - Behandling Id
      * @param builders - Collection med {@link InntektsmeldingBuilder}
      */
     void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders);
+
+    Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse);
 
 }

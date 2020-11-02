@@ -12,9 +12,9 @@ import java.util.Set;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
@@ -38,7 +38,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                               Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
                                                                               Yrkesaktivitet overstyrtAktivitet,
                                                                               DatoIntervallEntitet opptjeningPeriode,
-                                                                              SakInntektsmeldinger inntektsmeldinger) {
+                                                                              Set<Inntektsmelding> inntektsmeldinger) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, registerAktivitet.getArbeidType());
         return new ArrayList<>(mapAktivitetsavtaler(behandlingReferanse, registerAktivitet, grunnlag,
             vurderForSaksbehandling, type, overstyrtAktivitet, opptjeningPeriode, inntektsmeldinger));
@@ -58,7 +58,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                                                                                   OpptjeningAktivitetType type,
                                                                                   Yrkesaktivitet overstyrtAktivitet,
                                                                                   DatoIntervallEntitet opptjeningPeriode,
-                                                                                  SakInntektsmeldinger inntektsmeldinger) {
+                                                                                  Set<Inntektsmelding> inntektsmeldinger) {
         List<OpptjeningsperiodeForSaksbehandling> perioderForAktivitetsavtaler = new ArrayList<>();
         LocalDate skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
         for (AktivitetsAvtale avtale : gjeldendeAvtaler(grunnlag, skjæringstidspunkt, registerAktivitet, overstyrtAktivitet)) {

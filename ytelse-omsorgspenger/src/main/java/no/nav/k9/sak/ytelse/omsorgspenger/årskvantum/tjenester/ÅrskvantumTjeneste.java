@@ -44,7 +44,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -135,14 +134,17 @@ public class ÅrskvantumTjeneste {
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-        var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(ref.getSaksnummer());
+        var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
         var inntektsmeldingAggregat = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().orElseThrow();
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         var perioder = utledPerioderRelevantForBehandling(behandling, grunnlag);
 
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
 
-        /** @deprecated FIXME TSF-1101 Frode Lindås: innsendingstidpsunktet er ikke nødvendigvis satt korrekt.  Årskvantum etablerer ny måte å sortere uttaksplaner på. */
+        /**
+         * @deprecated FIXME TSF-1101 Frode Lindås: innsendingstidpsunktet er ikke nødvendigvis satt korrekt. Årskvantum etablerer ny måte å sortere
+         *             uttaksplaner på.
+         */
         @Deprecated
         var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
             .stream()
@@ -168,10 +170,13 @@ public class ÅrskvantumTjeneste {
         return utledPerioder(vilkårsperioder, fagsakFravær, behandlingFravær);
     }
 
-    Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder, List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær, Set<OppgittFraværPeriode> behandlingFravær) {
+    Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
+                                                                                                      List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær,
+                                                                                                      Set<OppgittFraværPeriode> behandlingFravær) {
         return fagsakFravær.stream()
             .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) || (Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
-                behandlingFravær.stream().anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at))))
+                behandlingFravær.stream()
+                    .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at))))
             .collect(Collectors.toSet());
     }
 
@@ -199,7 +204,12 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
-    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref, Vilkårene vilkårene, InntektArbeidYtelseGrunnlag iayGrunnlag, SakInntektsmeldinger sakInntektsmeldinger, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder, Behandling behandling) {
+    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref,
+                                                       Vilkårene vilkårene,
+                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                       Set<Inntektsmelding> sakInntektsmeldinger,
+                                                       Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
+                                                       Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, behandling.getFagsak().getPeriode(), perioder)
             .values()
@@ -263,14 +273,15 @@ public class ÅrskvantumTjeneste {
         return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), BarnType.VANLIG);
     }
 
-    private boolean kreverArbeidsgiverRefusjon(SakInntektsmeldinger sakInntektsmeldinger,
+    private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,
                                                Arbeidsgiver arbeidsgiver,
                                                InternArbeidsforholdRef arbeidsforholdRef,
                                                DatoIntervallEntitet periode) {
-        var alleInntektsmeldinger = sakInntektsmeldinger.getAlleInntektsmeldinger();
+        var alleInntektsmeldinger = sakInntektsmeldinger;
         var inntektsmeldinger = getInntektsmeldingerFor(alleInntektsmeldinger, arbeidsgiver);
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
-            .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef)) // TODO: Bør vi matcher på gjelderfor her? Perioder som er sendt inn med arbeidsforholdsId vil da matche med inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
+            .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef)) // TODO: Bør vi matcher på gjelderfor her? Perioder som er sendt inn med arbeidsforholdsId vil da matche med
+                                                                                   // inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
             .filter(it -> it.getOppgittFravær().stream()
                 .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
             .map(Inntektsmelding::getRefusjonBeløpPerMnd)

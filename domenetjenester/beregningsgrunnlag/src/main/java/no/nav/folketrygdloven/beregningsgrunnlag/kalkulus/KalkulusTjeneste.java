@@ -73,13 +73,13 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -151,7 +151,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         }
         var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentInntektsmeldinger(referanse.getSaksnummer());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
 
         StartBeregningListeRequest startBeregningRequest = initStartRequest(referanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, startBeregningInput);
         List<TilstandResponse> tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
@@ -277,7 +277,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
     protected StartBeregningListeRequest initStartRequest(BehandlingReferanse behandlingReferanse,
                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                          SakInntektsmeldinger sakInntektsmeldinger,
+                                                          Collection<Inntektsmelding> sakInntektsmeldinger,
                                                           List<RefusjonskravDato> refusjonskravDatoer,
                                                           List<StartBeregningInput> startBeregningInput) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(behandlingReferanse.getFagsakId());

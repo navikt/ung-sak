@@ -55,7 +55,6 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
@@ -139,7 +138,7 @@ public class TilKalkulusMapper {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
-    private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         if (inntektsmeldingerOpt.isEmpty()) {
             return null;
         }
@@ -173,7 +172,7 @@ public class TilKalkulusMapper {
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
     }
 
-    static List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    static List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         var inntektsmeldingene = new ArrayList<Inntektsmelding>();
 
         var alleInntektsmeldinger = hentInntektsmeldingerSomGjelderForVilkårsperiode(sakInntektsmeldinger, vilkårsPeriode);
@@ -223,9 +222,9 @@ public class TilKalkulusMapper {
         return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
     }
 
-    private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(SakInntektsmeldinger sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
 
-        return sakInntektsmeldinger.getAlleInntektsmeldinger()
+        return sakInntektsmeldinger
             .stream()
             .filter(it -> it.getOppgittFravær()
                 .stream()
@@ -366,7 +365,7 @@ public class TilKalkulusMapper {
     }
 
     public InntektArbeidYtelseGrunnlagDto mapTilDto(InntektArbeidYtelseGrunnlag grunnlag,
-                                                    SakInntektsmeldinger sakInntektsmeldinger,
+                                                    Collection<Inntektsmelding> sakInntektsmeldinger,
                                                     AktørId aktørId,
                                                     DatoIntervallEntitet vilkårsPeriode,
                                                     OppgittOpptjening oppgittOpptjening) {

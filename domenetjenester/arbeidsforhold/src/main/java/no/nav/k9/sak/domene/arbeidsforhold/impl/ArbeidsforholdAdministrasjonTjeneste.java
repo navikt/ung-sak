@@ -98,7 +98,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = Map.of();
 
-        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldinger(ref.getSaksnummer()).getAlleInntektsmeldinger();
+        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
 
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(aktørId));
 

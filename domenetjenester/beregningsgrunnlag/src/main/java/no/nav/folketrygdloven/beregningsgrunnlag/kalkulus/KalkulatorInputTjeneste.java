@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,8 +18,8 @@ import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.SakInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -41,7 +42,7 @@ public class KalkulatorInputTjeneste {
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse,
                                       UUID bgReferanse,
                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                      SakInntektsmeldinger sakInntektsmeldinger,
+                                      Collection<Inntektsmelding> sakInntektsmeldinger,
                                       List<RefusjonskravDato> refusjonskravDatoer,
                                       YtelsespesifiktGrunnlagDto ytelseGrunnlag,
                                       DatoIntervallEntitet vilkårsperiode) {
@@ -72,9 +73,9 @@ public class KalkulatorInputTjeneste {
     protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse,
                                                                DatoIntervallEntitet vilkårsperiode,
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
-                                                               SakInntektsmeldinger sakInntektsmeldinger,
+                                                               Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening) {
-        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
+        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
     }
 
     protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {
