@@ -88,11 +88,12 @@ public class BehandlingskontrollEventObserver {
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        BehandlingProsessEventDto behandlingProsessEventDto = getProduksjonstyringEventDto(eventHendelse, behandling.get());
-
-        String json = getJson(behandlingProsessEventDto);
+        var dto = getProduksjonstyringEventDto(eventHendelse, behandling.get());
+        var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
+        String json = getJson(dto);
         taskData.setPayload(json);
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
         return taskData;
     }
 
