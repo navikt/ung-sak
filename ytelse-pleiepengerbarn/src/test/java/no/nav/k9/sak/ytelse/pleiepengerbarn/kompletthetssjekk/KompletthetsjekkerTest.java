@@ -15,13 +15,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,7 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
@@ -48,18 +51,18 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class KompletthetsjekkerTest {
 
     private static final LocalDate STARTDATO = LocalDate.now().plusWeeks(1);
     private static final String KODE_INNTEKTSMELDING = DokumentTypeId.INNTEKTSMELDING.getOffisiellKode();
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private SøknadRepository søknadRepository = repositoryProvider.getSøknadRepository();
 
-    private KompletthetssjekkerTestUtil testUtil = new KompletthetssjekkerTestUtil(repositoryProvider);
+    private BehandlingRepositoryProvider repositoryProvider;
+    private SøknadRepository søknadRepository;
+
+    private KompletthetssjekkerTestUtil testUtil;
 
     @Mock
     private DokumentArkivTjeneste dokumentArkivTjeneste;
@@ -80,9 +83,14 @@ public class KompletthetsjekkerTest {
     private KompletthetsjekkerFelles kompletthetsjekkerFelles;
     private KompletthetsjekkerImpl kompletthetsjekkerImpl;
     private Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(STARTDATO).build();
+    private EntityManager entityManager;
 
-    @Before
+    @BeforeEach
     public void before() {
+
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        søknadRepository = repositoryProvider.getSøknadRepository();
+        testUtil = new KompletthetssjekkerTestUtil(repositoryProvider);
 
         when(skjæringstidspunktTjeneste.getSkjæringstidspunkter(Mockito.anyLong())).thenReturn(skjæringstidspunkt);
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(any(), anyBoolean())).thenReturn(new HashMap<>());
@@ -98,6 +106,10 @@ public class KompletthetsjekkerTest {
             inntektsmeldingTjeneste,
             kompletthetsjekkerFelles,
             søknadRepository);
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Test
