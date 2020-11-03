@@ -198,6 +198,8 @@ spec:
       value: "true"
     - name: UNNTAKSBEHANDLING
       value: "true"
+    - name: DISABLE_SJEKK_IM_FRAVAER
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

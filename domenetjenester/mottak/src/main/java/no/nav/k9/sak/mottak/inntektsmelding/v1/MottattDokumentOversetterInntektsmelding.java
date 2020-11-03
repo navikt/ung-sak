@@ -33,6 +33,7 @@ import no.nav.k9.sak.mottak.inntektsmelding.ValiderInntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
+import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 import no.seres.xsd.nav.inntektsmelding_m._201809.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
@@ -59,13 +60,16 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     private VirksomhetTjeneste virksomhetTjeneste;
     private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
+    private Boolean disableSjekkFravær;
+
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
     }
 
     @Inject
-    public MottattDokumentOversetterInntektsmelding(VirksomhetTjeneste virksomhetTjeneste) {
+    public MottattDokumentOversetterInntektsmelding(VirksomhetTjeneste virksomhetTjeneste, @KonfigVerdi(value = "DISABLE_SJEKK_IM_FRAVAER", defaultVerdi = "false") Boolean disableSjekkFravær) {
         this.virksomhetTjeneste = virksomhetTjeneste;
+        this.disableSjekkFravær = disableSjekkFravær;
     }
 
     @Override
@@ -78,7 +82,6 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         InntektsmeldingBuilder builder = InntektsmeldingBuilder.builder();
 
         builder.medYtelse(wrapper.getYtelse());
-
 
         mapInnsendingstidspunkt(mottattDokument, builder);
         builder.medMottattDato(mottattDokument.getMottattDato());
@@ -100,7 +103,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         } else {
             mapRefusjon(wrapper, builder);
         }
-        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
+        if (disableSjekkFravær) {
+            builder.medOppgittFravær(wrapper.getOppgittFravær());
+        } else {
+            builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
+        }
         return builder;
     }
 
@@ -168,7 +175,9 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 .map(EndringIRefusjonsListe::getEndringIRefusjon)
                 .orElse(Collections.emptyList())
                 .stream()
-                .forEach(eir -> builder.leggTil(new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()), eir.getEndringsdato().getValue())));
+                .forEach(eir -> builder
+                    .leggTil(new Refusjon(validator.validerRefusjonEndringMaks("endringIRefusjon.refusjonsbeloepPrMnd", eir.getRefusjonsbeloepPrMnd().getValue(), eir.getEndringsdato().getValue()),
+                        eir.getEndringsdato().getValue())));
 
         }
     }

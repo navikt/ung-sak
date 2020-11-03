@@ -35,6 +35,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumer;
+import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 import no.seres.xsd.nav.inntektsmelding_m._201812.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Arbeidsforhold;
@@ -64,14 +65,18 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
+    private Boolean disableSjekkFravær;
+
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
     }
 
     @Inject
     public MottattDokumentOversetterInntektsmelding(VirksomhetTjeneste virksomhetTjeneste,
+                                                    @KonfigVerdi(value = "DISABLE_SJEKK_IM_FRAVAER", defaultVerdi = "false") Boolean disableSjekkFravær,
                                                     AktørConsumer aktørConsumer) {
         this.virksomhetTjeneste = virksomhetTjeneste;
+        this.disableSjekkFravær = disableSjekkFravær;
         this.aktørConsumer = aktørConsumer;
     }
 
@@ -107,7 +112,11 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         } else {
             mapRefusjon(wrapper, builder);
         }
-        builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
+        if (disableSjekkFravær) {
+            builder.medOppgittFravær(wrapper.getOppgittFravær());
+        } else {
+            builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
+        }
         return builder;
     }
 
