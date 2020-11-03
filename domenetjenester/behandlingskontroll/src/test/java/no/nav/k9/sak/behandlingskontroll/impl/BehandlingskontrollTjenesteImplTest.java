@@ -8,10 +8,11 @@ import java.util.Objects;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -28,16 +29,14 @@ import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
 public class BehandlingskontrollTjenesteImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
-    @SuppressWarnings("deprecation")
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+    @RegisterExtension
+    public static final JpaExtension repoRule = new JpaExtension();
 
     private EntityManager em = repoRule.getEntityManager();
     private BehandlingskontrollTjenesteImpl kontrollTjeneste;
@@ -60,7 +59,7 @@ public class BehandlingskontrollTjenesteImplTest {
     private String steg2UtgangAksjonspunkt;
 
     @SuppressWarnings("resource")
-    @Before
+    @BeforeEach
     public void setup() {
         TestScenario scenario = TestScenario.dummyScenario();
         behandling = scenario.lagre(serviceProvider);
@@ -193,28 +192,24 @@ public class BehandlingskontrollTjenesteImplTest {
 
     @Test
     public void skal_kaste_exception_dersom_tilbakeføring_til_senere_steg() {
-        // Assert
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Kan ikke angi steg ");
-        expectedException.expectMessage("som er etter");
-
-        // Act
-        kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, steg4);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, steg4);
+        });
     }
 
     @Test
     public void skal_kaste_exception_dersom_ugyldig_tilbakeføring_fra_iverks() {
         // Assert
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Kan ikke tilbakeføre fra");
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            // Arrange
+            BehandlingStegType iverksettSteg = BehandlingStegType.IVERKSETT_VEDTAK;
+            BehandlingStegType forrigeSteg = modell.finnForrigeSteg(iverksettSteg).getBehandlingStegType();
+            manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, iverksettSteg);
 
-        // Arrange
-        BehandlingStegType iverksettSteg = BehandlingStegType.IVERKSETT_VEDTAK;
-        BehandlingStegType forrigeSteg = modell.finnForrigeSteg(iverksettSteg).getBehandlingStegType();
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, iverksettSteg);
+            // Act
+            kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, forrigeSteg);
 
-        // Act
-        kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, forrigeSteg);
+        });
     }
 
     @Test
@@ -257,10 +252,9 @@ public class BehandlingskontrollTjenesteImplTest {
             }
         };
 
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Støtter ikke nøstet prosessering");
-
-        this.kontrollTjeneste.prosesserBehandling(kontekst);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            this.kontrollTjeneste.prosesserBehandling(kontekst);
+        });
     }
 
     @Test
