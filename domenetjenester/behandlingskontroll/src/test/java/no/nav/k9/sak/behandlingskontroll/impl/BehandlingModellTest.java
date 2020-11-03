@@ -12,9 +12,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -31,20 +30,16 @@ import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.testutilities.TestScenario;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.k9.sak.db.util.CdiDbAwareTest;
 
 @SuppressWarnings("resource")
-@RunWith(CdiRunner.class)
+@CdiDbAwareTest
 public class BehandlingModellTest {
 
     private static final LocalDateTime FRIST_TID = LocalDateTime.now().plusWeeks(4).withNano(0);
 
     private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.SVANGERSKAPSPENGER;
-
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
     private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
@@ -228,21 +223,24 @@ public class BehandlingModellTest {
         assertThat(gjenoppta.kjørteSteg).isEqualTo(List.of(STEG_2, STEG_3));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void skal_feile_ved_gjenopptak_vanlig_steg() {
-        // Arrange
-        List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
-        BehandlingModellImpl modell = setupModell(modellData);
 
-        TestScenario scenario = TestScenario.dummyScenario();
-        Behandling behandling = scenario.lagre(serviceProvider);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            // Arrange
+            List<TestStegKonfig> modellData = List.of(
+                new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
+                new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
+                new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+            BehandlingModellImpl modell = setupModell(modellData);
 
-        // Act 1
-        BehandlingStegVisitorVenterUtenLagring visitor = lagVisitorVenter(behandling);
-        modell.prosesserFra(STEG_1, visitor);
+            TestScenario scenario = TestScenario.dummyScenario();
+            Behandling behandling = scenario.lagre(serviceProvider);
+
+            // Act 1
+            BehandlingStegVisitorVenterUtenLagring visitor = lagVisitorVenter(behandling);
+            modell.prosesserFra(STEG_1, visitor);
+        });
     }
 
     @Test

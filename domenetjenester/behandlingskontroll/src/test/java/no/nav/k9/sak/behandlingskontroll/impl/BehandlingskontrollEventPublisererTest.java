@@ -6,11 +6,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -26,10 +24,9 @@ import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.testutilities.TestScenario;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.k9.sak.db.util.CdiDbAwareTest;
 
-@RunWith(CdiRunner.class)
+@CdiDbAwareTest
 public class BehandlingskontrollEventPublisererTest {
     private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.FORELDREPENGER;
@@ -39,8 +36,6 @@ public class BehandlingskontrollEventPublisererTest {
     private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_KOMPLETTHET;
 
     private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Inject
     BehandlingskontrollEventPubliserer eventPubliserer;
@@ -51,7 +46,7 @@ public class BehandlingskontrollEventPublisererTest {
     // No Inject
     BehandlingskontrollTjenesteImpl kontrollTjeneste;
 
-    @Before
+    @BeforeEach
     public void setup() {
         BehandlingModellImpl behandlingModell = byggModell();
 
@@ -65,7 +60,7 @@ public class BehandlingskontrollEventPublisererTest {
         TestEventObserver.startCapture();
     }
 
-    @After
+    @AfterEach
     public void after() {
         TestEventObserver.reset();
     }
@@ -82,7 +77,7 @@ public class BehandlingskontrollEventPublisererTest {
         Aksjonspunkt aksjonspunkt = serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT, stegType);
         kontrollTjeneste.aksjonspunkterEndretStatus(kontekst, stegType, List.of(aksjonspunkt));
 
-        AksjonspunktDefinisjon[] ads = {AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT};
+        AksjonspunktDefinisjon[] ads = { AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT };
         TestEventObserver.containsExactly(ads);
     }
 
@@ -216,8 +211,7 @@ public class BehandlingskontrollEventPublisererTest {
             new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap(), ap()),
             new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_0), ap(a0_1)),
             new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_0), ap(a1_1)),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_0), ap(a2_1))
-        );
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_0), ap(a2_1)));
 
         return ModifiserbarBehandlingModell.setupModell(behandlingType, fagsakYtelseType, modellData);
     }
