@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -40,7 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
@@ -51,18 +51,21 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.Tuple;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class PleiepengerBeregneYtelseStegTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final BeregningsresultatRepository beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BeregningsresultatRepository beregningsresultatRepository;
+    private BehandlingRepository behandlingRepository;
+
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     @Inject
@@ -72,14 +75,18 @@ public class PleiepengerBeregneYtelseStegTest {
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
-    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(repoRule.getEntityManager(), repositoryProvider.getVilkårResultatRepository());
+    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
 
     private PleiepengerBeregneYtelseSteg steg;
     private BeregningsresultatEntitet beregningsresultat;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, repositoryProvider.getVilkårResultatRepository());
         beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository);
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
