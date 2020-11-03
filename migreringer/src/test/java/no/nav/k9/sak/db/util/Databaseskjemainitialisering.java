@@ -25,7 +25,7 @@ public final class Databaseskjemainitialisering {
         }
     }
 
-    public static void settPlaceholdereOgJdniOppslag() {
+    public static void settJdniOppslag() {
         try {
             DatabaseStøtte.settOppJndiForDefaultDataSource(DatasourceConfiguration.UNIT_TEST.get());
         } catch (FileNotFoundException e) {

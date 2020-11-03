@@ -16,10 +16,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -46,7 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -60,24 +60,24 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
 public class ForeslåBehandlingsresultatTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = FOM.plusWeeks(6);
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = FOM;
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @RegisterExtension
+    public static final JpaExtension extension = new JpaExtension();
 
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(extension.getEntityManager());
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -92,7 +92,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private UttakRepository uttakRepository = mock(UttakRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(uttakRepository.hentOppgittSøknadsperioder(anyLong())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
         when(uttakRepository.hentOppgittUttak(anyLong()))
