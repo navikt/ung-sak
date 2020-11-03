@@ -15,11 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -46,7 +45,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -60,24 +59,20 @@ import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.konfig.Tid;
 import no.nav.vedtak.util.Tuple;
 
-@RunWith(CdiRunner.class)
+@CdiDbAwareTest
 public class ForeslåBehandlingsresultatTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = FOM.plusWeeks(6);
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = FOM;
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
     @Inject
     private UttakInMemoryTjeneste uttakTjeneste;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
@@ -91,9 +86,11 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
     private UttakRepository uttakRepository = mock(UttakRepository.class);
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
+    private EntityManager entityManager;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         when(uttakRepository.hentOppgittSøknadsperioder(anyLong())).thenReturn(new Søknadsperioder(Set.of(new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)))));
         when(uttakRepository.hentOppgittUttak(anyLong()))
             .thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
@@ -104,6 +101,10 @@ public class ForeslåBehandlingsresultatTjenesteTest {
             vedtakVarselRepository,
             uttakRepository,
             revurderingBehandlingsresultatutleder);
+    }
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Test

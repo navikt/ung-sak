@@ -38,8 +38,8 @@
 		<changelist>-SNAPSHOT</changelist>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-		<felles.version>2.3.0-20201013152658-81aa82f</felles.version>
+        
+		<felles.version>2.4.0-20201103095947-cd9cca7</felles.version>
 
 		<fp-kontrakter.version>5.1-20200204103504-73692b0</fp-kontrakter.version>
 		<k9format.version>5.0.0-20200916141021-ab54476</k9format.version>
@@ -68,7 +68,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-
+                    
             <!-- Felles biblioteker - Importerte avhengigheter. -->
 			<dependency>
 				<!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -450,6 +450,7 @@
 				<artifactId>assertj-core</artifactId>
 				<version>3.18.0</version>
 			</dependency>
+            
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -525,7 +526,7 @@
 		<dependency>
 			<groupId>com.sun.xml.messaging.saaj</groupId>
 			<artifactId>saaj-impl</artifactId>
-		</dependency>
+    	</dependency>
 	</dependencies>
 
 	<build>

@@ -5,7 +5,7 @@ import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 public class UnittestRepositoryRule extends RepositoryRule {
 
     static {
-        Databaseskjemainitialisering.settPlaceholdereOgJdniOppslag();
+        Databaseskjemainitialisering.settJdniOppslag();
     }
 
     public UnittestRepositoryRule() {
