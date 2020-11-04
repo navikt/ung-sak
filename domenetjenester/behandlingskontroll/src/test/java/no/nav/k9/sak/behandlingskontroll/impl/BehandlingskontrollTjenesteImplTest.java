@@ -199,12 +199,13 @@ public class BehandlingskontrollTjenesteImplTest {
 
     @Test
     public void skal_kaste_exception_dersom_ugyldig_tilbakeføring_fra_iverks() {
+        // Arrange
+        BehandlingStegType iverksettSteg = BehandlingStegType.IVERKSETT_VEDTAK;
+        BehandlingStegType forrigeSteg = modell.finnForrigeSteg(iverksettSteg).getBehandlingStegType();
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, iverksettSteg);
+
         // Assert
         Assertions.assertThrows(IllegalStateException.class, () -> {
-            // Arrange
-            BehandlingStegType iverksettSteg = BehandlingStegType.IVERKSETT_VEDTAK;
-            BehandlingStegType forrigeSteg = modell.finnForrigeSteg(iverksettSteg).getBehandlingStegType();
-            manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, iverksettSteg);
 
             // Act
             kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, forrigeSteg);
