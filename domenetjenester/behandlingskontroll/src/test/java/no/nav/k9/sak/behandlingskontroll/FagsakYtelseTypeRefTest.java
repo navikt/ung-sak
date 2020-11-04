@@ -6,9 +6,11 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 /** Demonstrerer lookup med repeatble annotations. */
@@ -17,9 +19,14 @@ public class FagsakYtelseTypeRefTest {
 
     @Test
     public void skal_få_duplikat_instans_av_cdi_bean() throws Exception {
-        Assert.assertThrows("Har flere matchende instanser", IllegalStateException.class, () -> {
+
+        // Assert
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+
+            // Act
             FagsakYtelseTypeRef.Lookup.find(Bokstav.class, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
-        });
+
+        }, "Har flere matchende instanser");
     }
 
     @Test

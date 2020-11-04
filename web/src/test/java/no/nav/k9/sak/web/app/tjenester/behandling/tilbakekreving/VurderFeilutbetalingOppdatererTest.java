@@ -10,8 +10,10 @@ import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.ArgumentCaptor;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -56,11 +58,17 @@ public class VurderFeilutbetalingOppdatererTest {
 
     @Test
     public void skal_feile_når_Inntrekk_er_forsøkt_valgt() {
+
+        // Arrange
         VurderFeilutbetalingDto dto = new VurderFeilutbetalingDto("lorem ipsum", TilbakekrevingVidereBehandling.INNTREKK, null);
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
+        // Assert
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+
+            // Act
             oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         });
+
     }
 
 }

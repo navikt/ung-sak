@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -41,10 +42,14 @@ public class SjekkForEndringMellomPerioderImplTest {
 
     @Test
     public void skal_kaste_exception_når_både_ny_og_gammel_periode_er_lik_null() {
-        // Act
-        Assert.assertThrows(IllegalStateException.class, () -> {
+
+        // Assert
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+
+            // Act
             sjekkForEndringMellomPerioder.sjekk(null, null);
         });
+
     }
 
     @Test
