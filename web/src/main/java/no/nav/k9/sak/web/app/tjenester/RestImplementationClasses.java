@@ -10,6 +10,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
@@ -62,6 +63,7 @@ public class RestImplementationClasses {
         classes.add(SøknadRestTjeneste.class);
         classes.add(OpptjeningRestTjeneste.class);
         classes.add(InntektArbeidYtelseRestTjeneste.class);
+        classes.add(ArbeidsgiverRestTjeneste.class);
         classes.add(VilkårRestTjeneste.class);
         classes.add(IntegrasjonstatusRestTjeneste.class);
         classes.add(PipRestTjeneste.class);

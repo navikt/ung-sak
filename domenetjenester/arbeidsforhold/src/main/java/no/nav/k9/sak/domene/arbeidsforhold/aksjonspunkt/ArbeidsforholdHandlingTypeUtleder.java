@@ -23,19 +23,19 @@ class ArbeidsforholdHandlingTypeUtleder {
     static ArbeidsforholdHandlingType utledHandling(AvklarArbeidsforholdDto arbeidsforholdDto) {
 
         if (inntektSkalIkkeMedTilBeregningsgrunnlaget(arbeidsforholdDto)) {
-            return INNTEKT_IKKE_MED_I_BG;
+            throw new IllegalStateException("Ugyldig handling: " + INNTEKT_IKKE_MED_I_BG);
         } else if (skalLeggeTilNyttArbeidsforhold(arbeidsforholdDto)) {
             return LAGT_TIL_AV_SAKSBEHANDLER;
         } else if (skalLeggeTilNyttArbeidsforholdBasertPåInntektsmelding(arbeidsforholdDto)) {
             return BASERT_PÅ_INNTEKTSMELDING;
         } else if (skalOverstyrePerioder(arbeidsforholdDto)) {
-            return BRUK_MED_OVERSTYRT_PERIODE;
+            throw new IllegalStateException("Ugyldig handling: " + BRUK_MED_OVERSTYRT_PERIODE);
         } else if (skalBrukeUtenInnteksmelding(arbeidsforholdDto)) {
-            return BRUK_UTEN_INNTEKTSMELDING;
+            throw new IllegalStateException("Ugyldig handling: " + BRUK_UTEN_INNTEKTSMELDING);
         } else if (skalErstatteAnnenInntektsmelding(arbeidsforholdDto)) {
-            return SLÅTT_SAMMEN_MED_ANNET;
+            throw new IllegalStateException("Ugyldig handling: " + SLÅTT_SAMMEN_MED_ANNET);
         } else if (erNyttArbeidsforhold(arbeidsforholdDto)) {
-            return NYTT_ARBEIDSFORHOLD;
+            throw new IllegalStateException("Ugyldig handling: " + NYTT_ARBEIDSFORHOLD);
         } else if (brukArbeidsforholdet(arbeidsforholdDto)) {
             return BRUK;
         }

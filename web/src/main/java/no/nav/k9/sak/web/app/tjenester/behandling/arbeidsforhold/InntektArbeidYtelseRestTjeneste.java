@@ -8,6 +8,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -39,11 +40,13 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.Lookup;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
@@ -65,6 +68,7 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class InntektArbeidYtelseRestTjeneste {
 
     public static final String INNTEKT_ARBEID_YTELSE_PATH = "/behandling/inntekt-arbeid-ytelse";
+    public static final String INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH = "/behandling/iay/arbeidsforhold-v2";
     public static final String OPPGITT_OPPTJENING_PATH = "/behandling/oppgitt-opptjening";
     public static final String OPPGITT_OPPTJENING_PATH_V2 = "/behandling/oppgitt-opptjening-v2";
 
@@ -74,6 +78,7 @@ public class InntektArbeidYtelseRestTjeneste {
     private InntektArbeidYtelseDtoMapper dtoMapper;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private UttakRepository uttakRepository;
+    private ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste;
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -88,12 +93,14 @@ public class InntektArbeidYtelseRestTjeneste {
                                            InntektArbeidYtelseTjeneste iayTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            UttakRepository uttakRepository,
+                                           ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste,
                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.dtoMapper = dtoMapper;
         this.uttakRepository = uttakRepository;
+        this.arbeidsforholdAdministrasjonTjeneste = arbeidsforholdAdministrasjonTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
     }
 
@@ -101,7 +108,7 @@ public class InntektArbeidYtelseRestTjeneste {
     @Path(INNTEKT_ARBEID_YTELSE_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Deprecated
@@ -117,7 +124,7 @@ public class InntektArbeidYtelseRestTjeneste {
     @GET
     @Path(INNTEKT_ARBEID_YTELSE_PATH)
     @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -127,9 +134,33 @@ public class InntektArbeidYtelseRestTjeneste {
     }
 
     @GET
+    @Path(INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH)
+    @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser", summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."), tags = "inntekt-arbeid-ytelse", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = InntektArbeidYtelseArbeidsforholdV2Dto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Set<InntektArbeidYtelseArbeidsforholdV2Dto> getArbeidsforhold(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var grunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
+        if (grunnlag.isEmpty()) {
+            // Fins ikke ennå, returnerer tom dto for legacy kompatibilitet med frontend
+            return Set.of();
+        }
+        InntektArbeidYtelseGrunnlag iayg = grunnlag.get();
+
+        UtledArbeidsforholdParametere param = new UtledArbeidsforholdParametere(
+            behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
+        Skjæringstidspunkt skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+
+        return arbeidsforholdAdministrasjonTjeneste.hentArbeidsforhold(ref, iayg, param);
+    }
+
+    @GET
     @Path(OPPGITT_OPPTJENING_PATH)
     @Operation(description = "Hent informasjon om oppgitt opptjening og søknadsperiode", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -172,7 +203,7 @@ public class InntektArbeidYtelseRestTjeneste {
     @GET
     @Path(OPPGITT_OPPTJENING_PATH_V2)
     @Operation(description = "Hent informasjon om oppgitt opptjening for alle søknadsperioder", summary = ("Returnerer info om oppgitt opptjening og om hvilken ytelser det blir søkt ytelser for."), tags = "oppgitt-opptjening", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningV2Dto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer SøknadsperiodeOgOppgittOpptjeningDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SøknadsperiodeOgOppgittOpptjeningV2Dto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
