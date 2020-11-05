@@ -10,20 +10,25 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.kontrakt.vilkår.VurderVilkårManueltDto;
+import no.nav.k9.sak.ytelse.unntaksbehandling.repo.ManuellVilkårsvurderingGrunnlagRepository;
+import no.nav.k9.sak.ytelse.unntaksbehandling.repo.VilkårsvurderingFritekst;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderVilkårManueltDto.class, adapter = AksjonspunktOppdaterer.class)
 public class ManuellVilkårsvurderingOppdaterer implements AksjonspunktOppdaterer<VurderVilkårManueltDto> {
 
     private BehandlingRepository behandlingRepository;
+    private ManuellVilkårsvurderingGrunnlagRepository vilkårsvurderingRepository;
 
+    @SuppressWarnings("unused")
     ManuellVilkårsvurderingOppdaterer() {
-        // for CDI proxy
+        // for CDI
     }
 
     @Inject
-    public ManuellVilkårsvurderingOppdaterer(BehandlingRepositoryProvider repositoryProvider) {
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+    public ManuellVilkårsvurderingOppdaterer(BehandlingRepositoryProvider repositoryProvider, ManuellVilkårsvurderingGrunnlagRepository vilkårsvurderingRepository) {
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();  //TODO Sjekk ut provider
+        this.vilkårsvurderingRepository = vilkårsvurderingRepository;
     }
 
     // TODO: Lage lese-tjeneste som henter ut manuell vilkårsvurdering
@@ -34,8 +39,8 @@ public class ManuellVilkårsvurderingOppdaterer implements AksjonspunktOppdatere
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         behandling.setBehandlingResultatType(dto.getBehandlingResultatType());
-        // TODO: Lagre fritekst fra saksbehandler
+        vilkårsvurderingRepository.lagreOgFlushFritekst(behandlingId, new VilkårsvurderingFritekst(dto.getFritekst()));
 
-        return OppdateringResultat.utenTransisjon().build();
+        return OppdateringResultat.utenOveropp();
     }
 }

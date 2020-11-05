@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+
+    <sequence-generator name="SEQ_GR_MAN_VILKARSVURDERING" allocation-size="50" sequence-name="SEQ_GR_MAN_VILKARSVURDERING"/>
+    <sequence-generator name="SEQ_MAN_VV_FRITEKST" allocation-size="50" sequence-name="SEQ_MAN_VV_FRITEKST"/>
+
+    <entity class="no.nav.k9.sak.ytelse.unntaksbehandling.repo.ManuellVilkårsvurderingGrunnlag"/>
+    <entity class="no.nav.k9.sak.ytelse.unntaksbehandling.repo.VilkårsvurderingFritekst"/>
+
+</entity-mappings>
