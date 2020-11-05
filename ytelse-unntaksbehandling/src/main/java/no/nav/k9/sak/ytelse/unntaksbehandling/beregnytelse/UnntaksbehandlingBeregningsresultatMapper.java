@@ -40,6 +40,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
+import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
 
@@ -51,6 +52,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private BeregningsresultatProvider beregningsresultatProvider;
 
     UnntaksbehandlingBeregningsresultatMapper() {
         // For inject
@@ -59,10 +61,12 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
     @Inject
     public UnntaksbehandlingBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                                      InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                                     @BehandlingTypeRef("BT-010") BeregningsresultatProvider beregningsresultatProvider) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.beregningsresultatProvider = beregningsresultatProvider;
     }
 
     @Override
@@ -81,18 +85,23 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
     public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
+
+        var perioder = beregningsresultatProvider.hentBeregningsresultat(behandling.getId())
+            .map(beregningsresultat -> lagPerioder(behandling.getId(), beregningsresultat))
+            .orElse(List.of());
+        var utbetaltePerioder = beregningsresultatProvider.hentUtbetBeregningsresultat(behandling.getId())
+            .map(beregningsresultat -> lagPerioder(behandling.getId(), beregningsresultat))
+            .orElse(List.of());
+
         return BeregningsresultatMedUtbetaltePeriodeDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat()))
-            .medUtbetaltePerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getUtbetBeregningsresultat()))
+            .medPerioder(perioder)
+            .medUtbetaltePerioder(utbetaltePerioder)
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
 
     public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat) {
-        if (beregningsresultat == null) {
-            return List.of();
-        }
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         var beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder();
         var andelTilSisteUtbetalingsdatoMap = finnSisteUtbetalingdatoForAlleAndeler(beregningsresultatPerioder);
@@ -143,7 +152,6 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
                     .medStillingsprosent(brukersAndel.getStillingsprosent())
                     .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad());
-                //uttaksplan.ifPresent(it -> mapUttakForAndel(beregningsresultatPeriode.getPeriode(), brukersAndel, dtoBuilder, it));
                 var uttakDto = new UttakDto(new Periode(brukersAndel.getFom(), brukersAndel.getTom()), UtfallType.INNVILGET, brukersAndel.getUtbetalingsgrad());
                 dtoBuilder.medUttak(List.of(uttakDto));
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
