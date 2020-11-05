@@ -42,7 +42,7 @@
 		<felles.version>2.4.0-20201103095947-cd9cca7</felles.version>
 
 		<fp-kontrakter.version>5.1-20201104123841-693ace0</fp-kontrakter.version>
-		<k9format.version>5.0.0-20200916141021-ab54476</k9format.version>
+		<k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
 	</properties>
 
     <repositories>
