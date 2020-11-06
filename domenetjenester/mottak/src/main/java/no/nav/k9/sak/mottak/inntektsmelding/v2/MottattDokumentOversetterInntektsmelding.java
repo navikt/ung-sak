@@ -82,7 +82,8 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument) {
         var skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
         String aarsakTilInnsending = skjemainnhold.getAarsakTilInnsending();
-        var innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
+        var innsendingsårsak = aarsakTilInnsending.isEmpty()
+            ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
         var journalpostId = mottattDokument.getJournalpostId();
 

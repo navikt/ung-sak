@@ -75,10 +75,12 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
     public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument) {
         var skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
         String aarsakTilInnsending = skjemainnhold.getAarsakTilInnsending();
-        InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
+        var innsendingsårsak = aarsakTilInnsending.isEmpty()
+            ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
+        var journalpostId = mottattDokument.getJournalpostId();
 
-        InntektsmeldingBuilder builder = InntektsmeldingBuilder.builder();
+        var builder = InntektsmeldingBuilder.builder();
 
         builder.medYtelse(wrapper.getYtelse());
 
@@ -99,10 +101,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         List<PeriodeAndel> oppgittFravær = wrapper.getOppgittFravær();
         boolean ikkeFravær = markertIkkeFravær(skjemainnhold);
         if (ikkeFravær) {
-            if (!oppgittFravær.isEmpty()) {
-                throw new IllegalArgumentException("Mottatt inntektsmelding [" + mottattDokument.getJournalpostId() + "] markert IkkeFravaer som inneholder fravær: " + oppgittFravær);
-            }
-            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), mottattDokument.getJournalpostId());
+            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), journalpostId);
         } else {
             mapRefusjon(wrapper, builder);
             builder.medOppgittFravær(oppgittFravær);
