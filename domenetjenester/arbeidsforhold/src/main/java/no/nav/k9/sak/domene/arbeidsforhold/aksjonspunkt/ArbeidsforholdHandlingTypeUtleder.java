@@ -31,7 +31,9 @@ class ArbeidsforholdHandlingTypeUtleder {
         } else if (skalOverstyrePerioder(arbeidsforholdDto)) {
             throw new IllegalStateException("Ugyldig handling: " + BRUK_MED_OVERSTYRT_PERIODE);
         } else if (skalBrukeUtenInnteksmelding(arbeidsforholdDto)) {
-            throw new IllegalStateException("Ugyldig handling: " + BRUK_UTEN_INNTEKTSMELDING);
+            // TODO: Denne bør sannsynligvis fjernes
+            //throw new IllegalStateException("Ugyldig handling: " + BRUK_UTEN_INNTEKTSMELDING);
+            return BRUK_UTEN_INNTEKTSMELDING;
         } else if (skalErstatteAnnenInntektsmelding(arbeidsforholdDto)) {
             throw new IllegalStateException("Ugyldig handling: " + SLÅTT_SAMMEN_MED_ANNET);
         } else if (erNyttArbeidsforhold(arbeidsforholdDto)) {
