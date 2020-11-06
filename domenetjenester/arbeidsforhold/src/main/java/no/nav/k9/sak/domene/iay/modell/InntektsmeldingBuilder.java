@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jboss.weld.exceptions.IllegalArgumentException;
-
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -20,9 +18,9 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {
-    
+
     public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
-    
+
     private final Inntektsmelding kladd;
     private EksternArbeidsforholdRef eksternArbeidsforholdId;
     private boolean erBygget;
@@ -43,7 +41,7 @@ public class InntektsmeldingBuilder {
         return build(false);
     }
 
-    public Inntektsmelding build(boolean ignore) {
+    public Inntektsmelding build(boolean ignore) { // NOSONAR
         var internRef = getInternArbeidsforholdRef();
         Objects.requireNonNull(kladd.getKanalreferanse(), "kanalreferanse er ikke satt");
         if (internRef.isPresent() && !ignore) {
@@ -53,6 +51,28 @@ public class InntektsmeldingBuilder {
                     "Begge referanser må gjelde spesifikke arbeidsforhold. " + " Ekstern: " + eksternArbeidsforholdId + ", Intern: " + internRef);
             }
         }
+
+        // valider kombo refusjonkrav/fravær
+        if (harRefusjonskrav()) {
+            if (!harFravær()) {
+                throw new IllegalArgumentException("Har refusjonskrav men ikke oppgitt fravær. Gir ikke mening. JournalpostId=" + kladd.getJournalpostId());
+            } else {
+                // OK - vanligste forventet tilfelle - refusjonskrav med fravær
+            }
+        } else if (!harRefusjonskrav() && harFravær()) {
+            throw new IllegalArgumentException(
+                "Har ikke refusjonskrav, men har oppgitt fravær. Støttes ikke. Skulle vært sendt Gosys for utbetaling til bruker. JournalpostId=" + kladd.getJournalpostId());
+        } else {
+            // OK - ikke refusjon, ikke fravær. Skal kun opplyse brutto inntekt
+            if (kladd.getInntektBeløp() == null) {
+                throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi forventet bruttoinntekt, men mangler. JournalpostId=" + kladd.getJournalpostId());
+            } else if (kladd.getArbeidsforholdRef() == null) {
+                throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi arbeidsforholdId oppgitt, men er ikke satt. JournalpostId=" + kladd.getJournalpostId());
+            } else {
+                // OK - inntektsmelding opplyser kun brutto inntekt for arbeidsforhold uten inntekt
+            }
+        }
+
         erBygget = true; // Kan ikke bygge mer med samme builder, vil bare returnere samme kladd.
         return kladd;
     }
@@ -60,7 +80,7 @@ public class InntektsmeldingBuilder {
     public Arbeidsgiver getArbeidsgiver() {
         return kladd.getArbeidsgiver();
     }
-    
+
     public LocalDateTime getInnsendingstidspunkt() {
         return kladd.getInnsendingstidspunkt();
     }
@@ -68,11 +88,11 @@ public class InntektsmeldingBuilder {
     public String getKildesystem() {
         return kladd.getKildesystem();
     }
-    
+
     public String getKanalreferanse() {
         return kladd.getKanalreferanse();
     }
-    
+
     public Optional<EksternArbeidsforholdRef> getEksternArbeidsforholdRef() {
         return Optional.ofNullable(eksternArbeidsforholdId);
     }
@@ -98,7 +118,6 @@ public class InntektsmeldingBuilder {
         kladd.leggTilFravær(fravær);
         return this;
     }
-
 
     public InntektsmeldingBuilder leggTil(Refusjon refusjon) {
         precondition();
@@ -158,7 +177,7 @@ public class InntektsmeldingBuilder {
         kladd.setInnsendingstidspunkt(innsendingstidspunkt);
         return this;
     }
-    
+
     public InntektsmeldingBuilder medInntektsmeldingaarsak(InntektsmeldingInnsendingsårsak inntektsmeldingInnsendingsårsak) {
         precondition();
         kladd.setInntektsmeldingInnsendingsårsak(inntektsmeldingInnsendingsårsak);
@@ -223,6 +242,14 @@ public class InntektsmeldingBuilder {
         kladd.setRefusjonBeløpPerMnd(verdi == null ? null : new Beløp(verdi));
         kladd.setRefusjonOpphører(opphører);
         return this;
+    }
+
+    public boolean harRefusjonskrav() {
+        return kladd.harRefusjonskrav();
+    }
+
+    public boolean harFravær() {
+        return kladd.harFravær();
     }
 
     public InntektsmeldingBuilder medStartDatoPermisjon(LocalDate startPermisjon) {

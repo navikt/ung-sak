@@ -396,4 +396,11 @@ public class Inntektsmelding implements IndexKey {
         return gjelderSammeArbeidsforhold(andre) && COMP_REKKEFØLGE.compare(this, andre) > 0;
     }
 
+    public boolean harRefusjonskrav() {
+        return getRefusjonBeløpPerMnd() != null || getRefusjonOpphører() != null || !getEndringerRefusjon().isEmpty();
+    }
+
+    public boolean harFravær() {
+        return !getOppgittFravær().isEmpty();
+    }
 }

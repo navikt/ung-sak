@@ -62,7 +62,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     public void setUp() throws Exception {
         when(virksomhetTjeneste.finnOrganisasjon(ORGNR))
             .thenReturn(Optional.of(Virksomhet.getBuilder().medOrgnr(ORGNR).medNavn("Ukjent Firma").medRegistrert(LocalDate.now().minusDays(1)).build()));
-        oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste, false);
+        oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
     }
 
     @Test

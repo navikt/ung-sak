@@ -81,12 +81,6 @@ public class MapInntektsmeldinger {
         }
 
         public InntektsmeldingerDto map(ArbeidsforholdInformasjon arbeidsforholdInformasjon,
-                                        InntektsmeldingAggregat inntektsmeldingAggregat) {
-
-            return map(arbeidsforholdInformasjon, inntektsmeldingAggregat, false);
-        }
-
-        public InntektsmeldingerDto map(ArbeidsforholdInformasjon arbeidsforholdInformasjon,
                                         InntektsmeldingAggregat inntektsmeldingAggregat, boolean validerArbeidsforholdId) {
 
             if (arbeidsforholdInformasjon == null && inntektsmeldingAggregat == null) {
@@ -145,6 +139,8 @@ public class MapInntektsmeldinger {
 
             inntektsmeldingDto.medUtsettelsePerioder(im.getUtsettelsePerioder().stream().map(this::mapUtsettelsePeriode).sorted(COMP_UTSETTELSE).collect(Collectors.toList()));
 
+            inntektsmeldingDto.medOppgittFravær(im.getOppgittFravær().stream().map(this::mapOppgittFravær).sorted(COMP_FRAVÆR).collect(Collectors.toList()));
+
             return inntektsmeldingDto;
         }
 
@@ -201,7 +197,7 @@ public class MapInntektsmeldinger {
                 return null;
             }
             return new InntektsmeldingerDto()
-                .medInntektsmeldinger(inntektsmeldingBuildere.stream().map(this::map).collect(Collectors.toList()));
+                .medInntektsmeldinger(inntektsmeldingBuildere.stream().map(this::mapInntektsmelding).collect(Collectors.toList()));
         }
 
         private FraværDto mapOppgittFravær(PeriodeAndel fravær) {
@@ -209,7 +205,7 @@ public class MapInntektsmeldinger {
             return new FraværDto(new Periode(periode.getFom(), periode.getTom()), fravær.getVarighetPerDag());
         }
 
-        private InntektsmeldingDto map(InntektsmeldingBuilder builder) {
+        private InntektsmeldingDto mapInntektsmelding(InntektsmeldingBuilder builder) {
             final var im = builder.build(true);
             var arbeidsgiver = mapAktør(im.getArbeidsgiver());
             var journalpostId = new JournalpostId(im.getJournalpostId().getVerdi());
