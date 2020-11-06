@@ -47,7 +47,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
-import no.nav.k9.sak.ytelse.beregning.tilbaketrekk.Kopimaskin;
 import no.nav.vedtak.util.Tuple;
 
 @FagsakYtelseTypeRef("PSB")
@@ -283,7 +282,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }
-        BeregningsresultatAndel ny = Kopimaskin.deepCopy(a, a.getBeregningsresultatPeriode());
+        BeregningsresultatAndel ny = new BeregningsresultatAndel(a, a.getBeregningsresultatPeriode());
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
             .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());

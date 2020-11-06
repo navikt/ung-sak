@@ -115,6 +115,27 @@ public class BeregningsresultatAndel extends BaseEntitet {
     public BeregningsresultatAndel(BeregningsresultatAndel fraAndel, BeregningsresultatPeriode tilknyttPeriode) {
 
         this.beregningsresultatPeriode = Objects.requireNonNull(tilknyttPeriode, "tilknyttPeriode");
+        tilknyttPeriode.addBeregningsresultatAndel(this);
+
+        // avleder periode i onCreateMigrate
+        // avleder beregningsresultat i onCreateMigrate
+
+        this.brukerErMottaker = fraAndel.brukerErMottaker;
+        this.arbeidsforholdRef = fraAndel.arbeidsforholdRef;
+        this.arbeidsgiver = fraAndel.arbeidsgiver;
+        this.arbeidsforholdType = fraAndel.arbeidsforholdType;
+        this.dagsats = fraAndel.dagsats;
+        this.stillingsprosent = fraAndel.stillingsprosent;
+        this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.dagsatsFraBg = fraAndel.dagsatsFraBg;
+        this.feriepengerBeløp = fraAndel.feriepengerBeløp;
+        this.aktivitetStatus = fraAndel.aktivitetStatus;
+        this.inntektskategori = fraAndel.inntektskategori;
+
+    }
+
+    // copy ctor
+    public BeregningsresultatAndel(BeregningsresultatAndel fraAndel) {
         // avleder periode i onCreateMigrate
         // avleder beregningsresultat i onCreateMigrate
 

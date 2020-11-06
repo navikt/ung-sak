@@ -37,7 +37,7 @@ public class KopierFeriepenger {
                 var feriepengerÅrsbeløp = bgAndel.getFeriepengerÅrsbeløp();
                 @SuppressWarnings("unused")
                 var utbetAndel = finnKorresponderendeAndel(haystack, bgAndel, bgAndel.erBrukerMottaker())
-                    .orElseGet(() -> BeregningsresultatAndel.builder(Kopimaskin.deepCopy(bgAndel) /* FIXME: bytt ut med copy ctor istdf. reflection her. */)
+                    .orElseGet(() -> BeregningsresultatAndel.builder(new BeregningsresultatAndel(bgAndel))
                         .medDagsats(0)
                         .medDagsatsFraBg(0)
                         .medPeriode(beregningsresultatPeriode.getPeriode())
