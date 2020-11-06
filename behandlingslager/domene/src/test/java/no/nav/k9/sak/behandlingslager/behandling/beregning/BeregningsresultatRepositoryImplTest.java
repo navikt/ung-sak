@@ -6,9 +6,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -18,11 +20,11 @@ import no.nav.k9.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.vedtak.felles.testutilities.db.Repository;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class BeregningsresultatRepositoryImplTest {
 
@@ -30,19 +32,22 @@ public class BeregningsresultatRepositoryImplTest {
 
     private static final LocalDate DAGENSDATO = LocalDate.now();
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final Repository repository = repoRule.getRepository();
+    @RegisterExtension
+    public static final JpaExtension extension = new JpaExtension();
 
-    private final BeregningsresultatRepository beregningsresultatRepository = new BeregningsresultatRepository(repoRule.getEntityManager());
+    private final EntityManager entityManager = extension.getEntityManager();
+
+    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private final Repository repository = extension.getRepository();
+
+    private final BeregningsresultatRepository beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
     private Behandling behandling;
     private AktørId aktørId;
 
-    private final BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
+    private final BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
 
-    @Before
+    @BeforeEach
     public void setup() {
         aktørId = AktørId.dummy();
         behandling = opprettBehandling();
@@ -55,23 +60,21 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreOgHentBeregningsresultatAggregat() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         // Assert
         Optional<BehandlingBeregningsresultatEntitet> brKoblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
-        assertThat(brKoblingOpt).hasValueSatisfying(brKobling ->
-            assertThat(brKobling.getBgBeregningsresultat()).isSameAs(beregningsresultat)
-        );
+        assertThat(brKoblingOpt).hasValueSatisfying(brKobling -> assertThat(brKobling.getBgBeregningsresultat()).isSameAs(beregningsresultat));
     }
 
     @Test
     public void lagreOgHentUtbetBeregningsresultatAggregatNårUTBETEksisterer() {
         // Arrange
-        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
-        BeregningsresultatEntitet utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
+        var bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
@@ -79,15 +82,13 @@ public class BeregningsresultatRepositoryImplTest {
 
         // Assert
         Optional<BehandlingBeregningsresultatEntitet> brKoblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
-        assertThat(brKoblingOpt).hasValueSatisfying(brKobling ->
-            assertThat(brKobling.getUtbetBeregningsresultat()).isSameAs(utbetBeregningsresultat)
-        );
+        assertThat(brKoblingOpt).hasValueSatisfying(brKobling -> assertThat(brKobling.getUtbetBeregningsresultat()).isSameAs(utbetBeregningsresultat));
     }
 
     @Test
     public void lagreOgHenteBeregningsresultat() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -105,8 +106,8 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreOgHenteUtbetBeregningsresultat() {
         // Arrange
-        BeregningsresultatEntitet bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
-        BeregningsresultatEntitet utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
+        var bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, bgBeregningsresultat);
@@ -125,7 +126,7 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreOgHenteBeregningsresultatMedPrivatpersonSomArbeidsgiver() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), true);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), true);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -138,7 +139,7 @@ public class BeregningsresultatRepositoryImplTest {
         Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
         assertThat(beregningsresultatLest).isPresent();
-        Arbeidsgiver arbeidsgiver = beregningsresultatLest.get().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0).getArbeidsgiver().get();//NOSONAR
+        Arbeidsgiver arbeidsgiver = beregningsresultatLest.get().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0).getArbeidsgiver().get();// NOSONAR
         assertThat(arbeidsgiver.getAktørId()).isEqualTo(aktørId);
         assertThat(arbeidsgiver.getIdentifikator()).isEqualTo(aktørId.getId());
     }
@@ -146,7 +147,7 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreBeregningsresultatOgUnderliggendeTabellerMedEndringsdatoLikDagensDato() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -154,15 +155,15 @@ public class BeregningsresultatRepositoryImplTest {
         // Assert
         Long brId = beregningsresultat.getId();
         assertThat(brId).isNotNull();
-        BeregningsresultatPeriode brPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
+        var brPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
         Long brPeriodeId = brPeriode.getId();
         assertThat(brPeriodeId).isNotNull();
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
         repository.flushAndClear();
-        BeregningsresultatEntitet beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
-        BeregningsresultatPeriode brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
-        BeregningsresultatAndel brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
+        var beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
+        var brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
+        var brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
 
         assertThat(beregningsresultatLest.getId()).isNotNull();
         assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
@@ -175,7 +176,7 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreBeregningsresultatOgUnderliggendeTabellerMedTomEndringsdato() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.empty(), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.empty(), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -183,15 +184,15 @@ public class BeregningsresultatRepositoryImplTest {
         // Assert
         Long brId = beregningsresultat.getId();
         assertThat(brId).isNotNull();
-        BeregningsresultatPeriode brPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
+        var brPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
         Long brPeriodeId = brPeriode.getId();
         assertThat(brPeriodeId).isNotNull();
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
         repository.flushAndClear();
-        BeregningsresultatEntitet beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
-        BeregningsresultatPeriode brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
-        BeregningsresultatAndel brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
+        var beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
+        var brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
+        var brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
 
         assertThat(beregningsresultatLest.getId()).isNotNull();
         assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
@@ -204,31 +205,18 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void lagreBeregningsresultatOgFeriepenger() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
-        BeregningsresultatAndel andel = beregningsresultat.getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0);
-        BeregningsresultatFeriepengerPrÅr.builder()
-            .medOpptjeningsår(LocalDate.now().withMonth(12).withDayOfMonth(31))
-            .medÅrsbeløp(300L)
-            .buildFor(andel);
+        @SuppressWarnings("unused")
+        var andel = beregningsresultat.getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().get(0);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         // Assert
         repository.flushAndClear();
-        BeregningsresultatEntitet hentetResultat = repository.hent(BeregningsresultatEntitet.class, beregningsresultat.getId());
+        var hentetResultat = repository.hent(BeregningsresultatEntitet.class, beregningsresultat.getId());
         assertThat(hentetResultat).isNotNull();
-        assertThat(hentetResultat.getBeregningsresultatFeriepengerPrÅrListe()).isNotEmpty();
-        assertThat(hentetResultat.getBeregningsresultatFeriepengerPrÅrListe()).allSatisfy(this::assertFeriepenger);
-    }
-
-    private void assertFeriepenger(BeregningsresultatFeriepengerPrÅr prÅr) {
-        assertThat(prÅr).satisfies(val -> {
-            assertThat(val.getBeregningsresultatAndel()).isNotNull();
-            assertThat(val.getOpptjeningsår()).isNotNull();
-            assertThat(val.getÅrsbeløp()).isNotNull();
-        });
     }
 
     private void assertBeregningsresultatPeriode(BeregningsresultatPeriode brPeriodeLest, BeregningsresultatAndel brAndelLest, BeregningsresultatPeriode brPeriodeExpected) {
@@ -242,8 +230,8 @@ public class BeregningsresultatRepositoryImplTest {
     @Test
     public void toBehandlingerKanHaSammeBeregningsresultat() {
         // Arrange
-        Behandling behandling2 = opprettBehandling();
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var behandling2 = opprettBehandling();
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
 
         // Act
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -254,13 +242,13 @@ public class BeregningsresultatRepositoryImplTest {
         Optional<BeregningsresultatEntitet> beregningsresultat2 = beregningsresultatRepository.hentBgBeregningsresultat(behandling2.getId());
         assertThat(beregningsresultat1).isPresent();
         assertThat(beregningsresultat2).isPresent();
-        assertThat(beregningsresultat1).hasValueSatisfying(b -> assertThat(b).isSameAs(beregningsresultat2.get())); //NOSONAR
+        assertThat(beregningsresultat1).hasValueSatisfying(b -> assertThat(b).isSameAs(beregningsresultat2.get())); // NOSONAR
     }
 
     @Test
     public void slettBeregningsresultatOgKobling() {
         // Arrange
-        BeregningsresultatEntitet beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
+        var beregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         Optional<BehandlingBeregningsresultatEntitet> koblingOpt = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
@@ -268,24 +256,23 @@ public class BeregningsresultatRepositoryImplTest {
         // Act
         beregningsresultatRepository.deaktiverBeregningsresultat(behandling.getId(), behandlingRepository.taSkriveLås(behandling));
 
-        //Assert
-        BeregningsresultatEntitet hentetBG = repoRule.getEntityManager().find(BeregningsresultatEntitet.class, beregningsresultat.getId());
+        // Assert
+        var hentetBG = entityManager.find(BeregningsresultatEntitet.class, beregningsresultat.getId());
         assertThat(hentetBG).isNotNull();
 
-        BeregningsresultatPeriode beregningsresultatPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
-        BeregningsresultatPeriode hentetBGPeriode = repoRule.getEntityManager().find(BeregningsresultatPeriode.class, beregningsresultatPeriode.getId());
+        var beregningsresultatPeriode = beregningsresultat.getBeregningsresultatPerioder().get(0);
+        BeregningsresultatPeriode hentetBGPeriode = entityManager.find(BeregningsresultatPeriode.class, beregningsresultatPeriode.getId());
         assertThat(hentetBGPeriode).isNotNull();
 
-        BeregningsresultatAndel beregningsresultatAndel = beregningsresultatPeriode.getBeregningsresultatAndelList().get(0);
-        BeregningsresultatAndel hentetBRAndel = repoRule.getEntityManager().find(BeregningsresultatAndel.class, beregningsresultatAndel.getId());
+        var beregningsresultatAndel = beregningsresultatPeriode.getBeregningsresultatAndelList().get(0);
+        var hentetBRAndel = entityManager.find(BeregningsresultatAndel.class, beregningsresultatAndel.getId());
         assertThat(hentetBRAndel).isNotNull();
 
         Optional<BeregningsresultatEntitet> deaktivertBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         Optional<BehandlingBeregningsresultatEntitet> deaktivertKobling = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId());
         assertThat(deaktivertBeregningsresultat).isNotPresent();
         assertThat(deaktivertKobling).isNotPresent();
-        assertThat(koblingOpt).hasValueSatisfying(kobling ->
-            assertThat(kobling.erAktivt()).isFalse());
+        assertThat(koblingOpt).hasValueSatisfying(kobling -> assertThat(kobling.erAktivt()).isFalse());
     }
 
     private BeregningsresultatAndel buildBeregningsresultatAndel(BeregningsresultatPeriode beregningsresultatPeriode, boolean medPrivatpersonArbeidsgiver) {
@@ -299,6 +286,7 @@ public class BeregningsresultatRepositoryImplTest {
             .medStillingsprosent(BigDecimal.valueOf(100))
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
+            .medFeriepengerÅrsbeløp(new Beløp(BigDecimal.valueOf(999)))
             .buildFor(beregningsresultatPeriode);
     }
 
@@ -309,12 +297,12 @@ public class BeregningsresultatRepositoryImplTest {
     }
 
     private BeregningsresultatEntitet buildBeregningsresultat(Optional<LocalDate> endringsdato, boolean medPrivatpersonArbeidsgiver) {
-        BeregningsresultatEntitet.Builder builder = BeregningsresultatEntitet.builder()
+        var builder = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")
             .medRegelSporing("clob2");
         endringsdato.ifPresent(builder::medEndringsdato);
-        BeregningsresultatEntitet beregningsresultat = builder.build();
-        BeregningsresultatPeriode brPeriode = buildBeregningsresultatPeriode(beregningsresultat);
+        var beregningsresultat = builder.build();
+        var brPeriode = buildBeregningsresultatPeriode(beregningsresultat);
         buildBeregningsresultatAndel(brPeriode, medPrivatpersonArbeidsgiver);
         return beregningsresultat;
     }

@@ -4,7 +4,6 @@ import java.sql.Clob;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -148,18 +147,6 @@ public class BeregningsresultatEntitet extends BaseEntitet {
             .map(v -> new LocalDateSegment<>(v.getBeregningsresultatPeriodeFom(), v.getBeregningsresultatPeriodeTom(), v.getBeregningsresultatAndelList()))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(perioder);
-    }
-
-    public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
-        var andelTimeline = getBeregningsresultatAndelTimeline();
-        if (andelTimeline.isEmpty()) {
-            return List.of();
-        }
-
-        return List.copyOf(andelTimeline.toSegments().stream()
-            .flatMap(s -> s.getValue().stream())
-            .flatMap(a -> a.getBeregningsresultatFeriepengerPrÅrListe().stream())
-            .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     /** @deprecated Bruk {@link #getBeregningsresultatAndelTimeline()} i stedet. */

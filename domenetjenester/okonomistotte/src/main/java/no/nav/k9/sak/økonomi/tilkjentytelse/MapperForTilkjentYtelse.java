@@ -17,7 +17,6 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
@@ -60,9 +59,10 @@ public class MapperForTilkjentYtelse {
     private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel) {
         TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel);
         resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
-        for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : andel.getBeregningsresultatFeriepengerPrÅrListe()) {
-            Year år = Year.of(feriepengerPrÅr.getOpptjeningsår().getYear());
-            long beløp = feriepengerPrÅr.getÅrsbeløp().getVerdi().longValue();
+        var feriepenger = andel.getFeriepengerÅrsbeløp();
+        if (feriepenger != null) {
+            Year år = Year.from(andel.getFom());
+            long beløp = feriepenger.getVerdi().longValue();
             resultat.leggTilFeriepenger(år, beløp);
         }
         return resultat;

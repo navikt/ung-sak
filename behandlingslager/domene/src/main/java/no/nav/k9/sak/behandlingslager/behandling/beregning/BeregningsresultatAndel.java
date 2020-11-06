@@ -2,26 +2,20 @@ package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -44,6 +38,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Periode;
 
 @Entity(name = "BeregningsresultatAndel")
 @Table(name = "BR_ANDEL")
@@ -94,9 +89,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "dagsats_fra_bg", nullable = false)
     private int dagsatsFraBg;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatAndel", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    private List<BeregningsresultatFeriepengerPrÅr> beregningsresultatFeriepengerPrÅrListe;
-
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
@@ -117,12 +109,56 @@ public class BeregningsresultatAndel extends BaseEntitet {
         //
     }
 
+    /** @deprecated skal erstattes av en ren copy ctor uten BeregningsresultatPeriode (under) */
+    @Deprecated(forRemoval = true)
+    // copy ctor
+    public BeregningsresultatAndel(BeregningsresultatAndel fraAndel, BeregningsresultatPeriode tilknyttPeriode) {
+
+        this.beregningsresultatPeriode = Objects.requireNonNull(tilknyttPeriode, "tilknyttPeriode");
+        // avleder periode i onCreateMigrate
+        // avleder beregningsresultat i onCreateMigrate
+
+        this.brukerErMottaker = fraAndel.brukerErMottaker;
+        this.arbeidsforholdRef = fraAndel.arbeidsforholdRef;
+        this.arbeidsgiver = fraAndel.arbeidsgiver;
+        this.arbeidsforholdType = fraAndel.arbeidsforholdType;
+        this.dagsats = fraAndel.dagsats;
+        this.stillingsprosent = fraAndel.stillingsprosent;
+        this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.dagsatsFraBg = fraAndel.dagsatsFraBg;
+        this.feriepengerBeløp = fraAndel.feriepengerBeløp;
+        this.aktivitetStatus = fraAndel.aktivitetStatus;
+        this.inntektskategori = fraAndel.inntektskategori;
+
+    }
+
+    // copy ctor (erstatter over)
+    public BeregningsresultatAndel(BeregningsresultatAndel fraAndel, Periode tilknyttPeriode) {
+
+        Objects.requireNonNull(tilknyttPeriode, "tilknyttPeriode");
+        this.periode = DatoIntervallEntitet.fra(tilknyttPeriode).toRange();
+        // avleder beregningsresultat i onCreateMigrate
+
+        this.brukerErMottaker = fraAndel.brukerErMottaker;
+        this.arbeidsforholdRef = fraAndel.arbeidsforholdRef;
+        this.arbeidsgiver = fraAndel.arbeidsgiver;
+        this.arbeidsforholdType = fraAndel.arbeidsforholdType;
+        this.dagsats = fraAndel.dagsats;
+        this.stillingsprosent = fraAndel.stillingsprosent;
+        this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.dagsatsFraBg = fraAndel.dagsatsFraBg;
+        this.feriepengerBeløp = fraAndel.feriepengerBeløp;
+        this.aktivitetStatus = fraAndel.aktivitetStatus;
+        this.inntektskategori = fraAndel.inntektskategori;
+
+    }
+
     /** @deprecated brukes til migrering (fjerning av BR_PERIODE, BR_FERIEPENGER_PR_AAR er gjort). */
     @Deprecated(forRemoval = true)
     @PrePersist
     protected void onCreateMigrate() {
         if (this.periode == null) {
-            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            DatoIntervallEntitet datoIntervall = beregningsresultatPeriode.getPeriode();
             if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
                 throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
             }
@@ -130,11 +166,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
         if (this.beregningsresultat == null) {
-            this.beregningsresultat = getBeregningsresultatPeriode().getBeregningsresultat();
-        }
-        if (this.feriepengerBeløp == null) {
-            var feriepenger = getBeregningsresultatFeriepengerPrÅrListe();
-            this.feriepengerBeløp = feriepenger.isEmpty() ? null : feriepenger.iterator().next().getÅrsbeløp();
+            this.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
         }
     }
 
@@ -143,18 +175,14 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @PreUpdate
     protected void onUpdateMigrate() {
         if (this.periode == null) {
-            DatoIntervallEntitet datoIntervall = getBeregningsresultatPeriode().getPeriode();
+            DatoIntervallEntitet datoIntervall = beregningsresultatPeriode.getPeriode();
             if (datoIntervall.getFomDato().getYear() != datoIntervall.getTomDato().getYear()) {
                 throw new IllegalStateException(String.format("periode fom har forskjellig år fra tom: %s", datoIntervall));
             }
             this.periode = datoIntervall.toRange();
         }
         if (this.beregningsresultat == null) {
-            this.beregningsresultat = getBeregningsresultatPeriode().getBeregningsresultat();
-        }
-        if (this.feriepengerBeløp == null) {
-            var feriepenger = getBeregningsresultatFeriepengerPrÅrListe();
-            this.feriepengerBeløp = feriepenger.isEmpty() ? null : feriepenger.iterator().next().getÅrsbeløp();
+            this.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
         }
     }
 
@@ -162,6 +190,8 @@ public class BeregningsresultatAndel extends BaseEntitet {
         return id;
     }
 
+    /** @deprecated bruk fom/tom i stedet. */
+    @Deprecated(forRemoval = true)
     public BeregningsresultatPeriode getBeregningsresultatPeriode() {
         return beregningsresultatPeriode;
     }
@@ -221,15 +251,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
         this.feriepengerBeløp = feriepengerÅrsbeløp;
     }
 
-    public List<BeregningsresultatFeriepengerPrÅr> getBeregningsresultatFeriepengerPrÅrListe() {
-        if (beregningsresultatFeriepengerPrÅrListe == null) {
-            return Collections.emptyList();
-        } else if (beregningsresultatFeriepengerPrÅrListe.size() > 1) {
-            throw new IllegalArgumentException(String.format("Kun 1 feriepenger per andel, har registrert %s", beregningsresultatFeriepengerPrÅrListe));
-        }
-        return Collections.unmodifiableList(beregningsresultatFeriepengerPrÅrListe);
-    }
-
     public AktivitetStatus getAktivitetStatus() {
         return aktivitetStatus;
     }
@@ -283,9 +304,9 @@ public class BeregningsresultatAndel extends BaseEntitet {
             ", stillingsprosent=" + stillingsprosent +
             ", utbetalingsgrad=" + utbetalingsgrad +
             ", dagsatsFraBg=" + dagsatsFraBg +
-            ", beregningsresultatFeriepengerPrÅrListe=" + beregningsresultatFeriepengerPrÅrListe +
             ", aktivitetStatus=" + aktivitetStatus +
             ", inntektskategori=" + inntektskategori +
+            ", feriepengerÅrsbeløp=" + feriepengerBeløp +
             '}';
     }
 
@@ -339,9 +360,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
         public Builder(BeregningsresultatAndel eksisterendeBeregningsresultatAndel) {
-            if (eksisterendeBeregningsresultatAndel.getBeregningsresultatFeriepengerPrÅrListe().isEmpty()) {
-                eksisterendeBeregningsresultatAndel.beregningsresultatFeriepengerPrÅrListe = new ArrayList<>();
-            }
             mal = eksisterendeBeregningsresultatAndel;
         }
 
@@ -420,14 +438,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
             mal.inntektskategori = inntektskategori;
-            return this;
-        }
-
-        public Builder leggTilBeregningsresultatFeriepengerPrÅr(BeregningsresultatFeriepengerPrÅr beregningsresultatFeriepengerPrÅr) {
-            if (beregningsresultatFeriepengerPrÅr != null) {
-                mal.beregningsresultatFeriepengerPrÅrListe.clear();
-                mal.beregningsresultatFeriepengerPrÅrListe.add(beregningsresultatFeriepengerPrÅr);
-            }
             return this;
         }
 

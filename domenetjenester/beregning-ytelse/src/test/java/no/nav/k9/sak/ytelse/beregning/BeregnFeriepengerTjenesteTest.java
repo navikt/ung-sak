@@ -1,13 +1,13 @@
 package no.nav.k9.sak.ytelse.beregning;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -21,7 +21,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.Beregningsresultat
 
 public class BeregnFeriepengerTjenesteTest {
 
-
     private static final LocalDate STP = LocalDate.now();
     private static final LocalDateInterval PERIODE = LocalDateInterval.withPeriodAfterDate(STP, Period.ofMonths(10));
     public static final String ORGNR = "910909088";
@@ -29,7 +28,6 @@ public class BeregnFeriepengerTjenesteTest {
     private static final long DAGSATS = 500L;
     private static final long DAGSATS_FRA_BG = 500L;
     private static final BigDecimal UTBETALINGSGRAD = BigDecimal.valueOf(100);
-
 
     @Test
     public void skal_ikkje_lage_feriepengeresultat_om_årsbeløp_avrundes_til_0() {
@@ -45,8 +43,13 @@ public class BeregnFeriepengerTjenesteTest {
         BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
-        var beregningsresultatFeriepengerPrÅrListe = beregningsresultat.getBeregningsresultatFeriepengerPrÅrListe();
-        assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(0);
+        var andelTimeline = beregningsresultat.getBeregningsresultatAndelTimeline();
+        assertThat(andelTimeline.toSegments()).allSatisfy(seg -> {
+            assertThat(seg.getValue()).hasSize(1);
+            assertThat(seg.getValue()).allSatisfy(b -> {
+                assertThat(b.getFeriepengerÅrsbeløp()).isNull();
+            });
+        });
     }
 
     @Test
@@ -63,8 +66,14 @@ public class BeregnFeriepengerTjenesteTest {
         BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
-        var beregningsresultatFeriepengerPrÅrListe = beregningsresultat.getBeregningsresultatFeriepengerPrÅrListe();
-        assertThat(beregningsresultatFeriepengerPrÅrListe.size()).isEqualTo(1);
+        // Assert
+        var andelTimeline = beregningsresultat.getBeregningsresultatAndelTimeline();
+        assertThat(andelTimeline.toSegments()).allSatisfy(seg -> {
+            assertThat(seg.getValue()).hasSize(1);
+            assertThat(seg.getValue()).anySatisfy(b -> {
+                assertThat(b.getFeriepengerÅrsbeløp()).isNotNull();
+            });
+        });
     }
 
     private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet lagVlBeregningsresultat() {
@@ -72,7 +81,8 @@ public class BeregnFeriepengerTjenesteTest {
             .medRegelInput("Regelinput")
             .medRegelSporing("Regelsporing")
             .build();
-        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode vlBeregningsresultatPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
+        no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode vlBeregningsresultatPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode
+            .builder()
             .medBeregningsresultatPeriodeFomOgTom(PERIODE.getFomDato(), PERIODE.getTomDato())
             .build(beregningsresultat);
 

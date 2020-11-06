@@ -7,6 +7,8 @@ import javax.persistence.Embeddable;
 
 import com.vladmihalcea.hibernate.type.range.Range;
 
+import no.nav.k9.sak.typer.Periode;
+
 /**
  * Hibernate entitet som modellerer et dato intervall.
  */
@@ -89,6 +91,10 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         } else {
             return Range.closedInfinite(fom);
         }
+    }
+
+    public static DatoIntervallEntitet fra(Periode periode) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
     }
 
 }
