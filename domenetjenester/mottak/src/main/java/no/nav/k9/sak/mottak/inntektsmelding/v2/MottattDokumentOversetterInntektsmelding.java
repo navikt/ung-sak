@@ -6,6 +6,7 @@ import java.time.Month;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,12 +19,14 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.NaturalytelseKodeliste;
 import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakInnsendingKodeliste;
+import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.BegrunnelseIngenEllerRedusertUtbetalingKodeliste;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
+import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.iay.modell.UtsettelsePeriode;
 import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingFeil;
@@ -35,7 +38,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumer;
-import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.konfig.Tid;
 import no.seres.xsd.nav.inntektsmelding_m._201812.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Arbeidsforhold;
@@ -65,29 +67,27 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
     private ValiderInntektsmelding validator = new ValiderInntektsmelding();
 
-    private Boolean disableSjekkFravær;
-
     MottattDokumentOversetterInntektsmelding() {
         // for CDI proxy
     }
 
     @Inject
     public MottattDokumentOversetterInntektsmelding(VirksomhetTjeneste virksomhetTjeneste,
-                                                    @KonfigVerdi(value = "DISABLE_SJEKK_IM_FRAVAER", defaultVerdi = "false") Boolean disableSjekkFravær,
                                                     AktørConsumer aktørConsumer) {
         this.virksomhetTjeneste = virksomhetTjeneste;
-        this.disableSjekkFravær = disableSjekkFravær;
         this.aktørConsumer = aktørConsumer;
     }
 
     @Override
     public InntektsmeldingBuilder trekkUtData(MottattDokumentWrapperInntektsmelding wrapper, MottattDokument mottattDokument) {
-        Skjemainnhold skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
+        var skjemainnhold = wrapper.getSkjema().getSkjemainnhold();
         String aarsakTilInnsending = skjemainnhold.getAarsakTilInnsending();
-        InntektsmeldingInnsendingsårsak innsendingsårsak = aarsakTilInnsending.isEmpty() ? InntektsmeldingInnsendingsårsak.UDEFINERT
+        var innsendingsårsak = aarsakTilInnsending.isEmpty()
+            ? InntektsmeldingInnsendingsårsak.UDEFINERT
             : innsendingsårsakMap.get(ÅrsakInnsendingKodeliste.fromValue(aarsakTilInnsending));
+        var journalpostId = mottattDokument.getJournalpostId();
 
-        InntektsmeldingBuilder builder = InntektsmeldingBuilder.builder();
+        var builder = InntektsmeldingBuilder.builder();
 
         builder.medYtelse(wrapper.getYtelse());
 
@@ -96,7 +96,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         builder.medMottattDato(mottattDokument.getMottattDato());
         builder.medKildesystem(wrapper.getAvsendersystem());
         builder.medKanalreferanse(mottattDokument.getKanalreferanse());
-        builder.medJournalpostId(mottattDokument.getJournalpostId());
+        builder.medJournalpostId(journalpostId);
 
         mapArbeidsgiver(wrapper, builder);
 
@@ -106,23 +106,21 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         mapArbeidsforholdOgBeløp(wrapper, builder);
         mapNaturalYtelser(wrapper, builder);
         mapFerie(wrapper, builder);
+        List<PeriodeAndel> oppgittFravær = wrapper.getOppgittFravær();
         boolean ikkeFravær = markertIkkeFravær(skjemainnhold);
         if (ikkeFravær) {
-            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), mottattDokument.getJournalpostId());
+            log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), journalpostId);
         } else {
             mapRefusjon(wrapper, builder);
+            builder.medOppgittFravær(oppgittFravær);
         }
-        if (disableSjekkFravær) {
-            builder.medOppgittFravær(wrapper.getOppgittFravær());
-        } else {
-            builder.medOppgittFravær(validator.validerOppgittFravær(wrapper.getOppgittFravær())); // tar fortsatt med periodene her selv om markert ikkefravær
-        }
+
         return builder;
     }
 
     private boolean markertIkkeFravær(Skjemainnhold skjemainnhold) {
         String begrunnelseForReduksjonIkkeUtbetalt = getBegrunnelseForReduksjonIkkeUtbetalt(skjemainnhold);
-        return "IkkeFravaer".equals(begrunnelseForReduksjonIkkeUtbetalt); // magic constant i IM spesifikasjon
+        return BegrunnelseIngenEllerRedusertUtbetalingKodeliste.IKKE_FRAVAER.value().equals(begrunnelseForReduksjonIkkeUtbetalt); // magic constant i IM spesifikasjon
     }
 
     private String getBegrunnelseForReduksjonIkkeUtbetalt(Skjemainnhold skjemainnhold) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <melding xmlns="http://seres.no/xsd/NAV/Inntektsmelding_M/20180924">
     <Skjemainnhold>
-        <ytelse>Foreldrepenger</ytelse>
+        <ytelse>Omsorgspenger</ytelse>
         <aarsakTilInnsending>Ny</aarsakTilInnsending>
         <arbeidsgiver>
             <virksomhetsnummer>119999996</virksomhetsnummer>
@@ -17,24 +17,6 @@
             <beregnetInntekt>
                 <beloep>75000</beloep>
             </beregnetInntekt>
-            <utsettelseAvForeldrepengerListe>
-                <utsettelseAvForeldrepenger>
-                    <periode>
-                        <fom>2018-04-02</fom>
-                        <tom>2018-05-02</tom>
-                    </periode>
-                    <aarsakTilUtsettelse>Arbeid</aarsakTilUtsettelse>
-                </utsettelseAvForeldrepenger>
-            </utsettelseAvForeldrepengerListe>
-            <graderingIForeldrepengerListe>
-                <graderingIForeldrepenger>
-                    <periode>
-                        <fom>2018-02-02</fom>
-                        <tom>2018-03-02</tom>
-                    </periode>
-                    <arbeidstidprosent>10</arbeidstidprosent>
-                </graderingIForeldrepenger>
-            </graderingIForeldrepengerListe>
         </arbeidsforhold>
         <refusjon>
             <refusjonsbeloepPrMnd>50000</refusjonsbeloepPrMnd>
@@ -46,7 +28,6 @@
                 </endringIRefusjon>
             </endringIRefusjonListe>
         </refusjon>
-        <startdatoForeldrepengeperiode>2018-02-02</startdatoForeldrepengeperiode>
         <opphoerAvNaturalytelseListe>
             <opphoerAvNaturalytelse>
                 <naturalytelseType>aksjerGrunnfondsbevisTilUnderkurs</naturalytelseType>
@@ -63,13 +44,13 @@
             <naturalytelseDetaljer>
                 <naturalytelseType>aksjerGrunnfondsbevisTilUnderkurs</naturalytelseType>
                 <fom>2018-08-29</fom>
-                <!-- Skal bruke beløp fra opphoerAvNaturalytelse-->
-                <!--<beloepPrMnd>0</beloepPrMnd>-->
+                <!-- Skal bruke beløp fra opphoerAvNaturalytelse -->
+                <!--<beloepPrMnd>0</beloepPrMnd> -->
             </naturalytelseDetaljer>
             <naturalytelseDetaljer>
                 <naturalytelseType>elektroniskKommunikasjon</naturalytelseType>
                 <fom>2018-08-29</fom>
-                <!-- Skal bruke beløp fra opphoerAvNaturalytelse-->
+                <!-- Skal bruke beløp fra opphoerAvNaturalytelse -->
                 <beloepPrMnd>1234</beloepPrMnd>
             </naturalytelseDetaljer>
         </gjenopptakelseNaturalytelseListe>
@@ -78,5 +59,15 @@
             <systemversjon>1.0</systemversjon>
             <innsendingstidspunkt>2018-10-13T15:45:43Z</innsendingstidspunkt>
         </avsendersystem>
+        <omsorgspenger>
+            <harUtbetaltPliktigeDager>true</harUtbetaltPliktigeDager>
+            <fravaersPerioder>
+                <fravaerPeriode>
+                    <fom>2020-06-19</fom>
+                    <tom>2020-06-19</tom>
+                </fravaerPeriode>
+            </fravaersPerioder>
+            <delvisFravaersListe />
+        </omsorgspenger>
     </Skjemainnhold>
 </melding>
