@@ -68,4 +68,11 @@ public class MottattInntektsmeldingDto {
     public String getBegrunnelse() {
         return begrunnelse;
     }
+
+    @Override
+    public String toString() {
+        return "MottattInntektsmeldingDto{" +
+            "journalpostId=" + journalpostId +
+            '}';
+    }
 }
