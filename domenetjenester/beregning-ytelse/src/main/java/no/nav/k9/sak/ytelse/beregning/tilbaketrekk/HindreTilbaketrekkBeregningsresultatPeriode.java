@@ -27,7 +27,7 @@ class HindreTilbaketrekkBeregningsresultatPeriode {
         if (forrigeAndeler.isEmpty() || kunUtbetalingTilArbeidsgiver(forrigeAndeler)) {
             // ikke utbetalt tidligere: kopier bg-andeler
             bgAndeler.forEach(andel ->
-                BeregningsresultatAndel.builder(Kopimaskin.deepCopy(andel))
+            BeregningsresultatAndel.builder(new BeregningsresultatAndel(andel))
                     .medDagsats(andel.getDagsats())
                     .medDagsatsFraBg(andel.getDagsatsFraBg())
                     .medPeriode(segment.getLocalDateInterval())

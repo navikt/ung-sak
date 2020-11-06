@@ -40,12 +40,12 @@ class OmfordelUtbetaltYtelseV2 {
             int dagsats = revurderingAndel.getDagsats();
             boolean erBrukerMottaker = revurderingAndel.erBrukerMottaker();
             if (dagsats != 0) {
-                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(revurderingAndel))
+                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(revurderingAndel))
                     .medDagsats(dagsats)
                     .medDagsatsFraBg(revurderingAndel.getDagsatsFraBg());
                 list.add(builder);
             } else if (erBrukerMottaker) {
-                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(revurderingAndel))
+                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(revurderingAndel))
                     .medDagsats(dagsats)
                     .medDagsatsFraBg(revurderingAndel.getDagsatsFraBg());
                 list.add(builder);
@@ -63,12 +63,12 @@ class OmfordelUtbetaltYtelseV2 {
         for (BeregningsresultatAndel revurderingAndel : revurderingNøkkelMedAndeler.getAndelerSomHarReferanse()) {
             int reberegnetDagsats = getReberegnetDagsats(revurderingAndel,  revurderingNøkkelMedAndeler, originalNøkkelMedAndeler);
             if (reberegnetDagsats != 0) {
-                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(revurderingAndel))
+                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(revurderingAndel))
                     .medDagsats(reberegnetDagsats)
                     .medDagsatsFraBg(revurderingAndel.getDagsatsFraBg());
                 list.add(builder);
             } else if (revurderingAndel.erBrukerMottaker()) {
-                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(revurderingAndel))
+                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(revurderingAndel))
                     .medDagsats(reberegnetDagsats)
                     .medDagsatsFraBg(revurderingAndel.getDagsatsFraBg());
                 list.add(builder);
@@ -107,7 +107,7 @@ class OmfordelUtbetaltYtelseV2 {
         if (brukersAndelUtenreferanse.isPresent()) {
             int omberegnetDagsats = beregnDagsatsBrukerAndelUtenReferanse(originalNøkkelMedAndeler, andelerMedRefSomIkkeFinnesIRevurdering ,
                 brukersAndelUtenreferanse.get(), arbeidsgiversAndelUtenReferanse);
-            BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(brukersAndelUtenreferanse.get()))
+            BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(brukersAndelUtenreferanse.get()))
                 .medDagsats(omberegnetDagsats)
                 .medDagsatsFraBg(brukersAndelUtenreferanse.get().getDagsatsFraBg());
             list.add(builder);
@@ -116,7 +116,7 @@ class OmfordelUtbetaltYtelseV2 {
             int omberegnetDagsats = beregnDagsatsAGUtenReferanse(originalNøkkelMedAndeler, andelerMedRefSomIkkeFinnesIRevurdering ,
                 arbeidsgiversAndelUtenReferanse.get(), brukersAndelUtenreferanse);
             if (omberegnetDagsats != 0) {
-                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(Kopimaskin.deepCopy(arbeidsgiversAndelUtenReferanse.get()))
+                BeregningsresultatAndel.Builder builder = BeregningsresultatAndel.builder(new BeregningsresultatAndel(arbeidsgiversAndelUtenReferanse.get()))
                     .medDagsats(omberegnetDagsats)
                     .medDagsatsFraBg(arbeidsgiversAndelUtenReferanse.get().getDagsatsFraBg());
                 list.add(builder);

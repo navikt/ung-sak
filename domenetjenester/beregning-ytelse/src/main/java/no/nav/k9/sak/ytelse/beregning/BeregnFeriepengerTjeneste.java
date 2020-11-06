@@ -11,7 +11,6 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
@@ -102,12 +101,6 @@ public abstract class BeregnFeriepengerTjeneste {
             .forEach(prÅr -> {
                 BigDecimal feriepengerÅrsbeløp = prÅr.getÅrsbeløp().setScale(0, RoundingMode.HALF_UP);
                 andel.setFeriepengerBeløp(new Beløp(feriepengerÅrsbeløp));
-
-                long årsbeløp = feriepengerÅrsbeløp.longValue();
-                BeregningsresultatFeriepengerPrÅr.builder()
-                    .medOpptjeningsår(prÅr.getOpptjeningÅr())
-                    .medÅrsbeløp(årsbeløp)
-                    .buildFor(andel);
             });
     }
 

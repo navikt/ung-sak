@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.vedtak.felles.testutilities.db.EntityManagerAwareExtension;
+import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.util.env.Environment;
 
 public class JpaExtension extends EntityManagerAwareExtension {
@@ -18,6 +19,10 @@ public class JpaExtension extends EntityManagerAwareExtension {
             Databaseskjemainitialisering.migrerUnittestSkjemaer();
         }
         Databaseskjemainitialisering.settJdniOppslag();
+    }
+
+    public Repository getRepository() {
+        return new Repository(getEntityManager());
     }
 
 }
