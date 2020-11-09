@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -69,22 +70,18 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
                 .medBeregningsresultatPeriodeFomOgTom(tyPeriode.getFom(), tyPeriode.getTom())
                 .build(beregningsresultat);
             for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
-                // TODO: Lage validering som sikrer at bruker alltid har andel
-                BeregningsresultatAndel.builder()
-                    .medBrukerErMottaker(tyAndel.getErBrukerMottaker())
-                    .medDagsats(tyAndel.getDagsats())
-                    .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
-                    .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
-                    .medArbeidsgiver(OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
-                        ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
-                        : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()))
-                    )
-                    //.medArbeidsforholdRef() // antas kun nødvendig dersom flere arb.forhold samme arbeidsgiver
-                    .medAktivitetStatus(tyAndel.getAktivitetStatus())
-                    .medInntektskategori(tyAndel.getInntektskategori())
-                    .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
-                    .medStillingsprosent(STILLINGSPROSENT)
-                    .buildFor(brPeriode);
+                var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
+                var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
+
+                // Søkers andel  - obligatorisk for Beregningsresultat
+                var søkersAndel = byggBrAndel(tyAndel, tilSøker, true);
+                søkersAndel.buildFor(brPeriode);
+
+                // Arbeidsgivers andel (refusjon) - opsjonell for Beregningsresultat
+                if (refusjon > 0) {
+                    var arbeidsgiversAndel = byggBrAndel(tyAndel, refusjon, false);
+                    arbeidsgiversAndel.buildFor(brPeriode);
+                }
             }
         }
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
@@ -95,6 +92,23 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         beregningsresultatRepository.lagreOverstyrtBeregningsresultat(behandling, beregningsresultat);
 
-        return OppdateringResultat.utenTransisjon().build();
+        return OppdateringResultat.utenOveropp();
+    }
+
+    private BeregningsresultatAndel.Builder byggBrAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
+        return BeregningsresultatAndel.builder()
+            .medBrukerErMottaker(erBrukerMottaker)
+            .medDagsats(dagsats)
+            .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
+            .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
+            .medArbeidsgiver(OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
+                ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
+                : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()))
+            )
+            //.medArbeidsforholdRef() // kun nødvendig dersom flere arb.forhold samme arbeidsgiver
+            .medAktivitetStatus(tyAndel.getAktivitetStatus())
+            .medInntektskategori(tyAndel.getInntektskategori())
+            .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
+            .medStillingsprosent(STILLINGSPROSENT);
     }
 }

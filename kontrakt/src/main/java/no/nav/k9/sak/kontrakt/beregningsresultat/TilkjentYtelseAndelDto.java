@@ -63,10 +63,14 @@ public class TilkjentYtelseAndelDto {
     @DecimalMax("500.00")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal stillingsprosent;
+    @JsonProperty(value = "refusjon")
+    @Min(0)
+    @Max(1000000)
+    private Integer refusjon;
     @JsonProperty(value = "tilSoker")
     @Min(0)
     @Max(1000000)
-    private Integer dagsats;
+    private Integer tilSoker;
     @JsonProperty(value = "utbetalingsgrad")
     @DecimalMin("0.00")
     @DecimalMax("100.00")
@@ -83,7 +87,8 @@ public class TilkjentYtelseAndelDto {
 
     private TilkjentYtelseAndelDto(Builder builder) {
         this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
-        this.dagsats = builder.dagsats;
+        this.tilSoker = builder.tilSoker;
+        this.refusjon = builder.refusjon;
         this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
         this.aktivitetStatus = builder.aktivitetStatus;
@@ -104,90 +109,49 @@ public class TilkjentYtelseAndelDto {
         return aktivitetStatus;
     }
 
-    public void setAktivitetStatus(AktivitetStatus aktivitetStatus) {
-        this.aktivitetStatus = aktivitetStatus;
-    }
-
     public AktørId getAktørId() {
         return aktørId;
-    }
-
-    public void setAktørId(AktørId aktørId) {
-        this.aktørId = aktørId;
     }
 
     public String getArbeidsforholdId() {
         return arbeidsforholdId;
     }
 
-    public void setArbeidsforholdId(String arbeidsforholdId) {
-        this.arbeidsforholdId = arbeidsforholdId;
-    }
-
     public OpptjeningAktivitetType getArbeidsforholdType() {
         return arbeidsforholdType;
-    }
-
-    public void setArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-        this.arbeidsforholdType = arbeidsforholdType;
     }
 
     public ArbeidsgiverDto getArbeidsgiver() {
         return arbeidsgiver;
     }
 
-    public void setArbeidsgiver(ArbeidsgiverDto arbeidsgiver) {
-        this.arbeidsgiver = arbeidsgiver;
-    }
-
     public OrgNummer getArbeidsgiverOrgnr() {
         return arbeidsgiverOrgnr;
-    }
-
-    public void setArbeidsgiverOrgnr(OrgNummer arbeidsgiverOrgnr) {
-        this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
     }
 
     public Inntektskategori getInntektskategori() {
         return inntektskategori;
     }
 
-    public void setInntektskategori(Inntektskategori inntektskategori) {
-        this.inntektskategori = inntektskategori;
-    }
-
     public BigDecimal getStillingsprosent() {
         return stillingsprosent;
     }
 
-    public void setStillingsprosent(BigDecimal stillingsprosent) {
-        this.stillingsprosent = stillingsprosent;
+    public Integer getRefusjon() {
+        return refusjon;
     }
 
-    public Integer getDagsats() {
-        return dagsats;
-    }
-
-    public void setDagsats(Integer dagsats) {
-        this.dagsats = dagsats;
+    public Integer getTilSoker() {
+        return tilSoker;
     }
 
     public BigDecimal getUtbetalingsgrad() {
         return utbetalingsgrad;
     }
 
-    public void setUtbetalingsgrad(BigDecimal utbetalingsgrad) {
-        this.utbetalingsgrad = utbetalingsgrad;
-    }
-
     public List<UttakDto> getUttak() {
         return uttak;
     }
-
-    public void setUttak(List<UttakDto> uttak) {
-        this.uttak = uttak;
-    }
-
 
     public Boolean getErBrukerMottaker() {
         return erBrukerMottaker;
@@ -201,7 +165,8 @@ public class TilkjentYtelseAndelDto {
         private ArbeidsgiverDto arbeidsgiver;
         private OrgNummer arbeidsgiverOrgnr;
         private BigDecimal stillingsprosent;
-        private Integer dagsats;
+        private Integer refusjon;
+        private Integer tilSoker;
         private BigDecimal utbetalingsgrad;
         private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
@@ -249,8 +214,13 @@ public class TilkjentYtelseAndelDto {
             return this;
         }
 
-        public Builder medDagsats(Integer dagsats) {
-            this.dagsats = dagsats;
+        public Builder medRefusjon(Integer refusjon) {
+            this.refusjon = refusjon;
+            return this;
+        }
+
+        public Builder medTilSoker(Integer tilSoker) {
+            this.tilSoker = tilSoker;
             return this;
         }
 

@@ -61,16 +61,9 @@ public class TilkjentYtelseOppdatererTest {
         Inntektskategori inntekskategori = Inntektskategori.ARBEIDSAVKLARINGSPENGER;
 
         var andelBruker = TilkjentYtelseAndelDto.build()
-            .medErBrukerMottaker(true)
-            .medDagsats(dagsatsBruker)
-            .medAktivitetstatus(aktivitetStatus)
-            .medInntektskategori(inntekskategori)
-            .medArbeidsgiver(arbeidsgiver)
-            .medUtbetalingsgrad(utbealingsgrad)
-            .create();
-        var andelArbeidsgiver = TilkjentYtelseAndelDto.build()
-            .medErBrukerMottaker(false)
-            .medDagsats(dagsatsRefusjon)
+            .medErBrukerMottaker(true) //TODO: Fjernes
+            .medRefusjon(dagsatsRefusjon)
+            .medTilSoker(dagsatsBruker)
             .medAktivitetstatus(aktivitetStatus)
             .medInntektskategori(inntekskategori)
             .medArbeidsgiver(arbeidsgiver)
@@ -78,7 +71,7 @@ public class TilkjentYtelseOppdatererTest {
             .create();
 
         var ytelsePeriode = TilkjentYtelsePeriodeDto.build(fom, tom)
-            .medAndeler(List.of(andelBruker, andelArbeidsgiver))
+            .medAndeler(List.of(andelBruker))
             .create();
         var tilkjentYtelseDto = new TilkjentYtelseDto(List.of(ytelsePeriode));
 
