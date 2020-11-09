@@ -77,11 +77,11 @@ public class ArbeidsgiverRestTjeneste {
 
     @GET
     @Path(ARBEIDSGIVER_PATH)
-    @Operation(description = "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser",
-        summary = ("Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad."),
-        tags = "inntekt-arbeid-ytelse",
+    @Operation(description = "Henter informasjon om alle arbeidsgivere knyttet til bruker",
+        summary = ("Henter informasjon om alle arbeidsgivere (navn, fødselsnr for privat arbeidsgiver osv)"),
+        tags = "arbeidsgiver",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)",
+            @ApiResponse(responseCode = "200", description = "Returnerer ArbeidsgiverOversiktDto",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ArbeidsgiverOversiktDto.class)))
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
