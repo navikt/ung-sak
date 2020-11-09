@@ -20,8 +20,7 @@ public class TilkjentYtelseDto {
     @JsonProperty(value = "perioder")
     @Size(max = 100)
     @Valid
-    private List<TilkjentYtelsePeriodeDto> perioder;
-
+    private List<TilkjentYtelsePeriodeDto> perioder = Collections.emptyList();
 
     TilkjentYtelseDto() {
         //
