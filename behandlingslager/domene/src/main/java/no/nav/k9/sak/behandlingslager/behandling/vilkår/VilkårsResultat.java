@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -27,9 +28,13 @@ public class VilkårsResultat extends BaseEntitet {
     @JoinColumn(name = "vilkarene_id", updatable = false)
     private Vilkårene vilkårene;
 
+    @OneToOne
+    @JoinColumn(name = "manuell_vilkårsvurdering_id", nullable = true)
+    private ManuellVilkårsvurdering manuellVilkårsvurdering;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
-    
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -56,7 +61,9 @@ public class VilkårsResultat extends BaseEntitet {
             "id=" + id +
             ", behandlingId=" + behandlingId +
             ", vilkårene=" + vilkårene +
+            ", manuellVilkårsvurdering=" + manuellVilkårsvurdering +
             ", aktiv=" + aktiv +
+            ", versjon=" + versjon +
             '}';
     }
 }

@@ -15,6 +15,7 @@
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
 	<sequence-generator name="SEQ_VILKAR_PERIODE" allocation-size="50" sequence-name="SEQ_VILKAR_PERIODE" />
 	<sequence-generator name="SEQ_RS_VILKARS_RESULTAT" allocation-size="50" sequence-name="SEQ_RS_VILKARS_RESULTAT" />
+	<sequence-generator name="SEQ_MAN_VV_FRITEKST" allocation-size="50" sequence-name="SEQ_MAN_VV_FRITEKST"/>
 
 
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.Behandling" />
@@ -27,5 +28,6 @@
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.vilkår.ManuellVilkårsvurdering" />
 
 </entity-mappings>

@@ -10,15 +10,12 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.kontrakt.vilkår.VurderVilkårManueltDto;
-import no.nav.k9.sak.ytelse.unntaksbehandling.repo.ManuellVilkårsvurderingGrunnlagRepository;
-import no.nav.k9.sak.ytelse.unntaksbehandling.repo.VilkårsvurderingFritekst;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderVilkårManueltDto.class, adapter = AksjonspunktOppdaterer.class)
 public class ManuellVilkårsvurderingOppdaterer implements AksjonspunktOppdaterer<VurderVilkårManueltDto> {
 
     private BehandlingRepository behandlingRepository;
-    private ManuellVilkårsvurderingGrunnlagRepository vilkårsvurderingRepository;
 
     @SuppressWarnings("unused")
     ManuellVilkårsvurderingOppdaterer() {
@@ -26,9 +23,8 @@ public class ManuellVilkårsvurderingOppdaterer implements AksjonspunktOppdatere
     }
 
     @Inject
-    public ManuellVilkårsvurderingOppdaterer(BehandlingRepositoryProvider repositoryProvider, ManuellVilkårsvurderingGrunnlagRepository vilkårsvurderingRepository) {
+    public ManuellVilkårsvurderingOppdaterer(BehandlingRepositoryProvider repositoryProvider) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();  //TODO Sjekk ut provider
-        this.vilkårsvurderingRepository = vilkårsvurderingRepository;
     }
 
     // TODO: Lage lese-tjeneste som henter ut manuell vilkårsvurdering
@@ -39,7 +35,17 @@ public class ManuellVilkårsvurderingOppdaterer implements AksjonspunktOppdatere
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         behandling.setBehandlingResultatType(dto.getBehandlingResultatType());
-        vilkårsvurderingRepository.lagreOgFlushFritekst(behandlingId, new VilkårsvurderingFritekst(dto.getFritekst()));
+//        vilkårsvurderingRepository.lagreOgFlushFritekst(behandlingId, new VilkårsvurderingFritekst(dto.getFritekst()));
+
+        /*
+        Grunnlag og Resultat - hva er forskjellen?
+
+        grunnlag er alt før før skjæringstidspunkt
+        før beregning. medlemskap, opptjening,
+        Prosessmodell førstegangsbehandling
+        I unntaksløypa går vi rett til unntaksbehandling, og det er derfor resultat som blir riktig tankegang
+
+         */
 
         return OppdateringResultat.utenOveropp();
     }
