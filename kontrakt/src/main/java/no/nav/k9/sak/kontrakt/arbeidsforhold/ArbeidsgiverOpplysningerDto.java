@@ -2,6 +2,9 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.time.LocalDate;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,12 +15,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ArbeidsgiverOpplysningerDto {
 
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "referanse")
     private final String referanse;
+
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "identifikator")
     private final String identifikator;
+
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "navn")
     private final String navn;
+
+    @Valid
     @JsonProperty(value = "fødselsdato")
     private LocalDate fødselsdato;
 

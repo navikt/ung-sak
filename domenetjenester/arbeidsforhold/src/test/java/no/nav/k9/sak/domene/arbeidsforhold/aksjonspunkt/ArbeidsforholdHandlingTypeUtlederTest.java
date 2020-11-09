@@ -2,18 +2,15 @@ package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_ARBEIDSFORHOLD;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
@@ -27,10 +24,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
         // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(INNTEKT_IKKE_MED_I_BG);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto));
     }
 
     @Test
@@ -66,10 +60,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
         arbeidsforholdDto.setBrukArbeidsforholdet(true);
 
         // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(BRUK_MED_OVERSTYRT_PERIODE);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto));
     }
 
     @Test
@@ -92,10 +83,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
         arbeidsforholdDto.setErstatterArbeidsforholdId("1");
 
         // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(SLÅTT_SAMMEN_MED_ANNET);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto));
     }
 
     @Test
@@ -105,10 +93,7 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
         arbeidsforholdDto.setErNyttArbeidsforhold(true);
 
         // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(NYTT_ARBEIDSFORHOLD);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto));
     }
 
     @Test

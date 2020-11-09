@@ -1,8 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,11 +12,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -32,8 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
@@ -47,7 +43,6 @@ import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyrtePerioder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
@@ -63,17 +58,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
+@CdiDbAwareTest
 public class AvklarArbeidsforholdOppdatererTest {
 
     private static final String NAV_ORGNR = "889640782";
 
     private static final InternArbeidsforholdRef ARBEIDSFORHOLD_REF = InternArbeidsforholdRef.namedRef("TEST-REF");
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
+    private IAYRepositoryProvider repositoryProvider;
 
     @Inject
     private HistorikkTjenesteAdapter historikkAdapter;
@@ -87,9 +79,11 @@ public class AvklarArbeidsforholdOppdatererTest {
     private AvklarArbeidsforholdOppdaterer oppdaterer;
     private String randomId = UUID.randomUUID().toString();
     private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
+    private EntityManager entityManager;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
+        repositoryProvider = new IAYRepositoryProvider(entityManager);
         var arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
             vurderArbeidsforholdTjeneste,
@@ -238,175 +232,6 @@ public class AvklarArbeidsforholdOppdatererTest {
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
     }
 
-    @Test
-    public void skal_utlede_handling_lik_BRUK_MED_OVERSTYRT_PERIODE() {
-        // Arrange
-        String navn = "Arbeidsgiver";
-        LocalDate stpDato = LocalDate.of(2019, 1, 1);
-        LocalDate fomDato = stpDato.minusYears(3);
-        LocalDate tomDato = stpDato.minusMonths(2);
-        LocalDate overstyrtTomDato = stpDato.minusMonths(4);
-        BigDecimal stillingsprosent = BigDecimal.valueOf(100);
-        opprettVirksomhetAG();
-
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettIAYAggregat(behandling, false, fomDato);
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-
-        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
-        arbeidsforhold.setNavn(navn);
-        arbeidsforhold.setFomDato(fomDato);
-        arbeidsforhold.setTomDato(tomDato);
-        arbeidsforhold.setOverstyrtTom(overstyrtTomDato);
-        arbeidsforhold.setStillingsprosent(stillingsprosent);
-        arbeidsforhold.setLagtTilAvSaksbehandler(false);
-        arbeidsforhold.setId(randomId);
-        arbeidsforhold.setArbeidsgiverIdentifikator(NAV_ORGNR);
-        arbeidsforhold.setBrukArbeidsforholdet(true);
-
-        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("periode overstyrt", nyeArbeidsforhold);
-
-        Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
-            .medUtledetSkjæringstidspunkt(stpDato)
-            .build();
-
-        // Act
-        oppdaterer.oppdater(avklarArbeidsforholdDto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, stp, avklarArbeidsforholdDto.getBegrunnelse()));
-
-        // Assert
-        List<ArbeidsforholdOverstyring> overstyringer = hentGrunnlag(behandling)
-            .getArbeidsforholdInformasjon()
-            .map(ArbeidsforholdInformasjon::getOverstyringer)
-            .orElse(Collections.emptyList());
-
-        assertThat(overstyringer).as("overstyringer").hasSize(1);
-        ArbeidsforholdOverstyring overstyrtArbeidsforhold = overstyringer.get(0);
-        assertThat(overstyrtArbeidsforhold.getHandling()).isEqualTo(ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE);
-        List<ArbeidsforholdOverstyrtePerioder> overstyrtePerioder = overstyrtArbeidsforhold.getArbeidsforholdOverstyrtePerioder();
-        assertThat(overstyrtePerioder).as("overstyrtePerioder").hasSize(1);
-        assertThat(overstyrtePerioder.get(0).getOverstyrtePeriode().getTomDato()).isEqualTo(overstyrtTomDato);
-    }
-
-    @Test
-    public void skal_utlede_handling_lik_SLÅTT_SAMMEN_MED_ANNET() {
-        // Arrange
-        String navn = "Arbeidsgiver";
-        String nyArbeidsforholdRef = InternArbeidsforholdRef.nyRef().getReferanse();
-        LocalDate stpDato = LocalDate.of(2019, 1, 1);
-        LocalDate fomDato = stpDato.minusYears(3);
-        BigDecimal stillingsprosent = BigDecimal.valueOf(100);
-        opprettVirksomhetAG();
-
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettIAYAggregat(behandling, true, LocalDate.of(2018, 1, 1));
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-        String erstatterArbeidsforholdId = ARBEIDSFORHOLD_REF.getReferanse();
-
-        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
-        arbeidsforhold.setNavn(navn);
-        arbeidsforhold.setFomDato(fomDato);
-        arbeidsforhold.setStillingsprosent(stillingsprosent);
-        arbeidsforhold.setLagtTilAvSaksbehandler(false);
-        arbeidsforhold.setId(erstatterArbeidsforholdId);
-        arbeidsforhold.setArbeidsgiverIdentifikator(NAV_ORGNR);
-        arbeidsforhold.setBrukArbeidsforholdet(true);
-        arbeidsforhold.setArbeidsforholdId(ARBEIDSFORHOLD_REF.getReferanse());
-
-        AvklarArbeidsforholdDto arbeidsforhold2 = new AvklarArbeidsforholdDto();
-        arbeidsforhold2.setNavn(navn);
-        arbeidsforhold2.setFomDato(fomDato);
-        arbeidsforhold2.setStillingsprosent(stillingsprosent);
-        arbeidsforhold2.setLagtTilAvSaksbehandler(false);
-        arbeidsforhold2.setId(randomId);
-        arbeidsforhold2.setArbeidsgiverIdentifikator(NAV_ORGNR);
-        arbeidsforhold2.setBrukArbeidsforholdet(true);
-        arbeidsforhold2.setErstatterArbeidsforholdId(erstatterArbeidsforholdId);
-        arbeidsforhold2.setArbeidsforholdId(nyArbeidsforholdRef);
-
-        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold, arbeidsforhold2);
-        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
-
-        Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
-            .medUtledetSkjæringstidspunkt(stpDato)
-            .build();
-
-        // Act
-        oppdaterer.oppdater(avklarArbeidsforholdDto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, stp, avklarArbeidsforholdDto.getBegrunnelse()));
-
-        // Assert
-        List<ArbeidsforholdOverstyring> overstyringer = hentGrunnlag(behandling)
-            .getArbeidsforholdInformasjon()
-            .map(ArbeidsforholdInformasjon::getOverstyringer)
-            .orElse(Collections.emptyList());
-
-        assertThat(overstyringer).hasSize(2);
-        assertThat(overstyringer).anySatisfy(overstyring -> {
-            assertThat(overstyring.getHandling()).isEqualTo(ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET);
-            assertThat(overstyring.getArbeidsgiver().getOrgnr()).isEqualTo(NAV_ORGNR);
-            assertThat(overstyring.getArbeidsforholdRef().getReferanse()).isEqualTo(ARBEIDSFORHOLD_REF.getReferanse());
-            assertThat(overstyring.getNyArbeidsforholdRef().getReferanse()).isEqualTo(nyArbeidsforholdRef);
-        });
-        assertThat(overstyringer).anySatisfy(overstyring -> {
-            assertThat(overstyring.getHandling()).isEqualTo(ArbeidsforholdHandlingType.BRUK);
-            assertThat(overstyring.getArbeidsgiver().getOrgnr()).isEqualTo(NAV_ORGNR);
-            assertThat(overstyring.getArbeidsforholdRef().getReferanse()).isEqualTo(nyArbeidsforholdRef);
-            assertThat(overstyring.getNyArbeidsforholdRef()).isNull();
-        });
-    }
-
-    @Test
-    public void skal_utlede_handling_lik_inntekt_ikke_med_i_beregningsgrunnlag() {
-
-        // Arrange
-        String navn = "Utlandet";
-        LocalDate stpDato = LocalDate.of(2019, 1, 1);
-        LocalDate fomDato = stpDato.minusYears(3);
-        BigDecimal stillingsprosent = BigDecimal.valueOf(100);
-        opprettVirksomhetAG();
-
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-
-        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
-        arbeidsforhold.setNavn(navn);
-        arbeidsforhold.setFomDato(fomDato);
-        arbeidsforhold.setStillingsprosent(stillingsprosent);
-        arbeidsforhold.setLagtTilAvSaksbehandler(false);
-        arbeidsforhold.setId(randomId);
-        arbeidsforhold.setArbeidsgiverIdentifikator(NAV_ORGNR);
-        arbeidsforhold.setInntektMedTilBeregningsgrunnlag(false);
-        arbeidsforhold.setBrukArbeidsforholdet(true);
-
-        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("inntekt ikke med til bg", nyeArbeidsforhold);
-
-        Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
-            .medUtledetSkjæringstidspunkt(stpDato)
-            .build();
-
-        AksjonspunktOppdaterParameter params = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, stp, avklarArbeidsforholdDto.getBegrunnelse());
-
-        // Act
-        oppdaterer.oppdater(avklarArbeidsforholdDto, params);
-
-        // Assert
-        List<ArbeidsforholdOverstyring> overstyring = hentGrunnlag(behandling)
-            .getArbeidsforholdInformasjon()
-            .map(ArbeidsforholdInformasjon::getOverstyringer)
-            .orElse(Collections.emptyList());
-
-        assertThat(overstyring).hasSize(1);
-        ArbeidsforholdOverstyring overstyrtArbeidsforhold = overstyring.get(0);
-        assertThat(overstyrtArbeidsforhold.getHandling()).isEqualTo(ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG);
-    }
 
     @Test
     public void skal_utlede_handling_lik_lagt_til_av_saksbehandler() {
@@ -482,12 +307,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
     }
 
-    private void opprettVirksomhetAG() {
-        Virksomhet virksomhet = new Virksomhet.Builder()
-            .medOrgnr(NAV_ORGNR)
-            .build();
-        when(virksomhetTjeneste.finnOrganisasjon(any())).thenReturn(Optional.of(virksomhet));
-        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(virksomhet);
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
-
 }

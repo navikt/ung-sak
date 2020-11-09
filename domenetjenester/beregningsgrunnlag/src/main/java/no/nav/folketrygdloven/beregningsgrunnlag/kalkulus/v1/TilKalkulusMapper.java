@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -222,7 +223,7 @@ public class TilKalkulusMapper {
         return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
     }
 
-    private static List<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
 
         return sakInntektsmeldinger
             .stream()
@@ -230,7 +231,7 @@ public class TilKalkulusMapper {
                 .stream()
                 .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private static Predicate<Inntektsmelding> arbeidsforholdMatcher(Inntektsmelding inntektsmelding) {
