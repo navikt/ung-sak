@@ -29,7 +29,7 @@ public class VilkårsResultat extends BaseEntitet {
     private Vilkårene vilkårene;
 
     @OneToOne
-    @JoinColumn(name = "manuell_vilkårsvurdering_id", nullable = true)
+    @JoinColumn(name = "manuell_vilkarsvurdering_id", nullable = true)
     private ManuellVilkårsvurdering manuellVilkårsvurdering;
 
     @Column(name = "aktiv", nullable = false)
