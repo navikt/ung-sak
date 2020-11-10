@@ -56,8 +56,7 @@
 	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det
 		har uheldige virkninger ved bruk av import og dependency (bruk composition
 		over arv) da de overstyrer andre scope definisjoner. Sett det heller der
-		det brukes. -->
-	<dependencyManagement>
+		det brukes. --><dependencyManagement>
 
 		<dependencies>
 
@@ -450,7 +449,12 @@
 				<artifactId>assertj-core</artifactId>
 				<version>3.18.1</version>
 			</dependency>
-
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>5.7.0</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>

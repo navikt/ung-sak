@@ -9,15 +9,15 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -32,19 +32,21 @@ import javax.persistence.metamodel.ManagedType;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.db.util.DatasourceConfiguration;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 /** Sjekker alle entiteter er mappet korrekt.  Ligger i web slik at den fanger alle orm filer lagt i ulike moduler. */
-@RunWith(Parameterized.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class EntityTest {
 
     private static final EntityManagerFactory entityManagerFactory;
@@ -62,40 +64,30 @@ public class EntityTest {
         entityManagerFactory = Persistence.createEntityManagerFactory("pu-default");
     }
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager em = repoRule.getEntityManager();
-    private String name;
-    private Class<?> entityClass;
-
-    public EntityTest(String name, Class<?> entityClass) {
-        this.name = name;
-        this.entityClass = entityClass;
-    }
+    @Inject
+    private EntityManager entityManager;
 
     @AfterAll
     public static void teardown() {
         System.clearProperty("hibernate.hbm2ddl.auto");
     }
 
-    @org.junit.runners.Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> parameters() throws Exception {
+    public static Stream<Arguments> provideArguments() {
+
+        List<Arguments> params = new LinkedList<Arguments>();
 
         Set<Class<?>> baseEntitetSubklasser = getEntityClasses(BaseEntitet.class::isAssignableFrom);
-        Set<Class<?>> entityKlasser = getEntityClasses(c -> c.isAnnotationPresent(Entity.class));
-        Map<String, Object[]> params = new LinkedHashMap<>();
 
         for (Class<?> c : baseEntitetSubklasser) {
-            params.put(c.getName(), new Object[]{c.getSimpleName(), c});
+            params.add(Arguments.of(c.getName(), c));
         }
-        assertThat(params).isNotEmpty();
 
+        Set<Class<?>> entityKlasser = getEntityClasses(c -> c.isAnnotationPresent(Entity.class));
         for (Class<?> c : entityKlasser) {
-            params.put(c.getName(), new Object[]{c.getSimpleName(), c});
+            params.add(Arguments.of(c.getName(), c));
         }
-        assertThat(params).isNotEmpty();
 
-        return params.values();
+        return params.stream();
     }
 
     public static Set<Class<?>> getEntityClasses(Predicate<Class<?>> filter) {
@@ -116,8 +108,9 @@ public class EntityTest {
         return res;
     }
 
-    @Test
-    public void skal_ha_registrert_alle_entiteter_i_orm_xml() {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void skal_ha_registrert_alle_entiteter_i_orm_xml(String name, Class<?> entityClass) {
         try {
             entityManagerFactory.getMetamodel().managedType(entityClass);
         } catch (IllegalArgumentException e) {
@@ -127,8 +120,9 @@ public class EntityTest {
     }
 
     @Disabled("FIXME er ikke portet til Postgres")
-    @Test
-    public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db(String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         for (Attribute<?, ?> att : managedType.getAttributes()) {
@@ -157,8 +151,9 @@ public class EntityTest {
     }
 
     @Disabled("FIXME er ikke portet til Postgres")
-    @Test
-    public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db(String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         if (Modifier.isAbstract(entityClass.getModifiers())) {
@@ -177,7 +172,7 @@ public class EntityTest {
                 continue;
             }
 
-            String tableName = getTableName(field);
+            String tableName = getTableName(field, entityClass);
             Column column = field.getDeclaredAnnotation(Column.class);
             JoinColumn joinColumn = field.getDeclaredAnnotation(JoinColumn.class);
             if (column == null && joinColumn == null) {
@@ -199,7 +194,7 @@ public class EntityTest {
 
     @SuppressWarnings("unchecked")
     private String getNullability(String tableName, String columnName) {
-        List<String> result = em.createNativeQuery(
+        List<String> result = entityManager.createNativeQuery(
             "SELECT NULLABLE FROM ALL_TAB_COLS WHERE COLUMN_NAME=upper(:col) AND TABLE_NAME=upper(:table) AND OWNER=SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')")
             .setParameter("table", tableName)
             .setParameter("col", columnName)
@@ -208,7 +203,7 @@ public class EntityTest {
         return result.isEmpty() ? null : result.get(0);
     }
 
-    private String getTableName(Field field) {
+    private String getTableName(Field field, Class<?> entityClass) {
         Class<?> clazz = entityClass;
         if (field.getDeclaredAnnotation(OneToMany.class) != null) {
             ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
@@ -218,8 +213,9 @@ public class EntityTest {
         return getInheritedAnnotation(clazz, Table.class).name();
     }
 
-    @Test
-    public void sjekk_felt_ikke_er_Float_eller_Double() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_felt_ikke_er_Float_eller_Double(String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         for (Attribute<?, ?> att : managedType.getAttributes()) {
