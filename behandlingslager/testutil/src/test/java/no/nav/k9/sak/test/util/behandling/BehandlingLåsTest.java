@@ -2,29 +2,33 @@ package no.nav.k9.sak.test.util.behandling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingLåsTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private EntityManager em = repoRule.getEntityManager();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(em);
-    private final Saksnummer saksnummer  = new Saksnummer("2");
+    private BehandlingRepositoryProvider repositoryProvider;
+
+    private Saksnummer saksnummer  = new Saksnummer("2");
 
     private Fagsak fagsak;
 
@@ -32,13 +36,15 @@ public class BehandlingLåsTest {
 
     @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+
         fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(saksnummer).build();
-        em.persist(fagsak);
-        em.flush();
+        entityManager.persist(fagsak);
+        entityManager.flush();
 
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        em.persist(behandling);
-        em.flush();
+        entityManager.persist(behandling);
+        entityManager.flush();
     }
 
     @Test
