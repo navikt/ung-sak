@@ -4,8 +4,6 @@ import static java.lang.String.format;
 import static java.util.Map.entry;
 
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -26,22 +24,10 @@ public class InntektskategoriTilAktivitetstatusMapper {
     );
 
     public static AktivitetStatus aktivitetStatusFor(Inntektskategori inntektskategori) {
-        return INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.entrySet().stream()
-            .filter(e -> e.getKey().equals(inntektskategori))
-            .collect(toSingleton(inntektskategori))
-            .getValue();
-    }
-
-    public static <T> Collector<T, ?, T> toSingleton(Inntektskategori inntektskategori) {
-        return Collectors.collectingAndThen(
-            Collectors.toList(),
-            list -> {
-                if (list.size() != 1) {
-                    throw new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori));
-                }
-                return list.get(0);
-            }
-        );
+        if (!INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.containsKey(inntektskategori)) {
+            throw new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori));
+        }
+        return INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.get(inntektskategori);
     }
 }
 
