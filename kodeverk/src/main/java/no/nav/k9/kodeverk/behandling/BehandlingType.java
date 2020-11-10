@@ -31,7 +31,7 @@ public enum BehandlingType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 
-    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
+    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING, UNNTAKSBEHANDLING);
 
     public static final String KODEVERK = "BEHANDLING_TYPE";
     private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
