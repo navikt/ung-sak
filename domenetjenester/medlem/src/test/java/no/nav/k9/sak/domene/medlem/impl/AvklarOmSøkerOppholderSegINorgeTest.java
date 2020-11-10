@@ -9,9 +9,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -55,7 +55,7 @@ public class AvklarOmSøkerOppholderSegINorgeTest {
 
     private AvklarOmSøkerOppholderSegINorge tjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.tjeneste = new AvklarOmSøkerOppholderSegINorge(personopplysningTjeneste, iayTjeneste);
     }

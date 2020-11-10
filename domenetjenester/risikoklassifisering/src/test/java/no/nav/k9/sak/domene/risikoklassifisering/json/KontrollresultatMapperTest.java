@@ -10,7 +10,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;

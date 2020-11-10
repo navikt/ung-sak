@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -30,7 +30,7 @@ public class TilbakekrevingRestTjenesteTest {
     private TilbakekrevingRepository tilbakekrevingRepository = mock(TilbakekrevingRepository.class);
     private TilbakekrevingRestTjeneste tilbakekrevingRestTjeneste = new TilbakekrevingRestTjeneste(behandlingRepository, tilbakekrevingRepository);
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(behandlingRepository.hentBehandling((Long) Mockito.any())).thenAnswer(invocation -> lagBehandling());
         when(behandlingRepository.hentBehandling((UUID) Mockito.any())).thenAnswer(invocation -> lagBehandling());

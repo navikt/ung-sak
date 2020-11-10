@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -40,7 +40,7 @@ public class VurderBehandlingerUnderIverksettelseTest {
 
     private Behandling førstegangBehandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         TestScenarioBuilder førstegangScenario = TestScenarioBuilder.builderMedSøknad();
         førstegangBehandling = førstegangScenario.lagre(repositoryProvider);

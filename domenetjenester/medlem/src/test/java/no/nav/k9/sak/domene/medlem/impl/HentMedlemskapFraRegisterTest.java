@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
@@ -28,7 +28,7 @@ public class HentMedlemskapFraRegisterTest {
     private final MedlemsunntakRestKlient restKlient = mock(MedlemsunntakRestKlient.class);
     private HentMedlemskapFraRegister medlemTjeneste;
 
-    @Before
+    @BeforeEach
     public void before() {
         medlemTjeneste = new HentMedlemskapFraRegister(restKlient);
     }

@@ -20,7 +20,7 @@ import javax.persistence.Persistence;
 import javax.persistence.metamodel.ManagedType;
 
 import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

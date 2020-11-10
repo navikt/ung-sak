@@ -9,9 +9,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
@@ -47,7 +47,7 @@ public class AvklarOmErBosattTest {
 
     @Inject
     private MedlemskapRepository medlemskapRepository;
-    
+
     @Inject
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
 
@@ -56,7 +56,7 @@ public class AvklarOmErBosattTest {
 
     private AvklarOmErBosatt avklarOmErBosatt;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.avklarOmErBosatt = new AvklarOmErBosatt(medlemskapRepository, medlemskapPerioderTjeneste, personopplysningTjeneste);
     }

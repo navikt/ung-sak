@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -50,7 +50,7 @@ public class TpsAdapterImplTest {
     private final AktørId aktørId = AktørId.dummy();
     private final PersonIdent fnr = new PersonIdent("31018143212");
 
-    @Before
+    @BeforeEach
     public void setup() {
         TpsAdresseOversetter tpsAdresseOversetter = new TpsAdresseOversetter();
         TpsOversetter tpsOversetter = new TpsOversetter(

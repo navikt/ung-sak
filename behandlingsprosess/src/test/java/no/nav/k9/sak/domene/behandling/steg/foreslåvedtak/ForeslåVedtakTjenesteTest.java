@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -83,7 +83,7 @@ public class ForeslåVedtakTjenesteTest {
 
     private ArrayList<Oppgaveinfo> oppgaveinfoerSomReturneres = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);

@@ -13,9 +13,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -64,7 +64,7 @@ public class DokumentArkivTjenesteImplTest {
     @Rule
     public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         final FagsakRepository fagsakRepository = mock(FagsakRepository.class);
         final Fagsak fagsak = mock(Fagsak.class);

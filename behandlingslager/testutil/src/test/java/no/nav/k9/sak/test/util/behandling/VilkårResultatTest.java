@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -45,7 +45,7 @@ public class VilkårResultatTest {
     private Behandling behandling1;
     private VilkårResultatRepository vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
 
-    @Before
+    @BeforeEach
     public void setup() {
         fagsakReposiory.opprettNy(fagsak);
         behandling1 = behandlingBuilder.build();
@@ -57,7 +57,7 @@ public class VilkårResultatTest {
         lagreBehandling(behandling1);
 
         lagreOgGjenopphenteBehandlingsresultat(behandling1);
-        
+
         // Act
         Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING)
             .build();
@@ -65,7 +65,7 @@ public class VilkårResultatTest {
         vilkårResultatRepository.kopier(behandling2.getId(), behandling2.getId());
 
         lagreOgGjenopphenteBehandlingsresultat(behandling2);
-        
+
         // Assert
         assertThat(getVilkårene(behandling2))
             .isNotSameAs(getVilkårene(behandling1));
@@ -79,7 +79,7 @@ public class VilkårResultatTest {
         // Arrange
         lagreBehandling(behandling1);
         lagreOgGjenopphenteBehandlingsresultat(behandling1);
-        
+
         // Act
         Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING).build();
         lagreBehandling(behandling2);
@@ -96,7 +96,7 @@ public class VilkårResultatTest {
         vilkårResultatRepository.lagre(behandling2.getId(), vilkårResultat);
 
         lagreOgGjenopphenteBehandlingsresultat(behandling2);
-        
+
         // Assert
         assertThat(getVilkårene(behandling2).getId())
             .isNotEqualTo(getVilkårene(behandling1).getId());

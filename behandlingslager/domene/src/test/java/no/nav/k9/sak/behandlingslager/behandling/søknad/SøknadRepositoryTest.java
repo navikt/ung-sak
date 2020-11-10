@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -16,23 +19,28 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class SøknadRepositoryTest {
 
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider;
     private SøknadRepository søknadRepository;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
-    
+
     private DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1), LocalDate.now().minusDays(1));
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         søknadRepository = repositoryProvider.getSøknadRepository();
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         fagsakRepository = repositoryProvider.getFagsakRepository();
@@ -64,7 +72,7 @@ public class SøknadRepositoryTest {
         assertThat(endringssøknad2).isPresent();
         assertThat(endringssøknad.get()).isNotEqualTo(endringssøknad2.get());
     }
-    
+
     @Test
     public void skal_finne_søknad_med_overlapp() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
@@ -75,10 +83,10 @@ public class SøknadRepositoryTest {
 
         SøknadEntitet søknad = opprettSøknad(false);
         søknadRepository.lagreOgFlush(behandling, søknad);
-        
+
         var dato = søknadsperiode.getTomDato().minusDays(1);
         List<Behandling> behandlinger = søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), dato, dato);
-        
+
         assertThat(behandlinger).containsOnly(behandling);
 
     }

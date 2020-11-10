@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -70,7 +70,7 @@ public class VurderLøpendeMedlemskapStegTest {
     @Inject
     private VurderLøpendeMedlemskap vurdertLøpendeMedlemskapTjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider);
     }

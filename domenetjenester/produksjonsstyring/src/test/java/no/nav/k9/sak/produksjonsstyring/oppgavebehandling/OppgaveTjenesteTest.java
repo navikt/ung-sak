@@ -13,9 +13,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -54,7 +54,7 @@ public class OppgaveTjenesteTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
 
         prosessTaskRepository = mock(ProsessTaskRepository.class);

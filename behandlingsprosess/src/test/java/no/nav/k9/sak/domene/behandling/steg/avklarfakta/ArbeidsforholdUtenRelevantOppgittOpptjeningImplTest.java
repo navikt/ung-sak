@@ -8,9 +8,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -45,7 +45,7 @@ public class ArbeidsforholdUtenRelevantOppgittOpptjeningImplTest {
     private ArbeidsforholdUtenRelevantOppgittOpptjening arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void oppsett(){
         var scenario = TestScenarioBuilder.builderMedSøknad();
         this.behandling = scenario.lagre(repositoryProvider);
@@ -66,7 +66,7 @@ public class ArbeidsforholdUtenRelevantOppgittOpptjeningImplTest {
         // Arrange
         InntektArbeidYtelseAggregatBuilder builder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
-          
+
         // Act
         boolean erUtenRelevantOppgittOpptjening = arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste.erUtenRelevantOppgittOpptjening(lagInput(), iayTjeneste.finnGrunnlag(behandling.getId()));
         // Assert

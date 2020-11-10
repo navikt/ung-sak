@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -85,7 +85,7 @@ public class MedlemskapsvilkårTest {
         return scenario.lagre(repositoryProvider);
     }
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         this.vilkår = new VurderLøpendeMedlemskap(personopplysningTjeneste, repositoryProvider.getBehandlingRepository(), repositoryProvider.getMedlemskapRepository(), new MedlemskapPerioderTjeneste(), utledVurderingsdatoerMedlemskapTjeneste, iayTjeneste);
     }

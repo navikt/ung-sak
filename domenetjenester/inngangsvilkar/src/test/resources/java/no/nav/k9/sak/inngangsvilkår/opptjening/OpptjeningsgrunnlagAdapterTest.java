@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;

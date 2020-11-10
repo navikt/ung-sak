@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -48,7 +48,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private BehandlingReferanse ref;
     private AktørId aktørId;
 
-    @Before
+    @BeforeEach
     public void setUp()  {
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);

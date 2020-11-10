@@ -4,32 +4,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingOverlappInfotrygdRepositoryImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private Repository repository = repoRule.getRepository();
+    @Inject
+    private EntityManager entityManager;
 
+    private Repository repository;
     private BehandlingOverlappInfotrygdRepository behandlingOverlappInfotrygdRepository;
-    
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    private BasicBehandlingBuilder behandlingBuilder;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repository = new Repository(entityManager);
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
         behandlingOverlappInfotrygdRepository = new BehandlingOverlappInfotrygdRepository(entityManager);
     }
 

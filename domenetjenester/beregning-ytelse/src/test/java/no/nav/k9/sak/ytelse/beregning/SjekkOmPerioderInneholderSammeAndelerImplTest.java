@@ -5,9 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -31,7 +30,7 @@ public class SjekkOmPerioderInneholderSammeAndelerImplTest {
     private BeregningsresultatPeriode nyPeriode;
     private BeregningsresultatPeriode gammelPeriode;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         BeregningsresultatEntitet beregningsresultatFørstegangsbehandling = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")

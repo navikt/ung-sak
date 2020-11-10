@@ -7,8 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -20,23 +24,38 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class PipRepositoryTest {
 
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("42");
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final PipRepository pipRepository = new PipRepository(repoRule.getEntityManager());
-    private final FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private BehandlingRepository behandlingRepository ;
+    private PipRepository pipRepository ;
+    private FagsakRepository fagsakRepository ;
+    private BasicBehandlingBuilder behandlingBuilder ;
+
+
+    @BeforeEach
+    public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        pipRepository = new PipRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    }
+
     private Behandling behandling;
-    
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
 
     private void lagreBehandling(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
@@ -66,7 +85,7 @@ public class PipRepositoryTest {
         AktørId aktørId1 = fagsak1.getAktørId();
         Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.SVANGERSKAPSPENGER, aktørId1);
         @SuppressWarnings("unused")
-        Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(repoRule.getEntityManager()).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
+        Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(entityManager).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
 
         Set<Long> resultat = pipRepository.fagsakIderForSøker(Collections.singleton(aktørId1));
 
@@ -90,7 +109,7 @@ public class PipRepositoryTest {
         fagsakRepository.lagre(journalpost1);
         Journalpost journalpost2 = new Journalpost(new JournalpostId("4444"), fagsak1);
         fagsakRepository.lagre(journalpost2);
-        repoRule.getRepository().flush();
+        (new Repository(entityManager)).flush();
 
         Set<Long> fagsakId = pipRepository.fagsakIdForJournalpostId(Collections.singleton(JOURNALPOST_ID));
         assertThat(fagsakId).containsOnly(fagsak1.getId());

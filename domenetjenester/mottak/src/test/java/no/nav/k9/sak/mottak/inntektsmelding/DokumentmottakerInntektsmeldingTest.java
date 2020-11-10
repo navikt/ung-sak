@@ -12,9 +12,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -83,7 +83,7 @@ public class DokumentmottakerInntektsmeldingTest {
     private DokumentmottakerInntektsmelding dokumentmottaker;
     private DokumentmottakerFelles dokumentmottakerFelles;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         MockitoAnnotations.initMocks(this);
 

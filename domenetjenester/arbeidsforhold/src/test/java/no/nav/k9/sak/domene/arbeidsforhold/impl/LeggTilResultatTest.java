@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -18,7 +18,7 @@ public class LeggTilResultatTest {
     private InternArbeidsforholdRef ref1;
     private InternArbeidsforholdRef ref2;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ref1 = InternArbeidsforholdRef.nyRef();
         ref2 = InternArbeidsforholdRef.nyRef();

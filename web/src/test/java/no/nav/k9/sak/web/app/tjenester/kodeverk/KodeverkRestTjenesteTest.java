@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

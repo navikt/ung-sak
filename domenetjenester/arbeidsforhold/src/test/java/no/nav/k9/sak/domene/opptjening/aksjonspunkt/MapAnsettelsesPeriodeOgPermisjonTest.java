@@ -11,7 +11,7 @@ import java.time.Month;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;

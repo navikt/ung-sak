@@ -6,9 +6,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -34,7 +34,7 @@ public class HistorikkRepositoryImplTest {
     private final HistorikkRepository historikkRepository = new HistorikkRepository(entityManager);
     private Fagsak fagsak;
 
-    @Before
+    @BeforeEach
     public void setup() {
         fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
     }

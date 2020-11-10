@@ -7,9 +7,9 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -34,7 +34,7 @@ public class PersonopplysningDtoTjenesteTest {
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
     private PersonopplysningDtoTjeneste tjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, repositoryProvider);
     }

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PeriodeAndelTest {
     @Test

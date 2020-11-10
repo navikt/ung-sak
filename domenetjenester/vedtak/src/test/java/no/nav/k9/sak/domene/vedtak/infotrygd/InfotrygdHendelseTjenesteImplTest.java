@@ -11,9 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -48,7 +48,7 @@ public class InfotrygdHendelseTjenesteImplTest {
     private static final String BASE_URL_FEED = "https://infotrygd-hendelser-api-t10.nais.preprod.local/infotrygd/hendelser";
     private URI endpoint = URI.create(BASE_URL_FEED);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         tjeneste = new InfotrygdHendelseTjeneste(endpoint, oidcRestClient);
     }

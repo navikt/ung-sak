@@ -8,9 +8,9 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -66,7 +66,7 @@ public class SendVedtaksbrevTest {
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
     }
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         sendVedtaksbrev = new SendVedtaksbrev(behandlingRepository,
             repositoryProvider.getFagsakRepository(),

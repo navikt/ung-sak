@@ -12,9 +12,9 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -65,7 +65,7 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
     private Behandling behandling;
     private Totrinnsvurdering vurdering;
 
-    @Before
+    @BeforeEach
     public void setup() {
         initMocks(this);
         ArbeidsgiverTjeneste arbeidsgiverTjeneste = mock(ArbeidsgiverTjeneste.class);
@@ -77,7 +77,7 @@ public class TotrinnArbeidsforholdDtoTjenesteTest {
         Totrinnsvurdering.Builder vurderingBuilder = new Totrinnsvurdering.Builder(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
         vurdering = vurderingBuilder.medGodkjent(true).medBegrunnelse("").build();
     }
-    
+
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);
     }

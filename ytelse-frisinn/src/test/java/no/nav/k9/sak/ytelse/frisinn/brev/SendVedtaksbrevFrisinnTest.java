@@ -27,9 +27,9 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -67,7 +67,7 @@ public class SendVedtaksbrevFrisinnTest {
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
     }
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         fagsak = new Fagsak(FagsakYtelseType.FRISINN, AktørId.dummy(), mock(Saksnummer.class));
         var fagsakRepository = mock(FagsakRepository.class);

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -29,7 +29,7 @@ public class PersonopplysningTjenesteImplTest {
     private PersonopplysningTjeneste personopplysningTjeneste;
     private TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
 
-    @Before
+    @BeforeEach
     public void before() {
         personopplysningTjeneste = new PersonopplysningTjeneste(repositoryProvider.getPersonopplysningRepository());
     }

@@ -6,9 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
@@ -25,7 +24,7 @@ public class SjekkForEndringMellomPerioderImplTest {
     private SjekkForIngenAndelerOgAndelerUtenDagsats sjekkForIngenAndelerOgAndelerUtenDagsats = Mockito.mock(SjekkForIngenAndelerOgAndelerUtenDagsats.class);
     private SjekkForEndringMellomAndelerOgFOM sjekkForEndringMellomAndelerOgFOM = Mockito.mock(SjekkForEndringMellomAndelerOgFOM.class);
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         brRevurdering = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")

@@ -30,10 +30,10 @@ import javax.persistence.Table;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ManagedType;
 
-import org.junit.AfterClass;
-import org.junit.Ignore;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -73,7 +73,7 @@ public class EntityTest {
         this.entityClass = entityClass;
     }
 
-    @AfterClass
+    @AfterAll
     public static void teardown() {
         System.clearProperty("hibernate.hbm2ddl.auto");
     }
@@ -126,7 +126,7 @@ public class EntityTest {
         }
     }
 
-    @Ignore("FIXME er ikke portet til Postgres")
+    @Disabled("FIXME er ikke portet til Postgres")
     @Test
     public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db() throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
@@ -156,7 +156,7 @@ public class EntityTest {
         }
     }
 
-    @Ignore("FIXME er ikke portet til Postgres")
+    @Disabled("FIXME er ikke portet til Postgres")
     @Test
     public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db() throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);

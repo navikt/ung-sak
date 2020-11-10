@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -58,7 +58,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     private MottatteDokumentRepository mottatteDokumentRepository = new MottatteDokumentRepository(repoRule.getEntityManager());
     private MottattDokumentOversetterInntektsmelding oversetter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         when(virksomhetTjeneste.finnOrganisasjon(ORGNR))
             .thenReturn(Optional.of(Virksomhet.getBuilder().medOrgnr(ORGNR).medNavn("Ukjent Firma").medRegistrert(LocalDate.now().minusDays(1)).build()));

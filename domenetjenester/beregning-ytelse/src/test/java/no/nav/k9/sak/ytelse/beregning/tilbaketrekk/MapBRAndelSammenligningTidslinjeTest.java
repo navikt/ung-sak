@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -32,7 +32,7 @@ public class MapBRAndelSammenligningTidslinjeTest {
         // Arrange
         var stp = LocalDate.of(2019, 9, 01);
         var utbetaltTom = stp.minusDays(1);
-        
+
         BeregningsresultatPeriode periode = lagResultatMedPeriode(stp, stp.plusDays(15));
         BeregningsresultatPeriode periode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(29));
         BeregningsresultatPeriode periode3 = lagResultatMedPeriode(stp.plusDays(30), stp.plusDays(40));
@@ -57,7 +57,7 @@ public class MapBRAndelSammenligningTidslinjeTest {
         // Arrange
         var stp = LocalDate.of(2019, 9, 01);
         var utbetaltTom = stp.plusDays(20);
-        
+
         BeregningsresultatPeriode periode = lagResultatMedPeriode(stp, stp.plusDays(15));
         BeregningsresultatPeriode periode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(25));
         BeregningsresultatPeriode periode3 = lagResultatMedPeriode(stp.plusDays(26), stp.plusDays(40));
@@ -84,7 +84,7 @@ public class MapBRAndelSammenligningTidslinjeTest {
         // Arrange
         var stp = LocalDate.of(2019, 9, 01);
         var utbetaltTom = stp.plusDays(20);
-        
+
         // Gammelt resultat
         BeregningsresultatPeriode gammelPeriode = lagResultatMedPeriode(stp, stp.plusDays(15));
         BeregningsresultatPeriode gammelPeriode2 = lagResultatMedPeriode(stp.plusDays(16), stp.plusDays(25));

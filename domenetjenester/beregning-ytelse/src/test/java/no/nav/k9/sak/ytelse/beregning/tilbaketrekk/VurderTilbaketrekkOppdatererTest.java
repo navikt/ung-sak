@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -42,7 +42,7 @@ public class VurderTilbaketrekkOppdatererTest {
     @SuppressWarnings("unused")
     private BeregningsresultatEntitet beregningsresultat;
 
-    @Before
+    @BeforeEach
     public void setup() {
         HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
         historikkAdapter = new HistorikkTjenesteAdapter(repositoryProvider.getHistorikkRepository(), historikkInnslagKonverter, null);

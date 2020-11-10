@@ -7,8 +7,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.infotrygdfeed.ytelser.OmsorgspengerParametere;
 import no.nav.k9.sak.infotrygdfeed.ytelser.PleiepengerBarnParametere;
 import no.nav.k9.sak.typer.Saksnummer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -34,7 +34,7 @@ public class InfotrygdFeedPeriodeberegnerTest {
 
     private InfotrygdFeedPeriodeberegner beregner;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(param);
         beregner = newInfotrygdFeedPeriodeBeregner();

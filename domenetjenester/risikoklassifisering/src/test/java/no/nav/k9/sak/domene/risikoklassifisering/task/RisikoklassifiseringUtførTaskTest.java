@@ -5,8 +5,8 @@ import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -30,7 +30,7 @@ public class RisikoklassifiseringUtførTaskTest {
 
     private RisikoklassifiseringUtførTask risikoklassifiseringUtførTask;
 
-    @Before
+    @BeforeEach
     public void init(){
         MockitoAnnotations.initMocks(this);
         risikoklassifiseringUtførTask

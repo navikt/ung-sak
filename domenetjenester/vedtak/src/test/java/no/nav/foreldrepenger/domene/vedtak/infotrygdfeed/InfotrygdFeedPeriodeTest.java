@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 

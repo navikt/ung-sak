@@ -9,9 +9,9 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -40,7 +40,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
     private DefaultManglendePåkrevdeInntektsmeldingerTjeneste påkrevdeInntektsmeldingerTjeneste;
 
-    @Before
+    @BeforeEach
     public void setup(){
         påkrevdeInntektsmeldingerTjeneste = new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, new AbakusInMemoryInntektArbeidYtelseTjeneste(), repositoryProvider.getSøknadRepository());
     }

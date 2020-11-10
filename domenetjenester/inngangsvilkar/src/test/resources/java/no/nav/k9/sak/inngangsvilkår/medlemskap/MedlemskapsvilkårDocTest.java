@@ -1,7 +1,7 @@
 package no.nav.k9.sak.inngangsvilkår.medlemskap;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.nare.doc.RuleDescriptionDigraph;
 import no.nav.fpsak.nare.specification.Specification;

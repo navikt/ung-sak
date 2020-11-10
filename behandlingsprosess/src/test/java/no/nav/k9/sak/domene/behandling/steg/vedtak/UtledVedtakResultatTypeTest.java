@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -27,7 +27,7 @@ public class UtledVedtakResultatTypeTest {
     private BehandlingVedtakTjeneste vedtakTjeneste;
     private TestScenarioBuilder scenario;
 
-    @Before
+    @BeforeEach
     public void setup() {
         scenario = TestScenarioBuilder.builderMedSøknad();
         vedtakTjeneste = new BehandlingVedtakTjeneste(null, scenario.mockBehandlingRepositoryProvider(), null);

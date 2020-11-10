@@ -13,7 +13,7 @@ import java.util.function.BiConsumer;
 
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -67,7 +67,7 @@ public class InngangsvilkårAutoTest {
             case MEDLEMSKAPSVILKÅRET:
                 vurderVilkår(VilkårVurdering.DO_NOTHING);
                 return;
-            case OPPTJENINGSPERIODEVILKÅR:     
+            case OPPTJENINGSPERIODEVILKÅR:
                 fastsettOpptjeningsPeriode();
                 return;
             case OPPTJENINGSVILKÅRET:

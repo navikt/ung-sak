@@ -8,9 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -40,7 +40,7 @@ public class TilkjentYtelseOppdatererTest {
     private TilkjentYtelseOppdaterer oppdaterer;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
 

@@ -19,9 +19,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -105,7 +105,7 @@ public class InntektsmeldingTjenesteImplTest {
     private Arbeidsgiver arbeidsgiver;
     private ArbeidsforholdTjenesteMock arbeidsforholdTjenesteMock;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         var virksomhet1 = lagVirksomhet();
         var virksomhet2 = lagAndreVirksomhet();

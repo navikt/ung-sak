@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.kodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;

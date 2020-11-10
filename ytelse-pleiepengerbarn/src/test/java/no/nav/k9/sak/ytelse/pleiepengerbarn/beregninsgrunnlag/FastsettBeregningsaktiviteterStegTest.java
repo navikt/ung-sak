@@ -6,7 +6,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -22,20 +22,20 @@ public class FastsettBeregningsaktiviteterStegTest {
 
     @Inject
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> instances;
-    
-    @Inject 
+
+    @Inject
     @FagsakYtelseTypeRef
     @BehandlingStegRef(kode = "FASTSETT_STP_BER")
     @BehandlingTypeRef
     private FastsettBeregningsaktiviteterSteg steg;
-    
+
     @Test
     public void skal_få_injected_steg() throws Exception {
         assertThat(steg).isNotNull();
         assertThat(instances).isNotEmpty();
         var mapper = FagsakYtelseTypeRef.Lookup.find(instances, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         assertThat(mapper).isNotNull();
-        
+
         assertThat(steg.getYtelsesspesifikkMapper(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)).isNotNull();
     }
 }

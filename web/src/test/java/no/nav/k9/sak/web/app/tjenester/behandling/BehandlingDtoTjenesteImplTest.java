@@ -8,9 +8,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -61,7 +61,7 @@ public class BehandlingDtoTjenesteImplTest {
 
     private Collection<ResourceLink> existingRoutes;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
         tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository, "/k9/oppdrag/api");

@@ -12,9 +12,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -74,7 +74,7 @@ public class KompletthetskontrollerTest {
     private Behandling behandling;
     private MottattDokument mottattDokument;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         MockitoAnnotations.initMocks(this);
 

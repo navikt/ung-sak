@@ -2,8 +2,8 @@ package no.nav.k9.sak.behandling.hendelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -15,7 +15,7 @@ public class FinnAnsvarligSaksbehandlerTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();

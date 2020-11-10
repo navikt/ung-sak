@@ -7,9 +7,9 @@ import java.time.LocalDate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -45,7 +45,7 @@ public class FagsakTjenesteTest {
 
     private final FagsakYtelseType ytelseType = FagsakYtelseType.FORELDREPENGER;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null);
 

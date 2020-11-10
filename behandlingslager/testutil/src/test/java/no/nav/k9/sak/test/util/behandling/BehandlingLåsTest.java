@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -30,7 +30,7 @@ public class BehandlingLåsTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(saksnummer).build();
         em.persist(fagsak);

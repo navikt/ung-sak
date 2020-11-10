@@ -10,9 +10,9 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -63,7 +63,7 @@ public class RevurderingTjenesteImplTest {
     @Inject @Any
     private Instance<GrunnlagKopierer> grunnlagKopierer;
 
-    @Before
+    @BeforeEach
     public void setup() {
         opprettRevurderingsKandidat();
     }

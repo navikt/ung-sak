@@ -12,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
@@ -44,7 +44,7 @@ public class HistorikkinnslagTjenesteTest {
     private SafTjeneste journalTjeneste;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
-    @Before
+    @BeforeEach
     public void before() {
         historikkRepository = mock(HistorikkRepository.class);
         journalTjeneste = mock(SafTjeneste.class);

@@ -8,9 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -37,7 +37,7 @@ public class LagreHistorikkTaskTest {
     public LagreHistorikkTaskTest() throws IOException, URISyntaxException {
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
         scenario = TestScenarioBuilder.builderMedSøknad();

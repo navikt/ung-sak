@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -27,7 +27,7 @@ public class SjekkForIngenAndelerOgAndelerUtenDagsatsImplTest {
     private LocalDate fom;
     private LocalDate tom;
 
-    @Before
+    @BeforeEach
     public void oppsett(){
         sjekkForIngenAndelerOgAndelerUtenDagsats = new SjekkForIngenAndelerOgAndelerUtenDagsats();
         beregningsresultatFørstegangsbehandling = BeregningsresultatEntitet.builder()
