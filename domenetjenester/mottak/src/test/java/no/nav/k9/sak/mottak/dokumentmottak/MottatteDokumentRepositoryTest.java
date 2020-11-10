@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -77,7 +77,7 @@ public class MottatteDokumentRepositoryTest {
 
     private long journalpostId = 123L;
 
-    @Before
+    @BeforeEach
     public void setup() {
         fagsakRepository.opprettNy(fagsak);
 

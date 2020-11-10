@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.time.LocalDate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;

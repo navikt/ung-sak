@@ -7,13 +7,11 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -34,7 +32,7 @@ public class VurderFeilutbetalingOppdatererTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         this.behandling = scenario.lagMocked();

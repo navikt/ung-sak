@@ -14,9 +14,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
@@ -104,7 +104,7 @@ public class PersoninfoAdapterMedTPSOversetterTest {
 
     private final PersonIdent personIdent = PersonIdent.fra(FIKTIVE_FNR.nesteFnr());
 
-    @Before
+    @BeforeEach
     public void setup() throws HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         landkodeNor.setValue("NOR");
 

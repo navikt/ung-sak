@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
@@ -98,9 +98,9 @@ public class IAYDtoMapperRoundtripTest {
         assertThat(dtoIgjen.getKoblingReferanse()).isEqualTo(dto.getKoblingReferanse());
         assertThat(dtoIgjen.getOppgittOpptjening()).isEqualToComparingFieldByFieldRecursively(dto.getOppgittOpptjening());
         assertThat(dtoIgjen.getPerson()).isEqualToComparingFieldByFieldRecursively(dto.getPerson());
-        
+
         assertThat(dtoIgjen.getOverstyrt().getOpprettetTidspunkt()).isEqualTo(dto.getOverstyrt().getOpprettetTidspunkt());
-        
+
         // mangler mapping av inntektsmeldinger som ikke kommer (grunnet trenger mappe ArbeidsforholdInformasjon)
         assertThat(dtoIgjen.getInntektsmeldinger()).isEqualToComparingFieldByFieldRecursively(dto.getInntektsmeldinger());
 

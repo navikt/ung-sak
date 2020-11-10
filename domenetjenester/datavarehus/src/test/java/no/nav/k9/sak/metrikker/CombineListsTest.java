@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CombineListsTest {
 
@@ -32,7 +32,7 @@ public class CombineListsTest {
         for (var av : StatistikkRepository.AVSLAGSÅRSAKER) {
             assertThat(res).anyMatch(m -> m.get(AVSLAG_ARSAK).equals(av));
         }
-        
+
         for (var av : StatistikkRepository.FAGSAK_STATUS) {
             assertThat(res).anyMatch(m -> m.get(FAGSAK_STATUS).equals(av));
         }

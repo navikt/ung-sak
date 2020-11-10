@@ -7,23 +7,38 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class FagsakRepositoryImplTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private Repository repository = repoRule.getRepository();
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private Repository repository;
+    private FagsakRepository fagsakRepository;
+
+    @BeforeEach
+    public void setup() {
+        repository = new Repository(entityManager);
+        fagsakRepository  = new FagsakRepository(entityManager);
+    }
 
     @Test
     public void skal_finne_eksakt_fagsak_gitt_id() {
@@ -90,10 +105,10 @@ public class FagsakRepositoryImplTest {
 
         List<Fagsak> list0 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, fom.minusDays(10), fom.plusDays(5));
         assertThat(list0).containsOnly(fagsaker[0], fagsaker[1], fagsaker[2]);
-        
+
         List<Fagsak> list1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, tom, tom);
         assertThat(list1).containsOnly(fagsaker[0], fagsaker[2]);
-        
+
         List<Fagsak> list2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, tom, null);
         assertThat(list2).containsOnly(fagsaker[0], fagsaker[2], fagsaker[3]);
     }

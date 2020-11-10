@@ -10,8 +10,8 @@ import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringRepo
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +42,7 @@ public class RisikovurderingTjenesteTest {
     private Behandling behandling;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenarioFørstegang = TestScenarioBuilder.builderMedSøknad();
         behandling = scenarioFørstegang.lagMocked();

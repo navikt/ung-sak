@@ -10,10 +10,10 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.assertj.core.api.AbstractComparableAssert;
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -71,7 +71,7 @@ public class TilbakehoppTest {
     private BehandlingLås behandlingLås;
     private BehandlingModell modell;
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT;
@@ -95,14 +95,14 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medAP(identifisertI(steg2), løsesI(steg3, UT), AksjonspunktStatus.OPPRETTET, false));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_avbryte_aksjonspunkter_som_oppsto_etter_tilsteget() {
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg3, INN)));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_utførte_aksjonspunkter_som_oppsto_i_steget_det_hoppes_til() {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, INN), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
@@ -110,7 +110,7 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_aksjonspunkter_som_oppsto_før_til_steget_og_som_skulle_utføres_i_eller_etter_til_steget() {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2), medUtførtAP(identifisertI(steg1), løsesI(steg2, UT)));

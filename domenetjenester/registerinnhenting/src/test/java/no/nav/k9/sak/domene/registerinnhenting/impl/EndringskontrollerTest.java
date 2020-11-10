@@ -16,9 +16,9 @@ import java.util.HashSet;
 
 import javax.enterprise.inject.Instance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -56,7 +56,7 @@ public class EndringskontrollerTest {
 
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
 
-    @Before
+    @BeforeEach
     public void before() {
         kontrollerFaktaTjenesteMock = mock(KontrollerFaktaAksjonspunktUtleder.class);
         when(kontrollerFaktaTjenesteMock.utledAksjonspunkterTilHøyreForStartpunkt(any(), any(StartpunktType.class))).thenReturn(new ArrayList<>());

@@ -8,8 +8,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.spi.ApplicationException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import no.nav.k9.sak.kontrakt.FeilDto;
@@ -25,7 +25,7 @@ public class RedirectExceptionMapperTest {
 
     private RedirectExceptionMapper exceptionMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
 

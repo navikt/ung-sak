@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
@@ -55,7 +55,7 @@ public class BehandlingsgrunnlagEntitetTest {
     private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private SøknadRepository søknadRepository = repositoryProvider.getSøknadRepository();
 
-    @Before
+    @BeforeEach
     public void setup() {
         repository.lagre(fagsak);
         repository.flush();

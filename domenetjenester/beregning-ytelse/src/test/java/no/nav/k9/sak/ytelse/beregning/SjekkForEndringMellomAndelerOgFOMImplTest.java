@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -23,7 +23,7 @@ public class SjekkForEndringMellomAndelerOgFOMImplTest {
     private LocalDate fom;
     private LocalDate tom;
 
-    @Before
+    @BeforeEach
     public void oppsett(){
         brRevurdering = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")

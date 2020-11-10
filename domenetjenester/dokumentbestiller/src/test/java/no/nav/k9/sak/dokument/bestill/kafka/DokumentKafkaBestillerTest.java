@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
@@ -45,7 +45,7 @@ public class DokumentKafkaBestillerTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
 

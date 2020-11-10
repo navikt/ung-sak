@@ -5,8 +5,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
@@ -32,7 +32,7 @@ public class InntektskategoriHistorikkTjenesteTest {
     private InntektskategoriHistorikkTjeneste inntektskategoriHistorikkTjeneste = new InntektskategoriHistorikkTjeneste(
         new ArbeidsgiverHistorikkinnslag(new ArbeidsgiverTjeneste(null, virksomhetTjeneste)));
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Virksomhet.Builder virksomhetBuilder = new Virksomhet.Builder();
         virksomhetBuilder.medOrgnr(ORGNR);

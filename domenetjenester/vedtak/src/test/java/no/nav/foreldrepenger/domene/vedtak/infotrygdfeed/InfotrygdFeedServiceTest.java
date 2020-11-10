@@ -11,8 +11,8 @@ import java.time.LocalDate;
 
 import javax.enterprise.inject.Instance;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -32,7 +32,7 @@ public class InfotrygdFeedServiceTest {
 
     private InfotrygdFeedService service;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
         initServices(LocalDate.now(), LocalDate.now().plusDays(1));

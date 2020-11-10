@@ -8,8 +8,8 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class LesKontrollresultatTaskTest {
     private LesKontrollresultatTask task;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         risikovurderingTjeneste = mock(RisikovurderingTjeneste.class);
         kontrollresultatMapper = mock(KontrollresultatMapper.class);

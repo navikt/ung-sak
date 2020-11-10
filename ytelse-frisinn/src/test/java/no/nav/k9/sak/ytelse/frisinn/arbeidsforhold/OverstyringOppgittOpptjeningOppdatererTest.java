@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittEgenNæringDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;

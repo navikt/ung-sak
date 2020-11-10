@@ -5,11 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
@@ -18,25 +19,33 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingVedtakRepositoryImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final Repository repository = repoRule.getRepository();
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    @Inject
+    private EntityManager entityManager;
 
-    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private Repository repository;
+    private BehandlingRepositoryProvider repositoryProvider ;
+
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    private BehandlingRepository behandlingRepository;
     private Behandling behandling;
 
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    private BasicBehandlingBuilder behandlingBuilder;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repository = new Repository(entityManager);
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
         behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
     }
 

@@ -13,9 +13,9 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
@@ -61,7 +61,7 @@ public class SimulerOppdragStegTest {
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);

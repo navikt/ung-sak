@@ -12,9 +12,9 @@ import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
@@ -60,7 +60,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
     private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
 
-    @Before
+    @BeforeEach
     public void setup() {
     }
 

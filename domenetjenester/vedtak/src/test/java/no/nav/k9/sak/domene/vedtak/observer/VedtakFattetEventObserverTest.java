@@ -17,9 +17,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -48,7 +48,7 @@ public class VedtakFattetEventObserverTest {
 
     VedtakFattetEventObserver vedtakFattetEventObserver;
 
-    @Before
+    @BeforeEach
     public void setup() {
         vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, behandlingRepository, vedtakRepository);
     }

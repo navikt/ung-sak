@@ -6,8 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -28,24 +32,38 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingRevurderingRepositoryImplTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now();
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final BehandlingRevurderingRepository behandlingRevurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
-    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private final FagsakRepository fagsakRepository = repositoryProvider.getFagsakRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private BehandlingRepository behandlingRepository;
+    private BehandlingRevurderingRepository behandlingRevurderingRepository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    private FagsakRepository fagsakRepository;
 
     private Behandling behandling;
+
+    @BeforeEach
+    public void setup(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        behandlingRevurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
+        behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        fagsakRepository = repositoryProvider.getFagsakRepository();
+    }
 
     @Test
     public void skal_finne_henlagte_behandlinger_etter_forrige_ferdigbehandlede_søknad() {

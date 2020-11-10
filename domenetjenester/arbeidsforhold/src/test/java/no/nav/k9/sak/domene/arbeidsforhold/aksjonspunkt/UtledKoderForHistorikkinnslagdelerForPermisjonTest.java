@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;

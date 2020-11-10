@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 
@@ -62,7 +62,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
     private AksjonspunktutlederForVurderOppgittOpptjening utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
         repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste);
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
@@ -199,7 +199,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         String orgnr = "974760673";
 
         Behandling behandling = lagre(scenario);
-        
+
         OppgittOpptjeningBuilder.EgenNæringBuilder egenNæringBuilder = OppgittOpptjeningBuilder.EgenNæringBuilder.ny();
         OppgittUtenlandskVirksomhet svenska_stat = new OppgittUtenlandskVirksomhet(Landkoder.SWE, "Svenska Stat");
         egenNæringBuilder
@@ -214,7 +214,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         OppgittOpptjeningBuilder oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny();
         oppgittOpptjeningBuilder
             .leggTilEgneNæringer(Collections.singletonList(egenNæringBuilder));
-        
+
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgittOpptjeningBuilder);
 
         // Act
@@ -249,7 +249,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         oppgittOpptjeningBuilder
             .leggTilOppgittArbeidsforhold(OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medUtenlandskVirksomhet(svenska_stat).medPeriode(periode)
                 .medErUtenlandskInntekt(true).medArbeidType(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD));
-        
+
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgittOpptjeningBuilder);
 
         lagreOpptjeningsPeriode(behandling, tilOgMed);
@@ -276,7 +276,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         OppgittOpptjeningBuilder oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny();
         oppgittOpptjeningBuilder
             .leggTilEgneNæringer(Collections.singletonList(egenNæringBuilder));
-        
+
         Behandling behandling = lagre(scenario);
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgittOpptjeningBuilder);
 
@@ -293,7 +293,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
             inntektBuilder.leggTilInntektspost(inntektspost);
             aktørInntektBuilder.leggTilInntekt(inntektBuilder);
             iayAggregatBuilder.leggTilAktørInntekt(aktørInntektBuilder);
-            
+
             iayTjeneste.lagreIayAggregat(behandling.getId(), iayAggregatBuilder);
         }
 

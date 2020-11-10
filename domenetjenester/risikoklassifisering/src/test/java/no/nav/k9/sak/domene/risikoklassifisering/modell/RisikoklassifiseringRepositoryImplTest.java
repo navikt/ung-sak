@@ -14,7 +14,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;

@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -60,7 +60,7 @@ public class TpsTjenesteTest {
     public Repository repository = repoRule.getRepository();
     private TpsTjeneste tpsTjeneste;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         FNR_VED_AKTØR_ID.put(AKTØR_ID, FNR);
         FNR_VED_AKTØR_ID.put(ENDRET_AKTØR_ID, ENDRET_FNR);

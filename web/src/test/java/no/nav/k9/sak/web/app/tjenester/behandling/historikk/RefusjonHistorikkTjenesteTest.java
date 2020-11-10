@@ -5,8 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningsgrunnlagPrStatusOgAndelEndring;
@@ -33,7 +33,7 @@ public class RefusjonHistorikkTjenesteTest {
         new ArbeidsgiverHistorikkinnslag(
             new ArbeidsgiverTjeneste(null, virksomhetTjeneste)));
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Virksomhet.Builder virksomhetBuilder = new Virksomhet.Builder();
         virksomhetBuilder.medOrgnr(ORGNR);

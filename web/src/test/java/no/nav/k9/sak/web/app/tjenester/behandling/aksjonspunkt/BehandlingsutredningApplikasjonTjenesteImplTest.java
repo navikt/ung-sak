@@ -9,9 +9,9 @@ import java.time.Period;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
@@ -73,12 +73,12 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
     @Mock
     private SjekkProsessering sjekkProsessering;
-    
+
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
 
     private Long behandlingId;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         Behandling behandling = TestScenarioBuilder

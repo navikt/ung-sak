@@ -6,7 +6,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.typer.Arbeidsgiver;

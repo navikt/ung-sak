@@ -11,9 +11,9 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -42,7 +42,7 @@ public class StartpunktTjenesteImplTest {
     @Inject
     private Instance<StartpunktUtleder> startpunktUtledere;
 
-    @Before
+    @BeforeEach
     public void before() {
         tjeneste = new StartpunktTjenesteImpl(startpunktUtledere);
     }

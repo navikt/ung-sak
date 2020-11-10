@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.ws.rs.core.Context;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

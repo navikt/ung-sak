@@ -6,9 +6,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -20,20 +25,31 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class MedlemskapRepositoryImplTest {
 
-    @Rule
-    public RepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private MedlemskapRepository repository = new MedlemskapRepository(repositoryRule.getEntityManager());
-    private FagsakRepository fagsakRepository = new FagsakRepository(repositoryRule.getEntityManager());
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private MedlemskapRepository repository;
+    private FagsakRepository fagsakRepository;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository;
+
+    @BeforeEach
+    public void setup() {
+        repository = new MedlemskapRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+    }
 
     @Test
     public void skal_hente_eldste_versjon_av_aggregat() {

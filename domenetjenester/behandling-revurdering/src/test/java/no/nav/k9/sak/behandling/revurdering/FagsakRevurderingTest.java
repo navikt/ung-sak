@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -37,16 +37,16 @@ public class FagsakRevurderingTest {
     private Fagsak fagsakMedFlereBehandlinger;
     private Saksnummer fagsakMedFlereBehSaksnr  = new Saksnummer("2");
 
-    @Before
+    @BeforeEach
     public void setup(){
         behandlingRepository = mock(BehandlingRepository.class);
     }
 
-    @Before
+    @BeforeEach
     public void opprettBehandlinger() {
         fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakSaksnummer).build();
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        
+
         Whitebox.setInternalState(behandling, "id", 1L);
 
         fagsakMedFlereBehandlinger = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakMedFlereBehSaksnr).build();

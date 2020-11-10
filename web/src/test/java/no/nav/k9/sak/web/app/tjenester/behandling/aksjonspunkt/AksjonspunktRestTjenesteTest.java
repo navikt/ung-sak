@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -40,7 +40,7 @@ public class AksjonspunktRestTjenesteTest {
     private Behandling behandling = mock(Behandling.class);
     private TotrinnTjeneste totrinnTjeneste = mock(TotrinnTjeneste.class);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(behandling.getUuid()).thenReturn(UUID.randomUUID());
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(behandling);

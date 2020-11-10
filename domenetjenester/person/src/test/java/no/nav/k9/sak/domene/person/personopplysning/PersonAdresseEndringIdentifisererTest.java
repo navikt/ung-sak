@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;

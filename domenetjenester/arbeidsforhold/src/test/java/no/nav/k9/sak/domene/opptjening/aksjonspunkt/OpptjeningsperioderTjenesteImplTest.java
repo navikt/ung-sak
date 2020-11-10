@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -81,7 +81,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
     private AktørId AKTØRID = AktørId.dummy();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Virksomhet virksomhet = new Virksomhet.Builder().medOrgnr(ORG_NUMMER)
             .medOppstart(LocalDate.now())

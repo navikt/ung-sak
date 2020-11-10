@@ -4,13 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 /** Demonstrerer lookup med repeatble annotations. */

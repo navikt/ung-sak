@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
@@ -98,7 +98,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     private Arbeidsgiver arbeidsgiver;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Virksomhet virksomhet1 = lagVirksomhet();
         Virksomhet virksomhet2 = lagAndreVirksomheten();

@@ -3,7 +3,7 @@ package no.nav.k9.sak.metrikker;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;

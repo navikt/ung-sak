@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
@@ -34,7 +34,7 @@ import no.nav.vedtak.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRe
 public class EnhetsTjenesteTest {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER;
-    
+
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
     private static PersonIdent MOR_IDENT = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());
     private static Personinfo MOR_PINFO;
@@ -67,7 +67,7 @@ public class EnhetsTjenesteTest {
     private EnhetsTjeneste enhetsTjeneste;
 
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         tpsTjeneste = mock(TpsTjeneste.class);
         arbeidsfordelingTjeneste = mock(ArbeidsfordelingRestKlient.class);
@@ -207,5 +207,5 @@ public class EnhetsTjenesteTest {
             .thenReturn(barnKode6 || (annenPartKode6 && foreldreRelatertTps) ? Collections.singletonList(relatertKode6): Collections.emptyList());
         when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(FAR_IDENT)).thenReturn(annenPartKode6 ? Collections.singletonList(relatertKode6): Collections.emptyList());
     }
-    
+
 }

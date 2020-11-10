@@ -13,8 +13,8 @@ import java.util.UUID;
 import javax.enterprise.inject.Instance;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
@@ -39,7 +39,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private PubliserInfotrygdFeedElementTask task;
     private UnitTestLookupInstanceImpl<InfotrygdFeedPeriodeberegner> periodeBeregnere;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
         var behandling = Behandling.nyBehandlingFor(Fagsak.opprettNy(FagsakYtelseType.OMSORGSPENGER, AktørId.dummy(), new Saksnummer("1234")), BehandlingType.FØRSTEGANGSSØKNAD).build();

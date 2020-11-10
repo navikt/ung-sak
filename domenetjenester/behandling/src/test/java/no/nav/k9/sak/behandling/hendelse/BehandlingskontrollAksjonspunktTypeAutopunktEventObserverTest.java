@@ -14,9 +14,9 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -35,7 +35,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
 
     @Rule
     public RepositoryRule repositoryRule = new UnittestRepositoryRule();
-    
+
     private HistorikkInnslagForAksjonspunktEventObserver observer; // objectet vi tester
 
     private BehandlingskontrollKontekst behandlingskontrollKontekst;
@@ -48,7 +48,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     private String PERIODE = "P2W";
     private LocalDate localDate = LocalDate.now().plus(Period.parse(PERIODE));
 
-    @Before
+    @BeforeEach
     public void setup() {
         autopunktDefinisjon = AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
         manuellpunktDefinisjon = AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE;

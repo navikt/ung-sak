@@ -9,9 +9,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -37,7 +37,7 @@ public class UttakRepositoryTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         behandling = new BasicBehandlingBuilder(repoRule.getEntityManager()).opprettOgLagreFørstegangssøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
     }
@@ -48,7 +48,7 @@ public class UttakRepositoryTest {
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
         var data = new UttakAktivitet(Set.of(
-            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING), 
+            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING),
             new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING)));
 
         uttakRepository.lagreOgFlushOppgittUttak(behandlingId, data);
@@ -64,7 +64,7 @@ public class UttakRepositoryTest {
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
         var data = new UttakAktivitet(Set.of(
-            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING), 
+            new UttakAktivitetPeriode(fom, tom, UttakArbeidType.ARBEIDSTAKER, KORT_UKE, FULLTID_STILLING),
             new UttakAktivitetPeriode(tom.plusDays(1), tom.plusDays(10), UttakArbeidType.FRILANSER, KORT_UKE, FULLTID_STILLING)));
 
         uttakRepository.lagreOgFlushFastsattUttak(behandlingId, data);
@@ -109,7 +109,7 @@ public class UttakRepositoryTest {
         var tom = LocalDate.now().plusDays(10);
         var data = new OppgittTilsynsordning(Set.of(
             new TilsynsordningPeriode(fom, tom, Duration.parse("P1DT3H")),
-            new TilsynsordningPeriode(tom.plusDays(1), tom.plusDays(10), Duration.ofHours(3))), 
+            new TilsynsordningPeriode(tom.plusDays(1), tom.plusDays(10), Duration.ofHours(3))),
             OppgittTilsynSvar.JA);
 
         uttakRepository.lagreOgFlushOppgittTilsynsordning(behandlingId, data);

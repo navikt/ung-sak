@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
@@ -45,7 +45,7 @@ public class VurderFaresignalerOppdatererTest {
 
     private VurderFaresignalerOppdaterer vurderFaresignalerOppdaterer;
 
-    @Before
+    @BeforeEach
     public void setup() {
         behandlingRepositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
         HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();

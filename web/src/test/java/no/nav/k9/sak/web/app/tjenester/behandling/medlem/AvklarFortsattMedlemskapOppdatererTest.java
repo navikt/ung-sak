@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;

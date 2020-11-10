@@ -10,7 +10,7 @@ import java.util.Objects;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;

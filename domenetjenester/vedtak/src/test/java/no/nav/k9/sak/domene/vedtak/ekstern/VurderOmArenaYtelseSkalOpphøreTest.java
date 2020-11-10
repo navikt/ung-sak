@@ -13,7 +13,7 @@ import java.util.Optional;
 import javax.enterprise.inject.Instance;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;

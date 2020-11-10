@@ -14,8 +14,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -53,7 +53,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     @Inject
     private InternalManipulerBehandling manipulerInternBehandling;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         totrinnskontrollAksjonspunkterTjeneste = new TotrinnskontrollAksjonspunkterTjeneste(totrinnsaksjonspunktDtoTjeneste, totrinnTjeneste);
         totrinnresultatgrunnlag = new Totrinnresultatgrunnlag(behandling, null,
@@ -213,7 +213,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         boolean apAvbrutt = false;
 
         opprettBehandlingFor(Optional.empty());
-        
+
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.of(aksjonspunktDefinisjon), Optional.empty());
         opprettAksjonspunkt(behandling, aksjonspunktDefinisjon, apAvbrutt);
 

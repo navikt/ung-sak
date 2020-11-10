@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;

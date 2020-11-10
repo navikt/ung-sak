@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
@@ -40,7 +40,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
 
-@Ignore
+@Disabled
 public class OpprettProsessTaskIverksettTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
@@ -50,7 +50,7 @@ public class OpprettProsessTaskIverksettTest {
 
     private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
     private FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository, Mockito.mock(TaskManager.class));
-    
+
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
 
@@ -61,7 +61,7 @@ public class OpprettProsessTaskIverksettTest {
     private Behandling behandling;
     private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();

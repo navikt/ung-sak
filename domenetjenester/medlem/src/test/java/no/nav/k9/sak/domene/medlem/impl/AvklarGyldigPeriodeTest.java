@@ -12,9 +12,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
@@ -41,10 +41,10 @@ public class AvklarGyldigPeriodeTest {
 
     @Inject
     private MedlemskapRepository medlemskapRepository;
-    
+
     private AvklarGyldigPeriode avklarGyldigPeriode;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.avklarGyldigPeriode = new AvklarGyldigPeriode(medlemskapRepository, medlemskapPerioderTjeneste);
     }

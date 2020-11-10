@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -22,25 +25,33 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class PersonopplysningRepositoryImplTest {
 
-    @Rule
-    public RepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private PersonopplysningRepository repository = new PersonopplysningRepository(repositoryRule.getEntityManager());
-    private FagsakRepository fagsakRepository = new FagsakRepository(repositoryRule.getEntityManager());
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private PersonopplysningRepository repository;
+    private FagsakRepository fagsakRepository;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository;
     private Map<Landkoder, Region> landRegion;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
+
+        repository = new PersonopplysningRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+
         landRegion = new HashMap<>();
         landRegion.put(Landkoder.NOR, Region.NORDEN);
     }

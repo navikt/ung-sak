@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -29,7 +29,7 @@ public class PersoninfoAdapterTest {
 
     private Personinfo mockPersoninfo;
 
-    @Before
+    @BeforeEach
     public void setup() {
         Personinfo kjerneinfoSøker = lagHentPersonResponseForSøker();
         Personinfo kjerneinfobarn = lagHentPersonResponseForBarn();

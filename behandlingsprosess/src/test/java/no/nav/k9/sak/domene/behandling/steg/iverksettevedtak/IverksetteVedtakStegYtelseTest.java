@@ -12,9 +12,9 @@ import java.util.Optional;
 
 import javax.enterprise.inject.Instance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -86,7 +86,7 @@ public class IverksetteVedtakStegYtelseTest {
 
     private IverksetteVedtakSteg iverksetteVedtakSteg;
 
-    @Before
+    @BeforeEach
     public void setup() {
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,

@@ -19,7 +19,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -143,7 +143,7 @@ public class RestApiAbacTest {
         if (annotation != null && !annotation.property().isEmpty()) {
             return; // ok
         }
-        
+
         if (annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
             if (annotation.resource().isEmpty()) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for "

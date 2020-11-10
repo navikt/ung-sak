@@ -14,9 +14,9 @@ import javax.persistence.EntityManager;
 
 import org.assertj.core.api.AbstractComparableAssert;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
@@ -73,7 +73,7 @@ public class FremoverhoppTest {
     private Behandling behandling;
     private BehandlingLås behandlingLås;
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         var modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;

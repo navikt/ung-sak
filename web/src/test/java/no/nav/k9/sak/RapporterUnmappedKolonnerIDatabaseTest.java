@@ -25,9 +25,9 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.boot.spi.IntegratorProvider;
 import org.hibernate.mapping.Column;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     public RapporterUnmappedKolonnerIDatabaseTest() {
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         // Kan ikke skrus på nå - trigger på CHAR kolonner som kunne vært VARCHAR. Må fikses først
         // System.setProperty("hibernate.hbm2ddl.auto", "validate");
@@ -76,7 +76,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         entityManagerFactory = Persistence.createEntityManagerFactory("pu-default", configuration);
     }
 
-    @AfterClass
+    @AfterAll
     public static void teardown() throws Exception {
         entityManagerFactory.close();
     }
@@ -112,12 +112,12 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     private boolean whitelistTable(String tableName) {
         return WHITELIST.stream().anyMatch(p -> p.matcher(tableName).matches());
     }
-    
+
     private Set<String> whitelistColumns(String table, Set<String> columns) {
        var cols = columns.stream()
                .filter(c -> !WHITELIST.stream().anyMatch(p -> p.matcher(table + "#" + c).matches()))
                .collect(Collectors.toSet());
-       
+
        return cols;
     }
 
@@ -133,14 +133,14 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
             .getNamespaces()) {
             String namespaceName = getSchemaName(namespace);
             var dbColumns = getColumns(namespaceName);
-            
+
             for (var table : namespace.getTables()) {
-                
+
                 String tableName = table.getName().toUpperCase();
                 if(whitelistTable(tableName)) {
                     continue;
                 }
-                
+
                 List<Column> columns = StreamSupport.stream(
                     Spliterators.spliteratorUnknownSize(
                         table.getColumnIterator(),
