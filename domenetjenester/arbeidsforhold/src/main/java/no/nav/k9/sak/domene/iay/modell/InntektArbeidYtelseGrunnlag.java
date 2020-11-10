@@ -211,10 +211,6 @@ public class InntektArbeidYtelseGrunnlag {
         return arbeidsforholdInformasjon.getOverstyringer();
     }
 
-    void setBehandling(Long behandlingId) {
-        this.behandlingId = behandlingId;
-    }
-
     public Long getBehandlingId() {
         return behandlingId;
     }
