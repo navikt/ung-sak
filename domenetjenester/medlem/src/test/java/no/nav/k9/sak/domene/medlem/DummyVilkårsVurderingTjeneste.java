@@ -9,11 +9,13 @@ import java.util.TreeSet;
 import javax.enterprise.context.RequestScoped;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @RequestScoped
 public class DummyVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 

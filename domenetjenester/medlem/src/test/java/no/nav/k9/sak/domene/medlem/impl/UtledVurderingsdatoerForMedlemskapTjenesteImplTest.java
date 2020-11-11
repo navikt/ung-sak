@@ -23,6 +23,7 @@ import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
@@ -65,6 +66,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
     @Inject
     @FagsakYtelseTypeRef
+    @BehandlingTypeRef
     private DummyVilkårsVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     @Inject
