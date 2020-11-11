@@ -54,7 +54,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE = "5055";
     public static final String KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE = "5056";
     public static final String MANUELL_TILKJENT_YTELSE_KODE = "5057";
-    public static final String MANUELL_VURDERING_VILKÅR_KODE = "5059";
 
     public static final String VEDTAK_UTEN_TOTRINNSKONTROLL_KODE = "5018";
 
