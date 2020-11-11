@@ -29,9 +29,9 @@ public class AvklarArbeidsforholdDto {
     @Valid
     private UUID arbeidsforholdId;
 
-    // For mottak fra GUI (orgnr for virksomhet, og aktørId for person-arbeidsgiver)
+    // For mottak fra GUI (orgnr (9) for virksomhet, og aktørId (13) for person-arbeidsgiver)
     @JsonProperty(value = "arbeidsgiverIdentifikator")
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^([0-9]{9}|[0-9]{13})$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverIdentifikator;
 
     @JsonProperty(value = "basertPaInntektsmelding")

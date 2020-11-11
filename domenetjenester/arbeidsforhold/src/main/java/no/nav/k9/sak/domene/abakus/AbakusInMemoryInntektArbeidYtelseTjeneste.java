@@ -25,7 +25,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -265,9 +264,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     public void lagreArbeidsforhold(Long behandlingId, AktørId søkerAktørId, ArbeidsforholdInformasjonBuilder informasjon) {
         Objects.requireNonNull(informasjon, "informasjon"); // NOSONAR
         var builder = opprettGrunnlagBuilderFor(behandlingId);
-
-        builder.ryddOppErstattedeArbeidsforhold(søkerAktørId, informasjon.getReverserteErstattArbeidsforhold());
-        builder.ryddOppErstattedeArbeidsforhold(søkerAktørId, informasjon.getErstattArbeidsforhold());
         builder.medInformasjon(informasjon.build());
 
         lagreOgFlush(behandlingId, builder.build());
@@ -334,10 +330,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             var inntektsmelding = inntektsmeldingBuilder.build();
             var informasjonBuilder = ArbeidsforholdInformasjonBuilder.oppdatere(informasjon);
 
-            // Kommet inn inntektsmelding på arbeidsforhold som vi har gått videre med uten inntektsmelding?
-            if (kommetInntektsmeldingPåArbeidsforholdHvorViTidligereBehandletUtenInntektsmelding(inntektsmelding, informasjon)) {
-                informasjonBuilder.fjernOverstyringVedrørende(inntektsmeldingBuilder.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef());
-            }
             // Gjelder tilfeller der det først har kommet inn inntektsmelding uten id, også kommer det inn en inntektsmelding med spesifik id
             // nullstiller da valg gjort i 5080 slik at saksbehandler må ta stilling til aksjonspunktet på nytt.
             Optional<Arbeidsgiver> arbeidsgiverSomMåTilbakestilles = utledeArbeidsgiverSomMåTilbakestilles(inntektsmelding, informasjon);
@@ -383,15 +375,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
                 });
             }
         } // else do nothing
-    }
-
-    private boolean kommetInntektsmeldingPåArbeidsforholdHvorViTidligereBehandletUtenInntektsmelding(Inntektsmelding inntektsmelding,
-                                                                                                     ArbeidsforholdInformasjon informasjon) {
-        return informasjon.getOverstyringer()
-            .stream()
-            .anyMatch(ov -> (ov.kreverIkkeInntektsmelding() || ov.getHandling().equals(ArbeidsforholdHandlingType.IKKE_BRUK))
-                && ov.getArbeidsgiver().equals(inntektsmelding.getArbeidsgiver())
-                && ov.getArbeidsforholdRef().gjelderFor(inntektsmelding.getArbeidsforholdRef()));
     }
 
     private Set<Long> alleBehandlingMedGrunnlag(UUID grunnlagId) {

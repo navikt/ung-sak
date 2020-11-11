@@ -64,16 +64,14 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return this;
     }
 
-    private void medSaksbehandlet(InntektArbeidYtelseAggregatBuilder builder) {
-        if (builder != null) {
-            kladd.setSaksbehandlet(builder.build());
-        }
+    public void medSaksbehandlet(InntektArbeidYtelseAggregatBuilder builder) {
+        kladd.setSaksbehandlet(builder == null ? null : builder.build());
     }
 
-    private void medRegister(InntektArbeidYtelseAggregatBuilder builder) {
-        if (builder != null) {
-            kladd.setRegister(builder.build());
-        }
+    /** @deprecated skal fjernes, skal ikke kunne utføres på klient siden (kun internt i abakus). */
+    @Deprecated(forRemoval = true)
+    public void medRegister(InntektArbeidYtelseAggregatBuilder builder) {
+        kladd.setRegister(builder == null ? null : builder.build());
     }
 
     public InntektArbeidYtelseGrunnlagBuilder medOppgittOpptjening(OppgittOpptjeningBuilder builder) {
@@ -102,25 +100,30 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return k;
     }
 
+    /** @deprecated skal fjernes, skal kun kunne utføre {@link #medSaksbehandlet(InntektArbeidYtelseAggregatBuilder)} . */
+    @Deprecated(forRemoval = true)
     public InntektArbeidYtelseGrunnlagBuilder medData(InntektArbeidYtelseAggregatBuilder builder) {
         VersjonType versjon = builder.getVersjon();
 
         if (versjon == VersjonType.REGISTER) {
             medRegister(builder);
-        } else if (versjon == VersjonType.SAKSBEHANDLET) {
+        } else {
             medSaksbehandlet(builder);
         }
         return this;
     }
 
     public void ryddOppErstattedeArbeidsforhold(AktørId søker,
-                                         List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> erstattArbeidsforhold) {
+                                                List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> erstattArbeidsforhold) {
         final Optional<InntektArbeidYtelseAggregat> registerFørVersjon = kladd.getRegisterVersjon();
         for (Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>> tuple : erstattArbeidsforhold) {
             if (registerFørVersjon.isPresent()) {
                 // TODO: Vurder konsekvensen av dette.
-                final InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder.oppdatere(registerFørVersjon, VersjonType.REGISTER);
-                builder.oppdaterArbeidsforholdReferanseEtterErstatting(søker, tuple.getElement1(), tuple.getElement2().getElement1(),
+                var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(registerFørVersjon, VersjonType.REGISTER);
+                builder.oppdaterArbeidsforholdReferanseEtterErstatting(
+                    søker,
+                    tuple.getElement1(),
+                    tuple.getElement2().getElement1(),
                     tuple.getElement2().getElement2());
                 medData(builder);
             }
