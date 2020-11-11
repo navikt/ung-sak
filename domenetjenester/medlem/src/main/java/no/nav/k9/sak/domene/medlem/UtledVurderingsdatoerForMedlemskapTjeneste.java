@@ -25,6 +25,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -83,8 +84,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
 
         var endringssjekker = FagsakYtelseTypeRef.Lookup.find(alleEndringssjekkere, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
-        var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
-            .orElseThrow()
+        var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
         var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
         if (tidligsteStp.isEmpty()) {
@@ -110,8 +110,7 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()));
         Map<LocalDate, Set<VurderingsÅrsak>> datoer = new HashMap<>();
 
-        var vilkårsPerioder = FagsakYtelseTypeRef.Lookup.find(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType())
-            .orElseThrow()
+        var vilkårsPerioder = getPerioderTilVurderingTjeneste(behandling)
             .utled(behandlingId, VilkårType.MEDLEMSKAPSVILKÅRET);
         var tidligsteStp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo);
         if (tidligsteStp.isEmpty()) {
@@ -302,6 +301,11 @@ public class UtledVurderingsdatoerForMedlemskapTjeneste {
             riktigEntitetVerdi = sisteVersjon.getValue();
         }
         return riktigEntitetVerdi;
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
 }

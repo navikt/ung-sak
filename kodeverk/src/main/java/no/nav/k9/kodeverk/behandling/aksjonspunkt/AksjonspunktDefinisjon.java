@@ -148,11 +148,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
         UTEN_VILKÅR, UTEN_SKJERMLENKE,
         TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
-    MANUELL_VURDERING_VILKÅR(
-        AksjonspunktKodeDefinisjon.MANUELL_VURDERING_VILKÅR_KODE, AksjonspunktType.MANUELL,
-        "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN,
-        UTEN_VILKÅR, UTEN_SKJERMLENKE,
-        TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     VURDER_FAKTA_FOR_ATFL_SN(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE,
         AksjonspunktType.MANUELL, "Vurder fakta for arbeidstaker, frilans og selvstendig næringsdrivende", BehandlingStatus.UTREDES,
         BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
@@ -209,6 +204,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av beregningsgrunnlag",
         BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
+    OVERSTYRING_AV_K9_VILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_K9_VILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av K9-vilkåret",
+        Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     MANUELL_MARKERING_AV_UTLAND_SAKSTYPE(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE, AksjonspunktType.MANUELL, "Manuell markering av utenlandssak",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, EnumSet.of(OMP, PSB)),
 

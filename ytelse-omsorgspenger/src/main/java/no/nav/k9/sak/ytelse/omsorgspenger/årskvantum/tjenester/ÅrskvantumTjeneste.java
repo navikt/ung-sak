@@ -36,6 +36,7 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -90,7 +91,7 @@ public class ÅrskvantumTjeneste {
                               InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                               ÅrskvantumRestKlient årskvantumRestKlient,
                               TpsTjeneste tpsTjeneste,
-                              @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                              @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;

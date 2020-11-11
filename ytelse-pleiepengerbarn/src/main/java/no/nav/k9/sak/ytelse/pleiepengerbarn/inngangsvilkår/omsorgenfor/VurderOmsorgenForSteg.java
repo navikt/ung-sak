@@ -48,7 +48,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     @Inject
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                  OmsorgenForTjeneste omsorgenForTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();

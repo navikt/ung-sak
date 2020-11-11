@@ -60,7 +60,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Inject
     public VurderSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                                 PleiebehovResultatRepository resultatRepository,
-                                                @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 MedisinskVilkårTjeneste medisinskVilkårTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();

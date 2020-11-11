@@ -88,7 +88,12 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     }
 
     public Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, Behandling behandling) {
-        var tjeneste = FagsakYtelseTypeRef.Lookup.find(perioderTilVurderingTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
+        var tjeneste = getPerioderTilVurderingTjeneste(behandling);
         return tjeneste.utled(behandling.getId(), vilkårType);
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 }

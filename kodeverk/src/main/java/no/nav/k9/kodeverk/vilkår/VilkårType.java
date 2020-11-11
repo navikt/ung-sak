@@ -29,7 +29,14 @@ import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
-
+    K9_VILKÅRET(VilkårTypeKoder.FP_VK_0,
+        "K9-vilkåret", // for unntaksbehandling
+        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 8",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 8",
+            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 8",
+            FagsakYtelseType.OMP, "§ 8",
+            FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
+        Avslagsårsak.UDEFINERT),
     MEDLEMSKAPSVILKÅRET(VilkårTypeKoder.FP_VK_2,
         "Medlemskapsvilkåret",
         Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",

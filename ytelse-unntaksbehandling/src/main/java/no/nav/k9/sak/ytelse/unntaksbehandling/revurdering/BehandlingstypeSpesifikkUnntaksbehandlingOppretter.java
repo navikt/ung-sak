@@ -59,7 +59,7 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(nyBehandling);
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst,
-            List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_VILKÅR, AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE));
+            List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_K9_VILKÅRET, AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE));
 
         return nyBehandling;
     }

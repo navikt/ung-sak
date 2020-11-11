@@ -5,6 +5,7 @@ package no.nav.k9.kodeverk.vilkår;
  */
 public final class VilkårTypeKoder {
 
+    public static final String FP_VK_0 = "FP_VK_0";
     public static final String FP_VK_1 = "FP_VK_1";
     public static final String FP_VK_2 = "FP_VK_2";
     public static final String FP_VK_3 = "FP_VK_3";

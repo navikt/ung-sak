@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -48,7 +49,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     @Inject
     public OmpManglendePåkrevdeInntektsmeldingerTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                          BehandlingRepository behandlingRepository,
-                                                         @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                         @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                          TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingRepository = behandlingRepository;

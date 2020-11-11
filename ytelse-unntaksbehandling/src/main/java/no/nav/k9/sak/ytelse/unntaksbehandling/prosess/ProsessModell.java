@@ -32,6 +32,7 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_OMS);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
@@ -51,6 +52,7 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_FRISINN);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
@@ -70,6 +72,7 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, YTELSE_TYPE_PSB);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
