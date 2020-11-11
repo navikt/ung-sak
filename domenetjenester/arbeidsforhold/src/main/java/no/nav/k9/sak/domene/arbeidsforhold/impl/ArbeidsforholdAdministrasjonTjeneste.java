@@ -91,8 +91,8 @@ public class ArbeidsforholdAdministrasjonTjeneste {
      * Rydder opp i inntektsmeldinger som blir erstattet
      *
      * @param behandlingId behandlingId
-     * @param aktørId      aktørId
-     * @param builder      ArbeidsforholdsOverstyringene som skal lagrers
+     * @param aktørId aktørId
+     * @param builder ArbeidsforholdsOverstyringene som skal lagrers
      */
     public void lagre(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder) {
         inntektArbeidYtelseTjeneste.lagreArbeidsforhold(behandlingId, aktørId, builder);
@@ -283,12 +283,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         }
     }
 
-    public void fjernOverstyringerGjortAvSaksbehandler(Long behandlingId, AktørId aktørId) {
-        ArbeidsforholdInformasjonBuilder builder = opprettBuilderFor(behandlingId);
-        builder.fjernAlleOverstyringer();
-        inntektArbeidYtelseTjeneste.lagreArbeidsforhold(behandlingId, aktørId, builder);
-    }
-
     private boolean erAksjonspunktPå(ArbeidsforholdWrapper arbeidsforholdWrapper, Map.Entry<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> entry) {
         if (arbeidsforholdWrapper.getKilde() == INNTEKTSKOMPONENTEN) {
             return entry.getKey().getIdentifikator().equals(arbeidsforholdWrapper.getArbeidsgiverIdentifikator());
@@ -356,7 +350,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         wrapper.setIkkeRegistrertIAaRegister(yrkesaktiviteter.isEmpty());
         wrapper.setVurderOmSkalErstattes(false);
         wrapper.setHarErsattetEttEllerFlere(!inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold());
-        wrapper.setErstatterArbeidsforhold(harErstattetEtEllerFlereArbeidsforhold(arbeidsgiver, inntektsmelding.getArbeidsforholdRef(), overstyringer));
         wrapper.setErEndret(sjekkOmFinnesIOverstyr(overstyringer, inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef()));
         wrapper.setSkjaeringstidspunkt(skjæringstidspunkt);
         wrapper.setKilde(yrkesaktiviteter.stream().anyMatch(ya -> !filter.getAnsettelsesPerioder(ya).isEmpty()) ? ArbeidsforholdKilde.AAREGISTERET
@@ -479,7 +472,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         if (avtale.isPresent()) {
             return ArbeidsforholdKilde.AAREGISTERET;
         }
-        if (mottattDatoInntektsmelding != null || handling.equals(SLÅTT_SAMMEN_MED_ANNET)) {
+        if (mottattDatoInntektsmelding != null) {
             return ArbeidsforholdKilde.INNTEKTSMELDING;
         }
         return INNTEKTSKOMPONENTEN;
@@ -603,18 +596,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         return overstyringer.stream()
             .anyMatch(ov -> ov.kreverIkkeInntektsmelding()
                 && yr.gjelderFor(ov.getArbeidsgiver(), ov.getArbeidsforholdRef()));
-    }
-
-    private String harErstattetEtEllerFlereArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref,
-                                                          List<ArbeidsforholdOverstyring> overstyringer) {
-        if (ref == null || !ref.gjelderForSpesifiktArbeidsforhold()) {
-            return null;
-        }
-        return overstyringer.stream().filter(ov -> Objects.equals(ov.getHandling(), ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET)
-            && Objects.equals(ov.getArbeidsgiver(), arbeidsgiver) && Objects.equals(ov.getNyArbeidsforholdRef(), ref))
-            .findFirst()
-            .map(ov -> ov.getArbeidsgiver().getIdentifikator() + "-" + ov.getArbeidsforholdRef().getReferanse())
-            .orElse(null);
     }
 
     private boolean harIkkeFåttInntektsmelding(Yrkesaktivitet yr, Set<Inntektsmelding> inntektsmeldinger) {

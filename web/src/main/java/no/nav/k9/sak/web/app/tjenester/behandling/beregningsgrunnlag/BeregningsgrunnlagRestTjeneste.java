@@ -23,7 +23,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.BeregningsgrunnlagKoblingDto;
@@ -44,7 +43,6 @@ public class BeregningsgrunnlagRestTjeneste {
     static public final String PATH_KOBLINGER = "/behandling/beregningsgrunnlag/koblinger";
     static public final String PATH_ALLE = "/behandling/beregningsgrunnlag/alle";
     private BehandlingRepository behandlingRepository;
-    private OpptjeningRepository opptjeningRepository;
     private BeregningTjeneste kalkulusTjeneste;
 
     public BeregningsgrunnlagRestTjeneste() {
@@ -53,9 +51,7 @@ public class BeregningsgrunnlagRestTjeneste {
 
     @Inject
     public BeregningsgrunnlagRestTjeneste(BehandlingRepository behandlingRepository,
-                                          OpptjeningRepository opptjeningRepository,
                                           BeregningTjeneste kalkulusTjeneste) {
-        this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
     }

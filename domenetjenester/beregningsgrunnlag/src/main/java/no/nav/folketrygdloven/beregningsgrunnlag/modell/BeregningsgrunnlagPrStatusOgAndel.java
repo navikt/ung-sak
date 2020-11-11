@@ -481,7 +481,7 @@ public class BeregningsgrunnlagPrStatusOgAndel {
 
         public Builder medBGAndelArbeidsforhold(BGAndelArbeidsforhold.Builder bgAndelArbeidsforholdBuilder) {
             verifiserKanModifisere();
-            kladd.bgAndelArbeidsforhold = bgAndelArbeidsforholdBuilder.build(kladd);
+            kladd.bgAndelArbeidsforhold = bgAndelArbeidsforholdBuilder.build();
             return this;
         }
 

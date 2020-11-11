@@ -41,6 +41,7 @@ import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
+import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
 import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.feil.LogLevel;
@@ -68,6 +69,7 @@ public class AbakusTjeneste {
     private URI callbackUrl;
     private URI endpointArbeidsforholdIPeriode;
     private URI endpointGrunnlag;
+    private URI endpointOverstyring;
     private URI endpointMottaInntektsmeldinger;
     private URI endpointMottaOppgittOpptjening;
     private URI endpointOverstyrtOppgittOpptjening;
@@ -90,6 +92,7 @@ public class AbakusTjeneste {
 
         this.endpointArbeidsforholdIPeriode = toUri("/api/arbeidsforhold/v1/arbeidstaker");
         this.endpointGrunnlag = toUri("/api/iay/grunnlag/v1/");
+        this.endpointOverstyring = toUri("/api/iay/grunnlag/v1/overstyrt");
         this.endpointMottaInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/motta");
         this.endpointMottaOppgittOpptjening = toUri("/api/iay/oppgitt/v1/motta");
         this.endpointOverstyrtOppgittOpptjening = toUri("/api/iay/oppgitt/v1/overstyr");
@@ -207,6 +210,33 @@ public class AbakusTjeneste {
         }
     }
 
+    public void lagreOverstyrt(OverstyrtInntektArbeidYtelseDto dto) throws IOException {
+        var json = iayJsonWriter.writeValueAsString(dto);
+        UUID koblingReferanse = dto.getKoblingReferanse();
+        UUID grunnlagReferanse = dto.getGrunnlagReferanse();
+
+        HttpPut httpPut = new HttpPut(endpointOverstyring);
+        httpPut.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+
+        log.info("Lagre overstyrte [{}] (behandlingUUID={}, iayGrunnlagReferanse={}) i Abakus", httpPut.getURI(), koblingReferanse, grunnlagReferanse);
+        try (var httpResponse = oidcRestClient.execute(httpPut)) {
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+            if (responseCode != HttpStatus.SC_OK) {
+                String responseBody = EntityUtils.toString(httpResponse.getEntity());
+                String feilmelding = "Kunne ikke lagre overstyring grunnlag: " + grunnlagReferanse + " til abakus: " + httpPut.getURI()
+                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+
+                if (responseCode == HttpStatus.SC_BAD_REQUEST) {
+                    throw AbakusTjenesteFeil.FEIL.feilKallTilAbakus(feilmelding).toException();
+                } else {
+                    throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
+                }
+            }
+        }
+    }
+
+    /** @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet . */
+    @Deprecated(forRemoval = true)
     public void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto dto) throws IOException {
 
         var json = iayJsonWriter.writeValueAsString(dto);
@@ -328,7 +358,7 @@ public class AbakusTjeneste {
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
                 String feilmelding = "Kunne ikke lagre overstyrt oppgitt opptjening for behandling: " + behandlingRef + " til abakus: " + httpPost.getURI()
-                        + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
 
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
                     throw AbakusTjenesteFeil.FEIL.feilKallTilAbakus(feilmelding).toException();

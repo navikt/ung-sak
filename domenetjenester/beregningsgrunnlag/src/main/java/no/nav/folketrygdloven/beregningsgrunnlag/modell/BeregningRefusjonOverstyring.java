@@ -9,7 +9,6 @@ public class BeregningRefusjonOverstyring {
 
     private Arbeidsgiver arbeidsgiver;
     private LocalDate førsteMuligeRefusjonFom;
-    private BeregningRefusjonOverstyringer refusjonOverstyringer;
 
     BeregningRefusjonOverstyring() {
         // Hibernate
@@ -20,10 +19,6 @@ public class BeregningRefusjonOverstyring {
         Objects.requireNonNull(førsteMuligeRefusjonFom);
         this.førsteMuligeRefusjonFom = førsteMuligeRefusjonFom;
         this.arbeidsgiver = arbeidsgiver;
-    }
-
-    void setRefusjonOverstyringerEntitet(BeregningRefusjonOverstyringer refusjonOverstyringer) {
-        this.refusjonOverstyringer = refusjonOverstyringer;
     }
 
     public Arbeidsgiver getArbeidsgiver() {

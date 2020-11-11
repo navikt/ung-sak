@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -35,8 +34,6 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
     public enum Action {
         LAGRE_OPPGITT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
         LAGRE_INNTEKTSMELDINGER(InntektsmeldingerMottattRequest.class),
-        LAGRE_INNTEKTSMELDINGER_FRA_MOTTATT_DOKUMENT(InntektsmeldingerMottattRequest.class),
-        LAGRE_IAY_GRUNNLAG(InntektArbeidYtelseGrunnlagDto.class),
         LAGRE_OVERSTYRT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
         ;
 
@@ -87,9 +84,6 @@ public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
                     abakusTjeneste.lagreOverstyrtOppgittOpptjening(ref, payload);
                 case LAGRE_INNTEKTSMELDINGER:
                     abakusTjeneste.lagreInntektsmeldinger(ref, payload);
-                case LAGRE_IAY_GRUNNLAG:
-                    // parser en ekstra gang
-                    abakusTjeneste.lagreGrunnlag(MAPPER.readValue(payload, action.getForventetType()));
                 default:
                     throw new UnsupportedOperationException("Støtter ikke action: " + action);
             }

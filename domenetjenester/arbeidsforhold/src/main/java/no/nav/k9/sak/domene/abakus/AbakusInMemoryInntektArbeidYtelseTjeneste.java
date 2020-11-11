@@ -25,13 +25,13 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -46,6 +46,7 @@ import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.util.Tuple;
@@ -189,7 +190,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {
         var grunnlagBuilder = getGrunnlagBuilder(behandlingId, builder);
 
-        final ArbeidsforholdInformasjon informasjon = grunnlagBuilder.getInformasjon();
+        ArbeidsforholdInformasjon informasjon = grunnlagBuilder.getInformasjon();
 
         // lagre reserverte interne referanser opprettet tidligere
         builder.getNyeInternArbeidsforholdReferanser()
@@ -265,9 +266,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     public void lagreArbeidsforhold(Long behandlingId, AktørId søkerAktørId, ArbeidsforholdInformasjonBuilder informasjon) {
         Objects.requireNonNull(informasjon, "informasjon"); // NOSONAR
         var builder = opprettGrunnlagBuilderFor(behandlingId);
-
-        builder.ryddOppErstattedeArbeidsforhold(søkerAktørId, informasjon.getReverserteErstattArbeidsforhold());
-        builder.ryddOppErstattedeArbeidsforhold(søkerAktørId, informasjon.getErstattArbeidsforhold());
         builder.medInformasjon(informasjon.build());
 
         lagreOgFlush(behandlingId, builder.build());
@@ -334,10 +332,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             var inntektsmelding = inntektsmeldingBuilder.build();
             var informasjonBuilder = ArbeidsforholdInformasjonBuilder.oppdatere(informasjon);
 
-            // Kommet inn inntektsmelding på arbeidsforhold som vi har gått videre med uten inntektsmelding?
-            if (kommetInntektsmeldingPåArbeidsforholdHvorViTidligereBehandletUtenInntektsmelding(inntektsmelding, informasjon)) {
-                informasjonBuilder.fjernOverstyringVedrørende(inntektsmeldingBuilder.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef());
-            }
             // Gjelder tilfeller der det først har kommet inn inntektsmelding uten id, også kommer det inn en inntektsmelding med spesifik id
             // nullstiller da valg gjort i 5080 slik at saksbehandler må ta stilling til aksjonspunktet på nytt.
             Optional<Arbeidsgiver> arbeidsgiverSomMåTilbakestilles = utledeArbeidsgiverSomMåTilbakestilles(inntektsmelding, informasjon);
@@ -361,14 +355,14 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         return Optional.empty();
     }
 
-    private void konverterEksternArbeidsforholdRefTilInterne(InntektsmeldingBuilder inntektsmeldingBuilder, final ArbeidsforholdInformasjon informasjon) {
+    private void konverterEksternArbeidsforholdRefTilInterne(InntektsmeldingBuilder inntektsmeldingBuilder, ArbeidsforholdInformasjon informasjon) {
         if (inntektsmeldingBuilder.getEksternArbeidsforholdRef().isPresent()) {
             var ekstern = inntektsmeldingBuilder.getEksternArbeidsforholdRef().get();
             var intern = inntektsmeldingBuilder.getInternArbeidsforholdRef();
             if (ekstern.gjelderForSpesifiktArbeidsforhold()) {
                 if (!intern.get().gjelderForSpesifiktArbeidsforhold()) {
                     // lag ny intern id siden vi i
-                    var internId = informasjon.finnEllerOpprett(inntektsmeldingBuilder.getArbeidsgiver(), ekstern);
+                    var internId = finnEllerOpprett(informasjon, inntektsmeldingBuilder.getArbeidsgiver(), ekstern);
                     inntektsmeldingBuilder.medArbeidsforholdId(internId);
                 } else {
                     // registrer ekstern <-> intern mapping for allerede opprettet intern id
@@ -385,13 +379,12 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         } // else do nothing
     }
 
-    private boolean kommetInntektsmeldingPåArbeidsforholdHvorViTidligereBehandletUtenInntektsmelding(Inntektsmelding inntektsmelding,
-                                                                                                     ArbeidsforholdInformasjon informasjon) {
-        return informasjon.getOverstyringer()
-            .stream()
-            .anyMatch(ov -> (ov.kreverIkkeInntektsmelding() || ov.getHandling().equals(ArbeidsforholdHandlingType.IKKE_BRUK))
-                && ov.getArbeidsgiver().equals(inntektsmelding.getArbeidsgiver())
-                && ov.getArbeidsforholdRef().gjelderFor(inntektsmelding.getArbeidsforholdRef()));
+    private InternArbeidsforholdRef finnEllerOpprett(ArbeidsforholdInformasjon informasjon, Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef eksternReferanse) {
+        ArbeidsforholdReferanse referanse = informasjon
+            .getArbeidsforholdReferanser().stream().filter(it -> it.getArbeidsgiver().equals(arbeidsgiver) && it.getEksternReferanse().equals(eksternReferanse))
+            .findAny()
+            .orElseGet(() -> informasjon.opprettNyReferanse(arbeidsgiver, InternArbeidsforholdRef.nyRef(), eksternReferanse));
+        return referanse.getInternReferanse();
     }
 
     private Set<Long> alleBehandlingMedGrunnlag(UUID grunnlagId) {

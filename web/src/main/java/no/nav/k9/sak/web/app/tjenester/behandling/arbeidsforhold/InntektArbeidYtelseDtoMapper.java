@@ -117,7 +117,6 @@ public class InntektArbeidYtelseDtoMapper {
         dto.setEksternArbeidsforholdId(wrapper.getEksternArbeidsforholdId());
         dto.setIkkeRegistrertIAaRegister(wrapper.getIkkeRegistrertIAaRegister());
         dto.setHarErstattetEttEllerFlere(wrapper.getHarErsattetEttEllerFlere());
-        dto.setErstatterArbeidsforholdId(wrapper.getErstatterArbeidsforhold());
         dto.setKilde(wrapper.getKilde());
         dto.setMottattDatoInntektsmelding(wrapper.getMottattDatoInntektsmelding());
         dto.setTilVurdering(wrapper.isHarAksjonspunkt());

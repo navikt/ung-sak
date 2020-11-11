@@ -170,7 +170,7 @@ final class MapArbeidsforholdInformasjon {
             if (ref != null && ref.getReferanse() != null) {
                 EksternArbeidsforholdRef eksternReferanse;
                 try {
-                    eksternReferanse = arbeidsforholdInformasjon == null ? null : arbeidsforholdInformasjon.finnEksternRaw(arbeidsgiver, ref);
+                    eksternReferanse = arbeidsforholdInformasjon == null ? null : arbeidsforholdInformasjon.finnEkstern(arbeidsgiver, ref);
                 } catch (IllegalStateException e) {
                     if (e.getMessage().startsWith("Mangler eksternReferanse for internReferanse:")) {
                         // Sukk, må håndtere at det ligger dritt her også ..
@@ -206,29 +206,29 @@ final class MapArbeidsforholdInformasjon {
             return new Periode(periode.getFomDato(), periode.getTomDato());
         }
 
-        ArbeidsforholdInformasjon map(no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon entitet, UUID eksternReferanse, boolean aktiv) {
-            if (entitet == null)
+        ArbeidsforholdInformasjon map(no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon ai, UUID eksternReferanse, boolean aktiv) {
+            if (ai == null)
                 return null;
 
             var arbeidsforholdInformasjon = new ArbeidsforholdInformasjon();
-            var overstyringer = entitet.getOverstyringer().stream()
+            var overstyringer = ai.getOverstyringer().stream()
                 .map(ao -> {
                     var dto = new ArbeidsforholdOverstyringDto(mapAktør(ao.getArbeidsgiver()),
-                        mapArbeidsforholdsId(entitet, ao.getArbeidsgiver(), ao.getArbeidsforholdRef(), eksternReferanse, aktiv))
+                        mapArbeidsforholdsId(ai, ao.getArbeidsgiver(), ao.getArbeidsforholdRef(), eksternReferanse, aktiv))
                         .medBegrunnelse(ao.getBegrunnelse())
                         .medBekreftetPermisjon(mapBekreftetPermisjon(ao.getBekreftetPermisjon()))
                         .medHandling(KodeverkMapper.mapArbeidsforholdHandlingTypeTilDto(ao.getHandling()))
                         .medNavn(ao.getArbeidsgiverNavn())
                         .medStillingsprosent(ao.getStillingsprosent() == null ? null : ao.getStillingsprosent().getVerdi())
                         .medNyArbeidsforholdRef(
-                            ao.getNyArbeidsforholdRef() == null ? null : mapArbeidsforholdsId(entitet, ao.getArbeidsgiver(), ao.getNyArbeidsforholdRef(), eksternReferanse, aktiv))
+                            ao.getNyArbeidsforholdRef() == null ? null : mapArbeidsforholdsId(ai, ao.getArbeidsgiver(), ao.getNyArbeidsforholdRef(), eksternReferanse, aktiv))
                         .medArbeidsforholdOverstyrtePerioder(map(ao.getArbeidsforholdOverstyrtePerioder()));
                     return dto;
                 })
                 .sorted(COMP_ARBEIDSFORHOLD_OVERSTYRING)
                 .collect(Collectors.toList());
 
-            var referanser = entitet.getArbeidsforholdReferanser().stream()
+            var referanser = ai.getArbeidsforholdReferanser().stream()
                 .map(this::mapArbeidsforholdReferanse)
                 .filter(it -> it != null)
                 .sorted(COMP_ARBEIDSFORHOLD_REFERANSE)

@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -24,11 +22,9 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -77,7 +73,6 @@ public class AvklarArbeidsforholdOppdatererTest {
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private AvklarArbeidsforholdOppdaterer oppdaterer;
-    private String randomId = UUID.randomUUID().toString();
     private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
     private EntityManager entityManager;
 
@@ -95,31 +90,6 @@ public class AvklarArbeidsforholdOppdatererTest {
             arbeidsforholdAdministrasjonTjeneste,
             iayTjeneste,
             arbeidsforholdHistorikkinnslagTjeneste);
-    }
-
-    @Test
-    public void skal_kreve_totrinn_hvis_saksbehandler_har_tatt_stilling_til_aksjonspunktet() {
-
-        // Arrange
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-
-        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har tatt stilling til dette", List.of());
-        Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.of(2019, 1, 1)).build();
-
-        // Act
-        OppdateringResultat resultat = oppdaterer.oppdater(avklarArbeidsforholdDto,
-            new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, avklarArbeidsforholdDto.getBegrunnelse()));
-
-        // Assert
-        BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-        Behandling behandling1 = behandlingRepository.hentBehandling(behandling.getId());
-        Set<Aksjonspunkt> aksjonspunkter = behandling1.getAksjonspunkter();
-        assertThat(aksjonspunkter).hasSize(1);
-        assertThat(resultat.kreverTotrinnsKontroll()).isTrue();
     }
 
     @Test

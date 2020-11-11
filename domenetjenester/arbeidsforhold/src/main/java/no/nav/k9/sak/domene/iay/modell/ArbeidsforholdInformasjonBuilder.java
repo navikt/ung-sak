@@ -1,22 +1,14 @@
 package no.nav.k9.sak.domene.iay.modell;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.util.Tuple;
 
 public class ArbeidsforholdInformasjonBuilder {
 
     private final ArbeidsforholdInformasjon kladd;
-    private final List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> erstattArbeidsforhold = new ArrayList<>();
-    private final List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> reverserteErstattninger = new ArrayList<>();
 
     private ArbeidsforholdInformasjonBuilder(ArbeidsforholdInformasjon kladd) {
         this.kladd = kladd;
@@ -31,43 +23,7 @@ public class ArbeidsforholdInformasjonBuilder {
     }
 
     public ArbeidsforholdInformasjonBuilder tilbakestillOverstyringer() {
-        final List<ArbeidsforholdReferanse> collect = kladd.getArbeidsforholdReferanser().stream().filter(it -> kladd.getOverstyringer().stream()
-            .anyMatch(ov -> ov.getHandling().equals(ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET)
-                && ov.getNyArbeidsforholdRef().gjelderFor(it.getInternReferanse())))
-            .collect(Collectors.toList());
-        collect.forEach(it -> {
-            Optional<InternArbeidsforholdRef> arbeidsforholdRef = kladd.finnForEksternBeholdHistoriskReferanse(it.getArbeidsgiver(), it.getEksternReferanse());
-            if (arbeidsforholdRef.isPresent()) {
-                reverserteErstattninger.add(new Tuple<>(it.getArbeidsgiver(), new Tuple<>(it.getInternReferanse(), arbeidsforholdRef.get())));
-            }
-        });
         kladd.tilbakestillOverstyringer();
-        return this;
-    }
-
-    /**
-     * Benyttes for å vite hvilke inntektsmeldinger som skal tas ut av grunnlaget ved erstatting av ny id.
-     *
-     * @return Liste over Arbeidsgiver / ArbeidsforholdReferanser
-     */
-    public List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> getErstattArbeidsforhold() {
-        return Collections.unmodifiableList(erstattArbeidsforhold);
-    }
-
-    /**
-     * Benyttes for å vite hvilke inntektsmeldinger som skal tas ut av grunnlaget ved erstatting av ny id.
-     *
-     * @return Liste over Arbeidsgiver / ArbeidsforholdReferanser
-     */
-    public List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> getReverserteErstattArbeidsforhold() {
-        return Collections.unmodifiableList(reverserteErstattninger);
-    }
-
-    public ArbeidsforholdInformasjonBuilder erstattArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef gammelRef, InternArbeidsforholdRef ref) {
-        // TODO: Sjekke om revertert allerede
-        // Hvis eksisterer så reverter revertering og ikke legg inn erstattning og kall på erstatt
-        erstattArbeidsforhold.add(new Tuple<>(arbeidsgiver, new Tuple<>(gammelRef, ref)));
-        kladd.erstattArbeidsforhold(arbeidsgiver, gammelRef, ref);
         return this;
     }
 
@@ -80,16 +36,6 @@ public class ArbeidsforholdInformasjonBuilder {
 
     public ArbeidsforholdInformasjon build() {
         return kladd;
-    }
-
-    public ArbeidsforholdInformasjonBuilder fjernOverstyringVedrørende(Arbeidsgiver arbeidsgiver,
-                                                                       InternArbeidsforholdRef arbeidsforholdRef) {
-        kladd.fjernOverstyringVedrørende(arbeidsgiver, arbeidsforholdRef);
-        return this;
-    }
-
-    public void fjernAlleOverstyringer() {
-        kladd.tilbakestillOverstyringer();
     }
 
     public void fjernOverstyringerSomGjelder(Arbeidsgiver arbeidsgiver) {

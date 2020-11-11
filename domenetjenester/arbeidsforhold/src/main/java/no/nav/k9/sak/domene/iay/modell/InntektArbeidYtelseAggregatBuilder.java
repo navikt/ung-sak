@@ -128,7 +128,7 @@ public class InntektArbeidYtelseAggregatBuilder {
         return this.kladd;
     }
 
-    VersjonType getVersjon() {
+    public VersjonType getVersjon() {
         return versjon;
     }
 
@@ -137,7 +137,7 @@ public class InntektArbeidYtelseAggregatBuilder {
         final AktørArbeidBuilder builder = getAktørArbeidBuilder(søker);
         if (builder.getErOppdatering()) {
             if (eksistererIkkeFraFør(arbeidsgiver, gammelRef, builder)) {
-                final YrkesaktivitetBuilder yrkesaktivitetBuilder = builder.getYrkesaktivitetBuilderForNøkkelAvType(
+                var yrkesaktivitetBuilder = builder.getYrkesaktivitetBuilderForNøkkelAvType(
                     Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(gammelRef, arbeidsgiver),
                     ArbeidType.AA_REGISTER_TYPER);
                 if (yrkesaktivitetBuilder.getErOppdatering()) {

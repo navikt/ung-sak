@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -173,29 +171,6 @@ public class DokumentArkivTjeneste {
                     .build());
             });
         return builder;
-    }
-
-    // TODO (ESSV): Workaround mens vi venter på avklaring mapping Brevkode -> DokumentTypeId
-    private DokumentTypeId mapTilDokumentTypeId(String brevkodeVerdi) {
-        Brevkode brevKode = finnBrevKodeFraKodeverk(brevkodeVerdi);
-
-        DokumentTypeId dokumentTypeId = Arrays.stream(DokumentTypeId.values())
-            .filter(typeId -> typeId.name().equals(brevKode.getKode()))
-            .findFirst()
-            .orElse(DokumentTypeId.UDEFINERT);
-
-        return dokumentTypeId;
-    }
-
-    private Brevkode finnBrevKodeFraKodeverk(String brevkodeVerdi) {
-        Brevkode brevKode;
-        try {
-            brevKode = Brevkode.fraKode(brevkodeVerdi);
-        } catch (Exception e) {
-            LOG.warn("Fant ikke brevkode", e);
-            brevKode = Brevkode.UDEFINERT;
-        }
-        return brevKode;
     }
 
     private Optional<LocalDateTime> hentRelevantDato(Journalpost journalpost, Datotype datotype) {

@@ -18,7 +18,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ErEndringIBeregningVurderer;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -30,7 +29,6 @@ import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresul
 public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurderer {
 
     private UttakRepository uttakRepository;
-    private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
 
     EndringIBeregningTjenesteFRISINN() {
@@ -39,10 +37,8 @@ public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurd
 
     @Inject
     public EndringIBeregningTjenesteFRISINN(UttakRepository uttakRepository,
-                                            BeregningsresultatRepository beregningsresultatRepository,
                                             @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
         this.uttakRepository = uttakRepository;
-        this.beregningsresultatRepository = beregningsresultatRepository;
         this.beregningsresultatProvidere = beregningsresultatProvidere;
     }
 
@@ -73,6 +69,7 @@ public class EndringIBeregningTjenesteFRISINN implements ErEndringIBeregningVurd
 
     private BeregningsresultatProvider getBeregningsresultatProvider(BehandlingReferanse behandling) {
         return BehandlingTypeRef.Lookup.find(BeregningsresultatProvider.class, beregningsresultatProvidere, behandling.getFagsakYtelseType(), behandling.getBehandlingType())
-            .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getBehandlingType() + "]"));
+            .orElseThrow(() -> new UnsupportedOperationException(
+                "BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getBehandlingType() + "]"));
     }
 }

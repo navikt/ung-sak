@@ -163,7 +163,7 @@
 			<dependency>
 				<groupId>no.nav.foreldrepenger.abakus</groupId>
 				<artifactId>abakus-kontrakt</artifactId>
-				<version>1.2-2020.09.24.195511-924d9e2</version>
+				<version>1.2-2020.11.10.101913-83af8af</version>
 			</dependency>
 
 			<dependency>

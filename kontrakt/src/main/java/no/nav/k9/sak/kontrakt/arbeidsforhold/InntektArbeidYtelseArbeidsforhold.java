@@ -76,11 +76,6 @@ public class InntektArbeidYtelseArbeidsforhold {
     @JsonProperty(value = "erSlettet")
     private Boolean erSlettet;
 
-    @JsonProperty(value = "erstatterArbeidsforholdId")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String erstatterArbeidsforholdId;
-
     @JsonProperty(value = "fomDato", required = true)
     @NotNull
     private LocalDate fomDato;
@@ -193,10 +188,6 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     public Boolean getErSlettet() {
         return erSlettet;
-    }
-
-    public String getErstatterArbeidsforholdId() {
-        return erstatterArbeidsforholdId;
     }
 
     public LocalDate getFomDato() {
@@ -325,10 +316,6 @@ public class InntektArbeidYtelseArbeidsforhold {
 
     public void setErSlettet(Boolean erSlettet) {
         this.erSlettet = erSlettet;
-    }
-
-    public void setErstatterArbeidsforholdId(String erstatterArbeidsforholdId) {
-        this.erstatterArbeidsforholdId = erstatterArbeidsforholdId;
     }
 
     public void setFomDato(LocalDate fomDato) {

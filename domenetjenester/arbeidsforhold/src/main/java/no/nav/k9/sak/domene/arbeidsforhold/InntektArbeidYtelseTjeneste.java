@@ -91,7 +91,7 @@ public interface InntektArbeidYtelseTjeneste {
      * @deprecated Denne blir lett misbrukt, siden man antagelig ønsker å gjøre mer enn kun fjerne saksbehandlet versjon. Bruk derfor heller
      *             {@link #lagreIayAggregat(Long, InntektArbeidYtelseAggregatBuilder)} etter du er ferdig med alle endringer du trenger å gjøre
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     void fjernSaksbehandletVersjon(Long behandlingId);
 
     /**

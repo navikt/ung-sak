@@ -19,7 +19,6 @@ public class ArbeidsforholdWrapper {
     private String arbeidsforholdId;
     private String eksternArbeidsforholdId;
     private String begrunnelse;
-    private String erstatterArbeidsforhold;
     private LocalDate fomDato = LocalDate.now();
     private LocalDate tomDato;
     private ArbeidsforholdKilde kilde;
@@ -174,14 +173,6 @@ public class ArbeidsforholdWrapper {
         this.erSlettet = erSlettet;
     }
 
-    public String getErstatterArbeidsforhold() {
-        return erstatterArbeidsforhold;
-    }
-
-    public void setErstatterArbeidsforhold(String erstatterArbeidsforhold) {
-        this.erstatterArbeidsforhold = erstatterArbeidsforhold;
-    }
-
     public Boolean getHarErsattetEttEllerFlere() {
         return harErsattetEttEllerFlere;
     }
@@ -288,8 +279,10 @@ public class ArbeidsforholdWrapper {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         ArbeidsforholdWrapper that = (ArbeidsforholdWrapper) o;
         return Objects.equals(arbeidsgiverIdentifikator, that.arbeidsgiverIdentifikator) &&
             InternArbeidsforholdRef.ref(arbeidsforholdId).gjelderFor(InternArbeidsforholdRef.ref(that.arbeidsforholdId));

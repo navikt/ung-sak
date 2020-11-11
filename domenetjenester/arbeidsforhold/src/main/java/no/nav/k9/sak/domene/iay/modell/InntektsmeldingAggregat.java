@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.iay.modell;
 
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +68,6 @@ public class InntektsmeldingAggregat {
         return (ov.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
             && ov.getArbeidsgiver().equals(im.getArbeidsgiver())
             && (Objects.equals(IKKE_BRUK, ov.getHandling())
-                || Objects.equals(SLÅTT_SAMMEN_MED_ANNET, ov.getHandling())
                 || ov.kreverIkkeInntektsmelding());
     }
 

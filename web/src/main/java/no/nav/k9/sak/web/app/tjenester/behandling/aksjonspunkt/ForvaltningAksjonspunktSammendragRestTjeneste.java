@@ -67,8 +67,8 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     @GET
     @Produces({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
     @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = BehandlingAksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON)),
-        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
+            @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = BehandlingAksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -106,17 +106,17 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     @Path("/sammendrag_periode")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM))
+            @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAksjonspunkterSammendrag(@QueryParam("opprettetPeriode") @Parameter(description = "Tidsrom for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @NotNull Periode opprettetPeriode,
-                                      @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
-                                      @Context Request request) { // NOSONAR
+                                                @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,
+                                                @SuppressWarnings("unused") @Context Request request) { // NOSONAR
 
         var aksjonspunktStatuser = medUtforte
-            ? new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT}
-            : new AksjonspunktStatus[]{AksjonspunktStatus.OPPRETTET};
+            ? new AksjonspunktStatus[] { AksjonspunktStatus.OPPRETTET, AksjonspunktStatus.UTFØRT }
+            : new AksjonspunktStatus[] { AksjonspunktStatus.OPPRETTET };
 
         var map = aksjonspunktRepository.hentAksjonspunkter(
             opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed.plusDays(1), aksjonspunktStatuser);
@@ -156,7 +156,8 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             for (var a : b.getAksjonspunkter()) {
                 var ad = a.getAksjonspunktDefinisjon().getKode();
                 var at = a.getAksjonspunktDefinisjon().getAksjonspunktType().getKode();
-                var vt = a.getAksjonspunktDefinisjon().getVilkårType() == null || a.getAksjonspunktDefinisjon().getVilkårType() == VilkårType.UDEFINERT ? "" : a.getAksjonspunktDefinisjon().getVilkårType(); // NOSONAR
+                var vt = a.getAksjonspunktDefinisjon().getVilkårType() == null || a.getAksjonspunktDefinisjon().getVilkårType() == VilkårType.UDEFINERT ? ""
+                    : a.getAksjonspunktDefinisjon().getVilkårType(); // NOSONAR
                 var as = a.getStatus() == null ? "" : a.getStatus().getKode();
                 var vå = a.getVenteårsak() == null || a.getVenteårsak() == Venteårsak.UDEFINERT ? "" : a.getVenteårsak().getKode(); // NOSONAR
                 var ft = a.getFristTid();

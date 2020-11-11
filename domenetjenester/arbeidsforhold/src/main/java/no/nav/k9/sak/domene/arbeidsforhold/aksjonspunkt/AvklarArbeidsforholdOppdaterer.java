@@ -23,6 +23,7 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.BekreftetPermisjon;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforhold;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -57,6 +58,10 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         Long behandlingId = param.getBehandlingId();
 
         List<AvklarArbeidsforholdDto> arbeidsforhold = avklarArbeidsforholdDto.getArbeidsforhold();
+        if (arbeidsforhold.isEmpty()) {
+            return OppdateringResultat.utenTransisjon().build();
+        }
+
         List<AvklarArbeidsforholdDto> arbeidsforholdLagtTilAvSaksbehandler = avklarArbeidsforholdDto.getArbeidsforhold().stream()
             .filter(dto -> Boolean.TRUE.equals(dto.getLagtTilAvSaksbehandler()))
             .collect(Collectors.toList());
@@ -65,22 +70,32 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
             .filter(dto -> Boolean.TRUE.equals(dto.getBasertPaInntektsmelding()))
             .collect(Collectors.toList());
 
+        // TODO: blir det riktig å kun behandle en kategori av gangen (saksbehandlers, inntektmeldingers, overstyring av eksisterende)? Eller burde
+        // man behandlet alle samtidig?
 
         ArbeidsforholdInformasjonBuilder informasjonBuilder;
         if (!arbeidsforholdLagtTilAvSaksbehandler.isEmpty()) {
+            lagHistorikkinnslag(arbeidsforholdLagtTilAvSaksbehandler);
             håndterManuelleArbeidsforhold(param);
             informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
             informasjonBuilder.tilbakestillOverstyringer();
-            leggTilArbeidsforholdOppgittAvSaksbehandler(informasjonBuilder, arbeidsforholdLagtTilAvSaksbehandler);
+            leggTilArbeidsforhold(informasjonBuilder, arbeidsforholdLagtTilAvSaksbehandler);
         } else if (!arbeidsforholdBasertPåInntektsmelding.isEmpty()) {
+            lagHistorikkinnslag(arbeidsforholdLagtTilAvSaksbehandler);
             håndterManuelleArbeidsforhold(param);
             informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
             informasjonBuilder.tilbakestillOverstyringer();
-            leggTilArbeidsforholdBasertPåInntektsmelding(informasjonBuilder, arbeidsforholdBasertPåInntektsmelding);
+            leggTilArbeidsforhold(informasjonBuilder, arbeidsforholdBasertPåInntektsmelding);
         } else {
+            List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()).getArbeidsforholdOverstyringer();
+            for (var arbeidsforholdDto : arbeidsforhold) {
+                var ref = InternArbeidsforholdRef.ref(arbeidsforholdDto.getArbeidsforholdId());
+                arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(param, arbeidsforholdDto, getArbeidsgiver(arbeidsforholdDto), ref, overstyringer);
+            }
+
             informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
             informasjonBuilder.tilbakestillOverstyringer();
-            leggPåOverstyringPåOpprinnligeArbeidsforhold(param, informasjonBuilder, arbeidsforhold);
+            leggPåOverstyringPåOpprinnligeArbeidsforhold(informasjonBuilder, arbeidsforhold);
         }
 
         // krever totrinn hvis saksbehandler har tatt stilling til dette aksjonspunktet
@@ -89,27 +104,30 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         return OppdateringResultat.utenTransisjon().medTotrinn().build();
     }
 
-    private void leggTilArbeidsforholdBasertPåInntektsmelding(ArbeidsforholdInformasjonBuilder informasjonBuilder,
-                                                              List<AvklarArbeidsforholdDto> arbeidsforholdLagtTilAvSaksbehandler) {
-        for (var arbeidsforholdDto : arbeidsforholdLagtTilAvSaksbehandler) {
-            ArbeidsforholdHandlingType handlingType = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-            ArbeidsforholdOverstyringBuilder overstyrt = leggTilOverstyrt(informasjonBuilder, arbeidsforholdDto, handlingType,
-                OrgNummer.erGyldigOrgnr(arbeidsforholdDto.getArbeidsgiverIdentifikator()) ? Arbeidsgiver.virksomhet(arbeidsforholdDto.getArbeidsgiverIdentifikator())
-                    : Arbeidsgiver.person(new AktørId(arbeidsforholdDto.getArbeidsgiverIdentifikator())));
-            informasjonBuilder.leggTil(overstyrt);
+    private void lagHistorikkinnslag(List<AvklarArbeidsforholdDto> arbeidsforholdListe) {
+        // lag historikkinnslag
+        for (var arbeidsforholdDto : arbeidsforholdListe) {
             arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(arbeidsforholdDto, arbeidsforholdDto.getNavn(), Optional.empty());
         }
     }
 
-    private void leggTilArbeidsforholdOppgittAvSaksbehandler(ArbeidsforholdInformasjonBuilder informasjonBuilder,
-                                                             List<AvklarArbeidsforholdDto> arbeidsforholdLagtTilAvSaksbehandler) {
-        Arbeidsgiver fiktivArbeidsgiver = Arbeidsgiver.virksomhet(FIKTIVT_ORG);
-        for (var arbeidsforholdDto : arbeidsforholdLagtTilAvSaksbehandler) {
-            ArbeidsforholdHandlingType handlingType = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-            ArbeidsforholdOverstyringBuilder overstyrt = leggTilOverstyrt(informasjonBuilder, arbeidsforholdDto, handlingType, fiktivArbeidsgiver);
+    private void leggTilArbeidsforhold(ArbeidsforholdInformasjonBuilder informasjonBuilder,
+                                       List<AvklarArbeidsforholdDto> arbeidsforholdListe) {
+        for (var arbeidsforhold : arbeidsforholdListe) {
+            ArbeidsforholdHandlingType handlingType = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforhold);
+            Arbeidsgiver arbeidsgiver = getArbeidsgiver(arbeidsforhold);
+            ArbeidsforholdOverstyringBuilder overstyrt = leggTilOverstyrt(informasjonBuilder, arbeidsforhold, handlingType, arbeidsgiver);
             informasjonBuilder.leggTil(overstyrt);
-            arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(arbeidsforholdDto, arbeidsforholdDto.getNavn(), Optional.empty());
         }
+    }
+
+    private Arbeidsgiver getArbeidsgiver(AvklarArbeidsforholdDto arbeidsforhold) {
+        Arbeidsgiver arbeidsgiver = arbeidsforhold.getLagtTilAvSaksbehandler()
+            ? Arbeidsgiver.virksomhet(FIKTIVT_ORG)
+            : (OrgNummer.erGyldigOrgnr(arbeidsforhold.getArbeidsgiverIdentifikator())
+                ? Arbeidsgiver.virksomhet(arbeidsforhold.getArbeidsgiverIdentifikator())
+                : Arbeidsgiver.person(new AktørId(arbeidsforhold.getArbeidsgiverIdentifikator())));
+        return arbeidsgiver;
     }
 
     private ArbeidsforholdOverstyringBuilder leggTilOverstyrt(ArbeidsforholdInformasjonBuilder informasjonBuilder,
@@ -128,52 +146,28 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
                 arbeidsforholdDto.getTomDato() == null ? TIDENES_ENDE : arbeidsforholdDto.getTomDato());
     }
 
-    private void leggPåOverstyringPåOpprinnligeArbeidsforhold(AksjonspunktOppdaterParameter param,
-                                                              ArbeidsforholdInformasjonBuilder informasjonBuilder,
+    private void leggPåOverstyringPåOpprinnligeArbeidsforhold(ArbeidsforholdInformasjonBuilder informasjonBuilder,
                                                               List<AvklarArbeidsforholdDto> arbeidsforhold) {
-        List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()).getArbeidsforholdOverstyringer();
+
+        // FIXME: Antar resten av koden her kan også ryke Marius? Fjerning av SLÅTT_SAMMEN_MED_ANNET gjør at mye her har røket allerede. Gjenstår
+        // permisjon, begrunnelse
         for (AvklarArbeidsforholdDto arbeidsforholdDto : filtrerUtArbeidsforholdSomHarBlittErsattet(arbeidsforhold)) {
 
-            final ArbeidsforholdHandlingType handling = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-            final Arbeidsgiver arbeidsgiver = hentArbeidsgiver(arbeidsforholdDto);
-            final InternArbeidsforholdRef ref = InternArbeidsforholdRef.ref(arbeidsforholdDto.getArbeidsforholdId());
+            ArbeidsforholdHandlingType handling = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
+            Arbeidsgiver arbeidsgiver = hentArbeidsgiver(arbeidsforholdDto);
+            InternArbeidsforholdRef ref = InternArbeidsforholdRef.ref(arbeidsforholdDto.getArbeidsforholdId());
 
             ArbeidsforholdOverstyringBuilder overstyringBuilderFor = informasjonBuilder.getOverstyringBuilderFor(arbeidsgiver, ref)
                 .medBeskrivelse(arbeidsforholdDto.getBegrunnelse())
-                .medHandling(handling.equals(ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET)
-                    ? ArbeidsforholdHandlingType.BRUK
-                    : handling);
+                .medHandling(handling);
 
             if (arbeidsforholdDto.getBrukPermisjon() != null) {
                 BekreftetPermisjon bekreftetPermisjon = UtledBekreftetPermisjon.utled(arbeidsforholdDto);
                 overstyringBuilderFor.medBekreftetPermisjon(bekreftetPermisjon);
             }
 
-            if (ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE.equals(handling)) {
-                overstyringBuilderFor.leggTilOverstyrtPeriode(arbeidsforholdDto.getFomDato(), arbeidsforholdDto.getOverstyrtTom());
-            }
-
-            if (ArbeidsforholdHandlingTypeUtleder.skalErstatteAnnenInntektsmelding(arbeidsforholdDto)) {
-                InternArbeidsforholdRef gammelRef = utledArbeidsforholdIdSomSkalErstattes(arbeidsforholdDto.getErstatterArbeidsforholdId(), arbeidsforhold);
-                informasjonBuilder.erstattArbeidsforhold(arbeidsgiver, gammelRef, ref);
-                final ArbeidsforholdOverstyringBuilder erstattBuilder = informasjonBuilder.getOverstyringBuilderFor(arbeidsgiver, gammelRef);
-                erstattBuilder.medNyArbeidsforholdRef(ref);
-                erstattBuilder.medHandling(handling);
-                informasjonBuilder.leggTil(erstattBuilder);
-            }
-
             informasjonBuilder.leggTil(overstyringBuilderFor);
-            arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(param, arbeidsforholdDto, arbeidsgiver, ref, overstyringer);
         }
-    }
-
-    private InternArbeidsforholdRef utledArbeidsforholdIdSomSkalErstattes(String erstatterArbeidsforhold, List<AvklarArbeidsforholdDto> arbeidsforhold) {
-        var arbeidsforholdId = arbeidsforhold.stream()
-            .filter(af -> af.getId().equalsIgnoreCase(erstatterArbeidsforhold))
-            .findAny()
-            .map(AvklarArbeidsforholdDto::getArbeidsforholdId)
-            .orElseThrow();
-        return InternArbeidsforholdRef.ref(arbeidsforholdId);
     }
 
     private List<AvklarArbeidsforholdDto> filtrerUtArbeidsforholdSomHarBlittErsattet(List<AvklarArbeidsforholdDto> arbeidsforhold) {
@@ -193,6 +187,11 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
 
     }
 
+    /**
+     * @deprecated Denne blir lett misbrukt, siden man antagelig ønsker å gjøre mer enn kun fjerne saksbehandlet versjon. Bruk derfor heller
+     *             {@link #lagreIayAggregat(Long, InntektArbeidYtelseAggregatBuilder)} etter du er ferdig med alle endringer du trenger å gjøre
+     */
+    @Deprecated(forRemoval = true)
     private void håndterManuelleArbeidsforhold(AksjonspunktOppdaterParameter param) {
         Long behandlingId = param.getBehandlingId();
         inntektArbeidYtelseTjeneste.fjernSaksbehandletVersjon(behandlingId);

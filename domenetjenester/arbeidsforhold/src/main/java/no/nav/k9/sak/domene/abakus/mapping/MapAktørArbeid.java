@@ -242,7 +242,7 @@ public class MapAktørArbeid {
             }
             EksternArbeidsforholdRef eksternRef;
             try {
-                eksternRef = arbeidsforholdInformasjon == null ? null : arbeidsforholdInformasjon.finnEksternRaw(arbeidsgiver, internRef);
+                eksternRef = arbeidsforholdInformasjon == null ? null : arbeidsforholdInformasjon.finnEkstern(arbeidsgiver, internRef);
             } catch (IllegalStateException e) {
                 if (e.getMessage().startsWith("Mangler eksternReferanse for internReferanse:")) {
                     // Sukk, må håndtere at det ligger dritt her også ..

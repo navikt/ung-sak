@@ -14,7 +14,6 @@ public class BeregningAktivitetOverstyring {
     private InternArbeidsforholdRef arbeidsforholdRef;
     private BeregningAktivitetHandlingType handlingType;
     private OpptjeningAktivitetType opptjeningAktivitetType;
-    private BeregningAktivitetOverstyringer overstyringerEntitet;
     public BeregningAktivitetHandlingType getHandling() {
         return handlingType;
     }
@@ -39,10 +38,6 @@ public class BeregningAktivitetOverstyring {
                 .medFom(periode.getFomDato())
                 .medTom(periode.getTomDato())
                 .build();
-    }
-
-    void setBeregningAktivitetOverstyringer(BeregningAktivitetOverstyringer overstyringerEntitet) {
-        this.overstyringerEntitet = overstyringerEntitet;
     }
 
     public static Builder builder() {

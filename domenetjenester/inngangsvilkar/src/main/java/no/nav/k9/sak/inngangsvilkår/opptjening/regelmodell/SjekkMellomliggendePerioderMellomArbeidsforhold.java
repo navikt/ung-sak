@@ -35,7 +35,7 @@ public class SjekkMellomliggendePerioderMellomArbeidsforhold extends LeafSpecifi
     @Override
     public Evaluation evaluate(MellomregningOpptjeningsvilkårData data) {
 
-        SjekkMellomliggende mellomliggende = new SjekkMellomliggende(data.getGrunnlag());
+        SjekkMellomliggende mellomliggende = new SjekkMellomliggende();
         LocalDateTimeline<Boolean> arbeidsforholdstidslinje = new LocalDateTimeline<>(List.of());
         var arbeidsforholdsTidslinjer = data.getAktivitetTidslinjer(true, true)
             .entrySet()
@@ -89,10 +89,8 @@ public class SjekkMellomliggendePerioderMellomArbeidsforhold extends LeafSpecifi
     static class SjekkMellomliggende {
 
         private final Map<Aktivitet, LocalDateTimeline<Boolean>> akseptertMellomliggendePerioder = new HashMap<>();
-        private Opptjeningsgrunnlag grunnlag;
 
-        SjekkMellomliggende(Opptjeningsgrunnlag grunnlag) {
-            this.grunnlag = grunnlag;
+        SjekkMellomliggende() {
         }
 
         Map<Aktivitet, LocalDateTimeline<Boolean>> getAkseptertMellomliggendePerioder() {
