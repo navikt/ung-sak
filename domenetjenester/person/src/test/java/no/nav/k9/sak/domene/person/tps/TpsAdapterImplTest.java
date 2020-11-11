@@ -9,8 +9,10 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -20,6 +22,7 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
@@ -38,7 +41,10 @@ import no.nav.vedtak.feil.Feil;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TpsAdapterImplTest {
 
     private TpsAdapterImpl tpsAdapterImpl;
@@ -128,36 +134,44 @@ public class TpsAdapterImplTest {
         return response;
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void skal_få_exception_når_tjenesten_ikke_kan_finne_personen() throws Exception {
-        Mockito.when(personProxyServiceMock.hentPersonResponse(Mockito.any()))
-            .thenThrow(new HentPersonPersonIkkeFunnet(null, null));
+        Assertions.assertThrows(TekniskException.class, () -> {
+            Mockito.when(personProxyServiceMock.hentPersonResponse(Mockito.any()))
+                .thenThrow(new HentPersonPersonIkkeFunnet(null, null));
 
-        tpsAdapterImpl.hentKjerneinformasjon(fnr, aktørId);
+            tpsAdapterImpl.hentKjerneinformasjon(fnr, aktørId);
+        });
     }
 
-    @Test(expected = ManglerTilgangException.class)
+    @Test
     public void skal_få_exception_når_tjenesten_ikke_kan_aksesseres_pga_manglende_tilgang() throws Exception {
-        when(personProxyServiceMock.hentPersonResponse(any(HentPersonRequest.class)))
-            .thenThrow(new HentPersonSikkerhetsbegrensning(null, null));
+        Assertions.assertThrows(ManglerTilgangException.class, () -> {
+            when(personProxyServiceMock.hentPersonResponse(any(HentPersonRequest.class)))
+                .thenThrow(new HentPersonSikkerhetsbegrensning(null, null));
 
-        tpsAdapterImpl.hentKjerneinformasjon(fnr, aktørId);
+            tpsAdapterImpl.hentKjerneinformasjon(fnr, aktørId);
+        });
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void skal_få_exception_når_tjenesten_ikke_kan_finne_geografisk_tilknytning_for_personen() throws Exception {
-        Mockito.when(personProxyServiceMock.hentGeografiskTilknytning(Mockito.any()))
-            .thenThrow(new HentGeografiskTilknytningPersonIkkeFunnet(null, null));
+        Assertions.assertThrows(TekniskException.class, () -> {
+            Mockito.when(personProxyServiceMock.hentGeografiskTilknytning(Mockito.any()))
+                .thenThrow(new HentGeografiskTilknytningPersonIkkeFunnet(null, null));
 
-        tpsAdapterImpl.hentGeografiskTilknytning(fnr);
+            tpsAdapterImpl.hentGeografiskTilknytning(fnr);
+        });
     }
 
-    @Test(expected = ManglerTilgangException.class)
+    @Test
     public void skal_få_exception_ved_henting_av_geografisk_tilknytning_når_tjenesten_ikke_kan_aksesseres_pga_manglende_tilgang() throws Throwable {
-        when(personProxyServiceMock.hentGeografiskTilknytning(Mockito.any()))
-            .thenThrow(new HentGeografiskTilknytningSikkerhetsbegrensing(null, null));
+        Assertions.assertThrows(ManglerTilgangException.class, () -> {
+            when(personProxyServiceMock.hentGeografiskTilknytning(Mockito.any()))
+                .thenThrow(new HentGeografiskTilknytningSikkerhetsbegrensing(null, null));
 
-        tpsAdapterImpl.hentGeografiskTilknytning(fnr);
+            tpsAdapterImpl.hentGeografiskTilknytning(fnr);
+        });
     }
 
     @Test
@@ -188,17 +202,23 @@ public class TpsAdapterImplTest {
         assertThat(adresseinfoActual.getAdresselinje1()).isEqualTo(adresseinfoExpected.getAdresselinje1());
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void test_hentAdresseinformasjon_personIkkeFunnet() throws Exception {
-        when(personProxyServiceMock.hentPersonResponse(any())).thenThrow(new HentPersonPersonIkkeFunnet(null, null));
+        Assertions.assertThrows(TekniskException.class, () -> {
+            when(personProxyServiceMock.hentPersonResponse(any())).thenThrow(new HentPersonPersonIkkeFunnet(null, null));
 
-        tpsAdapterImpl.hentAdresseinformasjon(fnr);
+            tpsAdapterImpl.hentAdresseinformasjon(fnr);
+        });
+
     }
 
-    @Test(expected = ManglerTilgangException.class)
+    @Test
     public void test_hentAdresseinformasjon_manglende_tilgang() throws Exception {
-        when(personProxyServiceMock.hentPersonResponse(any())).thenThrow(new HentPersonSikkerhetsbegrensning(null, null));
+        Assertions.assertThrows(ManglerTilgangException.class, () -> {
+            when(personProxyServiceMock.hentPersonResponse(any())).thenThrow(new HentPersonSikkerhetsbegrensning(null, null));
 
-        tpsAdapterImpl.hentAdresseinformasjon(fnr);
+            tpsAdapterImpl.hentAdresseinformasjon(fnr);
+        });
+
     }
 }
