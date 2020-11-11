@@ -7,11 +7,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -20,22 +22,32 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TotrinnRepositoryImplTest {
 
     private static final AksjonspunktDefinisjon AKSDEF_01 = AksjonspunktDefinisjon.values()[0];
     private static final AksjonspunktDefinisjon AKSDEF_02 = AksjonspunktDefinisjon.values()[1];
     private static final AksjonspunktDefinisjon AKSDEF_03 = AksjonspunktDefinisjon.values()[2];
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private final TotrinnRepository totrinnRepository = new TotrinnRepository(entityManager);
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = new BehandlingRepository(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private TotrinnRepository totrinnRepository;
+    private FagsakRepository fagsakRepository;
+    private BehandlingRepository behandlingRepository ;
+
+    @BeforeEach
+    public void oppsett() {
+       totrinnRepository = new TotrinnRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        behandlingRepository = new BehandlingRepository(entityManager);
+    }
 
     @Test
     public void skal_finne_ett_inaktivt_totrinnsgrunnlag_og_ett_aktivt_totrinnsgrunnlag() {
@@ -60,7 +72,7 @@ public class TotrinnRepositoryImplTest {
 
         // Hent ut inaktive totrinnsgrunnlag
         TypedQuery<Totrinnresultatgrunnlag> query = entityManager.createQuery(
-            "SELECT trg FROM Totrinnresultatgrunnlag trg WHERE trg.behandling.id = :behandling_id AND trg.aktiv = 'N'", //$NON-NLS-1$
+            "SELECT trg FROM Totrinnresultatgrunnlag trg WHERE trg.behandling.id = :behandling_id AND trg.aktiv = false", //$NON-NLS-1$
             Totrinnresultatgrunnlag.class);
         query.setParameter("behandling_id", behandling.getId()); //$NON-NLS-1$
         List<Totrinnresultatgrunnlag> inaktive = query.getResultList();
@@ -115,7 +127,7 @@ public class TotrinnRepositoryImplTest {
 
         // Hent inaktive vurderinger etter flush
         TypedQuery<Totrinnsvurdering> query = entityManager.createQuery(
-            "SELECT tav FROM Totrinnsvurdering tav WHERE tav.behandling.id = :behandling_id AND tav.aktiv = 'N'", //$NON-NLS-1$
+            "SELECT tav FROM Totrinnsvurdering tav WHERE tav.behandling.id = :behandling_id AND tav.aktiv = false", //$NON-NLS-1$
             Totrinnsvurdering.class);
         query.setParameter("behandling_id", behandling.getId()); //$NON-NLS-1$
         List<Totrinnsvurdering> repoInaktiveTotrinnsvurderinger = query.getResultList();

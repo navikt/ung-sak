@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -25,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -44,22 +47,32 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
 
     private final AktørId AKTØRID = AktørId.dummy();
     private final LocalDate skjæringstidspunkt = LocalDate.now();
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private BehandlingRepositoryProvider repositoryProvider ;
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutleder;
-    private FagsakRepository fagsakRepository = repositoryProvider.getFagsakRepository();
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private FagsakRepository fagsakRepository ;
+    private BehandlingRepository behandlingRepository ;
 
     @BeforeEach
     public void setUp() {
+
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        fagsakRepository = repositoryProvider.getFagsakRepository();
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+
         aksjonspunktutleder = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste);
 
     }

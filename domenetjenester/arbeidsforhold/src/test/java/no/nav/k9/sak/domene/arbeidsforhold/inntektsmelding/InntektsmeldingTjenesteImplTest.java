@@ -19,9 +19,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -47,7 +50,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.abakus.ArbeidsforholdTjenesteMock;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -79,8 +82,11 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class InntektsmeldingTjenesteImplTest {
 
     private static final InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.namedRef("TEST-REF");
@@ -91,15 +97,16 @@ public class InntektsmeldingTjenesteImplTest {
     private static final LocalDate ARBEIDSFORHOLD_TIL = I_DAG.plusMonths(2);
     private static BigDecimal LØNNSPOST = BigDecimal.TEN;
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(I_DAG).build();
-    private final AtomicLong journalpostIdInc = new AtomicLong(123);
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+    @Inject
+    private EntityManager entityManager;
+
+    private Skjæringstidspunkt skjæringstidspunkt ;
+    private AtomicLong journalpostIdInc ;
+    private IAYRepositoryProvider repositoryProvider ;
+    private BehandlingRepository behandlingRepository ;
+    private FagsakRepository fagsakRepository ;
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
     private PersonIdentTjeneste tpsTjeneste;
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste;
     private Arbeidsgiver arbeidsgiver;
@@ -107,6 +114,15 @@ public class InntektsmeldingTjenesteImplTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+
+        skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(I_DAG).build();
+        journalpostIdInc = new AtomicLong(123);
+        repositoryProvider = new IAYRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        fagsakRepository = new FagsakRepository(entityManager);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+
         var virksomhet1 = lagVirksomhet();
         var virksomhet2 = lagAndreVirksomhet();
 
