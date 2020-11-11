@@ -42,15 +42,11 @@ public class BeregningsgrunnlagPrStatusOgAndel {
     private BigDecimal pgi2;
     private BigDecimal pgi3;
     private Beløp årsbeløpFraTilstøtendeYtelse;
-    private Boolean nyIArbeidslivet;
     private Boolean fastsattAvSaksbehandler = Boolean.FALSE;
-    private BigDecimal besteberegningPrÅr;
     private Inntektskategori inntektskategori = Inntektskategori.UDEFINERT;
     private Boolean lagtTilAvSaksbehandler = Boolean.FALSE;
     private BGAndelArbeidsforhold bgAndelArbeidsforhold;
     private Long orginalDagsatsFraTilstøtendeYtelse;
-    private BeregningsgrunnlagFrilansAndel beregningsgrunnlagFrilansAndel;
-    private BeregningsgrunnlagArbeidstakerAndel beregningsgrunnlagArbeidstakerAndel;
 
     public BeregningsgrunnlagPeriode getBeregningsgrunnlagPeriode() {
         return beregningsgrunnlagPeriode;
@@ -66,22 +62,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
 
     public LocalDate getBeregningsperiodeTom() {
         return beregningsperiode != null ? beregningsperiode.getTomDato() : null;
-    }
-
-    public Optional<Boolean> mottarYtelse() {
-        if (beregningsgrunnlagFrilansAndel != null) {
-            return Optional.ofNullable(beregningsgrunnlagFrilansAndel.getMottarYtelse());
-        } else if (beregningsgrunnlagArbeidstakerAndel != null) {
-            return Optional.ofNullable(beregningsgrunnlagArbeidstakerAndel.getMottarYtelse());
-        }
-        return Optional.empty();
-    }
-
-    public Optional<Boolean> erNyoppstartet() {
-        if (beregningsgrunnlagFrilansAndel != null) {
-            return Optional.ofNullable(beregningsgrunnlagFrilansAndel.getNyoppstartet());
-        }
-        return Optional.empty();
     }
 
     public boolean gjelderSammeArbeidsforhold(BeregningsgrunnlagPrStatusOgAndel that) {
@@ -177,10 +157,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
         return redusertBrukersAndelPrÅr;
     }
 
-    public Boolean getNyIArbeidslivet() {
-        return nyIArbeidslivet;
-    }
-
     public Boolean getFastsattAvSaksbehandler() {
         return fastsattAvSaksbehandler;
     }
@@ -241,10 +217,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
 
     public Long getAndelsnr() {
         return andelsnr;
-    }
-
-    public BigDecimal getBesteberegningPrÅr() {
-        return besteberegningPrÅr;
     }
 
     public Boolean getLagtTilAvSaksbehandler() {
@@ -323,7 +295,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
                 + "pgi2=" + pgi2 + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "pgi3=" + pgi3 + ", " //$NON-NLS-1$ //$NON-NLS-2$
                 + "årsbeløpFraTilstøtendeYtelse=" + årsbeløpFraTilstøtendeYtelse //$NON-NLS-1$
-                + "besteberegningPrÅr=" + besteberegningPrÅr //$NON-NLS-1$
                 + ">"; //$NON-NLS-1$
     }
 
@@ -478,62 +449,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
             return this;
         }
 
-        public Builder medNyIArbeidslivet(Boolean nyIArbeidslivet) {
-            verifiserKanModifisere();
-            kladd.nyIArbeidslivet = nyIArbeidslivet == null ? false: nyIArbeidslivet;
-            return this;
-        }
-
-        public Builder medMottarYtelse(Boolean mottarYtelse, AktivitetStatus aktivitetStatus) {
-            if (mottarYtelse == null) {
-                return this;
-            }
-
-            verifiserKanModifisere();
-            kladd.aktivitetStatus = aktivitetStatus;
-            if (kladd.aktivitetStatus.erFrilanser()) {
-                if (kladd.beregningsgrunnlagFrilansAndel == null) {
-                    kladd.beregningsgrunnlagFrilansAndel = BeregningsgrunnlagFrilansAndel.builder()
-                            .medMottarYtelse(mottarYtelse)
-                            .build(kladd);
-                } else {
-                    BeregningsgrunnlagFrilansAndel.builder(kladd.beregningsgrunnlagFrilansAndel)
-                    .medMottarYtelse(mottarYtelse);
-                }
-            } else if (kladd.aktivitetStatus.erArbeidstaker()) {
-                if (kladd.beregningsgrunnlagArbeidstakerAndel == null) {
-                    kladd.beregningsgrunnlagArbeidstakerAndel = BeregningsgrunnlagArbeidstakerAndel.builder()
-                            .medMottarYtelse(mottarYtelse)
-                            .build(kladd);
-                } else {
-                    BeregningsgrunnlagArbeidstakerAndel.builder(kladd.beregningsgrunnlagArbeidstakerAndel)
-                    .medMottarYtelse(mottarYtelse);
-                }
-            }
-            return this;
-        }
-
-        public Builder medNyoppstartet(Boolean nyoppstartet, AktivitetStatus aktivitetStatus) {
-            if (nyoppstartet == null) {
-                return this;
-            }
-            verifiserKanModifisere();
-            kladd.aktivitetStatus = aktivitetStatus;
-            if (kladd.aktivitetStatus.erFrilanser()) {
-                if (kladd.beregningsgrunnlagFrilansAndel == null) {
-                    kladd.beregningsgrunnlagFrilansAndel = BeregningsgrunnlagFrilansAndel.builder()
-                            .medNyoppstartet(nyoppstartet)
-                            .build(kladd);
-                } else {
-                    BeregningsgrunnlagFrilansAndel.builder(kladd.beregningsgrunnlagFrilansAndel)
-                    .medNyoppstartet(nyoppstartet);
-                }
-            } else {
-                throw new IllegalArgumentException("Andel må vere frilans for å sette nyoppstartet");
-            }
-            return this;
-        }
-
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
             verifiserKanModifisere();
             kladd.inntektskategori = inntektskategori;
@@ -543,12 +458,6 @@ public class BeregningsgrunnlagPrStatusOgAndel {
         public Builder medFastsattAvSaksbehandler(Boolean fastsattAvSaksbehandler) {
             verifiserKanModifisere();
             kladd.fastsattAvSaksbehandler = fastsattAvSaksbehandler == null?false: fastsattAvSaksbehandler;
-            return this;
-        }
-
-        public Builder medBesteberegningPrÅr(BigDecimal besteberegningPrÅr) {
-            verifiserKanModifisere();
-            kladd.besteberegningPrÅr = besteberegningPrÅr;
             return this;
         }
 

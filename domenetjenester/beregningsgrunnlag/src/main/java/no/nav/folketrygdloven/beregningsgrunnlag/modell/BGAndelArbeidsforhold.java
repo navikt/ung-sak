@@ -17,8 +17,6 @@ public class BGAndelArbeidsforhold {
     private BigDecimal refusjonskravPrÅr;
     private BigDecimal naturalytelseBortfaltPrÅr;
     private BigDecimal naturalytelseTilkommetPrÅr;
-    private Boolean erTidsbegrensetArbeidsforhold;
-    private Boolean lønnsendringIBeregningsperioden;
     private LocalDate arbeidsperiodeFom;
     private LocalDate arbeidsperiodeTom;
 
@@ -36,14 +34,6 @@ public class BGAndelArbeidsforhold {
 
     public Optional<BigDecimal> getNaturalytelseTilkommetPrÅr() {
         return Optional.ofNullable(naturalytelseTilkommetPrÅr);
-    }
-
-    public Boolean getErTidsbegrensetArbeidsforhold() {
-        return erTidsbegrensetArbeidsforhold;
-    }
-
-    public Boolean erLønnsendringIBeregningsperioden() {
-        return lønnsendringIBeregningsperioden;
     }
 
     public LocalDate getArbeidsperiodeFom() {
@@ -145,16 +135,6 @@ public class BGAndelArbeidsforhold {
 
         public Builder medRefusjonskravPrÅr(BigDecimal refusjonskravPrÅr) {
             bgAndelArbeidsforhold.refusjonskravPrÅr = refusjonskravPrÅr;
-            return this;
-        }
-
-        public BGAndelArbeidsforhold.Builder medTidsbegrensetArbeidsforhold(boolean erTidsbegrensetArbeidsforhold) {
-            bgAndelArbeidsforhold.erTidsbegrensetArbeidsforhold = erTidsbegrensetArbeidsforhold;
-            return this;
-        }
-
-        public Builder medLønnsendringIBeregningsperioden(boolean lønnsendringIBeregningsperioden) {
-            bgAndelArbeidsforhold.lønnsendringIBeregningsperioden = lønnsendringIBeregningsperioden;
             return this;
         }
 
