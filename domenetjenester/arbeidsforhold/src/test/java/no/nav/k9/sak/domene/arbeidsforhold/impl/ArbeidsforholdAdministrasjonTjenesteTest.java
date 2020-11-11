@@ -15,9 +15,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
@@ -40,7 +43,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -72,8 +75,11 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.konfig.Tid;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     private static final String ORG1 = "973093681";
@@ -86,20 +92,28 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
     private final EksternArbeidsforholdRef EKSTERN_ARBEIDSFORHOLD_ID = EksternArbeidsforholdRef.ref("123");
     private final AktørId AKTØRID = AktørId.dummy();
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+    private IAYRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
+
     private ArbeidsforholdAdministrasjonTjeneste arbeidsforholdTjeneste;
 
     private Arbeidsgiver arbeidsgiver;
 
     @BeforeEach
     public void setUp() {
+
+        repositoryProvider = new IAYRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        fagsakRepository = new FagsakRepository(entityManager);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+
         Virksomhet virksomhet1 = lagVirksomhet();
         Virksomhet virksomhet2 = lagAndreVirksomheten();
 
