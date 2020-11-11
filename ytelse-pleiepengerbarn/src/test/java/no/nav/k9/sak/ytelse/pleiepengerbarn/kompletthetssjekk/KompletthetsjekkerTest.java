@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
-import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -173,9 +172,6 @@ public class KompletthetsjekkerTest {
     public void skal_finne_at_kompletthet_er_oppfylt_når_vedlegg_til_søknad_finnes_i_joark() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
-
-        DokumentTypeId dokumentType = DokumentTypeId.finnForKodeverkEiersKode(KODE_INNTEKTSMELDING);
-        Set<DokumentTypeId> dokumentTypeIds = singleton(dokumentType);
 
         opprettSøknadMedPåkrevdVedlegg(behandling);
 

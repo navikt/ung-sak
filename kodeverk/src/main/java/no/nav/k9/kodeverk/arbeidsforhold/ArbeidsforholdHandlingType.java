@@ -29,14 +29,14 @@ public enum ArbeidsforholdHandlingType implements Kodeverdi {
     BRUK("BRUK", "Bruk"),
     IKKE_BRUK("IKKE_BRUK", "Ikke bruk"),
 
-    NYTT_ARBEIDSFORHOLD("NYTT_ARBEIDSFORHOLD", "Arbeidsforholdet er ansett som nytt"),
-
     LAGT_TIL_AV_SAKSBEHANDLER("LAGT_TIL_AV_SAKSBEHANDLER", "Arbeidsforhold lagt til av saksbehandler"),
     BASERT_PÅ_INNTEKTSMELDING("BASERT_PÅ_INNTEKTSMELDING", "Arbeidsforholdet som ikke ligger i AA-reg er basert på inntektsmelding"),
 
     /** midlertidig med - ønsker annen løsning i følge Marius Glittum. */
     BRUK_UTEN_INNTEKTSMELDING("BRUK_UTEN_INNTEKTSMELDING", "Bruk, men ikke benytt inntektsmelding"),
 
+    @Deprecated(forRemoval = true)
+    NYTT_ARBEIDSFORHOLD("NYTT_ARBEIDSFORHOLD", "Arbeidsforholdet er ansett som nytt"),
     @Deprecated(forRemoval = true)
     SLÅTT_SAMMEN_MED_ANNET("SLÅTT_SAMMEN_MED_ANNET", "Arbeidsforholdet er slått sammen med et annet"),
     @Deprecated(forRemoval = true)

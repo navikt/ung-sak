@@ -11,7 +11,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class BGAndelArbeidsforhold {
 
-    private BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel;
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
     private BigDecimal refusjonskravPrÅr;
@@ -148,9 +147,8 @@ public class BGAndelArbeidsforhold {
             return this;
         }
 
-        BGAndelArbeidsforhold build(BeregningsgrunnlagPrStatusOgAndel andel) {
+        BGAndelArbeidsforhold build() {
             Objects.requireNonNull(bgAndelArbeidsforhold.arbeidsgiver, "arbeidsgiver");
-            bgAndelArbeidsforhold.beregningsgrunnlagPrStatusOgAndel = andel;
             return bgAndelArbeidsforhold;
         }
     }

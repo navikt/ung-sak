@@ -105,7 +105,7 @@ public class MapInntektsmeldinger {
             var innsendingstidspunkt = im.getInnsendingstidspunkt();
             EksternArbeidsforholdRef eksternRef;
             try {
-                eksternRef = validerArbeidsforholdId ? arbeidsforholdInformasjon.finnEksternRaw(im.getArbeidsgiver(), im.getArbeidsforholdRef()) : null;
+                eksternRef = validerArbeidsforholdId ? arbeidsforholdInformasjon.finnEkstern(im.getArbeidsgiver(), im.getArbeidsforholdRef()) : null;
             } catch (IllegalStateException e) {
                 if (e.getMessage().startsWith("Mangler eksternReferanse for internReferanse:")) {
                     // Sukk, må håndtere at det ligger dårlig data her også ..

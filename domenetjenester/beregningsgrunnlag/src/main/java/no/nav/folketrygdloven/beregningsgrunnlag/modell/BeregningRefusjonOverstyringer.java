@@ -29,7 +29,6 @@ public class BeregningRefusjonOverstyringer {
 
         public Builder leggTilOverstyring(BeregningRefusjonOverstyring beregningRefusjonOverstyring) {
             BeregningRefusjonOverstyring entitet = beregningRefusjonOverstyring;
-            entitet.setRefusjonOverstyringerEntitet(kladd);
             kladd.overstyringer.add(entitet);
             return this;
         }

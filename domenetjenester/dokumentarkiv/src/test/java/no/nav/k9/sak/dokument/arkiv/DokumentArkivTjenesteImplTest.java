@@ -150,7 +150,6 @@ public class DokumentArkivTjenesteImplTest {
         List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
 
         assertThat(arkivDokuments).hasSize(1);
-        ArkivJournalPost post = arkivDokuments.get(0);
     }
 
     @Test
