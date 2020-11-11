@@ -9,20 +9,20 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-public class UNNTVilkårsPerioderTilVurderingTjenesteProvider {
+public class UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider {
 
     private static final String YTELSE_OMS = "OMP";
     private static final String YTELSE_PLEIEPENGER = "PSB";
     private static final String YTELSE_FRISINN = "FRISINN";
 
-    private UNNTVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
-    UNNTVilkårsPerioderTilVurderingTjenesteProvider() {
+    UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider() {
         // CDI
     }
 
     @Inject
-    UNNTVilkårsPerioderTilVurderingTjenesteProvider(UNNTVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+    UnntaksbehandlingVilkårsPerioderTilVurderingTjenesteProvider(UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 

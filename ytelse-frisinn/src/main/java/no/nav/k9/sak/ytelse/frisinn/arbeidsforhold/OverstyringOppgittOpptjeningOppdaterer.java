@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
+package no.nav.k9.sak.ytelse.frisinn.arbeidsforhold;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

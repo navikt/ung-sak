@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.medisinsk;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 
 import java.time.LocalDate;
 import java.util.List;

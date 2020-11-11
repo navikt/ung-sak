@@ -19,17 +19,17 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 
 @RequestScoped
-public class UNNTVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+public class UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private FagsakPeriode fagsakPeriode;
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
 
-    UNNTVilkårsPerioderTilVurderingTjeneste() {
+    UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
 
     @Inject
-    public UNNTVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository) {
+    public UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository) {
         this.fagsakPeriode = new FagsakPeriode(behandlingRepository);;
         vilkårsPeriodisering.put(VilkårType.K9_VILKÅRET, fagsakPeriode);
     }
