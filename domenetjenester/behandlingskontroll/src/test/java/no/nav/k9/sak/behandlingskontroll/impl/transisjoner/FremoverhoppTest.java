@@ -10,13 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.assertj.core.api.AbstractComparableAssert;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
@@ -42,39 +43,47 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class FremoverhoppTest {
 
     private static final FagsakYtelseType YTELSE_TYPE = TestScenario.DUMMY_YTELSE_TYPE;
 
     private List<no.nav.k9.sak.behandlingskontroll.impl.observer.StegTransisjon> transisjoner = new ArrayList<>();
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private EntityManager em = repoRule.getEntityManager();
-    private BehandlingRepository behandlingRepository = new BehandlingRepository(em);
-    private BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
+    @Inject
+    private EntityManager entityManager;
 
-    private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, null);
+    private BehandlingRepository behandlingRepository;
+    private BehandlingModellRepository behandlingModellRepository;
+    private BehandlingskontrollServiceProvider serviceProvider;
+    private BehandlingskontrollFremoverhoppTransisjonEventObserver observer;
 
     private BehandlingStegType steg1 ;
     private BehandlingStegType steg2;
     private BehandlingStegType steg3;
-    private BehandlingskontrollFremoverhoppTransisjonEventObserver observer = new BehandlingskontrollFremoverhoppTransisjonEventObserver(serviceProvider) {
-        @Override
-        protected void hoppFramover(BehandlingStegModell stegModell, BehandlingTransisjonEvent transisjonEvent, BehandlingStegType sisteSteg,
-                                    BehandlingStegType finalFørsteSteg) {
-            transisjoner.add(new no.nav.k9.sak.behandlingskontroll.impl.observer.StegTransisjon(TransisjonType.HOPP_OVER_FRAMOVER,
-                stegModell.getBehandlingStegType()));
-        }
-    };
-
     private Behandling behandling;
     private BehandlingLås behandlingLås;
 
     @BeforeEach
     public void before() throws Exception {
+
+        behandlingRepository = new BehandlingRepository(entityManager);
+        behandlingModellRepository = new BehandlingModellRepository();
+        serviceProvider = new BehandlingskontrollServiceProvider(entityManager, behandlingModellRepository, null);
+        observer = new BehandlingskontrollFremoverhoppTransisjonEventObserver(serviceProvider) {
+            @Override
+            protected void hoppFramover(BehandlingStegModell stegModell, BehandlingTransisjonEvent transisjonEvent, BehandlingStegType sisteSteg,
+                                        BehandlingStegType finalFørsteSteg) {
+                transisjoner.add(new no.nav.k9.sak.behandlingskontroll.impl.observer.StegTransisjon(TransisjonType.HOPP_OVER_FRAMOVER,
+                    stegModell.getBehandlingStegType()));
+            }
+        };
+
+
         var modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
         steg2 = modell.finnNesteSteg(steg1).getBehandlingStegType();

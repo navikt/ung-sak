@@ -8,9 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -18,15 +21,19 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class LagreHistorikkTaskTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
+
     String melding = new String(Files.readAllBytes(Paths.get(ClassLoader.getSystemResource("historikkinnslagmelding.json").toURI())));
     private HistorikkRepository historikkRepository;
     private Behandling behandling;
@@ -39,12 +46,12 @@ public class LagreHistorikkTaskTest {
 
     @BeforeEach
     public void setup() {
-        BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+        BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.lagre(repositoryProvider);
         behandling = scenario.getBehandling();
         melding = melding.replace("PLACEHOLDER-UUID", behandling.getUuid().toString());
-        historikkRepository = new HistorikkRepository(repoRule.getEntityManager());
+        historikkRepository = new HistorikkRepository(entityManager);
         historikkFraDtoMapper = new HistorikkFraDtoMapper(repositoryProvider.getBehandlingRepository(), repositoryProvider.getFagsakRepository());
         task = new LagreHistorikkTask(historikkRepository, historikkFraDtoMapper);
     }
