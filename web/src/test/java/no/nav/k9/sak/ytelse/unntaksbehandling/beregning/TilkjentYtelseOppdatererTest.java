@@ -19,6 +19,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -75,7 +76,7 @@ public class TilkjentYtelseOppdatererTest {
             .medErBrukerMottaker(true) //TODO: Fjernes
             .medRefusjon(dagsatsRefusjon)
             .medTilSoker(dagsatsBruker)
-            .medAktivitetstatus(aktivitetStatus)
+//            .medAktivitetstatus(aktivitetStatus)
             .medInntektskategori(inntekskategori)
             .medArbeidsgiver(arbeidsgiver)
             .medUtbetalingsgrad(utbealingsgrad)
@@ -99,7 +100,14 @@ public class TilkjentYtelseOppdatererTest {
 
         assertThat(aggregat.getOverstyrtBeregningsresultat()).isNotNull();
         assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder()).hasSize(1);
-        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder().get(0)
-            .getBeregningsresultatAndelList()).hasSize(2);
+        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList()).hasSize(2);
+
+        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder()
+            .stream().flatMap(e -> e.getBeregningsresultatAndelList().stream())
+            .map(BeregningsresultatAndel::getAktivitetStatus)
+        )
+            .containsOnly(AktivitetStatus.ARBEIDSAVKLARINGSPENGER);
+
+
     }
 }

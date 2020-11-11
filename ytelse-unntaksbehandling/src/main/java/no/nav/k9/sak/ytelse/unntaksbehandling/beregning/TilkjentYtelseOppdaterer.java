@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
 
+import static no.nav.k9.sak.ytelse.unntaksbehandling.vilkår.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
+
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -42,6 +44,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
 
+    @SuppressWarnings("unused")
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
     }
@@ -106,7 +109,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
                 : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()))
             )
             //.medArbeidsforholdRef() // kun nødvendig dersom flere arb.forhold samme arbeidsgiver
-            .medAktivitetStatus(tyAndel.getAktivitetStatus())
+            .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
             .medStillingsprosent(STILLINGSPROSENT);
