@@ -1,6 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -205,8 +206,17 @@ public class TilKalkulusMapper {
     }
 
     private static Optional<LocalDate> finnDatoNærmestSkjæringstidspunktet(Inntektsmelding inntektsmelding, LocalDate skjæringstidspunkt) {
+        var inkludert = inntektsmelding.getOppgittFravær()
+            .stream()
+            .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
+            .filter(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()).inkluderer(skjæringstidspunkt))
+            .findFirst();
+        if (inkludert.isPresent()) {
+            return Optional.of(skjæringstidspunkt);
+        }
         return inntektsmelding.getOppgittFravær()
             .stream()
+            .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
             .map(PeriodeAndel::getFom)
             .min(Comparator.comparingLong(x -> Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, x))));
     }
@@ -232,6 +242,7 @@ public class TilKalkulusMapper {
             .stream()
             .filter(it -> it.getOppgittFravær()
                 .stream()
+                .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
                 .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
