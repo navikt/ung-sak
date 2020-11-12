@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
@@ -31,20 +32,21 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class EndringskontrollerTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     private KontrollerFaktaAksjonspunktUtleder kontrollerFaktaTjenesteMock;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenesterMock;

@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -26,17 +27,20 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
 
     private final static int revurderingDagerTilbake = 0;
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -47,6 +51,11 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
     private EtterkontrollRepository etterkontrollRepository;
 
     private Behandling behandling;
+
+    @BeforeEach
+    public void before() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    }
 
     @Test
     public void skal_finne_kandidat_til_revurdering() {
