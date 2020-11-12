@@ -24,6 +24,43 @@ public class TilKalkulusMapperTest {
     private DatoIntervallEntitet periode3 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(4));
     private DatoIntervallEntitet periode4 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(8));
 
+    private static PeriodeAndel periode(String fom, String tom) {
+        return new PeriodeAndel(dato(fom), dato(tom));
+    }
+
+    private static LocalDate dato(String måneddato) {
+        var yr = LocalDate.now().getYear();
+        return LocalDate.parse(yr + "-" + måneddato);
+    }
+
+    @Test
+    public void skal_utlede_inntektsmeldinger_som_gjelder_for_periode() {
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        var periode2327 = periode("03-23", "03-27");
+        var periode0609 = periode("04-06", "04-09");
+        var periode14 = periode("04-14", "04-14");
+        var inntektsmelding1 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("1")
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medOppgittFravær(List.of(periode14))
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var inntektsmelding2 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("2")
+            .medBeløp(BigDecimal.ONE)
+            .medKanalreferanse("AR124")
+            .medOppgittFravær(List.of(periode2327, periode0609, periode14))
+            .medRefusjon(BigDecimal.ONE)
+            .build();
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
+        var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
+    }
+
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode() {
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
