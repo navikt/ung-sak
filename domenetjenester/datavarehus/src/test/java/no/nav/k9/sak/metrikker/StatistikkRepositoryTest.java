@@ -2,21 +2,34 @@ package no.nav.k9.sak.metrikker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Rule;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class StatistikkRepositoryTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private StatistikkRepository statistikkRepository = new StatistikkRepository(repoRule.getEntityManager());
+    private StatistikkRepository statistikkRepository ;
+
+    @BeforeEach
+    public void setup(){
+        statistikkRepository = new StatistikkRepository(entityManager);
+    }
+
 
     @Test
     public void skal_kunne_hente_statistikk() throws Exception {
@@ -46,7 +59,7 @@ public class StatistikkRepositoryTest {
         scenario.leggTilAksjonspunkt(aksjonspunkt, stegType);
 
         @SuppressWarnings("unused")
-        var behandling = scenario.lagre(repoRule.getEntityManager());
+        var behandling = scenario.lagre(entityManager);
 
         assertThat(statistikkRepository.aksjonspunktStatistikk()).isNotEmpty()
             .allMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
