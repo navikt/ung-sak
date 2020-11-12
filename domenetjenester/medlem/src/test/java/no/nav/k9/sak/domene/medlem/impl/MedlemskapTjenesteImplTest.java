@@ -7,10 +7,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -24,25 +25,35 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.konfig.Tid;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class MedlemskapTjenesteImplTest {
 
-    @Rule
-    public UnittestRepositoryRule rule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(rule.getEntityManager());
-    private FagsakRepository fagsakRepository = new FagsakRepository(rule.getEntityManager());
-    private BehandlingRepository behandlingRepository = provider.getBehandlingRepository();
-    private VilkårResultatRepository vilkårResultatRepository = provider.getVilkårResultatRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider ;
+    private FagsakRepository fagsakRepository ;
+    private BehandlingRepository behandlingRepository ;
+    private VilkårResultatRepository vilkårResultatRepository ;
 
     @Inject
     private MedlemTjeneste tjeneste;
 
+    @BeforeEach
+    public void setup()
+    {
+        provider = new BehandlingRepositoryProvider(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        behandlingRepository = provider.getBehandlingRepository();
+        vilkårResultatRepository = provider.getVilkårResultatRepository();
+    }
 
     @Test
     public void skal_returnere_empty_når_vilkåret_er_overstyrt_til_godkjent() {

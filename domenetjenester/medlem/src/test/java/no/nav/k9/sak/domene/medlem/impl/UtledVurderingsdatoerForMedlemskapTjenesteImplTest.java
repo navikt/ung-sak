@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -38,28 +39,29 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.medlem.DummyVilkårsVurderingTjeneste;
 import no.nav.k9.sak.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
     private static final LocalDate DAGENS_DATO = LocalDate.now();
 
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = provider.getBehandlingRepository();
-    private MedlemskapRepository medlemskapRepository = provider.getMedlemskapRepository();
-    private PersonopplysningRepository personopplysningRepository = provider.getPersonopplysningRepository();
-    private FagsakRepository fagsakRepository = provider.getFagsakRepository();
+    private BehandlingRepositoryProvider provider ;
+    private BehandlingRepository behandlingRepository ;
+    private MedlemskapRepository medlemskapRepository ;
+    private PersonopplysningRepository personopplysningRepository ;
+    private FagsakRepository fagsakRepository ;
 
     @Inject
     private UtledVurderingsdatoerForMedlemskapTjeneste tjeneste;
@@ -71,6 +73,16 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
     @Inject
     private InntektArbeidYtelseTjeneste iayTjeneste;
+
+    @BeforeEach
+    public void setup()
+    {
+        provider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = provider.getBehandlingRepository();
+        medlemskapRepository = provider.getMedlemskapRepository();
+        personopplysningRepository = provider.getPersonopplysningRepository();
+        fagsakRepository = provider.getFagsakRepository();
+    }
 
     @Test
     public void skal_ikke_utlede_dato_når_overlappende_perioder_uten_endring_i_medl() {
