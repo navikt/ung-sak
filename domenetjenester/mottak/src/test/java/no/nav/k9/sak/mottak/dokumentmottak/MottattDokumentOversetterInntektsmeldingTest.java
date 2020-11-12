@@ -15,15 +15,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
@@ -42,24 +48,38 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MottattDokumentOversetterInntektsmeldingTest {
     private static final String ORGNR = OrgNummer.KUNSTIG_ORG;
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private final VirksomhetTjeneste virksomhetTjeneste = mock(VirksomhetTjeneste.class);
-    private final FileToStringUtil fileToStringUtil = new FileToStringUtil();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    private VirksomhetTjeneste virksomhetTjeneste ;
+    private FileToStringUtil fileToStringUtil ;
+    private BehandlingRepositoryProvider repositoryProvider ;
 
-    private final InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private final InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-    private MottatteDokumentRepository mottatteDokumentRepository = new MottatteDokumentRepository(repoRule.getEntityManager());
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
+    private MottatteDokumentRepository mottatteDokumentRepository ;
     private MottattDokumentOversetterInntektsmelding oversetter;
 
     @BeforeEach
     public void setUp() throws Exception {
+
+        virksomhetTjeneste = mock(VirksomhetTjeneste.class);
+        fileToStringUtil = new FileToStringUtil();
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
+
         when(virksomhetTjeneste.finnOrganisasjon(ORGNR))
             .thenReturn(Optional.of(Virksomhet.getBuilder().medOrgnr(ORGNR).medNavn("Ukjent Firma").medRegistrert(LocalDate.now().minusDays(1)).build()));
         oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
