@@ -132,8 +132,6 @@ public interface InntektArbeidYtelseTjeneste {
 
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
 
-    Set<Inntektsmelding> hentUnikeInntektsmeldingerInkludertUgyldigeForSak(Saksnummer saksnummer);
-
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
 
     List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer);

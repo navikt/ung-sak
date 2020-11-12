@@ -154,11 +154,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
-    public Set<Inntektsmelding> hentUnikeInntektsmeldingerInkludertUgyldigeForSak(Saksnummer saksnummer) {
-        return hentUnikeInntektsmeldingerForSak(saksnummer);
-    }
-
-    @Override
     public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
         return hentUnikeInntektsmeldingerForSak(saksnummer);
     }

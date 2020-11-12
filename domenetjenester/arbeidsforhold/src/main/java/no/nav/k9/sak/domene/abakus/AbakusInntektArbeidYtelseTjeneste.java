@@ -75,7 +75,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
-    private MottattInntektsmeldingRepository mottattInntektsmeldingRepository;
     private IAYRequestCache requestCache;
 
     /**
@@ -92,11 +91,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
                                              BehandlingRepository behandlingRepository,
                                              FagsakRepository fagsakRepository,
-                                             MottattInntektsmeldingRepository mottattInntektsmeldingRepository,
                                              IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
-        this.mottattInntektsmeldingRepository = Objects.requireNonNull(mottattInntektsmeldingRepository, "mottattInntektsmeldingRepository");
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
     }
@@ -208,20 +205,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             // Hent grunnlag fra abakus
             return hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
 
-        }
-        return Set.of();
-    }
-
-    @Override
-    public Set<Inntektsmelding> hentUnikeInntektsmeldingerInkludertUgyldigeForSak(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (fagsakOpt.isPresent()) {
-            var fagsak = fagsakOpt.get();
-            var mottattInntektsmeldinger = mottattInntektsmeldingRepository.hentAlle(fagsak.getId());
-            /*return hentOgMapAlleInntektsmeldinger(fagsak.getAktørId(), saksnummer, fagsak.getYtelseType()).stream().map(it -> {
-                mottattInntektsmeldinger.stream().filter(it -> it.get)
-                return new MarkertInntektsmelding(it, )
-            }).collect(C); */
         }
         return Set.of();
     }
