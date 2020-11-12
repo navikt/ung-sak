@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,10 @@ public class TilKalkulusMapperTest {
 
     private static PeriodeAndel periode(String fom, String tom) {
         return new PeriodeAndel(dato(fom), dato(tom));
+    }
+
+    private static PeriodeAndel periode(String fom, String tom, Duration zero) {
+        return new PeriodeAndel(dato(fom), dato(tom), zero);
     }
 
     private static LocalDate dato(String måneddato) {
@@ -56,6 +61,43 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
+        var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
+    }
+
+    @Test
+    public void skal_utlede_inntektsmeldinger_som_gjelder_for_periode_2() {
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        var periode14 = periode("04-14", "04-14");
+        var periode1216 = periode("04-12", "04-16");
+        var periode1213 = periode("04-12", "04-13", Duration.ZERO);
+        var inntektsmelding1 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("1")
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("AR123")
+            .medOppgittFravær(List.of(periode14))
+            .medRefusjon(BigDecimal.TEN)
+            .build();
+        var inntektsmelding2 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("2")
+            .medBeløp(BigDecimal.ONE)
+            .medKanalreferanse("AR124")
+            .medOppgittFravær(List.of(periode1216))
+            .medRefusjon(BigDecimal.ONE)
+            .build();
+        var inntektsmelding3 = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medJournalpostId("3")
+            .medBeløp(BigDecimal.ONE)
+            .medKanalreferanse("AR125")
+            .medOppgittFravær(List.of(periode1213))
+            .medRefusjon(BigDecimal.ONE)
+            .build();
+
+        var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
