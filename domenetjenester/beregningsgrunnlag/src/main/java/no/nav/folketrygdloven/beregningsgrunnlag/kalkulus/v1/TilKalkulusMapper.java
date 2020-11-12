@@ -205,7 +205,10 @@ public class TilKalkulusMapper {
     }
 
     private static Optional<LocalDate> finnDatoNærmestSkjæringstidspunktet(Inntektsmelding inntektsmelding, LocalDate skjæringstidspunkt) {
-        return inntektsmelding.getOppgittFravær().stream().map(PeriodeAndel::getFom).min(Comparator.comparingLong(x -> ChronoUnit.DAYS.between(skjæringstidspunkt, x)));
+        return inntektsmelding.getOppgittFravær()
+            .stream()
+            .map(PeriodeAndel::getFom)
+            .min(Comparator.comparingLong(x -> Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, x))));
     }
 
     private static boolean erNærmereEllerLikeNæreSkjæringtidspunktet(Inntektsmelding gammel, LocalDate nyInntektsmeldingDatoNærmestStp, LocalDate skjæringstidspunkt) {
