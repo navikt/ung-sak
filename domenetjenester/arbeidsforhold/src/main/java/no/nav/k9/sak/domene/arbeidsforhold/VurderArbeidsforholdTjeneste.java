@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.FORENKLET_OPPGJØRSOR
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -139,35 +138,26 @@ public class VurderArbeidsforholdTjeneste {
     }
 
     private void erRapportertNormalInntektUtenArbeidsforhold(InntektArbeidYtelseGrunnlag grunnlag, BehandlingReferanse referanse) {
-        LocalDate skjæringstidspunkt = referanse.getUtledetSkjæringstidspunkt();
-        var filter = grunnlag.getAktørInntektFraRegister(referanse.getAktørId()).map(ai -> new InntektFilter(ai).før(skjæringstidspunkt))
+        var filter = grunnlag.getAktørInntektFraRegister(referanse.getAktørId()).map(InntektFilter::new)
             .orElse(InntektFilter.EMPTY);
 
         var lønnFilter = filter.filterPensjonsgivende().filter(InntektspostType.LØNN);
         var arbeidsforholdInformasjon = grunnlag.getArbeidsforholdInformasjon();
         var filterYrkesaktivitet = new YrkesaktivitetFilter(arbeidsforholdInformasjon, grunnlag.getAktørArbeidFraRegister(referanse.getAktørId()));
 
-        lønnFilter.getAlleInntekter().forEach(inntekt -> rapporterHvisHarIkkeArbeidsforhold(grunnlag, inntekt, filterYrkesaktivitet, skjæringstidspunkt));
+        lønnFilter.getAlleInntekter().forEach(inntekt -> rapporterHvisHarIkkeArbeidsforhold(grunnlag, inntekt, filterYrkesaktivitet));
     }
 
     private void rapporterHvisHarIkkeArbeidsforhold(InntektArbeidYtelseGrunnlag grunnlag,
                                                     Inntekt inntekt,
-                                                    YrkesaktivitetFilter filterYrkesaktivitet,
-                                                    LocalDate skjæringstidspunkt) {
-        var filterFør = filterYrkesaktivitet.før(skjæringstidspunkt);
-        var filterEtter = filterYrkesaktivitet.etter(skjæringstidspunkt);
+                                                    YrkesaktivitetFilter filterYrkesaktivitet) {
 
-        boolean ingenFør = true;
-        if (!filterFør.getYrkesaktiviteter().isEmpty()) {
-            ingenFør = ikkeArbeidsforholdRegisterert(inntekt, filterFør);
+        boolean ingen = true;
+        if (!filterYrkesaktivitet.getYrkesaktiviteter().isEmpty()) {
+            ingen = ikkeArbeidsforholdRegisterert(inntekt, filterYrkesaktivitet);
         }
 
-        boolean ingenEtter = true;
-        if (!filterEtter.getYrkesaktiviteter().isEmpty()) {
-            ingenEtter = ikkeArbeidsforholdRegisterert(inntekt, filterEtter);
-        }
-
-        if (ingenFør && ingenEtter) {
+        if (ingen) {
             Optional<InntektsmeldingAggregat> inntektsmeldinger = grunnlag.getInntektsmeldinger();
             if (inntektsmeldinger.isPresent()) {
                 var arbeidsforholdRefs = inntektsmeldinger.get()

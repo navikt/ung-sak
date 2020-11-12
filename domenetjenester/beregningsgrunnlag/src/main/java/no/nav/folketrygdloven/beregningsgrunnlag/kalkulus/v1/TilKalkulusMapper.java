@@ -235,7 +235,7 @@ public class TilKalkulusMapper {
     }
 
     private static Predicate<Inntektsmelding> arbeidsforholdMatcher(Inntektsmelding inntektsmelding) {
-        return it -> it.getArbeidsgiver().equals(inntektsmelding.getArbeidsgiver()) && it.getArbeidsforholdRef().gjelderFor(inntektsmelding.getArbeidsforholdRef());
+        return it -> it.gjelderSammeArbeidsforhold(inntektsmelding);
     }
 
     private static Periode mapPeriode(DatoIntervallEntitet periode) {

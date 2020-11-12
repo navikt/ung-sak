@@ -106,7 +106,7 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Lagre nytt grunnlag for ArbeidsforholdInformasjon. Builder bør ikke gjenbrukes etter kall her.
-     * 
+     *
      * @param behandlingId - Behandling Id
      * @param aktørId - Aktør Id
      * @param builder - {@link ArbeidsforholdInformasjonBuilder}
@@ -115,7 +115,7 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Kopier IAY grunnlag fra en behandling til en annen.
-     * 
+     *
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling
      */
@@ -123,7 +123,7 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Kopier IAY grunnlag fra en behandling til en annen.
-     * 
+     *
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling
      * @param dataset - aggregatene som skal kopieres
@@ -131,6 +131,8 @@ public interface InntektArbeidYtelseTjeneste {
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
 
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
+
+    Set<Inntektsmelding> hentUnikeInntektsmeldingerInkludertUgyldigeForSak(Saksnummer saksnummer);
 
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
 
@@ -140,7 +142,7 @@ public interface InntektArbeidYtelseTjeneste {
 
     /**
      * Lagre en eller flere inntektsmeldinger på en behandling for en sak.
-     * 
+     *
      * @param saksnummer - Saksnummer
      * @param behandlingId - Behandling Id
      * @param builders - Collection med {@link InntektsmeldingBuilder}
