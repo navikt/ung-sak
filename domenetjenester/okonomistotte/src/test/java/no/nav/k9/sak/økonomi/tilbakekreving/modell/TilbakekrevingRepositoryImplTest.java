@@ -5,27 +5,35 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TilbakekrevingRepositoryImplTest {
 
-    @Rule
-    public RepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private EntityManager entityManager = repoRule.getEntityManager();
+    private TilbakekrevingRepository repository;
+    private BasicBehandlingBuilder behandlingBuilder;
 
-    private TilbakekrevingRepository repository = new TilbakekrevingRepository(entityManager);
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    @BeforeEach
+    public void setup() {
+        repository = new TilbakekrevingRepository(entityManager);
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    }
 
     @Test
     public void skal_gi_empty_når_det_hentes_for_behandling_som_ikke_har_tilbakekrevingsvalg() {
