@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -34,15 +35,19 @@ public class InfotrygdFeedPeriodeTest {
         new InfotrygdFeedPeriode(LocalDate.of(2020, 1, 1), null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void valider_fom_etter_tom() {
-        LocalDate før = LocalDate.of(2020, 1, 1);
-        LocalDate etter = før.plusDays(1);
-        new InfotrygdFeedPeriode(etter, før);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            LocalDate før = LocalDate.of(2020, 1, 1);
+            LocalDate etter = før.plusDays(1);
+            new InfotrygdFeedPeriode(etter, før);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void valider_ubegrenset_fom_med_tom() {
-        new InfotrygdFeedPeriode(null, LocalDate.of(2020, 1, 1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new InfotrygdFeedPeriode(null, LocalDate.of(2020, 1, 1));
+        });
     }
 }
