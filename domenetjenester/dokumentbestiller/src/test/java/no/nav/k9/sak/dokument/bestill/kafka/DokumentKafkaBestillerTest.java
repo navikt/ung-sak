@@ -4,21 +4,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
-import org.junit.jupiter.api.BeforeEach;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
@@ -27,13 +34,20 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEventPubliserer;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DokumentKafkaBestillerTest {
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+
+    @Inject
+    private EntityManager entityManager;
+
     private DokumentKafkaBestiller dokumentKafkaBestiller;
     private BehandlingRepositoryProvider repositoryProvider;
 
@@ -47,11 +61,11 @@ public class DokumentKafkaBestillerTest {
 
     @BeforeEach
     public void setup() {
-        repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
 
         ProsessTaskEventPubliserer eventPubliserer = Mockito.mock(ProsessTaskEventPubliserer.class);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        prosessTaskRepository = new ProsessTaskRepositoryImpl(repositoryRule.getEntityManager(), null, eventPubliserer);
+        prosessTaskRepository = new ProsessTaskRepositoryImpl(entityManager, null, eventPubliserer);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.lagre(repositoryProvider);
