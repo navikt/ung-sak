@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -27,7 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBu
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
@@ -36,14 +36,16 @@ import no.nav.k9.sak.test.util.behandling.personopplysning.PersonAdresse;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AvklarOmErBosattTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider;
 
     @Inject
     private MedlemskapRepository medlemskapRepository;
@@ -58,6 +60,7 @@ public class AvklarOmErBosattTest {
 
     @BeforeEach
     public void setUp() {
+        provider = new BehandlingRepositoryProvider(entityManager);
         this.avklarOmErBosatt = new AvklarOmErBosatt(medlemskapRepository, medlemskapPerioderTjeneste, personopplysningTjeneste);
     }
 

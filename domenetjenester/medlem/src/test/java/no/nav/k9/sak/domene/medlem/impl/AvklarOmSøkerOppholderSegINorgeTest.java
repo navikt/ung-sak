@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -25,7 +25,7 @@ import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
@@ -38,14 +38,16 @@ import no.nav.k9.sak.test.util.behandling.personopplysning.PersonAdresse;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AvklarOmSøkerOppholderSegINorgeTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider;
 
     @Inject
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -56,7 +58,9 @@ public class AvklarOmSøkerOppholderSegINorgeTest {
     private AvklarOmSøkerOppholderSegINorge tjeneste;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp()
+    {
+        provider = new BehandlingRepositoryProvider(entityManager);
         this.tjeneste = new AvklarOmSøkerOppholderSegINorge(personopplysningTjeneste, iayTjeneste);
     }
 
