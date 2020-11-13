@@ -33,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.OpptjeningAktivitetTypeKodeverdiConverter;
-import no.nav.k9.sak.behandlingslager.økonomioppdrag.InntektskategoriKlassekodeMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
@@ -483,7 +482,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
             if (!mal.brukerErMottaker) {
                 Objects.requireNonNull(mal.arbeidsgiver, "virksomhet");
             }
-            InntektskategoriKlassekodeMapper.verifyInntektskategori(mal.inntektskategori);
         }
 
         private void verifyUtbetalingsgrad(BigDecimal utbetalingsgrad) {
