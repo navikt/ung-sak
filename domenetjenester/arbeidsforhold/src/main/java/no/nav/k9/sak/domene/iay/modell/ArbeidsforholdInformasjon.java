@@ -81,8 +81,9 @@ public class ArbeidsforholdInformasjon {
             .medArbeidsgiver(arbeidsgiver);
     }
 
-    void leggTilOverstyring(ArbeidsforholdOverstyring build) {
-        this.overstyringer.add(build);
+    void leggTilOverstyring(ArbeidsforholdOverstyring overstyring) {
+        this.overstyringer.remove(overstyring);
+        this.overstyringer.add(overstyring);
     }
 
     void tilbakestillOverstyringer() {
