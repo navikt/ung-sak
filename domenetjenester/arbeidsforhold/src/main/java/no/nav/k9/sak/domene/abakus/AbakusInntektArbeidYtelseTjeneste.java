@@ -481,10 +481,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var dto = hentUnikeInntektsmeldinger(request);
         var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
 
-        var sorted = inntektsmeldinger.stream()
+        return inntektsmeldinger.stream()
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        return sorted;
     }
 
     private List<RefusjonskravDato> hentOgMapAlleRefusjonskravDatoer(Fagsak fagsak) {

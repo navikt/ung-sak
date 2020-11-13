@@ -3,7 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -36,6 +39,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -111,13 +115,54 @@ public class ForvaltningBeregningRestTjeneste {
         return Response.ok(inputListe, JSON).cacheControl(cc).build();
     }
 
-    public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
+    @GET
+    @Path("inntektsmelding-sortering")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Sorterte inntektsmeldinger per vilkårsperiode", tags = "beregning",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer kalkulatorinput på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = Map.class), schema = @Schema(implementation = Inntektsmelding.class)), mediaType = MediaType.APPLICATION_JSON)),
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response inntektsmeldingSortering(@QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) BehandlingIdDto behandlingIdDto) { // NOSONAR
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var ref = BehandlingReferanse.fra(behandling);
+
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true);
+
+        Map<DatoIntervallEntitet, Set<Inntektsmelding>> fordeltInntektsmelding = new HashMap<>();
+
+        perioderTilVurdering.forEach(periode -> fordeltInntektsmelding.put(periode,
+            sakInntektsmeldinger.stream()
+                .filter(it -> it.getOppgittFravær()
+                    .stream()
+                    .anyMatch(at -> DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()).overlapper(periode))
+                ).collect(Collectors.toSet())));
+        fordeltInntektsmelding.put(behandling.getFagsak().getPeriode(), sakInntektsmeldinger.stream()
+            .filter(it -> perioderTilVurdering.stream()
+                .noneMatch(at -> it.getOppgittFravær().stream()
+                    .noneMatch(of -> DatoIntervallEntitet.fraOgMedTilOgMed(of.getFom(), of.getTom()).overlapper(at))))
+            .collect(Collectors.toSet()));
+
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+        cc.setNoStore(true);
+        cc.setMaxAge(0);
+        cc.setPrivate(true);
+
+        return Response.ok(fordeltInntektsmelding, JSON).cacheControl(cc).build();
+    }
+
+    private BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
         String ytelseTypeKode = ytelseType.getKode();
         return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
             () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
     }
 
-    public KalkulatorInputTjeneste getKalkulatorInputTjeneste(FagsakYtelseType ytelseType) {
+    private KalkulatorInputTjeneste getKalkulatorInputTjeneste(FagsakYtelseType ytelseType) {
         String ytelseTypeKode = ytelseType.getKode();
         return FagsakYtelseTypeRef.Lookup.find(kalkulatorInputTjeneste, ytelseTypeKode).orElseThrow(
             () -> new UnsupportedOperationException("Har ikke " + KalkulatorInputTjeneste.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));

@@ -13,6 +13,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjon
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
@@ -79,6 +80,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
+        classes.add(ForvaltningBeregningRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 
