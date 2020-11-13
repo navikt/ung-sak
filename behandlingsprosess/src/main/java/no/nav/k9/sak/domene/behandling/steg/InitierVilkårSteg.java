@@ -1,18 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg;
 
 import java.util.NavigableSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -28,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @BehandlingStegRef(kode = "INIT_VILKÅR")
@@ -37,10 +31,8 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class InitierVilkårSteg implements BehandlingSteg {
 
-    private Set<Saksnummer> feilendSaker = Set.of(new Saksnummer("6L5CG"), new Saksnummer("6JPNC"));
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private BehandlingProsesseringTjeneste prosesseringTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private boolean valideringDeaktivert;
 
@@ -51,12 +43,10 @@ public class InitierVilkårSteg implements BehandlingSteg {
     @Inject
     public InitierVilkårSteg(BehandlingRepository behandlingRepository,
                              VilkårResultatRepository vilkårResultatRepository,
-                             BehandlingProsesseringTjeneste prosesseringTjeneste,
                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                              @KonfigVerdi(value = "VILKAR_FAGSAKPERIODE_VALIDERING_DEAKTIVERT", required = false) boolean valideringDeaktivert) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.prosesseringTjeneste = prosesseringTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.valideringDeaktivert = valideringDeaktivert;
     }
@@ -66,16 +56,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         // Utleder vilkår med en gang
-        try {
-            utledVilkår(behandling);
-        } catch (NoSuchElementException e) {
-            // FIXME: Rydd opp, midlertidig tiltak pga behandlinger i limbo
-            if (FagsakYtelseType.OMSORGSPENGER.equals(behandling.getFagsakYtelseType()) && feilendSaker.contains(behandling.getFagsak().getSaksnummer())) {
-                // Planlegg ny fortsett behandling
-                prosesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
-                return BehandleStegResultat.tilbakeførtTilSteg(BehandlingStegType.INIT_PERIODER);
-            }
-        }
+        utledVilkår(behandling);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
