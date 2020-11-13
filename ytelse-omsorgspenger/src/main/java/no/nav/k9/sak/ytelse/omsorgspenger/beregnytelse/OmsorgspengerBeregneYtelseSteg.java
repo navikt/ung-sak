@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,6 +128,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                 .filter(it -> UttakArbeidType.fraKode(it.getArbeidsforhold().getType()).erArbeidstakerEllerFrilans())
                 .filter(it -> it.getUttaksperioder()
                     .stream()
+                    .filter(at -> !Duration.ZERO.equals(at.getDelvisFravær()))
                     .anyMatch(at -> periode.overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
                 .map(Aktivitet::getArbeidsforhold)
                 .forEach(it -> {
