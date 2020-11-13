@@ -64,33 +64,31 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         }
         var informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
 
-        // Arbeidsforhold basert på saksbehandler lagt til
-        List<AvklarArbeidsforholdDto> arbeidsforholdLagtTilAvSaksbehandler = arbeidsforhold.stream()
+        var arbeidsforholdLagtTilAvSaksbehandler = arbeidsforhold.stream()
             .filter(dto -> Boolean.TRUE.equals(dto.getLagtTilAvSaksbehandler()))
             .collect(Collectors.toList());
+        // Arbeidsforhold basert på saksbehandler lagt til
         if (!arbeidsforholdLagtTilAvSaksbehandler.isEmpty()) {
             lagHistorikkinnslag(arbeidsforholdLagtTilAvSaksbehandler);
-            håndterManuelleArbeidsforhold(param);
             leggTilArbeidsforhold(informasjonBuilder, arbeidsforholdLagtTilAvSaksbehandler);
         }
 
-        // Arbeidsforhold basert på inntektsmelding
-        List<AvklarArbeidsforholdDto> arbeidsforholdBasertPåInntektsmelding = arbeidsforhold.stream()
+        var arbeidsforholdBasertPåInntektsmelding = arbeidsforhold.stream()
             .filter(dto -> Boolean.TRUE.equals(dto.getBasertPaInntektsmelding()))
             .collect(Collectors.toList());
+        // Arbeidsforhold basert på inntektsmelding
         if (!arbeidsforholdBasertPåInntektsmelding.isEmpty()) {
-            lagHistorikkinnslag(arbeidsforholdLagtTilAvSaksbehandler);
-            håndterManuelleArbeidsforhold(param);
+            lagHistorikkinnslag(arbeidsforholdBasertPåInntektsmelding);
             leggTilArbeidsforhold(informasjonBuilder, arbeidsforholdBasertPåInntektsmelding);
         }
 
         // Andre overstyringer av opprinnelige arbeidsforhold
-        // TODO: DETTE KAN MULIG FJERNES? ER BARE BEGRUNNELSE OG PERMISJON IGJEN SOM SETTES HER? (MULIG OGSÅ BRUK/IKKE_BRUK?)
-        List<AvklarArbeidsforholdDto> opprinneligeArbeidsforhold = arbeidsforhold.stream()
+        // TODO: ER BARE BEGRUNNELSE OG PERMISJON IGJEN SOM SETTES HER? (MULIG OGSÅ BRUK/IKKE_BRUK?)
+        var opprinneligeArbeidsforhold = arbeidsforhold.stream()
             .filter(dto -> !Boolean.TRUE.equals(dto.getLagtTilAvSaksbehandler()) && !Boolean.TRUE.equals(dto.getBasertPaInntektsmelding()))
             .collect(Collectors.toList());
         if (!opprinneligeArbeidsforhold.isEmpty()) {
-            List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()).getArbeidsforholdOverstyringer();
+            var overstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()).getArbeidsforholdOverstyringer();
             for (var dto : opprinneligeArbeidsforhold) {
                 var ref = InternArbeidsforholdRef.ref(dto.getArbeidsforholdId());
                 arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(param, dto, hentArbeidsgiver(dto), ref, overstyringer);
@@ -98,6 +96,9 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
             leggPåOverstyringPåOpprinnligeArbeidsforhold(informasjonBuilder, opprinneligeArbeidsforhold);
         }
 
+        if (!arbeidsforholdLagtTilAvSaksbehandler.isEmpty() || !arbeidsforholdBasertPåInntektsmelding.isEmpty()) {
+            håndterManuelleArbeidsforhold(param);
+        }
         // krever totrinn hvis saksbehandler har tatt stilling til dette aksjonspunktet
         arbeidsforholdTjeneste.lagre(param.getBehandlingId(), param.getAktørId(), informasjonBuilder);
         return OppdateringResultat.utenTransisjon().medTotrinn().build();
