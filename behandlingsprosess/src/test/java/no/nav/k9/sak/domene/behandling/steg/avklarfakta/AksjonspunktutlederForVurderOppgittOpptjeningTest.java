@@ -9,9 +9,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 
@@ -28,7 +31,7 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
@@ -43,27 +46,34 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private Skjæringstidspunkt skjæringstidspunkt ;
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private VirksomhetTjeneste virksomhetTjeneste ;
+
+    @Spy
+    private AksjonspunktutlederForVurderOppgittOpptjening utleder ;
 
     private OpptjeningRepository opptjeningRepository;
 
-    private Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
-
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-
-    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
-
-    @Spy
-    private AksjonspunktutlederForVurderOppgittOpptjening utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
-        repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste);
-
     @BeforeEach
     public void oppsett() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
+        utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
+            repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste);
+
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
     }

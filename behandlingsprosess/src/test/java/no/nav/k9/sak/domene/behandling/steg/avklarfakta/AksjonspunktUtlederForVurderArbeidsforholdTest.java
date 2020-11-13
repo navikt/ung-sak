@@ -9,10 +9,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -25,7 +31,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
@@ -46,25 +52,46 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
+
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AksjonspunktUtlederForVurderArbeidsforholdTest {
 
     private static final String ORGNR = "21542512";
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(new InntektsmeldingFilterYtelseImpl()));
-    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
-    private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private InntektArbeidYtelseTjeneste iayTjeneste  ;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
+    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste ;
+    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste ;
+    private VurderArbeidsforholdTjeneste tjeneste  ;
 
     @Spy
-    private AksjonspunktUtlederForVurderArbeidsforhold utleder = new AksjonspunktUtlederForVurderArbeidsforhold(
-        iayTjeneste,
-        tjeneste);
+    private AksjonspunktUtlederForVurderArbeidsforhold utleder ;
+
+    @BeforeEach
+    public void setupt(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+        inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(new InntektsmeldingFilterYtelseImpl()));
+        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
+        tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
+
+        utleder = new AksjonspunktUtlederForVurderArbeidsforhold(
+            iayTjeneste,
+            tjeneste);
+    }
+
+
 
     @Test
     public void skal_få_aksjonspunkt_når_det_finnes_inntekt_og_ikke_arbeidsforhold() {

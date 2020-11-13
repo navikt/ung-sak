@@ -1,10 +1,11 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -14,27 +15,35 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.InngangsvilkårFellesTjeneste;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderOpptjeningsvilkårStegTest {
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
+
     @Inject
     public InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste;
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+
     @Inject
     private OpptjeningRepository opptjeningRepository;
 
     @Inject
     private BehandlingRepository behandlingRepository;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+
+    @BeforeEach
+    public void setup(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);
