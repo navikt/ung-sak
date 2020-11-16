@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
@@ -19,7 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringEntitet;
 import no.nav.k9.sak.domene.risikoklassifisering.modell.RisikoklassifiseringRepository;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
@@ -29,10 +33,14 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.kontroll.VurderFaresignalerDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.VurderFaresignalerOppdaterer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderFaresignalerOppdatererTest {
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+
+    @Inject
+    private EntityManager entityManager;
 
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     private BehandlingRepository behandlingRepository;
@@ -47,11 +55,11 @@ public class VurderFaresignalerOppdatererTest {
 
     @BeforeEach
     public void setup() {
-        behandlingRepositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
+        behandlingRepositoryProvider = new BehandlingRepositoryProvider(entityManager);
         HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
         historikkAdapter = new HistorikkTjenesteAdapter(behandlingRepositoryProvider.getHistorikkRepository(), historikkInnslagKonverter, null);
-        behandlingRepository = new BehandlingRepository(repositoryRule.getEntityManager());
-        risikoklassifiseringRepository = new RisikoklassifiseringRepository(repositoryRule.getEntityManager());
+        behandlingRepository = new BehandlingRepository(entityManager);
+        risikoklassifiseringRepository = new RisikoklassifiseringRepository(entityManager);
         risikovurderingTjeneste = new RisikovurderingTjeneste(risikoklassifiseringRepository, behandlingRepository, null, null, null);
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(behandlingRepositoryProvider);
@@ -162,19 +170,23 @@ public class VurderFaresignalerOppdatererTest {
         assertThat(faresignaler.get().getFraVerdi()).isEqualTo(HistorikkEndretFeltVerdiType.INNVIRKNING.getKode());
     }
 
-    @Test( expected = IllegalStateException.class)
+    @Test
     public void skal_feile_om_det_ikke_finnes_en_risikoklassifisering_for_behandlingen() {
-        // Arrange
-        VurderFaresignalerDto dto = new VurderFaresignalerDto("Dustemikkel", true);
 
-        // Act
-        vurderFaresignalerOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-        Optional<RisikoklassifiseringEntitet> oppdatertEntitet = risikoklassifiseringRepository.hentRisikoklassifiseringForBehandling(behandling.getId());
+        Assertions.assertThrows(IllegalStateException.class, () -> {
 
-        // Assert
-        assertThat(oppdatertEntitet).isPresent();
-        assertThat(oppdatertEntitet.get().getFaresignalVurdering()).isEqualTo(FaresignalVurdering.INNVIRKNING);
-        assertThat(oppdatertEntitet.get().getKontrollresultat()).isEqualTo(Kontrollresultat.HØY);
+            // Arrange
+            VurderFaresignalerDto dto = new VurderFaresignalerDto("Dustemikkel", true);
+
+            // Act
+            vurderFaresignalerOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+            Optional<RisikoklassifiseringEntitet> oppdatertEntitet = risikoklassifiseringRepository.hentRisikoklassifiseringForBehandling(behandling.getId());
+
+            // Assert
+            assertThat(oppdatertEntitet).isPresent();
+            assertThat(oppdatertEntitet.get().getFaresignalVurdering()).isEqualTo(FaresignalVurdering.INNVIRKNING);
+            assertThat(oppdatertEntitet.get().getKontrollresultat()).isEqualTo(Kontrollresultat.HØY);
+        });
     }
 
 
