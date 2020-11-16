@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
@@ -35,9 +34,6 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "erBrukerMottaker")
     @Valid
     private Boolean erBrukerMottaker;
-    @JsonProperty(value = "aktivitetStatus")
-    @Valid
-    private AktivitetStatus aktivitetStatus;
     @JsonProperty(value = "inntektskategori", required = true)
     @Valid
     private Inntektskategori inntektskategori;
@@ -91,7 +87,6 @@ public class TilkjentYtelseAndelDto {
         this.refusjon = builder.refusjon;
         this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
-        this.aktivitetStatus = builder.aktivitetStatus;
         this.arbeidsforholdId = builder.arbeidsforholdId;
         this.aktørId = builder.aktørId;
         this.arbeidsforholdType = builder.arbeidsforholdType;
@@ -103,10 +98,6 @@ public class TilkjentYtelseAndelDto {
 
     public static Builder build() {
         return new Builder();
-    }
-
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
     }
 
     public AktørId getAktørId() {
@@ -158,7 +149,6 @@ public class TilkjentYtelseAndelDto {
     }
 
     public static class Builder {
-        private AktivitetStatus aktivitetStatus;
         private AktørId aktørId;
         private String arbeidsforholdId;
         private OpptjeningAktivitetType arbeidsforholdType;
@@ -177,11 +167,6 @@ public class TilkjentYtelseAndelDto {
 
         public TilkjentYtelseAndelDto create() {
             return new TilkjentYtelseAndelDto(this);
-        }
-
-        public Builder medAktivitetstatus(AktivitetStatus aktivitetStatus) {
-            this.aktivitetStatus = aktivitetStatus;
-            return this;
         }
 
         public Builder medAktørId(AktørId aktørId) {

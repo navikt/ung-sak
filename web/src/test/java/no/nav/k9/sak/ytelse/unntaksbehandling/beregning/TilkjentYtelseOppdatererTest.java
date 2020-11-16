@@ -76,7 +76,6 @@ public class TilkjentYtelseOppdatererTest {
             .medErBrukerMottaker(true) //TODO: Fjernes
             .medRefusjon(dagsatsRefusjon)
             .medTilSoker(dagsatsBruker)
-//            .medAktivitetstatus(aktivitetStatus)
             .medInntektskategori(inntekskategori)
             .medArbeidsgiver(arbeidsgiver)
             .medUtbetalingsgrad(utbealingsgrad)

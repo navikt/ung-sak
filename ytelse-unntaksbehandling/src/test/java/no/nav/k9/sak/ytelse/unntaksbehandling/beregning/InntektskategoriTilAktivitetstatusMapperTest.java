@@ -19,7 +19,7 @@ public class InntektskategoriTilAktivitetstatusMapperTest {
                 assertThatCode(() ->
                     TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor(k)
                 )
-                    .as("Finner ingen mapping for inntekskategori %s, ta stilling til om denen skal legges til i %s", k, TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.class)
+                    .as("Finner ingen mapping for inntekskategori %s, ta stilling til om denne skal legges til i %s", k, TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.class)
                     .doesNotThrowAnyException()
             );
     }
