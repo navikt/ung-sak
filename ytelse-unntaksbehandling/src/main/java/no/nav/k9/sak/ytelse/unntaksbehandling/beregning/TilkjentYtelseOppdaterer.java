@@ -1,9 +1,13 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
 
-import static no.nav.k9.sak.ytelse.unntaksbehandling.vilkår.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
+import static java.lang.String.format;
+import static java.util.Map.entry;
+import static java.util.Optional.ofNullable;
+import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,6 +15,8 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -113,5 +119,26 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
             .medStillingsprosent(STILLINGSPROSENT);
+    }
+
+    static class InntektskategoriTilAktivitetstatusMapper {
+        private static final Map<Inntektskategori, AktivitetStatus> INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP = Map.ofEntries(
+            entry(Inntektskategori.ARBEIDSTAKER,/*                  */ AktivitetStatus.ARBEIDSTAKER),
+            entry(Inntektskategori.FRILANSER,/*                     */ AktivitetStatus.FRILANSER),
+            entry(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,/*   */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.DAGPENGER,/*                     */ AktivitetStatus.DAGPENGER),
+            entry(Inntektskategori.ARBEIDSAVKLARINGSPENGER,/*       */ AktivitetStatus.ARBEIDSAVKLARINGSPENGER),
+            entry(Inntektskategori.SJØMANN,/*                       */ AktivitetStatus.ARBEIDSTAKER),
+            entry(Inntektskategori.DAGMAMMA,/*                      */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.JORDBRUKER,/*                    */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.FISKER,/*                        */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER,/* */ AktivitetStatus.ARBEIDSTAKER)
+        );
+
+        static AktivitetStatus aktivitetStatusFor(Inntektskategori inntektskategori) {
+            return ofNullable(INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.get(inntektskategori))
+                .orElseThrow(() -> new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori)));
+
+        }
     }
 }
