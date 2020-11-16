@@ -10,11 +10,7 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
@@ -35,20 +31,16 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 public class DokumentKafkaBestillerTest {
 
     @Inject
     private EntityManager entityManager;
-
     private DokumentKafkaBestiller dokumentKafkaBestiller;
     private BehandlingRepositoryProvider repositoryProvider;
 
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
 
-    @Mock
     private BrevHistorikkinnslag brevHistorikkinnslag;
 
     private Behandling behandling;
@@ -56,7 +48,7 @@ public class DokumentKafkaBestillerTest {
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-
+        brevHistorikkinnslag = Mockito.mock(BrevHistorikkinnslag.class);
         ProsessTaskEventPubliserer eventPubliserer = Mockito.mock(ProsessTaskEventPubliserer.class);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         prosessTaskRepository = new ProsessTaskRepositoryImpl(entityManager, null, eventPubliserer);

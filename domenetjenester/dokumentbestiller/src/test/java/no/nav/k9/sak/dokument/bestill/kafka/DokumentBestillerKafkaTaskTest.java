@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -17,29 +20,30 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class DokumentBestillerKafkaTaskTest {
 
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     private DokumentbestillingProducer dokumentbestillingProducer;
     private DokumentBestillerKafkaTask dokumentBestillerKafkaTask;
     private BehandlingRepositoryProvider repositoryProvider;
-    private BehandlingRepository behandlingRepository;
 
 
-    @Before
+    @BeforeEach
     public void setup() {
         dokumentbestillingProducer = Mockito.mock(DokumentbestillingProducer.class);
-        repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
 
-        behandlingRepository = repositoryProvider.getBehandlingRepository();
-
+        BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
         dokumentBestillerKafkaTask = new DokumentBestillerKafkaTask(dokumentbestillingProducer, behandlingRepository);
     }
