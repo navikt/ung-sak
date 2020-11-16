@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.task;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
@@ -29,7 +30,7 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        Long fagsakId = prosessTaskData.getFagsakId();
+        Long fagsakId = Objects.requireNonNull(prosessTaskData.getFagsakId(), "fagsakId");
 
         identifiserBehandling(prosessTaskData)
             .stream()
@@ -38,7 +39,7 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
 
         fagsakLåsRepository.taLås(fagsakId);
 
-            prosesser(prosessTaskData);
+        prosesser(prosessTaskData);
     }
 
     protected abstract void prosesser(ProsessTaskData prosessTaskData);

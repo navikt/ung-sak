@@ -35,6 +35,17 @@ public class FagsakRepository {
         this.entityManager = entityManager;
     }
 
+    public Fagsak finnEksaktFagsak(long fagsakId, boolean taSkriveLås) {
+        TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where id=:fagsakId", Fagsak.class);
+        query.setParameter("fagsakId", fagsakId); // NOSONAR
+        if (taSkriveLås) {
+            query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+        }
+        Fagsak fagsak = HibernateVerktøy.hentEksaktResultat(query);
+        entityManager.refresh(fagsak); // hent alltid på nytt
+        return fagsak;
+    }
+
     public Fagsak finnEksaktFagsak(long fagsakId) {
         TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where id=:fagsakId", Fagsak.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
