@@ -31,6 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.shibboleth.utilities.java.support.security.DataSealerKeyStrategy;
+import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 import no.nav.k9.sak.db.util.DatasourceConfiguration;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
@@ -58,15 +60,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     public static void setup() {
         // Kan ikke skrus på nå - trigger på CHAR kolonner som kunne vært VARCHAR. Må fikses først
         // System.setProperty("hibernate.hbm2ddl.auto", "validate");
-        try {
-            // trenger å konfigurere opp jndi etc.
-            DBConnectionProperties connectionProperties = DBConnectionProperties.finnDefault(DatasourceConfiguration.UNIT_TEST.get()).get();
-            DatabaseStøtte.settOppJndiForDefaultDataSource(Collections.singletonList(connectionProperties));
-
-        } catch (FileNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-
+        Databaseskjemainitialisering.settJdniOppslag();
         Map<String, Object> configuration = new HashMap<>();
 
         configuration.put("hibernate.integrator_provider",

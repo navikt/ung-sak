@@ -9,7 +9,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -38,13 +37,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.db.util.DatasourceConfiguration;
+import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
-import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-/** Sjekker alle entiteter er mappet korrekt.  Ligger i web slik at den fanger alle orm filer lagt i ulike moduler. */
+/** Sjekker alle entiteter er mappet korrekt. Ligger i web slik at den fanger alle orm filer lagt i ulike moduler. */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class EntityTest {
@@ -52,15 +49,7 @@ public class EntityTest {
     private static final EntityManagerFactory entityManagerFactory;
 
     static {
-        // Kan ikke skrus på nå - trigger på CHAR kolonner som kunne vært VARCHAR.  Må fikses først
-        //System.setProperty("hibernate.hbm2ddl.auto", "validate");
-        try {
-            // trenger å konfigurere opp jndi etc.
-            DBConnectionProperties connectionProperties = DBConnectionProperties.finnDefault(DatasourceConfiguration.UNIT_TEST.get()).get();
-            DatabaseStøtte.settOppJndiForDefaultDataSource(Collections.singletonList(connectionProperties));
-        } catch (FileNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
+        Databaseskjemainitialisering.settJdniOppslag();
         entityManagerFactory = Persistence.createEntityManagerFactory("pu-default");
     }
 
