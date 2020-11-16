@@ -1,15 +1,20 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-
-import no.nav.k9.kodeverk.TempAvledeKode;
-import no.nav.k9.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.kodeverk.TempAvledeKode;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -34,6 +39,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     PUNKT_FOR_OMSORGEN_FOR("PUNKT_FOR_OMSORGEN_FOR", "Omsorgen for"),
     PUNKT_FOR_MEDLEMSKAP_LØPENDE("PUNKT_FOR_MEDLEMSKAP_LØPENDE", "Punkt for medlemskap løpende"),
     PUNKT_FOR_OPPTJENING("PUNKT_FOR_OPPTJENING", "Opptjening"),
+    PUNKT_FOR_MAN_VILKÅRSVURDERING("PUNKT_FOR_MAN_VILKÅRSVURDERING", "Punkt for manuell vilkårsvurdering"),
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     UDEFINERT("-", "Ikke definert"),

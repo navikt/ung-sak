@@ -146,7 +146,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     MANUELL_TILKJENT_YTELSE(
         AksjonspunktKodeDefinisjon.MANUELL_TILKJENT_YTELSE_KODE, AksjonspunktType.MANUELL,
         "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
-        UTEN_VILKÅR, UTEN_SKJERMLENKE,
+        UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE,
         TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     VURDER_FAKTA_FOR_ATFL_SN(AksjonspunktKodeDefinisjon.VURDER_FAKTA_FOR_ATFL_SN_KODE,
         AksjonspunktType.MANUELL, "Vurder fakta for arbeidstaker, frilans og selvstendig næringsdrivende", BehandlingStatus.UTREDES,
@@ -170,7 +170,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, EnumSet.of(OMP, PSB)),
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
         AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(OMP, PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, EnumSet.of(OMP, PSB)),
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
         AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(OMP, PSB)),
