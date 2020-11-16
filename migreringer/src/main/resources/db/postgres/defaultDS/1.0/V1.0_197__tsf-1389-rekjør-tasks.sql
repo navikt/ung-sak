@@ -5,11 +5,10 @@ SELECT nextval('seq_prosess_task'),
   nextval('seq_prosess_task_gruppe'),
   (current_timestamp at time zone 'UTC') + (row_number() OVER()) * INTERVAL '1 seconds',
   'fagsakId=' || t.id || '
-  saksnummer=' || t.saksnummer || '
+  saksnummer=' || t.saksnummer
 FROM (
   select distinct f.saksnummer, f.id from fagsak f
-  where f.saksnummer IN (
- '6FLKS', '6GB02', '6GDE6', '6GDZ0', '6GFH6', '6GGV6', '6GHY2', '6GJRC', '6GJVi', '6GK58', '6GK9E', '6GLM0', '6GLVQ', '6GMB0', '6GQ8o', '6GR4M', '6GUBW', '6GVHK', '6GVRA', 
+  where f.saksnummer IN ('6FLKS', '6GB02', '6GDE6', '6GDZ0', '6GFH6', '6GGV6', '6GHY2', '6GJRC', '6GJVi', '6GK58', '6GK9E', '6GLM0', '6GLVQ', '6GMB0', '6GQ8o', '6GR4M', '6GUBW', '6GVHK', '6GVRA', 
  '6GYNG', '6H0GQ', '6H462', '6H7SM', '6HBYM', '6HEJo', '6HQNS', '6HU8Y', '6HUTS', '6HVWo', '6HVZG', '6HWR8', '6HYYE', '6i25o', '6i4iE', '6i5A6', '6i5LA', '6i894', '6i9iY', 
  '6iAYC', '6iDCG', '6iFUQ', '6iHBi', '6ii4o', '6iJ4S', '6iJAC', '6iJZC', '6iK3i', '6iK4W', '6iLDC', '6iLoG', '6iM3Q', '6iNZS', '6iooS', '6iPJC', '6iPoW', '6iPRo', '6iPUG',
  '6iQM8', '6iYES', '6iYRA', '6J082', '6J1HW', '6J2F8', '6J3FC', '6J8Ei', '6JAWS', '6JBU4', '6JEM4', '6JF1E', '6JJPG', '6JKK0', '6Jo6K', '6JQ6S', '6JQ9K', '6JV7C', '6JW1W', 
@@ -116,8 +115,7 @@ FROM (
  '9KAG0', '9KFUG', '9KJ0C', '9KJJS', '9KJWA', '9KMV8', '9KR40', '9KZMY', '9L13Q', '9LA3C', '9LBWM', '9LBZE', '9LG6S', '9Lo3i', '9LoZG', '9LTKQ', '9LYQU', '9LZ1Y', '9M0MW', 
  '9M22A', '9M2ZM', '9M3VK', '9M7T8', '9M8W4', '9MBJY', '9MG80', '9MLW6', '9MQK8', '9NAL2', '9NEMW', '9NEPo', '9NEZE', '9NF3K', '9NF94', '9NFVC', '9NLMA', '9NNCS', '9NRoC', 
  '9NSKA', '9NT2C', '9o1FQ', '9o3Y0', '9o6Di', '9o9Yo', '9oJQ2', '9P9AW', '9PAM4', '9PD30', '9PFZ6', '9PG0K', '9PMAY', '9PMJA', '9PMM2', '9PN44', '9PNoY', '9PNQC', '9PNYo', 
- '9Po2U', '9Po70', '9PoB6', '9PoJi', '9PP9W', '9PPNS', '9PQUU'
-  )
+ '9Po2U', '9Po70', '9PoB6', '9PoJi', '9PP9W', '9PPNS', '9PQUU')
   AND f.ytelse_type = 'OMP'
 ) t
 ;
