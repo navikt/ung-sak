@@ -62,6 +62,10 @@ public class FagsakTjeneste {
         return fagsakRepository.finnEksaktFagsak(fagsakId);
     }
 
+    public Fagsak finnEksaktFagsak(long fagsakId, boolean taSkriveLås) {
+        return fagsakRepository.finnEksaktFagsak(fagsakId, taSkriveLås);
+    }
+
     public void oppdaterFagsakMedGsakSaksnummer(Long fagsakId, Saksnummer saksnummer) {
         fagsakRepository.oppdaterSaksnummer(fagsakId, saksnummer);
     }
@@ -81,4 +85,5 @@ public class FagsakTjeneste {
         }
         return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
     }
+
 }

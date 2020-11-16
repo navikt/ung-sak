@@ -21,9 +21,12 @@ import no.nav.k9.kodeverk.api.IndexKey;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
 
+    private static final String REGEXP = "^[\\p{Alnum}]+$";
+    private static final java.util.regex.Pattern PATTERN = java.util.regex.Pattern.compile(REGEXP);
+
     @JsonValue
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = REGEXP, message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String saksnummer; // NOSONAR
 
     protected Saksnummer() {
@@ -31,8 +34,12 @@ public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
     }
 
     @JsonCreator
-    public Saksnummer(@NotNull @Pattern(regexp = "^[\\p{Alnum}]+$", message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String saksnummer) {
-        this.saksnummer = Objects.requireNonNull(nonEmpty(saksnummer), "saksnummer");
+    public Saksnummer(@NotNull @Pattern(regexp = REGEXP, message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String saksnummer) {
+        String s = Objects.requireNonNull(nonEmpty(saksnummer), "saksnummer");
+        if (!PATTERN.matcher(s).matches()) {
+            throw new IllegalArgumentException("Ugyldig saksnummer:" + saksnummer);
+        }
+        this.saksnummer = s;
     }
     
     private String nonEmpty(String str) {

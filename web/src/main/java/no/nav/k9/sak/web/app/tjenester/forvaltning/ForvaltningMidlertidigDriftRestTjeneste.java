@@ -7,13 +7,18 @@ import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -40,6 +45,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -51,6 +57,7 @@ import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
@@ -90,6 +97,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TpsAdapter tpsAdapter;
     
     private ProsessTaskRepository prosessTaskRepository;
+    private FagsakTjeneste fagsakTjeneste;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -101,6 +109,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                         TpsTjeneste tpsTjeneste,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         AksjonspunktRepository aksjonspunktRepository, 
+                                                   FagsakTjeneste fagsakTjeneste,
                                         TpsAdapter tpsAdapter,
                                         ProsessTaskRepository prosessTaskRepository) {
 
@@ -108,6 +117,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
+        this.fagsakTjeneste = fagsakTjeneste;
         this.tpsAdapter = tpsAdapter;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -199,10 +209,20 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void revurderAlleSomAnnenFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
-        final ProsessTaskData taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
-        taskData.setCallIdFraEksisterende();
-        taskData.setPayload(opprettManuellRevurdering.getSaksnumre());
-        prosessTaskRepository.lagre(taskData);
+        var alleSaksnummer = Objects.requireNonNull(opprettManuellRevurdering.getSaksnumre(), "saksnumre");
+        var saknumre = new LinkedHashSet<>(Arrays.asList(alleSaksnummer.split("\\s+")));
+
+        int idx = 0;
+        for (var s : saknumre) {
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
+            var taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
+            taskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId());
+            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500 * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sekund
+            // lagrer direkte til prosessTaskRepository så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
+            prosessTaskRepository.lagre(taskData);
+            idx++;
+        }
+        
     }
     
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {

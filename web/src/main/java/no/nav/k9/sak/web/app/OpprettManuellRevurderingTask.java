@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -39,7 +38,6 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    
 
     protected OpprettManuellRevurderingTask() {
         // CDI proxy
@@ -47,10 +45,10 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
 
     @Inject
     public OpprettManuellRevurderingTask(BehandlingsoppretterApplikasjonTjeneste behandlingsoppretterApplikasjonTjeneste,
-            BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-            FagsakTjeneste fagsakTjeneste,
-            ProsessTaskRepository prosessTaskRepository,
-            BehandlingRepository behandlingRepository) {
+                                         BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
+                                         FagsakTjeneste fagsakTjeneste,
+                                         ProsessTaskRepository prosessTaskRepository,
+                                         BehandlingRepository behandlingRepository) {
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -58,38 +56,31 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
         this.behandlingRepository = behandlingRepository;
     }
 
+
     @Override
     public void doTask(ProsessTaskData pd) {
-        final String[] saksnumre = pd.getPayloadAsString().split("\\s");
-        revurderAlleSomProsessFeil(saksnumre);
-    }
-    
-    public void revurderAlleSomProsessFeil(String[] saksnumre) {
-        for (String saksnummer : saksnumre) {
-            try {
-                revurder(new Saksnummer(saksnummer));
-            } catch (VLException e) {
-                logger.warn("Kunne ikke opprette manuell revurdering for: {}", saksnummer);
-            }
+        Fagsak f = fagsakTjeneste.finnEksaktFagsak(pd.getFagsakId(), true);
+        try {
+            revurder(f);
+        } catch (VLException e) {
+            logger.warn("Kunne ikke opprette manuell revurdering for: {}", f.getId());
         }
     }
-    
-    public void revurder(Saksnummer saksnummer) {
-        final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
-        final Fagsak fagsak = funnetFagsak.get();
+
+    public void revurder(Fagsak fagsak) {
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ANNET;
-        
+
         final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
             final Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
             behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
         } else {
-            final Behandling behandling = finnBehandlingSomKanSendesTilbakeTilStart(saksnummer);
+            final Behandling behandling = finnBehandlingSomKanSendesTilbakeTilStart(fagsak.getSaksnummer());
             if (behandling == null) {
-                logger.warn("Kunne ikke finne åpen behandling for: {}", saksnummer.getVerdi());
+                logger.warn("Kunne ikke finne åpen behandling for: {}", fagsak.getSaksnummer());
                 return;
             }
-            
+
             final ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKNAME);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
@@ -97,14 +88,14 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
             prosessTaskRepository.lagre(prosessTaskData);
         }
     }
-    
+
     private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
         final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
-                .stream()
-                .filter(Behandling::erYtelseBehandling)
-                .filter(b -> !b.erStatusFerdigbehandlet())
-                .collect(Collectors.toList());
-        
+            .stream()
+            .filter(Behandling::erYtelseBehandling)
+            .filter(b -> !b.erStatusFerdigbehandlet())
+            .collect(Collectors.toList());
+
         if (behandlinger.isEmpty()) {
             return null;
         }
