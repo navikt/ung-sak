@@ -103,7 +103,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
             return JsonObjectMapper.getJson(dto);
         } catch (IOException e) {
             throw new IllegalArgumentException(
-                "Klarte ikke å serialisere historikkinnslag for behandling=" + dto.getBehandlingUuid() + ", mal=" + dto.getDokumentMal(), e); // NOSONAR
+                "Klarte ikke å serialisere dokumentbestilling for behandling=" + dto.getEksternReferanse() + ", mal=" + dto.getDokumentMal(), e); // NOSONAR
         }
     }
 }
