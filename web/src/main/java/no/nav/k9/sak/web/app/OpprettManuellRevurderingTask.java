@@ -60,7 +60,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData pd) {
-        final String[] saksnumre = pd.getPayloadAsString().split("\\s");
+        final String[] saksnumre = pd.getPayloadAsString().split("\\s+");
         revurderAlleSomProsessFeil(saksnumre);
     }
     

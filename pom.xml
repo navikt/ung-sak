@@ -1,49 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>no.nav.k9.sak</groupId>
-	<artifactId>k9sak</artifactId>
-	<packaging>pom</packaging>
-	<name>K9SAK :: Root</name>
-	<version>${revision}${sha1}${changelist}</version>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>no.nav.k9.sak</groupId>
+    <artifactId>k9sak</artifactId>
+    <packaging>pom</packaging>
+    <name>K9SAK :: Root</name>
+    <version>${revision}${sha1}${changelist}</version>
 
-	<modules>
-		<module>migreringer</module>
-		<module>kodeverk</module>
-		<module>kontrakt</module>
-		<module>behandlingslager</module>
-		<module>domenetjenester</module>
-		<module>behandlingsprosess</module>
+    <modules>
+        <module>migreringer</module>
+        <module>kodeverk</module>
+        <module>kontrakt</module>
+        <module>behandlingslager</module>
+        <module>domenetjenester</module>
+        <module>behandlingsprosess</module>
 
-        <!--Ytelsespesifikke moduler-->
-		<module>ytelse-omsorgspenger</module>
-		<module>ytelse-pleiepengerbarn</module>
-		<module>ytelse-frisinn</module>
-		<module>ytelse-unntaksbehandling</module>
+        <!--Ytelsespesifikke moduler -->
+        <module>ytelse-omsorgspenger</module>
+        <module>ytelse-pleiepengerbarn</module>
+        <module>ytelse-frisinn</module>
+        <module>ytelse-unntaksbehandling</module>
 
-		<!-- Web klient og server -->
-		<module>web</module>
-	</modules>
+        <!-- Web klient og server -->
+        <module>web</module>
+    </modules>
 
-	<properties>
-		<java.version>11</java.version> <!--Brukes av jenkins -->
-		<argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN
-			-Duser.timezone='Europe/Oslo'</argLine> <!-- default argLine for surefire-plugin -->
+    <properties>
+        <java.version>11</java.version> <!--Brukes av jenkins -->
+        <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN
+            -Duser.timezone='Europe/Oslo'</argLine> <!-- default argLine for surefire-plugin -->
 
-		<revision>3.1.0</revision>
-		<sha1></sha1>
-		<changelist>-SNAPSHOT</changelist>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-		<felles.version>2.4.0-20201109082002-8d5de30</felles.version>
+        <revision>3.1.0</revision>
+        <sha1></sha1>
+        <changelist>-SNAPSHOT</changelist>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<fp-kontrakter.version>5.1-20201105192657-fa0dd2a</fp-kontrakter.version>
-		<k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
-	</properties>
+        <felles.version>2.4.0-20201109082002-8d5de30</felles.version>
+
+        <fp-kontrakter.version>5.1-20201105192657-fa0dd2a</fp-kontrakter.version>
+        <k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
+    </properties>
 
     <repositories>
         <repository>
@@ -53,12 +52,13 @@
         </repository>
     </repositories>
 
-	<!-- NB: Unngå å put scope (test, provided) i dependency management. Det
-		har uheldige virkninger ved bruk av import og dependency (bruk composition
-		over arv) da de overstyrer andre scope definisjoner. Sett det heller der
-		det brukes. --><dependencyManagement>
+    <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
+        har uheldige virkninger ved bruk av import og dependency (bruk composition
+        over arv) da de overstyrer andre scope definisjoner. Sett det heller der
+        det brukes. -->
+    <dependencyManagement>
 
-		<dependencies>
+        <dependencies>
 
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
@@ -67,62 +67,68 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-                    
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>7.2.0</version>
+            </dependency>
+
             <!-- Felles biblioteker - Importerte avhengigheter. -->
-			<dependency>
-				<!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
-				<groupId>no.nav.foreldrepenger.felles</groupId>
-				<artifactId>felles</artifactId>
-				<version>${felles.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.vedtak.prosesstask</groupId>
-				<artifactId>prosesstask-root</artifactId>
-				<version>2.4.4-20201008065023-4841974</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
-				<artifactId>felles-sikkerhet</artifactId>
-				<version>${felles.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.json</groupId>
-						<artifactId>javax.json-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+            <dependency>
+                <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
+                <groupId>no.nav.foreldrepenger.felles</groupId>
+                <artifactId>felles</artifactId>
+                <version>${felles.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.vedtak.prosesstask</groupId>
+                <artifactId>prosesstask-root</artifactId>
+                <version>2.4.4-20201008065023-4841974</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
+                <artifactId>felles-sikkerhet</artifactId>
+                <version>${felles.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.json</groupId>
+                        <artifactId>javax.json-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
-			<dependency>
-				<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-				<artifactId>felles-integrasjon-pom</artifactId>
-				<version>${felles.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+                <artifactId>felles-integrasjon-pom</artifactId>
+                <version>${felles.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
 
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter</groupId>
-				<artifactId>fp-kontrakter-root</artifactId>
-				<version>${fp-kontrakter.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>fp-topics</artifactId>
-				<version>${fp-kontrakter.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
-				<artifactId>oppdrag-kontrakter</artifactId>
-				<version>1.1-20201113125302-3aed71f</version>
-			</dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+                <artifactId>fp-kontrakter-root</artifactId>
+                <version>${fp-kontrakter.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>fp-topics</artifactId>
+                <version>${fp-kontrakter.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
+                <artifactId>oppdrag-kontrakter</artifactId>
+                <version>1.1-20201113125302-3aed71f</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
@@ -134,231 +140,231 @@
                 <artifactId>eksterne-kontrakter</artifactId>
                 <version>0.0.1-20200615182907-c0e6735</version>
             </dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>fp-topics-manifest</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>fp-topics-behandlingsprosess</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>hendelse-historikk-innslag</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
-				<artifactId>hendelser-kontroll-resultat</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.kontrakter</groupId>
-				<artifactId>inntektsmelding-v1</artifactId>
-				<version>${fp-kontrakter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.foreldrepenger.abakus</groupId>
-				<artifactId>abakus-kontrakt</artifactId>
-				<version>1.2-2020.11.10.101913-83af8af</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.folketrygdloven.kalkulus</groupId>
-				<artifactId>kontrakt</artifactId>
-				<version>1.1-2020.09.23.125100-b3e5277</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.folketrygdloven</groupId>
-				<artifactId>beregningsgrunnlag-regelmodell</artifactId>
-				<version>2.1-20200304122043-f794ebb</version>
-			</dependency>
-
-			<!-- Prosjektets egne biblioteker -->
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>migreringer</artifactId>
-				<version>${project.version}</version>
-				<type>test-jar</type>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>migreringer</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>domenetjenester-bom</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>kodeverk</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>kontrakt</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandlingslager-domene</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandlingsprosess-steg</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandlingskontroll</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>inngangsvilkar</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>datavarehus</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>uttak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>mottak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>oppgavebehandling</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.folketrygdloven</groupId>
-				<artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>beregning-ytelse</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>produksjonsstyring</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>registerinnhenting</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>person</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>skjaeringstidspunkt</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>vedtak</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>arbeidsforhold</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>medlem</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandling</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandling-status</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandling-revurdering</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandling-prosessering</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>no.nav.k9.sak.ytelse</groupId>
-				<artifactId>ytelse-frisinn</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak.ytelse</groupId>
-				<artifactId>ytelse-omsorgspenger</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak.ytelse</groupId>
-				<artifactId>ytelse-pleiepengerbarn</artifactId>
-				<version>${project.version}</version>
-			</dependency>
             <dependency>
-				<groupId>no.nav.k9.sak.ytelse</groupId>
-				<artifactId>ytelse-unntaksbehandling</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>fp-topics-manifest</artifactId>
+                <version>${fp-kontrakter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>fp-topics-behandlingsprosess</artifactId>
+                <version>${fp-kontrakter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>hendelse-historikk-innslag</artifactId>
+                <version>${fp-kontrakter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+                <artifactId>hendelser-kontroll-resultat</artifactId>
+                <version>${fp-kontrakter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+                <artifactId>inntektsmelding-v1</artifactId>
+                <version>${fp-kontrakter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.abakus</groupId>
+                <artifactId>abakus-kontrakt</artifactId>
+                <version>1.2-2020.11.10.101913-83af8af</version>
+            </dependency>
 
-			<dependency>
-				<groupId>no.nav.fpsak.tidsserie</groupId>
-				<artifactId>fpsak-tidsserie</artifactId>
-				<version>2.3-20201019093601-b2584db</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.fpsak.nare</groupId>
-				<artifactId>fpsak-nare-core</artifactId>
-				<version>2.1-20200331052216-6a56f0c</version>
-			</dependency>
+            <dependency>
+                <groupId>no.nav.folketrygdloven.kalkulus</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>1.1-2020.09.23.125100-b3e5277</version>
+            </dependency>
 
-			<dependency>
-				<groupId>no.nav.k9</groupId>
-				<artifactId>soknad-frisinn</artifactId>
-				<version>${k9format.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9</groupId>
-				<artifactId>soknad-pleiepenger-barn</artifactId>
-				<version>${k9format.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>no.nav.folketrygdloven</groupId>
+                <artifactId>beregningsgrunnlag-regelmodell</artifactId>
+                <version>2.1-20200304122043-f794ebb</version>
+            </dependency>
+
+            <!-- Prosjektets egne biblioteker -->
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>migreringer</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>migreringer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>domenetjenester-bom</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>kodeverk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandlingslager-domene</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandlingsprosess-steg</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandlingskontroll</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>inngangsvilkar</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>datavarehus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>uttak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>mottak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>oppgavebehandling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.folketrygdloven</groupId>
+                <artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>beregning-ytelse</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>produksjonsstyring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>registerinnhenting</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>person</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>skjaeringstidspunkt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>vedtak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>arbeidsforhold</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>medlem</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandling-status</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandling-revurdering</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandling-prosessering</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-frisinn</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-omsorgspenger</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-pleiepengerbarn</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <artifactId>ytelse-unntaksbehandling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.fpsak.tidsserie</groupId>
+                <artifactId>fpsak-tidsserie</artifactId>
+                <version>2.3-20201019093601-b2584db</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.fpsak.nare</groupId>
+                <artifactId>fpsak-nare-core</artifactId>
+                <version>2.1-20200331052216-6a56f0c</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-frisinn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>soknad-pleiepenger-barn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-felles</artifactId>
@@ -366,89 +372,89 @@
             </dependency>
 
 
-			<!-- Prosjektets egne TEST AVHENGIGHETER -->
-			<!-- NB: Definer scope der det brukes, ikke her. -->
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>web-webapp</artifactId>
-				<type>jar</type>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>dokumentbestiller</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>risikoklassifisering</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>okonomistotte</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>behandlingslager-testutilities</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav.k9.sak</groupId>
-				<artifactId>dokumentarkiv</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+            <!-- Prosjektets egne TEST AVHENGIGHETER -->
+            <!-- NB: Definer scope der det brukes, ikke her. -->
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>web-webapp</artifactId>
+                <type>jar</type>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>dokumentbestiller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>risikoklassifisering</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>okonomistotte</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>behandlingslager-testutilities</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>dokumentarkiv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-			<!-- 3dje parts NAV felleskomponenter -->
-			<!-- NB: Definer scope der det brukes, ikke her. -->
+            <!-- 3dje parts NAV felleskomponenter -->
+            <!-- NB: Definer scope der det brukes, ikke her. -->
 
-			<!-- EKSTRA TEST AVHENGIGHETER FOR LOKAL WEBSERVER -->
-			<!-- NB: Definer scope der det brukes, ikke her. -->
-			<dependency>
-				<groupId>net.logstash.logback</groupId>
-				<artifactId>logstash-logback-encoder</artifactId>
-				<version>6.4</version>
-			</dependency>
-			<dependency>
-				<groupId>com.papertrailapp</groupId>
-				<artifactId>logback-syslog4j</artifactId>
-				<version>1.0.0</version>
-			</dependency>
+            <!-- EKSTRA TEST AVHENGIGHETER FOR LOKAL WEBSERVER -->
+            <!-- NB: Definer scope der det brukes, ikke her. -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>6.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.papertrailapp</groupId>
+                <artifactId>logback-syslog4j</artifactId>
+                <version>1.0.0</version>
+            </dependency>
 
-			<!-- kafka -->
-			<dependency>
-				<groupId>org.apache.kafka</groupId>
-				<artifactId>kafka-streams</artifactId>
-				<version>2.6.0</version>
-			</dependency>
+            <!-- kafka -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-streams</artifactId>
+                <version>2.6.0</version>
+            </dependency>
 
-			<!-- Transitive avhengighet resolution for å sikre bestemt versjon -->
-			<dependency>
-				<groupId>joda-time</groupId>
-				<artifactId>joda-time</artifactId>
-				<version>2.10.8</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jasypt</groupId>
-				<artifactId>jasypt</artifactId>
-				<version>1.9.3</version>
-			</dependency>
-			<dependency>
-				<groupId>io.javaslang</groupId>
-				<artifactId>javaslang</artifactId>
-				<version>2.0.6</version>
-			</dependency>
-			<dependency>
-				<groupId>org.owasp.encoder</groupId>
-				<artifactId>encoder</artifactId>
-				<version>1.2.3</version>
-			</dependency>
-			<dependency>
-				<groupId>org.assertj</groupId>
-				<artifactId>assertj-core</artifactId>
-				<version>3.18.1</version>
-			</dependency>
+            <!-- Transitive avhengighet resolution for å sikre bestemt versjon -->
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.10.8</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jasypt</groupId>
+                <artifactId>jasypt</artifactId>
+                <version>1.9.3</version>
+            </dependency>
+            <dependency>
+                <groupId>io.javaslang</groupId>
+                <artifactId>javaslang</artifactId>
+                <version>2.0.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.owasp.encoder</groupId>
+                <artifactId>encoder</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.18.1</version>
+            </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
@@ -474,273 +480,273 @@
             </dependency>
 
             <dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>2.4.0-b180830.0438</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.4.0-b180830.0359</version>
-			</dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>2.4.0-b180830.0438</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.4.0-b180830.0359</version>
+            </dependency>
 
-			<!-- Java11 -->
-			<dependency>
-				<groupId>org.javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>3.27.0-GA</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.santuario</groupId>
-				<artifactId>xmlsec</artifactId>
-				<version>2.1.4</version>
-			</dependency>
+            <!-- Java11 -->
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.27.0-GA</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.santuario</groupId>
+                <artifactId>xmlsec</artifactId>
+                <version>2.1.4</version>
+            </dependency>
 
-			<!-- bean validation -->
-			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>jakarta.el</artifactId>
-				<version>3.0.3</version>
-			</dependency>
+            <!-- bean validation -->
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>jakarta.el</artifactId>
+                <version>3.0.3</version>
+            </dependency>
 
-			<!-- Database -->
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.2.18</version>
-			</dependency>
-			<dependency>
-				<groupId>no.nav</groupId>
-				<artifactId>vault-jdbc</artifactId>
-				<version>1.3.7</version>
-			</dependency>
-			<dependency>
-				<groupId>com.vladmihalcea</groupId>
-				<artifactId>hibernate-types-52</artifactId>
-				<version>2.10.0</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <!-- Database -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.2.18</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav</groupId>
+                <artifactId>vault-jdbc</artifactId>
+                <version>1.3.7</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladmihalcea</groupId>
+                <artifactId>hibernate-types-52</artifactId>
+                <version>2.10.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.ws</groupId>
-			<artifactId>jaxws-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.messaging.saaj</groupId>
-			<artifactId>saaj-impl</artifactId>
-    	</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.messaging.saaj</groupId>
+            <artifactId>saaj-impl</artifactId>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-remote-resources-plugin</artifactId>
-					<version>1.7.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>buildnumber-maven-plugin</artifactId>
-					<version>1.4</version>
-				</plugin>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-remote-resources-plugin</artifactId>
+                    <version>1.7.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.4</version>
+                </plugin>
 
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.jacoco</groupId>
-					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.1.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
-					<configuration>
-						<source>${java.version}</source>
-						<target>${java.version}</target>
-						<encoding>UTF-8</encoding>
-						<release>${java.version}</release>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-install-plugin</artifactId>
-					<version>3.0.0-M1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.0.0-M1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M5</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M5</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.2.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>flatten-maven-plugin</artifactId>
-					<version>1.2.5</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonarsource.scanner.maven</groupId>
-					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.7.0.1746</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>UTF-8</encoding>
+                        <release>${java.version}</release>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>3.7.0.1746</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>flatten-maven-plugin</artifactId>
-				<configuration>
-					<flattenMode>bom</flattenMode>
-					<flattenedPomFilename>.flattened</flattenedPomFilename>
-				</configuration>
-				<executions>
-					<execution>
-						<id>flatten</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>flatten</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>flatten.clean</id>
-						<phase>clean</phase>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>failsafe-integration-test</id>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>failsafe-verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jboss.jandex</groupId>
-				<artifactId>jandex-maven-plugin</artifactId>
-				<version>1.0.8</version>
-				<executions>
-					<execution>
-						<id>make-index</id>
-						<goals>
-							<goal>jandex</goal>
-						</goals>
-						<configuration>
-							<!-- Nothing needed here for simple cases -->
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <configuration>
+                    <flattenMode>bom</flattenMode>
+                    <flattenedPomFilename>.flattened</flattenedPomFilename>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>failsafe-integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>failsafe-verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jboss.jandex</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+                <version>1.0.8</version>
+                <executions>
+                    <execution>
+                        <id>make-index</id>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Nothing needed here for simple cases -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-	<scm>
-		<connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
-		<developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
-		<url>https://github.com/navikt/k9-sak</url>
-		<tag>HEAD</tag>
-	</scm>
+    <scm>
+        <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
+        <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
+        <url>https://github.com/navikt/k9-sak</url>
+        <tag>HEAD</tag>
+    </scm>
 
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>Github navikt Maven Packages</name>
-			<url>https://maven.pkg.github.com/navikt/k9-sak</url>
-		</repository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>Github navikt Maven Packages</name>
+            <url>https://maven.pkg.github.com/navikt/k9-sak</url>
+        </repository>
+    </distributionManagement>
 
 </project>

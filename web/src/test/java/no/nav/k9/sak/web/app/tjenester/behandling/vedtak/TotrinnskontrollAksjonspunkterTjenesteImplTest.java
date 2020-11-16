@@ -12,11 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -34,9 +31,7 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
 public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
     private static final BehandlingStegType STEG_KONTROLLER_FAKTA = BehandlingStegType.KONTROLLER_FAKTA;
@@ -50,8 +45,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
     private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
 
-    @Inject
-    private InternalManipulerBehandling manipulerInternBehandling;
+    private InternalManipulerBehandling manipulerInternBehandling = new InternalManipulerBehandling();
 
     @BeforeEach
     public void oppsett() {
