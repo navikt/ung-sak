@@ -3,7 +3,6 @@ package no.nav.k9.sak.dokument.bestill.kafka;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +13,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
+import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -50,6 +50,9 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
     }
 
     private static FagsakYtelseType mapYtelse(no.nav.k9.kodeverk.behandling.FagsakYtelseType fpsakYtelseKode) {
+        if (fpsakYtelseKode == no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMP) {
+            return FagsakYtelseType.OMSORGSPENGER;
+        }
         return FagsakYtelseType.fraKode(fpsakYtelseKode.getKode());
     }
 
@@ -71,17 +74,13 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         var dto = new Dokumentbestilling();
         dto.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         dto.setAktørId(behandling.getAktørId().getId());
-        dto.setArsakskode(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK));
-        dto.setBehandlingUuid(behandling.getUuid());
-        dto.setDokumentbestillingUuid(UUID.fromString(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID)));
+        dto.setEksternReferanse(behandling.getUuid().toString());
+        dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
         dto.setFritekst(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class));
-        dto.setHistorikkAktør(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.HISTORIKK_AKTØR));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
-        dto.setBehandlendeEnhetNavn(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLENDE_ENHET_NAVN));
-
-        // FIXME K9: verdikjedtestester setter ugyldi enhet navn
-        //valider(dto);
+        dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
+        valider(dto);
 
         return dto;
     }

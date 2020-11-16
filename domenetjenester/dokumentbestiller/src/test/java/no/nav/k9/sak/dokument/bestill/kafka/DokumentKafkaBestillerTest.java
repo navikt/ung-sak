@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
-import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
+import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -73,37 +73,36 @@ public class DokumentKafkaBestillerTest {
     @Test
     public void skal_opprette_historikkinnslag_og_lagre_prosesstask() {
         var innhentDok = DokumentMalType.INNHENT_DOK;
-        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, null, null);
+        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, null);
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
         List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
-            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK)).isNull();
+            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
             assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isNull();
         });
     }
 
     @Test
-    public void skal_opprette_historikkinnslag_og_lagre_prosesstask_med_fritekst_og_årsak() {
+    public void skal_opprette_historikkinnslag_og_lagre_prosesstask_med_fritekst() {
         var innhentDok = DokumentMalType.INNHENT_DOK;
         String fritekst = "FRITEKST";
-        RevurderingVarslingÅrsak årsak = RevurderingVarslingÅrsak.BARN_IKKE_REGISTRERT_FOLKEREGISTER;
-        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, årsak.getKode(), fritekst);
+        BestillBrevDto bestillBrevDto = lagBestillBrevDto(innhentDok, fritekst);
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
         List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
-            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.REVURDERING_VARSLING_ÅRSAK)).isEqualTo(årsak.getKode());
+            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
             assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), String.class)).isEqualTo(fritekst);
         });
     }
 
-    private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String arsakskode, String fritekst) {
-        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, arsakskode);
+    private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String fritekst) {
+        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null);
     }
 
 }
