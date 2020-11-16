@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 import no.nav.k9.sak.db.util.DatasourceConfiguration;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
@@ -40,13 +41,7 @@ public class SjekkCollectionsOrderedIEntiteterTest {
     private static final EntityManagerFactory entityManagerFactory;
 
     static {
-        try {
-            // trenger å konfigurere opp jndi etc.
-            DBConnectionProperties connectionProperties = DBConnectionProperties.finnDefault(DatasourceConfiguration.UNIT_TEST.get()).get();
-            DatabaseStøtte.settOppJndiForDefaultDataSource(Collections.singletonList(connectionProperties));
-        } catch (FileNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
+        Databaseskjemainitialisering.settJdniOppslag();
         entityManagerFactory = Persistence.createEntityManagerFactory("pu-default");
     }
 
