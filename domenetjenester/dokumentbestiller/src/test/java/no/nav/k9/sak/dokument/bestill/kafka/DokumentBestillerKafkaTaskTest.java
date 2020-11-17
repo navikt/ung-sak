@@ -70,14 +70,6 @@ public class DokumentBestillerKafkaTaskTest {
         assertThat(dokumentbestilling.getFritekst()).isEqualTo("en fritekst");
         assertThat(dokumentbestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat(dokumentbestilling.getYtelseType().getKode()).isEqualTo("PSB");
-
-        assertThat(dokumentbestilling.getArsakskode()).isNull();
-        assertThat(dokumentbestilling.getBehandlendeEnhetNavn()).isNull();
-        assertThat(dokumentbestilling.getBehandlingUuid()).isNull();
-        assertThat(dokumentbestilling.getDokumentbestillingUuid()).isNull();
-        assertThat(dokumentbestilling.getHistorikkAktør()).isNull();
-
-
     }
 
     @Test
