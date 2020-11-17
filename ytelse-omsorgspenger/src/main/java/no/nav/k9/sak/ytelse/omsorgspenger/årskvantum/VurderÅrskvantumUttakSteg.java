@@ -6,15 +6,10 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
-import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.aarskvantum.kontrakter.Vilkår;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -68,15 +63,17 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumResultat = årskvantumTjeneste.beregnÅrskvantumUttak(ref);
 
-        if (skalDetLagesAksjonspunkt(årskvantumResultat)) {
+        var årskvantumAksjonspunkt = skalDetLagesAksjonspunkt(årskvantumResultat);
+
+        if (årskvantumAksjonspunkt != null) {
             try {
-                log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
-                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
+                if (log.isDebugEnabled()) { log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
+                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat)); }
             } catch (IOException e) {
-                log.info("Feilet i serialisering av årskvantum respons: " + årskvantumResultat);
+                log.info("Feilet i serialisering av årskvantum respons='{}' og exception='{}'", årskvantumResultat, e);
             }
 
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum().getAksjonspunktDefinisjon()));
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkt).getAksjonspunktDefinisjon()));
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -91,27 +88,17 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
     }
 
 
-    private AksjonspunktResultat opprettAksjonspunktForÅrskvantum() {
-        AksjonspunktDefinisjon apDef = AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE;
+    private AksjonspunktResultat opprettAksjonspunktForÅrskvantum(AksjonspunktDefinisjon apDef) {
         return AksjonspunktResultat.opprettForAksjonspunkt(apDef);
     }
 
-
-    public boolean skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
-        if (!Bekreftet.MANUELTBEKREFTET.equals(årskvantumResultat.getUttaksplan().getBekreftet())) {
-            for (Aktivitet uttaksPlanOmsorgspengerAktivitet : årskvantumResultat.getUttaksplan().getAktiviteter()) {
-                for (Uttaksperiode uttaksperiodeOmsorgspenger : uttaksPlanOmsorgspengerAktivitet.getUttaksperioder()) {
-                    for (Vilkår vilkår : uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().keySet()) {
-                        if ((Vilkår.UIDENTIFISERT_RAMMEVEDTAK.equals(vilkår) || Vilkår.SMITTEVERN.equals(vilkår) || Vilkår.NOK_DAGER.equals(vilkår) || Vilkår.OMSORGSVILKÅRET.equals(vilkår)) &&
-                            (uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.AVSLÅTT) ||
-                                uttaksperiodeOmsorgspenger.getVurderteVilkår().getVilkår().getOrDefault(vilkår, Utfall.INNVILGET).equals(Utfall.UAVKLART))) {
-                            return true;
-                        }
-                    }
-                }
+    public AksjonspunktDefinisjon skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
+        if (årskvantumResultat.getUttaksplan().getAksjonspunkt() != null) {
+            if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(årskvantumResultat.getUttaksplan().getAksjonspunkt())) {
+                return AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE;
             }
         }
-
-        return false;
+        return null;
     }
+
 }
