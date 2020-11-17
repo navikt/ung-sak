@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import static java.util.Map.entry;
 import static java.util.Optional.ofNullable;
 import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
+import static no.nav.vedtak.feil.LogLevel.INFO;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -37,6 +38,10 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
+import no.nav.vedtak.feil.Feil;
+import no.nav.vedtak.feil.FeilFactory;
+import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
+import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftTilkjentYtelseDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -73,6 +78,24 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medRegelInput("manuell_behandling")
             .medRegelSporing("manuell_behandling")
             .build();
+
+        // En ny bestilling som jeg legger inn her: Må validere at
+        // perioder for Tilkjent ytelse (TilkjentYtelsePeriodeDto) ikke overlapper hverandre (kan skje ved brukerfeil)
+
+
+        /*
+          1. Valider at perioder for Tilkjent ytelse (TilkjentYtelsePeriodeDto) ikke overlapper hverandre (kan skje ved brukerfeil)
+          2. Valider at TilkjentYtelsePeriodeDto er innenfor fom-tom for vilkårsperioder
+         */
+        TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder());
+
+
+        /*
+          public List<Beregningsgrunnlag> hentVilkår(BehandlingReferanse ref) {
+              var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+              var vilkår = vilkårene.getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
+              var perioder = vilkår.getPerioder();
+         */
 
         for (TilkjentYtelsePeriodeDto tyPeriode : dto.getTilkjentYtelse().getPerioder()) {
             var brPeriode = BeregningsresultatPeriode.builder()
@@ -121,6 +144,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medStillingsprosent(STILLINGSPROSENT);
     }
 
+    public interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {
+        TilkjentYtelseOppdatererFeil FACTORY = FeilFactory.create(TilkjentYtelseOppdatererFeil.class); // NOSONAR
+
+        @FunksjonellFeil(feilkode = "K9-123456", feilmelding = "Det er angitt overlappende perioder med tilkjent ytelse: %s", løsningsforslag = "", logLevel = INFO)
+        Feil overlappendeTilkjentYtelsePerioder(String feilmelding);
+    }
+
     static class InntektskategoriTilAktivitetstatusMapper {
         private static final Map<Inntektskategori, AktivitetStatus> INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP = Map.ofEntries(
             entry(Inntektskategori.ARBEIDSTAKER,/*                  */ AktivitetStatus.ARBEIDSTAKER),
@@ -140,5 +170,6 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
                 .orElseThrow(() -> new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori)));
 
         }
+
     }
 }
