@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -43,9 +44,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRawValue;
@@ -56,18 +57,10 @@ import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.jackson.IndexClasses;
 import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
-@RunWith(Parameterized.class)
 public class RestApiInputValideringDtoTest extends RestApiTester {
 
-    private Class<?> dto;
-
-    @Parameterized.Parameters(name = "Validerer Dto - {0}")
-    public static Collection<Object[]> getDtos() {
-        return finnAlleDtoTyper().stream().map(c -> new Object[] { c.getName(), c }).collect(Collectors.toSet());
-    }
-
-    public RestApiInputValideringDtoTest(@SuppressWarnings("unused") String name /* brukes til navngiving av test */, Class<?> dto) {
-        this.dto = dto;
+    public static Stream<Arguments> provideArguments() {
+        return finnAlleDtoTyper().stream().map(c -> Arguments.of( c )).collect(Collectors.toSet()).stream();
     }
 
     /**
@@ -75,8 +68,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
      * <p>
      * Kontakt Team Humle hvis du trenger hjelp til å endre koden din slik at den går igjennom her
      */
-    @Test
-    public void alle_felter_i_objekter_som_brukes_som_inputDTO_skal_enten_ha_valideringsannotering_eller_være_av_godkjent_type() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void alle_felter_i_objekter_som_brukes_som_inputDTO_skal_enten_ha_valideringsannotering_eller_være_av_godkjent_type(Class<?> dto) throws Exception {
         Set<Class<?>> validerteKlasser = new HashSet<>(); // trengs for å unngå løkker og unngå å validere samme klasse flere multipliser dobbelt
         validerRekursivt(validerteKlasser, dto, null);
     }

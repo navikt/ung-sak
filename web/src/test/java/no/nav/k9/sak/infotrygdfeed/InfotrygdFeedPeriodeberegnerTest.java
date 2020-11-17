@@ -1,91 +1,81 @@
 package no.nav.k9.sak.infotrygdfeed;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriode;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.infotrygdfeed.ytelser.OmsorgspengerParametere;
 import no.nav.k9.sak.infotrygdfeed.ytelser.PleiepengerBarnParametere;
 import no.nav.k9.sak.typer.Saksnummer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-@RunWith(Parameterized.class)
 public class InfotrygdFeedPeriodeberegnerTest {
 
-    @Parameterized.Parameters(name = "{0}")
-    public static List<InfotrygdFeedPeriodeberegnerTestParametere> parameters() {
+    public static Stream<Arguments> provideArguments() {
         return List.of(
-            new PleiepengerBarnParametere(),
-            new OmsorgspengerParametere()
-        );
+            Arguments.of(new PleiepengerBarnParametere()),
+            Arguments.of(new OmsorgspengerParametere())
+        ).stream();
     }
 
-    @Parameterized.Parameter
-    public InfotrygdFeedPeriodeberegnerTestParametere param;
-
-    private InfotrygdFeedPeriodeberegner beregner;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        initMocks(param);
-        beregner = newInfotrygdFeedPeriodeBeregner();
-    }
-
-    @Test
-    public void med_alle_data() {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void med_alle_data(InfotrygdFeedPeriodeberegnerTestParametere param) {
         LocalDate fom = LocalDate.of(2020, 1, 1);
         LocalDate tom = fom.plusMonths(1);
         LocalDate etter = tom.plusMonths(1);
 
         Saksnummer saksnummer = new Saksnummer("x2345");
 
-        mockHelper()
+        mockHelper(param)
             .medInnvilgetPeriode(fom, tom)
             .medAvslåttPeriode(tom, etter)
             .medSaksnummer(saksnummer)
             .mock();
 
-        InfotrygdFeedPeriode periode = getBeregner().finnInnvilgetPeriode(saksnummer);
+        InfotrygdFeedPeriode periode = getBeregner(param).finnInnvilgetPeriode(saksnummer);
         assertThat(periode).isEqualTo(new InfotrygdFeedPeriode(fom, tom));
     }
 
-    @Test
-    public void uten_perioder_i_uttak() {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void uten_perioder_i_uttak(InfotrygdFeedPeriodeberegnerTestParametere param) {
         Saksnummer saksnummer = new Saksnummer("x2345");
 
-        mockHelper()
+        mockHelper(param)
             .medSaksnummer(saksnummer)
             .mock();
 
-        assertThat(getBeregner().finnInnvilgetPeriode(saksnummer)).isEqualTo(InfotrygdFeedPeriode.annullert());
+        assertThat(getBeregner(param).finnInnvilgetPeriode(saksnummer)).isEqualTo(InfotrygdFeedPeriode.annullert());
     }
 
-    @Test
-    public void med_bare_avslåtte_perioder() {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void med_bare_avslåtte_perioder(InfotrygdFeedPeriodeberegnerTestParametere param) {
         LocalDate fom = LocalDate.of(2020, 1, 1);
         LocalDate tom = fom.plusMonths(1);
 
         Saksnummer saksnummer = new Saksnummer("x2345");
 
-        mockHelper()
+        mockHelper(param)
             .medAvslåttPeriode(fom, tom)
             .medSaksnummer(saksnummer)
             .mock();
 
-        assertThat(getBeregner().finnInnvilgetPeriode(saksnummer)).isEqualTo(InfotrygdFeedPeriode.annullert());
+        assertThat(getBeregner(param).finnInnvilgetPeriode(saksnummer)).isEqualTo(InfotrygdFeedPeriode.annullert());
     }
 
-    @Test
-    public void med_flere_innvilgede_perioder() {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void med_flere_innvilgede_perioder(InfotrygdFeedPeriodeberegnerTestParametere param) {
         LocalDate fomA = LocalDate.of(2020, 1, 1);
         LocalDate tomA = fomA.plusMonths(1);
 
@@ -94,55 +84,46 @@ public class InfotrygdFeedPeriodeberegnerTest {
 
         Saksnummer saksnummer = new Saksnummer("x2345");
 
-        mockHelper()
+        mockHelper(param)
             .medInnvilgetPeriode(fomA, tomA)
             .medInnvilgetPeriode(fomB, tomB)
             .medSaksnummer(saksnummer)
             .mock();
 
-        InfotrygdFeedPeriode periode = getBeregner().finnInnvilgetPeriode(saksnummer);
+        InfotrygdFeedPeriode periode = getBeregner(param).finnInnvilgetPeriode(saksnummer);
         assertThat(periode).isEqualTo(new InfotrygdFeedPeriode(fomA, tomB));
     }
 
-    @Test
-    public void uten_treff_i_tjeneste() {
-        mockHelper()
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void uten_treff_i_tjeneste(InfotrygdFeedPeriodeberegnerTestParametere param) {
+        mockHelper(param)
             .utenTreffITjeneste()
             .mock();
 
-        assertThat(getBeregner().finnInnvilgetPeriode(new Saksnummer("123"))).isEqualTo(InfotrygdFeedPeriode.annullert());
+        assertThat(getBeregner(param).finnInnvilgetPeriode(new Saksnummer("123"))).isEqualTo(InfotrygdFeedPeriode.annullert());
     }
 
-    @Test
-    public void støtter_fagsak() {
-        var ytelsesTypeKode = getBeregner().getClass().getAnnotation(FagsakYtelseTypeRef.class).value();
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void støtter_fagsak(InfotrygdFeedPeriodeberegnerTestParametere param) {
+        var ytelsesTypeKode = getBeregner(param).getClass().getAnnotation(FagsakYtelseTypeRef.class).value();
         assertThat(ytelsesTypeKode).isNotNull();
-        assertThat(ytelsesTypeKode).isEqualTo(fagsakYtelseType().getKode());
+        assertThat(ytelsesTypeKode).isEqualTo(param.fagsakYtelseType().getKode());
     }
 
-    @Test
-    public void riktig_infotrygdkode() {
-        assertThat(getBeregner().getInfotrygdYtelseKode()).isNotNull();
-        assertThat(getBeregner().getInfotrygdYtelseKode()).isEqualTo(infotrygdKode());
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void riktig_infotrygdkode(InfotrygdFeedPeriodeberegnerTestParametere param) {
+        assertThat(getBeregner(param).getInfotrygdYtelseKode()).isNotNull();
+        assertThat(getBeregner(param).getInfotrygdYtelseKode()).isEqualTo(param.infotrygdKode());
     }
 
-    private InfotrygdFeedPeriodeberegner getBeregner() {
-        return beregner;
-    }
-
-    private InfotrygdFeedPeriodeberegner newInfotrygdFeedPeriodeBeregner() {
+    private InfotrygdFeedPeriodeberegner getBeregner(InfotrygdFeedPeriodeberegnerTestParametere param) {
         return param.newInfotrygdFeedPeriodeBeregner();
     }
 
-    private FagsakYtelseType fagsakYtelseType() {
-        return param.fagsakYtelseType();
-    }
-
-    private String infotrygdKode() {
-        return param.infotrygdKode();
-    }
-
-    private InfotrygdFeedPeriodeberegnerMockHelper mockHelper() {
+    private InfotrygdFeedPeriodeberegnerMockHelper mockHelper(InfotrygdFeedPeriodeberegnerTestParametere param) {
         return new InfotrygdFeedPeriodeberegnerMockHelper(param);
     }
 }

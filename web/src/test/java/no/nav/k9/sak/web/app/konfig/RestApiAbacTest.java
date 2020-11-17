@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,9 +20,9 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import no.nav.k9.abac.BeskyttetRessursKoder;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
@@ -33,37 +34,30 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 /**
  * Sjekker at alle REST endepunkt har definert tilgangskontroll konfigurert for ABAC (Attribute Based Access Control).
  */
-@RunWith(Parameterized.class)
 public class RestApiAbacTest {
-    @Parameterized.Parameters(name = "Validerer Dto - {0}")
-    public static Collection<Object[]> getRestMetoder() {
-        return RestApiTester.finnAlleRestMetoder().stream().map(m -> new Object[] { m.getDeclaringClass().getName() + "#" + m.getName(), m })
-            .collect(Collectors.toList());
+
+    public static Stream<Arguments> provideArguments() {
+        return RestApiTester.finnAlleRestMetoder().stream().map(m -> Arguments.of( m ))
+            .collect(Collectors.toList()).stream();
     }
 
-    private Method restMethod;
-    @SuppressWarnings("unused")
-    private String name;
-
-    public RestApiAbacTest(String name, Method method) {
-        this.name = name;
-        this.restMethod = method;
-    }
-
-    @Test
-    public void test_at_alle_restmetoder_er_annotert_med_BeskyttetRessurs() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void test_at_alle_restmetoder_er_annotert_med_BeskyttetRessurs(Method restMethod) throws Exception {
         if (restMethod.getAnnotation(BeskyttetRessurs.class) == null) {
             throw new AssertionError("Mangler @" + BeskyttetRessurs.class.getSimpleName() + "-annotering på " + restMethod);
         }
     }
 
-    @Test
-    public void sjekk_at_ingen_metoder_er_annotert_med_dummy_verdier() throws IllegalAccessException {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_at_ingen_metoder_er_annotert_med_dummy_verdier(Method restMethod) throws IllegalAccessException {
         assertAtIngenBrukerDummyVerdierPåBeskyttetRessurs(restMethod);
     }
 
-    @Test
-    public void sjekk_at_ingen_metoder_er_ressurs_annotert_med_tomme_eller_ugyldige_verdier() throws IllegalAccessException {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_at_ingen_metoder_er_ressurs_annotert_med_tomme_eller_ugyldige_verdier(Method restMethod) throws IllegalAccessException {
         assertAtIngenBrukerTommeEllerUgyldigeVerdierPåBeskyttetRessurs(restMethod);
     }
 
@@ -72,8 +66,9 @@ public class RestApiAbacTest {
      * <p>
      * Kontakt Team Humle hvis du trenger hjelp til å endre koden din slik at den går igjennom her *
      */
-    @Test
-    public void test_at_alle_input_parametre_til_restmetoder_implementer_AbacDto_eller_spesifiserer_AbacDataSupplier() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void test_at_alle_input_parametre_til_restmetoder_implementer_AbacDto_eller_spesifiserer_AbacDataSupplier(Method restMethod) throws Exception {
         String feilmelding = "Parameter på %s.%s av type %s må implementere " + AbacDto.class.getSimpleName()
             + ", eller være annotatert med @TilpassetAbacAttributt.\n";
         StringBuilder feilmeldinger = new StringBuilder();
