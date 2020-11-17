@@ -9,8 +9,8 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
 import no.nav.k9.sak.kontrakt.kontroll.KontrollresultatDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +28,7 @@ public class KontrollDtoTjenesteTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenarioKlage = TestScenarioBuilder.builderMedSøknad();
         behandling = scenarioKlage.lagMocked();

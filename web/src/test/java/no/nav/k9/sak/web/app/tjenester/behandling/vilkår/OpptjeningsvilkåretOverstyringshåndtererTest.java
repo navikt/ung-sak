@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -25,23 +28,35 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.kontrakt.opptjening.OverstyringOpptjeningsvilkåretDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
 import no.nav.vedtak.exception.FunksjonellException;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class OpptjeningsvilkåretOverstyringshåndtererTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    public EntityManager entityManager;
+
+
     @Inject
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjeneste;
-    private Periode periode = new Periode(LocalDate.now().minusMonths(3), LocalDate.now());
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private Periode periode ;
+
+    @BeforeEach
+    public void setup(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        periode = new Periode(LocalDate.now().minusMonths(3), LocalDate.now());
+    }
 
     @Test
     public void skal_opprette_aksjonspunkt_for_overstyring() {

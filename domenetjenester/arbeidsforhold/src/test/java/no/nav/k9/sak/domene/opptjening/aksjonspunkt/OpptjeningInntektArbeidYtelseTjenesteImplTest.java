@@ -11,8 +11,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -28,6 +33,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -46,33 +52,56 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
     public static final String NAV_ORG_NUMMER = "889640782";
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final LocalDate skjæringstidspunkt = LocalDate.now();
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repoRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-    private VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(repoRule.getEntityManager());
-    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
-    private AksjonspunktutlederForVurderOppgittOpptjening apoOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste);
-    private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(opptjeningRepository, iayTjeneste);
-    private OpptjeningsperioderTjeneste asdf = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(),
-        apoOpptjening, apbOpptjening);
-    private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), asdf);
-    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
-    private AktørId AKTØRID = AktørId.dummy();
+    @Inject
+    private EntityManager entityManager;
+
+    private LocalDate skjæringstidspunkt ;
+    private IAYRepositoryProvider repositoryProvider ;
+    private BehandlingRepository behandlingRepository ;
+    private FagsakRepository fagsakRepository ;
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private OpptjeningRepository opptjeningRepository ;
+    private VilkårResultatRepository vilkårResultatRepository ;
+    private VirksomhetTjeneste virksomhetTjeneste ;
+    private AksjonspunktutlederForVurderOppgittOpptjening apoOpptjening ;
+    private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening ;
+    private OpptjeningsperioderTjeneste asdf ;
+    private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste ;
+    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID ;
+    private AktørId AKTØRID ;
+
+    @BeforeEach
+    public void setup() {
+        skjæringstidspunkt = LocalDate.now();
+        repositoryProvider = new IAYRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        fagsakRepository = new FagsakRepository(entityManager);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+        vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+        virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
+        apoOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste);
+        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(opptjeningRepository, iayTjeneste);
+        asdf = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), apoOpptjening, apbOpptjening);
+        opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), asdf);
+        ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
+        AKTØRID = AktørId.dummy();
+    }
 
     @Test
     public void skal_utlede_en_periode_for_egen_næring() {
+
+
+
         // Arrange
         final Behandling behandling = opprettBehandling();
 

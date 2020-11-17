@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
@@ -132,7 +132,7 @@ public class IAYDtoMapperLagretKonverteringTest {
                 .medKilde(Fagsystem.K9SAK)
                 .medYtelseType(FagsakYtelseType.SYKEPENGER)
                 .medSaksnummer(sakId);
-        
+
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
             .medYtelseType(FagsakYtelseType.FORELDREPENGER)

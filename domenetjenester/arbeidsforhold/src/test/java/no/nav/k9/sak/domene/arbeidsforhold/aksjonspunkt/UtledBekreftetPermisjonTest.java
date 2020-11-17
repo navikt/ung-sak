@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
@@ -64,14 +65,16 @@ public class UtledBekreftetPermisjonTest {
         assertThat(bekreftetPermisjon.getPeriode().getTomDato()).isEqualTo(TIDENES_ENDE);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void skal_kaste_exception_hvis_utledet_status_er_udefinert(){
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukPermisjon(null);
-        arbeidsforholdDto.setPermisjoner(List.of());
-        // Act
-        UtledBekreftetPermisjon.utled(arbeidsforholdDto);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            // Arrange
+            AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
+            arbeidsforholdDto.setBrukPermisjon(null);
+            arbeidsforholdDto.setPermisjoner(List.of());
+            // Act
+            UtledBekreftetPermisjon.utled(arbeidsforholdDto);
+        });
     }
 
 }

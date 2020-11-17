@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -27,7 +27,7 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
 
     private HindreTilbaketrekkNårAlleredeUtbetalt tjeneste;
 
-    @Before
+    @BeforeEach
     public void setup() {
         tjeneste = new HindreTilbaketrekkNårAlleredeUtbetalt();
     }

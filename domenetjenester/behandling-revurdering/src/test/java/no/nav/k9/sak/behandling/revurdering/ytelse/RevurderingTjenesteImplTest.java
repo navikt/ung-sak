@@ -10,10 +10,9 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -31,19 +30,18 @@ import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class RevurderingTjenesteImplTest {
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
+    @Inject
+    private EntityManager entityManager;
 
     @Inject
     private UttakRepository uttakRepository;
@@ -54,7 +52,7 @@ public class RevurderingTjenesteImplTest {
     @Inject
     private BehandlingskontrollServiceProvider serviceProvider;
 
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    private BehandlingRepositoryProvider repositoryProvider ;
 
     @Inject
     @FagsakYtelseTypeRef
@@ -63,8 +61,9 @@ public class RevurderingTjenesteImplTest {
     @Inject @Any
     private Instance<GrunnlagKopierer> grunnlagKopierer;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         opprettRevurderingsKandidat();
     }
 

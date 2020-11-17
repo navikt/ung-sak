@@ -8,8 +8,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -20,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
@@ -28,14 +34,23 @@ import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AvklarFortsattMedlemskapOppdatererTest {
 
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    public EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private LocalDate now = LocalDate.now();
+    private BehandlingRepositoryProvider repositoryProvider;
+    private LocalDate now;
+
+    @BeforeEach
+    public void setuop(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        now = LocalDate.now();
+    }
 
     @Test
     public void avklar_fortsatt_medlemskap() {

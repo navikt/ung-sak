@@ -101,6 +101,5 @@
 
     <root level="${log.level.root:-INFO}">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="APP_FILE_LOG" />
     </root>
 </configuration>

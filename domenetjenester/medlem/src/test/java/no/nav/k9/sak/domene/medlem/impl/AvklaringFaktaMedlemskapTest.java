@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
@@ -38,14 +38,16 @@ import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AvklaringFaktaMedlemskapTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider;
 
     @Inject
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
@@ -60,8 +62,9 @@ public class AvklaringFaktaMedlemskapTest {
 
     private static final LocalDate SKJÆRINGSDATO_FØDSEL = LocalDate.now().plusDays(1);
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        provider = new BehandlingRepositoryProvider(entityManager);
         this.tjeneste = new AvklaringFaktaMedlemskap(provider, medlemskapPerioderTjeneste, personopplysningTjeneste, iayTjeneste);
     }
 

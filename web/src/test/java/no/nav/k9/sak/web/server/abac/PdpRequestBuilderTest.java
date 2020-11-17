@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -143,9 +143,11 @@ public class PdpRequestBuilderTest {
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
     }
 
+    // TODO: FLytt til junit 5
     @Test
     public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_og_behandling_id_som_ikke_stemmer_overens() throws Exception {
 
+        // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FAGSAK_ID, 123L));
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
@@ -153,10 +155,13 @@ public class PdpRequestBuilderTest {
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
             Optional.of(new PipBehandlingsData(BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode())));
 
-        Assert.assertThrows(ManglerTilgangException.class, () -> {
-            requestBuilder.lagPdpRequest(attributter);
-        });
+        // Assert
+        Assertions.assertThrows(ManglerTilgangException.class, () -> {
 
+            // Act
+            requestBuilder.lagPdpRequest(attributter);
+
+        });
     }
 
     private AbacAttributtSamling byggAbacAttributtSamling() {

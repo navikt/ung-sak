@@ -5,8 +5,8 @@ import no.nav.vedtak.sikkerhet.pdp.PdpConsumer;
 import no.nav.vedtak.sikkerhet.pdp.PdpKlientImpl;
 import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlRequestBuilder;
 import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlResponseWrapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import javax.json.Json;
@@ -32,7 +32,7 @@ public class XacmlRequestBuilderTjenesteImplTest {
     private PdpConsumer pdpConsumerMock;
     private AppXacmlRequestBuilderTjenesteImpl xamlRequestBuilderTjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         pdpConsumerMock = mock(PdpConsumer.class);
         xamlRequestBuilderTjeneste = new AppXacmlRequestBuilderTjenesteImpl();

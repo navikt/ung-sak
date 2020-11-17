@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -34,7 +34,7 @@ public class GjenopptaBehandlingTaskTest {
     private BehandlendeEnhetTjeneste mockEnhetsTjeneste;
     private OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("4802", "NAV Bærum");
 
-    @Before
+    @BeforeEach
     public void setup() {
         mockBehandlingRepository = mock(BehandlingRepository.class);
         mockBehandlingskontrollTjeneste = mock(BehandlingskontrollTjeneste.class);

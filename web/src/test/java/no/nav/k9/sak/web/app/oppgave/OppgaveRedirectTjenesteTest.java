@@ -8,8 +8,8 @@ import java.util.Optional;
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -36,12 +36,12 @@ public class OppgaveRedirectTjenesteTest {
 
     private final Saksnummer saksnummer = new Saksnummer("22");
 
-    @Before
+    @BeforeEach
     public void setContextPath() {
         ContextPathHolder.instance("/k9/sak");
     }
 
-    @Before
+    @BeforeEach
     public void setLoadBalancerUrl() {
         redirectFactory.setLoadBalancerUrl("https://erstatter.nav.no");
     }

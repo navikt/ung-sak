@@ -11,9 +11,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -37,18 +40,22 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingRepositoryImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final Repository repository = repoRule.getRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private Repository repository;
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
@@ -73,6 +80,12 @@ public class BehandlingRepositoryImplTest {
 
     private LocalDateTime imorgen = LocalDateTime.now().plusDays(1);
     private LocalDateTime igår = LocalDateTime.now().minusDays(1);
+
+
+    @BeforeEach
+    public void setup() {
+        repository = new Repository(entityManager);
+    }
 
     @Test
     public void skal_finne_behandling_gitt_id() {

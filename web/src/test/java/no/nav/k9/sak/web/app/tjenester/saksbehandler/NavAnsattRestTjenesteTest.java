@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
 import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
@@ -21,7 +21,7 @@ public class NavAnsattRestTjenesteTest {
     private static final Boolean skalViseDetaljerteFeilmeldinger = true;
     private NavAnsattRestTjeneste saksbehandlerTjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         saksbehandlerTjeneste = new NavAnsattRestTjeneste(gruppenavnSaksbehandler, gruppenavnVeileder, gruppenavnBeslutter, gruppenavnOverstyrer, gruppenavnEgenAnsatt, gruppenavnKode6, gruppenavnKode7, skalViseDetaljerteFeilmeldinger);
     }

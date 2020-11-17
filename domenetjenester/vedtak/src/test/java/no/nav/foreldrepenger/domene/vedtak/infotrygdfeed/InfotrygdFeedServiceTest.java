@@ -11,8 +11,9 @@ import java.time.LocalDate;
 
 import javax.enterprise.inject.Instance;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -32,7 +33,7 @@ public class InfotrygdFeedServiceTest {
 
     private InfotrygdFeedService service;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
         initServices(LocalDate.now(), LocalDate.now().plusDays(1));
@@ -85,22 +86,26 @@ public class InfotrygdFeedServiceTest {
         Mockito.verifyNoInteractions(prosessTaskRepository);
     }
 
-    @Test(expected = InfotrygdFeedService.ManglendeVerdiException.class)
+    @Test
     public void publiserHendelse_uten_saksnummer() {
-        Behandling behandling = mockHelper()
-            .medSaksnummer(null)
-            .hentBehandling();
-        service.publiserHendelse(behandling);
+        Assertions.assertThrows(InfotrygdFeedService.ManglendeVerdiException.class, () -> {
+            Behandling behandling = mockHelper()
+                .medSaksnummer(null)
+                .hentBehandling();
+            service.publiserHendelse(behandling);
+        });
     }
 
     // === Obligatoriske meldingsfelt ====
 
-    @Test(expected = InfotrygdFeedService.ManglendeVerdiException.class)
+    @Test
     public void publiserHendelse_uten_aktørId() {
-        Behandling behandling = mockHelper()
-            .medAktørId(null)
-            .hentBehandling();
-        service.publiserHendelse(behandling);
+        Assertions.assertThrows(InfotrygdFeedService.ManglendeVerdiException.class, () -> {
+            Behandling behandling = mockHelper()
+                .medAktørId(null)
+                .hentBehandling();
+            service.publiserHendelse(behandling);
+        });
     }
 
     private FeedServiceMockHelper mockHelper() {

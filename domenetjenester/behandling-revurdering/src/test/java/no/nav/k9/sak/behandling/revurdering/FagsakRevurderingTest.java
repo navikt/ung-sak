@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
@@ -13,8 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -25,8 +29,11 @@ import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.testutilities.Whitebox;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class FagsakRevurderingTest {
 
+    @Mock
     private BehandlingRepository behandlingRepository;
     private Behandling behandling;
     private Behandling nyesteBehandling;
@@ -37,16 +44,16 @@ public class FagsakRevurderingTest {
     private Fagsak fagsakMedFlereBehandlinger;
     private Saksnummer fagsakMedFlereBehSaksnr  = new Saksnummer("2");
 
-    @Before
+    @BeforeEach
     public void setup(){
-        behandlingRepository = mock(BehandlingRepository.class);
+        // behandlingRepository = mock(BehandlingRepository.class);
     }
 
-    @Before
+    @BeforeEach
     public void opprettBehandlinger() {
         fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakSaksnummer).build();
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        
+
         Whitebox.setInternalState(behandling, "id", 1L);
 
         fagsakMedFlereBehandlinger = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medSaksnummer(fagsakMedFlereBehSaksnr).build();

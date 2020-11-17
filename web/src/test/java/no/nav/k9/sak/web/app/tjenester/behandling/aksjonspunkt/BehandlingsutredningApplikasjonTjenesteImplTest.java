@@ -8,14 +8,19 @@ import java.time.LocalDate;
 import java.time.Period;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -29,20 +34,23 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
@@ -73,12 +81,12 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
     @Mock
     private SjekkProsessering sjekkProsessering;
-    
+
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
 
     private Long behandlingId;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         Behandling behandling = TestScenarioBuilder
@@ -124,13 +132,15 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
         assertThat(behandling.getVenteårsak()).isEqualTo(Venteårsak.AVV_FODSEL);
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void skal_kaste_feil_når_oppdatering_av_ventefrist_av_behandling_som_ikke_er_på_vent() {
-        // Arrange
-        LocalDate toUkerFrem = LocalDate.now().plusWeeks(2);
+        Assertions.assertThrows(Exception.class, () -> {
+            // Arrange
+            LocalDate toUkerFrem = LocalDate.now().plusWeeks(2);
 
-        // Act
-        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
+            // Act
+            behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, toUkerFrem, Venteårsak.AVV_FODSEL, null);
+        });
     }
 
     @Test

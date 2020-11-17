@@ -7,9 +7,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.ArgumentCaptor;
 
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
@@ -32,7 +32,7 @@ public class VurderFeilutbetalingOppdatererTest {
 
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         this.behandling = scenario.lagMocked();
@@ -56,11 +56,17 @@ public class VurderFeilutbetalingOppdatererTest {
 
     @Test
     public void skal_feile_når_Inntrekk_er_forsøkt_valgt() {
+
+        // Arrange
         VurderFeilutbetalingDto dto = new VurderFeilutbetalingDto("lorem ipsum", TilbakekrevingVidereBehandling.INNTREKK, null);
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
+        // Assert
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+
+            // Act
             oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         });
+
     }
 
 }

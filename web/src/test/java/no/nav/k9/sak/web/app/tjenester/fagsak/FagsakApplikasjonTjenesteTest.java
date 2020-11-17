@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
@@ -37,7 +37,7 @@ public class FagsakApplikasjonTjenesteTest {
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         tpsTjeneste = mock(TpsTjeneste.class);
         fagsakRepository = mock(FagsakRepository.class);

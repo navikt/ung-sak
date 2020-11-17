@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -31,7 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -45,37 +48,55 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 import no.nav.k9.sak.ytelse.beregning.beregningsresultat.DefaultBeregningsresultatProvider;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.testutilities.db.Repository;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderOmArenaYtelseSkalOpphøreTest {
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private final Repository repository = repoRule.getRepository();
-    private final BeregningsresultatRepository beregningsresultatRepository = new BeregningsresultatRepository(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
 
-    private Instance<BeregningsresultatProvider> beregningsresultatProvidere = new UnitTestLookupInstanceImpl<>(new DefaultBeregningsresultatProvider(repositoryProvider));
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository ;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    private Repository repository ;
+    private BeregningsresultatRepository beregningsresultatRepository ;
+
+    private Instance<BeregningsresultatProvider> beregningsresultatProvidere ;
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
     private static Long MELDEKORTPERIODE = 14L;
 
-    private final LocalDate stp = LocalDate.parse("2020-08-08");
-    private final TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private final VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(
-        behandlingRepository,
-        iayTjeneste, behandlingVedtakRepository, null, beregningsresultatProvidere);
+    private LocalDate stp ;
+    private TestScenarioBuilder scenario;
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør ;
 
     private Behandling behandling;
 
     private BeregningsresultatEntitet.Builder beregningsresultatBuilder;
     private BeregningsresultatPeriode.Builder brPeriodebuilder;
+
+    @BeforeEach
+    public void setup(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        repository = new Repository(entityManager);
+        beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
+
+        beregningsresultatProvidere = new UnitTestLookupInstanceImpl<>(new DefaultBeregningsresultatProvider(repositoryProvider));
+
+        stp = LocalDate.parse("2020-08-08");
+        scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(behandlingRepository, iayTjeneste, behandlingVedtakRepository, null, beregningsresultatProvidere);
+    }
+
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
         return scenario.lagre(repositoryProvider);

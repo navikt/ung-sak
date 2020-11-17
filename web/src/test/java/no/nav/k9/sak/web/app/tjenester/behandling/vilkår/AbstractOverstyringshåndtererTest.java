@@ -9,9 +9,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -22,30 +22,34 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.medlem.OverstyringMedlemskapsvilkåretDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonTjeneste;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AbstractOverstyringshåndtererTest {
 
     private static final String IKKE_OK = "ikke ok likevel";
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-
-    private EntityManager em = repoRule.getEntityManager();
+    @Inject
+    public EntityManager entityManager;
 
     @Inject
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjeneste;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(em);
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private AksjonspunktTestSupport aksjonspunktRepository ;
 
-    private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
+    @BeforeEach
+    public void setup(){
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        aksjonspunktRepository = new AksjonspunktTestSupport();
+    }
 
     @Test
     public void skal_reaktivere_inaktivt_aksjonspunkt() throws Exception {

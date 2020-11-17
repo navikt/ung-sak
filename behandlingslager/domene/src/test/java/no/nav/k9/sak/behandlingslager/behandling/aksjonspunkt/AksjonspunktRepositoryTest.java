@@ -6,11 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -20,27 +21,34 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AksjonspunktRepositoryTest {
-
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
-    private EntityManager em = repoRule.getEntityManager();
-    private AksjonspunktRepository aksjonspunktRepository = new AksjonspunktRepository(em);
-    private BehandlingRepository behandlingRepository = new BehandlingRepository(em);
-    private FagsakRepository fagsakRepository = new FagsakRepository(em);
+    @Inject
+    private EntityManager entityManager;
+
+    private AksjonspunktRepository aksjonspunktRepository;
+    private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
 
     private Fagsak fagsak;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setup() {
+
+        aksjonspunktRepository = new AksjonspunktRepository(entityManager);
+        behandlingRepository = new BehandlingRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+
         fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"));
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();

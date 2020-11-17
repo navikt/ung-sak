@@ -1,5 +1,7 @@
 package no.nav.k9.sak.infotrygdfeed.ytelser;
 
+import static org.mockito.Mockito.mock;
+
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UtfallType;
@@ -13,6 +15,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.PleiepengerBarnInfotrygdFeedPeriodeberegner;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,9 @@ public class PleiepengerBarnParametere implements InfotrygdFeedPeriodeberegnerTe
 
     @Override
     public void konfigurerMock(Saksnummer saksnummer, List<TestPeriode> perioder, boolean harTreffITjeneste) {
+
+        uttakTjeneste = mock(UttakTjeneste.class);
+
         if(!harTreffITjeneste) {
             return;
         }

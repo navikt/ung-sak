@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.app.tjenester;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -15,7 +15,7 @@ public abstract class DtoTest {
 
     protected ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         objectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();

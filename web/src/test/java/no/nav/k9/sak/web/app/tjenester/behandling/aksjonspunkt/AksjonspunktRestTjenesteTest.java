@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -40,7 +41,7 @@ public class AksjonspunktRestTjenesteTest {
     private Behandling behandling = mock(Behandling.class);
     private TotrinnTjeneste totrinnTjeneste = mock(TotrinnTjeneste.class);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(behandling.getUuid()).thenReturn(UUID.randomUUID());
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(behandling);
@@ -71,12 +72,14 @@ public class AksjonspunktRestTjenesteTest {
     }
 
     @SuppressWarnings("resource")
-    @Test(expected = FunksjonellException.class)
+    @Test
     public void skal_ikke_kunne_bekrefte_andre_aksjonspunkt_ved_status_fatter_vedtak() throws URISyntaxException {
-        when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);
-        Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
-        aksjonspunkt.add(new AvklarFortsattMedlemskapDto(begrunnelse, new ArrayList<>()));
-        aksjonspunktRestTjeneste.bekreft(BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
+        Assertions.assertThrows(FunksjonellException.class, () -> {
+            when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);
+            Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
+            aksjonspunkt.add(new AvklarFortsattMedlemskapDto(begrunnelse, new ArrayList<>()));
+            aksjonspunktRestTjeneste.bekreft(BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
+        });
     }
 
     private AksjonspunktGodkjenningDto opprettetGodkjentAksjonspunkt(boolean godkjent) {

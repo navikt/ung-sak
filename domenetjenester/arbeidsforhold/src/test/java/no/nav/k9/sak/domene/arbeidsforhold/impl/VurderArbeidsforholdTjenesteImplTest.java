@@ -11,10 +11,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
@@ -26,7 +28,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
@@ -40,28 +42,39 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderArbeidsforholdTjenesteImplTest {
 
     private static final LocalDate IDAG = LocalDate.now();
     private final LocalDate skjæringstidspunkt = IDAG.minusDays(30);
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
-    private LocalDateTime nåTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-    private volatile int nåTidTeller;
-    private IAYRepositoryProvider repositoryProvider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-    private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
-    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null,
-        new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
-    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(
-        new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
-    private VurderArbeidsforholdTjeneste tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
 
-    @Before
+    @Inject
+    private EntityManager entityManager;
+
+    private LocalDateTime nåTid ;
+    private volatile int nåTidTeller;
+    private IAYRepositoryProvider repositoryProvider ;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
+    private InntektsmeldingFilterYtelse inntektsmeldingFilterYtelse ;
+    private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste ;
+    private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjeneste ;
+    private VurderArbeidsforholdTjeneste tjeneste ;
+
+    @BeforeEach
     public void setup() {
+        nåTid = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        repositoryProvider = new IAYRepositoryProvider(entityManager);
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+        inntektsmeldingFilterYtelse = new InntektsmeldingFilterYtelseImpl();
+        inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(inntektsmeldingFilterYtelse));
+        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
+        tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
     }
 
     @Test

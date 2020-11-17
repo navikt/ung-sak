@@ -11,11 +11,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
@@ -24,28 +24,31 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBu
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class AvklarGyldigPeriodeTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider;
 
     @Inject
     private MedlemskapPerioderTjeneste medlemskapPerioderTjeneste;
 
     @Inject
     private MedlemskapRepository medlemskapRepository;
-    
+
     private AvklarGyldigPeriode avklarGyldigPeriode;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        provider = new BehandlingRepositoryProvider(entityManager);
         this.avklarGyldigPeriode = new AvklarGyldigPeriode(medlemskapRepository, medlemskapPerioderTjeneste);
     }
 

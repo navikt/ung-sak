@@ -7,31 +7,44 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class OppgaveBehandlingKoblingRepositoryImplTest {
 
     private static final Saksnummer DUMMY_SAKSNUMMER = new Saksnummer("123");
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private Repository repository = repoRule.getRepository();
 
-    private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository = new OppgaveBehandlingKoblingRepository(
-        repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private Repository repository ;
+    private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository ;
+
+    @BeforeEach
+    public void setup() {
+        repository = new Repository(entityManager);
+        oppgaveBehandlingKoblingRepository = new OppgaveBehandlingKoblingRepository(entityManager);
+    }
 
     @Test
     public void skal_hente_opp_oppgave_behandling_kobling_basert_på_oppgave_id() {
         // Arrange
         String oppgaveId = "G1502453";
-        Behandling behandling = new BasicBehandlingBuilder(repoRule.getEntityManager()).opprettOgLagreFørstegangssøknad(FagsakYtelseType.ENGANGSTØNAD);
+        Behandling behandling = new BasicBehandlingBuilder(entityManager).opprettOgLagreFørstegangssøknad(FagsakYtelseType.ENGANGSTØNAD);
         lagOppgave(new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, oppgaveId, DUMMY_SAKSNUMMER, behandling));
 
         // Act
@@ -46,7 +59,7 @@ public class OppgaveBehandlingKoblingRepositoryImplTest {
     @Test
     public void skal_hente_opp_oppgave_behandling_koblinger_for_åpne_oppgaver() {
         // Arrange
-        Behandling behandling = new BasicBehandlingBuilder(repoRule.getEntityManager()).opprettOgLagreFørstegangssøknad(FagsakYtelseType.ENGANGSTØNAD);
+        Behandling behandling = new BasicBehandlingBuilder(entityManager).opprettOgLagreFørstegangssøknad(FagsakYtelseType.ENGANGSTØNAD);
         OppgaveBehandlingKobling bsAvsl = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "O1234", DUMMY_SAKSNUMMER, behandling);
         bsAvsl.ferdigstillOppgave("I11111");
         OppgaveBehandlingKobling bsAapen = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "O1235", DUMMY_SAKSNUMMER, behandling);

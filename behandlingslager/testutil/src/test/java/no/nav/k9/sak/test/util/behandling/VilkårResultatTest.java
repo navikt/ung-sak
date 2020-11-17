@@ -5,9 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -26,27 +29,42 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 import no.nav.vedtak.konfig.Tid;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VilkårResultatTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final FagsakRepository fagsakReposiory = new FagsakRepository(repoRule.getEntityManager());
-    private Repository repository = repoRule.getRepository();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private FagsakRepository fagsakReposiory;
+    private Repository repository;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+
     private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
     private Behandling behandling1;
-    private VilkårResultatRepository vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
 
-    @Before
+
+
+
+    @BeforeEach
     public void setup() {
+
+        fagsakReposiory = new FagsakRepository(entityManager);
+        repository = new Repository(entityManager);
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+
         fagsakReposiory.opprettNy(fagsak);
         behandling1 = behandlingBuilder.build();
     }
@@ -57,7 +75,7 @@ public class VilkårResultatTest {
         lagreBehandling(behandling1);
 
         lagreOgGjenopphenteBehandlingsresultat(behandling1);
-        
+
         // Act
         Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING)
             .build();
@@ -65,7 +83,7 @@ public class VilkårResultatTest {
         vilkårResultatRepository.kopier(behandling2.getId(), behandling2.getId());
 
         lagreOgGjenopphenteBehandlingsresultat(behandling2);
-        
+
         // Assert
         assertThat(getVilkårene(behandling2))
             .isNotSameAs(getVilkårene(behandling1));
@@ -79,7 +97,7 @@ public class VilkårResultatTest {
         // Arrange
         lagreBehandling(behandling1);
         lagreOgGjenopphenteBehandlingsresultat(behandling1);
-        
+
         // Act
         Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING).build();
         lagreBehandling(behandling2);
@@ -96,7 +114,7 @@ public class VilkårResultatTest {
         vilkårResultatRepository.lagre(behandling2.getId(), vilkårResultat);
 
         lagreOgGjenopphenteBehandlingsresultat(behandling2);
-        
+
         // Assert
         assertThat(getVilkårene(behandling2).getId())
             .isNotEqualTo(getVilkårene(behandling1).getId());

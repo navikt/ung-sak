@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -30,7 +30,7 @@ public class SjekkOmPerioderInneholderSammeAndelerImplTest {
     private BeregningsresultatPeriode nyPeriode;
     private BeregningsresultatPeriode gammelPeriode;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         BeregningsresultatEntitet beregningsresultatFørstegangsbehandling = BeregningsresultatEntitet.builder()
             .medRegelInput("clob1")
@@ -276,9 +276,12 @@ public class SjekkOmPerioderInneholderSammeAndelerImplTest {
         opprettBeregningsresultatAndel(gammelPeriode, true, ARBEIDSFORHOLD_ID, AktivitetStatus.ARBEIDSTAKER,
             Inntektskategori.ARBEIDSTAKER, ORGNR1, 1000, BigDecimal.valueOf(80), BigDecimal.valueOf(80), 1000, OpptjeningAktivitetType.FORELDREPENGER);
 
-        // Act
-        Assert.assertThrows(TekniskException.class, () -> {
+        // Assert
+        Assertions.assertThrows(TekniskException.class, () -> {
+
+            // Act
             sjekkOmPerioderInneholderSammeAndeler.sjekk(nyPeriode, gammelPeriode);
+
         });
     }
 

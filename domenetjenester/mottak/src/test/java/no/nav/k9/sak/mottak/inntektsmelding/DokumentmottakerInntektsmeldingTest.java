@@ -11,14 +11,17 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -34,7 +37,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakTestUtil;
@@ -48,13 +51,16 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DokumentmottakerInntektsmeldingTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
@@ -63,7 +69,7 @@ public class DokumentmottakerInntektsmeldingTest {
     @Inject
     private FagsakRepository fagsakRepository;
 
-    private AksjonspunktTestSupport aksjonspunktRepository = new AksjonspunktTestSupport();
+    private AksjonspunktTestSupport aksjonspunktRepository;
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
@@ -83,8 +89,10 @@ public class DokumentmottakerInntektsmeldingTest {
     private DokumentmottakerInntektsmelding dokumentmottaker;
     private DokumentmottakerFelles dokumentmottakerFelles;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
+        aksjonspunktRepository = new AksjonspunktTestSupport();
+
         MockitoAnnotations.initMocks(this);
 
         dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,

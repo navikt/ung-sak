@@ -13,9 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.PersonstatusType;
@@ -26,7 +30,7 @@ import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -35,8 +39,11 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensn
 import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.feil.FeilFactory;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TpsTjenesteTest {
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
@@ -55,13 +62,16 @@ public class TpsTjenesteTest {
     private static Map<AktørId, PersonIdent> FNR_VED_AKTØR_ID = new HashMap<>();
     private static Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    public Repository repository = repoRule.getRepository();
+    @Inject
+    private EntityManager entityManager;
+    public Repository repository;
     private TpsTjeneste tpsTjeneste;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
+
+        repository = new Repository(entityManager);
+
         FNR_VED_AKTØR_ID.put(AKTØR_ID, FNR);
         FNR_VED_AKTØR_ID.put(ENDRET_AKTØR_ID, ENDRET_FNR);
         AKTØR_ID_VED_FNR.put(FNR, AKTØR_ID);
@@ -96,14 +106,18 @@ public class TpsTjenesteTest {
         assertThat(geografiskTilknytning).isNotNull();
     }
 
-    @Test(expected = TekniskException.class)
+    @Test
     public void test_hentGeografiskTilknytning_finnes_ikke() {
-        tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666"));
+        Assertions.assertThrows(TekniskException.class, () -> {
+            tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666"));
+        });
     }
 
-    @Test(expected = TpsException.class)
+    @Test
     public void skal_kaste_feil_ved_tjenesteexception_dersom_aktør_ikke_er_cachet() {
-        tpsTjeneste.hentBrukerForAktør(AKTØR_ID_SOM_TRIGGER_EXCEPTION);
+        Assertions.assertThrows(TpsException.class, () -> {
+            tpsTjeneste.hentBrukerForAktør(AKTØR_ID_SOM_TRIGGER_EXCEPTION);
+        });
     }
 
     private class TpsAdapterMock implements TpsAdapter {

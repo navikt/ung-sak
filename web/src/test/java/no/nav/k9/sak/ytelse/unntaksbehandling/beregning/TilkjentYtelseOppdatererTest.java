@@ -8,9 +8,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -18,7 +21,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
@@ -26,22 +29,30 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TilkjentYtelseOppdatererTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    public EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private BeregningsresultatRepository beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
-    private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private BeregningsresultatRepository beregningsresultatRepository ;
+    private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste ;
 
     private TilkjentYtelseOppdaterer oppdaterer;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
+        beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
+
         oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
 
         var scenario = TestScenarioBuilder.builderMedSøknad();

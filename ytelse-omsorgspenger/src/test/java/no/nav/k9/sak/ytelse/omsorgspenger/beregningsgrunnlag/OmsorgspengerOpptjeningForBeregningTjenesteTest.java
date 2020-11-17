@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -17,7 +20,7 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
@@ -31,28 +34,35 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
 
 
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
     public static final LocalDate FØRSTE_UTTAKSDAG = SKJÆRINGSTIDSPUNKT.minusDays(9);
     public static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.virksomhet("123456789");
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private OpptjeningRepository opptjeningRepository ;
     private OmsorgspengerOpptjeningForBeregningTjeneste tjeneste;
     private BehandlingReferanse ref;
     private AktørId aktørId;
 
-    @Before
+    @BeforeEach
     public void setUp()  {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);
-        Behandling behandling = scenario.lagre(repoRule.getEntityManager());
+        Behandling behandling = scenario.lagre(entityManager);
         ref = BehandlingReferanse.fra(behandling).medSkjæringstidspunkt(Skjæringstidspunkt.builder()
             .medSkjæringstidspunktOpptjening(FØRSTE_UTTAKSDAG).build());
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);

@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -29,7 +29,7 @@ public class InngangsvilkårSøkersOpplysningspliktTest {
     private Kompletthetsjekker kompletthetssjekker = mock(Kompletthetsjekker.class);
     private DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMed(LocalDate.now());
 
-    @Before
+    @BeforeEach
     public void setup() {
         kompletthetssjekkerProvider = mock(KompletthetsjekkerProvider.class);
         testObjekt = new InngangsvilkårSøkersOpplysningsplikt(kompletthetssjekkerProvider);

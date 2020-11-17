@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Test;
-
 import java.net.URI;
+
+import org.junit.jupiter.api.Test;
 
 public class FrontendLoginResourceTest {
 

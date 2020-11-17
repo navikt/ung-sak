@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -43,24 +43,25 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.medlemskap.VurderLøpendeMedlemskap;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderLøpendeMedlemskapStegTest {
 
-    @Rule
-    public RepositoryRule repositoryRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider provider = new BehandlingRepositoryProvider(repositoryRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = provider.getBehandlingRepository();
-    private MedlemskapRepository medlemskapRepository = provider.getMedlemskapRepository();
-    private PersonopplysningRepository personopplysningRepository = provider.getPersonopplysningRepository();
-    private FagsakRepository fagsakRepository = provider.getFagsakRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider provider;
+    private BehandlingRepository behandlingRepository ;
+    private MedlemskapRepository medlemskapRepository ;
+    private PersonopplysningRepository personopplysningRepository ;
+    private FagsakRepository fagsakRepository;
 
     private VurderMedlemskapSteg steg;
 
@@ -70,8 +71,14 @@ public class VurderLøpendeMedlemskapStegTest {
     @Inject
     private VurderLøpendeMedlemskap vurdertLøpendeMedlemskapTjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
+        provider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = provider.getBehandlingRepository();
+        medlemskapRepository = provider.getMedlemskapRepository();
+        personopplysningRepository = provider.getPersonopplysningRepository();
+        fagsakRepository = provider.getFagsakRepository();
+
         steg = new VurderMedlemskapSteg(vurdertLøpendeMedlemskapTjeneste, provider);
     }
 

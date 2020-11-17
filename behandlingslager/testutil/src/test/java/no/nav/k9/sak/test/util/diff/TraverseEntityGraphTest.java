@@ -12,7 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
@@ -181,7 +181,7 @@ public class TraverseEntityGraphTest {
         // diff mot seg selv
         DiffResult diffResultNy = differ.diff(periode1, periode1);
         assertThat(diffResultNy.getLeafDifferences()).isEmpty();
-        
+
         // diff mot kopi
         MedlemskapPerioderEntitet nyPeriode1 = new MedlemskapPerioderBuilder().medKildeType(MedlemskapKildeType.ANNEN).build();
         DiffResult diffResultNy2 = differ.diff(periode1, nyPeriode1);

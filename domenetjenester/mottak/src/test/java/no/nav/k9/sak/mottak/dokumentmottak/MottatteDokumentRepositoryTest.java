@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -17,12 +20,15 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class MottatteDokumentRepositoryTest {
 
     private String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -64,12 +70,12 @@ public class MottatteDokumentRepositoryTest {
         "</Skjemainnhold>" +
         "</melding>";
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private final MottatteDokumentRepository mottatteDokumentRepository = new MottatteDokumentRepository(repoRule.getEntityManager());
-    private final BehandlingRepository behandlingRepository = new BehandlingRepository(repoRule.getEntityManager());
-    private final FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
+    private MottatteDokumentRepository mottatteDokumentRepository ;
+    private BehandlingRepository behandlingRepository ;
+    private FagsakRepository fagsakRepository ;
 
     private final Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private Behandling beh1, beh2;
@@ -77,8 +83,13 @@ public class MottatteDokumentRepositoryTest {
 
     private long journalpostId = 123L;
 
-    @Before
+    @BeforeEach
     public void setup() {
+
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
+        behandlingRepository = new BehandlingRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+
         fagsakRepository.opprettNy(fagsak);
 
         beh1 = opprettBuilderForBehandling().build();

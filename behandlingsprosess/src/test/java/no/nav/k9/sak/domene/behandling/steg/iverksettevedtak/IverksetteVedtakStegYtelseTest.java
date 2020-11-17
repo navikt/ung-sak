@@ -11,13 +11,19 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -39,40 +45,44 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingOverlappInfotr
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.IdentifiserOverlappendeInfotrygdYtelseTjeneste;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class IverksetteVedtakStegYtelseTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository ;
 
     private Behandling behandling;
 
     private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
 
-    private Repository repository = repoRule.getRepository();
-    private BehandlingVedtakRepository behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-    private HistorikkRepository historikkRepository = repositoryProvider.getHistorikkRepository();
+    private Repository repository ;
+    private BehandlingVedtakRepository behandlingVedtakRepository ;
+    private HistorikkRepository historikkRepository ;
 
     @Mock
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
 
     @Mock
     private IdentifiserOverlappendeInfotrygdYtelseTjeneste iverksettingSkalIkkeStoppesAvOverlappendeYtelse;
-
 
     @Mock
     private FagsakProsessTaskRepository prosessTaskRepository;
@@ -83,11 +93,18 @@ public class IverksetteVedtakStegYtelseTest {
     @Mock
     private InfotrygdFeedService infotrygdFeedService;
 
-
     private IverksetteVedtakSteg iverksetteVedtakSteg;
 
-    @Before
+    @BeforeEach
     public void setup() {
+
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        repository =  new Repository(entityManager);
+        behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        historikkRepository = repositoryProvider.getHistorikkRepository();
+
+
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,

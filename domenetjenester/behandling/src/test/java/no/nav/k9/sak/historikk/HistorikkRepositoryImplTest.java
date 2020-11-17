@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -18,24 +20,28 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class HistorikkRepositoryImplTest {
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final Repository repository = repoRule.getRepository();
+    @Inject
+    private EntityManager entityManager;
 
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(repoRule.getEntityManager());
-
-
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private final HistorikkRepository historikkRepository = new HistorikkRepository(entityManager);
+    private Repository repository;
+    private BasicBehandlingBuilder behandlingBuilder;
+    private HistorikkRepository historikkRepository;
     private Fagsak fagsak;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repository = new Repository(entityManager);
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+        historikkRepository = new HistorikkRepository(entityManager);
         fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
     }
 

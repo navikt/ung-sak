@@ -11,39 +11,37 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class StartpunktTjenesteImplTest {
 
     private StartpunktTjeneste tjeneste;
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
+    @Inject
+    private EntityManager entityManager;
 
-    private final BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Any
     @Inject
     private Instance<StartpunktUtleder> startpunktUtledere;
 
-    @Before
+    @BeforeEach
     public void before() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         tjeneste = new StartpunktTjenesteImpl(startpunktUtledere);
     }
 

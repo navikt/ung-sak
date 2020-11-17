@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
@@ -21,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
@@ -29,20 +33,29 @@ import no.nav.k9.sak.kontrakt.medlem.BekreftBosattVurderingDto;
 import no.nav.k9.sak.kontrakt.medlem.BekreftedePerioderDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjenesteImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BekreftBosattVurderingOppdatererTest {
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private LocalDate now = LocalDate.now();
+    @Inject
+    public EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
-    private HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder();
+    private LocalDate now ;
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private HistorikkInnslagTekstBuilder tekstBuilder ;
 
     @Inject
     private SkjæringstidspunktTjenesteImpl skjæringstidspunktTjeneste;
+
+    @BeforeEach
+    public void setup(){
+        now = LocalDate.now();
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        tekstBuilder = new HistorikkInnslagTekstBuilder();
+    }
 
     @Test
     public void bekreft_bosett_vurdering() {

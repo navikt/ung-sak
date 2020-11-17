@@ -4,12 +4,15 @@ import static java.time.Month.JANUARY;
 
 import java.time.LocalDate;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -23,19 +26,21 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.testutilities.Whitebox;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class FagsakTjenesteTest {
 
     private final AktørId forelderAktørId = AktørId.dummy();
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
+    @Inject
+    private EntityManager entityManager;
     private FagsakTjeneste tjeneste;
     @Mock
     private SøknadRepository søknadRepository;
@@ -45,7 +50,7 @@ public class FagsakTjenesteTest {
 
     private final FagsakYtelseType ytelseType = FagsakYtelseType.FORELDREPENGER;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null);
 
@@ -69,13 +74,14 @@ public class FagsakTjenesteTest {
         return fagsak;
     }
 
-    @Test(expected = PersistenceException.class)
+    @Test
     public void opprettFlereFagsakerSammeBrukerDuplikaterSkalFeile_1() throws Exception {
-        // Opprett en fagsak i systemet
-        Whitebox.setInternalState(fagsak, "fagsakStatus", FagsakStatus.LØPENDE); // dirty, men eksponerer ikke status nå
+        Assertions.assertThrows(PersistenceException.class, () -> {
+            // Opprett en fagsak i systemet
+            Whitebox.setInternalState(fagsak, "fagsakStatus", FagsakStatus.LØPENDE); // dirty, men eksponerer ikke status nå
 
-        Fagsak fagsakNy = Fagsak.opprettNy(ytelseType, personinfo.getAktørId());
-        tjeneste.opprettFagsak(fagsakNy);
+            Fagsak fagsakNy = Fagsak.opprettNy(ytelseType, personinfo.getAktørId());
+            tjeneste.opprettFagsak(fagsakNy);
+        });
     }
-
 }

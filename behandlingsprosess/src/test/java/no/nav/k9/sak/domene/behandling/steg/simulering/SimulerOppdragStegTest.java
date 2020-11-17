@@ -11,11 +11,12 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
@@ -31,7 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
@@ -40,29 +41,40 @@ import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.vedtak.felles.testutilities.db.Repository;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class SimulerOppdragStegTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private final EntityManager entityManager = repoRule.getEntityManager();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-    private TilbakekrevingRepository tilbakekrevingRepository = new TilbakekrevingRepository(entityManager);
-    private BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+    private TilbakekrevingRepository tilbakekrevingRepository ;
+    private BehandlingRepository behandlingRepository ;
+    private K9OppdragRestKlient k9OppdragRestKlientMock ;
+    private K9TilbakeRestKlient k9TilbakeRestKlientMock ;
+    private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock ;
+    private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
+    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste ;
 
     private SimulerOppdragSteg steg;
-    private K9OppdragRestKlient k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
-    private K9TilbakeRestKlient k9TilbakeRestKlientMock = mock(K9TilbakeRestKlient.class);
-    private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
-    private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
-
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
 
-    @Before
+    @BeforeEach
     public void setup() {
+
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        tilbakekrevingRepository = new TilbakekrevingRepository(entityManager);
+        behandlingRepository = repositoryProvider.getBehandlingRepository();
+        k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
+        k9TilbakeRestKlientMock = mock(K9TilbakeRestKlient.class);
+        tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
+        behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
+
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
         kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
@@ -80,13 +92,13 @@ public class SimulerOppdragStegTest {
     public void deaktiverer_eksisterende_tilbakekrevingValg_ved_hopp_over_bakover() {
         // Arrange
         tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, "varsel"));
-        repoRule.getRepository().flushAndClear();
+        (new Repository(entityManager)).flushAndClear();
 
         steg = opprettSteg();
 
         // Act
         steg.vedHoppOverBakover(kontekst, mock(BehandlingStegModell.class), BehandlingStegType.VURDER_UTTAK, BehandlingStegType.FATTE_VEDTAK);
-        repoRule.getRepository().flushAndClear();
+        (new Repository(entityManager)).flushAndClear();
 
         // Assert
         Optional<TilbakekrevingValg> tilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
@@ -125,7 +137,7 @@ public class SimulerOppdragStegTest {
 
         // Act
         BehandleStegResultat resultat = steg.utførSteg(kontekst);
-        repoRule.getRepository().flushAndClear();
+        (new Repository(entityManager)).flushAndClear();
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
         assertThat(resultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);

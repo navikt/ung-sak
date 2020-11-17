@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import static no.nav.k9.sak.typer.OrgNummer.KUNSTIG_ORG;
 import static java.util.Arrays.asList;
+import static no.nav.k9.sak.typer.OrgNummer.KUNSTIG_ORG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -32,7 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
@@ -52,25 +54,34 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BekreftOpptjeningPeriodeAksjonspunktTest {
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
-    private BehandlingRepository behandlingRepository = new BehandlingRepository(repoRule.getEntityManager());
-    private FagsakRepository fagsakRepository = new FagsakRepository(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepository behandlingRepository ;
+    private FagsakRepository fagsakRepository ;
     private VirksomhetTjeneste tjeneste;
 
     private BekreftOpptjeningPeriodeAksjonspunkt bekreftOpptjeningPeriodeAksjonspunkt;
 
-    private AktørId AKTØRID = AktørId.dummy();
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-    private final AksjonspunktutlederForVurderOppgittOpptjening vurderOpptjening = mock(AksjonspunktutlederForVurderOppgittOpptjening.class);
+    private AktørId AKTØRID;
+    private InntektArbeidYtelseTjeneste iayTjeneste ;
+    private AksjonspunktutlederForVurderOppgittOpptjening vurderOpptjening ;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
+
+        behandlingRepository = new BehandlingRepository(entityManager);
+        fagsakRepository = new FagsakRepository(entityManager);
+        AKTØRID = AktørId.dummy();
+        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        vurderOpptjening = mock(AksjonspunktutlederForVurderOppgittOpptjening.class);
+
         tjeneste = mock(VirksomhetTjeneste.class);
         Virksomhet.Builder builder = new Virksomhet.Builder();
         Virksomhet børreAs = builder.medOrgnr(KUNSTIG_ORG)

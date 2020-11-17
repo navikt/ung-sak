@@ -14,8 +14,8 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -40,7 +40,7 @@ public class BrevRestTjenesteTest {
     private final VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
     private final BehandlingVedtakRepository behandlingVedtakRepository = mock(BehandlingVedtakRepository.class);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(mock(Behandling.class));
 

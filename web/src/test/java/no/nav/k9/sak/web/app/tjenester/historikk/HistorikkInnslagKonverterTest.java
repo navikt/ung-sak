@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;

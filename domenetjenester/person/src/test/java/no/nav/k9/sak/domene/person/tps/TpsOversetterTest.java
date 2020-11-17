@@ -11,15 +11,22 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.junit.Before;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -29,7 +36,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse;
@@ -65,8 +72,13 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.UstrukturertAdresse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.konfig.Tid;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TpsOversetterTest {
     private static final DatatypeFactory DATATYPE_FACTORY;
     static {
@@ -86,8 +98,8 @@ public class TpsOversetterTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     @Mock
     private Bruker bruker;
@@ -111,7 +123,7 @@ public class TpsOversetterTest {
     private TpsOversetter tpsOversetter;
     private TpsAdresseOversetter tpsAdresseOversetter;
 
-    @Before
+    @BeforeEach
     public void oppsett() throws DatatypeConfigurationException {
 
         Landkoder landkodeNorge = new Landkoder();
@@ -184,10 +196,12 @@ public class TpsOversetterTest {
         assertThat(adresseinfo.getPostNr()).isEqualTo("1234");
     }
 
-    @Test(expected = VLException.class)
+    @Test
     public void testPostnummerAdresseEksistererIkke() {
-        when(bruker.getGjeldendePostadressetype()).thenReturn(new Postadressetyper());
-        tpsOversetter.tilAdresseInfo(bruker);
+        Assertions.assertThrows(VLException.class, () -> {
+            when(bruker.getGjeldendePostadressetype()).thenReturn(new Postadressetyper());
+            tpsOversetter.tilAdresseInfo(bruker);
+        });
     }
 
     @Test

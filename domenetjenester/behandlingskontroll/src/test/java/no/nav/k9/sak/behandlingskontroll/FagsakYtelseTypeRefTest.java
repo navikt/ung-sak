@@ -4,22 +4,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
 /** Demonstrerer lookup med repeatble annotations. */
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class FagsakYtelseTypeRefTest {
 
     @Test
     public void skal_få_duplikat_instans_av_cdi_bean() throws Exception {
-        Assert.assertThrows("Har flere matchende instanser", IllegalStateException.class, () -> {
+
+        // Assert
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+
+            // Act
             FagsakYtelseTypeRef.Lookup.find(Bokstav.class, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
-        });
+
+        }, "Har flere matchende instanser");
     }
 
     @Test

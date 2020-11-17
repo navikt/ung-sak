@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -42,7 +42,7 @@ public class RegelOrkestrererImplTest {
     private InngangsvilkårTjeneste inngangsvilkårTjeneste;
     private BehandlingRepositoryProvider repositoryProvider;
 
-    @Before
+    @BeforeEach
     public void oppsett() {
         inngangsvilkårTjeneste = Mockito.mock(InngangsvilkårTjeneste.class);
     }

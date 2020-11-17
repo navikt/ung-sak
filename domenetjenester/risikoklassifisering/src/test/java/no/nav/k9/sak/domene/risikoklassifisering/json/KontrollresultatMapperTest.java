@@ -1,29 +1,32 @@
 package no.nav.k9.sak.domene.risikoklassifisering.json;
 
-import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
-import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
-import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
-import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
-@RunWith(CdiRunner.class)
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
+import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
+import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
+import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
+import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
+
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class KontrollresultatMapperTest {
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
     @Inject
     KontrollresultatMapper kontrollresultatMapper;

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;

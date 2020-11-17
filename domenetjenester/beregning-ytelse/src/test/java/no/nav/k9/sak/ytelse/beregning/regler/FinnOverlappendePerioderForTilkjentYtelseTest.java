@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
@@ -31,7 +31,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Periode;
 
-@Ignore("Espen Velsvik: Venter på at kalkulus returnerer ikke-redusert dagsats")
+@Disabled("Espen Velsvik: Venter på at kalkulus returnerer ikke-redusert dagsats")
 public class FinnOverlappendePerioderForTilkjentYtelseTest {
 
     private final String orgnr = "123";
@@ -361,10 +361,10 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.50 * redusertBrukersAndel.doubleValue());
         BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.SN,
-            Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, 
-            UttakArbeidType.ANNET, 
+            Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,
+            UttakArbeidType.ANNET,
             true);
-        
+
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();
         Evaluation evaluation = regel.evaluate(mellomregning);
@@ -426,7 +426,7 @@ public class FinnOverlappendePerioderForTilkjentYtelseTest {
         long dagsatsBruker = redusertBrukersAndel.divide(BigDecimal.valueOf(260), 0, RoundingMode.HALF_UP).longValue();
         long redDagsatsBruker = getDagsats(0.66 * redusertBrukersAndel.doubleValue());
         BeregningsresultatRegelmodellMellomregning mellomregning = settOppGraderingScenarioForAndreStatuser(redusertBrukersAndel, stillingsgrad, utbetalingsgrad, AktivitetStatus.DP,
-            Inntektskategori.DAGPENGER, UttakArbeidType.ANNET, 
+            Inntektskategori.DAGPENGER, UttakArbeidType.ANNET,
             true);
         // Act
         FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder regel = new FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder();

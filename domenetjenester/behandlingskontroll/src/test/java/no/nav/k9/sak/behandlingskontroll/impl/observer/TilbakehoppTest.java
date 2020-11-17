@@ -7,14 +7,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.assertj.core.api.AbstractComparableAssert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
@@ -38,41 +38,48 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class TilbakehoppTest {
 
+    @Inject
+    private EntityManager entityManager;
+
     private static final FagsakYtelseType YTELSE_TYPE = TestScenario.DUMMY_YTELSE_TYPE;
-    private final BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+
+    private BehandlingModellRepository behandlingModellRepository;
+    private BehandlingskontrollServiceProvider serviceProvider;
+    private BehandlingRepository behandlingRepository ;
+    private BehandlingskontrollTransisjonTilbakeføringEventObserver observer;
+
     private BehandlingStegType steg1;
     private BehandlingStegType steg2;
     private BehandlingStegType steg3;
     private BehandlingStegType steg4;
     private BehandlingStegType steg5;
     private List<StegTransisjon> transisjoner = new ArrayList<>();
-    private EntityManager em = repoRule.getEntityManager();
-    private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, null);
-    private final BehandlingRepository behandlingRepository = serviceProvider.getBehandlingRepository();
-
-    private BehandlingskontrollTransisjonTilbakeføringEventObserver observer = new BehandlingskontrollTransisjonTilbakeføringEventObserver(serviceProvider) {
-        @Override
-        protected void hoppBakover(BehandlingStegModell s,
-                                   BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent event,
-                                   BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
-            transisjoner.add(new StegTransisjon(TransisjonType.HOPP_OVER_BAKOVER, s.getBehandlingStegType()));
-        }
-    };
-
     private Behandling behandling;
     private BehandlingLås behandlingLås;
     private BehandlingModell modell;
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
+        behandlingModellRepository = new BehandlingModellRepository();
+        serviceProvider = new BehandlingskontrollServiceProvider(entityManager, behandlingModellRepository, null);
+        behandlingRepository = serviceProvider.getBehandlingRepository();
+
+        observer = new BehandlingskontrollTransisjonTilbakeføringEventObserver(serviceProvider) {
+            @Override
+            protected void hoppBakover(BehandlingStegModell s,
+                                       BehandlingStegOvergangEvent.BehandlingStegTilbakeføringEvent event,
+                                       BehandlingStegType førsteSteg, BehandlingStegType sisteSteg) {
+                transisjoner.add(new StegTransisjon(TransisjonType.HOPP_OVER_BAKOVER, s.getBehandlingStegType()));
+            }
+        };
+
         modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         steg1 = BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT;
 
@@ -95,14 +102,14 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medAP(identifisertI(steg2), løsesI(steg3, UT), AksjonspunktStatus.OPPRETTET, false));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_avbryte_aksjonspunkter_som_oppsto_etter_tilsteget() {
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
         assertAPAvbrytesVedTilbakehopp(fra(steg3, INN), til(steg1), medUtførtAP(identifisertI(steg2), løsesI(steg3, INN)));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_utførte_aksjonspunkter_som_oppsto_i_steget_det_hoppes_til() {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, INN), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
@@ -110,7 +117,7 @@ public class TilbakehoppTest {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2, UT), medUtførtAP(identifisertI(steg2), løsesI(steg2, UT)));
     }
 
-    @Ignore("TODO: sjekk test oppsett og avbrudd")
+    @Disabled("TODO: sjekk test oppsett og avbrudd")
     @Test
     public void skal_ikke_endre_aksjonspunkter_som_oppsto_før_til_steget_og_som_skulle_utføres_i_eller_etter_til_steget() {
         assertAPUendretVedTilbakehopp(fra(steg3, INN), til(steg2), medUtførtAP(identifisertI(steg1), løsesI(steg2, UT)));

@@ -8,9 +8,13 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.Before;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -23,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
@@ -33,32 +38,49 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
 
     private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
 
-    @Rule
-    public RepositoryRule repositoryRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
+
     Behandling behandling;
     Aksjonspunkt aksjonspunkt;
     Skjæringstidspunkt skjæringstidspunkt;
     @Mock
-    private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslagTjeneste = Mockito.mock(ArbeidsgiverHistorikkinnslag.class);
-    private SafTjeneste mockSafTjeneste = mock(SafTjeneste.class);
-    private IAYRepositoryProvider provider = new IAYRepositoryProvider(repositoryRule.getEntityManager());
-    private HistorikkRepository historikkRepository = new HistorikkRepository(repositoryRule.getEntityManager());
-    private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
-    private HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
-    private DokumentArkivTjeneste dokumentApplikasjonTjeneste = new DokumentArkivTjeneste(mockSafTjeneste);
+    private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslagTjeneste ;
+    private SafTjeneste mockSafTjeneste ;
+    private IAYRepositoryProvider provider ;
+    private HistorikkRepository historikkRepository ;
+    private AksjonspunktTestSupport aksjonspunktTestSupport ;
+    private HistorikkInnslagKonverter historikkInnslagKonverter ;
+    private DokumentArkivTjeneste dokumentApplikasjonTjeneste ;
+
     private HistorikkTjenesteAdapter historikkAdapter;
     private ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste;
-    private Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("1");
-    private InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();
+    private Arbeidsgiver virksomhet ;
+    private InternArbeidsforholdRef ref ;
 
-    @Before
+    @BeforeEach
     public void setup() {
+
+        arbeidsgiverHistorikkinnslagTjeneste = Mockito.mock(ArbeidsgiverHistorikkinnslag.class);
+        mockSafTjeneste = mock(SafTjeneste.class);
+        provider = new IAYRepositoryProvider(entityManager);
+        historikkRepository = new HistorikkRepository(entityManager);
+        aksjonspunktTestSupport = new AksjonspunktTestSupport();
+        historikkInnslagKonverter = new HistorikkInnslagKonverter();
+        dokumentApplikasjonTjeneste = new DokumentArkivTjeneste(mockSafTjeneste);
+        virksomhet = Arbeidsgiver.virksomhet("1");
+        ref = InternArbeidsforholdRef.nyRef();
+
         historikkAdapter = new HistorikkTjenesteAdapter(historikkRepository, historikkInnslagKonverter, dokumentApplikasjonTjeneste);
         arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         IAYScenarioBuilder scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);

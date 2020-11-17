@@ -6,9 +6,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -21,19 +24,24 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEnt
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class VurderTilbaketrekkOppdatererTest {
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(repoRule.getEntityManager());
+    @Inject
+    private EntityManager entityManager;
+
+    private BehandlingRepositoryProvider repositoryProvider ;
+
     private Behandling behandling;
     private HistorikkTjenesteAdapter historikkAdapter;
     private VurderTilbaketrekkOppdaterer vurderTilbaketrekkOppdaterer;
@@ -42,8 +50,9 @@ public class VurderTilbaketrekkOppdatererTest {
     @SuppressWarnings("unused")
     private BeregningsresultatEntitet beregningsresultat;
 
-    @Before
+    @BeforeEach
     public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         HistorikkInnslagKonverter historikkInnslagKonverter = new HistorikkInnslagKonverter();
         historikkAdapter = new HistorikkTjenesteAdapter(repositoryProvider.getHistorikkRepository(), historikkInnslagKonverter, null);
         vurderTilbaketrekkOppdaterer = new VurderTilbaketrekkOppdaterer(repositoryProvider, historikkAdapter);

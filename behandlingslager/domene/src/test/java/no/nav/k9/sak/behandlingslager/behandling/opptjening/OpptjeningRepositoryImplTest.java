@@ -7,10 +7,12 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
@@ -20,19 +22,27 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class OpptjeningRepositoryImplTest {
 
-    @Rule
-    public final RepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private final EntityManager em = repoRule.getEntityManager();
-    private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(em);
-    private final OpptjeningRepository opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-    private BasicBehandlingBuilder behandlingBuilder = new BasicBehandlingBuilder(em);
+    private BehandlingRepositoryProvider repositoryProvider;
+    private OpptjeningRepository opptjeningRepository;
+    private BasicBehandlingBuilder behandlingBuilder;
+
+    @BeforeEach
+    public void setup() {
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+        behandlingBuilder = new BasicBehandlingBuilder(entityManager);
+    }
 
     @Test
     public void skal_lagre_opptjeningsperiode() throws Exception {

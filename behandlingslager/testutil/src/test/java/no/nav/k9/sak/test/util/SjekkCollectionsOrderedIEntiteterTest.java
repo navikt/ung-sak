@@ -9,10 +9,13 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManagerFactory;
@@ -20,39 +23,26 @@ import javax.persistence.Persistence;
 import javax.persistence.metamodel.ManagedType;
 
 import org.junit.Assume;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 import no.nav.k9.sak.db.util.DatasourceConfiguration;
 import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
 import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
 
 /** Lagt til web for å sjekke orm filer fra alle moduler. */
-@RunWith(Parameterized.class)
 public class SjekkCollectionsOrderedIEntiteterTest {
 
     private static final EntityManagerFactory entityManagerFactory;
 
     static {
-        try {
-            // trenger å konfigurere opp jndi etc.
-            DBConnectionProperties connectionProperties = DBConnectionProperties.finnDefault(DatasourceConfiguration.UNIT_TEST.get()).get();
-            DatabaseStøtte.settOppJndiForDefaultDataSource(Collections.singletonList(connectionProperties));
-        } catch (FileNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
+        Databaseskjemainitialisering.settJdniOppslag();
         entityManagerFactory = Persistence.createEntityManagerFactory("pu-default");
-    }
-
-    private String name;
-    private Class<?> entityClass;
-
-    public SjekkCollectionsOrderedIEntiteterTest(String name, Class<?> entityClass) {
-        this.name = name;
-        this.entityClass = entityClass;
     }
 
     @org.junit.runners.Parameterized.Parameters(name = "{0}")
@@ -75,13 +65,31 @@ public class SjekkCollectionsOrderedIEntiteterTest {
         return params.values();
     }
 
+    public static Stream<Arguments> provideArguments() {
+
+        List<Arguments> params = new LinkedList<Arguments>();
+
+        Set<Class<?>> baseEntitetSubklasser = getEntityClasses(BaseEntitet.class::isAssignableFrom);
+        for (Class<?> c : baseEntitetSubklasser) {
+            params.add(Arguments.of(c.getName(), c));
+        }
+
+        Set<Class<?>> entityKlasser = getEntityClasses(c -> c.isAnnotationPresent(Entity.class));
+        for (Class<?> c : entityKlasser) {
+            params.add(Arguments.of(c.getName(), c));
+        }
+
+        return params.stream();
+    }
+
     public static Set<Class<?>> getEntityClasses(Predicate<Class<?>> filter) {
         Set<ManagedType<?>> managedTypes = entityManagerFactory.getMetamodel().getManagedTypes();
         return managedTypes.stream().map(javax.persistence.metamodel.Type::getJavaType).filter(c -> !Modifier.isAbstract(c.getModifiers())).filter(filter).collect(Collectors.toSet());
     }
 
-    @Test
-    public void sjekk_alle_lister_er_ordered() throws Exception {
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_alle_lister_er_ordered(String name, Class<?> entityClass) throws Exception {
         for (Field f : entityClass.getDeclaredFields()) {
             if (Collection.class.isAssignableFrom(f.getType())) {
                 if (!Modifier.isStatic(f.getModifiers())) {
