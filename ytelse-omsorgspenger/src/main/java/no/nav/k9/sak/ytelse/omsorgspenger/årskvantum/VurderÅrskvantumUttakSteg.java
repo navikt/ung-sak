@@ -67,10 +67,10 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         if (årskvantumAksjonspunkt != null) {
             try {
-                log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
-                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat));
+                if (log.isDebugEnabled()) { log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
+                    "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat)); }
             } catch (IOException e) {
-                log.info("Feilet i serialisering av årskvantum respons: " + årskvantumResultat);
+                log.info("Feilet i serialisering av årskvantum respons='{}' og exception='{}'", årskvantumResultat, e);
             }
 
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkt).getAksjonspunktDefinisjon()));
