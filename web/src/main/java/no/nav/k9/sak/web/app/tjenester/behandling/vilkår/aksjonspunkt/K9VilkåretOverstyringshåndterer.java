@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.vilkår.aksjonspunkt;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -38,20 +39,27 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
 
     @Override
     public OppdateringResultat håndterOverstyring(Overstyringk9VilkåretDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        var behandlingResultatType = dto.getBehandlingResultatType();
+        validerBehandlingsresultat(behandlingResultatType);
+        behandling.setBehandlingResultatType(behandlingResultatType);
+
         var utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var periode = dto.getPeriode();
-
         inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), VilkårType.K9_VILKÅRET, utfall, dto.getAvslagskode(),
             kontekst, periode.getFom(), periode.getTom(), dto.getBegrunnelse());
-
-        behandling.setBehandlingResultatType(dto.getBehandlingResultatType());
 
         return OppdateringResultat.utenOveropp();
     }
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, Overstyringk9VilkåretDto dto) {
-        // TODO: Legg inn SkjermlenkeType for k9-vilkåret
-        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), dto.getErVilkarOk(), SkjermlenkeType.PUNKT_FOR_MEDLEMSKAP);
+        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), dto.getErVilkarOk(), SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING);
+    }
+
+
+    private void validerBehandlingsresultat(BehandlingResultatType behandlingResultatType) {
+        if (!BehandlingResultatType.getUnntaksbehandlingKoder().contains(behandlingResultatType)) {
+            throw new IllegalArgumentException("Ugyldig behandlingsresultattype " + behandlingResultatType.getKode());
+        }
     }
 }

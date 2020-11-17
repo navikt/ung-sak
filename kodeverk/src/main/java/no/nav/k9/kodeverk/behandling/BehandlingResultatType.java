@@ -40,25 +40,26 @@ public enum BehandlingResultatType implements Kodeverdi {
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
     private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, INNVILGET_ENDRING);
+    private static final Set<BehandlingResultatType> UNNTAKSBEHANDLING_KODER = Set.of(INNVILGET, AVSLÅTT);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "BEHANDLING_RESULTAT_TYPE";
 
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
         }
-        
+
         var henlagte = KODER.values().stream().filter( v -> v.erHenleggelse).collect(Collectors.toSet());
         ALLE_HENLEGGELSESKODER = EnumSet.copyOf(henlagte);
-        
+
         var henlagtSøknad = EnumSet.copyOf(henlagte);
         henlagtSøknad.remove(MERGET_OG_HENLAGT);
-        
+
         HENLEGGELSESKODER_FOR_SØKNAD = henlagtSøknad;
     }
 
@@ -69,7 +70,7 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     @JsonIgnore
     private boolean erHenleggelse;
-    
+
     private BehandlingResultatType(String kode) {
         this.kode = kode;
     }
@@ -77,7 +78,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     private BehandlingResultatType(String kode, String navn) {
         this(kode, navn, false);
     }
-    
+
     private BehandlingResultatType(String kode, String navn, boolean erHenleggelse) {
         this.kode = kode;
         this.navn = navn;
@@ -105,7 +106,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public String getNavn() {
         return navn;
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public boolean erHenleggelse() {
         return erHenleggelse;
@@ -140,6 +141,10 @@ public enum BehandlingResultatType implements Kodeverdi {
         return HENLEGGELSESKODER_FOR_SØKNAD;
     }
 
+    public static Set<BehandlingResultatType> getUnntaksbehandlingKoder() {
+        return UNNTAKSBEHANDLING_KODER;
+    }
+
     public static Set<BehandlingResultatType> getInnvilgetKoder() {
         return INNVILGET_KODER;
     }
@@ -168,7 +173,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
     }
-    
+
     public boolean isBehandlingsresultatHenlagt() {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
