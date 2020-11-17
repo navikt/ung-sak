@@ -63,7 +63,7 @@ public class MapFraÅrskvantumResultatTest {
 
 
     private Uttaksplan lagUttaksplan() {
-        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET);
+        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET, null);
 
         return uttaksplanOmsorgspenger;
     }
