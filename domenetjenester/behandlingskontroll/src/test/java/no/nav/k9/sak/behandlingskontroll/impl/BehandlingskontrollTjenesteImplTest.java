@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Assertions;
@@ -33,19 +34,19 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class BehandlingskontrollTjenesteImplTest {
 
-    @RegisterExtension
-    public static final JpaExtension repoRule = new JpaExtension();
-
-    private EntityManager em = repoRule.getEntityManager();
+    @Inject
+    private EntityManager entityManager;
     private BehandlingskontrollTjenesteImpl kontrollTjeneste;
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
-    private BehandlingskontrollEventPublisererForTest eventPubliserer = new BehandlingskontrollEventPublisererForTest();
-    private BehandlingModellRepository behandlingModellRepository = new BehandlingModellRepository();
-    private BehandlingskontrollServiceProvider serviceProvider = new BehandlingskontrollServiceProvider(em, behandlingModellRepository, eventPubliserer);
-    private InternalManipulerBehandling manipulerInternBehandling = new InternalManipulerBehandling();
+
+    private BehandlingskontrollEventPublisererForTest eventPubliserer ;
+    private BehandlingModellRepository behandlingModellRepository ;
+    private BehandlingskontrollServiceProvider serviceProvider ;
+    private InternalManipulerBehandling manipulerInternBehandling ;
 
     private BehandlingStegType steg2;
     private BehandlingStegType steg3;
@@ -61,6 +62,12 @@ public class BehandlingskontrollTjenesteImplTest {
     @SuppressWarnings("resource")
     @BeforeEach
     public void setup() {
+
+        eventPubliserer = new BehandlingskontrollEventPublisererForTest();
+        behandlingModellRepository = new BehandlingModellRepository();
+        serviceProvider = new BehandlingskontrollServiceProvider(entityManager, behandlingModellRepository, eventPubliserer);
+        manipulerInternBehandling = new InternalManipulerBehandling();
+
         TestScenario scenario = TestScenario.dummyScenario();
         behandling = scenario.lagre(serviceProvider);
         modell = serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
@@ -114,8 +121,8 @@ public class BehandlingskontrollTjenesteImplTest {
 
         assertThat(behandling.getBehandlingStegTilstand(steg2)).isPresent();
 
-        em.persist(behandling); // lagre for å sjekke BehandlingStegTilstand i db.
-        em.flush();
+        entityManager.persist(behandling); // lagre for å sjekke BehandlingStegTilstand i db.
+        entityManager.flush();
 
         assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
 
@@ -156,8 +163,8 @@ public class BehandlingskontrollTjenesteImplTest {
         assertThat(behandling.getBehandlingStegStatus()).isNull();
         assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
 
-        em.persist(behandling);
-        em.flush();
+        entityManager.persist(behandling);
+        entityManager.flush();
 
         assertThat(getBehandlingStegTilstand(behandling)).hasSize(1);
 
@@ -285,7 +292,7 @@ public class BehandlingskontrollTjenesteImplTest {
 
     @SuppressWarnings("unchecked")
     private List<BehandlingStegTilstand> getBehandlingStegTilstand(Behandling behandling) {
-        return em.createNativeQuery("select s.* from behandling_steg_tilstand s where s.behandling_id=:id", BehandlingStegTilstand.class)
+        return entityManager.createNativeQuery("select s.* from behandling_steg_tilstand s where s.behandling_id=:id", BehandlingStegTilstand.class)
             .setParameter("id", behandling.getId()).getResultList();
     }
 

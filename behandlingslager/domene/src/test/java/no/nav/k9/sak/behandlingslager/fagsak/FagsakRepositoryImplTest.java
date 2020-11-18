@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

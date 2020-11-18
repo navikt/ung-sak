@@ -12,12 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -33,9 +30,6 @@ import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class InfotrygdHendelseTjenesteImplTest {
-
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
     @Mock
     private Behandling behandling;

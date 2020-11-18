@@ -5,21 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;
 import no.nav.k9.sak.kontrakt.historikk.HistorikkinnslagDto;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class HistorikkInnslagKonverterTest {
-
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Test
     public void skalSetteDokumentLinksSomUtgåttHvisTomListeAvArkivJournalPost() {

@@ -3,18 +3,13 @@ package no.nav.k9.sak.ytelse.unntaksbehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.CDI;
 
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,7 +22,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 /** Sjekk at alle konfigurasjoner fungerer og har definerte steg implementasjoner. */
