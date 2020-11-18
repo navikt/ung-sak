@@ -17,11 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
@@ -40,9 +45,10 @@ public class TilkjentYtelseOppdatererTest {
     @Inject
     public EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
-    private BeregningsresultatRepository beregningsresultatRepository ;
-    private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste ;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private BeregningsresultatRepository beregningsresultatRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste;
 
     private TilkjentYtelseOppdaterer oppdaterer;
     private Behandling behandling;
@@ -53,11 +59,27 @@ public class TilkjentYtelseOppdatererTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
+        vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
 
         oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
+
+        // legg til et nytt vilkårsresultat
+//        final var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(getVilkårene(behandling));
+        final var vilkårResultatBuilder = Vilkårene.builder();
+        final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.K9_VILKÅRET)
+                .leggTil(new VilkårPeriodeBuilder()
+//                        .medUtfall(Utfall.OPPFYLT)
+//                .medMerknad(VilkårUtfallMerknad.VM_1001)
+                        .medPeriode(LocalDate.now(), LocalDate.now().plusDays(7))
+                        .medUtfallOverstyrt(Utfall.OPPFYLT)
+                )
+        )
+            .build();
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+
     }
 
     @Test

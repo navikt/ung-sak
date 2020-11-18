@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -30,6 +31,8 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPer
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -54,6 +57,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     @SuppressWarnings("unused")
     TilkjentYtelseOppdaterer() {
@@ -66,6 +70,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
+        this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
 
@@ -73,6 +78,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     public OppdateringResultat oppdater(BekreftTilkjentYtelseDto dto, AksjonspunktOppdaterParameter param) {
         var behandlingId = param.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+
 
         var beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("manuell_behandling")
@@ -87,7 +93,11 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
           1. Valider at perioder for Tilkjent ytelse (TilkjentYtelsePeriodeDto) ikke overlapper hverandre (kan skje ved brukerfeil)
           2. Valider at TilkjentYtelsePeriodeDto er innenfor fom-tom for vilkårsperioder
          */
-        TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder());
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var vilkår = vilkårene.getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
+
+
+        TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), vilkår);
 
 
         /*
@@ -149,6 +159,9 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         @FunksjonellFeil(feilkode = "K9-123456", feilmelding = "Det er angitt overlappende perioder med tilkjent ytelse: %s", løsningsforslag = "", logLevel = INFO)
         Feil overlappendeTilkjentYtelsePerioder(String feilmelding);
+
+        @FunksjonellFeil(feilkode = "K9-234567", feilmelding = "Periode med tilkjent ytelse er ikke innenfor vilkåret", løsningsforslag = "", logLevel = INFO)
+        Feil tilkjentYtelseIkkeInnenforVilkår();
     }
 
     static class InntektskategoriTilAktivitetstatusMapper {
