@@ -40,7 +40,6 @@ public enum BehandlingResultatType implements Kodeverdi {
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
     private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, INNVILGET_ENDRING);
-    private static final Set<BehandlingResultatType> UNNTAKSBEHANDLING_KODER = Set.of(INNVILGET, AVSLÅTT);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
@@ -139,10 +138,6 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public static Set<BehandlingResultatType> getHenleggelseskoderForSøknad() {
         return HENLEGGELSESKODER_FOR_SØKNAD;
-    }
-
-    public static Set<BehandlingResultatType> getUnntaksbehandlingKoder() {
-        return UNNTAKSBEHANDLING_KODER;
     }
 
     public static Set<BehandlingResultatType> getInnvilgetKoder() {

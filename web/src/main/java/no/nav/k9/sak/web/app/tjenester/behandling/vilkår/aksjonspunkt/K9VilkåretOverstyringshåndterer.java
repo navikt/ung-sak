@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vilkår.aksjonspunkt;
 
+import java.util.Set;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -14,7 +16,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.vilkår.Overstyringk9VilkåretDto;
@@ -23,8 +24,11 @@ import no.nav.k9.sak.kontrakt.vilkår.Overstyringk9VilkåretDto;
 @DtoTilServiceAdapter(dto = Overstyringk9VilkåretDto.class, adapter = Overstyringshåndterer.class)
 public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshåndterer<Overstyringk9VilkåretDto> {
 
+    private static final Set<BehandlingResultatType> UNNTAKSBEHANDLING_KODER = Set.of(
+        BehandlingResultatType.INNVILGET,
+        BehandlingResultatType.AVSLÅTT);
+
     private InngangsvilkårTjeneste inngangsvilkårTjeneste;
-    private AksjonspunktRepository aksjonspunktRepository;
 
     K9VilkåretOverstyringshåndterer() {
         // for CDI proxy
@@ -58,7 +62,7 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
 
 
     private void validerBehandlingsresultat(BehandlingResultatType behandlingResultatType) {
-        if (!BehandlingResultatType.getUnntaksbehandlingKoder().contains(behandlingResultatType)) {
+        if (!UNNTAKSBEHANDLING_KODER.contains(behandlingResultatType)) {
             throw new IllegalArgumentException("Ugyldig behandlingsresultattype " + behandlingResultatType.getKode());
         }
     }
