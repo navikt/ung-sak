@@ -138,7 +138,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.1-20201118092223-36d8ca4<</version>
+                <version>0.0.1-20201118092223-36d8ca4</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
