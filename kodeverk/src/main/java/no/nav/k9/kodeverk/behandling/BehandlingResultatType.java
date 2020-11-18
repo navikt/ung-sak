@@ -45,20 +45,20 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public static final String KODEVERK = "BEHANDLING_RESULTAT_TYPE";
 
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
         }
-        
+
         var henlagte = KODER.values().stream().filter( v -> v.erHenleggelse).collect(Collectors.toSet());
         ALLE_HENLEGGELSESKODER = EnumSet.copyOf(henlagte);
-        
+
         var henlagtSøknad = EnumSet.copyOf(henlagte);
         henlagtSøknad.remove(MERGET_OG_HENLAGT);
-        
+
         HENLEGGELSESKODER_FOR_SØKNAD = henlagtSøknad;
     }
 
@@ -69,7 +69,7 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     @JsonIgnore
     private boolean erHenleggelse;
-    
+
     private BehandlingResultatType(String kode) {
         this.kode = kode;
     }
@@ -77,7 +77,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     private BehandlingResultatType(String kode, String navn) {
         this(kode, navn, false);
     }
-    
+
     private BehandlingResultatType(String kode, String navn, boolean erHenleggelse) {
         this.kode = kode;
         this.navn = navn;
@@ -105,7 +105,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public String getNavn() {
         return navn;
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     public boolean erHenleggelse() {
         return erHenleggelse;
@@ -168,7 +168,7 @@ public enum BehandlingResultatType implements Kodeverdi {
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
     }
-    
+
     public boolean isBehandlingsresultatHenlagt() {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
