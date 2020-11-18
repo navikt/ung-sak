@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -28,13 +27,8 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
-import no.nav.vedtak.felles.testutilities.db.RepositoryRule;
 
 public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
-
-    @Rule
-    public RepositoryRule repositoryRule = new UnittestRepositoryRule();
 
     private HistorikkInnslagForAksjonspunktEventObserver observer; // objectet vi tester
 

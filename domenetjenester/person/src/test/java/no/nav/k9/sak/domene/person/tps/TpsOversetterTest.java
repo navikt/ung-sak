@@ -18,12 +18,9 @@ import javax.xml.datatype.DatatypeFactory;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -94,9 +91,6 @@ public class TpsOversetterTest {
     private static final String GATEADRESSE1 = "Gaten 13 B";
 
     private static final String USTRUKTURERT_GATEADRESSE1 = "Ustrukturert adresselinje 1";
-
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
     @Inject
     private EntityManager entityManager;

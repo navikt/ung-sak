@@ -12,10 +12,13 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.jboss.weld.exceptions.UnsupportedOperationException;
-import org.junit.Rule;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
+import org.junit.Rule;
 import org.junit.rules.ErrorCollector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +27,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsPeriode;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
 
+@EnableRuleMigrationSupport
 public class InngangsvilkårAutoTest {
 
     private static final ObjectMapper OM = JsonUtil.getObjectMapper();
@@ -44,7 +48,6 @@ public class InngangsvilkårAutoTest {
         }
         return params.stream();
     }
-
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
@@ -70,22 +73,32 @@ public class InngangsvilkårAutoTest {
     }
 
     private void vurderVilkår(BiConsumer<VilkårResultat, Object> ekstraSjekk, VilkårType v, File in, File out) throws IOException {
+
         new VilkårVurdering().vurderCase(collector, ekstraSjekk, VilkårVurdering.getVilkårImplementasjon(v), OM, in, out);
+
     }
 
     public void vurderOpptjening( VilkårType v, File in, File out) throws IOException {
-        final BiConsumer<VilkårResultat, Object> extraDataSjekk = (resultat, extra) -> collector.checkThat("Avvik i opptjeningstid for " + resultat,
-            ((OpptjeningsvilkårResultat) extra).getResultatOpptjent(), equalTo(Period.parse(resultat.getOpptjentTid())));
+
+        final BiConsumer<VilkårResultat, Object> extraDataSjekk = (resultat, extra) -> {
+
+            collector.checkThat("Avvik i opptjeningstid for " + resultat,  ((OpptjeningsvilkårResultat) extra).getResultatOpptjent(), equalTo(Period.parse(resultat.getOpptjentTid())));
+
+        };
+
         vurderVilkår(extraDataSjekk, v, in, out);
     }
 
     public void fastsettOpptjeningsPeriode( VilkårType v, File in, File out) throws IOException  {
+
         final BiConsumer<VilkårResultat, Object> extraDataSjekk = (resultat, extra) -> {
-            collector.checkThat("Avvik i opptjeningstid for " + resultat,
-                ((OpptjeningsPeriode) extra).getOpptjeningsperiodeFom(), equalTo(resultat.getOpptjeningFom()));
-            collector.checkThat("Avvik i opptjeningstid for " + resultat,
-                ((OpptjeningsPeriode) extra).getOpptjeningsperiodeTom(), equalTo(resultat.getOpptjeningTom()));
+
+            collector.checkThat("Avvik i opptjeningstid for " + resultat, ((OpptjeningsPeriode) extra).getOpptjeningsperiodeFom(), equalTo(resultat.getOpptjeningFom()));
+
+            collector.checkThat("Avvik i opptjeningstid for " + resultat,  ((OpptjeningsPeriode) extra).getOpptjeningsperiodeTom(), equalTo(resultat.getOpptjeningTom()));
+
         };
+
         vurderVilkår(extraDataSjekk, v, in, out);
     }
 }

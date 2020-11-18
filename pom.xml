@@ -467,12 +467,7 @@
                 <version>5.7.0</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.junit.vintage</groupId>
-                <artifactId>junit-vintage-engine</artifactId>
-                <version>5.7.0</version>
-                <scope>test</scope>
-            </dependency>
+
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>

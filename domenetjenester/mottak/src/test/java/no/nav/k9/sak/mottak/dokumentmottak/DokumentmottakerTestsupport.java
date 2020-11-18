@@ -8,8 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -23,20 +22,20 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public abstract class DokumentmottakerTestsupport {
 
     protected static final int FRIST_INNSENDING_UKER = 6;
-    @Rule
-    public final UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+
     protected final LocalDate DATO_ETTER_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER + 2);
     protected final LocalDate DATO_FØR_INNSENDINGSFRISTEN = LocalDate.now().minusWeeks(FRIST_INNSENDING_UKER - 2);
     @Inject
@@ -58,18 +57,18 @@ public abstract class DokumentmottakerTestsupport {
         return behandling;
     }
 
-    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType, 
-                                           BehandlingType behandlingType, 
+    protected Behandling opprettBehandling(FagsakYtelseType fagsakYtelseType,
+                                           BehandlingType behandlingType,
                                            BehandlingResultatType behandlingResultatType,
-                                           VedtakResultatType vedtakResultatType, 
+                                           VedtakResultatType vedtakResultatType,
                                            LocalDate vedtaksdato) {
         var scenario = TestScenarioBuilder.builderMedSøknad(fagsakYtelseType)
             .medBehandlingType(behandlingType);
         return opprettBehandling(scenario, behandlingResultatType, vedtakResultatType, vedtaksdato);
     }
 
-    private Behandling opprettBehandling(AbstractTestScenario<?> scenario, 
-                                         BehandlingResultatType behandlingResultatType, 
+    private Behandling opprettBehandling(AbstractTestScenario<?> scenario,
+                                         BehandlingResultatType behandlingResultatType,
                                          VedtakResultatType vedtakResultatType,
                                          LocalDate vedtaksdato) {
 

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknad.BekreftSokersOpplysningspliktManuDto;
@@ -29,8 +27,7 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.util.Tuple;
 
 public class BekreftSøkersOpplysningspliktManuellOppdatererTest {
-    @Rule
-    public UnittestRepositoryRule repositoryRule = new UnittestRepositoryRule();
+
     private final HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder();
 
     @Test

@@ -5,17 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 
 public class VilkårKodeverkRepositoryImplTest {
-
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Test
     public void test_finn_vilkårtype_fra_avslagårsak() {

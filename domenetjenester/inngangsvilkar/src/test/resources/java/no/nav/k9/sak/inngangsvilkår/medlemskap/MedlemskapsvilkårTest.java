@@ -11,9 +11,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,7 +37,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderBu
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
@@ -59,14 +58,14 @@ import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon.Bui
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.cdi.CdiRunner;
 
-@RunWith(CdiRunner.class)
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 public class MedlemskapsvilkårTest {
 
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @Inject
     private BasisPersonopplysningTjeneste personopplysningTjeneste;

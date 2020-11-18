@@ -10,20 +10,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
 import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
@@ -39,17 +43,20 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
+import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @Disabled
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class OpprettProsessTaskIverksettTest {
-    @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule().silent();
 
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
+    @Inject
+    private EntityManager entityManager;
 
-    private ProsessTaskRepository prosessTaskRepository = new ProsessTaskRepositoryImpl(repoRule.getEntityManager(), null, null);
-    private FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(repoRule.getEntityManager(), prosessTaskRepository, Mockito.mock(TaskManager.class));
+    private ProsessTaskRepository prosessTaskRepository ;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository ;
 
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
@@ -63,6 +70,9 @@ public class OpprettProsessTaskIverksettTest {
 
     @BeforeEach
     public void setup() {
+        prosessTaskRepository = new ProsessTaskRepositoryImpl(entityManager, null, null);
+        fagsakProsessTaskRepository = new FagsakProsessTaskRepository(entityManager, prosessTaskRepository, Mockito.mock(TaskManager.class));
+
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
         opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService);

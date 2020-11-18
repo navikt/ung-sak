@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
@@ -22,7 +21,6 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.UnittestRepositoryRule;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.saf.Arkivsaksystem;
@@ -60,9 +58,6 @@ public class DokumentArkivTjenesteImplTest {
 
     private DokumentArkivTjeneste dokumentApplikasjonTjeneste;
     private SafTjeneste safTjeneste;
-
-    @Rule
-    public UnittestRepositoryRule repoRule = new UnittestRepositoryRule();
 
     @BeforeEach
     public void setUp() {

@@ -13,9 +13,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
