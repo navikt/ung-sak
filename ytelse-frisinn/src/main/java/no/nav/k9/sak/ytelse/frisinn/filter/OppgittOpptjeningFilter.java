@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.frisinn.filter;
 
+import static no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
+import static no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.nyFraEksisterende;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -62,7 +65,7 @@ public class OppgittOpptjeningFilter {
     }
 
     private OppgittOpptjening leggTilNyeOpptjeningerHvisTilkommet() {
-        var builder = OppgittOpptjeningBuilder.nyFraEksisterende(overstyrtOppgittOpptjening, overstyrtOppgittOpptjening.getEksternReferanse(), overstyrtOppgittOpptjening.getOpprettetTidspunkt());
+        var builder = nyFraEksisterende(overstyrtOppgittOpptjening, overstyrtOppgittOpptjening.getEksternReferanse(), overstyrtOppgittOpptjening.getOpprettetTidspunkt());
 
         var senesteOverstyrtPeriodeFL = overstyrtOppgittOpptjening.getFrilans()
             .flatMap(oppgittFrilans -> oppgittFrilans.getFrilansoppdrag().stream()
@@ -71,7 +74,10 @@ public class OppgittOpptjeningFilter {
         var senesteOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream()
             .map(OppgittEgenNæring::getPeriode)
             .max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
-        var senestePeriode = senestePeriode(senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL);
+        var senesteOverstyrtOrdArbForhold = overstyrtOppgittOpptjening.getOppgittArbeidsforhold().stream()
+            .map(OppgittArbeidsforhold::getPeriode)
+            .max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
+        var senestePeriode = senestePeriode(senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL, senesteOverstyrtOrdArbForhold);
 
         List<EgenNæringBuilder> egenNæringBuilders = finnSNPerioderSomSkalLeggesTil(oppgittOpptjening.getEgenNæring(), senestePeriode);
         builder.leggTilEgneNæringer(egenNæringBuilders);
@@ -79,6 +85,8 @@ public class OppgittOpptjeningFilter {
         if (oppgittFrilans != null) {
             builder.leggTilFrilansOpplysninger(oppgittFrilans);
         }
+        List<OppgittArbeidsforholdBuilder> oppgittArbeidsforholdBuilders = finnOrdArbForholdPerioderSomSkalLeggesTil(oppgittOpptjening.getOppgittArbeidsforhold(), senestePeriode);
+        builder.leggTilOppgittArbeidsforhold(oppgittArbeidsforholdBuilders);
 
         // Historiske opptjening
         var historiskPeriodeSN = oppgittOpptjening.getEgenNæring().stream().map(OppgittEgenNæring::getPeriode).filter(periode -> periode.getTomDato().isBefore(SKJÆRINGSTIDSPUNKT)).findFirst();
@@ -142,17 +150,36 @@ public class OppgittOpptjeningFilter {
             .collect(Collectors.toList());
     }
 
-    private Optional<DatoIntervallEntitet> senestePeriode(Optional<DatoIntervallEntitet> senestePeriodeSN, Optional<DatoIntervallEntitet> senestePeriodeFL) {
-        if (senestePeriodeFL.isEmpty() && senestePeriodeSN.isEmpty()) {
-            return Optional.empty();
-        } else if (senestePeriodeFL.isEmpty()) {
-            return senestePeriodeSN;
-        } else if (senestePeriodeSN.isEmpty()) {
-            return senestePeriodeFL;
-        }
-        DatoIntervallEntitet fl = senestePeriodeFL.get();
-        DatoIntervallEntitet sn = senestePeriodeSN.get();
+    private List<OppgittArbeidsforholdBuilder> leggTilOrdinærtdArbForhold(DatoIntervallEntitet senestePeriode) {
+        List<OppgittArbeidsforhold> oppgitteArbeidsforhold = oppgittOpptjening.getOppgittArbeidsforhold().stream().filter(it -> it.getPeriode().equals(senestePeriode)).collect(Collectors.toList());
 
-        return fl.getTomDato().isAfter(sn.getTomDato()) || fl.getTomDato().equals(sn.getTomDato()) ? senestePeriodeFL : senestePeriodeSN;
+        return oppgitteArbeidsforhold.stream().map(af -> OppgittArbeidsforholdBuilder.ny()
+            .medArbeidType(af.getArbeidType())
+            .medPeriode(af.getPeriode())
+            .medInntekt(af.getInntekt()))
+            .collect(Collectors.toList());
+    }
+
+    private List<OppgittArbeidsforholdBuilder> finnOrdArbForholdPerioderSomSkalLeggesTil(List<OppgittArbeidsforhold> oppgittArbeidsforhold, Optional<DatoIntervallEntitet> senesteOverstyrtPeriode) {
+        List<DatoIntervallEntitet> perioderEtterOverstyring = oppgittArbeidsforhold
+            .stream()
+            .filter(eg -> senesteOverstyrtPeriode.isEmpty() || eg.getPeriode().getFomDato().isAfter(senesteOverstyrtPeriode.get().getTomDato()))
+            .map(OppgittArbeidsforhold::getPeriode)
+            .collect(Collectors.toList());
+
+        List<List<OppgittArbeidsforholdBuilder>> builders = new ArrayList<>();
+        for (DatoIntervallEntitet periode : perioderEtterOverstyring) {
+            builders.add(leggTilOrdinærtdArbForhold(periode));
+        }
+        return builders.stream().flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    private Optional<DatoIntervallEntitet> senestePeriode(Optional<DatoIntervallEntitet> senestePeriodeSN, Optional<DatoIntervallEntitet> senestePeriodeFL, Optional<DatoIntervallEntitet> senesteOverstyrtOrdArbForhold) {
+        var senestePerioder = List.of(senestePeriodeSN, senestePeriodeFL, senesteOverstyrtOrdArbForhold).stream()
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
+        return senestePerioder.stream()
+            .reduce((p1, p2) -> p1.getTomDato().isAfter(p2.getTomDato()) || p1.getTomDato().equals(p2.getTomDato()) ? p1 : p2);
     }
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
@@ -19,6 +20,9 @@ public class OppgittOpptjeningFilterTest {
 
     private final DatoIntervallEntitet periodeApril = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
     private final DatoIntervallEntitet periodeMai = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
+    private final DatoIntervallEntitet periodeAugust = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 8, 1), LocalDate.of(2020, 8, 31));
+    private final DatoIntervallEntitet periodeSeptember = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 9, 1), LocalDate.of(2020, 9, 30));
+    private final DatoIntervallEntitet periodeOktober = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31));
 
     @Test
     public void skal_legge_til_tilkommet_periode_for_SN_FRISINN() {
@@ -147,6 +151,37 @@ public class OppgittOpptjeningFilterTest {
         assertThat(oppgittOpptjeningFrisinn.get().getFrilans().isPresent());
         assertThat(oppgittOpptjeningFrisinn.get().getFrilans().get().getFrilansoppdrag()).hasSize(1);
     }
+
+    @Test
+    public void case_fra_prod() {
+        OppgittOpptjeningBuilder oppgittOpptjening = OppgittOpptjeningBuilder.ny();
+
+
+        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder augustArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeAugust).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(augustArb);
+
+        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder septArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeSeptember).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(septArb);
+
+        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder oktArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeOktober).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(oktArb);
+
+
+        OppgittOpptjeningBuilder overstyrt = OppgittOpptjeningBuilder.ny();
+        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder augustArbOS = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeAugust).medInntekt(BigDecimal.TEN);
+        overstyrt.leggTilOppgittArbeidsforhold(augustArbOS);
+
+        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder septArbOS = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeSeptember).medInntekt(BigDecimal.TEN);
+        overstyrt.leggTilOppgittArbeidsforhold(septArbOS);
+
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstyrt.build());
+
+        var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn();
+
+        assertThat(oppgittOpptjeningFrisinn).isNotNull();
+        assertThat(oppgittOpptjeningFrisinn.getOppgittArbeidsforhold()).hasSize(3);
+    }
+
 }
 
 
