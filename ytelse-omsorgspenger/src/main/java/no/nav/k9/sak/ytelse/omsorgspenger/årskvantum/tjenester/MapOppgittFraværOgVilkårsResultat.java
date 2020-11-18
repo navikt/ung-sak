@@ -39,14 +39,14 @@ public class MapOppgittFraværOgVilkårsResultat {
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje = opprettFraværsTidslinje(fagsakPeriode, fraværsPerioder);
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdOgPermitertTidslinje = opprettPermitertTidslinje(filter);
-        fraværsTidslinje = kombinerTidslinjer(fraværsTidslinje, arbeidsforholdOgPermitertTidslinje);
+        fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, arbeidsforholdOgPermitertTidslinje);
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = opprettVilkårTidslinje(vilkårene);
 
         return kombinerTidslinjene(fraværsTidslinje, avslåtteVilkårTidslinje);
     }
 
-    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> kombinerTidslinjer(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje,
-                                                                                              Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdOgPermitertTidslinje) {
+    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> kombinerFraværOgArbeidsforholdsTidslinjer(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje,
+                                                                                                                     Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdOgPermitertTidslinje) {
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         for (Aktivitet aktivitet : fraværsTidslinje.keySet()) {
             var arbeidsforholdSomMatcher = arbeidsforholdOgPermitertTidslinje.keySet()
@@ -56,6 +56,14 @@ public class MapOppgittFraværOgVilkårsResultat {
                 .collect(Collectors.toList());
             result.put(aktivitet, mergeTidslinjer(fraværsTidslinje.get(aktivitet), arbeidsforholdSomMatcher));
         }
+        // Arbeidsforhold som har fravær, men ikke finnes i arbeidsforhold
+        var fraværUtenArbeidsforhold = fraværsTidslinje.keySet()
+            .stream()
+            .filter(it -> arbeidsforholdOgPermitertTidslinje.keySet().stream().noneMatch(it::matcher))
+            .collect(Collectors.toSet());
+
+        var ikkeIArbeidTidslinje = List.of(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(null, null, null, ArbeidStatus.IKKE_EKSISTERENDE, null)))));
+        fraværUtenArbeidsforhold.forEach(af -> result.put(af, mergeTidslinjer(fraværsTidslinje.get(af), ikkeIArbeidTidslinje)));
         return result;
     }
 
@@ -89,9 +97,9 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettArbeidsforholdTidslinje(Yrkesaktivitet yrkesaktivitet, YrkesaktivitetFilter filter) {
-        LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(null, null, null, true, null))));
+        LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AVSLUTTET))));
         var ansettelsesPerioder = filter.getAnsettelsesPerioder(yrkesaktivitet).stream()
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new WrappedOppgittFraværPeriode(null, null, null, false, null)))
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT)))
             .collect(Collectors.toList());
         var permisjonsPerioder = yrkesaktivitet.getPermisjon()
             .stream()
@@ -172,7 +180,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettFraværsTidslinje(DatoIntervallEntitet fagsakPeriode, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder) {
         var perioderPerAktivitet = perioder
             .stream()
-            .map(it -> new WrappedOppgittFraværPeriode(it.getPeriode(), it.getInnsendingstidspunkt(), null, null, null))
+            .map(it -> new WrappedOppgittFraværPeriode(it.getPeriode(), it.getInnsendingstidspunkt()))
             .collect(Collectors.groupingBy(WrappedOppgittFraværPeriode::getAktivitet, Collectors.toList()));
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result = new HashMap<>();
@@ -187,7 +195,7 @@ public class MapOppgittFraværOgVilkårsResultat {
 
             var segmenterPåUtsidenAvFagsaksinterval = fraværsTidslinje.disjoint(fagsakInterval).compress().toSegments();
             if (!segmenterPåUtsidenAvFagsaksinterval.isEmpty()) {
-                log.warn("Fant fraværsperioder=[{}] på utsiden av fagsaksintervallet {}", segmenterPåUtsidenAvFagsaksinterval, fagsakInterval);
+                log.info("Fant fraværsperioder=[{}] på utsiden av fagsaksintervallet {}", segmenterPåUtsidenAvFagsaksinterval, fagsakInterval);
             }
 
             result.put(aktivitetsPerioder.getKey(), fraværsTidslinje.intersection(fagsakInterval).compress());
@@ -199,7 +207,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         var segmentValue = segment.getValue();
         var oppgittPeriode = segmentValue.getPeriode();
         return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(segment.getFom(), segment.getTom(), oppgittPeriode.getAktivitetType(),
-            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()), segmentValue.getInnsendingstidspunkt(), segmentValue.getErIPermisjon(), segmentValue.getErIkkeIArbeid(), segmentValue.getErAvslåttInngangsvilkår());
+            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()), segmentValue.getInnsendingstidspunkt(), segmentValue.getErIPermisjon(), segmentValue.getArbeidStatus(), segmentValue.getErAvslåttInngangsvilkår());
     }
 
     private LocalDateSegment<WrappedOppgittFraværPeriode> mergePeriode(LocalDateInterval di,
@@ -215,7 +223,7 @@ public class MapOppgittFraværOgVilkårsResultat {
 
         var avslåttInngangsvilkår = booleanPrioTrue(første.getErAvslåttInngangsvilkår(), siste.getErAvslåttInngangsvilkår());
         var iPermisjon = booleanPrioTrue(første.getErIPermisjon(), siste.getErIPermisjon());
-        var ikkeIArbeid = booleanPrioFalse(første.getErIkkeIArbeid(), siste.getErIkkeIArbeid());
+        var ikkeIArbeid = arbeidStatusPrioAktivt(første.getArbeidStatus(), siste.getArbeidStatus());
         var innsendingstidspunkt = utledInnsendingstidspunkt(første.getInnsendingstidspunkt(), siste.getInnsendingstidspunkt());
 
         return lagSegment(di, avslåttInngangsvilkår, utledOppgittPeriode(første.getPeriode(), siste.getPeriode()), iPermisjon, ikkeIArbeid, innsendingstidspunkt);
@@ -234,11 +242,20 @@ public class MapOppgittFraværOgVilkårsResultat {
         return innsendingstidspunkt;
     }
 
-    private Boolean booleanPrioFalse(Boolean boolOne, Boolean boolTwo) {
-        if (boolOne == null || boolTwo == null) {
-            return boolTwo != null ? boolTwo : boolOne;
+    private ArbeidStatus arbeidStatusPrioAktivt(ArbeidStatus status1, ArbeidStatus status2) {
+        if (status1 == null || status2 == null) {
+            return status2 != null ? status2 : status1;
         }
-        return boolOne && boolTwo;
+        if (status1.equals(status2)) {
+            return status1;
+        }
+        if (ArbeidStatus.AKTIVT.equals(status1) || ArbeidStatus.AKTIVT.equals(status2)) {
+            return ArbeidStatus.AKTIVT;
+        }
+        if (ArbeidStatus.AVSLUTTET.equals(status1) || ArbeidStatus.AVSLUTTET.equals(status2)) {
+            return ArbeidStatus.AVSLUTTET;
+        }
+        return status1;
     }
 
     private Boolean booleanPrioTrue(Boolean boolOne, Boolean boolTwo) {
@@ -255,7 +272,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         return a;
     }
 
-    private LocalDateSegment<WrappedOppgittFraværPeriode> lagSegment(LocalDateInterval di, Boolean erAvslått, OppgittFraværPeriode oppgittPeriode, Boolean iPermisjon, Boolean ikkeIArbeid, LocalDateTime innsendingstidspunkt) {
+    private LocalDateSegment<WrappedOppgittFraværPeriode> lagSegment(LocalDateInterval di, Boolean erAvslått, OppgittFraværPeriode oppgittPeriode, Boolean iPermisjon, ArbeidStatus ikkeIArbeid, LocalDateTime innsendingstidspunkt) {
         var oppdaterOppgittFravær = oppgittPeriode != null ? new OppgittFraværPeriode(di.getFomDato(), di.getTomDato(), oppgittPeriode.getAktivitetType(),
             oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()) : null;
         var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, innsendingstidspunkt, iPermisjon, ikkeIArbeid, erAvslått);
@@ -266,7 +283,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         var oppgittPeriode = segmentValue.getPeriode();
         var oppdaterOppgittFravær = oppgittPeriode != null ? new OppgittFraværPeriode(di.getFomDato(), di.getTomDato(), oppgittPeriode.getAktivitetType(),
             oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFraværPerDag()) : null;
-        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, segmentValue.getInnsendingstidspunkt(), segmentValue.getErIPermisjon(), segmentValue.getErIkkeIArbeid(), segmentValue.getErAvslåttInngangsvilkår());
+        var wrapper = new WrappedOppgittFraværPeriode(oppdaterOppgittFravær, segmentValue.getInnsendingstidspunkt(), segmentValue.getErIPermisjon(), segmentValue.getArbeidStatus(), segmentValue.getErAvslåttInngangsvilkår());
         return new LocalDateSegment<>(di, wrapper);
     }
 }

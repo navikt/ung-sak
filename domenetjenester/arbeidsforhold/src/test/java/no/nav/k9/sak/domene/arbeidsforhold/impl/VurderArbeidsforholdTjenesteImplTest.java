@@ -163,7 +163,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
 
     private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforhold(Behandling behandling) {
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling), iayGrunnlag);
+        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling));
         return vurder;
     }
 
@@ -210,7 +210,7 @@ public class VurderArbeidsforholdTjenesteImplTest {
         sendNyInntektsmelding(behandling, virksomhet, ref1);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling), iayGrunnlag);
+        Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder = tjeneste.vurder(lagRef(behandling));
         assertThat(vurder).isEmpty();
     }
 

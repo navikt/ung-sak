@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -28,6 +29,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.iay.modell.Inntekt;
+import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -80,6 +83,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var grunnlag = grunnlagOptional.get();
 
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
+        var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(behandling.getAktørId()));
 
         var arbeidsgiverArbeidsforholdMap = yrkesaktivitetFilter.getYrkesaktiviteter()
             .stream()
@@ -91,14 +95,29 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
             var arbeidsgiver = arbeidsgiverArbeidsforhold.getArbeidsgiver();
             var arbeidsforhold = arbeidsgiverArbeidsforholdMap.getOrDefault(arbeidsgiver, Set.of());
             var arbeidsforholdet = arbeidsgiverArbeidsforhold.getArbeidsforhold();
-            if (arbeidsforhold.stream().noneMatch(arbeidsforholdet::gjelderFor) && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
+            if (arbeidsforhold.stream().noneMatch(arbeidsforholdet::gjelderFor)
+                && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
                 var arbeidsforholdRefs = Set.of(arbeidsforholdet);
-                LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
-                logger.info("Inntektsmelding uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
+                if (rapportertInntektFraArbeidsgiver(arbeidsgiver, inntektFilter)) {
+                    LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
+                    logger.info("Inntektsmelding med inntekt uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
+                } else {
+                    logger.info("Inntektsmelding uten kjent arbeidsforhold & ingen rapportert inntekt: arbeidsforholdRef={}", arbeidsforholdRefs);
+                }
             }
         }
 
         return result;
+    }
+
+    private boolean rapportertInntektFraArbeidsgiver(Arbeidsgiver arbeidsgiver, InntektFilter inntektFilter) {
+        return inntektFilter
+            .filter(arbeidsgiver)
+            .getAlleInntektPensjonsgivende()
+            .stream()
+            .map(Inntekt::getAlleInntektsposter)
+            .flatMap(Collection::stream)
+            .anyMatch(it -> InntektspostType.LØNN.equals(it.getInntektspostType()));
     }
 
     @Override

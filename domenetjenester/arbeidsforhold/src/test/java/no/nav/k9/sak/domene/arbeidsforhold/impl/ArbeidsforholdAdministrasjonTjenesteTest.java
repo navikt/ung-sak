@@ -131,7 +131,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         arbeidsforholdRefSet.add(ARBEIDSFORHOLD_ID);
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsgiverSetMap = new HashMap<>();
         arbeidsgiverSetMap.put(arbeidsgiver, arbeidsforholdRefSet);
-        when(vurderArbeidsforholdTjeneste.vurder(any(), any())).thenReturn(arbeidsgiverSetMap);
+        when(vurderArbeidsforholdTjeneste.vurder(any())).thenReturn(arbeidsgiverSetMap);
 
         ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
         arbeidsforholdTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste, arbeidsgiverTjeneste, iayTjeneste);
@@ -363,7 +363,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
         Behandling behandling = opprettBehandling();
         DatoIntervallEntitet periodeFør = DatoIntervallEntitet.fraOgMedTilOgMed(I_DAG.minusYears(1), I_DAG);
         DatoIntervallEntitet periodeEtter = DatoIntervallEntitet.fraOgMedTilOgMed(I_DAG.plusDays(1), I_DAG.plusYears(1));
-        InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder .oppdatere(Optional.empty(), VersjonType.REGISTER);
+        InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
 
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(AKTØRID);
         final var informasjonBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
@@ -445,15 +445,15 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
     private void lagreInntektsmelding(LocalDate mottattDato, Behandling behandling, InternArbeidsforholdRef arbeidsforholdId, EksternArbeidsforholdRef eksternArbeidsforholdRef) {
         JournalpostId journalPostId = new JournalpostId("123");
         var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
-        .medStartDatoPermisjon(I_DAG)
-        .medArbeidsgiver(arbeidsgiver)
-        .medBeløp(BigDecimal.TEN)
-        .medNærRelasjon(false)
-        .medArbeidsforholdId(arbeidsforholdId)
-        .medArbeidsforholdId(eksternArbeidsforholdRef)
-        .medMottattDato(mottattDato)
-        .medKanalreferanse("AR" + LocalDateTime.now())
-        .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
+            .medStartDatoPermisjon(I_DAG)
+            .medArbeidsgiver(arbeidsgiver)
+            .medBeløp(BigDecimal.TEN)
+            .medNærRelasjon(false)
+            .medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsforholdId(eksternArbeidsforholdRef)
+            .medMottattDato(mottattDato)
+            .medKanalreferanse("AR" + LocalDateTime.now())
+            .medInnsendingstidspunkt(LocalDateTime.now()).medJournalpostId(journalPostId);
 
         inntektsmeldingTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), List.of(inntektsmeldingBuilder));
 
@@ -554,7 +554,7 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
     }
 
     private InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder leggTilYrkesaktivitetUtenAnsperiode(InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder builder,
-                                                                                                       InternArbeidsforholdRef arbeidsforhold, ArbeidType type) {
+                                                                                                      InternArbeidsforholdRef arbeidsforhold, ArbeidType type) {
         YrkesaktivitetBuilder yrkesaktivitetBuilder = builder.getYrkesaktivitetBuilderForNøkkelAvType(new Opptjeningsnøkkel(arbeidsforhold, arbeidsgiver),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
@@ -568,20 +568,20 @@ public class ArbeidsforholdAdministrasjonTjenesteTest {
 
     private Virksomhet lagVirksomhet() {
         return new Virksomhet.Builder()
-        .medOrgnr(ORG1)
-        .medNavn("Virksomheten")
-        .medRegistrert(I_DAG.minusYears(2L))
-        .medOppstart(I_DAG.minusYears(1L))
-        .build();
+            .medOrgnr(ORG1)
+            .medNavn("Virksomheten")
+            .medRegistrert(I_DAG.minusYears(2L))
+            .medOppstart(I_DAG.minusYears(1L))
+            .build();
     }
 
     private Virksomhet lagAndreVirksomheten() {
         return new Virksomhet.Builder()
-        .medOrgnr(ORG2)
-        .medNavn("OrgA")
-        .medRegistrert(I_DAG.minusYears(2L))
-        .medOppstart(I_DAG.minusYears(1L))
-        .build();
+            .medOrgnr(ORG2)
+            .medNavn("OrgA")
+            .medRegistrert(I_DAG.minusYears(2L))
+            .medOppstart(I_DAG.minusYears(1L))
+            .build();
     }
 
     private Behandling opprettBehandling() {

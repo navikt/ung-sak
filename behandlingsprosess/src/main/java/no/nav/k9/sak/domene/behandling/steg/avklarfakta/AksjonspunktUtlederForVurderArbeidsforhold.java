@@ -58,7 +58,7 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforholdTilVurdering(AksjonspunktUtlederInput param,
                                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag) {
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder;
-        vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef(), iayGrunnlag);
+        vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef());
         return vurder;
     }
 }

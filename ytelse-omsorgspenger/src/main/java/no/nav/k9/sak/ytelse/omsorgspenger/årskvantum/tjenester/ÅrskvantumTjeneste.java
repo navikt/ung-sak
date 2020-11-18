@@ -256,11 +256,14 @@ public class ÅrskvantumTjeneste {
     }
 
     private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
-        if (wrappedOppgittFraværPeriode.getErIkkeIArbeid() != null && wrappedOppgittFraværPeriode.getErIkkeIArbeid()) {
+        if (wrappedOppgittFraværPeriode.getArbeidStatus() != null && ArbeidStatus.AVSLUTTET.equals(wrappedOppgittFraværPeriode.getArbeidStatus())) {
             return ArbeidsforholdStatus.AVSLUTTET;
         }
         if (wrappedOppgittFraværPeriode.getErIPermisjon() != null && wrappedOppgittFraværPeriode.getErIPermisjon()) {
             return ArbeidsforholdStatus.PERMITERT;
+        }
+        if (wrappedOppgittFraværPeriode.getArbeidStatus() != null && ArbeidStatus.IKKE_EKSISTERENDE.equals(wrappedOppgittFraværPeriode.getArbeidStatus())) {
+            return ArbeidsforholdStatus.AVSLUTTET; // TODO: sett ikke eksisterende
         }
         return ArbeidsforholdStatus.AKTIVT;
     }
