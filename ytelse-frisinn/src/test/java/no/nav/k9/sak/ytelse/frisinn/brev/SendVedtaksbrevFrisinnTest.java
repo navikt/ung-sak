@@ -68,7 +68,7 @@ public class SendVedtaksbrevFrisinnTest {
     private TestScenarioBuilder scenario;
 
     public SendVedtaksbrevFrisinnTest() {
-        scenario = TestScenarioBuilder.builderMedSøknad()
+        scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.FRISINN)
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
     }
 
@@ -107,16 +107,6 @@ public class SendVedtaksbrevFrisinnTest {
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
 
         // Assert
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
-    }
-
-    @Test
-    public void senderBrevOmUendretUtfallVedRevurdering() {
-        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
-        behandling = scenario.lagre(repositoryProvider);
-
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
-
         verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
     }
 
@@ -182,22 +172,6 @@ public class SendVedtaksbrevFrisinnTest {
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
 
         verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
-    }
-
-    @Test
-    public void senderFritekstbrevVedOverstyrt() {
-        TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
-        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
-        behandling = scenario.lagre(repositoryProvider);
-
-        VedtakVarsel varsel = new VedtakVarsel();
-        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
-        vedtakVarselRepository.lagre(behandling.getId(), varsel);
-
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
-
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
     }
 
     @Test

@@ -21,11 +21,9 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
@@ -78,41 +76,6 @@ public class SendVedtaksbrevTest {
     }
 
     @Test
-    public void testSendVedtaksbrevVedtakInnvilget() {
-        scenario.medBehandlingVedtak().medVedtakResultatType(VedtakResultatType.INNVILGET);
-        behandling = scenario.lagre(repositoryProvider);
-
-        // Act
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
-
-        // Assert
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
-    }
-
-    @Test
-    public void testSendVedtaksbrevVedtakAvslag() {
-        // Arrange
-        scenario.medBehandlingVedtak().medVedtakResultatType(VedtakResultatType.AVSLAG);
-        behandling = scenario.lagre(repositoryProvider);
-
-        // Act
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
-
-        // Assert
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
-    }
-
-    @Test
-    public void senderBrevOmUendretUtfallVedRevurdering() {
-        scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
-        behandling = scenario.lagre(repositoryProvider);
-
-        sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
-
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
-    }
-
-    @Test
     public void senderIkkeBrevOmUendretUtfallHvisIkkeSendtVarselbrevOmRevurdering() {
         behandling = scenario.lagre(repositoryProvider);
 
@@ -144,20 +107,17 @@ public class SendVedtaksbrevTest {
     }
 
     @Test
-    public void senderFritekstbrevVedOverstyrt() {
+    public void senderIkkeBrevForPleiepenger() {
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
         scenario.medBehandlingVedtak().medBeslutning(true).medVedtakResultatType(VedtakResultatType.INNVILGET);
         behandling = scenario.lagre(repositoryProvider);
 
-        VedtakVarsel varsel = new VedtakVarsel();
-        varsel.setVedtaksbrev(Vedtaksbrev.FRITEKST);
-        vedtakVarselRepository.lagre(behandling.getId(), varsel);
-
         sendVedtaksbrev.sendVedtaksbrev(behandling.getId().toString());
 
-        verify(dokumentBestillerApplikasjonTjeneste).produserVedtaksbrev(any(), any());
+        verify(dokumentBestillerApplikasjonTjeneste, never()).produserVedtaksbrev(any(), any());
     }
+
 
     @Test
     public void senderIkkeBrevEtterKlagebehandling() {
