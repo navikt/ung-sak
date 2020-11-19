@@ -9,20 +9,20 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 public class Beregningsgrunnlag {
 
-    private LocalDate skjæringstidspunkt;
     private final List<AktivitetStatus> aktivitetStatuser = new ArrayList<>();
     @JsonManagedReference
     private final List<BeregningsgrunnlagPeriode> beregningsgrunnlagPerioder = new ArrayList<>();
+    private LocalDate skjæringstidspunkt;
 
     private Beregningsgrunnlag() {
     }
 
-    public List<BeregningsgrunnlagPeriode> getBeregningsgrunnlagPerioder() {
-        return beregningsgrunnlagPerioder;
-    }
-
     public static Builder builder() {
         return new Builder();
+    }
+
+    public List<BeregningsgrunnlagPeriode> getBeregningsgrunnlagPerioder() {
+        return beregningsgrunnlagPerioder;
     }
 
     public static class Builder {
@@ -32,12 +32,12 @@ public class Beregningsgrunnlag {
             beregningsgrunnlagMal = new Beregningsgrunnlag();
         }
 
-        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt){
+        public Builder medSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
             beregningsgrunnlagMal.skjæringstidspunkt = skjæringstidspunkt;
             return this;
         }
 
-        public Builder medAktivitetStatuser(List<AktivitetStatus> aktivitetStatusList){
+        public Builder medAktivitetStatuser(List<AktivitetStatus> aktivitetStatusList) {
             beregningsgrunnlagMal.aktivitetStatuser.addAll(aktivitetStatusList);
             return this;
         }
@@ -61,10 +61,10 @@ public class Beregningsgrunnlag {
             Objects.requireNonNull(beregningsgrunnlagMal.skjæringstidspunkt, "skjæringstidspunkt");
             Objects.requireNonNull(beregningsgrunnlagMal.aktivitetStatuser, "aktivitetStatuser");
             if (beregningsgrunnlagMal.beregningsgrunnlagPerioder.isEmpty()) {
-                throw new IllegalStateException("Beregningsgrunnlaget må inneholde minst 1 periode");
+                throw new IllegalStateException("Beregningsgrunnlaget [" + beregningsgrunnlagMal.skjæringstidspunkt + "] må inneholde minst 1 periode");
             }
             if (beregningsgrunnlagMal.aktivitetStatuser.isEmpty()) {
-                throw new IllegalStateException("Beregningsgrunnlaget må inneholde minst 1 status");
+                throw new IllegalStateException("Beregningsgrunnlaget [" + beregningsgrunnlagMal.skjæringstidspunkt + "] må inneholde minst 1 status");
             }
         }
     }
