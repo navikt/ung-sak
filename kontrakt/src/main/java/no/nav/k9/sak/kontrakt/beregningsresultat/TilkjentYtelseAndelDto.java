@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
@@ -32,12 +31,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilkjentYtelseAndelDto {
 
-    @JsonProperty(value = "erBrukerMottaker")
-    @Valid
-    private Boolean erBrukerMottaker;
-    @JsonProperty(value = "aktivitetStatus")
-    @Valid
-    private AktivitetStatus aktivitetStatus;
     @JsonProperty(value = "inntektskategori", required = true)
     @Valid
     private Inntektskategori inntektskategori;
@@ -51,7 +44,7 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
-    @JsonProperty(value = "arbeidsforholdType")
+    @JsonProperty(value = "arbeidsforhéoldType")
     @Valid
     private OpptjeningAktivitetType arbeidsforholdType;
     @JsonAlias("orgNummer")
@@ -91,22 +84,16 @@ public class TilkjentYtelseAndelDto {
         this.refusjon = builder.refusjon;
         this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
-        this.aktivitetStatus = builder.aktivitetStatus;
         this.arbeidsforholdId = builder.arbeidsforholdId;
         this.aktørId = builder.aktørId;
         this.arbeidsforholdType = builder.arbeidsforholdType;
         this.stillingsprosent = builder.stillingsprosent;
         this.arbeidsgiver = builder.arbeidsgiver;
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
-        this.erBrukerMottaker = Objects.requireNonNull(builder.erBrukerMottaker, "erBrukerMottaker");
     }
 
     public static Builder build() {
         return new Builder();
-    }
-
-    public AktivitetStatus getAktivitetStatus() {
-        return aktivitetStatus;
     }
 
     public AktørId getAktørId() {
@@ -153,12 +140,7 @@ public class TilkjentYtelseAndelDto {
         return uttak;
     }
 
-    public Boolean getErBrukerMottaker() {
-        return erBrukerMottaker;
-    }
-
     public static class Builder {
-        private AktivitetStatus aktivitetStatus;
         private AktørId aktørId;
         private String arbeidsforholdId;
         private OpptjeningAktivitetType arbeidsforholdType;
@@ -170,18 +152,12 @@ public class TilkjentYtelseAndelDto {
         private BigDecimal utbetalingsgrad;
         private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
-        private boolean erBrukerMottaker;
 
         private Builder() {
         }
 
         public TilkjentYtelseAndelDto create() {
             return new TilkjentYtelseAndelDto(this);
-        }
-
-        public Builder medAktivitetstatus(AktivitetStatus aktivitetStatus) {
-            this.aktivitetStatus = aktivitetStatus;
-            return this;
         }
 
         public Builder medAktørId(AktørId aktørId) {
@@ -236,11 +212,6 @@ public class TilkjentYtelseAndelDto {
 
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
             this.inntektskategori = inntektskategori;
-            return this;
-        }
-
-        public Builder medErBrukerMottaker(boolean erBrukerMottaker) {
-            this.erBrukerMottaker = erBrukerMottaker;
             return this;
         }
     }
