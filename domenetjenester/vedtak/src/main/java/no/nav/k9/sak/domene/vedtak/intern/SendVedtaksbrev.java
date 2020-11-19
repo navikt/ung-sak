@@ -79,8 +79,8 @@ public class SendVedtaksbrev {
             return false;
         }
 
-        if (erKunRefusjonTilArbeidsgiver(ref)) {
-            log.info("Sender ikke vedtaksbrev for omsorgspenger - refusjon til arbeidsgiver. Gjelder behandlingId {}", behandlingId); //$NON-NLS-1$
+        if (erAnnenYtelseEnnFrisinn(ref)) {
+            log.info("Bruker vedtakhendelse for å generere vedtaksbrev for andre ytelser enn frisinn. Gjelder behandlingId {}", behandlingId); //$NON-NLS-1$
             return false;
         }
 
@@ -106,8 +106,8 @@ public class SendVedtaksbrev {
         return true;
     }
 
-    protected boolean erKunRefusjonTilArbeidsgiver(BehandlingReferanse ref) {
-        return ref.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER;
+    protected boolean erAnnenYtelseEnnFrisinn(BehandlingReferanse ref) {
+        return ref.getFagsakYtelseType() != FagsakYtelseType.FRISINN;
     }
 
     protected boolean erBehandlingEtterKlage(Behandling behandling) {
