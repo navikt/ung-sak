@@ -44,7 +44,7 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
-    @JsonProperty(value = "arbeidsforhéoldType")
+    @JsonProperty(value = "arbeidsforholdType")
     @Valid
     private OpptjeningAktivitetType arbeidsforholdType;
     @JsonAlias("orgNummer")
