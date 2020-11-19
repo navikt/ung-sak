@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
@@ -146,6 +147,46 @@ public class OppgittOpptjeningFilterTest {
         assertThat(oppgittOpptjeningFrisinn).isPresent();
         assertThat(oppgittOpptjeningFrisinn.get().getFrilans().isPresent());
         assertThat(oppgittOpptjeningFrisinn.get().getFrilans().get().getFrilansoppdrag()).hasSize(1);
+    }
+
+    @Test
+    public void skal_legge_til_tilkommet_periode_for_FL_MED_OPPGITT_ARBFORHOLD() {
+        OppgittOpptjeningBuilder oppgittOpptjening = OppgittOpptjeningBuilder.ny();
+        var frilans = OppgittFrilansBuilder.ny();
+        var aprilOppdrag = OppgittFrilansOppdragBuilder.ny();
+        aprilOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeApril);
+        var aprilArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        aprilArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeApril).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(aprilArbForhold);
+
+        var maiOppdrag = OppgittFrilansOppdragBuilder.ny();
+        maiOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeMai);
+        var maiArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        maiArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeMai).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(maiArbForhold);
+
+        frilans.medFrilansOppdrag(List.of(aprilOppdrag.build(), maiOppdrag.build()));
+        oppgittOpptjening.leggTilFrilansOpplysninger(frilans.build());
+
+        var aprilOverstyrt = OppgittFrilansBuilder.ny();
+
+        var overstyrtAprilOppdrag = OppgittFrilansOppdragBuilder.ny();
+        overstyrtAprilOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeApril);
+        aprilOverstyrt.leggTilFrilansOppdrag(overstyrtAprilOppdrag.build());
+        var aprilOverstyrtArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        aprilOverstyrtArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeApril).medInntekt(BigDecimal.TEN);
+
+        OppgittOpptjeningBuilder overstyrt = OppgittOpptjeningBuilder.ny();
+        overstyrt.leggTilFrilansOpplysninger(aprilOverstyrt.build());
+        overstyrt.leggTilOppgittArbeidsforhold(aprilOverstyrtArbForhold);
+
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstyrt.build());
+
+        var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn();
+
+        assertThat(oppgittOpptjeningFrisinn.getFrilans().isPresent());
+        assertThat(oppgittOpptjeningFrisinn.getFrilans().get().getFrilansoppdrag()).hasSize(2);
+        assertThat(oppgittOpptjeningFrisinn.getOppgittArbeidsforhold()).hasSize(2);
     }
 }
 
