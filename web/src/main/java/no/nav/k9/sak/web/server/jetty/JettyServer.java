@@ -237,7 +237,6 @@ public class JettyServer {
         webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*resteasy-.*.jar$|^.*felles-sikkerhet-.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
 
-        webAppContext.setParentLoaderPriority(true);
         updateMetaData(webAppContext.getMetaData());
         webAppContext.setThrowUnavailableOnStartupException(true);
         return webAppContext;

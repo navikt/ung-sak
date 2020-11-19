@@ -24,7 +24,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 
 public class BeregningsresultatRepositoryImplTest {
 
@@ -39,7 +38,6 @@ public class BeregningsresultatRepositoryImplTest {
 
     private BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     private final BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-    private final Repository repository = extension.getRepository();
 
     private final BeregningsresultatRepository beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
     private Behandling behandling;
@@ -97,7 +95,7 @@ public class BeregningsresultatRepositoryImplTest {
         Long id = beregningsresultat.getId();
         assertThat(id).isNotNull();
 
-        repository.flushAndClear();
+        flushAndClear();
         Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
 
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
@@ -117,7 +115,7 @@ public class BeregningsresultatRepositoryImplTest {
         Long id = utbetBeregningsresultat.getId();
         assertThat(id).isNotNull();
 
-        repository.flushAndClear();
+        flushAndClear();
         Optional<BeregningsresultatEntitet> utbetBeregningsresultatLest = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
 
         assertThat(utbetBeregningsresultatLest).isEqualTo(Optional.of(utbetBeregningsresultat));
@@ -135,7 +133,7 @@ public class BeregningsresultatRepositoryImplTest {
         Long id = beregningsresultat.getId();
         assertThat(id).isNotNull();
 
-        repository.flushAndClear();
+        flushAndClear();
         Optional<BeregningsresultatEntitet> beregningsresultatLest = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId());
         assertThat(beregningsresultatLest).isEqualTo(Optional.of(beregningsresultat));
         assertThat(beregningsresultatLest).isPresent();
@@ -160,10 +158,10 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(brPeriodeId).isNotNull();
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
-        repository.flushAndClear();
-        var beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
-        var brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
-        var brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
+        flushAndClear();
+        var beregningsresultatLest = hentEntitet(BeregningsresultatEntitet.class, brId);
+        var brPeriodeLest = hentEntitet(BeregningsresultatPeriode.class, brPeriodeId);
+        var brAndelLest = hentEntitet(BeregningsresultatAndel.class, brAndelId);
 
         assertThat(beregningsresultatLest.getId()).isNotNull();
         assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
@@ -171,6 +169,10 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(beregningsresultatLest.getRegelSporing()).isEqualTo(beregningsresultat.getRegelSporing());
         assertThat(beregningsresultatLest.getEndringsdato()).isEqualTo(Optional.of(DAGENSDATO));
         assertBeregningsresultatPeriode(brPeriodeLest, brAndelLest, brPeriode);
+    }
+
+    private <V> V hentEntitet(Class<V> cls, Long primaryKey) {
+        return entityManager.find(cls, primaryKey);
     }
 
     @Test
@@ -189,10 +191,10 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(brPeriodeId).isNotNull();
         Long brAndelId = brPeriode.getBeregningsresultatAndelList().get(0).getId();
 
-        repository.flushAndClear();
-        var beregningsresultatLest = repository.hent(BeregningsresultatEntitet.class, brId);
-        var brPeriodeLest = repository.hent(BeregningsresultatPeriode.class, brPeriodeId);
-        var brAndelLest = repository.hent(BeregningsresultatAndel.class, brAndelId);
+        flushAndClear();
+        var beregningsresultatLest = hentEntitet(BeregningsresultatEntitet.class, brId);
+        var brPeriodeLest = hentEntitet(BeregningsresultatPeriode.class, brPeriodeId);
+        var brAndelLest = hentEntitet(BeregningsresultatAndel.class, brAndelId);
 
         assertThat(beregningsresultatLest.getId()).isNotNull();
         assertThat(beregningsresultatLest.getBeregningsresultatPerioder()).hasSize(1);
@@ -214,9 +216,14 @@ public class BeregningsresultatRepositoryImplTest {
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         // Assert
-        repository.flushAndClear();
-        var hentetResultat = repository.hent(BeregningsresultatEntitet.class, beregningsresultat.getId());
+        flushAndClear();
+        var hentetResultat = hentEntitet(BeregningsresultatEntitet.class, beregningsresultat.getId());
         assertThat(hentetResultat).isNotNull();
+    }
+
+    private void flushAndClear() {
+        entityManager.flush();
+        entityManager.clear();
     }
 
     private void assertBeregningsresultatPeriode(BeregningsresultatPeriode brPeriodeLest, BeregningsresultatAndel brAndelLest, BeregningsresultatPeriode brPeriodeExpected) {

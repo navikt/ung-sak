@@ -1,6 +1,5 @@
 package no.nav.k9.sak;
 
-import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,11 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.shibboleth.utilities.java.support.security.DataSealerKeyStrategy;
 import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
-import no.nav.k9.sak.db.util.DatasourceConfiguration;
-import no.nav.vedtak.felles.lokal.dbstoette.DBConnectionProperties;
-import no.nav.vedtak.felles.lokal.dbstoette.DatabaseStøtte;
 
 /**
  * Denne testen rapporterer kun tabeller og kolonner som ikke er mappet i hibernate. Det kan være gyldige grunner til det (f.eks. dersom det
