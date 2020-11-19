@@ -154,13 +154,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medStillingsprosent(STILLINGSPROSENT);
     }
 
-    public interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {
+    interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {
         TilkjentYtelseOppdatererFeil FACTORY = FeilFactory.create(TilkjentYtelseOppdatererFeil.class); // NOSONAR
 
-        @FunksjonellFeil(feilkode = "K9-123456", feilmelding = "Det er angitt overlappende perioder med tilkjent ytelse: %s", løsningsforslag = "", logLevel = INFO)
+        @FunksjonellFeil(feilkode = "K9-951877", feilmelding = "Det er angitt overlappende perioder med tilkjent ytelse: %s", løsningsforslag = "", logLevel = INFO)
         Feil overlappendeTilkjentYtelsePerioder(String feilmelding);
 
-        @FunksjonellFeil(feilkode = "K9-234567", feilmelding = "Periode med tilkjent ytelse er ikke innenfor vilkåret", løsningsforslag = "", logLevel = INFO)
+        @FunksjonellFeil(feilkode = "K9-951878", feilmelding = "Periode med tilkjent ytelse er ikke innenfor vilkåret", løsningsforslag = "", logLevel = INFO)
         Feil tilkjentYtelseIkkeInnenforVilkår();
     }
 

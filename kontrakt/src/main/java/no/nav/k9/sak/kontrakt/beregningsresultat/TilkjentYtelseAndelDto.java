@@ -31,9 +31,6 @@ import no.nav.k9.sak.typer.OrgNummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class TilkjentYtelseAndelDto {
 
-    @JsonProperty(value = "erBrukerMottaker")
-    @Valid
-    private Boolean erBrukerMottaker;
     @JsonProperty(value = "inntektskategori", required = true)
     @Valid
     private Inntektskategori inntektskategori;
@@ -47,7 +44,7 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
-    @JsonProperty(value = "arbeidsforholdType")
+    @JsonProperty(value = "arbeidsforhéoldType")
     @Valid
     private OpptjeningAktivitetType arbeidsforholdType;
     @JsonAlias("orgNummer")
@@ -93,7 +90,6 @@ public class TilkjentYtelseAndelDto {
         this.stillingsprosent = builder.stillingsprosent;
         this.arbeidsgiver = builder.arbeidsgiver;
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
-        this.erBrukerMottaker = Objects.requireNonNull(builder.erBrukerMottaker, "erBrukerMottaker");
     }
 
     public static Builder build() {
@@ -144,10 +140,6 @@ public class TilkjentYtelseAndelDto {
         return uttak;
     }
 
-    public Boolean getErBrukerMottaker() {
-        return erBrukerMottaker;
-    }
-
     public static class Builder {
         private AktørId aktørId;
         private String arbeidsforholdId;
@@ -160,7 +152,6 @@ public class TilkjentYtelseAndelDto {
         private BigDecimal utbetalingsgrad;
         private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
-        private boolean erBrukerMottaker;
 
         private Builder() {
         }
@@ -221,11 +212,6 @@ public class TilkjentYtelseAndelDto {
 
         public Builder medInntektskategori(Inntektskategori inntektskategori) {
             this.inntektskategori = inntektskategori;
-            return this;
-        }
-
-        public Builder medErBrukerMottaker(boolean erBrukerMottaker) {
-            this.erBrukerMottaker = erBrukerMottaker;
             return this;
         }
     }

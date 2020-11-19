@@ -1,9 +1,9 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
 import static java.lang.String.format;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -22,23 +22,27 @@ class TilkjentYtelsePerioderValidator {
     }
 
     static void validerVilkårsperiode(List<TilkjentYtelsePeriodeDto> perioder, Vilkår vilkår) {
-        var vilkårFom = vilkår.getPerioder().stream().min(comparing(VilkårPeriode::getFom))
+        var vilkårFom = vilkår.getPerioder().stream()
             .map(VilkårPeriode::getFom)
+            .min(LocalDate::compareTo)
             .orElseThrow(feil("Finner ikke vilkårets fom"));
 
-        var vilkårTom = vilkår.getPerioder().stream().min(comparing(VilkårPeriode::getFom))
+        var vilkårTom = vilkår.getPerioder().stream()
             .map(VilkårPeriode::getTom)
+            .max(LocalDate::compareTo)
             .orElseThrow(feil("Finner ikke vilkårets tom"));
 
-        var tilkjentYtelseFom = perioder.stream().min(comparing(TilkjentYtelsePeriodeDto::getFom))
+        var tilkjentYtelseFom = perioder.stream()
             .map(TilkjentYtelsePeriodeDto::getFom)
+            .min(LocalDate::compareTo)
             .orElseThrow(feil("Finner ikke når tilkjent ytelse fom"));
 
-        var tilkjentYtelseTom = perioder.stream().max(comparing(TilkjentYtelsePeriodeDto::getTom))
+        var tilkjentYtelseTom = perioder.stream()
             .map(TilkjentYtelsePeriodeDto::getTom)
+            .max(LocalDate::compareTo)
             .orElseThrow(feil("Finner ikke når tilkjent ytelse fom"));
 
-        if (tilkjentYtelseFom.isBefore(vilkårFom) || tilkjentYtelseTom.isAfter(tilkjentYtelseTom)) {
+        if (tilkjentYtelseFom.isBefore(vilkårFom) || tilkjentYtelseTom.isAfter(vilkårTom)) {
             throw TilkjentYtelseOppdaterer.TilkjentYtelseOppdatererFeil.FACTORY.tilkjentYtelseIkkeInnenforVilkår().toException();
         }
     }
@@ -52,7 +56,7 @@ class TilkjentYtelsePerioderValidator {
         List<LocalDateSegment<TilkjentYtelsePeriodeDto>> datoSegmenter = perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).collect(Collectors.toList());
 
         try {
-            LocalDateTimeline<TilkjentYtelsePeriodeDto> localDateTimeline = new LocalDateTimeline<>(datoSegmenter);
+            @SuppressWarnings("unused") LocalDateTimeline<TilkjentYtelsePeriodeDto> localDateTimeline = new LocalDateTimeline<>(datoSegmenter);
         } catch (IllegalArgumentException e) {
             throw TilkjentYtelseOppdaterer.TilkjentYtelseOppdatererFeil.FACTORY.overlappendeTilkjentYtelsePerioder(e.getMessage()).toException();
         }

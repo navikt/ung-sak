@@ -91,11 +91,9 @@ public class TilkjentYtelseOppdatererTest {
         int dagsatsBruker = 100;
         BigDecimal utbealingsgrad = BigDecimal.valueOf(100);
         ArbeidsgiverDto arbeidsgiver = new ArbeidsgiverDto("910909088", "GUI-910909088", "Bedriftsnavn");
-        AktivitetStatus aktivitetStatus = AktivitetStatus.ARBEIDSAVKLARINGSPENGER;
         Inntektskategori inntekskategori = Inntektskategori.ARBEIDSAVKLARINGSPENGER;
 
         var andelBruker = TilkjentYtelseAndelDto.build()
-            .medErBrukerMottaker(true) //TODO: Fjernes
             .medRefusjon(dagsatsRefusjon)
             .medTilSoker(dagsatsBruker)
             .medInntektskategori(inntekskategori)
