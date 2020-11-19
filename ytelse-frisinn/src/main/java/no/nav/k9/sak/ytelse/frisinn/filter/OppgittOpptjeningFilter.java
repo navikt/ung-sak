@@ -74,10 +74,7 @@ public class OppgittOpptjeningFilter {
         var senesteOverstyrtPeriodeSN = overstyrtOppgittOpptjening.getEgenNæring().stream()
             .map(OppgittEgenNæring::getPeriode)
             .max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
-        var senesteOverstyrtOrdArbForhold = overstyrtOppgittOpptjening.getOppgittArbeidsforhold().stream()
-            .map(OppgittArbeidsforhold::getPeriode)
-            .max(Comparator.comparing(DatoIntervallEntitet::getTomDato));
-        var senestePeriode = senestePeriode(senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL, senesteOverstyrtOrdArbForhold);
+        var senestePeriode = senestePeriode(senesteOverstyrtPeriodeSN, senesteOverstyrtPeriodeFL);
 
         List<EgenNæringBuilder> egenNæringBuilders = finnSNPerioderSomSkalLeggesTil(oppgittOpptjening.getEgenNæring(), senestePeriode);
         builder.leggTilEgneNæringer(egenNæringBuilders);
@@ -153,10 +150,10 @@ public class OppgittOpptjeningFilter {
     private List<OppgittArbeidsforholdBuilder> leggTilOrdinærtdArbForhold(DatoIntervallEntitet senestePeriode) {
         List<OppgittArbeidsforhold> oppgitteArbeidsforhold = oppgittOpptjening.getOppgittArbeidsforhold().stream().filter(it -> it.getPeriode().equals(senestePeriode)).collect(Collectors.toList());
 
-        return oppgitteArbeidsforhold.stream().map(af -> OppgittArbeidsforholdBuilder.ny()
-            .medArbeidType(af.getArbeidType())
-            .medPeriode(af.getPeriode())
-            .medInntekt(af.getInntekt()))
+        return oppgitteArbeidsforhold.stream().map(arbForhold -> OppgittArbeidsforholdBuilder.ny()
+            .medArbeidType(arbForhold.getArbeidType())
+            .medPeriode(arbForhold.getPeriode())
+            .medInntekt(arbForhold.getInntekt()))
             .collect(Collectors.toList());
     }
 
@@ -174,8 +171,8 @@ public class OppgittOpptjeningFilter {
         return builders.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private Optional<DatoIntervallEntitet> senestePeriode(Optional<DatoIntervallEntitet> senestePeriodeSN, Optional<DatoIntervallEntitet> senestePeriodeFL, Optional<DatoIntervallEntitet> senesteOverstyrtOrdArbForhold) {
-        var senestePerioder = List.of(senestePeriodeSN, senestePeriodeFL, senesteOverstyrtOrdArbForhold).stream()
+    private Optional<DatoIntervallEntitet> senestePeriode(Optional<DatoIntervallEntitet> senestePeriodeSN, Optional<DatoIntervallEntitet> senestePeriodeFL) {
+        var senestePerioder = List.of(senestePeriodeSN, senestePeriodeFL).stream()
             .filter(Optional::isPresent)
             .map(Optional::get)
             .collect(Collectors.toList());

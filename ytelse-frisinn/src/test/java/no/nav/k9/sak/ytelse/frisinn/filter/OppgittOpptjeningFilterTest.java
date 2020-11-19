@@ -20,9 +20,6 @@ public class OppgittOpptjeningFilterTest {
 
     private final DatoIntervallEntitet periodeApril = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
     private final DatoIntervallEntitet periodeMai = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
-    private final DatoIntervallEntitet periodeAugust = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 8, 1), LocalDate.of(2020, 8, 31));
-    private final DatoIntervallEntitet periodeSeptember = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 9, 1), LocalDate.of(2020, 9, 30));
-    private final DatoIntervallEntitet periodeOktober = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 10, 1), LocalDate.of(2020, 10, 31));
 
     @Test
     public void skal_legge_til_tilkommet_periode_for_SN_FRISINN() {
@@ -153,35 +150,44 @@ public class OppgittOpptjeningFilterTest {
     }
 
     @Test
-    public void case_fra_prod() {
+    public void skal_legge_til_tilkommet_periode_for_FL_MED_OPPGITT_ARBFORHOLD() {
         OppgittOpptjeningBuilder oppgittOpptjening = OppgittOpptjeningBuilder.ny();
+        var frilans = OppgittFrilansBuilder.ny();
+        var aprilOppdrag = OppgittFrilansOppdragBuilder.ny();
+        aprilOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeApril);
+        var aprilArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        aprilArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeApril).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(aprilArbForhold);
 
+        var maiOppdrag = OppgittFrilansOppdragBuilder.ny();
+        maiOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeMai);
+        var maiArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        maiArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeMai).medInntekt(BigDecimal.TEN);
+        oppgittOpptjening.leggTilOppgittArbeidsforhold(maiArbForhold);
 
-        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder augustArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeAugust).medInntekt(BigDecimal.TEN);
-        oppgittOpptjening.leggTilOppgittArbeidsforhold(augustArb);
+        frilans.medFrilansOppdrag(List.of(aprilOppdrag.build(), maiOppdrag.build()));
+        oppgittOpptjening.leggTilFrilansOpplysninger(frilans.build());
 
-        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder septArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeSeptember).medInntekt(BigDecimal.TEN);
-        oppgittOpptjening.leggTilOppgittArbeidsforhold(septArb);
+        var aprilOverstyrt = OppgittFrilansBuilder.ny();
 
-        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder oktArb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeOktober).medInntekt(BigDecimal.TEN);
-        oppgittOpptjening.leggTilOppgittArbeidsforhold(oktArb);
-
+        var overstyrtAprilOppdrag = OppgittFrilansOppdragBuilder.ny();
+        overstyrtAprilOppdrag.medInntekt(BigDecimal.TEN).medPeriode(periodeApril);
+        aprilOverstyrt.leggTilFrilansOppdrag(overstyrtAprilOppdrag.build());
+        var aprilOverstyrtArbForhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+        aprilOverstyrtArbForhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeApril).medInntekt(BigDecimal.TEN);
 
         OppgittOpptjeningBuilder overstyrt = OppgittOpptjeningBuilder.ny();
-        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder augustArbOS = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeAugust).medInntekt(BigDecimal.TEN);
-        overstyrt.leggTilOppgittArbeidsforhold(augustArbOS);
-
-        OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder septArbOS = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny().medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD).medPeriode(periodeSeptember).medInntekt(BigDecimal.TEN);
-        overstyrt.leggTilOppgittArbeidsforhold(septArbOS);
+        overstyrt.leggTilFrilansOpplysninger(aprilOverstyrt.build());
+        overstyrt.leggTilOppgittArbeidsforhold(aprilOverstyrtArbForhold);
 
         var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstyrt.build());
 
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn();
 
-        assertThat(oppgittOpptjeningFrisinn).isNotNull();
-        assertThat(oppgittOpptjeningFrisinn.getOppgittArbeidsforhold()).hasSize(3);
+        assertThat(oppgittOpptjeningFrisinn.getFrilans().isPresent());
+        assertThat(oppgittOpptjeningFrisinn.getFrilans().get().getFrilansoppdrag()).hasSize(2);
+        assertThat(oppgittOpptjeningFrisinn.getOppgittArbeidsforhold()).hasSize(2);
     }
-
 }
 
 
