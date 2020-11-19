@@ -49,7 +49,6 @@ import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftTilkjentYtelseDto.class, adapter = AksjonspunktOppdaterer.class)
 public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftTilkjentYtelseDto> {
-
     // Konstanter som er del av beregningsresultat, men som ikke brukes som variabler av k9-oppdrag
     private static final BigDecimal STILLINGSPROSENT = BigDecimal.valueOf(100);
     private static final OpptjeningAktivitetType ARBEIDSFORHOLD_TYPE = OpptjeningAktivitetType.UDEFINERT;
@@ -73,39 +72,20 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
-
     @Override
     public OppdateringResultat oppdater(BekreftTilkjentYtelseDto dto, AksjonspunktOppdaterParameter param) {
         var behandlingId = param.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-
 
         var beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("manuell_behandling")
             .medRegelSporing("manuell_behandling")
             .build();
 
-        // En ny bestilling som jeg legger inn her: Må validere at
-        // perioder for Tilkjent ytelse (TilkjentYtelsePeriodeDto) ikke overlapper hverandre (kan skje ved brukerfeil)
-
-
-        /*
-          1. Valider at perioder for Tilkjent ytelse (TilkjentYtelsePeriodeDto) ikke overlapper hverandre (kan skje ved brukerfeil)
-          2. Valider at TilkjentYtelsePeriodeDto er innenfor fom-tom for vilkårsperioder
-         */
         Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkår = vilkårene.getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
 
-
         TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), vilkår);
-
-
-        /*
-          public List<Beregningsgrunnlag> hentVilkår(BehandlingReferanse ref) {
-              var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-              var vilkår = vilkårene.getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
-              var perioder = vilkår.getPerioder();
-         */
 
         for (TilkjentYtelsePeriodeDto tyPeriode : dto.getTilkjentYtelse().getPerioder()) {
             var brPeriode = BeregningsresultatPeriode.builder()
@@ -181,8 +161,6 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         static AktivitetStatus aktivitetStatusFor(Inntektskategori inntektskategori) {
             return ofNullable(INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.get(inntektskategori))
                 .orElseThrow(() -> new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori)));
-
         }
-
     }
 }
