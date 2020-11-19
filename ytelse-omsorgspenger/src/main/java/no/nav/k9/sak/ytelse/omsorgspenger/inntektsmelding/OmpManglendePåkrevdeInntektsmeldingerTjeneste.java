@@ -98,7 +98,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
             if (arbeidsforhold.stream().noneMatch(arbeidsforholdet::gjelderFor)
                 && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
                 var arbeidsforholdRefs = Set.of(arbeidsforholdet);
-                if (rapportertInntektFraArbeidsgiver(arbeidsgiver, inntektFilter)) {
+                if (rapportertInntektFraArbeidsgiver(arbeidsgiver, inntektFilter, yrkesaktivitetFilter)) {
                     LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
                     logger.info("Inntektsmelding med inntekt uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
                 } else {
@@ -110,7 +110,14 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         return result;
     }
 
-    private boolean rapportertInntektFraArbeidsgiver(Arbeidsgiver arbeidsgiver, InntektFilter inntektFilter) {
+    private boolean rapportertInntektFraArbeidsgiver(Arbeidsgiver arbeidsgiver, InntektFilter inntektFilter, YrkesaktivitetFilter filter) {
+        var erIkkeRapportArbeidsforholdIAOrdningen = filter.getAlleYrkesaktiviteter()
+            .stream()
+            .noneMatch(it -> it.getArbeidsgiver().equals(arbeidsgiver));
+        return erIkkeRapportArbeidsforholdIAOrdningen && erRapportertInntekt(arbeidsgiver, inntektFilter);
+    }
+
+    private boolean erRapportertInntekt(Arbeidsgiver arbeidsgiver, InntektFilter inntektFilter) {
         return inntektFilter
             .filter(arbeidsgiver)
             .getAlleInntektPensjonsgivende()
