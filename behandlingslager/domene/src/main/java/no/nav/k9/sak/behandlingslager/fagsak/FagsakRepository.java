@@ -113,14 +113,6 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    public void oppdaterSaksnummer(Long fagsakId, Saksnummer saksnummer) {
-        Fagsak fagsak = finnEksaktFagsak(fagsakId);
-        fagsak.setSaksnummer(saksnummer);
-        entityManager.persist(fagsak);
-        entityManager.flush();
-
-    }
-
     public void oppdaterPeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
         fagsak.setPeriode(fom, tom);
