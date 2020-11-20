@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.inngangsvilkår.InngangsvilkårTjeneste;
 import no.nav.k9.sak.kontrakt.vilkår.Overstyringk9VilkåretDto;
@@ -29,6 +30,7 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         BehandlingResultatType.AVSLÅTT);
 
     private InngangsvilkårTjeneste inngangsvilkårTjeneste;
+    private BeregningsresultatRepository beregningsresultatRepository;
 
     K9VilkåretOverstyringshåndterer() {
         // for CDI proxy
@@ -36,9 +38,11 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
 
     @Inject
     public K9VilkåretOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
-                                           InngangsvilkårTjeneste inngangsvilkårTjeneste) {
+                                           InngangsvilkårTjeneste inngangsvilkårTjeneste,
+                                           BeregningsresultatRepository beregningsresultatRepository) {
         super(historikkAdapter, AksjonspunktDefinisjon.OVERSTYRING_AV_K9_VILKÅRET);
         this.inngangsvilkårTjeneste = inngangsvilkårTjeneste;
+        this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
     @Override
@@ -46,6 +50,9 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         var behandlingResultatType = dto.getBehandlingResultatType();
         validerBehandlingsresultat(behandlingResultatType);
         behandling.setBehandlingResultatType(behandlingResultatType);
+        if (BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType)) {
+            nullstillTilkjentYtelse(behandling, kontekst);
+        }
 
         var utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var periode = dto.getPeriode();
@@ -65,5 +72,25 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         if (!UNNTAKSBEHANDLING_KODER.contains(behandlingResultatType)) {
             throw new IllegalArgumentException("Ugyldig behandlingsresultattype " + behandlingResultatType.getKode());
         }
+    }
+
+    private void nullstillTilkjentYtelse(Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        var origBehandlingId = behandling.getOriginalBehandlingId();
+
+        if (!origBehandlingId.isPresent()) {
+            beregningsresultatRepository.deaktiverBeregningsresultat(behandling.getId(), kontekst.getSkriveLås());
+            return;
+        }
+
+        // Reverter til beregningsresultat fra forrige behandling
+        beregningsresultatRepository.hentBeregningsresultatAggregat(origBehandlingId.get())
+            .ifPresent(origAggregat -> {
+                if (origAggregat.getBgBeregningsresultat() != null) {
+                    beregningsresultatRepository.lagre(behandling, origAggregat.getBgBeregningsresultat());
+                }
+                if (origAggregat.getOverstyrtBeregningsresultat() != null) {
+                    beregningsresultatRepository.lagre(behandling, origAggregat.getOverstyrtBeregningsresultat());
+                }
+            });
     }
 }
