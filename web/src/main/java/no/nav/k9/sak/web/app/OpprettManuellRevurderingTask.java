@@ -21,7 +21,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsoppretterApplikasjonTjeneste;
-import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -39,7 +38,6 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    
 
     protected OpprettManuellRevurderingTask() {
         // CDI proxy
@@ -47,10 +45,10 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
 
     @Inject
     public OpprettManuellRevurderingTask(BehandlingsoppretterApplikasjonTjeneste behandlingsoppretterApplikasjonTjeneste,
-            BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-            FagsakTjeneste fagsakTjeneste,
-            ProsessTaskRepository prosessTaskRepository,
-            BehandlingRepository behandlingRepository) {
+                                         BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
+                                         FagsakTjeneste fagsakTjeneste,
+                                         ProsessTaskRepository prosessTaskRepository,
+                                         BehandlingRepository behandlingRepository) {
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -60,25 +58,15 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData pd) {
-        final String[] saksnumre = pd.getPayloadAsString().split("\\s+");
-        revurderAlleSomProsessFeil(saksnumre);
+        var saksnummer = pd.getSaksnummer();
+        revurder(new Saksnummer(saksnummer));
     }
-    
-    public void revurderAlleSomProsessFeil(String[] saksnumre) {
-        for (String saksnummer : saksnumre) {
-            try {
-                revurder(new Saksnummer(saksnummer));
-            } catch (VLException e) {
-                logger.warn("Kunne ikke opprette manuell revurdering for: {}", saksnummer);
-            }
-        }
-    }
-    
+
     public void revurder(Saksnummer saksnummer) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ANNET;
-        
+
         final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
             final Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
@@ -89,7 +77,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
                 logger.warn("Kunne ikke finne åpen behandling for: {}", saksnummer.getVerdi());
                 return;
             }
-            
+
             final ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKNAME);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
@@ -97,14 +85,14 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
             prosessTaskRepository.lagre(prosessTaskData);
         }
     }
-    
+
     private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
         final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
-                .stream()
-                .filter(Behandling::erYtelseBehandling)
-                .filter(b -> !b.erStatusFerdigbehandlet())
-                .collect(Collectors.toList());
-        
+            .stream()
+            .filter(Behandling::erYtelseBehandling)
+            .filter(b -> !b.erStatusFerdigbehandlet())
+            .collect(Collectors.toList());
+
         if (behandlinger.isEmpty()) {
             return null;
         }

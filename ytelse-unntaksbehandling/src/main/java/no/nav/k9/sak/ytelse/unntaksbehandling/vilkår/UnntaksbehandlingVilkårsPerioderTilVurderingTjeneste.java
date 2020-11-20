@@ -30,7 +30,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste implements Vi
 
     @Inject
     public UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste(BehandlingRepository behandlingRepository) {
-        this.fagsakPeriode = new FagsakPeriode(behandlingRepository);;
+        this.fagsakPeriode = new FagsakPeriode(behandlingRepository);
         vilkårsPeriodisering.put(VilkårType.K9_VILKÅRET, fagsakPeriode);
     }
 
