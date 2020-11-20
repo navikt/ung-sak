@@ -88,8 +88,10 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                        LocalDate stp) {
-        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp).stream()
-            .map(this::mapOpptjeningPeriode).collect(Collectors.toList());
+        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
+            .stream()
+            .map(this::mapOpptjeningPeriode)
+            .collect(Collectors.toList());
         if (opptjeningsPerioder.isEmpty()) {
             return Optional.empty();
         }
