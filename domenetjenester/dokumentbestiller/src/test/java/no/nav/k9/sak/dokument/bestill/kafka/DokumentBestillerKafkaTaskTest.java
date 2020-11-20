@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
@@ -64,12 +65,13 @@ public class DokumentBestillerKafkaTaskTest {
         assertThat(dokumentbestilling.getAktørId()).isEqualTo(behandling.getAktørId().getId());
         assertThat(dokumentbestilling.getAvsenderApplikasjon()).isEqualTo(AvsenderApplikasjon.K9SAK);
         assertThat(dokumentbestilling.getDokumentbestillingId()).isEqualTo(bestillingUuid);
-        assertThat(dokumentbestilling.getDokumentdata()).isNull();
         assertThat(dokumentbestilling.getDokumentMal()).isEqualTo(DokumentMalType.INNVILGELSE_DOK.getKode());
         assertThat(dokumentbestilling.getEksternReferanse()).isEqualTo(behandling.getUuid().toString());
-        assertThat(dokumentbestilling.getFritekst()).isEqualTo("en fritekst");
         assertThat(dokumentbestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat(dokumentbestilling.getYtelseType().getKode()).isEqualTo("PSB");
+
+        DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
+        assertThat(dokumentdata.getFritekst().getBrødtekst()).isEqualTo("en fritekst");
     }
 
     @Test
@@ -94,7 +96,7 @@ public class DokumentBestillerKafkaTaskTest {
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, DokumentMalType.INNVILGELSE_DOK.getKode());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, bestillingUuid);
-        prosessTaskData.setPayload("\"en fritekst\"");
+        prosessTaskData.setPayload("en fritekst");
         return prosessTaskData;
     }
 
