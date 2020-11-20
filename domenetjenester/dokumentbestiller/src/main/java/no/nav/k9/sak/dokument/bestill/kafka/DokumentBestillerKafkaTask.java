@@ -13,7 +13,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
-import no.nav.k9.formidling.kontrakt.dokumentdataparametre.Fritekst;
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
@@ -89,9 +88,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
 
     private DokumentdataParametreK9 dokumentdataParametre(String payloadAsString) {
         var dokumentdataParametre = new DokumentdataParametreK9();
-        var fritekst = new Fritekst();
-        fritekst.setBrødtekst(payloadAsString);
-        dokumentdataParametre.setFritekst(fritekst);
+        dokumentdataParametre.setFritekst(payloadAsString);
         return dokumentdataParametre;
     }
 

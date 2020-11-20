@@ -71,7 +71,7 @@ public class DokumentBestillerKafkaTaskTest {
         assertThat(dokumentbestilling.getYtelseType().getKode()).isEqualTo("PSB");
 
         DokumentdataParametreK9 dokumentdata = JsonObjectMapper.OM.convertValue(dokumentbestilling.getDokumentdata(), DokumentdataParametreK9.class);
-        assertThat(dokumentdata.getFritekst().getBrødtekst()).isEqualTo("en fritekst");
+        assertThat(dokumentdata.getFritekst()).isEqualTo("en fritekst");
     }
 
     @Test
