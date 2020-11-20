@@ -1,16 +1,19 @@
 package no.nav.k9.sak.domene.abakus.async;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
-import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
-import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.Dataset;
+import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -21,94 +24,69 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
-@ProsessTask(AsyncAbakusLagreTask.TASKTYPE)
+@ProsessTask(AsyncAbakusKopierGrunnlagTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class AsyncAbakusLagreTask extends UnderBehandlingProsessTask {
-    static final String TASKTYPE = "abakus.async.lagre";
-    static final String KEY = "action";
+class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
-    private static final ObjectMapper MAPPER = IayGrunnlagJsonMapper.getMapper();
+    public static final String TASKTYPE = "abakus.async.kopiergrunnlag";
+
+    /** Angir hvilken behandling det skal kopieres fra. */
+    static final String ORIGINAL_BEHANDLING_ID = "original.behandlingId";
+
+    static final String DATASET = "kopiergrunnlag.dataset";
 
     private AbakusTjeneste abakusTjeneste;
 
-    public enum Action {
-        LAGRE_OPPGITT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
-        LAGRE_INNTEKTSMELDINGER(InntektsmeldingerMottattRequest.class),
-        LAGRE_OVERSTYRT_OPPTJENING(OppgittOpptjeningMottattRequest.class),
-        ;
+    private BehandlingRepository behandlingRepository;
 
-        @SuppressWarnings("rawtypes")
-        private final Class forventetType;
-
-        @SuppressWarnings("rawtypes")
-        Action(Class forventetType) {
-            this.forventetType = forventetType;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <V> Class<V> getForventetType() {
-            return forventetType;
-        }
-
-        void validerForventetType(Object obj) {
-            if (!forventetType.isInstance(obj)) {
-                throw new IllegalArgumentException("Angitt objekt er ikke av type " + forventetType.getName() + ": " + obj);
-            }
-        }
-    }
-
-    AsyncAbakusLagreTask() {
+    AsyncAbakusKopierGrunnlagTask() {
         // for proxy
     }
 
     @Inject
-    public AsyncAbakusLagreTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste) {
+    AsyncAbakusKopierGrunnlagTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste) {
         super(behandlingRepository, behandlingLåsRepository);
+        this.behandlingRepository = behandlingRepository;
         this.abakusTjeneste = abakusTjeneste;
     }
 
     @Override
-    protected void doProsesser(ProsessTaskData input, Behandling behandling) {
+    protected void doProsesser(ProsessTaskData input, Behandling tilBehandling) {
 
-        String behandlingId = input.getBehandlingId();
-        Action action = Action.valueOf(input.getPropertyValue(KEY));
-        String payload = input.getPayloadAsString();
+        String fraBehandlingId = Objects.requireNonNull(input.getPropertyValue(ORIGINAL_BEHANDLING_ID), ORIGINAL_BEHANDLING_ID);
+        var fraBehandling = behandlingRepository.hentBehandling(fraBehandlingId);
+        Set<Dataset> dataset = getDataset(input.getPropertyValue(DATASET));
 
+        preconditions(fraBehandling, tilBehandling);
 
+        var request = new KopierGrunnlagRequest(tilBehandling.getFagsak().getSaksnummer().getVerdi(),
+            tilBehandling.getUuid(),
+            fraBehandling.getUuid(),
+            YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
+            new AktørIdPersonident(tilBehandling.getAktørId().getId()),
+            dataset);
         try {
-            var ref = behandling.getUuid();
-            switch (action) {
-                case LAGRE_OPPGITT_OPPTJENING:
-                    abakusTjeneste.lagreOppgittOpptjening(ref, payload);
-                case LAGRE_OVERSTYRT_OPPTJENING:
-                    abakusTjeneste.lagreOverstyrtOppgittOpptjening(ref, payload);
-                case LAGRE_INNTEKTSMELDINGER:
-                    abakusTjeneste.lagreInntektsmeldinger(ref, payload);
-                default:
-                    throw new UnsupportedOperationException("Støtter ikke action: " + action);
-            }
+            abakusTjeneste.kopierGrunnlag(request);
         } catch (IOException e) {
-            throw new IllegalStateException("Kan ikke utføre " + action + " for behandling=" + behandlingId, e);
-        }
-
-    }
-
-    static <V> V readValue(String payload, Class<V> cls) {
-        try {
-            return MAPPER.readValue(payload, cls);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("kunne ikke deserialisere payload:" + payload, e);
+            throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId()), e);
         }
     }
 
-    static void initPayload(ProsessTaskData data, Action action, Object payload) {
-        try {
-            action.validerForventetType(payload);
-            String payloadString = MAPPER.writeValueAsString(payload);
-            data.setPayload(payloadString);
-            data.setProperty(KEY, action.name());
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("kunne ikke serialisere payload:" + payload, e);
+    private static Set<Dataset> getDataset(String datasetStr) {
+        if (datasetStr != null && !(datasetStr = datasetStr.trim()).isEmpty()) {
+            return Arrays.asList(datasetStr.split(",\\s*")).stream().map(Dataset::valueOf).collect(Collectors.toSet());
+        } else {
+            return EnumSet.allOf(Dataset.class);
+        }
+    }
+
+    public static void preconditions(Behandling originalBehandling, Behandling behandling) {
+        if (!Objects.equals(behandling.getFagsakId(), originalBehandling.getFagsakId())) {
+            throw new IllegalArgumentException("Behandling må høre til samme fagsak: [" + originalBehandling.getFagsakId() + "] vs [" + behandling.getFagsakId() + "]");
+        } else if (!originalBehandling.erAvsluttet()) {
+            throw new IllegalArgumentException("Kan ikke kopiere fra behandling som ikke er avsluttet: " + originalBehandling);
+        } else if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalArgumentException("Kan ikke kopiere til behandling som ikke er åpen: " + originalBehandling);
         }
     }
 

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.test.util.aktør;
+package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static java.time.Month.OCTOBER;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
@@ -12,7 +12,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
-public class NavPersoninfoBuilder {
+class PersoninfoBuilder {
 
     private static final String DEFAULT_NAVN = "Anne-Berit Hjartdal";
     private static final AktørId DEFAULT_AKTØR_ID = AktørId.dummy();
@@ -31,45 +31,47 @@ public class NavPersoninfoBuilder {
 
     private String diskresjonskode;
     private PersonstatusType personstatusType;
-    public NavPersoninfoBuilder() {
+
+    PersoninfoBuilder() {
     }
 
 
-    public NavPersoninfoBuilder medAktørId(AktørId aktørId) {
+    PersoninfoBuilder medAktørId(AktørId aktørId) {
         this.aktørId = aktørId;
         return this;
     }
     
-    public NavPersoninfoBuilder medPersonIdent(PersonIdent personIdent) {
+    PersoninfoBuilder medPersonIdent(PersonIdent personIdent) {
         this.personIdent = personIdent;
         return this;
     }
 
-    public NavPersoninfoBuilder medNavn(String navn) {
+    PersoninfoBuilder medNavn(String navn) {
         this.navn = navn;
         return this;
     }
 
-    public NavPersoninfoBuilder medFødselsdato(LocalDate fødselsdato) {
+    PersoninfoBuilder medFødselsdato(LocalDate fødselsdato) {
         this.fødselsdato = fødselsdato;
         return this;
     }
 
-    public NavPersoninfoBuilder medForetrukketSpråk(Språkkode foretrukketSpråk) {
+    PersoninfoBuilder medForetrukketSpråk(Språkkode foretrukketSpråk) {
         this.foretrukketSpråk = foretrukketSpråk;
         return this;
     }
 
-    public NavPersoninfoBuilder medDiskresjonskode(String diskresjonskode) {
+    PersoninfoBuilder medDiskresjonskode(String diskresjonskode) {
         this.diskresjonskode = diskresjonskode;
         return this;
     }
-    public NavPersoninfoBuilder medPersonstatusType(PersonstatusType personstatusType) {
+
+    PersoninfoBuilder medPersonstatusType(PersonstatusType personstatusType) {
         this.personstatusType = personstatusType;
         return this;
     }
 
-    public Personinfo build() {
+    Personinfo build() {
         if (aktørId == null) {
             aktørId = DEFAULT_AKTØR_ID;
         }

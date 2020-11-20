@@ -29,7 +29,6 @@ import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.GrunnlagVersjon;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
-import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
@@ -40,6 +39,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.MapInntektsmeldinger;
@@ -76,6 +76,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private IAYRequestCache requestCache;
+    private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
     /**
      * CDI ctor for proxies.
@@ -89,6 +90,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
      */
     @Inject
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
+                                             AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
                                              FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache) {
@@ -96,6 +98,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
+        this.asyncIayTjeneste = asyncIayTjeneste;
     }
 
     @Override
@@ -353,36 +356,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     @Override
     public void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset) {
-        var fraBehandling = behandlingRepository.hentBehandling(fraBehandlingId);
-        var tilBehandling = behandlingRepository.hentBehandling(tilBehandlingId);
-        var request = new KopierGrunnlagRequest(tilBehandling.getFagsak().getSaksnummer().getVerdi(),
-            tilBehandling.getUuid(),
-            fraBehandling.getUuid(),
-            YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
-            new AktørIdPersonident(tilBehandling.getAktørId().getId()),
-            dataset);
-        try {
-            abakusTjeneste.kopierGrunnlag(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
-        }
+        asyncIayTjeneste.kopierIayGrunnlag(fraBehandlingId, tilBehandlingId, dataset);
     }
 
     @Override
     public void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId) {
-        var fraBehandling = behandlingRepository.hentBehandling(fraBehandlingId);
-        var tilBehandling = behandlingRepository.hentBehandling(tilBehandlingId);
-        var request = new KopierGrunnlagRequest(tilBehandling.getFagsak().getSaksnummer().getVerdi(),
-            tilBehandling.getUuid(),
-            fraBehandling.getUuid(),
-            YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
-            new AktørIdPersonident(tilBehandling.getAktørId().getId()),
-            EnumSet.allOf(Dataset.class));
-        try {
-            abakusTjeneste.kopierGrunnlag(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
-        }
+        kopierGrunnlagFraEksisterendeBehandling(fraBehandlingId, tilBehandlingId, null);
     }
 
     private InntektArbeidYtelseGrunnlag hentOgMapGrunnlag(InntektArbeidYtelseGrunnlagRequest request, AktørId aktørId) {

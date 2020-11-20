@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.test.util.aktør.NavPersoninfoBuilder;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -55,7 +54,7 @@ public class FagsakApplikasjonTjenesteTest {
     @Test
     public void skal_hente_saker_på_fnr() {
         // Arrange
-        Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
+        Personinfo personinfo = new PersoninfoBuilder().medAktørId(AKTØR_ID).build();
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
 
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
@@ -75,7 +74,7 @@ public class FagsakApplikasjonTjenesteTest {
     @Test
     public void skal_hente_saker_på_saksreferanse() {
         // Arrange
-        Personinfo personinfo = new NavPersoninfoBuilder().medAktørId(AKTØR_ID).build();
+        Personinfo personinfo = new PersoninfoBuilder().medAktørId(AKTØR_ID).build();
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 

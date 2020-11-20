@@ -216,8 +216,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         for (var s : saknumre) {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
             var taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
-            taskData.setFagsak(fagsak.getId(), fagsak.getAktørId().getId());
-            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500 * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sekund
+            taskData.setSaksnummer(fagsak.getSaksnummer().getVerdi());
+            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500 * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sek.
             // lagrer direkte til prosessTaskRepository så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
             prosessTaskRepository.lagre(taskData);
             idx++;
