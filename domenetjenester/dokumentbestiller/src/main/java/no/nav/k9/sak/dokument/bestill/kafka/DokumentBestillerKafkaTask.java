@@ -78,7 +78,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dto.setEksternReferanse(behandling.getUuid().toString());
         dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
-        dto.setDokumentdata(dokumentdataParametre(prosessTaskData.getPayloadAsString()));
+        dto.setDokumentdata(dokumentdataParametre(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class)));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
         valider(dto);

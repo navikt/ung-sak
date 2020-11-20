@@ -2,6 +2,7 @@ package no.nav.k9.sak.dokument.bestill.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -96,7 +97,11 @@ public class DokumentBestillerKafkaTaskTest {
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, DokumentMalType.INNVILGELSE_DOK.getKode());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, bestillingUuid);
-        prosessTaskData.setPayload("en fritekst");
+        try {
+            prosessTaskData.setPayload(JsonObjectMapper.getJson("en fritekst"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return prosessTaskData;
     }
 
