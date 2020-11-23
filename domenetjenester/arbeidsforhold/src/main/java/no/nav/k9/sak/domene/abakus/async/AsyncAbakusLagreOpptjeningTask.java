@@ -52,7 +52,7 @@ class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
                     abakusTjeneste.lagreOppgittOpptjening(request);
                     break;
                 case OVERSTYRT:
-                    abakusTjeneste.lagreOppgittOpptjening(request);
+                    abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
                     break;
                 default:
                     throw new UnsupportedOperationException("Støtter ikke opptjening type: " + opptjeningType);
