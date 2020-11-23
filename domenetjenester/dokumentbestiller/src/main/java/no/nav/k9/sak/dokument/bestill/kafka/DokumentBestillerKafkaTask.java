@@ -12,6 +12,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
+import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
@@ -77,12 +78,18 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dto.setEksternReferanse(behandling.getUuid().toString());
         dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
-        dto.setFritekst(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class));
+        dto.setDokumentdata(dokumentdataParametre(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class)));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
         valider(dto);
 
         return dto;
+    }
+
+    private DokumentdataParametreK9 dokumentdataParametre(String payloadAsString) {
+        var dokumentdataParametre = new DokumentdataParametreK9();
+        dokumentdataParametre.setFritekst(payloadAsString);
+        return dokumentdataParametre;
     }
 
     @SuppressWarnings("unused")
