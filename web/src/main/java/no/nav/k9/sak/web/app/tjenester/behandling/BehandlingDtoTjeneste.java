@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -418,7 +419,13 @@ public class BehandlingDtoTjeneste {
             "/k9/formidling/api/brev/tilgjengeligevedtaksbrev",
             "tilgjengelige-vedtaksbrev",
             Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString(),
-                "sakstype", behandling.getFagsakYtelseType().getKode())));
+                "sakstype", mapFormidlingYtelsetype(behandling.getFagsakYtelseType()))));
+    }
+
+    private String mapFormidlingYtelsetype(FagsakYtelseType fagsakYtelseType) {
+        if (fagsakYtelseType == FagsakYtelseType.OMP)
+            return no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType.OMSORGSPENGER.getKode();
+        else return fagsakYtelseType.getKode();
     }
 
     private Optional<ResourceLink> lagLagreDokumentdatalink(Behandling behandling) {
