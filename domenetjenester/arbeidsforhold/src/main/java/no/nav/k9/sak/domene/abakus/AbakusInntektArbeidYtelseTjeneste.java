@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +28,6 @@ import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.GrunnlagVersjon;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
-import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
@@ -61,11 +59,6 @@ import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 
 @Dependent
 @Default
@@ -258,6 +251,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return sakInntektsmeldinger.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
 
+    // FIXME: : bør håndteres i egen task (kall asyncabakustjeneste internt).
     @Override
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {
         if (!Objects.equals(builder.getVersjon(), VersjonType.SAKSBEHANDLET)) {
@@ -271,42 +265,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     @Override
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        if (oppgittOpptjeningBuilder == null) {
-            return;
-        }
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        var saksnummer = behandling.getFagsak().getSaksnummer();
-        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
-        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
-
-        try {
-            abakusTjeneste.lagreOppgittOpptjening(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-        }
+        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, false);
     }
 
     @Override
     public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        if (oppgittOpptjeningBuilder == null) {
-            return;
-        }
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        var saksnummer = behandling.getFagsak().getSaksnummer();
-        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
-        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
-
-        try {
-            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-        }
+        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, true);
     }
 
+    // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task
     @Override
     public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
         Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR
@@ -324,6 +291,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return Optional.ofNullable(hentOgMapGrunnlag(request, aktørId)).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }
 
+    // FIXME: I dag kalles denne fra LagreMottattInntektsmeldingerTask. Burde hatt task logikk i implementasjonen her i stedet for symmetri
     @Override
     public void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders) {
         Objects.requireNonNull(builders, "inntektsmelding");
@@ -588,13 +556,5 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
         }
-    }
-
-    interface AbakusInntektArbeidYtelseTjenesteFeil extends DeklarerteFeil {
-        AbakusInntektArbeidYtelseTjenesteFeil FEIL = FeilFactory.create(AbakusInntektArbeidYtelseTjenesteFeil.class);
-
-        @TekniskFeil(feilkode = "FP-118669", feilmelding = "Feil ved kall til Abakus: %s", logLevel = LogLevel.WARN)
-        Feil feilVedKallTilAbakus(String feilmelding, Throwable t);
-
     }
 }
