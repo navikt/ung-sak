@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -71,13 +71,16 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
         var referanse = BehandlingReferanse.fra(behandling);
 
-        var noeAvslått = !vilkåret.getPerioder().isEmpty() && vilkåret.getPerioder()
+        var avslåttePerioder = vilkåret.getPerioder()
             .stream()
             .filter(it -> vurdertePerioder.contains(it.getPeriode()))
-            .anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()) || ingenBeregningsAktiviteter(opptjeningForBeregningTjeneste, it, grunnlag, referanse));
+            .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()) || ingenBeregningsAktiviteter(opptjeningForBeregningTjeneste, it, grunnlag, referanse))
+            .collect(Collectors.toList());
+
+        var noeAvslått = !vilkåret.getPerioder().isEmpty() && !avslåttePerioder.isEmpty();
 
         if (noeAvslått) {
-            avslåBerregningsperioderDerHvorOpptjeningErAvslått(kontekst, vilkårene, vilkåret, vurdertePerioder);
+            avslåBerregningsperioderDerHvorOpptjeningErAvslått(referanse, vilkårene, avslåttePerioder);
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -87,12 +90,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         return opptjeningAktiviteter.isEmpty();
     }
 
-    private void avslåBerregningsperioderDerHvorOpptjeningErAvslått(BehandlingskontrollKontekst kontekst, Vilkårene vilkårene, Vilkår vilkåret, Set<DatoIntervallEntitet> vurdertePerioder) {
-        var avslåttePerioder = vilkåret.getPerioder()
-            .stream()
-            .filter(it -> vurdertePerioder.contains(it.getPeriode()))
-            .filter(it -> Utfall.IKKE_OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .collect(Collectors.toList());
+    private void avslåBerregningsperioderDerHvorOpptjeningErAvslått(BehandlingReferanse referanse, Vilkårene vilkårene, List<VilkårPeriode> avslåttePerioder) {
 
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
@@ -103,7 +101,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         }
         builder.leggTil(vilkårBuilder);
 
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
+        vilkårResultatRepository.lagre(referanse.getBehandlingId(), builder.build());
     }
 
     public Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, Behandling behandling) {

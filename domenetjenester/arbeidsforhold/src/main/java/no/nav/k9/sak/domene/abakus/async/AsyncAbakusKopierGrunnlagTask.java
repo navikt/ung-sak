@@ -86,7 +86,7 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
         } else if (!originalBehandling.erAvsluttet()) {
             throw new IllegalArgumentException("Kan ikke kopiere fra behandling som ikke er avsluttet: " + originalBehandling);
         } else if (behandling.erSaksbehandlingAvsluttet()) {
-            throw new IllegalArgumentException("Kan ikke kopiere til behandling som ikke er åpen: " + originalBehandling);
+            throw new IllegalArgumentException("Kan ikke kopiere til behandling som ikke er åpen: " + behandling);
         }
     }
 
