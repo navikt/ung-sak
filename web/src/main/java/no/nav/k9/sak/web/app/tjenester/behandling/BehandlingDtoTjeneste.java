@@ -186,7 +186,6 @@ public class BehandlingDtoTjeneste {
         }
 
         // Brev
-        dto.leggTil(getFraMap("/k9/formidling/api/brev/maler", "brev-maler", uuidQueryParams));
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
     }
 
@@ -306,10 +305,8 @@ public class BehandlingDtoTjeneste {
         lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
         lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
         lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
-        lagTilgjengeligeVedtakbrevlink(behandling).ifPresent(dto::leggTil);
-        lagLagreDokumentdatalink(behandling).ifPresent(dto::leggTil);
-        lagHenteDokumentdatalink(behandling).ifPresent(dto::leggTil);
 
+        lagFormidlingLink(behandling).forEach(dto::leggTil);
         lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
     }
 
@@ -413,26 +410,22 @@ public class BehandlingDtoTjeneste {
         return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
     }
 
-    private Optional<ResourceLink> lagTilgjengeligeVedtakbrevlink(Behandling behandling) {
-        return Optional.of(ResourceLink.getFraMap(
-            "/k9/formidling/api/brev/tilgjengeligevedtaksbrev",
-            "tilgjengelige-vedtaksbrev",
-            Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString(),
-                "sakstype", behandling.getFagsakYtelseType().getKode())));
-    }
+    private List<ResourceLink> lagFormidlingLink(Behandling behandling) {
+        final var formidling = "/k9/formidling/api";
+        final var formidling_dokumentdata = "/k9/formidling/dokumentdata/api";
 
-    private Optional<ResourceLink> lagLagreDokumentdatalink(Behandling behandling) {
-        return Optional.of(ResourceLink.post(
-            "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
-            "dokumentdata-lagre",
-            null));
-    }
+        final var behandlingUuid = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        final var behandlingUuidOgYtelse = Map.of(
+            BehandlingUuidDto.NAME, behandling.getUuid().toString(),
+            "sakstype", behandling.getFagsakYtelseType().getKode()
+        );
 
-    private Optional<ResourceLink> lagHenteDokumentdatalink(Behandling behandling) {
-        return Optional.of(ResourceLink.get(
-            "/k9/formidling/dokumentdata/api?" + BehandlingUuidDto.NAME + "=" + behandling.getUuid().toString(),
-            "dokumentdata-hente",
-            null));
+        List<ResourceLink> links = new ArrayList<>();
+        links.add(ResourceLink.get(formidling + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(formidling + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(formidling_dokumentdata, "dokumentdata-hente", behandlingUuid));
+        links.add(ResourceLink.post(formidling_dokumentdata+"/"+behandling.getUuid(), "dokumentdata-lagre", null));
+        return links;
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
