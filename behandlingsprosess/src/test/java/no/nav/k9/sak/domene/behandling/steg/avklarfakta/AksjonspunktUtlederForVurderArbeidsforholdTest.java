@@ -91,41 +91,9 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
             tjeneste);
     }
 
-
-
-    @Test
-    public void skal_få_aksjonspunkt_når_det_finnes_inntekt_og_ikke_arbeidsforhold() {
-        // Arrange
-        AktørId aktørId1 = AktørId.dummy();
-        var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-
-        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
-        opprettInntekt(aktørId1, behandling, ORGNR, arbeidsforholdId);
-
-        // Act
-        List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-
-        // Assert
-        assertThat(aksjonspunktResultater).hasSize(1);
-    }
-
     private AksjonspunktUtlederInput lagRef(Behandling behandling) {
         Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
         return new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling, skjæringstidspunkt));
-    }
-
-    @Test
-    public void skal_få_aksjonspunkt_når_det_ikke_finnes_inntekt_eller_arbeidsforhold() {
-        // Arrange
-        AktørId aktørId1 = AktørId.dummy();
-        var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId1);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        // Act
-        List<AksjonspunktResultat> aksjonspunktResultater = utleder.utledAksjonspunkterFor(lagRef(behandling));
-
-        // Assert
-        assertThat(aksjonspunktResultater).containsExactly(AksjonspunktResultat.opprettForAksjonspunkt(VURDER_ARBEIDSFORHOLD));
     }
 
     @Test
