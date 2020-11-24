@@ -411,8 +411,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private List<ResourceLink> lagFormidlingLink(Behandling behandling) {
-        final var formidling = "/k9/formidling/api";
-        final var formidling_dokumentdata = "/k9/formidling/dokumentdata/api";
+        final var FORMIDLING_PATH = "/k9/formidling/api";
+        final var FORMIDLING_DOKUMENTDATA_PATH = "/k9/formidling/dokumentdata/api";
 
         final var behandlingUuid = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         final var behandlingUuidOgYtelse = Map.of(
@@ -421,10 +421,10 @@ public class BehandlingDtoTjeneste {
         );
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(formidling + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
-        links.add(ResourceLink.get(formidling + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", behandlingUuidOgYtelse));
-        links.add(ResourceLink.get(formidling_dokumentdata, "dokumentdata-hente", behandlingUuid));
-        links.add(ResourceLink.post(formidling_dokumentdata+"/"+behandling.getUuid(), "dokumentdata-lagre", null));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
+        links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
     }
 
