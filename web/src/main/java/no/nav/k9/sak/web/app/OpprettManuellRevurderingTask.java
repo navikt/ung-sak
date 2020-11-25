@@ -10,11 +10,13 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -38,6 +40,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
+    private RevurderingTjeneste revurderingTjeneste;
 
     protected OpprettManuellRevurderingTask() {
         // CDI proxy
@@ -48,12 +51,14 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
                                          BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                          FagsakTjeneste fagsakTjeneste,
                                          ProsessTaskRepository prosessTaskRepository,
-                                         BehandlingRepository behandlingRepository) {
+                                         BehandlingRepository behandlingRepository,
+                                         @FagsakYtelseTypeRef @BehandlingTypeRef RevurderingTjeneste revurderingTjeneste) {
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
+        this.revurderingTjeneste = revurderingTjeneste;
     }
 
     @Override
@@ -67,8 +72,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
         final Fagsak fagsak = funnetFagsak.get();
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ANNET;
 
-        final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
+        if (revurderingTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             final Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
             behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
         } else {
@@ -90,6 +94,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
         final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
             .stream()
             .filter(Behandling::erYtelseBehandling)
+            .filter(b -> !BehandlingType.UNNTAKSBEHANDLING.equals(b.getType()))
             .filter(b -> !b.erStatusFerdigbehandlet())
             .collect(Collectors.toList());
 

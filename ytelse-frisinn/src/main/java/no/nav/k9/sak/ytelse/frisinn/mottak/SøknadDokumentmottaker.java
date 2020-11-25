@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
+import no.nav.k9.sak.mottak.SøknadmottakFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -27,7 +27,7 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @Dependent
 public class SøknadDokumentmottaker {
 
-    private DokumentmottakerFelles dokumentmottakerFelles;
+    private SøknadmottakFelles søknadmottakFelles;
     private SaksnummerRepository saksnummerRepository;
     private Behandlingsoppretter behandlingsoppretter;
     private LagreSøknad soknadOversetter;
@@ -44,7 +44,7 @@ public class SøknadDokumentmottaker {
 
     @Inject
     public SøknadDokumentmottaker(@KonfigVerdi(value = "FRISINN_FLERE_SOKNADER_SAMME_DAG", defaultVerdi = "true") Boolean flereSøknaderSammeDag,
-                                  DokumentmottakerFelles dokumentmottakerFelles,
+                                  SøknadmottakFelles søknadmottakFelles,
                                   SaksnummerRepository saksnummerRepository,
                                   Behandlingsoppretter behandlingsoppretter,
                                   LagreSøknad søknadOversetter,
@@ -52,7 +52,7 @@ public class SøknadDokumentmottaker {
                                   FagsakTjeneste fagsakTjeneste,
                                   BehandlingRepositoryProvider provider) {
         this.flereSøknaderSammeDag = flereSøknaderSammeDag;
-        this.dokumentmottakerFelles = dokumentmottakerFelles;
+        this.søknadmottakFelles = søknadmottakFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.søknadRepository = provider.getSøknadRepository();
@@ -143,7 +143,7 @@ public class SøknadDokumentmottaker {
         Behandling behandling;
         behandling = behandlingsoppretter.opprettRevurdering(forrigeBehandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         soknadOversetter.persister(søknad, behandling);
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        søknadmottakFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }
 
@@ -152,7 +152,7 @@ public class SøknadDokumentmottaker {
         // førstegangssøknad
         behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
         soknadOversetter.persister(søknad, behandling);
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        søknadmottakFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }
 

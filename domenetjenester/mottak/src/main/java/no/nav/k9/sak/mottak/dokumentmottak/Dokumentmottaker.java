@@ -8,8 +8,6 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public interface Dokumentmottaker {
 
-    void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak);
-
     void mottaDokument(Collection<MottattDokument> mottattDokument, Fagsak fagsak);
 
     void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType);

@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -57,14 +58,17 @@ public class FagsakRestTjeneste {
     public static final String STATUS_PATH = "/fagsak/status";
     public static final String SOK_PATH = "/fagsak/sok";
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
+    private RevurderingTjeneste revurderingTjeneste;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
+                              @FagsakYtelseTypeRef @BehandlingTypeRef RevurderingTjeneste revurderingTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
+        this.revurderingTjeneste = revurderingTjeneste;
     }
 
     @GET
@@ -142,8 +146,7 @@ public class FagsakRestTjeneste {
         List<FagsakDto> dtoer = new ArrayList<>();
         for (var info : view.getFagsakInfoer()) {
             Fagsak fagsak = info.getFagsak();
-            Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
-                .kanRevurderingOpprettes(fagsak);
+            Boolean kanRevurderingOpprettes = revurderingTjeneste.kanNyBehandlingOpprettes(fagsak);
             dtoer.add(new FagsakDto(
                 fagsak.getSaksnummer(),
                 fagsak.getYtelseType(),

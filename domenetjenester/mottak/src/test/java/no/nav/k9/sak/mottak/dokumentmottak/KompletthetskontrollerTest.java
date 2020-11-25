@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,18 +50,12 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 public class KompletthetskontrollerTest {
 
     @Inject
-    private EntityManager entityManager;
-
-    @Inject
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Mock
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     @Mock
     private KompletthetsjekkerProvider kompletthetsjekkerProvider;
-
-    @Mock
-    private DokumentmottakerFelles dokumentmottakerFelles;
 
     @Mock
     private Kompletthetsjekker kompletthetsjekker;
@@ -72,6 +65,9 @@ public class KompletthetskontrollerTest {
 
     @Mock
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+
+    @Mock
+    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
@@ -94,12 +90,13 @@ public class KompletthetskontrollerTest {
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
 
 
-        kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
+        kompletthetskontroller = new Kompletthetskontroller(
             mottatteDokumentTjeneste,
             modell,
             behandlingProsesseringTjeneste,
             prosessTaskRepository,
-            skjæringstidspunktTjeneste);
+            skjæringstidspunktTjeneste,
+            historikkinnslagTjeneste);
 
         mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);
 
@@ -188,7 +185,7 @@ public class KompletthetskontrollerTest {
 
         // Assert
         verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
+        verify(historikkinnslagTjeneste).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.FOR_TIDLIG_SOKNAD);
     }
 
@@ -206,7 +203,7 @@ public class KompletthetskontrollerTest {
 
         // Assert
         verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
+        verify(historikkinnslagTjeneste).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.AVV_DOK);
     }
 }

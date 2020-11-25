@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.Period;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +22,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -46,8 +43,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
-    @Inject
-    private EntityManager entityManager;
 
     @Inject
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
@@ -63,12 +58,6 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
     @Mock
     private OppgaveTjeneste oppgaveTjenesteMock;
-
-    @Mock
-    private BehandlingModellRepository behandlingModellRepositoryMock;
-
-    @Mock
-    private RevurderingTjeneste revurderingTjenesteMock;
 
     @Mock
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;

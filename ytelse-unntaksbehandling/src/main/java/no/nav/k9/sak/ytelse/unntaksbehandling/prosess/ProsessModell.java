@@ -33,7 +33,9 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.INREG_AVSL)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.MANUELL_TILKJENNING_YTELSE)
@@ -53,7 +55,9 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.INREG_AVSL)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.MANUELL_TILKJENNING_YTELSE)
@@ -73,7 +77,9 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.INREG_AVSL)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.MANUELL_TILKJENNING_YTELSE)

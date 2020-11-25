@@ -37,30 +37,30 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 @Dependent
 public class Kompletthetskontroller {
 
-    private DokumentmottakerFelles dokumentmottakerFelles;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private KompletthetModell kompletthetModell;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
+    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     public Kompletthetskontroller() {
         // For CDI proxy
     }
 
     @Inject
-    public Kompletthetskontroller(DokumentmottakerFelles dokumentmottakerFelles,
-                                  MottatteDokumentTjeneste mottatteDokumentTjeneste,
+    public Kompletthetskontroller(MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                   KompletthetModell kompletthetModell,
                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                   ProsessTaskRepository prosessTaskRepository,
-                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
-        this.dokumentmottakerFelles = dokumentmottakerFelles;
+                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                  HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.kompletthetModell = kompletthetModell;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
 
     public void persisterDokumentOgVurderKompletthet(Behandling behandling, Collection<MottattDokument> mottattDokument) {
@@ -115,8 +115,8 @@ public class Kompletthetskontroller {
         // Settes på vent til behandlig er komplett
         behandlingProsesseringTjeneste.settBehandlingPåVent(behandling, AUTO_VENT_KOMPLETT_OPPDATERING,
             kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak(), kompletthetResultat.getVenteårsakVariant());
-        dokumentmottakerFelles.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling,
-            HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
+        historikkinnslagTjeneste.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT,
+            kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
     }
 
     /** for test only */
@@ -135,8 +135,8 @@ public class Kompletthetskontroller {
             if (!kompletthetResultat.erOppfylt()) {
                 // Et av kompletthetskriteriene er ikke oppfylt, og evt. brev er sendt ut. Logger historikk og avbryter
                 if (!kompletthetResultat.erFristUtløpt()) {
-                    dokumentmottakerFelles.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling,
-                        HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
+                    historikkinnslagTjeneste.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT,
+                        kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
                 }
                 return;
             }

@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
+import no.nav.k9.sak.mottak.SøknadmottakFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -31,7 +31,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     private static final int CUT_OFF_OMP = 2020;
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-    private DokumentmottakerFelles dokumentmottakerFelles;
+    private SøknadmottakFelles søknadmottakFelles;
     private Behandlingsoppretter behandlingsoppretter;
     private BehandlingRepository behandlingRepository;
 
@@ -40,12 +40,12 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Inject
-    public OmsorgspengerSøknadMottaker(DokumentmottakerFelles dokumentmottakerFelles,
+    public OmsorgspengerSøknadMottaker(SøknadmottakFelles søknadmottakFelles,
                                        BehandlingRepository behandlingRepository,
                                        SaksnummerRepository saksnummerRepository,
                                        Behandlingsoppretter behandlingsoppretter,
                                        FagsakTjeneste fagsakTjeneste) {
-        this.dokumentmottakerFelles = dokumentmottakerFelles;
+        this.søknadmottakFelles = søknadmottakFelles;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -66,7 +66,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         // FIXME K9 Persister søknad
         persisterSøknad(behandling, søknadInnsending);
 
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        søknadmottakFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
 
         return behandling;
     }

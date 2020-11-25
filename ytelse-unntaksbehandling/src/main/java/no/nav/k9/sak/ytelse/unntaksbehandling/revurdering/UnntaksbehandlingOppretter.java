@@ -14,8 +14,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
+import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -30,7 +30,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 @FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-010")
 @ApplicationScoped
-public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements UnntaksbehandlingOppretterTjeneste {
+public class UnntaksbehandlingOppretter implements RevurderingTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
@@ -38,15 +38,15 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
 
-    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter() {
+    public UnntaksbehandlingOppretter() {
         // for CDI proxy
     }
 
     @Inject
-    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                              RevurderingTjenesteFelles revurderingTjenesteFelles,
-                                                              BehandlingRepositoryProvider behandlingRepositoryProvider,
-                                                              @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
+    public UnntaksbehandlingOppretter(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                      RevurderingTjenesteFelles revurderingTjenesteFelles,
+                                      BehandlingRepositoryProvider behandlingRepositoryProvider,
+                                      @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
@@ -55,14 +55,21 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     }
 
     @Override
-    public Behandling opprettNyBehandling(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType behandlingÅrsak, OrganisasjonsEnhet enhet) {
+    public Behandling opprettAutomatiskNyBehandling(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+        return opprettManueltNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak, enhet);
+    }
+
+    @Override
+    public Behandling opprettManueltNyBehandling(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType behandlingÅrsak, OrganisasjonsEnhet enhet) {
+        validerTilstand(origBehandling);
+
         Behandling nyBehandling;
         if (origBehandling == null) {
             nyBehandling = opprettFørsteBehandling(fagsak, behandlingÅrsak, enhet);
         } else {
             nyBehandling = opprettNyBehandling(origBehandling, behandlingÅrsak, true, enhet);
-            kopierGrunnlag(origBehandling, nyBehandling);
-            kopierTilkjentYtelse(origBehandling, nyBehandling);
+            kopierAlleGrunnlagFraTidligereBehandling(origBehandling, nyBehandling);
+            kopierTilkjentYtelseFraTidligereBehandling(origBehandling, nyBehandling);
         }
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(nyBehandling);
@@ -71,12 +78,24 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
         return nyBehandling;
     }
 
-    private void kopierGrunnlag(Behandling origBehandling, Behandling nyBehandling) {
+    @Override
+    public void kopierAlleGrunnlagFraTidligereBehandling(Behandling origBehandling, Behandling nyBehandling) {
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedManuellOpprettelse(origBehandling, nyBehandling);
     }
 
-    private void kopierTilkjentYtelse(Behandling origBehandling, Behandling nyBehandling) {
+    @Override
+    public Boolean kanNyBehandlingOpprettes(Fagsak fagsak) {
+        return behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).isEmpty();
+    }
+
+    private void validerTilstand(Behandling origBehandling) {
+        if (origBehandling != null && !kanNyBehandlingOpprettes(origBehandling.getFagsak())) {
+            throw new IllegalStateException("Kan ikke opprette unntaksbehandling på fagsak");
+        }
+    }
+
+    private void kopierTilkjentYtelseFraTidligereBehandling(Behandling origBehandling, Behandling nyBehandling) {
         beregningsresultatRepository.hentBeregningsresultatAggregat(origBehandling.getId())
             .ifPresent(aggregat -> {
                 if (aggregat.getBgBeregningsresultat() != null) {
@@ -88,7 +107,7 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
             });
     }
 
-    public Behandling opprettFørsteBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, OrganisasjonsEnhet enhet) {
+    private Behandling opprettFørsteBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, OrganisasjonsEnhet enhet) {
         var behandlingType = BehandlingType.UNNTAKSBEHANDLING;
 
         return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
@@ -112,10 +131,6 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
         return manuellBehandling;
     }
 
-    @Override
-    public Boolean kanNyBehandlingOpprettes(Fagsak fagsak) {
-        return behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).isEmpty();
-    }
 
     private GrunnlagKopierer getGrunnlagKopierer(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, ytelseType)

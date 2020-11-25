@@ -14,9 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -52,10 +50,8 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     }
 
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        Boolean kanRevurderingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
-        // TODO: Også guarde mot at revurdering ikke kan opprettes dersom siste behandling er manuell behandling
-        if (!kanRevurderingOpprettes) {
+        var revurderingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UDEFINERT);
+        if (!revurderingTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
 
@@ -63,12 +59,12 @@ public class BehandlingsoppretterApplikasjonTjeneste {
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
 
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return revurderingTjeneste.opprettManuellRevurdering(fagsak, origBehandling, behandlingÅrsakType, enhet);
+        return revurderingTjeneste.opprettManueltNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
     public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
-        if (!unntaksbehandlingOppretterTjeneste.kanNyBehandlingOpprettes(fagsak)) {
+        var unntaksbehandlingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
+        if (!unntaksbehandlingTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
         }
 
@@ -76,12 +72,12 @@ public class BehandlingsoppretterApplikasjonTjeneste {
             .orElse(null);
 
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
+        return unntaksbehandlingTjeneste.opprettManueltNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
-    private UnntaksbehandlingOppretterTjeneste getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, ytelseType, behandlingType)
-            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretterTjeneste.class.getSimpleName() +
+    private RevurderingTjeneste getRevurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(RevurderingTjeneste.class, ytelseType, behandlingType)
+            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + RevurderingTjeneste.class.getSimpleName() +
                 " for ytelsetype " + ytelseType + " , behandlingstype " + behandlingType));
     }
 

@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
+import no.nav.k9.sak.mottak.SøknadmottakFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -25,7 +25,7 @@ import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknadValidator;
 @Dependent
 class SøknadDokumentmottaker {
 
-    private DokumentmottakerFelles dokumentmottakerFelles;
+    private SøknadmottakFelles søknadmottakFelles;
     private SaksnummerRepository saksnummerRepository;
     private Behandlingsoppretter behandlingsoppretter;
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
@@ -37,13 +37,13 @@ class SøknadDokumentmottaker {
     }
 
     @Inject
-    SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
+    SøknadDokumentmottaker(SøknadmottakFelles søknadmottakFelles,
                            BehandlingRepository behandlingRepository,
                            SaksnummerRepository saksnummerRepository,
                            Behandlingsoppretter behandlingsoppretter,
                            SøknadOversetter pleiepengerBarnSoknadOversetter,
                            FagsakTjeneste fagsakTjeneste) {
-        this.dokumentmottakerFelles = dokumentmottakerFelles;
+        this.søknadmottakFelles = søknadmottakFelles;
         this.behandlingRepository = behandlingRepository;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -65,11 +65,11 @@ class SøknadDokumentmottaker {
         Objects.requireNonNull(søknad);
 
         new PleiepengerBarnSøknadValidator().forsikreValidert(søknad);
-        
+
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
 
-        dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
+        søknadmottakFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
 
         return behandling;
     }

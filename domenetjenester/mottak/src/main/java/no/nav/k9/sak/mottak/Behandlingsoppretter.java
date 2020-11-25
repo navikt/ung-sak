@@ -7,14 +7,16 @@ import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -26,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
@@ -35,29 +36,25 @@ public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private Instance<RevurderingTjeneste> revurderingTjenester;
 
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
-                                MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) { // NOSONAR
+                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                @Any Instance<RevurderingTjeneste> revurderingTjenester) { // NOSONAR
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
-        this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
-    }
-
-    public boolean erKompletthetssjekkPassert(Behandling behandling) {
-        return behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.VURDER_KOMPLETTHET);
+        this.revurderingTjenester = revurderingTjenester;
     }
 
     /**
@@ -87,8 +84,8 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
-        Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
+        RevurderingTjeneste revurderingTjeneste = getRevurderingTjeneste(origBehandling);
+        Behandling revurdering = revurderingTjeneste.opprettAutomatiskNyBehandling(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return revurdering;
     }
 
@@ -124,17 +121,8 @@ public class Behandlingsoppretter {
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
     }
 
-    public boolean harBehandlingsresultatOpphørt(Behandling behandling) {
-        return behandling.getBehandlingResultatType().isBehandlingsresultatOpphørt();
-    }
-
-    public boolean erAvslåttBehandling(Behandling behandling) {
-        return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
-    }
-
     public Behandling opprettNyFørstegangsbehandling(Collection<MottattDokument> mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
         var nyFørstegangsbehandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyFørstegangsbehandling, mottattDokument);
         return nyFørstegangsbehandling;
     }
 
@@ -165,5 +153,10 @@ public class Behandlingsoppretter {
         }
 
         return Optional.empty();
+    }
+
+    private RevurderingTjeneste getRevurderingTjeneste(Behandling origBehandling) {
+        return BehandlingTypeRef.Lookup.find(RevurderingTjeneste.class, revurderingTjenester, origBehandling.getFagsakYtelseType(), origBehandling.getType())
+            .orElseThrow(() ->  new UnsupportedOperationException("RevurderingTjeneste ikke implementert for ytelse [" + origBehandling.getFagsakYtelseType() + "], behandlingtype [" + origBehandling.getType() + "]"));
     }
 }
