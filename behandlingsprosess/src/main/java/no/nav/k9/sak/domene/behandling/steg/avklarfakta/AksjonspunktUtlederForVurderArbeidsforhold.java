@@ -15,7 +15,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -24,7 +23,6 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
     private static final List<AksjonspunktResultat> INGEN_AKSJONSPUNKTER = emptyList();
 
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
-    private ArbeidsforholdUtenRelevantOppgittOpptjening arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
@@ -36,27 +34,21 @@ public class AksjonspunktUtlederForVurderArbeidsforhold {
                                                       VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
-        this.arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste = new ArbeidsforholdUtenRelevantOppgittOpptjening();
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
         var iayGrunnlag = iayTjeneste.finnGrunnlag(param.getBehandlingId());
         if (iayGrunnlag.isPresent()) {
-            var vurder = hentArbeidsforholdTilVurdering(param, iayGrunnlag.get());
+            var vurder = hentArbeidsforholdTilVurdering(param);
             if (!vurder.isEmpty()) {
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
             }
         }
 
-        if (arbeidsforholdUtenRelevantOppgittOpptjeningTjeneste.erUtenRelevantOppgittOpptjening(param, iayGrunnlag)) {
-            return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-        }
-
         return INGEN_AKSJONSPUNKTER;
     }
 
-    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforholdTilVurdering(AksjonspunktUtlederInput param,
-                                                                                           InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    private Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> hentArbeidsforholdTilVurdering(AksjonspunktUtlederInput param) {
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder;
         vurder = vurderArbeidsforholdTjeneste.vurder(param.getRef());
         return vurder;

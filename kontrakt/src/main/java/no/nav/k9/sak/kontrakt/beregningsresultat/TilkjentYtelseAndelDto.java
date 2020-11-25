@@ -41,6 +41,10 @@ public class TilkjentYtelseAndelDto {
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Graph}\\-\\p{P}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforholdId;
+    @JsonProperty(value = "arbeidsforholdRef")
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\-_:.\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String arbeidsforholdRef;
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
@@ -85,6 +89,7 @@ public class TilkjentYtelseAndelDto {
         this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
         this.arbeidsforholdId = builder.arbeidsforholdId;
+        this.arbeidsforholdRef = builder.arbeidsforholdRef;
         this.aktørId = builder.aktørId;
         this.arbeidsforholdType = builder.arbeidsforholdType;
         this.stillingsprosent = builder.stillingsprosent;
@@ -110,6 +115,10 @@ public class TilkjentYtelseAndelDto {
 
     public ArbeidsgiverDto getArbeidsgiver() {
         return arbeidsgiver;
+    }
+
+    public String getArbeidsforholdRef() {
+        return arbeidsforholdRef;
     }
 
     public OrgNummer getArbeidsgiverOrgnr() {
@@ -143,6 +152,7 @@ public class TilkjentYtelseAndelDto {
     public static class Builder {
         private AktørId aktørId;
         private String arbeidsforholdId;
+        public String arbeidsforholdRef;
         private OpptjeningAktivitetType arbeidsforholdType;
         private ArbeidsgiverDto arbeidsgiver;
         private OrgNummer arbeidsgiverOrgnr;
@@ -167,6 +177,11 @@ public class TilkjentYtelseAndelDto {
 
         public Builder medArbeidsforholdId(String arbeidsforholdId) {
             this.arbeidsforholdId = arbeidsforholdId;
+            return this;
+        }
+
+        public Builder medArbeidsforholdRef(String arbeidsforholdRef) {
+            this.arbeidsforholdRef = arbeidsforholdRef;
             return this;
         }
 

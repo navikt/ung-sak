@@ -4,12 +4,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
 import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -32,6 +36,7 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
+    private Instance<GrunnlagKopierer> grunnlagKopierere;
 
     public BehandlingstypeSpesifikkUnntaksbehandlingOppretter() {
         // for CDI proxy
@@ -40,11 +45,13 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     @Inject
     public BehandlingstypeSpesifikkUnntaksbehandlingOppretter(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                               RevurderingTjenesteFelles revurderingTjenesteFelles,
-                                                              BehandlingRepositoryProvider behandlingRepositoryProvider) {
+                                                              BehandlingRepositoryProvider behandlingRepositoryProvider,
+                                                              @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = behandlingRepositoryProvider.getBeregningsresultatRepository();
+        this.grunnlagKopierere = grunnlagKopierere;
     }
 
     @Override
@@ -54,6 +61,7 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
             nyBehandling = opprettFørsteBehandling(fagsak, behandlingÅrsak, enhet);
         } else {
             nyBehandling = opprettNyBehandling(origBehandling, behandlingÅrsak, true, enhet);
+            kopierGrunnlag(origBehandling, nyBehandling);
             kopierTilkjentYtelse(origBehandling, nyBehandling);
         }
 
@@ -61,6 +69,11 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_K9_VILKÅRET));
 
         return nyBehandling;
+    }
+
+    private void kopierGrunnlag(Behandling origBehandling, Behandling nyBehandling) {
+        var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
+        grunnlagKopierer.kopierGrunnlagVedManuellOpprettelse(origBehandling, nyBehandling);
     }
 
     private void kopierTilkjentYtelse(Behandling origBehandling, Behandling nyBehandling) {
@@ -102,6 +115,11 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     @Override
     public Boolean kanNyBehandlingOpprettes(Fagsak fagsak) {
         return behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).isEmpty();
+    }
+
+    private GrunnlagKopierer getGrunnlagKopierer(FagsakYtelseType ytelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, ytelseType)
+            .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for unntaksbehandling ikke støttet for " + ytelseType.getKode()));
     }
 
 }

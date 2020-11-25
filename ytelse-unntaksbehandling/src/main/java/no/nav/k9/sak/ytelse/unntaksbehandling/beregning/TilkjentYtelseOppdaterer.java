@@ -38,6 +38,7 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
@@ -127,7 +128,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
                 ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
                 : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()))
             )
-            //.medArbeidsforholdRef() // kun nødvendig dersom flere arb.forhold samme arbeidsgiver
+            .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
