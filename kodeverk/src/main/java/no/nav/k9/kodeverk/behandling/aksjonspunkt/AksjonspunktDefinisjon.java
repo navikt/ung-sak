@@ -170,7 +170,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, EnumSet.of(OMP, PSB)),
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
         AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, EnumSet.of(OMP, PSB)),
+        UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(OMP, PSB)),
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
         AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(OMP, PSB)),
@@ -205,7 +205,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av beregningsgrunnlag",
         BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_K9_VILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_K9_VILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av K9-vilkåret",
-        Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
+        Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, EnumSet.of(OMP, PSB, FRISINN)),
     MANUELL_MARKERING_AV_UTLAND_SAKSTYPE(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE, AksjonspunktType.MANUELL, "Manuell markering av utenlandssak",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, EnumSet.of(OMP, PSB)),
 
