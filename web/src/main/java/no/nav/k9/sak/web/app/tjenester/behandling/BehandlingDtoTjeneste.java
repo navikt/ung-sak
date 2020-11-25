@@ -51,6 +51,7 @@ import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
@@ -291,6 +292,8 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
         dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidQueryParams));
+        dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold-v1", uuidQueryParams));
+        dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
 
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
         dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
