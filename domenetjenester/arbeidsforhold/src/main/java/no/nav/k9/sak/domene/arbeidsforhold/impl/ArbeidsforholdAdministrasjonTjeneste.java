@@ -217,7 +217,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     }
 
     private InntektArbeidYtelseArbeidsforholdV2Dto finnEllerOpprett(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        var collect = result.stream().filter(it -> gjelderSammeArbeidsforhold(it, arbeidsgiver, arbeidsforholdRef)).collect(Collectors.toList());
+        Objects.requireNonNull(result, "result");
+        Objects.requireNonNull(arbeidsgiver, "arbeidsgiver");
+        var collect = result.stream()
+            .filter(it -> gjelderSammeArbeidsforhold(it, arbeidsgiver, arbeidsforholdRef))
+            .collect(Collectors.toList());
 
         if (collect.isEmpty()) {
             var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(arbeidsgiver, mapArbeidsforholdsId(arbeidsgiver, arbeidsforholdRef, arbeidsforholdInformasjon));
