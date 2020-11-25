@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -58,7 +58,7 @@ public class FagsakRestTjeneste {
     public static final String STATUS_PATH = "/fagsak/status";
     public static final String SOK_PATH = "/fagsak/sok";
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
-    private RevurderingTjeneste revurderingTjeneste;
+    private NyBehandlingTjeneste revurderingTjeneste;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
@@ -66,7 +66,7 @@ public class FagsakRestTjeneste {
 
     @Inject
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
-                              @FagsakYtelseTypeRef @BehandlingTypeRef RevurderingTjeneste revurderingTjeneste) {
+                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.revurderingTjeneste = revurderingTjeneste;
     }

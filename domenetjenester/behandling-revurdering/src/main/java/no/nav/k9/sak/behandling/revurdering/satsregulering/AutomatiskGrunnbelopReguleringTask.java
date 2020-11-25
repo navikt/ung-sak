@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -34,7 +34,7 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakRepository fagsakRepository;
     private BehandlendeEnhetTjeneste enhetTjeneste;
-    private RevurderingTjeneste revurderingTjeneste;
+    private NyBehandlingTjeneste revurderingTjeneste;
 
     AutomatiskGrunnbelopReguleringTask() {
         // for CDI proxy
@@ -44,7 +44,7 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
     public AutomatiskGrunnbelopReguleringTask(BehandlingRepositoryProvider repositoryProvider,
                                               ProsessTaskRepository prosessTaskRepository,
                                               BehandlendeEnhetTjeneste enhetTjeneste,
-                                              @FagsakYtelseTypeRef @BehandlingTypeRef RevurderingTjeneste revurderingTjeneste) {
+                                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.prosessTaskRepository = prosessTaskRepository;

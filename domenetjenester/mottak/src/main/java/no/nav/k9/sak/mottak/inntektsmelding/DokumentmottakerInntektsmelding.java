@@ -103,7 +103,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         if (sisteHenlagteFørstegangsbehandling.isPresent()) { // #I6
             nyBehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottatteDokumenter, sisteHenlagteFørstegangsbehandling.get().getFagsak(), sisteHenlagteFørstegangsbehandling.get());
         } else {
-            nyBehandling = behandlingsoppretter.opprettRevurdering(tidligereAvsluttetBehandling, getBehandlingÅrsakType());
+            nyBehandling = behandlingsoppretter.opprettNyBehandling(tidligereAvsluttetBehandling, getBehandlingÅrsakType());
         }
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyBehandling, mottatteDokumenter);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottatteDokumenter, nyBehandling);

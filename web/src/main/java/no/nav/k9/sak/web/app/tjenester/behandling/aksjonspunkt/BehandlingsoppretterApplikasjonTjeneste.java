@@ -12,8 +12,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -50,7 +50,7 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     }
 
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var revurderingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UDEFINERT);
+        var revurderingTjeneste = getNyBehandlingTjeneste(fagsak.getYtelseType(), BehandlingType.REVURDERING);
         if (!revurderingTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
@@ -63,7 +63,7 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     }
 
     public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var unntaksbehandlingTjeneste = getRevurderingTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
+        var unntaksbehandlingTjeneste = getNyBehandlingTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
         if (!unntaksbehandlingTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
         }
@@ -75,9 +75,9 @@ public class BehandlingsoppretterApplikasjonTjeneste {
         return unntaksbehandlingTjeneste.opprettManueltNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
-    private RevurderingTjeneste getRevurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(RevurderingTjeneste.class, ytelseType, behandlingType)
-            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + RevurderingTjeneste.class.getSimpleName() +
+    private NyBehandlingTjeneste getNyBehandlingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(NyBehandlingTjeneste.class, ytelseType, behandlingType)
+            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + NyBehandlingTjeneste.class.getSimpleName() +
                 " for ytelsetype " + ytelseType + " , behandlingstype " + behandlingType));
     }
 

@@ -22,8 +22,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandling.revurdering.BeregningRevurderingTestUtil;
-import no.nav.k9.sak.behandling.revurdering.DefaultRevurderingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
+import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
@@ -86,7 +86,7 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new DefaultRevurderingTjeneste(behandlingskontrollTjeneste,
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
             revurderingTjenesteFelles, grunnlagKopierer);
 
         // Act

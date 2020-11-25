@@ -15,7 +15,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -40,7 +40,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     private FagsakTjeneste fagsakTjeneste;
     private ProsessTaskRepository prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private RevurderingTjeneste revurderingTjeneste;
+    private NyBehandlingTjeneste revurderingTjeneste;
 
     protected OpprettManuellRevurderingTask() {
         // CDI proxy
@@ -52,7 +52,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
                                          FagsakTjeneste fagsakTjeneste,
                                          ProsessTaskRepository prosessTaskRepository,
                                          BehandlingRepository behandlingRepository,
-                                         @FagsakYtelseTypeRef @BehandlingTypeRef RevurderingTjeneste revurderingTjeneste) {
+                                         @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
