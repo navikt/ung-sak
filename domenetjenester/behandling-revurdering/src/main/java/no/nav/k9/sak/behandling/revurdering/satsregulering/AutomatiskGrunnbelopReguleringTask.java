@@ -44,7 +44,7 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
     public AutomatiskGrunnbelopReguleringTask(BehandlingRepositoryProvider repositoryProvider,
                                               ProsessTaskRepository prosessTaskRepository,
                                               BehandlendeEnhetTjeneste enhetTjeneste,
-                                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
+                                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-004") NyBehandlingTjeneste revurderingTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.prosessTaskRepository = prosessTaskRepository;

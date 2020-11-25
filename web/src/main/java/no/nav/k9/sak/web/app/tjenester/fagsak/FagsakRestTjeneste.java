@@ -66,7 +66,7 @@ public class FagsakRestTjeneste {
 
     @Inject
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
-                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
+                              @FagsakYtelseTypeRef @BehandlingTypeRef("BT-004") NyBehandlingTjeneste revurderingTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.revurderingTjeneste = revurderingTjeneste;
     }

@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.NyBehandlingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -88,7 +89,10 @@ public class Behandlingsoppretter {
      * - Ellers opprettes revurdering
      */
     public Behandling opprettNyBehandling(Behandling origBehandling, BehandlingÅrsakType nyBehandlingÅrsak) {
-        NyBehandlingTjeneste nyBehandlingTjeneste = getNyBehandlingTjeneste(origBehandling);
+        var nyBehandlingType = origBehandling.getType().equals(BehandlingType.UNNTAKSBEHANDLING)
+            ? BehandlingType.UNNTAKSBEHANDLING
+            : BehandlingType.REVURDERING;
+        NyBehandlingTjeneste nyBehandlingTjeneste = getNyBehandlingTjeneste(origBehandling.getFagsakYtelseType(), nyBehandlingType);
         Behandling nyBehandling = nyBehandlingTjeneste.opprettAutomatiskNyBehandling(origBehandling, nyBehandlingÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return nyBehandling;
     }
@@ -140,7 +144,7 @@ public class Behandlingsoppretter {
         if (søknad.isPresent()) {
             søknadRepository.lagreOgFlush(behandling, søknad.get());
         }
-        NyBehandlingTjeneste nyBehandlingTjeneste = getNyBehandlingTjeneste(behandlingMedSøknad);
+        NyBehandlingTjeneste nyBehandlingTjeneste = getNyBehandlingTjeneste(fagsak.getYtelseType(), BehandlingType.REVURDERING);
         nyBehandlingTjeneste.kopierAlleGrunnlagFraTidligereBehandling(behandlingMedSøknad, behandling);
         return behandling;
     }
@@ -159,8 +163,8 @@ public class Behandlingsoppretter {
         return Optional.empty();
     }
 
-    private NyBehandlingTjeneste getNyBehandlingTjeneste(Behandling origBehandling) {
-        return BehandlingTypeRef.Lookup.find(NyBehandlingTjeneste.class, nyBehandlingTjenester, origBehandling.getFagsakYtelseType(), origBehandling.getType())
-            .orElseThrow(() ->  new UnsupportedOperationException("RevurderingTjeneste ikke implementert for ytelse [" + origBehandling.getFagsakYtelseType() + "], behandlingtype [" + origBehandling.getType() + "]"));
+    private NyBehandlingTjeneste getNyBehandlingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType nyBehandlingType) {
+        return BehandlingTypeRef.Lookup.find(NyBehandlingTjeneste.class, nyBehandlingTjenester, fagsakYtelseType, nyBehandlingType)
+            .orElseThrow(() ->  new UnsupportedOperationException("RevurderingTjeneste ikke implementert for ytelse [" + fagsakYtelseType + "], behandlingtype [" + nyBehandlingType + "]"));
     }
 }

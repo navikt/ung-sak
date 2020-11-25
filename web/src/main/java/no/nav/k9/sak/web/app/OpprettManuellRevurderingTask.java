@@ -52,7 +52,7 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
                                          FagsakTjeneste fagsakTjeneste,
                                          ProsessTaskRepository prosessTaskRepository,
                                          BehandlingRepository behandlingRepository,
-                                         @FagsakYtelseTypeRef @BehandlingTypeRef("BT-002") NyBehandlingTjeneste revurderingTjeneste) {
+                                         @FagsakYtelseTypeRef @BehandlingTypeRef("BT-004") NyBehandlingTjeneste revurderingTjeneste) {
         this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;

@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef("BT-004")
 @ApplicationScoped
 public class RevurderingTjeneste implements NyBehandlingTjeneste {
 
