@@ -760,7 +760,6 @@
         <url>https://github.com/navikt/k9-sak</url>
         <tag>HEAD</tag>
     </scm>
-
     <distributionManagement>
         <repository>
             <id>github</id>
