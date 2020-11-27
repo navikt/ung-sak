@@ -30,9 +30,13 @@ public class MottatteDokumentRepository {
     }
 
     public MottattDokument lagre(MottattDokument mottattDokument) {
+        return lagre(mottattDokument, DokumentStatus.GYLDIG);
+    }
+
+    public MottattDokument lagre(MottattDokument mottattDokument, DokumentStatus status) {
+        mottattDokument.setStatus(status);
         entityManager.persist(mottattDokument);
         entityManager.flush();
-
         return mottattDokument;
     }
 
@@ -66,6 +70,15 @@ public class MottatteDokumentRepository {
             .setParameter("journalpostIder", journalpostIder)
             .setParameter("gyldig", DokumentStatus.GYLDIG) // NOSONAR
             .getResultList();
+    }
+
+    public void oppdaterStatus(List<MottattDokument> mottatteDokumenter, DokumentStatus status) {
+        mottatteDokumenter.stream().forEach(m -> {
+            m.setStatus(status);
+            entityManager.persist(m);
+        });
+        entityManager.flush();
+
     }
 
 }
