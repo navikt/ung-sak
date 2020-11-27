@@ -3,8 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.fordeling;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

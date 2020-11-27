@@ -204,11 +204,10 @@ public interface BehandlingskontrollTjeneste {
     /**
      * Setter autopunkter av en spesifikk aksjonspunktdefinisjon til utført. Dette klargjør kun behandligen for
      * prosessering, men vil ikke drive prosessen videre.
-     *
      * @param aksjonspunktDefinisjon Aksjonspunktdefinisjon til de aksjonspunktene som skal lukkes
      *            Bruk {@link #prosesserBehandling(BehandlingskontrollKontekst)} el. tilsvarende for det.
      */
-    void settAutopunktTilUtført(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon, BehandlingskontrollKontekst kontekst);
+    void settAutopunktTilUtført(Behandling behandling, BehandlingskontrollKontekst kontekst, Collection<AksjonspunktDefinisjon> aksjonspunktDefinisjon);
 
     /**
      * Setter behandlingen på vent med angitt hvilket steg det står i.
