@@ -64,7 +64,11 @@ public class TrekkUtFraværTjeneste {
                 fravær = fraværFraInntektsmeldinger;
             }
         }
-        log.info("Fravær har totalt {} perioder", fravær.size());
+        log.info("Fravær har totalt {} perioder: {}",
+            fravær.size(),
+            fravær.stream()
+                .map(OppgittFraværPeriode::getPeriode)
+                .collect(Collectors.toList()));
         if (fravær.isEmpty()) {
             throw new IllegalStateException("Utvikler feil, forventer fraværsperioder til behandlingen");
         }
