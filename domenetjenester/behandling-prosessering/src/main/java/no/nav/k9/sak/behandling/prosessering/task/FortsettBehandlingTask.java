@@ -1,6 +1,8 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -64,8 +66,8 @@ public class FortsettBehandlingTask extends UnderBehandlingProsessTask {
         } else {
             String utført = data.getPropertyValue(FortsettBehandlingTask.AKSJONSPUNKT_STATUS_TIL_UTFORT);
             if (utført != null) {
-                AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.fraKode(utført);
-                behandlingskontrollTjeneste.settAutopunktTilUtført(behandling, aksjonspunkt, kontekst);
+                var aksjonspunkter = Arrays.asList(utført.split(",\\s*")).stream().map(v -> AksjonspunktDefinisjon.fraKode(v)).collect(Collectors.toList());
+                behandlingskontrollTjeneste.settAutopunktTilUtført(behandling, kontekst, aksjonspunkter);
             }
         }
         // Ingen åpne autopunkt her, takk

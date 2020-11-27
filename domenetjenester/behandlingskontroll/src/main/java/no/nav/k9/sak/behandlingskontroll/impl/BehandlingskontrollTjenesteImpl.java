@@ -458,8 +458,8 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     @Override
-    public void settAutopunktTilUtført(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon, BehandlingskontrollKontekst kontekst) {
-        List<Aksjonspunkt> åpneAksjonspunktAvDef = behandling.getÅpneAksjonspunkter(List.of(aksjonspunktDefinisjon));
+    public void settAutopunktTilUtført(Behandling behandling, BehandlingskontrollKontekst kontekst, Collection<AksjonspunktDefinisjon> aksjonspunktDefinisjon) {
+        List<Aksjonspunkt> åpneAksjonspunktAvDef = behandling.getÅpneAksjonspunkter(aksjonspunktDefinisjon);
         lagreAksjonspunkterUtført(kontekst, behandling.getAktivtBehandlingSteg(), åpneAksjonspunktAvDef);
     }
 

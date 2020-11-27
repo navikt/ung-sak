@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -20,7 +19,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
 import no.nav.k9.sak.domene.iay.modell.BekreftetPermisjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
