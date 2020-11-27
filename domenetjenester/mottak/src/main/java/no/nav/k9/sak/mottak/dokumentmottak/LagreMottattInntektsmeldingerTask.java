@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -61,9 +60,6 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
 
         var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(mottatteDokumenter);
 
-        mottatteDokumentRepository.oppdaterStatus(mottatteDokumenter, DokumentStatus.GYLDIG);
-
-        // må gjøres til slutt siden vi har å gjøre med et ikke-tx grensesnitt til abakus
         inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, inntektsmeldinger);
 
     }

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -90,7 +89,8 @@ public class MottatteDokumentTjeneste {
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
-            mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTAR);// setter status MOTTAR; oppdatres senere til GYLDIG når er lagret i Abakus
+            mottatteDokumentRepository.lagre(dokument);// oppdaterer
+
         }
 
         var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));

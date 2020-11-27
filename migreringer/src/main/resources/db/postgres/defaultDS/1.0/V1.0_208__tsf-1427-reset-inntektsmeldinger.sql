@@ -1,1 +1,0 @@
-update mottatt_dokument set status='MOTTAR' where journalpost_id in ('490674017','490674020');

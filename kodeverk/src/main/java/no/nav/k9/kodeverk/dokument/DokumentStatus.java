@@ -23,7 +23,6 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum DokumentStatus implements Kodeverdi {
     
     GYLDIG("GYLDIG", "Gyldig"),
-    MOTTAR("MOTTAR", "Mottar"),
     UGYLDIG("UGYLDIG", "Ugyldig"),
     ;
 

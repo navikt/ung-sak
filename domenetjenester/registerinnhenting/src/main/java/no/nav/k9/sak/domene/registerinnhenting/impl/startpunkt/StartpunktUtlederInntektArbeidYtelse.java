@@ -20,6 +20,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -30,6 +31,7 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private StartpunktUtlederInntektsmelding startpunktUtlederInntektsmelding;
     private StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger;
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -41,10 +43,12 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
     @Inject
     StartpunktUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste iayTjeneste, // NOSONAR - ingen enkel måte å unngå mange parametere her
                                          BehandlingRepositoryProvider repositoryProvider,
+                                         StartpunktUtlederInntektsmelding startpunktUtlederInntektsmelding,
                                          StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger,
                                          VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.startpunktUtlederInntektsmelding = startpunktUtlederInntektsmelding;
         this.startpunktUtlederInntektsmeldinger = startpunktUtlederInntektsmeldinger;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
     }
@@ -56,61 +60,50 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
             .orElse(StartpunktType.UDEFINERT);
     }
 
-    private List<StartpunktType> hentAlleStartpunktForInntektArbeidYtelse(BehandlingReferanse ref, UUID grunnlagId1, UUID grunnlagId2) { // NOSONAR
+    private List<StartpunktType> hentAlleStartpunktForInntektArbeidYtelse(BehandlingReferanse ref,
+                                                                          UUID grunnlagId1, UUID grunnlagId2) {
         List<StartpunktType> startpunkter = new ArrayList<>();
-        var grunnlag1 = iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId1);
-        var grunnlag2 = iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2);
-        var diff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
+        InntektArbeidYtelseGrunnlag grunnlag1 = iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId1);
+        InntektArbeidYtelseGrunnlag grunnlag2 = iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2);
 
-        if (startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref)) {
-            var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag2);
-            boolean erInntektsmeldingEndret = !StartpunktType.UDEFINERT.equals(startpunktType);
-            if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "inntektsmelding");
-            }
-        } else {
-            boolean erInntektsmeldingEndret = diff.erEndringPåInntektsmelding();
-            if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "inntektsmelding");
-            }
-        }
+        LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
 
-        if (!startpunkter.isEmpty()) {
-            return startpunkter; // quick exit siden vi har allerede testet to viktigste startpunkt typer
-        }
+        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId()); // TODO burde ikke være nødvendig (bør velge grunnlagId1, grunnlagId2)
+
+        boolean erPåkrevdManuelleAvklaringer = !vurderArbeidsforholdTjeneste.vurder(ref).isEmpty();
+
+        IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(grunnlag1, grunnlag2);
+        boolean erAktørArbeidEndretForSøker = iayGrunnlagDiff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
+        boolean erAktørInntektEndretForSøker = iayGrunnlagDiff.erEndringPåAktørInntektForAktør(skjæringstidspunkt, ref.getAktørId());
+        var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag2);
+        boolean erInntektsmeldingEndret = erInntektsmeldingEndret(ref, iayGrunnlagDiff, startpunktType);
 
         Saksnummer saksnummer = ref.getSaksnummer();
-        LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
-        AktørYtelseEndring aktørYtelseEndringForSøker = diff.endringPåAktørYtelseForAktør(saksnummer, skjæringstidspunkt, ref.getAktørId());
-        if (harAksjonspunkt5080(ref)) {
+        AktørYtelseEndring aktørYtelseEndringForSøker = iayGrunnlagDiff.endringPåAktørYtelseForAktør(saksnummer, skjæringstidspunkt, ref.getAktørId());
+
+        if (erPåkrevdManuelleAvklaringer) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        } else if (aktørYtelseEndringForSøker.erEksklusiveYtelserEndret()) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "aktør ytelse");
-        } else if (erPåkrevdManuelleAvklaringer(ref)) {
+        } else if (harAksjonspunkt5080(ref)) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
         }
-
-        if (!startpunkter.isEmpty()) {
-            return startpunkter; // quick exit siden vi har allerede testet to viktigste startpunkt typer
-        }
-
-        boolean erAktørArbeidEndretForSøker = diff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
         if (erAktørArbeidEndretForSøker) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktørarbeid");
-        } else if (aktørYtelseEndringForSøker.erAndreYtelserEndret()) {
+        }
+        if (aktørYtelseEndringForSøker.erEksklusiveYtelserEndret()) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "aktør ytelse");
+        }
+        if (aktørYtelseEndringForSøker.erAndreYtelserEndret()) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør ytelse andre tema");
-        } else {
-            boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(skjæringstidspunkt, ref.getAktørId());
-            if (erAktørInntektEndretForSøker) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt");
-            }
+        }
+        if (erAktørInntektEndretForSøker) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt");
+        }
+        if (erInntektsmeldingEndret) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "inntektsmelding");
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktUtlederInntektsmelding.utledStartpunkt(ref, grunnlag1, grunnlag2), "inntektsmelding");
         }
 
         return startpunkter;
-    }
-
-    private boolean erPåkrevdManuelleAvklaringer(BehandlingReferanse ref) {
-        return !vurderArbeidsforholdTjeneste.vurder(ref).isEmpty();
     }
 
     private boolean harAksjonspunkt5080(BehandlingReferanse ref) {
@@ -120,6 +113,10 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
             .stream()
             .filter(Aksjonspunkt::erÅpentAksjonspunkt)
             .anyMatch(ap -> ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD));
+    }
+
+    private boolean erInntektsmeldingEndret(BehandlingReferanse ref, IAYGrunnlagDiff iayGrunnlagDiff, StartpunktType startpunktType) {
+        return startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref) ? !StartpunktType.UDEFINERT.equals(startpunktType) : iayGrunnlagDiff.erEndringPåInntektsmelding();
     }
 
     private void leggTilStartpunkt(List<StartpunktType> startpunkter, UUID grunnlagId1, UUID grunnlagId2, StartpunktType startpunkt, String endringLoggtekst) {
