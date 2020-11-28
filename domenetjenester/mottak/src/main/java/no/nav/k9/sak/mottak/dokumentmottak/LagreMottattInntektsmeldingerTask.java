@@ -57,7 +57,7 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
 
         var journalpostIder = Arrays.asList(input.getPropertyValue(MOTTATT_DOKUMENT).split(",")).stream().map(s -> new JournalpostId(s)).collect(Collectors.toCollection(LinkedHashSet::new));
 
-        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);
+        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG);
 
         var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(mottatteDokumenter);
 

@@ -95,7 +95,6 @@ class LagreOppgittOpptjening {
         }
 
         if (erNyeOpplysninger) {
-            // FIXME K9: håndter lagring i egen task så det blir robust kall til abakus
             iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
         }
     }

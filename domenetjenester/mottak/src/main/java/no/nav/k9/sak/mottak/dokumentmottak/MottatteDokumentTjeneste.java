@@ -90,7 +90,7 @@ public class MottatteDokumentTjeneste {
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
-            mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTAR);// setter status MOTTAR; oppdatres senere til GYLDIG når er lagret i Abakus
+            mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);// setter status MOTTATT; oppdatres senere til GYLDIG når er lagret i Abakus
         }
 
         var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -115,7 +115,7 @@ public class MottatteDokumentTjeneste {
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
-        MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument);
+        MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);
         return mottattDokument.getId();
     }
 

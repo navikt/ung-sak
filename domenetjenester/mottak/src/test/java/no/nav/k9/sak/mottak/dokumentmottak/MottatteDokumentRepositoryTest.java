@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -100,11 +101,11 @@ public class MottatteDokumentRepositoryTest {
 
         // Opprett og lagre MottateDokument
         dokument1 = lagMottatteDokument(beh1, Brevkode.INNTEKTSMELDING, payload);
-        mottatteDokumentRepository.lagre(dokument1);
+        mottatteDokumentRepository.lagre(dokument1, DokumentStatus.GYLDIG);
 
         // Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
         dokument2 = lagMottatteDokument(beh2, Brevkode.INNTEKTSMELDING, payload);
-        mottatteDokumentRepository.lagre(dokument2);
+        mottatteDokumentRepository.lagre(dokument2, DokumentStatus.GYLDIG);
     }
 
     @Test

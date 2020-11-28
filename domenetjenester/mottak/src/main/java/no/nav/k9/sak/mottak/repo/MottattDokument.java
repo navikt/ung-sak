@@ -84,7 +84,7 @@ public class MottattDokument extends BaseEntitet {
 
     @Convert(converter = DokumentStatusKodeverdiConverter.class)
     @Column(name = "status", nullable = false)
-    private DokumentStatus status = DokumentStatus.GYLDIG;
+    private DokumentStatus status = DokumentStatus.MOTTATT;
 
     @Column(name = "feilmelding")
     private String feilmelding;
