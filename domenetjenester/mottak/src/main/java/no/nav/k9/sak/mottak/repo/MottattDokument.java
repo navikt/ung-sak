@@ -233,7 +233,7 @@ public class MottattDokument extends BaseEntitet {
         setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
     }
 
-    private void setStatus(DokumentStatus status) {
+    void setStatus(DokumentStatus status) {
         this.status = Objects.requireNonNull(status, "status");
     }
 
