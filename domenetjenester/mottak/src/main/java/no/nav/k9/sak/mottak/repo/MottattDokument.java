@@ -84,7 +84,7 @@ public class MottattDokument extends BaseEntitet {
 
     @Convert(converter = DokumentStatusKodeverdiConverter.class)
     @Column(name = "status", nullable = false)
-    private DokumentStatus status = DokumentStatus.GYLDIG;
+    private DokumentStatus status = DokumentStatus.MOTTATT;
 
     @Column(name = "feilmelding")
     private String feilmelding;
@@ -233,7 +233,7 @@ public class MottattDokument extends BaseEntitet {
         setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
     }
 
-    private void setStatus(DokumentStatus status) {
+    void setStatus(DokumentStatus status) {
         this.status = Objects.requireNonNull(status, "status");
     }
 

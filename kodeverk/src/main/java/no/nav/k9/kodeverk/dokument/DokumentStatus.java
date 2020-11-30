@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -22,7 +23,11 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentStatus implements Kodeverdi {
     
+    /** Dokument mottatt og validert gyldig. */
     GYLDIG("GYLDIG", "Gyldig"),
+    /** Dokument mottatt, ikke godtatt for behandling ennå (må sette til GYLDIG først). */
+    MOTTATT("MOTTATT", "Mottar"),
+    /** Dokument vurdert som ugyldig. */
     UGYLDIG("UGYLDIG", "Ugyldig"),
     ;
 
