@@ -43,6 +43,11 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     @JsonProperty(value = "arbeidsforhold")
     private ArbeidsforholdIdDto arbeidsforhold;
 
+    @JsonProperty(value = "yrkestittel")
+    @Size(max = 400)
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String yrkestittel = "Ukjent";
+
     @JsonProperty(value = "begrunnelse")
     @Size(max = 400)
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -188,7 +193,6 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
         this.inntektsmeldinger = inntektsmeldinger;
     }
 
-
     public void leggTilInntektsmelding(MottattInntektsmeldingDto inntektsmelding) {
         Objects.requireNonNull(inntektsmelding);
         if (this.inntektsmeldinger == null) {
@@ -196,4 +200,13 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
         }
         this.inntektsmeldinger.add(inntektsmelding);
     }
+
+    public String getYrkestittel() {
+        return yrkestittel;
+    }
+
+    public void setYrkestittel(String yrkestittel) {
+        this.yrkestittel = yrkestittel;
+    }
+
 }
