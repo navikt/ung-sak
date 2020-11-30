@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.behandling;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -10,47 +11,59 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
+@JsonInclude(value = Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class FagsakDto {
-
-    @JsonProperty(value = "endret")
-    private LocalDateTime endret;
-
-    @JsonProperty(value = "kanRevurderingOpprettes")
-    private Boolean kanRevurderingOpprettes;
-
-    @JsonProperty(value = "opprettet", required = true)
-    @NotNull
-    private LocalDateTime opprettet;
-
-    @JsonProperty(value = "person", required = true)
-    @NotNull
-    @Valid
-    private PersonDto person;
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
     private Saksnummer saksnummer;
 
     @JsonProperty(value = "sakstype", required = true)
+    @Valid
     @NotNull
     private FagsakYtelseType sakstype;
+
+    @JsonProperty(value = "gyldigPeriode", required = false)
+    @Valid
+    private Periode gyldigPeriode;
+
+    @JsonProperty(value = "status")
+    @Valid
+    private FagsakStatus status;
+
+    @JsonProperty(value = "kanRevurderingOpprettes")
+    private Boolean kanRevurderingOpprettes;
 
     @JsonProperty(value = "skalBehandlesAvInfotrygd")
     private Boolean skalBehandlesAvInfotrygd;
 
-    @JsonProperty(value = "status", required = true)
-    @NotNull
-    private FagsakStatus status;
+    @JsonProperty(value = "opprettet")
+    private LocalDateTime opprettet;
+
+    @JsonProperty(value = "endret")
+    private LocalDateTime endret;
+
+    @JsonProperty(value = "person", required = false)
+    @Valid
+    private PersonDto person;
+
+    @JsonProperty(value = "pleietrengendeAktørId", required = false)
+    @Valid
+    private AktørId pleietrengendeAktørId;
 
     public FagsakDto() {
         // Injiseres i test
@@ -59,7 +72,9 @@ public class FagsakDto {
     public FagsakDto(Saksnummer saksnummer,
                      FagsakYtelseType ytelseType,
                      FagsakStatus status,
+                     Periode periode,
                      PersonDto person,
+                     AktørId pleietrengendeAktørId,
                      Boolean kanRevurderingOpprettes,
                      Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
@@ -67,7 +82,9 @@ public class FagsakDto {
         this.saksnummer = saksnummer;
         this.sakstype = ytelseType;
         this.status = status;
+        this.gyldigPeriode = periode;
         this.person = person;
+        this.pleietrengendeAktørId = pleietrengendeAktørId;
         this.opprettet = opprettetTidspunkt;
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
@@ -81,19 +98,22 @@ public class FagsakDto {
         if (!(o instanceof FagsakDto))
             return false;
 
-        FagsakDto fagsakDto = (FagsakDto) o;
+        var other = (FagsakDto) o;
 
-        if (!saksnummer.equals(fagsakDto.saksnummer))
+        if (!saksnummer.equals(other.saksnummer))
             return false;
-        if (!sakstype.equals(fagsakDto.sakstype))
+        if (!sakstype.equals(other.sakstype))
             return false;
-        if (!status.equals(fagsakDto.status))
+        if (!status.equals(other.status))
             return false;
-        if (!person.equals(fagsakDto.person))
+        if (!person.equals(other.person))
             return false;
-        if (opprettet != null ? !opprettet.equals(fagsakDto.opprettet) : fagsakDto.opprettet != null)
+        if (opprettet != null ? !opprettet.equals(other.opprettet) : other.opprettet != null)
             return false;
-        return endret != null ? endret.equals(fagsakDto.endret) : fagsakDto.endret == null;
+        if (!Objects.equals(gyldigPeriode, other.gyldigPeriode))
+            return false;
+
+        return endret != null ? endret.equals(other.endret) : other.endret == null;
     }
 
     public LocalDateTime getEndret() {
@@ -136,6 +156,7 @@ public class FagsakDto {
         result = 31 * result + person.hashCode();
         result = 31 * result + (opprettet != null ? opprettet.hashCode() : 0);
         result = 31 * result + (endret != null ? endret.hashCode() : 0);
+        result = 31 * result + (gyldigPeriode != null ? gyldigPeriode.hashCode() : 0);
         return result;
     }
 
@@ -173,12 +194,13 @@ public class FagsakDto {
 
     @Override
     public String toString() {
-        return "<saksnummer=" + saksnummer + //$NON-NLS-1$
-            ", sakstype=" + sakstype + //$NON-NLS-1$
-            ", status=" + status + //$NON-NLS-1$
-            ", person=" + person + //$NON-NLS-1$
-            ", opprettet=" + opprettet + //$NON-NLS-1$
-            ", endret=" + endret + //$NON-NLS-1$
+        return "<saksnummer=" + saksnummer +
+            ", sakstype=" + sakstype +
+            ", status=" + status +
+            ", gyldigPeriode=" + gyldigPeriode +
+            ", person=" + person +
+            ", opprettet=" + opprettet +
+            ", endret=" + endret +
             ">";
     }
 

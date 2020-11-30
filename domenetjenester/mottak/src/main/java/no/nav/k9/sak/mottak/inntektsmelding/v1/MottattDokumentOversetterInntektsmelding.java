@@ -17,9 +17,8 @@ import javax.xml.bind.JAXBElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.NaturalytelseKodeliste;
-import no.nav.inntektsmelding.xml.kodeliste._2018xxyy.ÅrsakInnsendingKodeliste;
-import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.BegrunnelseIngenEllerRedusertUtbetalingKodeliste;
+import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.NaturalytelseKodeliste;
+import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.ÅrsakInnsendingKodeliste;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
@@ -42,7 +41,6 @@ import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.EndringIRefusjonsListe;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.NaturalytelseDetaljer;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Periode;
-import no.seres.xsd.nav.inntektsmelding_m._20180924.Skjemainnhold;
 
 @NamespaceRef(InntektsmeldingConstants.NAMESPACE)
 @ApplicationScoped
@@ -94,35 +92,19 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
 
         builder.medNærRelasjon(wrapper.getErNærRelasjon());
         builder.medInntektsmeldingaarsak(innsendingsårsak);
+        builder.medStartDatoPermisjon(wrapper.getStartDatoPermisjon().orElse(null));
 
         mapArbeidsforholdOgBeløp(wrapper, builder);
         mapNaturalYtelser(wrapper, builder);
         mapFerie(wrapper, builder);
         List<PeriodeAndel> oppgittFravær = wrapper.getOppgittFravær();
-        boolean ikkeFravær = markertIkkeFravær(skjemainnhold);
-        if (ikkeFravær) {
+        if (wrapper.markertIkkeFravær()) {
             log.info("Mottatt inntektsmelding [kanalreferanse={}] markert IkkeFravaer [journalpostid={}]", builder.getKanalreferanse(), journalpostId);
         } else {
             mapRefusjon(wrapper, builder);
             builder.medOppgittFravær(oppgittFravær);
         }
         return builder;
-    }
-
-    private boolean markertIkkeFravær(Skjemainnhold skjemainnhold) {
-        String begrunnelseForReduksjonIkkeUtbetalt = getBegrunnelseForReduksjonIkkeUtbetalt(skjemainnhold);
-        return BegrunnelseIngenEllerRedusertUtbetalingKodeliste.IKKE_FRAVAER.value().equals(begrunnelseForReduksjonIkkeUtbetalt); // magic constant i IM spesifikasjon
-    }
-
-    private String getBegrunnelseForReduksjonIkkeUtbetalt(Skjemainnhold skjemainnhold) {
-        var sykepenger = skjemainnhold.getSykepengerIArbeidsgiverperioden();
-        if (sykepenger != null && sykepenger.getValue() != null) {
-            var sykepengerIArbeisgiverPerioden = sykepenger.getValue();
-            return sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt() == null ? null
-                : sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt().getValue();
-        } else {
-            return null;
-        }
     }
 
     private void mapArbeidsforholdOgBeløp(MottattDokumentWrapperInntektsmelding wrapper, InntektsmeldingBuilder builder) {
@@ -134,8 +116,7 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
                 var arbeidsforholdRef = EksternArbeidsforholdRef.ref(arbeidsforholdId.getValue());
                 builder.medArbeidsforholdId(arbeidsforholdRef);
             }
-            builder.medBeløp(validator.validerRefusjonMaks("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()))
-                .medStartDatoPermisjon(wrapper.getStartDatoPermisjon().orElse(null));
+            builder.medBeløp(validator.validerRefusjonMaks("arbeidsforhold.beregnetInntekt", arbeidsforholdet.getBeregnetInntekt().getValue().getBeloep().getValue()));
         } else {
             throw InntektsmeldingFeil.FACTORY.manglendeInformasjon().toException();
         }

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
 
+import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.BegrunnelseIngenEllerRedusertUtbetalingKodeliste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.mottak.inntektsmelding.MapYtelseTypeFraInntektsmelding;
@@ -100,20 +101,23 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
     public Optional<LocalDate> getStartDatoPermisjon() {
         FagsakYtelseType ytelseType = getYtelse();
         switch (ytelseType) {
-            case PLEIEPENGER_SYKT_BARN:
-            case SVANGERSKAPSPENGER:
-                return Optional.ofNullable(getSkjemaInnhold().getArbeidsforhold().getValue().getFoersteFravaersdag()).map(JAXBElement::getValue);
             case OMSORGSPENGER:
-                return Optional.empty();
+                return markertIkkeFravær() ? getFørsteFraværsdag() : Optional.empty();
             case OPPLÆRINGSPENGER:
-                return Optional.empty();
+            case PLEIEPENGER_SYKT_BARN:
             case PLEIEPENGER_NÆRSTÅENDE:
-                return Optional.empty();
-            case FORELDREPENGER:
-                return Optional.ofNullable(getSkjemaInnhold().getStartdatoForeldrepengeperiode().getValue());
+                return getFørsteFraværsdag();
             default:
                 return Optional.empty();
         }
+    }
+
+    public Optional<LocalDate> getFørsteFraværsdag() {
+        var arbeidsforhold = getSkjemaInnhold().getArbeidsforhold();
+        if (arbeidsforhold != null) {
+            return Optional.ofNullable(arbeidsforhold.getValue()).map(Arbeidsforhold::getFoersteFravaersdag).map(JAXBElement::getValue);
+        }
+        return Optional.empty();
     }
 
     private Skjemainnhold getSkjemaInnhold() {
@@ -145,6 +149,17 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
             .orElse(Collections.emptyList());
     }
 
+    private String getBegrunnelseForReduksjonIkkeUtbetalt(Skjemainnhold skjemainnhold) {
+        var sykepenger = skjemainnhold.getSykepengerIArbeidsgiverperioden();
+        if (sykepenger != null && sykepenger.getValue() != null) {
+            var sykepengerIArbeisgiverPerioden = sykepenger.getValue();
+            return sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt() == null ? null
+                : sykepengerIArbeisgiverPerioden.getBegrunnelseForReduksjonEllerIkkeUtbetalt().getValue();
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Hvis inntektsmeldingen kommer fra Altinn (innsendingstidspunkt ikke oppgitt), bruker vi
      * tilnæringen "LocalDateTime.now()", selv om riktig innsendingstidspunkt er arkiveringstidspunkt i joark.
@@ -157,5 +172,15 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
 
     public String getAvsendersystem() {
         return getSkjemaInnhold().getAvsendersystem().getSystemnavn();
+    }
+
+    public boolean markertIkkeFravær() {
+        var kode = BegrunnelseIngenEllerRedusertUtbetalingKodeliste.IKKE_FRAVAER;// magic constant i IM spesifikasjon
+        return markertBegrunnelseIngenEllerRedusertUtbetaling(kode);
+    }
+
+    public boolean markertBegrunnelseIngenEllerRedusertUtbetaling(BegrunnelseIngenEllerRedusertUtbetalingKodeliste kode) {
+        String begrunnelseForReduksjonIkkeUtbetalt = getBegrunnelseForReduksjonIkkeUtbetalt(getSkjemaInnhold());
+        return kode.value().equals(begrunnelseForReduksjonIkkeUtbetalt);
     }
 }
