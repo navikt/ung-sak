@@ -38,7 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <felles.version>2.4.0-20201109082002-8d5de30</felles.version>
+        <felles.version>2.4.0-20201130080833-172bcb2</felles.version>
 
         <fp-kontrakter.version>5.1-20201105192657-fa0dd2a</fp-kontrakter.version>
         <k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
