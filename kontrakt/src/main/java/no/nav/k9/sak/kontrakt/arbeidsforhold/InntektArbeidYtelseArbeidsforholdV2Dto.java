@@ -85,7 +85,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     public InntektArbeidYtelseArbeidsforholdV2Dto(Arbeidsgiver arbeidsgiver, ArbeidsforholdIdDto arbeidsforhold) {
         this.arbeidsgiver = Objects.requireNonNull(arbeidsgiver, "arbeidsgiver");
         this.arbeidsforhold = arbeidsforhold;
-        this.id = arbeidsgiver.getIdentifikator() + "-" + (arbeidsforhold != null ? arbeidsforhold.getInternArbeidsforholdId().toString() : null);
+        this.id = arbeidsgiver.getIdentifikator() + "-" + (arbeidsforhold != null && arbeidsforhold.getInternArbeidsforholdId() != null ? arbeidsforhold.getInternArbeidsforholdId().toString() : null);
     }
 
     public String getBegrunnelse() {

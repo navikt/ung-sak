@@ -91,8 +91,8 @@ public class ArbeidsforholdAdministrasjonTjeneste {
      * Rydder opp i inntektsmeldinger som blir erstattet
      *
      * @param behandlingId behandlingId
-     * @param aktørId aktørId
-     * @param builder ArbeidsforholdsOverstyringene som skal lagrers
+     * @param aktørId      aktørId
+     * @param builder      ArbeidsforholdsOverstyringene som skal lagrers
      */
     public void lagre(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder) {
         inntektArbeidYtelseTjeneste.lagreArbeidsforhold(behandlingId, aktørId, builder);
