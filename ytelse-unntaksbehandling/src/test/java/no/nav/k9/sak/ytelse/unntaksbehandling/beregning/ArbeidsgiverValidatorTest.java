@@ -20,6 +20,7 @@ public class ArbeidsgiverValidatorTest {
     private static final String GYLDIG_ORGNR = "910909088";
     private static final String UGYLDIG_ORGNR = "123456789";
     private static final String UKJENT_ORGNR = "979312059";
+    private static final String ORGNR_VIRKSOMHETSTJENESTE_FEILER = "890484832";
 
     private static final String AKTØRID_IDENT1 = "1234567890123";
     private static final String AKTØRID_IDENT2 = "1234567890124";
@@ -38,10 +39,12 @@ public class ArbeidsgiverValidatorTest {
         ArbeidsgiverOpplysninger opplysningerForGyldigOrgnr = new ArbeidsgiverOpplysninger(GYLDIG_ORGNR, "Bedrift 1");
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(GYLDIG_ORGNR)))).thenReturn(opplysningerForGyldigOrgnr);
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(UKJENT_ORGNR)))).thenReturn(null);
+        when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(ORGNR_VIRKSOMHETSTJENESTE_FEILER)))).thenThrow(new RuntimeException("Oppslag mot virksomhetstjeneste feilet"));
 
         assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR, null));
         assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UGYLDIG_ORGNR, null));
         assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR, null));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER, null));
     }
 
     @Test

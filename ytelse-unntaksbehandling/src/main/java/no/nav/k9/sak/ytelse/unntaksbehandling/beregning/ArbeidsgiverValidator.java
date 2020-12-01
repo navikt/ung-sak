@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -61,13 +62,14 @@ class ArbeidsgiverValidator {
             throw FACTORY.ugyldigOrgnummer(identifikator).toException();
         }
 
+        ArbeidsgiverOpplysninger arbeidsgiverOpplysninger;
         try {
-            var arbeidsgiverOpplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(identifikator));
-            if (arbeidsgiverOpplysninger == null) {
-                throw FACTORY.ukjentOrgnummer(identifikator).toException();
-            }
+            arbeidsgiverOpplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(identifikator));
         } catch (RuntimeException e) {
             throw FACTORY.ukjentOrgnummer(identifikator, e).toException();
+        }
+        if (arbeidsgiverOpplysninger == null) {
+            throw FACTORY.ukjentOrgnummer(identifikator).toException();
         }
 
     }
