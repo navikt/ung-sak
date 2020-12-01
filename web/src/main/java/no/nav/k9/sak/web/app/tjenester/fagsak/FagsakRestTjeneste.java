@@ -5,6 +5,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -140,11 +141,12 @@ public class FagsakRestTjeneste {
             .filter(f -> f.getPleietrengendeAktørId() == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
             .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
             .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
+            .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
             .findFirst();
 
         return fagsak.isPresent()
             ? Response.ok(tilFagsakDto(null, fagsak.get())).build()
-            : Response.status(Status.NOT_FOUND).build();
+            : Response.status(Status.NO_CONTENT).build();
     }
 
     @POST
