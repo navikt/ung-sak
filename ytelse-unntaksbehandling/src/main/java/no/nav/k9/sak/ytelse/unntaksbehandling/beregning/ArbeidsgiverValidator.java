@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -61,10 +62,16 @@ class ArbeidsgiverValidator {
             throw FACTORY.ugyldigOrgnummer(identifikator).toException();
         }
 
-        var arbeidsgiverOpplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(identifikator));
+        ArbeidsgiverOpplysninger arbeidsgiverOpplysninger;
+        try {
+            arbeidsgiverOpplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(identifikator));
+        } catch (RuntimeException e) {
+            throw FACTORY.ukjentOrgnummer(identifikator, e).toException();
+        }
         if (arbeidsgiverOpplysninger == null) {
             throw FACTORY.ukjentOrgnummer(identifikator).toException();
         }
+
     }
 
     private void validerAktørId(String identifikator, AktørId fagsakAktørId) {
@@ -82,6 +89,9 @@ class ArbeidsgiverValidator {
 
         @FunksjonellFeil(feilkode = "K9-187651", feilmelding = "Arbeidsgiver for andel finnes ikke i Enhetsregisteret: %s", løsningsforslag = "", logLevel = INFO)
         Feil ukjentOrgnummer(String feilmelding);
+
+        @FunksjonellFeil(feilkode = "K9-886241", feilmelding = "Arbeidsgiver for andel finnes ikke i Enhetsregisteret: %s", løsningsforslag = "", logLevel = INFO)
+        Feil ukjentOrgnummer(String feilmelding, Throwable e);
 
         @FunksjonellFeil(feilkode = "K9-146118", feilmelding = "Arbeidsgiver for andel er verken orgnummer eller bruker. Ident mottatt: %s", løsningsforslag = "", logLevel = INFO)
         Feil ukjentIdentifikator(String feilmelding);
