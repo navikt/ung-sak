@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.9.0</simple.client.version>
-        <swagger-ui.version>3.37.0</swagger-ui.version>
+        <swagger-ui.version>3.37.2</swagger-ui.version>
         <resteasy.version>4.5.8.Final</resteasy.version>
     </properties>
 
