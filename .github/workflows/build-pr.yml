@@ -54,7 +54,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          mvn package --batch-mode --file pom.xml -DtrimStackTrace=false
+          mvn verify -U --batch-mode --file pom.xml -DtrimStackTrace=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
