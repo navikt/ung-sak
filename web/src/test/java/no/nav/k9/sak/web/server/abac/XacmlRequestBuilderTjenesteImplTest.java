@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.server.abac;
 
+import no.nav.k9.abac.BeskyttetRessursKoder;
 import no.nav.vedtak.sikkerhet.abac.*;
 import no.nav.vedtak.sikkerhet.pdp.PdpConsumer;
 import no.nav.vedtak.sikkerhet.pdp.PdpKlientImpl;
@@ -139,9 +140,9 @@ public class XacmlRequestBuilderTjenesteImplTest {
 
     private PdpRequest lagPdpRequest() {
         PdpRequest request = new PdpRequest();
-        request.put(NavAbacCommonAttributter.RESOURCE_FELLES_DOMENE, "foreldrepenger");
+        request.put(NavAbacCommonAttributter.RESOURCE_FELLES_DOMENE, "omsorgspenger");
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, BeskyttetRessursActionAttributt.READ.getEksternKode());
-        request.put(NavAbacCommonAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursResourceAttributt.FAGSAK.getEksternKode());
+        request.put(NavAbacCommonAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         return request;
     }
 
