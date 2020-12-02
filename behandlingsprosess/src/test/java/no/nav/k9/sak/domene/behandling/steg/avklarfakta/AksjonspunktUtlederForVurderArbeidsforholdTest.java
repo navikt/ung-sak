@@ -47,13 +47,13 @@ import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 
 @ExtendWith(CdiAwareExtension.class)

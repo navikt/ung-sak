@@ -21,8 +21,8 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.OppgaveIdDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
+import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.testutilities.Whitebox;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 
 @SuppressWarnings({ "deprecation", "resource" })

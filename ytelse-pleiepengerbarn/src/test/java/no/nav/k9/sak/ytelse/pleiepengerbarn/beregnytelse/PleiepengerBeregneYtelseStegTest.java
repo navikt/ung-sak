@@ -45,6 +45,7 @@ import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
@@ -52,7 +53,6 @@ import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.util.Tuple;
 
 @ExtendWith(CdiAwareExtension.class)

@@ -1,10 +1,11 @@
 package no.nav.k9.sak.behandlingskontroll;
 
+import java.util.Objects;
+
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.vedtak.util.Objects;
 
 /**
  * Brukes for intern håndtering av flyt på et steg. Inneholder kode for stegets nye status. Hvis status er fremoverføring,
@@ -41,11 +42,13 @@ public class StegProsesseringResultat {
     }
 
     static void validerKombinasjon(BehandlingStegStatus nyStegStatus, BehandlingStegType målsteg) {
-        Objects.check(nyStegStatus != null, "resultat må være satt"); //$NON-NLS-1$
+        Objects.requireNonNull(nyStegStatus, "resultat må være satt"); //$NON-NLS-1$
         if (BehandlingStegStatus.FREMOVERFØRT.equals(nyStegStatus)) {
-            Objects.check(målsteg != null, "målsteg må være satt ved fremoverføring"); //$NON-NLS-1$
+            Objects.requireNonNull(målsteg, "målsteg må være satt ved fremoverføring"); //$NON-NLS-1$
         } else {
-            Objects.check(målsteg == null, "målsteg skal ikke være satt ved resultat " + nyStegStatus.getKode()); //$NON-NLS-1$
+            if (målsteg != null) {
+                throw new IllegalArgumentException("målsteg skal ikke være satt ved resultat " + nyStegStatus.getKode());
+            }
         }
     }
 }

@@ -28,7 +28,6 @@ import no.nav.k9.abac.BeskyttetRessursKoder;
 import no.nav.vedtak.sikkerhet.abac.AbacDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursResourceAttributt;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 /**
@@ -115,14 +114,11 @@ public class RestApiAbacTest {
         BeskyttetRessurs annotation = metode.getAnnotation(BeskyttetRessurs.class);
         if (annotation != null) {
             if (annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
-                    + BeskyttetRessursActionAttributt.class.getSimpleName());
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for action()");
             } else if (annotation.property() != null && !"".equals(annotation.property())) {
                 return; // ok
-            } else if (annotation.resource().isEmpty() &&
-                annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for "
-                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+            } else if (annotation.resource().isEmpty()) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk Dtom verdi for resource()");
             }
         }
     }
@@ -139,15 +135,14 @@ public class RestApiAbacTest {
             return; // ok
         }
 
-        if (annotation != null && annotation.ressurs() == BeskyttetRessursResourceAttributt.DUMMY) {
+        if (annotation != null && annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
             if (annotation.resource().isEmpty()) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for "
-                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for resource()");
             }
 
             if (!konstanter.contains(annotation.resource())) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Bruk verdi fra kodeliste for "
-                    + BeskyttetRessursResourceAttributt.class.getSimpleName());
+                    + BeskyttetRessursKoder.class.getSimpleName());
             }
         }
     }
