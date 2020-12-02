@@ -36,7 +36,6 @@ public class FinnSak {
 
     @JsonProperty(value = "periode", required = false)
     @Valid
-    @NotNull
     private Periode periode;
 
     @JsonCreator
