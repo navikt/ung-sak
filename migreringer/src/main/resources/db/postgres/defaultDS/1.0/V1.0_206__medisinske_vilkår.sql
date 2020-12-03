@@ -1,20 +1,22 @@
-create table if not exists PERSON
+create table if not exists SYKDOM_PERSON
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
     AKTOER_ID     VARCHAR(50)                            NOT NULL UNIQUE,
     NORSK_IDENTITETSNUMMER  VARCHAR(50)                  NOT NULL UNIQUE
 );
+create sequence if not exists SEQ_SYKDOM_PERSON increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERINGER
 (
-    ID            BIGINT                                 NOT NULL PRIMARY KEY,
-    PERSON_ID     BIGINT                                NOT NULL,
+    ID              BIGINT                               NOT NULL PRIMARY KEY,
+    SYK_PERSON_ID   BIGINT                               NOT NULL,
 
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT FK_SYKDOM_VURDERINGER_01
-        FOREIGN_KEY(PERSON_ID) REFERENCES PERSON(ID)
+        FOREIGN_KEY(SYK_PERSON_ID) REFERENCES PERSON(ID)
 );
+create sequence if not exists SEQ_SYKDOM_VURDERINGER increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERING
 (
@@ -33,6 +35,7 @@ create table if not exists SYKDOM_VURDERING
         SYKDOM_VURDERING_RANGERING,
         TYPE)
 );
+create sequence if not exists SEQ_SYKDOM_VURDERING increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERING_VERSJON
 (
@@ -54,6 +57,7 @@ create table if not exists SYKDOM_VURDERING_VERSJON
         FOREIGN KEY(ENDRET_FOR_PERSON_ID) REFERENCES PERSON(ID)
     UNIQUE(SYKDOM_VURDERING_ID, VERSJON)
 );
+create sequence if not exists SEQ_SYKDOM_VURDERING_VERSJON increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERING_VERSJON_BESLUTTET
 (
@@ -65,6 +69,7 @@ create table if not exists SYKDOM_VURDERING_VERSJON_BESLUTTET
     CONSTRAINT FK_SYKDOM_VURDERING_VERSJON_BESLUTTET_01
         FOREIGN KEY(SYKDOM_VURDERING_VERSJON_ID) REFERENCES SYKDOM_VURDERING_VERSJON(ID)
 );
+create sequence if not exists SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_PERIODE
 (
@@ -78,6 +83,7 @@ create table if not exists SYKDOM_PERIODE
     CONSTRAINT FK_SYKDOM_PERIODE_01
         FOREIGN KEY(SYKDOM_VURDERING_VERSJON_ID) REFERENCES SYKDOM_VURDERING_VERSJON(ID)
 );
+create sequence if not exists SEQ_SYKDOM_PERIODE increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_DOKUMENT
 (
@@ -91,6 +97,7 @@ create table if not exists SYKDOM_DOKUMENT
     ENDRET_TID    TIMESTAMP(3)                          NOT NULL,
     UNIQUE(JOURNALPOST_ID, DOKUMENT_INFO_ID)
 );
+create sequence if not exists SEQ_SYKDOM_DOKUMENT increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERING_VERSJON_DOKUMENT
 (
@@ -105,6 +112,7 @@ create table if not exists SYKDOM_VURDERING_VERSJON_DOKUMENT
     CONSTRAINT FK_SYKDOM_VURDERING_VERSJON_DOKUMENT_02
         FOREIGN KEY(SYKDOM_VURDERING_VERSJON_ID) REFERENCES SYKDOM_VURDERING_VERSJON(ID)
 );
+create sequence if not exists SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT increment by 5 minvalue 1000000;
 
 ------------------------- SØKERS FAGSAK HERFRA
 
@@ -116,6 +124,7 @@ create table if not exists SYKDOM_GRUNNLAG
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+create sequence if not exists SEQ_SYKDOM_GRUNNLAG increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_GRUNNLAG_BEHANDLING
 (
@@ -136,6 +145,7 @@ create table if not exists SYKDOM_GRUNNLAG_BEHANDLING
     UNIQUE(BEHANDLING_UUID, VERSJON),
     UNIQUE(SAKSNUMMER, BEHANDLINGSNUMMER, VERSJON)
 );
+create sequence if not exists SEQ_SYKDOM_GRUNNLAG_BEHANDLING increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_GRUNNLAG_VURDERING
 (
@@ -150,6 +160,7 @@ create table if not exists SYKDOM_GRUNNLAG_VURDERING
     CONSTRAINT FK_SYKDOM_GRUNNLAG_VURDERING_02
         FOREIGN KEY(SYKDOM_VURDERING_VERSJON_ID) REFERENCES SYKDOM_VURDERING_VERSJON(ID)
 );
+create sequence if not exists SEQ_SYKDOM_GRUNNLAG_VURDERING increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_SOEKT_PERIODE
 (
@@ -163,6 +174,7 @@ create table if not exists SYKDOM_SOEKT_PERIODE
     CONSTRAINt FK_SYKDOM_SOEKT_PERIODE_01
         FOREIGN KEY(SYKDOM_GRUNNLAG_ID) REFERENCES SYKDOM_GRUNNLAG(ID)
 );
+create sequence if not exists SEQ_SYKDOM_SOEKT_PERIODE increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_REVURDERING_PERIODE
 (
@@ -176,3 +188,4 @@ create table if not exists SYKDOM_REVURDERING_PERIODE
     CONSTRAINt FK_SYKDOM_REVURDERING_PERIODE_01
         FOREIGN KEY(SYKDOM_GRUNNLAG_ID) REFERENCES SYKDOM_GRUNNLAG(ID)
 );
+create sequence if not exists SEQ_SYKDOM_REVURDERING_PERIODE increment by 5 minvalue 1000000;
