@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,7 +28,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     private final Period periodeFør = Period.parse("P36M");
 
     private UttakRepository uttakRepository;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
     private BehandlingRepository behandlingRepository;
 
     FrisinnSkjæringstidspunktTjenesteImpl() {
@@ -42,7 +40,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
                                                  UttakTjeneste uttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.uttakRepository = uttakRepository;
-        this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
     @Override
@@ -76,11 +73,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
             .orElseThrow(() -> new IllegalStateException("Mangler sønadsperiode for behandlingId=" + behandlingId));
 
         return søknadsperioder.getMaksPeriode().getFomDato();
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
 
     @Override
