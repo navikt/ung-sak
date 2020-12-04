@@ -14,7 +14,7 @@ create table if not exists SYKDOM_VURDERINGER
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT FK_SYKDOM_VURDERINGER_01
-        FOREIGN_KEY(SYK_PERSON_ID) REFERENCES PERSON(ID)
+        FOREIGN_KEY(SYK_PERSON_ID) REFERENCES SYKDOM_PERSON(ID)
 );
 create sequence if not exists SEQ_SYKDOM_VURDERINGER increment by 5 minvalue 1000000;
 
@@ -23,7 +23,7 @@ create table if not exists SYKDOM_VURDERING
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
     TYPE          VARCHAR(20)                           NOT NULL,
     SYKDOM_VURDERINGER_ID   BIGINT                      NOT NULL,
-    SYKDOM_VURDERINGER_RANGERING    BIGINT              NOT NULL,
+    RANGERING               BIGINT                      NOT NULL,
 
     VERSJON       BIGINT       DEFAULT 0                NOT NULL,
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
@@ -43,7 +43,6 @@ create table if not exists SYKDOM_VURDERING_VERSJON
     SYKDOM_VURDERING_ID     BIGINT                      NOT NULL,
     TEKST         VARCHAR(4000)                         NOT NULL,
     RESULTAT      VARCHAR(20)                           NOT NULL,
-    BESLUTTET_IVERKSATT BOOLEAN DEFAULT FALSE           NOT NULL,
 
     VERSJON       BIGINT       DEFAULT 0                NOT NULL,
     ENDRET_AV     VARCHAR(20)                           NOT NULL,
@@ -61,8 +60,7 @@ create sequence if not exists SEQ_SYKDOM_VURDERING_VERSJON increment by 5 minval
 
 create table if not exists SYKDOM_VURDERING_VERSJON_BESLUTTET
 (
-    SYKDOM_VURDERING_VERSJON_ID     BIGINT                  NOT NULL PRIMARY KEY,
-    BESLUTTET_IVERKSATT             BOOLEAN DEFAULT FALSE   NOT NULL,
+    "SYKDOM_VURDERING_VERSJON_ID"     BIGINT                  NOT NULL PRIMARY KEY,
 
     ENDRET_AV               VARCHAR(20)                 NOT NULL,
     ENDRET_TID              TIMESTAMP(3)                NOT NULL,
@@ -87,17 +85,31 @@ create sequence if not exists SEQ_SYKDOM_PERIODE increment by 5 minvalue 1000000
 
 create table if not exists SYKDOM_DOKUMENT
 (
-    ID                  BIGINT                          NOT NULL PRIMARY KEY,
-    JOURNALPOST_ID      VARCHAR(50)                    NOT NULL,
-    DOKUMENT_INFO_ID    VARCHAR(50)                    NOT NULL,
+    ID                  BIGINT                             NOT NULL PRIMARY KEY,
+    JOURNALPOST_ID      VARCHAR(50)                        NOT NULL,
+    DOKUMENT_INFO_ID    VARCHAR(50)                        NOT NULL,
     --variant?
-    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
-    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    ENDRET_AV     VARCHAR(20)                           NOT NULL,
-    ENDRET_TID    TIMESTAMP(3)                          NOT NULL,
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'                NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP   NOT NULL,
+    ENDRET_AV     VARCHAR(20)                              NOT NULL,
+    ENDRET_TID    TIMESTAMP(3)                             NOT NULL,
     UNIQUE(JOURNALPOST_ID, DOKUMENT_INFO_ID)
 );
 create sequence if not exists SEQ_SYKDOM_DOKUMENT increment by 5 minvalue 1000000;
+
+create table if not exists SYKDOM_DOKUMENT_SAK
+(
+    ID                  BIGINT                             NOT NULL PRIMARY KEY,
+    SYKDOM_DOKUMENT_ID  BIGINT                             NOT NULL,
+    SAK_PERSON_ID       BIGINT                             NOT NULL,
+    SAKSNUMMMER         VARCHAR(19)                        NOT NULL,
+
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'                NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP   NOT NULL,
+    CONSTRAINT FK_SYKDOM_DOKUMENT_SAK_01
+        FOREIGN KEY SYKDOM_DOKUMENT_ID REFERENCES SYKDOM_DOKUMENT(ID)
+);
+create sequence if not exists SEQ_SYKDOM_DOKUMENT_SAK increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_VURDERING_VERSJON_DOKUMENT
 (
