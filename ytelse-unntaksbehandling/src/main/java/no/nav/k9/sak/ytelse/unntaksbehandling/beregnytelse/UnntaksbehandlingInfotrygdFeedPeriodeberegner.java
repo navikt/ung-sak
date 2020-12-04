@@ -27,6 +27,7 @@ public class UnntaksbehandlingInfotrygdFeedPeriodeberegner implements InfotrygdF
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
 
+    @SuppressWarnings("unused")
     UnntaksbehandlingInfotrygdFeedPeriodeberegner() {
         // for CDI
     }
@@ -40,31 +41,11 @@ public class UnntaksbehandlingInfotrygdFeedPeriodeberegner implements InfotrygdF
 
     @Override
     public InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer) {
-        // Ansvar:
-        // Beregne periode (finn første og siste dato) som skal sendes til infotrygd for sjekk mot andre ytelser
-
-
-        // Vi skal sende vilkårsperiodens fom - tom som vår periode ved unntaksbehandling
-        // Vi må finne ut hvilken behandling vi jobber på.
-
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow();
-        // behandling er et inkrement - siste behandling inneholder "alle tidligere behandlinger"
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId()).orElseThrow();
-
-        // benytter ikke årskvantumTjeneste her, men baserer oss direkte på tilkjent ytelse.
-
-        // kan returnere empty
         Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(sisteBehandling.getId());
 
-        /*
-          Hvis det ikke finnes noen BeregningsresultatPeriode'er her så kan det skyldes:
-           1. Finnes ikke noe BehandlingBeregningsresultatEntitet (beregningsresultatAggregat)
-           2. Finnes ikke noe overstyrt- eller bg-beregningsresultat på BehandlingBeregningsresultatEntitet
-
-            Dersom dette ikke finnes så velger jeg forløpig å lage en InfotrygdFeedPeriode.annullert()
-         */
-
-        var infotrygdFeedPeriode = beregningsresultatAggregat
+        return beregningsresultatAggregat
             .map(
                 behandlingBeregningsresultatEntitet ->
                     ofNullable(behandlingBeregningsresultatEntitet.getOverstyrtBeregningsresultat())
@@ -77,8 +58,6 @@ public class UnntaksbehandlingInfotrygdFeedPeriodeberegner implements InfotrygdF
                 return new InfotrygdFeedPeriode(fraOgMed, tilOgMed);
             })
             .orElse(InfotrygdFeedPeriode.annullert());
-
-        return infotrygdFeedPeriode;
     }
 
     @Override
