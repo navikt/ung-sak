@@ -141,9 +141,12 @@ public class MottattDokumentOversetterInntektsmelding implements MottattInntekts
         var optionalRefusjon = wrapper.getRefusjon();
         if (optionalRefusjon.isPresent()) {
             var refusjon = optionalRefusjon.get();
-            BigDecimal refusjonsbeløp = refusjon.getRefusjonsbeloepPrMnd().getValue();
+            BigDecimal refusjonsbeløp = null;
+            if (refusjon.getRefusjonsbeloepPrMnd() != null) {
+                refusjonsbeløp = validator.validerRefusjonMaks("refusjon.refusjonsbeloepPrMnd", refusjon.getRefusjonsbeloepPrMnd().getValue());
+            }
             if (refusjon.getRefusjonsopphoersdato() != null) {
-                builder.medRefusjon(validator.validerRefusjonMaks("refusjon.refusjonsbeloepPrMnd", refusjonsbeløp), refusjon.getRefusjonsopphoersdato().getValue());
+                builder.medRefusjon(refusjonsbeløp, refusjon.getRefusjonsopphoersdato().getValue());
             } else if (refusjon.getRefusjonsbeloepPrMnd() != null) {
                 builder.medRefusjon(refusjonsbeløp);
             }
