@@ -16,6 +16,7 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
  * BeregningTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt (https://github.com/navikt/ft-kalkulus/)
@@ -30,7 +31,7 @@ public interface BeregningTjeneste {
      * @param ytelseGrunnlag - ytelsespesifikt grunnlag per skjæringstidspunkt
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag);
+    SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder);
 
     /**
      * Kjører en beregning videre fra gitt steg <br>
