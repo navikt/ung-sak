@@ -144,7 +144,7 @@ spec:
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app-q1.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
-      value: https://oppgave-q1.intern.dev.adeo.no/api/v1/oppgaver
+      value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: MEDL2_RS_URL
       value: https://app-q1.adeo.no/medl2/api/v1/medlemskapsunntak
 
