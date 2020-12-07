@@ -241,7 +241,7 @@ class FeedServiceMockHelper {
         }
 
         @Override
-        public String getInfotrygdYtelseKode() {
+        public String getInfotrygdYtelseKode(Saksnummer saksnummer) {
             return infotrygdYtelseKode;
         }
 

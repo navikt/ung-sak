@@ -6,8 +6,9 @@ public interface InfotrygdFeedPeriodeberegner {
 
     /**
      * Infotrygdkode for FagsakYtelseType som er støttet av denne periodeberegneren
+     * @param saksnummer for fagsaken
      */
-    String getInfotrygdYtelseKode();
+    String getInfotrygdYtelseKode(Saksnummer saksnummer);
 
     /**
      * For alle gjeldende perioder: beregn første fom-dato og siste tom-dato.

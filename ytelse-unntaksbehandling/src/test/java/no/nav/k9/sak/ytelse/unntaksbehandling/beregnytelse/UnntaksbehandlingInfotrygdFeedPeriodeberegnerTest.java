@@ -1,11 +1,16 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregnytelse;
 
+import static java.util.stream.Stream.of;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 import java.time.LocalDate;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,14 +31,10 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
-
     @Inject
     private EntityManager entityManager;
-
     private BeregningsresultatRepository beregningsresultatRepository;
-
     private UnntaksbehandlingInfotrygdFeedPeriodeberegner testSubject;
-    private TestScenarioBuilder scenario;
     private BehandlingRepository behandlingRepository;
 
     @BeforeEach
@@ -41,10 +42,6 @@ class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
         behandlingRepository = new BehandlingRepository(entityManager);
         FagsakRepository fagsakRepository = new FagsakRepository(entityManager);
         beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
-
-        scenario = TestScenarioBuilder
-            .builderMedSøknad(FagsakYtelseType.OMSORGSPENGER)
-            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
 
         testSubject = new UnntaksbehandlingInfotrygdFeedPeriodeberegner(fagsakRepository, behandlingRepository, beregningsresultatRepository);
     }
@@ -55,22 +52,80 @@ class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
         LocalDate for20DagerSiden = LocalDate.now().minusDays(20);
         LocalDate for15DagerSiden = LocalDate.now().minusDays(15);
 
-        scenario.medBehandlingVedtak();
+        TestScenarioBuilder builder = TestScenarioBuilder
+            .builderUtenSøknad()
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
 
-        Behandling behandling = scenario.lagre(entityManager);
+        builder.medBehandlingVedtak();
+
+        Behandling behandling = builder.lagre(entityManager);
         avsluttBehandling(behandling);
-        lagBeregningsresultatFor(
-            behandling,
-            for20DagerSiden,
-            for15DagerSiden
-        );
+        lagBeregningsresultatFor(behandling, for20DagerSiden, for15DagerSiden);
 
         // Act
         InfotrygdFeedPeriode infotrygdFeedPeriode = testSubject.finnInnvilgetPeriode(behandling.getFagsak().getSaksnummer());
 
         // Assert
-        Assertions.assertThat(infotrygdFeedPeriode.getFom()).isEqualTo(for20DagerSiden);
-        Assertions.assertThat(infotrygdFeedPeriode.getTom()).isEqualTo(for15DagerSiden);
+        assertThat(infotrygdFeedPeriode.getFom()).isEqualTo(for20DagerSiden);
+        assertThat(infotrygdFeedPeriode.getTom()).isEqualTo(for15DagerSiden);
+    }
+
+    @Test
+    void skal_utlede_ytelseskode_fra_ytelsetype_for_pleiepenger_sykt_barn() {
+        // Arrange
+        TestScenarioBuilder builder = TestScenarioBuilder
+            .builderUtenSøknad(PLEIEPENGER_SYKT_BARN)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        Behandling behandling = builder.lagre(entityManager);
+
+        // Act
+        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
+
+        // Assert
+        assertThat(infotrygdYtelseKode).isEqualTo("PN");
+
+
+    }
+
+    @Test
+    void skal_utlede_ytelseskode_fra_ytelsetype_for_omsorgspenger() {
+        // Arrange
+        TestScenarioBuilder builder = TestScenarioBuilder
+            .builderUtenSøknad(OMSORGSPENGER)
+            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+        Behandling behandling = builder.lagre(entityManager);
+
+        // Act
+        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
+
+        // Assert
+        assertThat(infotrygdYtelseKode).isEqualTo("OM");
+    }
+
+    @Test
+    void skal_ikke_støtte_utlede_ytelseskode_fra_ytelsetype_for_andre_ytelsetyper() {
+
+        of(FagsakYtelseType.values())
+            .filter(ytelse -> of(OMSORGSPENGER, PLEIEPENGER_SYKT_BARN).noneMatch(it -> it.equals(ytelse)))
+            .forEach(ikkeStøttetYtelseType ->
+                assertThatCode(() ->
+                    {
+                        // Arrange
+                        TestScenarioBuilder builder = TestScenarioBuilder
+                            .builderUtenSøknad(ikkeStøttetYtelseType)
+                            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+                        Behandling behandling = builder.lagre(entityManager);
+
+                        // Act
+                        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
+                    }
+                )
+                    // Assert
+                    .isInstanceOf(UnsupportedOperationException.class)
+                    .hasMessageContaining("Kan ikke utlede infotrygdytelsekode for ytelsetype")
+                    .hasMessageContaining(ikkeStøttetYtelseType.toString())
+                    .hasMessageContaining("mapping for dette mangler")
+            );
     }
 
     private void avsluttBehandling(Behandling behandling) {
