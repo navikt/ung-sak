@@ -81,9 +81,9 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
 
     private void setPeriodeOgYtelse(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
         InfotrygdFeedPeriodeberegner periodeBeregner = getInfotrygdFeedPeriodeBeregner(behandling);
-        builder.ytelse(periodeBeregner.getInfotrygdYtelseKode());
-
         Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
+        builder.ytelse(periodeBeregner.getInfotrygdYtelseKode(saksnummer));
+
         InfotrygdFeedPeriode periode = periodeBeregner.finnInnvilgetPeriode(saksnummer);
 
         LocalDate fom = periode.getFom();

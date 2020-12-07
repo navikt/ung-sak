@@ -115,8 +115,12 @@ public class InfotrygdFeedPeriodeberegnerTest {
     @ParameterizedTest
     @MethodSource("provideArguments")
     public void riktig_infotrygdkode(InfotrygdFeedPeriodeberegnerTestParametere param) {
-        assertThat(getBeregner(param).getInfotrygdYtelseKode()).isNotNull();
-        assertThat(getBeregner(param).getInfotrygdYtelseKode()).isEqualTo(param.infotrygdKode());
+        assertThat(getBeregner(param).getInfotrygdYtelseKode(etSaksnummer())).isNotNull();
+        assertThat(getBeregner(param).getInfotrygdYtelseKode(etSaksnummer())).isEqualTo(param.infotrygdKode());
+    }
+
+    private Saksnummer etSaksnummer() {
+        return new Saksnummer("12345");
     }
 
     private InfotrygdFeedPeriodeberegner getBeregner(InfotrygdFeedPeriodeberegnerTestParametere param) {

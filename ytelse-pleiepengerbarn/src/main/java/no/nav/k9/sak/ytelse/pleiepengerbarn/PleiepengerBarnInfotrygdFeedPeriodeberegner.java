@@ -60,7 +60,7 @@ public class PleiepengerBarnInfotrygdFeedPeriodeberegner implements InfotrygdFee
     }
 
     @Override
-    public String getInfotrygdYtelseKode() {
+    public String getInfotrygdYtelseKode(Saksnummer saksnummer) {
         return "PN";
     }
 }

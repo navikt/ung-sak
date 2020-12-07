@@ -35,7 +35,7 @@ public class OmsorgspengerInfotrygdFeedPeriodeberegner implements InfotrygdFeedP
     }
 
     @Override
-    public String getInfotrygdYtelseKode() {
+    public String getInfotrygdYtelseKode(Saksnummer saksnummer) {
         return "OM";
     }
 }
