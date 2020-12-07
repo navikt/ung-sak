@@ -20,6 +20,12 @@ public class SykdomGrunnlag {
     @Column(name = "SYKDOM_GRUNNLAG_UUID", nullable = false)
     private UUID sykdomGrunnlagUUID;
 
+    @OneToMany(mappedBy = "SYKDOM_GRUNNLAG_ID")
+    private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
+
+    @OneToMany(mappedBy = "SYKDOM_GRUNNLAG_ID")
+    private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
+
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
     private String opprettetAv;

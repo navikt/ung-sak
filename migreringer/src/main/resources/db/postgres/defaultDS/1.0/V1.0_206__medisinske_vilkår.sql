@@ -176,13 +176,13 @@ create sequence if not exists SEQ_SYKDOM_GRUNNLAG_VURDERING increment by 5 minva
 
 create table if not exists SYKDOM_SOEKT_PERIODE
 (
-    ID            BIGINT                                 NOT NULL PRIMARY KEY,
-    SYKDOM_GRUNNLAG_ID          BIGINT                      NOT NULL,
-    FOM             DATE                                NOT NULL,
-    TOM             DATE                                NOT NULL,
+    ID                  BIGINT                              NOT NULL PRIMARY KEY,
+    SYKDOM_GRUNNLAG_ID  BIGINT                              NOT NULL,
+    FOM                 DATE                                NOT NULL,
+    TOM                 DATE                                NOT NULL,
 
-    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
-    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'                 NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP    NOT NULL,
     CONSTRAINt FK_SYKDOM_SOEKT_PERIODE_01
         FOREIGN KEY(SYKDOM_GRUNNLAG_ID) REFERENCES SYKDOM_GRUNNLAG(ID)
 );
