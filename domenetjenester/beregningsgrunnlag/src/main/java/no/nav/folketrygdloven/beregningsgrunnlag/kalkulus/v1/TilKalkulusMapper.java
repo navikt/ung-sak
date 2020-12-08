@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -57,26 +56,7 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
-import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
-import no.nav.k9.sak.domene.iay.modell.Inntekt;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.InntektFilter;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
-import no.nav.k9.sak.domene.iay.modell.Inntektspost;
-import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
-import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
-import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
-import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
-import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.*;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -140,14 +120,14 @@ public class TilKalkulusMapper {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
-    private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, Collection<Yrkesaktivitet> yrkesaktiviteter, DatoIntervallEntitet vilkårsPeriode) {
         if (inntektsmeldingerOpt.isEmpty()) {
             return null;
         }
 
         // TODO: Skal vi ta hensyn til endringer i refusjonskrav så må dette konstrueres fra alle inntektsmeldingene som overlapper med perioden
         // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
-        List<Inntektsmelding> inntektsmeldingerForPerioden = utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
+        List<Inntektsmelding> inntektsmeldingerForPerioden = utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, vilkårsPeriode);
 
         List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
             Aktør aktør = mapTilAktør(inntektsmelding.getArbeidsgiver());
@@ -174,10 +154,10 @@ public class TilKalkulusMapper {
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
     }
 
-    static List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    static List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, Collection<Yrkesaktivitet> yrkesaktiviteter, DatoIntervallEntitet vilkårsPeriode) {
         var inntektsmeldingene = new ArrayList<Inntektsmelding>();
 
-        var alleInntektsmeldinger = hentInntektsmeldingerSomGjelderForVilkårsperiode(sakInntektsmeldinger, vilkårsPeriode);
+        var alleInntektsmeldinger = hentInntektsmeldingerSomGjelderForVilkårsperiode(sakInntektsmeldinger, yrkesaktiviteter, vilkårsPeriode);
         for (Inntektsmelding inntektsmelding : alleInntektsmeldinger) {
             if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)) {
                 inntektsmeldingene.add(inntektsmelding);
@@ -236,10 +216,11 @@ public class TilKalkulusMapper {
         return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
     }
 
-    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, Collection<Yrkesaktivitet> yrkesaktiviteter, DatoIntervallEntitet vilkårsPeriode) {
 
         return sakInntektsmeldinger
             .stream()
+            .filter(it -> yrkesaktiviteter.stream().anyMatch(at -> at.getArbeidsgiver().equals(it.getArbeidsgiver()) && (it.getArbeidsforholdRef().gjelderFor(at.getArbeidsforholdRef()))))
             .filter(it -> it.getOppgittFravær()
                 .stream()
                 .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
@@ -389,16 +370,17 @@ public class TilKalkulusMapper {
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
         Optional<AktørArbeid> arbeid = grunnlag.getAktørArbeidFraRegister(aktørId);
+        var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), arbeid);
 
         var inntektsmeldinger = grunnlag.getInntektsmeldinger();
-        var yrkesaktiviteterForBeregning = arbeid.map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList());
+        var yrkesaktiviteterForBeregning = yrkesaktivitetFilter.getAlleYrkesaktiviteter();
         var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
-        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
+        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger, sakInntektsmeldinger, yrkesaktivitetFilter.getYrkesaktiviteter(), vilkårsPeriode));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
         inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));

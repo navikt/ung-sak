@@ -6,15 +6,16 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.sak.domene.iay.modell.*;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -43,6 +44,10 @@ public class TilKalkulusMapperTest {
     @Test
     public void skal_utlede_inntektsmeldinger_som_gjelder_for_periode() {
         Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+            .medArbeidsgiver(virksomhet)
+            .build());
         var periode2327 = periode("03-23", "03-27");
         var periode0609 = periode("04-06", "04-09");
         var periode14 = periode("04-14", "04-14");
@@ -64,13 +69,17 @@ public class TilKalkulusMapperTest {
             .build();
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, vilkårsperiode2);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 
     @Test
     public void skal_utlede_inntektsmeldinger_som_gjelder_for_periode_2() {
         Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+            .medArbeidsgiver(virksomhet)
+            .build());
         var periode14 = periode("04-14", "04-14");
         var periode1216 = periode("04-12", "04-16");
         var periode1213 = periode("04-12", "04-13", Duration.ZERO);
@@ -101,14 +110,24 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, vilkårsperiode2);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode() {
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        Arbeidsgiver virksomhet2 = Arbeidsgiver.virksomhet("000000001");
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet)
+                .build(),
+            YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet2)
+                .build());
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
             .medJournalpostId("1")
@@ -119,7 +138,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.TEN)
             .build();
         var inntektsmelding2 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000001"))
+            .medArbeidsgiver(virksomhet2)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
@@ -130,7 +149,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
         var inntektsmelding3 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
@@ -141,7 +160,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
         var inntektsmelding4 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medArbeidsforholdId(EksternArbeidsforholdRef.nullRef())
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
@@ -157,19 +176,45 @@ public class TilKalkulusMapperTest {
 
         //assertThat(sortedInntektsmeldinger).has(sortedInntektsmeldinger);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode1);
 
         assertThat(relevanteInntektsmeldinger).containsSequence(inntektsmelding2, inntektsmelding3);
 
-        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
+        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode2);
         assertThat(relevanteInntektsmeldinger).containsSequence(inntektsmelding4);
     }
 
     @Test
     public void skal_filtrere_ut_inntektsmeldinger_som_ikke_gjelder_for_vilkårs_periode_2() {
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        Arbeidsgiver virksomhet2 = Arbeidsgiver.virksomhet("000000001");
+        var arbeidsforhold1 = InternArbeidsforholdRef.nyRef();
+        var arbeidsforhold2 = InternArbeidsforholdRef.nyRef();
+        var arbeidsforhold3 = InternArbeidsforholdRef.nyRef();
+        var arbeidsforhold4 = InternArbeidsforholdRef.nyRef();
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet)
+                .medArbeidsforholdId(arbeidsforhold1)
+                .build(),
+            YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet)
+                .medArbeidsforholdId(arbeidsforhold3)
+                .build(),
+            YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet)
+                .medArbeidsforholdId(arbeidsforhold4)
+                .build(),
+            YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .medArbeidsgiver(virksomhet2)
+                .medArbeidsforholdId(arbeidsforhold2)
+                .build());
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medArbeidsgiver(virksomhet)
+            .medArbeidsforholdId(arbeidsforhold1)
             .medArbeidsforholdId(EksternArbeidsforholdRef.ref("123"))
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
             .medJournalpostId("1")
@@ -179,8 +224,8 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.TEN)
             .build();
         var inntektsmelding2 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000001"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medArbeidsgiver(virksomhet2)
+            .medArbeidsforholdId(arbeidsforhold2)
             .medArbeidsforholdId(EksternArbeidsforholdRef.ref("123"))
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
             .medJournalpostId("2")
@@ -190,9 +235,9 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
         var inntektsmelding3 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
-            .medArbeidsforholdId(EksternArbeidsforholdRef.ref("123"))
+            .medArbeidsgiver(virksomhet)
+            .medArbeidsforholdId(arbeidsforhold3)
+            .medArbeidsforholdId(EksternArbeidsforholdRef.ref("1234"))
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
             .medJournalpostId("3")
             .medBeløp(BigDecimal.ONE)
@@ -201,9 +246,9 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.ONE)
             .build();
         var inntektsmelding4 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
-            .medArbeidsforholdId(EksternArbeidsforholdRef.ref("123"))
+            .medArbeidsgiver(virksomhet)
+            .medArbeidsforholdId(arbeidsforhold4)
+            .medArbeidsforholdId(EksternArbeidsforholdRef.ref("12345"))
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
             .medJournalpostId("4")
             .medBeløp(BigDecimal.ONE)
@@ -214,20 +259,26 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode1);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1, inntektsmelding2, inntektsmelding3);
 
-        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
+        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode2);
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding4);
     }
 
     @Test
     public void skal_prioritere_inntektsmelding_nærmest_skjøringstidspunktet() {
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
         var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+            .medArbeidsgiver(virksomhet)
+            .medArbeidsforholdId(arbeidsforholdId)
+            .build());
         var ref = EksternArbeidsforholdRef.ref("123");
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(arbeidsforholdId)
             .medArbeidsforholdId(ref)
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
@@ -238,7 +289,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.TEN)
             .build();
         var inntektsmelding2 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(arbeidsforholdId)
             .medArbeidsforholdId(ref)
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
@@ -251,7 +302,7 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode3);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode3);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1);
     }
@@ -260,8 +311,14 @@ public class TilKalkulusMapperTest {
     public void skal_prioritere_inntektsmelding_nærmest_skjøringstidspunktet_2() {
         var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
         var ref = EksternArbeidsforholdRef.ref("123");
+        Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("000000000");
+        List<Yrkesaktivitet> yrkesaktiviteter = List.of(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+            .medArbeidsgiver(virksomhet)
+            .medArbeidsforholdId(arbeidsforholdId)
+            .build());
         var inntektsmelding1 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(arbeidsforholdId)
             .medArbeidsforholdId(ref)
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(10))
@@ -272,7 +329,7 @@ public class TilKalkulusMapperTest {
             .medRefusjon(BigDecimal.TEN)
             .build();
         var inntektsmelding2 = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+            .medArbeidsgiver(virksomhet)
             .medArbeidsforholdId(arbeidsforholdId)
             .medArbeidsforholdId(ref)
             .medInnsendingstidspunkt(LocalDateTime.now().minusDays(9))
@@ -285,7 +342,7 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode4);
+        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, yrkesaktiviteter, periode4);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1);
     }
