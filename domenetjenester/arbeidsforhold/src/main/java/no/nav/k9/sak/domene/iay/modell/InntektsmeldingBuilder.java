@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -18,6 +21,8 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.konfig.Tid;
 
 public class InntektsmeldingBuilder {
+
+    private static final Logger log = LoggerFactory.getLogger(InntektsmeldingBuilder.class);
 
     public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
 
@@ -59,17 +64,23 @@ public class InntektsmeldingBuilder {
             } else {
                 // OK - vanligste forventet tilfelle - refusjonskrav med fravær
             }
-        } else if (!harRefusjonskrav() && harFravær()) {
-            throw new IllegalArgumentException(
-                "Har ikke refusjonskrav, men har oppgitt fravær. Støttes ikke. Skulle vært sendt Gosys for utbetaling til bruker. JournalpostId=" + kladd.getJournalpostId());
         } else {
-            // OK - ikke refusjon, ikke fravær. Skal kun opplyse brutto inntekt
-            if (kladd.getInntektBeløp() == null) {
-                throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi forventet bruttoinntekt, men mangler. JournalpostId=" + kladd.getJournalpostId());
-            } else if (kladd.getArbeidsforholdRef() == null) {
-                throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi arbeidsforholdId oppgitt, men er ikke satt. JournalpostId=" + kladd.getJournalpostId());
+            if (harFravær()) {
+                if (harKunKorreksjon()) {
+                    log.warn("Mottatt inntektsmelding uten refusjon, kun korreksjon av fravær, journalpostId [{}], fravær: {}", kladd.getJournalpostId(), kladd.getOppgittFravær());
+                } else {
+                    log.warn("Mottatt inntektsmelding uten refusjon, med oppgitt fravær, journalpostId [{}], fravær: {}. Antyder mulig utbetaling til bruker", kladd.getJournalpostId(),
+                        kladd.getOppgittFravær());
+                }
             } else {
-                // OK - inntektsmelding opplyser kun brutto inntekt for arbeidsforhold uten inntekt
+                // Må opplyse brutto inntekt
+                if (kladd.getInntektBeløp() == null) {
+                    throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi forventet bruttoinntekt, men mangler. JournalpostId=" + kladd.getJournalpostId());
+                } else if (kladd.getArbeidsforholdRef() == null) {
+                    throw new IllegalArgumentException("Har ikke refusjon eller fravær. Må oppgi arbeidsforholdId, men er ikke satt. JournalpostId=" + kladd.getJournalpostId());
+                } else {
+                    // OK - inntektsmelding opplyser kun brutto inntekt for arbeidsforhold uten inntekt
+                }
             }
         }
 
@@ -250,6 +261,10 @@ public class InntektsmeldingBuilder {
 
     public boolean harFravær() {
         return kladd.harFravær();
+    }
+
+    private boolean harKunKorreksjon() {
+        return kladd.harKunKorreksjon();
     }
 
     public InntektsmeldingBuilder medStartDatoPermisjon(LocalDate startPermisjon) {
