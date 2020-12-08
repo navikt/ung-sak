@@ -71,35 +71,24 @@ class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
     }
 
     @Test
-    void skal_utlede_ytelseskode_fra_ytelsetype_for_pleiepenger_sykt_barn() {
-        // Arrange
-        TestScenarioBuilder builder = TestScenarioBuilder
-            .builderUtenSøknad(PLEIEPENGER_SYKT_BARN)
-            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
-        Behandling behandling = builder.lagre(entityManager);
+    void skal_støtte_utlede_ytelseskode_fra_ytelsetype_for_kjente_ytelsetyper() {
+        of(OMSORGSPENGER, PLEIEPENGER_SYKT_BARN)
+            .forEach(støttetYtelseType ->
+                assertThatCode(() ->
+                    {
+                        // Arrange
+                        TestScenarioBuilder builder = TestScenarioBuilder
+                            .builderUtenSøknad(støttetYtelseType)
+                            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
+                        Behandling behandling = builder.lagre(entityManager);
 
-        // Act
-        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
-
-        // Assert
-        assertThat(infotrygdYtelseKode).isEqualTo("PN");
-
-
-    }
-
-    @Test
-    void skal_utlede_ytelseskode_fra_ytelsetype_for_omsorgspenger() {
-        // Arrange
-        TestScenarioBuilder builder = TestScenarioBuilder
-            .builderUtenSøknad(OMSORGSPENGER)
-            .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
-        Behandling behandling = builder.lagre(entityManager);
-
-        // Act
-        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
-
-        // Assert
-        assertThat(infotrygdYtelseKode).isEqualTo("OM");
+                        // Act
+                        testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
+                    }
+                )
+                    // Assert
+                    .doesNotThrowAnyException()
+            );
     }
 
     @Test
@@ -117,7 +106,7 @@ class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
                         Behandling behandling = builder.lagre(entityManager);
 
                         // Act
-                        String infotrygdYtelseKode = testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
+                        testSubject.getInfotrygdYtelseKode(behandling.getFagsak().getSaksnummer());
                     }
                 )
                     // Assert
@@ -135,18 +124,12 @@ class UnntaksbehandlingInfotrygdFeedPeriodeberegnerTest {
 
     private void lagBeregningsresultatFor(Behandling behandling, LocalDate fraOgMed, LocalDate tilOgMed) {
         BeregningsresultatEntitet.Builder builder = BeregningsresultatEntitet.builder()
-            //TODO Hva brukes regel-greier til?
             .medRegelInput("ikkeInteressant")
             .medRegelSporing("ikkeInteressant");
         BeregningsresultatEntitet beregningsresultat = builder.build();
-        BeregningsresultatPeriode brPeriode = buildBeregningsresultatPeriode(beregningsresultat, fraOgMed, tilOgMed);
-        beregningsresultatRepository.lagre(behandling, beregningsresultat);
-    }
-
-    private BeregningsresultatPeriode buildBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat, LocalDate fraOgMed, LocalDate tilOgMed) {
-        return BeregningsresultatPeriode.builder()
+        BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(fraOgMed, tilOgMed)
             .build(beregningsresultat);
+        beregningsresultatRepository.lagre(behandling, beregningsresultat);
     }
-
 }
