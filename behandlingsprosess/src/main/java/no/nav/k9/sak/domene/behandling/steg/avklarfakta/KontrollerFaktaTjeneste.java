@@ -19,7 +19,7 @@ class KontrollerFaktaTjeneste extends KontrollerFaktaTjenesteImpl {
     }
 
     @Inject
-    KontrollerFaktaTjeneste(KontrollerFaktaUtledereTjenesteImpl utlederTjeneste,
+    KontrollerFaktaTjeneste(@FagsakYtelseTypeRef KontrollerFaktaUtledere utlederTjeneste,
                             BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         super(utlederTjeneste, behandlingskontrollTjeneste);
     }

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
-import java.util.List;
+import java.util.List; 
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -9,36 +9,34 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
-import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedisinskvilkår;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 
+@FagsakYtelseTypeRef
 @ApplicationScoped
-class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
+public class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
 
     @Inject
-    KontrollerFaktaUtledereTjenesteImpl() {
+    protected KontrollerFaktaUtledereTjenesteImpl() {
     }
 
     // Legg til aksjonspunktutledere som er felles for Førstegangsbehandling og Revurdering
-    protected List<AksjonspunktUtleder> leggTilFellesutledere(BehandlingReferanse ref) {
+    protected AksjonspunktUtlederHolder leggTilFellesutledere(BehandlingReferanse ref) {
         var utlederHolder = new AksjonspunktUtlederHolder();
 
         // Legger til utledere som alltid skal kjøres
         leggTilStandardUtledere(utlederHolder);
 
-        if (FagsakYtelseType.PSB.equals(ref.getFagsakYtelseType())) {
-            utlederHolder.leggTil(AksjonspunktutlederForMedisinskvilkår.class);
-        }
         if (FagsakYtelseType.OMP.equals(ref.getFagsakYtelseType())) {
             utlederHolder.leggTil(AksjonspunktutlederForAlder.class);
         }
 
-        return utlederHolder.getUtledere();
+        return utlederHolder;
     }
 
     @Override
-    public List<AksjonspunktUtleder> utledUtledereFor(BehandlingReferanse ref) {
-        return leggTilFellesutledere(ref);
+    public final List<AksjonspunktUtleder> utledUtledereFor(BehandlingReferanse ref) {
+        return leggTilFellesutledere(ref).getUtledere();
     }
 
     private void leggTilStandardUtledere(AksjonspunktUtlederHolder utlederHolder) {
