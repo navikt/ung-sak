@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -28,7 +29,8 @@ class FagsakRevurdering {
 
     private boolean kanRevurderingOpprettes(List<Behandling> behandlinger) {
         Optional<Behandling> gjeldendeBehandling = hentBehandlingMedVedtak(behandlinger);
-        return gjeldendeBehandling.isPresent();
+        return gjeldendeBehandling.isPresent()
+            && !gjeldendeBehandling.get().getType().equals(BehandlingType.UNNTAKSBEHANDLING);
     }
 
     private Optional<Behandling> hentBehandlingMedVedtak(List<Behandling> behandlinger) {

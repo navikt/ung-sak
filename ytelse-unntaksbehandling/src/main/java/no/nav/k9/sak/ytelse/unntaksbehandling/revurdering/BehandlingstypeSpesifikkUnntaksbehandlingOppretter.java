@@ -56,6 +56,8 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
 
     @Override
     public Behandling opprettNyBehandling(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType behandlingÅrsak, OrganisasjonsEnhet enhet) {
+        validerTilstand(origBehandling);
+
         Behandling nyBehandling;
         if (origBehandling == null) {
             nyBehandling = opprettFørsteBehandling(fagsak, behandlingÅrsak, enhet);
@@ -79,11 +81,12 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     private void kopierTilkjentYtelse(Behandling origBehandling, Behandling nyBehandling) {
         beregningsresultatRepository.hentBeregningsresultatAggregat(origBehandling.getId())
             .ifPresent(aggregat -> {
-                if (aggregat.getBgBeregningsresultat() != null) {
-                    beregningsresultatRepository.lagre(nyBehandling, aggregat.getBgBeregningsresultat());
-                }
                 if (aggregat.getOverstyrtBeregningsresultat() != null) {
-                    beregningsresultatRepository.lagre(nyBehandling, aggregat.getOverstyrtBeregningsresultat());
+                    // Videreføre overstyrt tilkjent ytelse
+                    beregningsresultatRepository.lagreOverstyrtBeregningsresultat(nyBehandling, aggregat.getOverstyrtBeregningsresultat());
+                } else if (aggregat.getBgBeregningsresultat() != null) {
+                    // Initiere overstyrt tilkjent ytelse som forrige beregnede tilkjente ytelse
+                    beregningsresultatRepository.lagreOverstyrtBeregningsresultat(nyBehandling, aggregat.getBgBeregningsresultat());
                 }
             });
     }
@@ -120,6 +123,12 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     private GrunnlagKopierer getGrunnlagKopierer(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.find(grunnlagKopierere, ytelseType)
             .orElseThrow(() -> new IllegalStateException("Kopiering av grunnlag for unntaksbehandling ikke støttet for " + ytelseType.getKode()));
+    }
+
+    private void validerTilstand(Behandling origBehandling) {
+        if (origBehandling != null && !kanNyBehandlingOpprettes(origBehandling.getFagsak())) {
+            throw new IllegalStateException("Kan ikke opprette unntaksbehandling på fagsak");
+        }
     }
 
 }

@@ -97,10 +97,11 @@ public class DokumentmottakerFelles {
     }
 
     public Behandling opprettRevurderingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling revurdering = behandlingsoppretter.opprettRevurdering(tidligereBehandling, behandlingÅrsakType);
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
-        opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
-        return revurdering;
+        Behandling nyBehandling = behandlingsoppretter.opprettNyBehandling(tidligereBehandling, behandlingÅrsakType);
+        // TODO: Skal man ikke lagre inntektsmelding dersom unntaksbehandling?
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyBehandling, mottattDokument);
+        opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyBehandling);
+        return nyBehandling;
     }
 
     public void opprettTaskForÅStarteBehandlingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling behandling) {

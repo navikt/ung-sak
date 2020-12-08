@@ -54,7 +54,6 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         Boolean kanRevurderingOpprettes = revurderingTjeneste.kanRevurderingOpprettes(fagsak);
-        // TODO: Også guarde mot at revurdering ikke kan opprettes dersom siste behandling er manuell behandling
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }

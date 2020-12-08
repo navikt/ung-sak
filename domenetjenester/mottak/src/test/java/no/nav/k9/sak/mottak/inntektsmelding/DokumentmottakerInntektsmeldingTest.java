@@ -218,13 +218,13 @@ public class DokumentmottakerInntektsmeldingTest {
         when(revurdering.getAktørId()).thenReturn(behandling.getAktørId());
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-        when(behandlingsoppretter.opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
+        when(behandlingsoppretter.opprettNyBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
 
         // Act
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak());
 
         // Assert
-        verify(behandlingsoppretter).opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(behandlingsoppretter).opprettNyBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, List.of(mottattDokument));
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }
