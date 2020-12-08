@@ -68,7 +68,7 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
         try {
             abakusTjeneste.kopierGrunnlag(request);
         } catch (IOException e) {
-            throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId()), e);
+            throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId(), dataset), e);
         }
     }
 
