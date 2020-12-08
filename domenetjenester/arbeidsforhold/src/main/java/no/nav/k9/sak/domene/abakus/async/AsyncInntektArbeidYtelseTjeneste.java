@@ -90,7 +90,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
             prosessTaskRepository.lagre(enkeltTask);
 
         } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus feiler.", e).toException();
         }
     }
 
