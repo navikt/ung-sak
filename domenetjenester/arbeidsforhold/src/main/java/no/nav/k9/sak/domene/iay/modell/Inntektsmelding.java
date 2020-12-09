@@ -201,6 +201,12 @@ public class Inntektsmelding implements IndexKey {
         return Collections.unmodifiableList(oppgittFravær);
     }
 
+    /** alle perioder har 0 timer. */
+    public boolean harKunKorreksjon() {
+        return !oppgittFravær.isEmpty()
+            && oppgittFravær.stream().allMatch(f -> f.getVarighetPerDag() != null && f.getVarighetPerDag().isZero());
+    }
+
     /**
      * Liste over naturalytelser
      *
