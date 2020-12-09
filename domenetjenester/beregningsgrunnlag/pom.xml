@@ -28,10 +28,6 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kontrakt</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>no.nav.folketrygdloven</groupId>
-			<artifactId>beregningsgrunnlag-regelmodell</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>no.nav.folketrygdloven.kalkulus</groupId>

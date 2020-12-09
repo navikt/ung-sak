@@ -361,7 +361,8 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsforholdType() == null ? null : new OpptjeningAktivitetType(redigerbarAndel.getArbeidsforholdType().getKode()),
             redigerbarAndel.getLagtTilAvSaksbehandler(),
             redigerbarAndel.getBeregningsperiodeFom(),
-            redigerbarAndel.getBeregningsperiodeTom());
+            redigerbarAndel.getBeregningsperiodeTom(),
+            null /* AndelKilde */);
     }
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.RedigerbarAndelDto mapTilRedigerbarAndelDto(RedigerbarAndelDto redigerbarAndel) {

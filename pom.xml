@@ -174,13 +174,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.1-2020.09.23.125100-b3e5277</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.folketrygdloven</groupId>
-                <artifactId>beregningsgrunnlag-regelmodell</artifactId>
-                <version>2.1-20200304122043-f794ebb</version>
+                <version>1.1-2020.12.09.143424-5a1126b</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->

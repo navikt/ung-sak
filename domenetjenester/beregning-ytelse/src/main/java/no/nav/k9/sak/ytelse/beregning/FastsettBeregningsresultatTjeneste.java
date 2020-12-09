@@ -7,9 +7,9 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraVLTilRegel;
@@ -47,7 +47,7 @@ public class FastsettBeregningsresultatTjeneste {
         RegelFastsettBeregningsresultat regel = new RegelFastsettBeregningsresultat();
         no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat outputContainer = no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat.builder().build();
         Evaluation evaluation = regel.evaluer(regelmodell, outputContainer);
-        String sporing = RegelmodellOversetter.getSporing(evaluation);
+        String sporing = EvaluationSerializer.asJson(evaluation);
 
         // Map tilbake til domenemodell fra regelmodell
         BeregningsresultatEntitet beregningsresultat = BeregningsresultatEntitet.builder()

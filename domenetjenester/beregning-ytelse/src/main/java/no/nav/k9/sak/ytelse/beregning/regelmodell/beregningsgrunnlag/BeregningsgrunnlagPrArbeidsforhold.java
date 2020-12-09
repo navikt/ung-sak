@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.folketrygdloven.skjæringstidspunkt.regelmodell.AktivPeriode;
-
 public class BeregningsgrunnlagPrArbeidsforhold {
 
     /**

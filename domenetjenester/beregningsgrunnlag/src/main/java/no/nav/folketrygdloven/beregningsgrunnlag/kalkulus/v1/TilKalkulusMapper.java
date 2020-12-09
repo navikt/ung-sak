@@ -23,6 +23,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.BeløpDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.JournalpostId;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
@@ -127,7 +128,6 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getNyoppstartet(),
             oppgittEgenNæring.getVarigEndring(),
             oppgittEgenNæring.getEndringDato(),
-            oppgittEgenNæring.getNærRelasjon(),
             oppgittEgenNæring.getNyIArbeidslivet(),
             oppgittEgenNæring.getBruttoInntekt());
     }
@@ -149,26 +149,26 @@ public class TilKalkulusMapper {
         // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
         List<Inntektsmelding> inntektsmeldingerForPerioden = utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
 
-        List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
-            Aktør aktør = mapTilAktør(inntektsmelding.getArbeidsgiver());
-            var beløpDto = new BeløpDto(inntektsmelding.getInntektBeløp().getVerdi());
-            var naturalYtelseDtos = inntektsmelding.getNaturalYtelser().stream().map(naturalYtelse -> new NaturalYtelseDto(
+        List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(im -> {
+            Aktør aktør = mapTilAktør(im.getArbeidsgiver());
+            var beløpDto = new BeløpDto(im.getInntektBeløp().getVerdi());
+            var naturalYtelseDtos = im.getNaturalYtelser().stream().map(naturalYtelse -> new NaturalYtelseDto(
                 mapPeriode(naturalYtelse.getPeriode()),
                 new BeløpDto(naturalYtelse.getBeloepPerMnd().getVerdi()),
                 new NaturalYtelseType(naturalYtelse.getType().getKode()))).collect(Collectors.toList());
 
-            var refusjonDtos = inntektsmelding.getEndringerRefusjon().stream().map(refusjon -> new RefusjonDto(
+            var refusjonDtos = im.getEndringerRefusjon().stream().map(refusjon -> new RefusjonDto(
                 new BeløpDto(refusjon.getRefusjonsbeløp().getVerdi()),
                 refusjon.getFom())).collect(Collectors.toList());
 
-            var internArbeidsforholdRefDto = inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold()
-                ? new InternArbeidsforholdRefDto(inntektsmelding.getArbeidsforholdRef().getReferanse())
+            var internArbeidsforholdRefDto = im.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold()
+                ? new InternArbeidsforholdRefDto(im.getArbeidsforholdRef().getReferanse())
                 : null;
-            var startDato = inntektsmelding.getStartDatoPermisjon().isPresent() ? inntektsmelding.getStartDatoPermisjon().get() : null;
-            var refusjon = inntektsmelding.getRefusjonOpphører();
-            var beløpDto1 = inntektsmelding.getRefusjonBeløpPerMnd() != null ? new BeløpDto(inntektsmelding.getRefusjonBeløpPerMnd().getVerdi()) : null;
-
-            return new InntektsmeldingDto(aktør, beløpDto, naturalYtelseDtos, refusjonDtos, internArbeidsforholdRefDto, startDato, refusjon, beløpDto1);
+            var startDato = im.getStartDatoPermisjon().isPresent() ? im.getStartDatoPermisjon().get() : null;
+            var refusjon = im.getRefusjonOpphører();
+            var beløpDto1 = im.getRefusjonBeløpPerMnd() != null ? new BeløpDto(im.getRefusjonBeløpPerMnd().getVerdi()) : null;
+            var journalpostId = im.getJournalpostId() == null ? null : new JournalpostId(im.getJournalpostId().getVerdi());
+            return new InntektsmeldingDto(aktør, beløpDto, naturalYtelseDtos, refusjonDtos, internArbeidsforholdRefDto, startDato, refusjon, beløpDto1, journalpostId, im.getKanalreferanse());
         }).collect(Collectors.toList());
 
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);

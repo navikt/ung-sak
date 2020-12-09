@@ -6,8 +6,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -47,7 +47,7 @@ public abstract class BeregnFeriepengerTjeneste {
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
-        String sporing = RegelmodellOversetter.getSporing(evaluation);
+        String sporing = EvaluationSerializer.asJson(evaluation);
 
         beregningsresultat.setFeriepengerRegelInput(regelInput);
         beregningsresultat.setFeriepengerRegelSporing(sporing);

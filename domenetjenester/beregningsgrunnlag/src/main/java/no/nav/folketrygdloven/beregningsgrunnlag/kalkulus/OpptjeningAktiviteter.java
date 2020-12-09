@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.regelmodell.Periode;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
