@@ -64,4 +64,9 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
         return null;
     }
+
+    @Override
+    public ÅrskvantumUttrekk hentUttrekk() {
+        return null;
+    }
 }
