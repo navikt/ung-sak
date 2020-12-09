@@ -27,6 +27,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
@@ -143,7 +144,7 @@ public class ÅrskvantumRestTjeneste {
     @Operation(description = "Hent uttrekk fra årskvantum", tags = "behandling - årskvantum/uttrekk", responses = {
         @ApiResponse(responseCode = "200", description = "uttrekk fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumUttrekk hentUttrekk() {
         return årskvantumTjeneste.hentUttrekk();
