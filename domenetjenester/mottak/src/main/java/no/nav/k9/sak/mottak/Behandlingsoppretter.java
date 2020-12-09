@@ -92,24 +92,23 @@ public class Behandlingsoppretter {
     }
 
     public Behandling opprettNyBehandling(Behandling origBehandling, BehandlingÅrsakType nyBehandlingÅrsak) {
-        if (origBehandling.getType().equals(BehandlingType.UNNTAKSBEHANDLING)) {
-            // TODO: Vurder om dette heller skal håndters av klient som kaller metoden
-            // Unntaksbehandling er terminaltilstand; ny behandling må også være unntaksbehandling
-            return opprettUnntaksbehandling(origBehandling, nyBehandlingÅrsak);
-        } else {
+        if (origBehandling.getType() != BehandlingType.UNNTAKSBEHANDLING) {
             return opprettRevurdering(origBehandling, nyBehandlingÅrsak);
+        } else {
+            // Unntaksbehandling er terminaltilstand - ny behandling må også være unntaksbehandling
+            return opprettUnntaksbehandling(origBehandling, nyBehandlingÅrsak);
         }
-    }
-
-    private Behandling opprettUnntaksbehandling(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak,
-            behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
     }
 
     private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
         Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return revurdering;
+    }
+
+    private Behandling opprettUnntaksbehandling(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
+        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak,
+            behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
     }
 
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {

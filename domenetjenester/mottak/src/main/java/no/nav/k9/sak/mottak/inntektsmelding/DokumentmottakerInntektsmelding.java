@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -78,9 +77,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     void oppdaterÅpenBehandlingMedDokument(Behandling behandling, Collection<MottattDokument> mottattDokument) { // #I2
-        if (behandling.getType().equals(BehandlingType.UNNTAKSBEHANDLING)) {
-            throw new UnsupportedOperationException("Kan ikke oppdatere åpen unntaksbehandling");
-        }
         mottattDokument.forEach(m -> dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, getBehandlingÅrsakType());
         dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT);
@@ -105,7 +101,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
                 sisteHenlagteFørstegangsbehandling.get());
             dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
         } else {
-            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
+            dokumentMottakerFelles.opprettNyBehandlingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
         }
     }
 

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -97,9 +98,11 @@ public class Kompletthetskontroller {
     }
 
     private void preconditionIkkeAksepterKobling(Behandling behandling) {
-        Long behandlingId = behandling.getId();
-        if (kompletthetModell.erKompletthetssjekkPassert(behandlingId) && !kompletthetModell.erRegisterInnhentingPassert(behandlingId)) {
-            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaVentendeTaskerPåBehandling(behandlingId).toException();
+        if (behandling.getType() == BehandlingType.UNNTAKSBEHANDLING) {
+            throw new UnsupportedOperationException("Kan ikke oppdatere åpen unntaksbehandling");
+        }
+        if (kompletthetModell.erKompletthetssjekkPassert(behandling.getId()) && !kompletthetModell.erRegisterInnhentingPassert(behandling.getId())) {
+            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaVentendeTaskerPåBehandling(behandling.getId()).toException();
         } else {
             Set<String> treeAmigos = Set.of(StartBehandlingTask.TASKTYPE, FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE);
             behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, treeAmigos);

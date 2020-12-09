@@ -96,9 +96,8 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    public Behandling opprettRevurderingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
+    public Behandling opprettNyBehandlingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
         Behandling nyBehandling = behandlingsoppretter.opprettNyBehandling(tidligereBehandling, behandlingÅrsakType);
-        // TODO: Skal man ikke lagre inntektsmelding dersom unntaksbehandling?
         mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyBehandling, mottattDokument);
         opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyBehandling);
         return nyBehandling;

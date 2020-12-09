@@ -66,7 +66,7 @@ public class BehandlingsoppretterApplikasjonTjeneste {
     }
 
     public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING);
+        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType());
         if (!unntaksbehandlingOppretterTjeneste.kanNyBehandlingOpprettes(fagsak)) {
             throw BehandlingsoppretterApplikasjonTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
         }
@@ -78,10 +78,10 @@ public class BehandlingsoppretterApplikasjonTjeneste {
         return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
-    private UnntaksbehandlingOppretterTjeneste getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, ytelseType, behandlingType)
+    private UnntaksbehandlingOppretterTjeneste getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {
+        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, ytelseType, BehandlingType.UNNTAKSBEHANDLING)
             .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretterTjeneste.class.getSimpleName() +
-                " for ytelsetype " + ytelseType + " , behandlingstype " + behandlingType));
+                " for ytelsetype " + ytelseType + " , behandlingstype " + BehandlingType.UNNTAKSBEHANDLING));
     }
 
     interface BehandlingsoppretterApplikasjonTjenesteFeil extends DeklarerteFeil {

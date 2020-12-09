@@ -19,7 +19,7 @@ class FagsakRevurdering {
         this.behandlingRepository = behandlingRepository;
     }
 
-    Boolean kanRevurderingOpprettes(Fagsak fagsak) {
+    boolean kanRevurderingOpprettes(Fagsak fagsak) {
         if (harÅpenBehandling(fagsak)) {
             return false;
         }
@@ -30,7 +30,7 @@ class FagsakRevurdering {
     private boolean kanRevurderingOpprettes(List<Behandling> behandlinger) {
         Optional<Behandling> gjeldendeBehandling = hentBehandlingMedVedtak(behandlinger);
         return gjeldendeBehandling.isPresent()
-            && !gjeldendeBehandling.get().getType().equals(BehandlingType.UNNTAKSBEHANDLING);
+            && gjeldendeBehandling.get().getType() != BehandlingType.UNNTAKSBEHANDLING;
     }
 
     private Optional<Behandling> hentBehandlingMedVedtak(List<Behandling> behandlinger) {
