@@ -57,8 +57,6 @@ public class UnntaksbehandlingInfotrygdFeedPeriodeberegner implements InfotrygdF
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId()).orElseThrow();
         Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(sisteBehandling.getId());
 
-        FagsakYtelseType ytelseType = fagsak.getYtelseType();
-
         return beregningsresultatAggregat
             .map(
                 behandlingBeregningsresultatEntitet ->
