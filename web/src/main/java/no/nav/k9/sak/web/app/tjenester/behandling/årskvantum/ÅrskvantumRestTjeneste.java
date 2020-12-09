@@ -1,7 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.årskvantum;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.aarskvantum.kontrakter.*;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,21 +27,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path(ÅrskvantumRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,6 +41,7 @@ public class ÅrskvantumRestTjeneste {
     public static final String FULL_UTTAKSPLAN_PATH = "/uttaksplan";
     public static final String INPUT_PATH = "/input";
     public static final String UTBETALINGSGRUNNLAG = "/utbetalingsgrunnlag";
+    public static final String UTTREKK_PATH = "/uttrekk";
     static final String BASE_PATH = "/behandling/aarskvantum";
     public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
     public static final String FULL_UTTAKSPLAN = BASE_PATH + FULL_UTTAKSPLAN_PATH;
@@ -134,5 +133,20 @@ public class ÅrskvantumRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumUtbetalingGrunnlag hentUtbetalingsgrunnlagFraÅrskvantum(@NotNull @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return årskvantumTjeneste.hentUtbetalingGrunnlag(behandlingIdDto.getBehandlingUuid());
+    }
+
+    /**
+     * Hent Uttrekk fra årskvantum.
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(UTTREKK_PATH)
+    @Operation(description = "Hent uttrekk fra årskvantum", tags = "behandling - årskvantum/uttrekk", responses = {
+        @ApiResponse(responseCode = "200", description = "uttrekk fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public ÅrskvantumUttrekk hentUttrekk() {
+        return årskvantumTjeneste.hentUttrekk();
     }
 }

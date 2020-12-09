@@ -161,6 +161,16 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
+    @Override
+    public ÅrskvantumUttrekk hentUttrekk() {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentUttrekk");
+            return restKlient.post(endpoint, "", ÅrskvantumUttrekk.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilÅrskvantum(e.getMessage(), e).toException();
+        }
+    }
+
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {

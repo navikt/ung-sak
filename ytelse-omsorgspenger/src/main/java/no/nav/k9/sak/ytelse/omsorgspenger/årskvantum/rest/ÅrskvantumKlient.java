@@ -33,4 +33,6 @@ public interface ÅrskvantumKlient {
     FullUttaksplanForBehandlinger hentFullUttaksplanForBehandling(List<UUID> behandlinger);
 
     ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag);
+
+    ÅrskvantumUttrekk hentUttrekk();
 }
