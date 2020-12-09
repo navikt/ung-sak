@@ -50,7 +50,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
             var referanse = BehandlingReferanse.fra(behandling);
             // Henter søkte perioder
             var søktePerioder = periodeTjeneste.hentPerioderFor(referanse);
-            var vurdertePerioder = tjeneste.vurderSøknadsfrist(referanse, søktePerioder);
+            var vurdertePerioder = tjeneste.vurderSøknadsfrist(søktePerioder);
             // Henter tidligere vurderinger av fristavbrytende kontakt
             // TODO: Vurder (nye) dokumenter/perioder
 

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.perioder;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -35,6 +36,10 @@ public class SøktPeriode {
 
     public InternArbeidsforholdRef getArbeidsforholdRef() {
         return arbeidsforholdRef;
+    }
+
+    public void justerPeriode(LocalDateSegment<SøktPeriode> segment) {
+        periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
     }
 
     public static SøktPeriode arbeid(DatoIntervallEntitet periode, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {

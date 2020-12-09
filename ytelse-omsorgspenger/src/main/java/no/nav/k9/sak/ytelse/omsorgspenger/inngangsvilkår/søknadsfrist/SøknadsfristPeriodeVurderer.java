@@ -1,12 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.perioder.Søknad;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 
-import java.util.Set;
-
 public interface SøknadsfristPeriodeVurderer {
 
-    Set<VurdertSøktPeriode> vurderPeriode(Søknad søknadsDokument, Set<SøktPeriode> søktPeriode);
+    LocalDateTimeline<VurdertSøktPeriode> vurderPeriode(Søknad søknadsDokument, LocalDateTimeline<SøktPeriode> søktPeriode);
+
+    default LocalDateInterval periodeSomVurderes() {
+        return new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+    }
 }
