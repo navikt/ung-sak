@@ -33,11 +33,9 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -190,7 +188,7 @@ public class FagsakRestTjeneste {
     private FagsakDto tilFagsakDto(PersonDto personDto, Fagsak fagsak) {
         Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
             .kanRevurderingOpprettes(fagsak);
-        var kanUnntaksbehandlingOpprettes = BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, fagsak.getYtelseType(), BehandlingType.UNNTAKSBEHANDLING).orElseThrow()
+        var kanUnntaksbehandlingOpprettes = FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, fagsak.getYtelseType()).orElseThrow()
             .kanNyBehandlingOpprettes(fagsak);
         var periode = new Periode(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
         return new FagsakDto(

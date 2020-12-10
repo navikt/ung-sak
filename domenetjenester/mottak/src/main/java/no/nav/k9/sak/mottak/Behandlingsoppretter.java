@@ -15,8 +15,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -42,15 +41,13 @@ public class Behandlingsoppretter {
     private BehandlingRevurderingRepository revurderingRepository;
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private UnntaksbehandlingOppretterTjeneste unntaksbehandlingOppretterTjeneste;
 
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
-                                @FagsakYtelseTypeRef @BehandlingTypeRef("BT-010") UnntaksbehandlingOppretterTjeneste unntaksbehandlingOppretterTjeneste) { // NOSONAR
+                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
@@ -58,7 +55,6 @@ public class Behandlingsoppretter {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
-        this.unntaksbehandlingOppretterTjeneste = unntaksbehandlingOppretterTjeneste;
     }
 
     public boolean erKompletthetssjekkPassert(Behandling behandling) {
@@ -107,8 +103,9 @@ public class Behandlingsoppretter {
     }
 
     private Behandling opprettUnntaksbehandling(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak,
-            behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
+        UnntaksbehandlingOppretter unntaksbehandlingOppretter = FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, origBehandling.getFagsak().getYtelseType()).orElseThrow();
+        var nyBehandling = unntaksbehandlingOppretter.opprettNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
+        return nyBehandling;
     }
 
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {

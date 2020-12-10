@@ -15,7 +15,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -28,9 +28,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef
 @ApplicationScoped
-public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements UnntaksbehandlingOppretterTjeneste {
+public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppretter {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
@@ -38,15 +38,15 @@ public class BehandlingstypeSpesifikkUnntaksbehandlingOppretter implements Unnta
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
 
-    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter() {
+    public UnntaksbehandlingOppretterTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public BehandlingstypeSpesifikkUnntaksbehandlingOppretter(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                              RevurderingTjenesteFelles revurderingTjenesteFelles,
-                                                              BehandlingRepositoryProvider behandlingRepositoryProvider,
-                                                              @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
+    public UnntaksbehandlingOppretterTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                              RevurderingTjenesteFelles revurderingTjenesteFelles,
+                                              BehandlingRepositoryProvider behandlingRepositoryProvider,
+                                              @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();

@@ -14,7 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretterTjeneste;
+import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -78,9 +78,9 @@ public class BehandlingsoppretterApplikasjonTjeneste {
         return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
-    private UnntaksbehandlingOppretterTjeneste getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {
-        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretterTjeneste.class, ytelseType, BehandlingType.UNNTAKSBEHANDLING)
-            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretterTjeneste.class.getSimpleName() +
+    private UnntaksbehandlingOppretter getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {
+        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, ytelseType, BehandlingType.UNNTAKSBEHANDLING)
+            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretter.class.getSimpleName() +
                 " for ytelsetype " + ytelseType + " , behandlingstype " + BehandlingType.UNNTAKSBEHANDLING));
     }
 
