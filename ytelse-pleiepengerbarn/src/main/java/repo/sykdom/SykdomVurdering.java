@@ -1,7 +1,6 @@
 package repo.sykdom;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.KontinuerligTilsyn;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -44,4 +43,56 @@ public class SykdomVurdering {
         // hibernate
     }
 
+    public SykdomVurdering(
+            SykdomVurderingType type,
+            Long rangering,
+            SykdomVurderinger sykdomVurderinger,
+            SykdomVurderingVersjon sykdomVurderingVersjon,
+            Long versjon,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt) {
+        this.type = type;
+        this.rangering = rangering;
+        this.sykdomVurderinger = sykdomVurderinger;
+        this.sykdomVurderingVersjon = sykdomVurderingVersjon;
+        this.versjon = versjon;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public SykdomVurderingType getType() {
+        return type;
+    }
+
+    public Long getRangering() {
+        return rangering;
+    }
+
+    public SykdomVurderinger getSykdomVurderinger() {
+        return sykdomVurderinger;
+    }
+
+    public void setSykdomVurderinger(SykdomVurderinger sykdomVurderinger) {
+        this.sykdomVurderinger = sykdomVurderinger;
+    }
+
+    public SykdomVurderingVersjon getSykdomVurderingVersjon() {
+        return sykdomVurderingVersjon;
+    }
+
+    public Long getVersjon() {
+        return versjon;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
 }

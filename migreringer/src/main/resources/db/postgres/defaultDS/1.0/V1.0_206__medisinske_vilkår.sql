@@ -69,7 +69,7 @@ create table if not exists SYKDOM_VURDERING_VERSJON_BESLUTTET
 );
 create sequence if not exists SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET increment by 5 minvalue 1000000;
 
-create table if not exists SYKDOM_PERIODE
+create table if not exists SYKDOM_VURDERING_PERIODE
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
     SYKDOM_VURDERING_VERSJON_ID BIGINT                  NOT NULL,
@@ -78,10 +78,10 @@ create table if not exists SYKDOM_PERIODE
 
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT FK_SYKDOM_PERIODE_01
+    CONSTRAINT FK_SYKDOM_VURDERING_PERIODE_01
         FOREIGN KEY(SYKDOM_VURDERING_VERSJON_ID) REFERENCES SYKDOM_VURDERING_VERSJON(ID)
 );
-create sequence if not exists SEQ_SYKDOM_PERIODE increment by 5 minvalue 1000000;
+create sequence if not exists SEQ_SYKDOM_VURDERING_PERIODE increment by 5 minvalue 1000000;
 
 create table if not exists SYKDOM_DOKUMENT
 (

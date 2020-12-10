@@ -2,13 +2,13 @@ package repo.sykdom;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.typer.Saksnummer;
-import org.apache.maven.repository.internal.SnapshotMetadataGeneratorFactory;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity(name = "SykdomVurderingVersjon")
 @Table(name = "SYKDOM_VURDERING_VERSJON")
@@ -20,7 +20,7 @@ public class SykdomVurderingVersjon {
 
     @OneToOne
     @Column(name = "SYKDOM_VURDERING_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers?
-    private Long sykdomVurderingId;
+    private SykdomVurdering sykdomVurdering;
 
     @Column(name = "TEKST", nullable = false)
     private String tekst;
@@ -64,10 +64,88 @@ public class SykdomVurderingVersjon {
 
     @OneToMany
     @JoinColumn(name = "SYKDOM_VURDERING_VERSJON_ID")
-    private List<SykdomPeriode> perioder = new ArrayList<>();
+    private List<SykdomVurderingPeriode> perioder = new ArrayList<>();
 
     SykdomVurderingVersjon() {
         // hibernate
     }
 
+    public SykdomVurderingVersjon(
+            SykdomVurdering sykdomVurdering,
+            String tekst,
+            Resultat resultat,
+            Long versjon,
+            String endretAv,
+            LocalDateTime endretTidspunkt,
+            UUID endretBehandlingUuid,
+            Saksnummer endretSaksnummer,
+            SykdomPerson endretForPerson,
+            SykdomVurderingVersjonBesluttet besluttet,
+            List<SykdomDokument> dokumenter,
+            List<SykdomVurderingPeriode> perioder) {
+        this.sykdomVurdering = sykdomVurdering;
+        this.tekst = tekst;
+        this.resultat = resultat;
+        this.versjon = versjon;
+        this.endretAv = endretAv;
+        this.endretTidspunkt = endretTidspunkt;
+        this.endretBehandlingUuid = endretBehandlingUuid;
+        this.endretSaksnummer = endretSaksnummer;
+        this.endretForPerson = endretForPerson;
+        this.besluttet = besluttet;
+        this.dokumenter = dokumenter.stream().collect(Collectors.toList());
+        this.perioder = perioder.stream().collect(Collectors.toList());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public SykdomVurdering getSykdomVurdering() {
+        return sykdomVurdering;
+    }
+
+    public String getTekst() {
+        return tekst;
+    }
+
+    public Resultat getResultat() {
+        return resultat;
+    }
+
+    public Long getVersjon() {
+        return versjon;
+    }
+
+    public String getEndretAv() {
+        return endretAv;
+    }
+
+    public LocalDateTime getEndretTidspunkt() {
+        return endretTidspunkt;
+    }
+
+    public UUID getEndretBehandlingUuid() {
+        return endretBehandlingUuid;
+    }
+
+    public Saksnummer getEndretSaksnummer() {
+        return endretSaksnummer;
+    }
+
+    public SykdomPerson getEndretForPerson() {
+        return endretForPerson;
+    }
+
+    public SykdomVurderingVersjonBesluttet getBesluttet() {
+        return besluttet;
+    }
+
+    public List<SykdomDokument> getDokumenter() {
+        return dokumenter;
+    }
+
+    public List<SykdomVurderingPeriode> getPerioder() {
+        return perioder;
+    }
 }

@@ -1,8 +1,6 @@
 package repo.sykdom;
 
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.søknad.felles.NorskIdentitetsnummer;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 
 import javax.persistence.*;
 
@@ -24,27 +22,20 @@ public class SykdomPerson {
         // hibernate
     }
 
-    public Long getId() {
-        return id;
+    public SykdomPerson(AktørId aktoerId, String norskIdentitetsnummer) {
+        this.aktoerId = aktoerId;
+        this.norskIdentitetsnummer = norskIdentitetsnummer;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getId() {
+        return id;
     }
 
     public AktørId getAktoerId() {
         return aktoerId;
     }
 
-    public void setAktoerId(AktørId aktoerId) {
-        this.aktoerId = aktoerId;
-    }
-
     public String getNorskIdentitetsnummer() {
         return norskIdentitetsnummer;
-    }
-
-    public void setNorskIdentitetsnummer(String norskIdentitetsnummer) {
-        this.norskIdentitetsnummer = norskIdentitetsnummer;
     }
 }

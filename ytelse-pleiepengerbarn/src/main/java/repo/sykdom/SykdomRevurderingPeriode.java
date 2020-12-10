@@ -16,4 +16,24 @@ public class SykdomRevurderingPeriode {
     @Column(name = "TOM", nullable = false)
     private LocalDate tom;
 
+    SykdomRevurderingPeriode() {
+        //Hibernate
+    }
+
+    public SykdomRevurderingPeriode(LocalDate fom, LocalDate tom) {
+        this.fom = fom;
+        this.tom = tom;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
 }

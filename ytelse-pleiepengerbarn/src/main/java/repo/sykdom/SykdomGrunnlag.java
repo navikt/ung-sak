@@ -26,6 +26,14 @@ public class SykdomGrunnlag {
     @OneToMany(mappedBy = "SYKDOM_GRUNNLAG_ID")
     private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
 
+    @OneToMany()
+    @JoinTable(
+        name="SYKDOM_GRUNNLAG_VURDERING",
+        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
+        inverseJoinColumns = @JoinColumn( name="SYKDOM_VURDERING_VERSJON_ID")
+    )
+    private List<SykdomVurderingVersjon> vurderinger = new ArrayList<>();
+
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
     private String opprettetAv;

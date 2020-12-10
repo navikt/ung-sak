@@ -6,6 +6,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity(name = "SykdomDokumentSak")
+@Table(name = "SYKDOM_DOKUMENT_SAK")
 public class SykdomDokumentSak {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT_SAK")
