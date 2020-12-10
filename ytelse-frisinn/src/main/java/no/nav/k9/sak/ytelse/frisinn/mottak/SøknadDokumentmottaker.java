@@ -141,7 +141,7 @@ public class SøknadDokumentmottaker {
 
     private Behandling opprettEndringBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Behandling forrigeBehandling) {
         Behandling behandling;
-        behandling = behandlingsoppretter.opprettNyBehandling(forrigeBehandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
+        behandling = behandlingsoppretter.opprettRevurdering(forrigeBehandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         soknadOversetter.persister(søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;

@@ -15,7 +15,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandling.revurdering.UnntaksbehandlingOppretter;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -87,46 +86,32 @@ public class Behandlingsoppretter {
         return nyFørstegangsbehandling;
     }
 
-    public Behandling opprettNyBehandling(Behandling origBehandling, BehandlingÅrsakType nyBehandlingÅrsak) {
-        if (origBehandling.getType() != BehandlingType.UNNTAKSBEHANDLING) {
-            return opprettRevurdering(origBehandling, nyBehandlingÅrsak);
-        } else {
-            // Unntaksbehandling er terminaltilstand - ny behandling må også være unntaksbehandling
-            return opprettUnntaksbehandling(origBehandling, nyBehandlingÅrsak);
-        }
-    }
-
-    private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
+    public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
         Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return revurdering;
     }
 
-    private Behandling opprettUnntaksbehandling(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
-        UnntaksbehandlingOppretter unntaksbehandlingOppretter = FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, origBehandling.getFagsak().getYtelseType()).orElseThrow();
-        var nyBehandling = unntaksbehandlingOppretter.opprettNyBehandling(origBehandling.getFagsak(), origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
-        return nyBehandling;
-    }
 
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
             return opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
         } else {
-            Behandling nyBehandling = opprettNyBehandling(sisteYtelseBehandling, revurderingsÅrsak);
+            Behandling revurdering = opprettRevurdering(sisteYtelseBehandling, revurderingsÅrsak);
 
-            opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, nyBehandling);
+            opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, revurdering);
 
             // Kopier behandlingsårsaker fra forrige behandling
             new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
                 .map(BehandlingÅrsak::getBehandlingÅrsakType)
                 .collect(toList()))
-                    .buildFor(nyBehandling);
+                    .buildFor(revurdering);
 
-            BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(nyBehandling);
-            behandlingRepository.lagre(nyBehandling, nyKontekst.getSkriveLås());
+            BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
+            behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
 
-            return nyBehandling;
+            return revurdering;
         }
     }
 

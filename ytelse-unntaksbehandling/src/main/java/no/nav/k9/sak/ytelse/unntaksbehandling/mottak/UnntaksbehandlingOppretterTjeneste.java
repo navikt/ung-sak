@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.unntaksbehandling.revurdering;
+package no.nav.k9.sak.ytelse.unntaksbehandling.mottak;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @FagsakYtelseTypeRef
-@BehandlingTypeRef
+@BehandlingTypeRef("BT-010")
 @ApplicationScoped
 public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppretter {
 
