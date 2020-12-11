@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
@@ -164,8 +165,9 @@ public class FagsakRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
         @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
     })
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public Response hentRettigheter(@NotNull @QueryParam("saksnummer") @Valid SaksnummerDto s) {
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response hentRettigheter(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);
         if (fagsak.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();

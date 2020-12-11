@@ -360,7 +360,7 @@ public class BehandlingRestTjeneste {
             LOG.info("BEHREST opprett behandling feil", e);
         }
 
-        if (BehandlingType.REVURDERING.getKode().equals(behandlingType)) {
+        if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
