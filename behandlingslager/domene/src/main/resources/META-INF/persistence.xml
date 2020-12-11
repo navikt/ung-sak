@@ -32,6 +32,12 @@
 			<!-- Batcher også inserts av @Versioned data. (krever at executeBatch for database driver returnerer riktig) -->
 			<property name="hibernate.jdbc.batch_versioned_data" value="true" />
 			
+            <!-- timeout for når statement må ha returnert noe -->
+            <property name="javax.persistence.query.timeout" value="10000" />
+            
+            <!-- timeout for venting på locking før aborter operasjon -->
+            <property name="javax.persistence.lock.timeout" value="30000" />
+            
 		</properties>
 	</persistence-unit>
 
