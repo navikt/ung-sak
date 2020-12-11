@@ -29,6 +29,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -60,7 +63,6 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsoppretterApplikasjonTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.feil.Feil;
@@ -80,6 +82,8 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Produces(MediaType.APPLICATION_JSON)
 public class BehandlingRestTjeneste {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BehandlingRestTjeneste.class);
+
     public static final String BEHANDLING_PATH = "/behandling";
     public static final String BEHANDLINGER_ALLE = "/behandlinger/alle";
     public static final String BEHANDLINGER_PATH = "/behandlinger";
@@ -96,8 +100,8 @@ public class BehandlingRestTjeneste {
     static public final String HANDLING_RETTIGHETER = "/behandlinger/handling-rettigheter";
 
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
-    private BehandlingsoppretterApplikasjonTjeneste behandlingsoppretterApplikasjonTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
+    private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
@@ -110,7 +114,7 @@ public class BehandlingRestTjeneste {
 
     @Inject
     public BehandlingRestTjeneste(BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, // NOSONAR
-                                  BehandlingsoppretterApplikasjonTjeneste behandlingsoppretterApplikasjonTjeneste,
+                                  BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                   FagsakTjeneste fagsakTjeneste,
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
@@ -118,8 +122,8 @@ public class BehandlingRestTjeneste {
                                   SjekkProsessering sjekkProsessering,
                                   @KonfigVerdi(value = "UNNTAKSBEHANDLING", defaultVerdi = "true") Boolean unntaksbehandlingTogglet) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
-        this.behandlingsoppretterApplikasjonTjeneste = behandlingsoppretterApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
+        this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
@@ -340,29 +344,36 @@ public class BehandlingRestTjeneste {
     public Response opprettNyBehandling(@Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
             throws URISyntaxException {
         Saksnummer saksnummer = dto.getSaksnummer();
+        BehandlingType behandlingType = BehandlingType.fraKode(dto.getBehandlingType().getKode());
         Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
-        String kode = dto.getBehandlingType().getKode();
 
         if (funnetFagsak.isEmpty()) {
             throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
         }
 
         Fagsak fagsak = funnetFagsak.get();
+        try {
+            if (!behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsak.getId(), behandlingType)) {
+                LOG.info("BEHREST opprett behandling får nei for sak {} behandlingtype {}", fagsak.getSaksnummer().getVerdi(), behandlingType.getKode());
+            }
+        } catch (Exception e) {
+            LOG.info("BEHREST opprett behandling feil", e);
+        }
 
-        if (BehandlingType.REVURDERING.getKode().equals(kode)) {
+        if (BehandlingType.REVURDERING.getKode().equals(behandlingType)) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-            Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
+            Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
 
-        } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(kode)) {
+        } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(behandlingType.getKode())) {
             throw new UnsupportedOperationException("Ikke implementert støtte for å opprette ny førstegangsbehandling for " + fagsak);
             // ved førstegangssønad opprettes egen task for vurdere denne,
             // sender derfor ikke viderer til prosesser behandling (i motsetning til de andre).
             // må også oppfriske hele sakskomplekset, så sender til fagsak poll url
             // return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
         } else {
-            throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + kode);
+            throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
         }
 
     }
@@ -381,16 +392,24 @@ public class BehandlingRestTjeneste {
         }
         Saksnummer saksnummer = dto.getSaksnummer();
         Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
-        String kode = dto.getBehandlingType().getKode();
+        BehandlingType kode = BehandlingType.fraKode(dto.getBehandlingType().getKode());
 
         if (funnetFagsak.isEmpty()) {
             throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
         }
+        Fagsak fagsak = funnetFagsak.get();
 
-        if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode)) {
-            Fagsak fagsak = funnetFagsak.get();
+        try {
+            if (!behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsak.getId(), kode)) {
+                LOG.info("BEHREST opprett behandling får nei for sak {} behandlingtype {}", fagsak.getSaksnummer().getVerdi(), kode.getKode());
+            }
+        } catch (Exception e) {
+            LOG.info("BEHREST opprett behandling feil", e);
+        }
+
+        if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-            Behandling behandling = behandlingsoppretterApplikasjonTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
+            Behandling behandling = behandlingsoppretterTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
 

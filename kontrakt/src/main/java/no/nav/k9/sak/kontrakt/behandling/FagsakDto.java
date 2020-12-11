@@ -48,9 +48,6 @@ public class FagsakDto {
     @JsonProperty(value = "kanRevurderingOpprettes")
     private Boolean kanRevurderingOpprettes;
 
-    @JsonProperty(value = "kanUnntaksbehandlingOpprettes")
-    private Boolean kanUnntaksbehandlingOpprettes;
-
     @JsonProperty(value = "skalBehandlesAvInfotrygd")
     private Boolean skalBehandlesAvInfotrygd;
 
@@ -79,7 +76,6 @@ public class FagsakDto {
                      PersonDto person,
                      AktørId pleietrengendeAktørId,
                      Boolean kanRevurderingOpprettes,
-                     Boolean kanUnntaksbehandlingOpprettes,
                      Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
                      LocalDateTime endretTidspunkt) {
@@ -92,7 +88,6 @@ public class FagsakDto {
         this.opprettet = opprettetTidspunkt;
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
-        this.kanUnntaksbehandlingOpprettes = kanUnntaksbehandlingOpprettes;
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
     }
 
