@@ -20,6 +20,7 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkSikkerhetsbegrensning;
+import no.nav.tjeneste.virksomhet.person.v3.feil.Kodeverdi;
 import no.nav.tjeneste.virksomhet.person.v3.feil.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
@@ -42,6 +43,7 @@ import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 public class TpsAdapterImpl implements TpsAdapter {
 
     private AktørConsumerMedCache aktørConsumer;
+    //TODO Legge til AktørService som benyter pdlklient. Logge når != det fra TPS
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
@@ -73,7 +75,7 @@ public class TpsAdapterImpl implements TpsAdapter {
 
     @Override
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-        return aktørConsumer.hentPersonIdentForAktørId(aktørId.getId()).map(f -> new PersonIdent(f));
+        return aktørConsumer.hentPersonIdentForAktørId(aktørId.getId()).map(PersonIdent::new);
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)
@@ -165,7 +167,7 @@ public class TpsAdapterImpl implements TpsAdapter {
             return null;
         }
         var begr = faultInfo.getSikkerhetsbegrensning();
-        String sikkerhetsbegrensninger = begr == null ? null : begr.stream().map(b -> b.getValue()).collect(Collectors.joining(", "));
+        String sikkerhetsbegrensninger = begr == null ? null : begr.stream().map(Kodeverdi::getValue).collect(Collectors.joining(", "));
         String feilaarsak = faultInfo.getFeilaarsak();
         String feilkilde = faultInfo.getFeilkilde();
         String feilmelding = faultInfo.getFeilmelding();
@@ -197,7 +199,7 @@ public class TpsAdapterImpl implements TpsAdapter {
     @Override
     public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
         Optional<PersonIdent> personIdent = hentIdentForAktørId(aktørId);
-        if (!personIdent.isPresent()) {
+        if (personIdent.isEmpty()) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePersonForAktørId().toException();
         }
         HentPersonRequest request = new HentPersonRequest();
@@ -226,7 +228,7 @@ public class TpsAdapterImpl implements TpsAdapter {
         } else {
             final PersonIdent fra = PersonIdent.fra(identNr);
             Optional<AktørId> aktørId = hentAktørIdForPersonIdent(fra);
-            if (!aktørId.isPresent()) {
+            if (aktørId.isEmpty()) {
                 return tpsOversetter.relasjonTilPersoninfo(familierelasjon);
             }
 
