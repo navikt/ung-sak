@@ -48,9 +48,10 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
                     vurdertTimeline = vurdertTimeline.combine(unntaksvurdertTimeline, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                 }
             }
-            result.put(entry.getKey(), vurdertTimeline.stream().map(LocalDateSegment::getValue).collect(Collectors.toSet()));
+            result.put(entry.getKey(), vurdertTimeline.compress().map(TimelineMerger::konsistens).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet()));
         }
 
         return result;
     }
+
 }

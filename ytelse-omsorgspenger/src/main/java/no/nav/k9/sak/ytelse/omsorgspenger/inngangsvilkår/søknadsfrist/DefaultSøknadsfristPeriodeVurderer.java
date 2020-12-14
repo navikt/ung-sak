@@ -17,12 +17,15 @@ public class DefaultSøknadsfristPeriodeVurderer implements SøknadsfristPeriode
 
     @Override
     public LocalDateTimeline<VurdertSøktPeriode> vurderPeriode(Søknad søknadsDokument, LocalDateTimeline<SøktPeriode> søktePeriode) {
-        var vurderingsdato = søknadsDokument.getInnsendingsTidspunkt().withDayOfMonth(1).toLocalDate();
-        var cutOffDato = vurderingsdato.minus(frist);
+        var vurderingsdato = søknadsDokument.getInnsendingsTidspunkt().toLocalDate();
+        var cutOffDato = vurderingsdato.minus(frist).withDayOfMonth(1).minusDays(1);
+
         LocalDateTimeline<SøktPeriode> perioderUtenforSøknadsfrist = søktePeriode.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, cutOffDato));
         LocalDateTimeline<SøktPeriode> perioderInnenforSøknadsfrist = søktePeriode.disjoint(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, cutOffDato));
+
         var godkjentTidslinje = new LocalDateTimeline<>(perioderInnenforSøknadsfrist.stream().map(segment -> vurderEnkeltPeriode(segment, Utfall.OPPFYLT)).collect(Collectors.toList()));
         var avslåtteTidslinje = new LocalDateTimeline<>(perioderUtenforSøknadsfrist.stream().map(segment -> vurderEnkeltPeriode(segment, Utfall.IKKE_OPPFYLT)).collect(Collectors.toList()));
+
         return godkjentTidslinje.combine(avslåtteTidslinje, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 

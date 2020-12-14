@@ -51,15 +51,14 @@ public class SøktPeriode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SøktPeriode that = (SøktPeriode) o;
-        return Objects.equals(periode, that.periode) &&
-            type == that.type &&
+        return type == that.type &&
             Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, type, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(type, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override

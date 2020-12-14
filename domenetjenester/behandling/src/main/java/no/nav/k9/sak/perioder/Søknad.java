@@ -8,11 +8,13 @@ import java.util.Objects;
 public class Søknad {
 
     private JournalpostId journalpostId;
+    private SøknadType type;
     private LocalDateTime innsendingsTidspunkt;
 
-    public Søknad(JournalpostId journalpostId, LocalDateTime innsendingsTidspunkt) {
+    public Søknad(JournalpostId journalpostId, LocalDateTime innsendingsTidspunkt, SøknadType type) {
         this.journalpostId = journalpostId;
         this.innsendingsTidspunkt = innsendingsTidspunkt;
+        this.type = type;
     }
 
     public JournalpostId getJournalpostId() {
@@ -29,18 +31,20 @@ public class Søknad {
         if (o == null || getClass() != o.getClass()) return false;
         Søknad that = (Søknad) o;
         return Objects.equals(journalpostId, that.journalpostId) &&
+            Objects.equals(type, that.type) &&
             Objects.equals(innsendingsTidspunkt, that.innsendingsTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, innsendingsTidspunkt);
+        return Objects.hash(journalpostId, type, innsendingsTidspunkt);
     }
 
     @Override
     public String toString() {
         return "SøktnadsDokument{" +
             "journalpostId=" + journalpostId +
+            ", type=" + type +
             ", innsendingsTidspunkt=" + innsendingsTidspunkt +
             '}';
     }

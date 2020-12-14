@@ -1,10 +1,13 @@
 package no.nav.k9.sak.perioder;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+
+import java.util.Objects;
 
 public class VurdertSøktPeriode {
 
@@ -41,4 +44,33 @@ public class VurdertSøktPeriode {
     public Utfall getUtfall() {
         return utfall;
     }
+
+    public void justerPeriode(LocalDateInterval interval) {
+        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(interval.getFomDato(), interval.getTomDato());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VurdertSøktPeriode that = (VurdertSøktPeriode) o;
+        return type == that.type && Objects.equals(arbeidsgiver, that.arbeidsgiver) && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) && utfall == that.utfall;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, arbeidsgiver, arbeidsforholdRef, utfall);
+    }
+
+    @Override
+    public String toString() {
+        return "VurdertSøktPeriode{" +
+            "periode=" + periode +
+            ", type=" + type +
+            ", arbeidsgiver=" + arbeidsgiver +
+            ", arbeidsforholdRef=" + arbeidsforholdRef +
+            ", utfall=" + utfall +
+            '}';
+    }
+
 }
