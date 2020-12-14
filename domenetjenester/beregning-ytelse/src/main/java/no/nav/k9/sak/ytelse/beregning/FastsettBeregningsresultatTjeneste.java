@@ -7,9 +7,9 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraVLTilRegel;
@@ -42,15 +42,15 @@ public class FastsettBeregningsresultatTjeneste {
 
     public BeregningsresultatEntitet fastsettBeregningsresultat(List<Beregningsgrunnlag> beregningsgrunnlag, UttakResultat input) {
         // Map til regelmodell
-        BeregningsresultatRegelmodell regelmodell = mapBeregningsresultatFraVLTilRegel.mapFra(beregningsgrunnlag, input);
+        var regelmodell = mapBeregningsresultatFraVLTilRegel.mapFra(beregningsgrunnlag, input);
         // Kalle regel
-        RegelFastsettBeregningsresultat regel = new RegelFastsettBeregningsresultat();
-        no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat outputContainer = no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat.builder().build();
+        var regel = new RegelFastsettBeregningsresultat();
+        var outputContainer = no.nav.k9.sak.ytelse.beregning.regelmodell.Beregningsresultat.builder().build();
         Evaluation evaluation = regel.evaluer(regelmodell, outputContainer);
-        String sporing = RegelmodellOversetter.getSporing(evaluation);
+        String sporing = EvaluationSerializer.asJson(evaluation);
 
         // Map tilbake til domenemodell fra regelmodell
-        BeregningsresultatEntitet beregningsresultat = BeregningsresultatEntitet.builder()
+        var beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput(toJson(regelmodell))
             .medRegelSporing(sporing)
             .build();
@@ -61,9 +61,8 @@ public class FastsettBeregningsresultatTjeneste {
     }
 
     private String toJson(BeregningsresultatRegelmodell grunnlag) {
-        JacksonJsonConfig var10000 = this.jacksonJsonConfig;
-        FastsettBeregningsresultatFeil var10002 = FastsettBeregningsresultatFeil.FACTORY;
-        return var10000.toJson(grunnlag, var10002::jsonMappingFeilet);
+        var jsonFac = this.jacksonJsonConfig;
+        return jsonFac.toJson(grunnlag, FastsettBeregningsresultatFeil.FACTORY::jsonMappingFeilet);
     }
 
     interface FastsettBeregningsresultatFeil extends DeklarerteFeil {

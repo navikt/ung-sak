@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,9 +42,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class EndringskontrollerTest {
-
-    @Inject
-    private EntityManager entityManager;
 
     private KontrollerFaktaAksjonspunktUtleder kontrollerFaktaTjenesteMock;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenesterMock;
