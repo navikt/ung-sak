@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.medlem.kontrollerfakta;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 
 import java.util.List;
 
