@@ -29,6 +29,10 @@
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingsprosess-steg</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-db</artifactId>
         </dependency>
