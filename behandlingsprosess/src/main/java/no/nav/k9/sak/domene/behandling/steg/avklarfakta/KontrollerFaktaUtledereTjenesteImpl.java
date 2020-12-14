@@ -9,10 +9,12 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 
 @FagsakYtelseTypeRef
+@BehandlingTypeRef
 @ApplicationScoped
 public class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
 
@@ -35,7 +37,7 @@ public class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtled
     }
 
     @Override
-    public final List<AksjonspunktUtleder> utledUtledereFor(BehandlingReferanse ref) {
+    public List<AksjonspunktUtleder> utledUtledereFor(BehandlingReferanse ref) {
         return leggTilFellesutledere(ref).getUtledere();
     }
 
