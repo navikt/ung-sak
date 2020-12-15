@@ -2,16 +2,40 @@ package no.nav.k9.sak.kontrakt.behandling;
 
 import java.util.UUID;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class BehandlingOperasjonerDto {
 
+    @JsonProperty(value = "uuid", required = true)
+    @Valid
+    @NotNull
     private UUID uuid;
+
+    @JsonProperty(value = "behandlingKanBytteEnhet")
     private boolean behandlingKanBytteEnhet;
+
+    @JsonProperty(value = "behandlingKanHenlegges")
     private boolean behandlingKanHenlegges;
+
+    @JsonProperty(value = "behandlingKanGjenopptas")
     private boolean behandlingKanGjenopptas;
+
+    @JsonProperty(value = "behandlingKanOpnesForEndringer")
     private boolean behandlingKanOpnesForEndringer;
+
+    @JsonProperty(value = "behandlingKanSettesPaVent")
     private boolean behandlingKanSettesPaVent;
+
+    @JsonProperty(value = "behandlingKanSendeMelding")
     private boolean behandlingKanSendeMelding;
+
+    @JsonProperty(value = "behandlingFraBeslutter")
     private boolean behandlingFraBeslutter;
+
+    @JsonProperty(value = "behandlingTilGodkjenning")
     private boolean behandlingTilGodkjenning;
 
     public UUID getUuid() {
@@ -92,7 +116,7 @@ public class BehandlingOperasjonerDto {
             this.kladd.behandlingKanSendeMelding = sendeMelding;
             return this;
         }
-        
+
         public Builder medFraBeslutter(boolean fraBeslutter) {
             this.kladd.behandlingFraBeslutter = fraBeslutter;
             return this;

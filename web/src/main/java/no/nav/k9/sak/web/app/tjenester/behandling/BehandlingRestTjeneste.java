@@ -352,14 +352,6 @@ public class BehandlingRestTjeneste {
         }
 
         Fagsak fagsak = funnetFagsak.get();
-        try {
-            if (!behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsak.getId(), behandlingType)) {
-                LOG.info("BEHREST opprett behandling får nei for sak {} behandlingtype {}", fagsak.getSaksnummer().getVerdi(), behandlingType.getKode());
-            }
-        } catch (Exception e) {
-            LOG.info("BEHREST opprett behandling feil", e);
-        }
-
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
@@ -398,15 +390,6 @@ public class BehandlingRestTjeneste {
             throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
         }
         Fagsak fagsak = funnetFagsak.get();
-
-        try {
-            if (!behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsak.getId(), kode)) {
-                LOG.info("BEHREST opprett behandling får nei for sak {} behandlingtype {}", fagsak.getSaksnummer().getVerdi(), kode.getKode());
-            }
-        } catch (Exception e) {
-            LOG.info("BEHREST opprett behandling feil", e);
-        }
-
         if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
