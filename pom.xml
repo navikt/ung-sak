@@ -73,6 +73,12 @@
                 <artifactId>flyway-core</artifactId>
                 <version>7.3.1</version>
             </dependency>
+            
+            <dependency>
+                <groupId>javax.el</groupId>
+                <artifactId>javax.el-api</artifactId>
+                <version>3.0.0</version>
+            </dependency>
 
             <!-- Felles biblioteker - Importerte avhengigheter. -->
             <dependency>
@@ -174,7 +180,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.1-2020.09.23.125100-b3e5277</version>
+                <version>1.1-2020.12.14.170353-f34dc83</version>
             </dependency>
 
             <dependency>

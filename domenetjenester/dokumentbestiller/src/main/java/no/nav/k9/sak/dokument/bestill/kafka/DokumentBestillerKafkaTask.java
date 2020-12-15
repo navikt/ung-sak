@@ -92,7 +92,6 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         return dokumentdataParametre;
     }
 
-    @SuppressWarnings("unused")
     private void valider(Dokumentbestilling dokumentbestillingDto) {
         Set<ConstraintViolation<Dokumentbestilling>> violations = validator.validate(dokumentbestillingDto);
         if (!violations.isEmpty()) {

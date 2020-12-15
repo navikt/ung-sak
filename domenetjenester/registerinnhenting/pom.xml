@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>domenetjenester-pom</artifactId>
         <groupId>no.nav.k9.sak</groupId>
@@ -13,7 +14,7 @@
 
     <dependencies>
         <!-- Domenetjeneste avhengigheter -->
-		<dependency>
+        <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>produksjonsstyring</artifactId>
         </dependency>
@@ -23,7 +24,7 @@
             <artifactId>folketrygdloven-beregningsgrunnlag</artifactId>
         </dependency>
 
-		<dependency>
+        <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>person</artifactId>
         </dependency>
@@ -59,6 +60,16 @@
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+        </dependency>
+        
         <!-- Test avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

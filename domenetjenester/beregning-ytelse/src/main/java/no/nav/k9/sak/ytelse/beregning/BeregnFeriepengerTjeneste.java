@@ -6,8 +6,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.RegelmodellOversetter;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -47,7 +47,7 @@ public abstract class BeregnFeriepengerTjeneste {
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
-        String sporing = RegelmodellOversetter.getSporing(evaluation);
+        String sporing = EvaluationSerializer.asJson(evaluation);
 
         beregningsresultat.setFeriepengerRegelInput(regelInput);
         beregningsresultat.setFeriepengerRegelSporing(sporing);
@@ -56,9 +56,8 @@ public abstract class BeregnFeriepengerTjeneste {
     }
 
     private String toJson(BeregningsresultatFeriepengerRegelModell grunnlag) {
-        JacksonJsonConfig var10000 = this.jacksonJsonConfig;
-        BeregnFeriepengerFeil var10002 = BeregnFeriepengerFeil.FACTORY;
-        return var10000.toJson(grunnlag, var10002::jsonMappingFeilet);
+        var jsonFac = this.jacksonJsonConfig;
+        return jsonFac.toJson(grunnlag, BeregnFeriepengerFeil.FACTORY::jsonMappingFeilet);
     }
 
     static void mapTilResultatFraRegelModell(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {

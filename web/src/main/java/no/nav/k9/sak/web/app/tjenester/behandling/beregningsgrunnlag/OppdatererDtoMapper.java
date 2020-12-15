@@ -163,7 +163,7 @@ public class OppdatererDtoMapper {
             fastsattBrukersAndel.getLagtTilAvSaksbehandler(),
             fastsattBrukersAndel.getFastsattBeløp(),
             fastsattBrukersAndel.getInntektskategori() == null ?
-                null : new no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori(fastsattBrukersAndel.getInntektskategori().getKode())
+                null : no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(fastsattBrukersAndel.getInntektskategori().getKode())
         );
     }
 
@@ -194,7 +194,7 @@ public class OppdatererDtoMapper {
             fastsettMånedsinntektUtenInntektsmeldingAndelDto.getAndelsnr(),
                 fastsettMånedsinntektUtenInntektsmeldingAndelDto.getFastsattBeløp(),
                 fastsettMånedsinntektUtenInntektsmeldingAndelDto.getInntektskategori() == null ?  null :
-                    new no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori(fastsettMånedsinntektUtenInntektsmeldingAndelDto.getInntektskategori().getKode()));
+                no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(fastsettMånedsinntektUtenInntektsmeldingAndelDto.getInntektskategori().getKode()));
     }
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.VurderLønnsendringDto mapVurderLønnsendringDto(VurderLønnsendringDto vurdertLonnsendring) {
@@ -239,7 +239,7 @@ public class OppdatererDtoMapper {
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.DagpengeAndelLagtTilBesteberegningDto mapNyDagpengeandel(DagpengeAndelLagtTilBesteberegningDto nyDagpengeAndel) {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.DagpengeAndelLagtTilBesteberegningDto(nyDagpengeAndel.getFastsatteVerdier().getFastsattBeløp(),
-            new no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori(nyDagpengeAndel.getFastsatteVerdier().getInntektskategori().getKode()));
+            no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(nyDagpengeAndel.getFastsatteVerdier().getInntektskategori().getKode()));
     }
 
     private static List<no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.BesteberegningFødendeKvinneAndelDto> mapBesteberegningAndeler(List<BesteberegningFødendeKvinneAndelDto> besteberegningAndelListe) {
@@ -250,12 +250,13 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.BesteberegningFødendeKvinneAndelDto(
             besteberegningFødendeKvinneAndelDto.getAndelsnr(),
             besteberegningFødendeKvinneAndelDto.getFastsatteVerdier().getFastsattBeløp(),
-            new no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori(besteberegningFødendeKvinneAndelDto.getFastsatteVerdier().getInntektskategori().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(besteberegningFødendeKvinneAndelDto.getFastsatteVerdier().getInntektskategori().getKode()),
             besteberegningFødendeKvinneAndelDto.getLagtTilAvSaksbehandler());
     }
 
     private static FaktaOmBeregningTilfelleDto mapFaktaOmBeregningTilfeller(List<FaktaOmBeregningTilfelle> tilfeller) {
-        return new FaktaOmBeregningTilfelleDto(tilfeller.stream().map(FaktaOmBeregningTilfelle::getKode).map(no.nav.folketrygdloven.kalkulus.kodeverk.FaktaOmBeregningTilfelle::new).collect(Collectors.toList()));
+        return new FaktaOmBeregningTilfelleDto(
+            tilfeller.stream().map(FaktaOmBeregningTilfelle::getKode).map(no.nav.folketrygdloven.kalkulus.kodeverk.FaktaOmBeregningTilfelle::fraKode).collect(Collectors.toList()));
     }
 
     public static List<no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.InntektPrAndelDto> mapTilInntektPrAndelListe(List<InntektPrAndelDto> inntektPrAndelList) {
@@ -295,7 +296,7 @@ public class OppdatererDtoMapper {
             .medArbeidsgiverIdentifikator(beregningsaktivitetLagreDto.getArbeidsgiverIdentifikator())
             .medFom(beregningsaktivitetLagreDto.getFom())
             .medOppdragsgiverOrg(beregningsaktivitetLagreDto.getOppdragsgiverOrg())
-            .medOpptjeningAktivitetType(new no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType(beregningsaktivitetLagreDto.getOpptjeningAktivitetType().getKode()))
+            .medOpptjeningAktivitetType(no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType.fraKode(beregningsaktivitetLagreDto.getOpptjeningAktivitetType().getKode()))
             .medSkalBrukes(beregningsaktivitetLagreDto.getSkalBrukes())
             .medTom(beregningsaktivitetLagreDto.getTom())
             .build();
@@ -321,7 +322,7 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.FordelBeregningsgrunnlagAndelDto(
             mapTilFordelRedigerbarAndelDto(fordelBeregningsgrunnlagAndelDto),
             mapTilFordelFastsatteVerdier(fordelBeregningsgrunnlagAndelDto.getFastsatteVerdier()),
-            fordelBeregningsgrunnlagAndelDto.getForrigeInntektskategori() == null ? null : new Inntektskategori(fordelBeregningsgrunnlagAndelDto.getForrigeInntektskategori().getKode()),
+            fordelBeregningsgrunnlagAndelDto.getForrigeInntektskategori() == null ? null : Inntektskategori.fraKode(fordelBeregningsgrunnlagAndelDto.getForrigeInntektskategori().getKode()),
             fordelBeregningsgrunnlagAndelDto.getForrigeRefusjonPrÅr(),
             fordelBeregningsgrunnlagAndelDto.getForrigeArbeidsinntektPrÅr());
     }
@@ -330,7 +331,7 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FastsettBeregningsgrunnlagAndelDto(
             mapTilRedigerbarAndelDto(fastsettBeregningsgrunnlagAndelDto),
             mapTilFastsatteVerdier(fastsettBeregningsgrunnlagAndelDto.getFastsatteVerdier()),
-            fastsettBeregningsgrunnlagAndelDto.getForrigeInntektskategori() == null ? null : new Inntektskategori(fastsettBeregningsgrunnlagAndelDto.getForrigeInntektskategori().getKode()),
+            fastsettBeregningsgrunnlagAndelDto.getForrigeInntektskategori() == null ? null : Inntektskategori.fraKode(fastsettBeregningsgrunnlagAndelDto.getForrigeInntektskategori().getKode()),
             fastsettBeregningsgrunnlagAndelDto.getForrigeRefusjonPrÅr(),
             fastsettBeregningsgrunnlagAndelDto.getForrigeArbeidsinntektPrÅr());
     }
@@ -339,7 +340,7 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.FordelFastsatteVerdierDto(
             fastsatteVerdier.getRefusjonPrÅr(),
             fastsatteVerdier.getFastsattÅrsbeløp(),
-            new Inntektskategori(fastsatteVerdier.getInntektskategori().getKode()),
+            Inntektskategori.fraKode(fastsatteVerdier.getInntektskategori().getKode()),
             fastsatteVerdier.getFastsattÅrsbeløpInklNaturalytelse() == null ? fastsatteVerdier.getFastsattÅrsbeløp() : fastsatteVerdier.getFastsattÅrsbeløpInklNaturalytelse()
         );
     }
@@ -347,7 +348,7 @@ public class OppdatererDtoMapper {
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FastsatteVerdierDto mapTilFastsatteVerdier(FastsatteVerdierDto fastsatteVerdier) {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FastsatteVerdierDto(
             fastsatteVerdier.getFastsattBeløp(),
-            new Inntektskategori(fastsatteVerdier.getInntektskategori().getKode()),
+            Inntektskategori.fraKode(fastsatteVerdier.getInntektskategori().getKode()),
             false);
     }
 
@@ -357,11 +358,12 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsgiverId(),
             redigerbarAndel.getArbeidsforholdId().getReferanse(),
             redigerbarAndel.getNyAndel(),
-            redigerbarAndel.getAktivitetStatus() == null ? null : new AktivitetStatus(redigerbarAndel.getAktivitetStatus().getKode()),
-            redigerbarAndel.getArbeidsforholdType() == null ? null : new OpptjeningAktivitetType(redigerbarAndel.getArbeidsforholdType().getKode()),
+            redigerbarAndel.getAktivitetStatus() == null ? null : AktivitetStatus.fraKode(redigerbarAndel.getAktivitetStatus().getKode()),
+            redigerbarAndel.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(redigerbarAndel.getArbeidsforholdType().getKode()),
             redigerbarAndel.getLagtTilAvSaksbehandler(),
             redigerbarAndel.getBeregningsperiodeFom(),
-            redigerbarAndel.getBeregningsperiodeTom());
+            redigerbarAndel.getBeregningsperiodeTom(),
+            null /** AndelKilde */);
     }
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.RedigerbarAndelDto mapTilRedigerbarAndelDto(RedigerbarAndelDto redigerbarAndel) {

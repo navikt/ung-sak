@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +24,6 @@ import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class KontrollresultatMapperTest {
-    @Inject
-    private EntityManager entityManager;
 
     @Inject
     KontrollresultatMapper kontrollresultatMapper;

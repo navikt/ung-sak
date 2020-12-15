@@ -8,11 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -153,9 +151,8 @@ public class TilKalkulusMapperTest {
             .build();
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
-        var sortedInntektsmeldinger = sakInntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toList());
 
-        //assertThat(sortedInntektsmeldinger).has(sortedInntektsmeldinger);
+        // assertThat(sortedInntektsmeldinger).has(sortedInntektsmeldinger);
 
         var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
 

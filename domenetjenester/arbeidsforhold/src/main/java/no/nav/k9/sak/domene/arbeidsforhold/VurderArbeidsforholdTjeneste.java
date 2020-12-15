@@ -1,24 +1,15 @@
 package no.nav.k9.sak.domene.arbeidsforhold;
 
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.FORENKLET_OPPGJØRSORDNING;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.MARITIMT_ARBEIDSFORHOLD;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
@@ -28,10 +19,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
 public class VurderArbeidsforholdTjeneste {
-
-    private static final Set<ArbeidType> ARBEIDSFORHOLD_TYPER = Stream.of(ORDINÆRT_ARBEIDSFORHOLD, FORENKLET_OPPGJØRSORDNING, MARITIMT_ARBEIDSFORHOLD)
-        .collect(Collectors.toSet());
-    private static final Logger logger = LoggerFactory.getLogger(VurderArbeidsforholdTjeneste.class);
 
     private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester;
 

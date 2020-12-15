@@ -18,7 +18,6 @@
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>kontrakt</artifactId>
-			<scope>provided</scope><!-- ikke trekk med transitivt til andre moduler -->
 		</dependency>
 
 		<dependency>
