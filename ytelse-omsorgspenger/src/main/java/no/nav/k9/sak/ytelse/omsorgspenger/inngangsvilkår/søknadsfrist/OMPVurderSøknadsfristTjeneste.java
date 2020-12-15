@@ -3,14 +3,15 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.perioder.Søknad;
-import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.*;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,31 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     private Map<LocalDateInterval, SøknadsfristPeriodeVurderer> avviksVurderere;
     private SøknadsfristPeriodeVurderer defaultVurderer = new DefaultSøknadsfristPeriodeVurderer();
+    private InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste;
 
     OMPVurderSøknadsfristTjeneste() {
-        KoronaUtvidetSøknadsfristVurderer vurderer = new KoronaUtvidetSøknadsfristVurderer();
-        avviksVurderere = Map.of(vurderer.periodeSomVurderes(), vurderer);
+        var utvidetVurderer = new KoronaUtvidetSøknadsfristVurderer();
+        this.avviksVurderere = Map.of(utvidetVurderer.periodeSomVurderes(), utvidetVurderer);
+    }
+
+    @Inject
+    public OMPVurderSøknadsfristTjeneste(InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste) {
+        this();
+        this.inntektsmeldingerPerioderTjeneste = inntektsmeldingerPerioderTjeneste;
+    }
+
+    @Override
+    public Map<Søknad, Set<SøktPeriode>> hentPerioder(BehandlingReferanse referanse) {
+        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
+        HashMap<Søknad, Set<SøktPeriode>> result = new HashMap<>();
+        inntektsmeldinger.forEach(it -> {
+            result.put(new Søknad(it.getJournalpostId(), it.getInnsendingstidspunkt(), SøknadType.INNTEKTSMELDING),
+                it.getOppgittFravær()
+                    .stream()
+                    .map(op -> new SøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(op.getPeriode().getFom(), op.getPeriode().getTom()), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef()))
+                    .collect(Collectors.toSet()));
+        });
+        return result;
     }
 
     @Override
