@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsoppretterApplikasjonTjeneste;
+import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -59,7 +60,22 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData pd) {
         var saksnummer = pd.getSaksnummer();
-        revurder(new Saksnummer(saksnummer));
+        if (saksnummer == null) {
+            final String[] saksnumre = pd.getPayloadAsString().split("\\s+");
+            revurderAlleSomProsessFeil(saksnumre);
+        } else {
+            revurder(new Saksnummer(saksnummer));
+        }
+    }
+    
+    public void revurderAlleSomProsessFeil(String[] saksnumre) {
+        for (String saksnummer : saksnumre) {
+            try {
+                revurder(new Saksnummer(saksnummer));
+            } catch (VLException e) {
+                logger.warn("Kunne ikke opprette manuell revurdering for: {}", saksnummer);
+            }
+        }
     }
 
     public void revurder(Saksnummer saksnummer) {
