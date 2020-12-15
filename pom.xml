@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.1-2020.12.14.170353-f34dc83</version>
+                <version>1.1-2020.12.15.102322-866ca80</version>
             </dependency>
 
             <dependency>
