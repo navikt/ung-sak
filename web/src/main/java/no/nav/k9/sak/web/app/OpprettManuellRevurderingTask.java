@@ -59,7 +59,15 @@ public class OpprettManuellRevurderingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData pd) {
         var saksnummer = pd.getSaksnummer();
-        revurder(new Saksnummer(saksnummer));
+        if (saksnummer == null) {
+            final String[] saksnumre = pd.getPayloadAsString().split("\\s+");
+            if (saksnumre.length != 1) {
+                throw new IllegalStateException("Kan ikke håndtere forespørsel med flere saksnummer grunnet feil i Abakus. Antall: " + saksnumre.length);
+            }
+            revurder(new Saksnummer(saksnumre[0]));
+        } else {
+            revurder(new Saksnummer(saksnummer));
+        }
     }
 
     public void revurder(Saksnummer saksnummer) {
