@@ -47,8 +47,7 @@ public class BehandlingsoppretterTjeneste {
     }
 
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
-        boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId).stream()
-            .map(Behandling::getType).anyMatch(type::equals);
+        boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, type).size() > 0;
         if (finnesÅpneBehandlingerAvType) {
             return false;
         }
@@ -69,11 +68,10 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private boolean kanOppretteRevurdering(Long fagsakId) {
-        boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId).stream()
-            .anyMatch(b -> BehandlingType.FØRSTEGANGSSØKNAD.equals(b.getType()) || BehandlingType.REVURDERING.equals(b.getType()));
+        var åpneBehandlinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
         //Strengere versjon var behandling = behandlingRepository.finnSisteInnvilgetBehandling(fagsakId).orElse(null);
         var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElse(null);
-        if (finnesÅpneBehandlingerAvType || behandling == null) {
+        if (åpneBehandlinger.size() > 0 || behandling == null) {
             return false;
         }
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, behandling.getFagsakYtelseType()).orElseThrow();
