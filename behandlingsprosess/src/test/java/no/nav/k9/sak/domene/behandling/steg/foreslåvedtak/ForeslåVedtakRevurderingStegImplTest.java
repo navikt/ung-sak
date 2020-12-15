@@ -12,9 +12,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,9 +53,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ForeslåVedtakRevurderingStegImplTest {
-
-    @Inject
-    private EntityManager entityManager;
 
     @Mock
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;

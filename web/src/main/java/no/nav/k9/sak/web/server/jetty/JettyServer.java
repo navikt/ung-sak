@@ -108,6 +108,16 @@ public class JettyServer {
         jettyServer.bootStrap();
     }
 
+    private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
+        Server server = new Server(appKonfigurasjon.getServerPort());
+        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[] {}));
+    
+        var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
+        server.setHandler(handlers);
+        server.start();
+        server.join();
+    }
+
     protected void bootStrap() throws Exception { // NOSONAR
         konfigurer();
         migrerDatabaser();
@@ -124,6 +134,13 @@ public class JettyServer {
 
     protected void konfigurerMiljø() throws Exception {
         hacks4Nais();
+    }
+
+    private void konfigurerJndi() throws Exception {
+        // må være << antall db connectdions. Summen av runner threads + kall fra ulike løsninger bør ikke overgå antall conns (vi isåfall kunne
+        // medføre connection timeouts)
+        System.setProperty("task.manager.runner.threads", "7");
+        new EnvEntry("jdbc/defaultDS", DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
     }
 
     protected void konfigurerSikkerhet(File jaspiConf) {
@@ -164,13 +181,6 @@ public class JettyServer {
         }
     }
 
-    private void konfigurerJndi() throws Exception {
-        // må være << antall db connectdions. Summen av runner threads + kall fra ulike løsninger bør ikke overgå antall conns (vi isåfall kunne
-        // medføre connection timeouts)
-        System.setProperty("task.manager.runner.threads", "7");
-        new EnvEntry("jdbc/defaultDS", DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
-    }
-
     protected void migrerDatabaser() throws IOException {
         EnvironmentClass environmentClass = getEnvironmentClass();
         String initSql = String.format("SET ROLE \"%s\"", DatasourceUtil.getDbRole("defaultDS", DatasourceRole.ADMIN));
@@ -189,16 +199,6 @@ public class JettyServer {
                 log.warn("Klarte ikke stenge connection etter migrering", e);
             }
         }
-    }
-
-    private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
-        Server server = new Server(appKonfigurasjon.getServerPort());
-        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[] {}));
-
-        var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
-        server.setHandler(handlers);
-        server.start();
-        server.join();
     }
 
     protected EnvironmentClass getEnvironmentClass() {

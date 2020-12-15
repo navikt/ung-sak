@@ -60,7 +60,6 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
 
-    @SuppressWarnings("unused")
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
     }
