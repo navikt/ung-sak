@@ -41,6 +41,7 @@ import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsgiverOpplysningerDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagRequest;
@@ -55,7 +56,6 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.StartBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
-import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.frisinn.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -166,7 +166,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
         var bgRefs = BgRef.getRefs(bgReferanser);
-        var ytelseType = new YtelseTyperKalkulusStøtterKontrakt(fagsakYtelseType.getKode());
+        var ytelseType = YtelseTyperKalkulusStøtterKontrakt.fraKode(fagsakYtelseType.getKode());
         var request = new FortsettBeregningListeRequest(saksnummer.getVerdi(), bgRefs, ytelseType, new StegType(stegType.getKode()));
         List<TilstandResponse> tilstandResponse = restTjeneste.fortsettBeregning(request);
         return mapFraTilstand(tilstandResponse, bgReferanser);
@@ -205,7 +205,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(referanse.getFagsakYtelseType().getKode());
+        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         List<ArbeidsgiverOpplysningerDto> arbeidsgiverOpplysningerListe = lagArbeidsgiverOpplysningListe(referanse, inntektArbeidYtelseGrunnlag);
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
@@ -235,12 +235,14 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (bgReferanser.isEmpty()) {
             return List.of();
         }
-        var ytelseSomSkalBeregnes = new YtelseTyperKalkulusStøtterKontrakt(ref.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(ref.getFagsakYtelseType().getKode());
 
+        var saksnummer = ref.getSaksnummer().getVerdi();
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
-        List<HentBeregningsgrunnlagRequest> requests = bgReferanser.stream().map(bgRef -> new HentBeregningsgrunnlagRequest(bgRef.getRef(), ytelseSomSkalBeregnes, false)).collect(Collectors.toList());
+        List<HentBeregningsgrunnlagRequest> requests = bgReferanser.stream()
+            .map(bgRef -> new HentBeregningsgrunnlagRequest(bgRef.getRef(), saksnummer, ytelseSomSkalBeregnes, false)).collect(Collectors.toList());
 
-        var dtoer = restTjeneste.hentBeregningsgrunnlagGrunnlag(new HentBeregningsgrunnlagListeRequest(requests, ref.getBehandlingUuid(), false));
+        var dtoer = restTjeneste.hentBeregningsgrunnlagGrunnlag(new HentBeregningsgrunnlagListeRequest(requests, ref.getBehandlingUuid(), saksnummer, false));
 
         if (dtoer == null || dtoer.isEmpty()) {
             return Collections.emptyList();
@@ -297,7 +299,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             input,
             fagsak.getSaksnummer().getVerdi(),
             aktør,
-            new YtelseTyperKalkulusStøtterKontrakt(behandlingReferanse.getFagsakYtelseType().getKode()));
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()));
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {

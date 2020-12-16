@@ -34,6 +34,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -156,9 +157,9 @@ public class FordelRestTjeneste {
     @Path("/innsending")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
-    @Operation(description = "Mottak av søknad.", tags = "fordel")
+    @Operation(description = "Mottak av dokument.", tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public InnsendingMottatt innsending(@Parameter(description = "Søknad i JSON-format.") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid Innsending innsending) {
+    public InnsendingMottatt innsending(@Parameter(description = "Søknad/dokument innsendt.") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid Innsending innsending) {
         var saksnummer = innsending.getSaksnummer();
         var ytelseType = innsending.getYtelseType();
         var journalpostId = innsending.getJournalpostId();
@@ -170,7 +171,7 @@ public class FordelRestTjeneste {
         var behandling = søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
 
         mottattDokument.setBehandlingId(behandling.getId());
-        mottatteDokumentRepository.lagre(mottattDokument);
+        mottatteDokumentRepository.lagre(mottattDokument, DokumentStatus.GYLDIG);
 
         return new InnsendingMottatt(saksnummer);
     }
@@ -190,7 +191,7 @@ public class FordelRestTjeneste {
         builder.medMottattDato(mottattTidspunkt.toLocalDate());
 
         MottattDokument mottattDokument = builder.build();
-        mottatteDokumentRepository.lagre(mottattDokument);
+        mottatteDokumentRepository.lagre(mottattDokument, DokumentStatus.MOTTATT);
         return mottattDokument;
     }
 

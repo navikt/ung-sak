@@ -17,7 +17,6 @@ import org.mockito.quality.Strictness;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedPeriodeberegner;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.infotrygdfeed.InfotrygdFeedPeriodeberegnerTestParametere;
 import no.nav.k9.sak.infotrygdfeed.TestPeriode;
 import no.nav.k9.sak.kontrakt.uttak.Periode;

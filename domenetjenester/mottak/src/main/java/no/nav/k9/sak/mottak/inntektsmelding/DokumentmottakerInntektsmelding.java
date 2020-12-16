@@ -101,7 +101,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
                 sisteHenlagteFørstegangsbehandling.get());
             dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
         } else {
-            dokumentMottakerFelles.opprettRevurderingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
+            dokumentMottakerFelles.opprettNyBehandlingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
         }
     }
 

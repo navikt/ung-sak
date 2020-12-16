@@ -21,13 +21,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.testutilities.Whitebox;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -82,6 +83,19 @@ public class FagsakRevurderingTest {
     @Test
     public void kanIkkeOppretteRevurderingNårBehandlingErHenlagt() {
         behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
+
+        FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
+        Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);
+
+        assertThat(kanRevurderingOpprettes).isFalse();
+    }
+
+    @Test
+    public void kanIkkeOppretteRevurderingNårOrigBehandlingErUnntaksbehandling() {
+        var unntaksbehandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.UNNTAKSBEHANDLING).build();
+
+        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsakSaksnummer))
+            .thenReturn(singletonList(unntaksbehandling));
 
         FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
         Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);

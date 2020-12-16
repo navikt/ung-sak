@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
@@ -263,7 +264,7 @@ public class MottattDokumentOversetterInntektsmeldingTest {
             .medPayload(xml)
             .build();
 
-        mottatteDokumentRepository.lagre(mottattDokument);
+        mottatteDokumentRepository.lagre(mottattDokument, DokumentStatus.MOTTATT);
         return mottattDokument;
     }
 }

@@ -31,11 +31,8 @@ class UnntaksbehandlingBeregningsresultatProvider implements BeregningsresultatP
 
     @Override
     public Optional<BeregningsresultatEntitet> hentBeregningsresultat(Long behandlingId) {
-        Optional<BehandlingBeregningsresultatEntitet> aggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(behandlingId);
-        Optional<BeregningsresultatEntitet> overstyrt = aggregat
+        return beregningsresultatRepository.hentBeregningsresultatAggregat(behandlingId)
             .map(BehandlingBeregningsresultatEntitet::getOverstyrtBeregningsresultat);
-
-        return overstyrt.isPresent() ? overstyrt : aggregat.map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
     @Override
@@ -44,6 +41,6 @@ class UnntaksbehandlingBeregningsresultatProvider implements BeregningsresultatP
         Optional<BeregningsresultatEntitet> utbet = aggregat
             .map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
 
-        return utbet.isPresent() ? utbet : hentBeregningsresultat(behandlingId);
+        return utbet.isPresent() ? utbet : aggregat.map(BehandlingBeregningsresultatEntitet::getOverstyrtBeregningsresultat);
     }
 }

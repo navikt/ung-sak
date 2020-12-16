@@ -34,20 +34,19 @@ public class FinnSak {
     @Valid
     private AktørId pleietrengendeAktørId;
 
-    @JsonProperty(value = "periode", required = true)
+    @JsonProperty(value = "periode", required = false)
     @Valid
-    @NotNull
     private Periode periode;
 
     @JsonCreator
     public FinnSak(@JsonProperty(value = "ytelseType", required = true) FagsakYtelseType ytelseType,
                    @JsonProperty(value = "aktørId", required = true) @NotNull AktørId aktørId,
-                   @JsonProperty(value = "periode", required = true) Periode periode,
+                   @JsonProperty(value = "periode", required = false) Periode periode,
                    @JsonProperty(value = "pleietrengendeAktørId", required = false) AktørId pleietrengendeAktørId) {
         this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.aktørId = Objects.requireNonNull(aktørId, "aktørId");
-        this.periode = Objects.requireNonNull(periode, "periode");
         this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.periode = periode;
     }
 
     public FagsakYtelseType getYtelseType() {

@@ -33,10 +33,10 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -49,6 +49,7 @@ public class TilkjentYtelseOppdatererTest {
     private BeregningsresultatRepository beregningsresultatRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste;
+    private ArbeidsgiverValidator arbeidsgiverValidator;
 
     private TilkjentYtelseOppdaterer oppdaterer;
     private Behandling behandling;
@@ -60,19 +61,17 @@ public class TilkjentYtelseOppdatererTest {
         beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
         vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        arbeidsgiverValidator = mock(ArbeidsgiverValidator.class);
 
-        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
+        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
 
         // legg til et nytt vilkårsresultat
-//        final var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(getVilkårene(behandling));
         final var vilkårResultatBuilder = Vilkårene.builder();
         final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.K9_VILKÅRET)
                 .leggTil(new VilkårPeriodeBuilder()
-//                        .medUtfall(Utfall.OPPFYLT)
-//                .medMerknad(VilkårUtfallMerknad.VM_1001)
                         .medPeriode(LocalDate.now(), LocalDate.now().plusDays(7))
                         .medUtfallOverstyrt(Utfall.OPPFYLT)
                 )

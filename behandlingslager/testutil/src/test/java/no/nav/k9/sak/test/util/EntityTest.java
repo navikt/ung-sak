@@ -2,7 +2,6 @@ package no.nav.k9.sak.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.FileNotFoundException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -111,7 +110,7 @@ public class EntityTest {
     @Disabled("FIXME er ikke portet til Postgres")
     @ParameterizedTest
     @MethodSource("provideArguments")
-    public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db(String name, Class<?> entityClass) throws Exception {
+    public void sjekk_felt_mapping_primitive_felt_i_entiteter_må_ha_not_nullable_i_db(@SuppressWarnings("unused") String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         for (Attribute<?, ?> att : managedType.getAttributes()) {
@@ -142,7 +141,7 @@ public class EntityTest {
     @Disabled("FIXME er ikke portet til Postgres")
     @ParameterizedTest
     @MethodSource("provideArguments")
-    public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db(String name, Class<?> entityClass) throws Exception {
+    public void sjekk_felt_ikke_primitive_wrappere_kan_ikke_være_not_nullable_i_db(@SuppressWarnings("unused") String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         if (Modifier.isAbstract(entityClass.getModifiers())) {
@@ -204,7 +203,7 @@ public class EntityTest {
 
     @ParameterizedTest
     @MethodSource("provideArguments")
-    public void sjekk_felt_ikke_er_Float_eller_Double(String name, Class<?> entityClass) throws Exception {
+    public void sjekk_felt_ikke_er_Float_eller_Double(@SuppressWarnings("unused") String name, Class<?> entityClass) throws Exception {
         ManagedType<?> managedType = entityManagerFactory.getMetamodel().managedType(entityClass);
 
         for (Attribute<?, ?> att : managedType.getAttributes()) {

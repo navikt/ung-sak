@@ -11,8 +11,6 @@ import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
@@ -91,9 +89,6 @@ public class TpsOversetterTest {
     private static final String GATEADRESSE1 = "Gaten 13 B";
 
     private static final String USTRUKTURERT_GATEADRESSE1 = "Ustrukturert adresselinje 1";
-
-    @Inject
-    private EntityManager entityManager;
 
     @Mock
     private Bruker bruker;

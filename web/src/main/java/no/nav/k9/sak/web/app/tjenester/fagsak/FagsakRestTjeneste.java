@@ -1,13 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -23,6 +27,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,18 +35,27 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingOpprettingDto;
 import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.kontrakt.behandling.SakRettigheterDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
@@ -54,17 +68,24 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class FagsakRestTjeneste {
 
     public static final String PATH = "/fagsak";
-    public static final String STATUS_PATH = "/fagsak/status";
-    public static final String SOK_PATH = "/fagsak/sok";
+    public static final String STATUS_PATH = PATH + "/status";
+    public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
+    public static final String SOK_PATH = PATH + "/sok";
+    private static final String RETTIGHETER_PART_PATH = "/rettigheter";
+
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
+    private FagsakTjeneste fagsakTjeneste;
+    private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
+        this.fagsakTjeneste = fagsakTjeneste;
+        this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
     }
 
     @GET
@@ -110,6 +131,56 @@ public class FagsakRestTjeneste {
         }
     }
 
+    @SuppressWarnings("resource")
+    @POST
+    @Path(SISTE_FAGSAK_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Finn siste eksisterende fagsak.", summary = ("Finn siste fagsak som matcher søkekriteriene"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public Response finnSisteFagsak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnSak finnSakDto) {
+        var ytelseType = finnSakDto.getYtelseType();
+
+        AktørId bruker = finnSakDto.getAktørId();
+        AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
+        var periode = finnSakDto.getPeriode();
+
+        var fagsak = fagsakTjeneste.finnFagsakerForAktør(bruker)
+            .stream()
+            .filter(f -> f.getPleietrengendeAktørId() == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
+            .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
+            .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
+            .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
+            .findFirst();
+
+        return fagsak.isPresent()
+            ? Response.ok(tilFagsakDto(null, fagsak.get())).build()
+            : Response.status(Status.NO_CONTENT).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(RETTIGHETER_PART_PATH)
+    @Operation(description = "Hent rettigheter for saksnummer", tags = "fagsak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
+        @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
+    })
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response hentRettigheter(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);
+        if (fagsak.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        var fagsakId = fagsak.map(Fagsak::getId).orElseThrow();
+        var oppretting = BehandlingType.getYtelseBehandlingTyper().stream()
+            .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt)))
+            .collect(Collectors.toList());
+
+        var dto = new SakRettigheterDto(fagsak.map(Fagsak::getSkalTilInfotrygd).orElse(false), oppretting, List.of());
+        return Response.ok(dto).build();
+    }
+
     @POST
     @Path(SOK_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -136,26 +207,30 @@ public class FagsakRestTjeneste {
             brukerInfo.getPersonstatus(),
             brukerInfo.getDiskresjonskode(),
             brukerInfo.getDødsdato(),
-            brukerInfo.getAktørId()
-        );
+            brukerInfo.getAktørId());
 
         List<FagsakDto> dtoer = new ArrayList<>();
         for (var info : view.getFagsakInfoer()) {
-            Fagsak fagsak = info.getFagsak();
-            Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
-                .kanRevurderingOpprettes(fagsak);
-            dtoer.add(new FagsakDto(
-                fagsak.getSaksnummer(),
-                fagsak.getYtelseType(),
-                fagsak.getStatus(),
-                personDto,
-                kanRevurderingOpprettes,
-                fagsak.getSkalTilInfotrygd(),
-                fagsak.getOpprettetTidspunkt(),
-                fagsak.getEndretTidspunkt()
-            ));
+            dtoer.add(tilFagsakDto(personDto, info.getFagsak()));
         }
         return dtoer;
+    }
+
+    private FagsakDto tilFagsakDto(PersonDto personDto, Fagsak fagsak) {
+        Boolean kanRevurderingOpprettes = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow()
+            .kanRevurderingOpprettes(fagsak);
+        var periode = new Periode(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
+        return new FagsakDto(
+            fagsak.getSaksnummer(),
+            fagsak.getYtelseType(),
+            fagsak.getStatus(),
+            periode,
+            personDto,
+            fagsak.getPleietrengendeAktørId(),
+            kanRevurderingOpprettes,
+            fagsak.getSkalTilInfotrygd(),
+            fagsak.getOpprettetTidspunkt(),
+            fagsak.getEndretTidspunkt());
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {

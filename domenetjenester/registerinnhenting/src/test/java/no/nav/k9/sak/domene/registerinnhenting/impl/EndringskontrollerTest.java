@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,16 +35,13 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class EndringskontrollerTest {
-
-    @Inject
-    private EntityManager entityManager;
 
     private KontrollerFaktaAksjonspunktUtleder kontrollerFaktaTjenesteMock;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenesterMock;

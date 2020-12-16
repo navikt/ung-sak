@@ -95,12 +95,12 @@ public interface InntektArbeidYtelseTjeneste {
     void fjernSaksbehandletVersjon(Long behandlingId);
 
     /**
-     * Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
+     * (async) Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
      */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
-     * Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
+     * (async) Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
      */
     void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
@@ -114,7 +114,7 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder);
 
     /**
-     * Kopier IAY grunnlag fra en behandling til en annen.
+     * (async) Kopier IAY grunnlag fra en behandling til en annen.
      *
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling

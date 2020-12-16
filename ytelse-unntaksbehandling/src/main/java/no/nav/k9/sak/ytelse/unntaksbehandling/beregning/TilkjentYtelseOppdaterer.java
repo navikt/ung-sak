@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -32,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -58,40 +58,36 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private ArbeidsgiverValidator arbeidsgiverValidator;
 
-    @SuppressWarnings("unused")
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
-                                    @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
+                                    @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
+                                    ArbeidsgiverValidator arbeidsgiverValidator) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.arbeidsgiverValidator = arbeidsgiverValidator;
     }
 
     @Override
     public OppdateringResultat oppdater(BekreftTilkjentYtelseDto dto, AksjonspunktOppdaterParameter param) {
-        var behandlingId = param.getBehandlingId();
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        validerDto(dto, behandling);
 
-        var beregningsresultat = BeregningsresultatEntitet.builder()
-            .medRegelInput("manuell_behandling")
-            .medRegelSporing("manuell_behandling")
-            .build();
-
-        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var vilkår = vilkårene.getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
-
-        TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), vilkår);
+        var beregningsresultat = BeregningsresultatEntitet.builder().medRegelInput("unntaksbehandling")
+            .medRegelSporing("unntaksbehandling").build();
 
         for (TilkjentYtelsePeriodeDto tyPeriode : dto.getTilkjentYtelse().getPerioder()) {
             var brPeriode = BeregningsresultatPeriode.builder()
                 .medBeregningsresultatPeriodeFomOgTom(tyPeriode.getFom(), tyPeriode.getTom())
                 .build(beregningsresultat);
+
             for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
                 var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
                 var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
@@ -133,6 +129,14 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medInntektskategori(tyAndel.getInntektskategori())
             .medArbeidsforholdType(ARBEIDSFORHOLD_TYPE)
             .medStillingsprosent(STILLINGSPROSENT);
+    }
+
+    private void validerDto(BekreftTilkjentYtelseDto dto, Behandling behandling) {
+        var k9Vilkåret = vilkårResultatRepository.hent(behandling.getId())
+            .getVilkår(VilkårType.K9_VILKÅRET).orElseThrow();
+        TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), k9Vilkåret);
+
+        arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder(), behandling.getAktørId());
     }
 
     interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {

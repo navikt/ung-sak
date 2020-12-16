@@ -10,8 +10,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -71,9 +69,6 @@ class PersoninfoAdapterMedTPSOversetterTest {
         }
     }
     private static final FiktiveFnr FIKTIVE_FNR = new FiktiveFnr();
-
-    @Inject
-    private EntityManager entityManager;
 
     private PersoninfoAdapter adapterMedVanligOversetter; // objektet vi tester
 

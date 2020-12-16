@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +48,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class KompletthetskontrollerTest {
-
-    @Inject
-    private EntityManager entityManager;
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;

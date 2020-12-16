@@ -23,6 +23,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.BeløpDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.JournalpostId;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
@@ -110,7 +111,7 @@ public class TilKalkulusMapper {
             .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
                 arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse())
                     : null,
-                new ArbeidsforholdHandlingType(arbeidsforholdOverstyring.getHandling().getKode())))
+                ArbeidsforholdHandlingType.fraKode(arbeidsforholdOverstyring.getHandling().getKode())))
             .collect(Collectors.toList());
 
         if (!resultat.isEmpty()) {
@@ -123,11 +124,10 @@ public class TilKalkulusMapper {
         return new OppgittEgenNæringDto(
             mapPeriode(oppgittEgenNæring.getPeriode()),
             oppgittEgenNæring.getOrgnr() == null ? null : new Organisasjon(oppgittEgenNæring.getOrgnr()),
-            new VirksomhetType(oppgittEgenNæring.getVirksomhetType().getKode()),
+            VirksomhetType.fraKode(oppgittEgenNæring.getVirksomhetType().getKode()),
             oppgittEgenNæring.getNyoppstartet(),
             oppgittEgenNæring.getVarigEndring(),
             oppgittEgenNæring.getEndringDato(),
-            oppgittEgenNæring.getNærRelasjon(),
             oppgittEgenNæring.getNyIArbeidslivet(),
             oppgittEgenNæring.getBruttoInntekt());
     }
@@ -155,7 +155,7 @@ public class TilKalkulusMapper {
             var naturalYtelseDtos = inntektsmelding.getNaturalYtelser().stream().map(naturalYtelse -> new NaturalYtelseDto(
                 mapPeriode(naturalYtelse.getPeriode()),
                 new BeløpDto(naturalYtelse.getBeloepPerMnd().getVerdi()),
-                new NaturalYtelseType(naturalYtelse.getType().getKode()))).collect(Collectors.toList());
+                NaturalYtelseType.fraKode(naturalYtelse.getType().getKode()))).collect(Collectors.toList());
 
             var refusjonDtos = inntektsmelding.getEndringerRefusjon().stream().map(refusjon -> new RefusjonDto(
                 new BeløpDto(refusjon.getRefusjonsbeløp().getVerdi()),
@@ -168,7 +168,16 @@ public class TilKalkulusMapper {
             var refusjon = inntektsmelding.getRefusjonOpphører();
             var beløpDto1 = inntektsmelding.getRefusjonBeløpPerMnd() != null ? new BeløpDto(inntektsmelding.getRefusjonBeløpPerMnd().getVerdi()) : null;
 
-            return new InntektsmeldingDto(aktør, beløpDto, naturalYtelseDtos, refusjonDtos, internArbeidsforholdRefDto, startDato, refusjon, beløpDto1);
+            var journalpostId = new JournalpostId(inntektsmelding.getJournalpostId().getJournalpostId().getVerdi());
+            return new InntektsmeldingDto(aktør, beløpDto,
+                naturalYtelseDtos,
+                refusjonDtos,
+                internArbeidsforholdRefDto,
+                startDato,
+                refusjon,
+                beløpDto1,
+                journalpostId,
+                inntektsmelding.getKanalreferanse());
         }).collect(Collectors.toList());
 
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
@@ -280,7 +289,7 @@ public class TilKalkulusMapper {
         if (KODEVERDI_UNDEFINED.equals(ytelse.getBehandlingsTema().getKode())) {
             return null;
         }
-        return new TemaUnderkategori(ytelse.getBehandlingsTema().getKode());
+        return TemaUnderkategori.fraKode(ytelse.getBehandlingsTema().getKode());
     }
 
     private static BeløpDto mapBeløp(Optional<Beløp> beløp) {
@@ -309,7 +318,7 @@ public class TilKalkulusMapper {
     }
 
     private static UtbetalingDto mapTilDto(Inntekt inntekt) {
-        UtbetalingDto utbetalingDto = new UtbetalingDto(new InntektskildeType(inntekt.getInntektsKilde().getKode()),
+        UtbetalingDto utbetalingDto = new UtbetalingDto(InntektskildeType.fraKode(inntekt.getInntektsKilde().getKode()),
             inntekt.getAlleInntektsposter().stream().map(TilKalkulusMapper::mapTilDto).collect(Collectors.toList()));
         if (inntekt.getArbeidsgiver() != null) {
             return utbetalingDto.medArbeidsgiver(mapTilAktør(inntekt.getArbeidsgiver()));
@@ -320,7 +329,7 @@ public class TilKalkulusMapper {
     private static UtbetalingsPostDto mapTilDto(Inntektspost inntektspost) {
         return new UtbetalingsPostDto(
             mapPeriode(inntektspost.getPeriode()),
-            new InntektspostType(inntektspost.getInntektspostType().getKode()),
+            InntektspostType.fraKode(inntektspost.getInntektspostType().getKode()),
             inntektspost.getBeløp().getVerdi());
     }
 
@@ -343,13 +352,13 @@ public class TilKalkulusMapper {
         return new YrkesaktivitetDto(
             mapTilAktør(yrkesaktivitet.getArbeidsgiver()),
             arbeidsforholdRef != null ? new InternArbeidsforholdRefDto(arbeidsforholdRef) : null,
-            new ArbeidType(yrkesaktivitet.getArbeidType().getKode()),
+            ArbeidType.fraKode(yrkesaktivitet.getArbeidType().getKode()),
             aktivitetsAvtaleDtos);
     }
 
     public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter) {
         return new OpptjeningAktiviteterDto(opptjeningAktiviteter.getOpptjeningPerioder().stream().map(opptjeningPeriode -> new OpptjeningPeriodeDto(
-            new OpptjeningAktivitetType(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
+            OpptjeningAktivitetType.fraKode(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
             new Periode(opptjeningPeriode.getPeriode().getFom(), opptjeningPeriode.getPeriode().getTom()),
             mapTilDto(opptjeningPeriode),
             opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null
