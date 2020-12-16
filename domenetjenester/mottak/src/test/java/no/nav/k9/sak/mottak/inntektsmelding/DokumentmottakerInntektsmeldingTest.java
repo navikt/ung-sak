@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
+import no.nav.k9.sak.mottak.NyBehandlingOppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakTestUtil;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
@@ -46,6 +48,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.Kompletthetskontroller;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -78,6 +81,8 @@ public class DokumentmottakerInntektsmeldingTest {
     @Mock
     private Behandlingsoppretter behandlingsoppretter;
     @Mock
+    private NyBehandlingOppretter nyBehandlingOppretter;
+    @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     @Mock
     private UttakTjeneste uttakTjeneste;
@@ -91,12 +96,13 @@ public class DokumentmottakerInntektsmeldingTest {
 
         MockitoAnnotations.initMocks(this);
 
+        Instance<NyBehandlingOppretter>  nyBehandlingOpprettere = new UnitTestLookupInstanceImpl<>(nyBehandlingOppretter);
         dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,
             prosessTaskRepository,
             behandlendeEnhetTjeneste,
             historikkinnslagTjeneste,
             mottatteDokumentTjeneste,
-            behandlingsoppretter));
+            nyBehandlingOpprettere));
 
         dokumentmottaker = Mockito.spy(new DokumentmottakerInntektsmelding(dokumentmottakerFelles,
             mottatteDokumentTjeneste,
@@ -214,13 +220,13 @@ public class DokumentmottakerInntektsmeldingTest {
         when(revurdering.getAktørId()).thenReturn(behandling.getAktørId());
 
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-        when(behandlingsoppretter.opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
+        when(nyBehandlingOppretter.opprettNyBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
 
         // Act
         dokumentmottaker.mottaDokument(mottattDokument, behandling.getFagsak());
 
         // Assert
-        verify(behandlingsoppretter).opprettRevurdering(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        verify(nyBehandlingOppretter).opprettNyBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(mottatteDokumentTjeneste).persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, List.of(mottattDokument));
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
     }

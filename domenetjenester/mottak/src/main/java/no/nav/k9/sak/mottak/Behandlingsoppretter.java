@@ -46,7 +46,7 @@ public class Behandlingsoppretter {
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) { // NOSONAR
+                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
@@ -91,6 +91,7 @@ public class Behandlingsoppretter {
         Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
         return revurdering;
     }
+
 
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
