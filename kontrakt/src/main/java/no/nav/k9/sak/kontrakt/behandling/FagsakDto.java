@@ -120,10 +120,6 @@ public class FagsakDto {
         return endret;
     }
 
-    public Boolean getKanRevurderingOpprettes() {
-        return kanRevurderingOpprettes;
-    }
-
     public LocalDateTime getOpprettet() {
         return opprettet;
     }
@@ -162,10 +158,6 @@ public class FagsakDto {
 
     public void setEndret(LocalDateTime endret) {
         this.endret = endret;
-    }
-
-    public void setKanRevurderingOpprettes(Boolean kanRevurderingOpprettes) {
-        this.kanRevurderingOpprettes = kanRevurderingOpprettes;
     }
 
     public void setOpprettet(LocalDateTime opprettet) {

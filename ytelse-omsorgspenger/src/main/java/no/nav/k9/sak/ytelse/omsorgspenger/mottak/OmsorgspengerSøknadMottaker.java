@@ -61,6 +61,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow();
         validerIngenÅpneBehandlinger(fagsak);
 
+        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
         var behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
 
         // FIXME K9 Persister søknad

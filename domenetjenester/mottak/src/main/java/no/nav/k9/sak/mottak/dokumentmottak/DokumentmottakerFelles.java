@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -12,13 +14,14 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.mottak.Behandlingsoppretter;
+import no.nav.k9.sak.mottak.NyBehandlingOppretter;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -33,7 +36,7 @@ public class DokumentmottakerFelles {
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
-    private Behandlingsoppretter behandlingsoppretter;
+    private Instance<NyBehandlingOppretter> nyBehandlingOpprettere;
 
     @SuppressWarnings("unused")
     private DokumentmottakerFelles() { // NOSONAR
@@ -46,13 +49,13 @@ public class DokumentmottakerFelles {
                                   BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                   HistorikkinnslagTjeneste historikkinnslagTjeneste,
                                   MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                  Behandlingsoppretter behandlingsoppretter) {
+                                  @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
-        this.behandlingsoppretter = behandlingsoppretter;
+        this.nyBehandlingOpprettere = nyBehandlingOpprettere;
     }
 
     public void leggTilBehandlingsårsak(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
@@ -96,11 +99,11 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(behandling, behandlingÅrsakType);
     }
 
-    public Behandling opprettRevurderingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling tidligereBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling revurdering = behandlingsoppretter.opprettRevurdering(tidligereBehandling, behandlingÅrsakType);
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(revurdering, mottattDokument);
-        opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, revurdering);
-        return revurdering;
+    public Behandling opprettNyBehandlingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling forrigeBehandling, BehandlingÅrsakType behandlingÅrsakType) {
+        Behandling nyBehandling = getNyBehandlingOppretter(forrigeBehandling).opprettNyBehandling(forrigeBehandling, behandlingÅrsakType);
+        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyBehandling, mottattDokument);
+        opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyBehandling);
+        return nyBehandling;
     }
 
     public void opprettTaskForÅStarteBehandlingFraInntektsmelding(Collection<MottattDokument> mottattDokument, Behandling behandling) {
@@ -112,4 +115,8 @@ public class DokumentmottakerFelles {
         mottattDokument.forEach(m -> opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
     }
 
+    private NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
+        return BehandlingTypeRef.Lookup.find(NyBehandlingOppretter.class, nyBehandlingOpprettere, forrigeBehandling.getFagsakYtelseType(), forrigeBehandling.getType())
+            .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + forrigeBehandling.getFagsakYtelseType() + "], behandlingtype [" + forrigeBehandling.getType() + "]"));
+    }
 }

@@ -5,6 +5,7 @@ import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.hibernate.jpa.QueryHints;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -74,7 +76,7 @@ public class BehandlingRepository {
 
     /**
      * Henter behandling for angitt id (erstatter andre {@link #hentBehandling(Long) og #hentBehandling(UUID)}
-     * 
+     *
      * @param behandlingId må være type Long eller UUID format
      */
     public Behandling hentBehandling(String behandlingId) {
@@ -172,15 +174,19 @@ public class BehandlingRepository {
     /**
      * Hent alle åpne behandlinger på fagsak.
      */
-    public List<Behandling> hentÅpneBehandlingerForFagsakId(Long fagsakId) {
+    public List<Behandling> hentÅpneBehandlingerForFagsakId(Long fagsakId, BehandlingType... behandlingTyper) {
         Objects.requireNonNull(fagsakId, FAGSAK_ID); // $NON-NLS-1$
+
+        List<BehandlingType> typerList = Arrays.asList(behandlingTyper == null || behandlingTyper.length == 0 ? BehandlingType.values() : behandlingTyper);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT beh from Behandling AS beh " +
                 "WHERE beh.fagsak.id = :fagsakId " +
+                "AND beh.behandlingType IN (:behandlingType)" +
                 "AND beh.status NOT IN (:status)", //$NON-NLS-1$
             Behandling.class);
         query.setParameter(FAGSAK_ID, fagsakId); // $NON-NLS-1$
+        query.setParameter("behandlingType", typerList); //$NON-NLS-1$
         query.setParameter("status", BehandlingStatus.getFerdigbehandletStatuser()); //$NON-NLS-1$
         query.setHint(QueryHints.HINT_READONLY, "true"); //$NON-NLS-1$
         return query.getResultList();
@@ -260,7 +266,7 @@ public class BehandlingRepository {
         query.setParameter(FAGSAK_ID, fagsakId);
         query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, true);
-        
+
         // lukker bort henlagte
         return query.getResultList().stream()
             .filter(b -> !b.getBehandlingResultatType().erHenleggelse())

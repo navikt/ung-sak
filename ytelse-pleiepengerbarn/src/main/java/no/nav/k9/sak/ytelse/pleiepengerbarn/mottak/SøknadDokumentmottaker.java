@@ -65,7 +65,7 @@ class SøknadDokumentmottaker {
         Objects.requireNonNull(søknad);
 
         new PleiepengerBarnSøknadValidator().forsikreValidert(søknad);
-        
+
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
 
@@ -86,7 +86,7 @@ class SøknadDokumentmottaker {
 
         validerIngenÅpneBehandlinger(fagsak);
 
-        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType
+        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
         return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
     }
 
