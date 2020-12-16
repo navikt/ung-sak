@@ -115,7 +115,7 @@ public class DokumentmottakerFelles {
         mottattDokument.forEach(m -> opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
     }
 
-    private NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
+    public NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
         return BehandlingTypeRef.Lookup.find(NyBehandlingOppretter.class, nyBehandlingOpprettere, forrigeBehandling.getFagsakYtelseType(), forrigeBehandling.getType())
             .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + forrigeBehandling.getFagsakYtelseType() + "], behandlingtype [" + forrigeBehandling.getType() + "]"));
     }

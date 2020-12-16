@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -80,17 +79,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     protected BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
-    }
-
-    private void håndterAvsluttetTidligereBehandling(Collection<MottattDokument> mottattDokument, Behandling tidligereAvsluttetBehandling) {
-        var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(tidligereAvsluttetBehandling.getFagsak());
-        if (sisteHenlagteFørstegangsbehandling.isPresent()) { // #I6
-            var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, sisteHenlagteFørstegangsbehandling.get().getFagsak(),
-                sisteHenlagteFørstegangsbehandling.get());
-            dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
-        } else {
-            dokumentMottakerFelles.opprettNyBehandlingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
-        }
     }
 
     private void doMottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {

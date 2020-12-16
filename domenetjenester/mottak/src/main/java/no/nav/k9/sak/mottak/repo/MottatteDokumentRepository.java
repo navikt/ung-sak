@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -47,14 +48,27 @@ public class MottatteDokumentRepository {
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
      * ikke å anbefale å bruke.
      */
-    public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId, DokumentStatus... statuser) {
-        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status IN (:status))";
+    public List<MottattDokument> hentMottatteDokumentForBehandling(long fagsakId, long behandlingId, boolean taSkriveLås, DokumentStatus... statuser) {
+        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :fagsakId AND m.behandlingId = :behandlingId AND (m.status IS NULL OR m.status IN (:status)) order by m.id";
         Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
-        return entityManager.createQuery(
+        var query = entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
-            .setParameter("param", fagsakId)
-            .setParameter("status", statusParam)
-            .getResultList();
+            .setParameter("fagsakId", fagsakId)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("status", statusParam);
+        if (taSkriveLås) {
+            query.setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        }
+        return query.getResultList();
+    }
+
+    /**
+     * Returnerer liste av MottattDokument.
+     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
+     * ikke å anbefale å bruke.
+     */
+    public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId, DokumentStatus... statuser) {
+        return hentMottatteDokumentMedFagsakId(fagsakId, false, statuser);
     }
 
     /**
@@ -64,6 +78,24 @@ public class MottatteDokumentRepository {
      */
     public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId) {
         return hentMottatteDokumentMedFagsakId(fagsakId, DokumentStatus.GYLDIG);
+    }
+
+    /**
+     * Returnerer liste av MottattDokument.
+     * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
+     * ikke å anbefale å bruke.
+     */
+    public List<MottattDokument> hentMottatteDokumentMedFagsakId(long fagsakId, boolean taSkriveLås, DokumentStatus... statuser) {
+        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status IN (:status)) order by m.id";
+        Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
+        var query = entityManager.createQuery(
+            strQueryTemplate, MottattDokument.class)
+            .setParameter("param", fagsakId)
+            .setParameter("status", statusParam);
+        if (taSkriveLås) {
+            query.setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        }
+        return query.getResultList();
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder) {
@@ -90,5 +122,6 @@ public class MottatteDokumentRepository {
         entityManager.flush();
 
     }
+
 
 }
