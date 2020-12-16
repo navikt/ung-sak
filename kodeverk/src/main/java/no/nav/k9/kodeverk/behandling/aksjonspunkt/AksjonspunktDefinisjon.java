@@ -275,7 +275,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
         AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_AARSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
