@@ -67,11 +67,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     @Override
-    public void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak) {
-        doMottaDokument(fagsak, List.of(mottattDokument));
-    }
-
-    @Override
     public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
         inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
@@ -85,13 +80,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     protected BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
-    }
-
-    private void håndterIngenTidligereBehandling(Fagsak fagsak, Collection<MottattDokument> mottattDokument) { // #I1
-        // Opprett ny førstegangsbehandling
-        Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
-        dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
     }
 
     private void håndterAvsluttetTidligereBehandling(Collection<MottattDokument> mottattDokument, Behandling tidligereAvsluttetBehandling) {
@@ -109,7 +97,12 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
 
         if (sisteYtelsesbehandling.isEmpty()) {
-            håndterIngenTidligereBehandling(fagsak, mottattDokument);
+            // ingen tidligere behandling
+
+            // Opprett ny førstegangsbehandling
+            Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+            mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
+            dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
             return;
         }
 
@@ -120,8 +113,16 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
         if (sisteYtelseErFerdigbehandlet) {
             Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
             sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
+
             // Håndter avsluttet behandling
-            håndterAvsluttetTidligereBehandling(mottattDokument, sisteBehandling);
+            var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(sisteBehandling.getFagsak());
+            if (sisteHenlagteFørstegangsbehandling.isPresent()) { // #I6
+                var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, sisteHenlagteFørstegangsbehandling.get().getFagsak(),
+                    sisteHenlagteFørstegangsbehandling.get());
+                dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
+            } else {
+                dokumentMottakerFelles.opprettNyBehandlingFraInntektsmelding(mottattDokument, sisteBehandling, getBehandlingÅrsakType());
+            }
         } else {
             oppdaterÅpenBehandlingMedDokument(sisteBehandling, mottattDokument);
         }
