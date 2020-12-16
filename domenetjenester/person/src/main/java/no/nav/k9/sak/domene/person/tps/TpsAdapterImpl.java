@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
@@ -34,7 +35,6 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
@@ -42,8 +42,7 @@ import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 @ApplicationScoped
 public class TpsAdapterImpl implements TpsAdapter {
 
-    private AktørConsumerMedCache aktørConsumer;
-    //TODO Legge til AktørService som benyter pdlklient. Logge når != det fra TPS
+    private AktørTjeneste aktørTjeneste;
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
@@ -51,10 +50,10 @@ public class TpsAdapterImpl implements TpsAdapter {
     }
 
     @Inject
-    public TpsAdapterImpl(AktørConsumerMedCache aktørConsumer,
+    public TpsAdapterImpl(AktørTjeneste aktørTjeneste,
                           PersonConsumer personConsumer,
                           TpsOversetter tpsOversetter) {
-        this.aktørConsumer = aktørConsumer;
+        this.aktørTjeneste = aktørTjeneste;
         this.personConsumer = personConsumer;
         this.tpsOversetter = tpsOversetter;
     }
@@ -66,7 +65,8 @@ public class TpsAdapterImpl implements TpsAdapter {
             return Optional.empty();
         }
         try {
-            return aktørConsumer.hentAktørIdForPersonIdent(personIdent.getIdent()).map(AktørId::new);
+            Optional<AktørId> aktørId = aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
+            return aktørId;
         } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
             // Her sorterer vi ut dødfødte barn
             return Optional.empty();
@@ -75,7 +75,7 @@ public class TpsAdapterImpl implements TpsAdapter {
 
     @Override
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-        return aktørConsumer.hentPersonIdentForAktørId(aktørId.getId()).map(PersonIdent::new);
+        return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)

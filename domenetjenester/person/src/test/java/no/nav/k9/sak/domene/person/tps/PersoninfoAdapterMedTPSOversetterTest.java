@@ -28,6 +28,7 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -51,7 +52,6 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Postnummer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.StedsadresseNorge;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.UstrukturertAdresse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
@@ -94,7 +94,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     @Mock
     private TpsAdresseOversetter tpsAdresseOversetter;
     @Mock
-    private AktørConsumerMedCache aktørConsumer;
+    private AktørTjeneste aktørTjeneste;
     @Mock
     private PersonConsumer personConsumer;
 
@@ -108,13 +108,13 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void setup() throws HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         landkodeNor.setValue("NOR");
 
-        when(aktørConsumer.hentAktørIdForPersonIdent(any())).thenReturn(Optional.of(AKTØR_ID__ADRESSE).map(AktørId::getId));
-        when(aktørConsumer.hentPersonIdentForAktørId(any())).thenReturn(Optional.of(FNR_ADRESSE.getIdent()));
+        when(aktørTjeneste.hentAktørIdForPersonIdent(any())).thenReturn(Optional.of(AKTØR_ID__ADRESSE));
+        when(aktørTjeneste.hentPersonIdentForAktørId(any())).thenReturn(Optional.of(FNR_ADRESSE));
         when(mockPersoninfo.getFødselsdato()).thenReturn(LocalDate.now()); // trenger bare en verdi
         when(tpsOversetter.tilBrukerInfo(Mockito.any(AktørId.class), any(Bruker.class))).thenReturn(mockPersoninfo);
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
-        tpsAdapter = new TpsAdapterImpl(aktørConsumer, personConsumer, tpsOversetter);
+        tpsAdapter = new TpsAdapterImpl(aktørTjeneste, personConsumer, tpsOversetter);
         adapterMedVanligOversetter = new PersoninfoAdapter(tpsAdapter);
     }
 

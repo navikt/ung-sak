@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
@@ -38,7 +39,6 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
@@ -49,7 +49,7 @@ public class TpsAdapterImplTest {
 
     private TpsAdapterImpl tpsAdapterImpl;
 
-    private AktørConsumerMedCache aktørConsumerMock = Mockito.mock(AktørConsumerMedCache.class);
+    private AktørTjeneste aktørTjeneste = Mockito.mock(AktørTjeneste.class);
     private PersonConsumer personProxyServiceMock = Mockito.mock(PersonConsumer.class);
 
     TpsTjenesteImpl tpsTjeneste = Mockito.mock(TpsTjenesteImpl.class);
@@ -61,17 +61,18 @@ public class TpsAdapterImplTest {
         TpsAdresseOversetter tpsAdresseOversetter = new TpsAdresseOversetter();
         TpsOversetter tpsOversetter = new TpsOversetter(
             tpsAdresseOversetter);
-        tpsAdapterImpl = new TpsAdapterImpl(aktørConsumerMock, personProxyServiceMock, tpsOversetter);
+        tpsAdapterImpl = new TpsAdapterImpl(aktørTjeneste, personProxyServiceMock, tpsOversetter);
     }
 
     @Test
     public void skal_returnere_tom_når_det_finnes_flere_enn_en_aktør_på_samme_ident___kan_skje_ved_dødfødsler() throws Exception {
         DetFinnesFlereAktørerMedSammePersonIdentException exception = new DetFinnesFlereAktørerMedSammePersonIdentException(Mockito.mock(Feil.class));
-        String fnr2 = "125343412";
-        Mockito.when(aktørConsumerMock.hentAktørIdForPersonIdent(fnr2))
+        PersonIdent personIdent = PersonIdent.fra("125343412");
+
+        Mockito.when(aktørTjeneste.hentAktørIdForPersonIdent(personIdent))
             .thenThrow(exception);
 
-        Optional<AktørId> optAktørId = tpsAdapterImpl.hentAktørIdForPersonIdent(new PersonIdent(fnr2));
+        Optional<AktørId> optAktørId = tpsAdapterImpl.hentAktørIdForPersonIdent(personIdent);
         assertThat(optAktørId).isEmpty();
     }
 
@@ -97,7 +98,7 @@ public class TpsAdapterImplTest {
             .build();
 
         Mockito.when(tpsOversetterMock.tilBrukerInfo(Mockito.any(AktørId.class), eq(person))).thenReturn(personinfo0);
-        tpsAdapterImpl = new TpsAdapterImpl(aktørConsumerMock, personProxyServiceMock, tpsOversetterMock);
+        tpsAdapterImpl = new TpsAdapterImpl(aktørTjeneste, personProxyServiceMock, tpsOversetterMock);
 
         Personinfo personinfo = tpsAdapterImpl.hentKjerneinformasjon(fnr, aktørId);
         assertNotNull(personinfo);
@@ -193,7 +194,7 @@ public class TpsAdapterImplTest {
         Adresseinfo adresseinfoExpected = builder.medAdresselinje1(addresse).build();
 
         when(tpsOversetterMock.tilAdresseInfo(eq(person))).thenReturn(adresseinfoExpected);
-        tpsAdapterImpl = new TpsAdapterImpl(aktørConsumerMock, personProxyServiceMock, tpsOversetterMock);
+        tpsAdapterImpl = new TpsAdapterImpl(aktørTjeneste, personProxyServiceMock, tpsOversetterMock);
 
         Adresseinfo adresseinfoActual = tpsAdapterImpl.hentAdresseinformasjon(fnr);
 
