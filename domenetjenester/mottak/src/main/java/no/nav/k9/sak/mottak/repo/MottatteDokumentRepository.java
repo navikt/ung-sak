@@ -1,6 +1,7 @@
 package no.nav.k9.sak.mottak.repo;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -103,7 +104,9 @@ public class MottatteDokumentRepository {
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder, DokumentStatus... statuser) {
-
+        if (journalpostIder == null || journalpostIder.isEmpty()) {
+            return Collections.emptyList();
+        }
         String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :param AND (m.status IS NULL OR m.status IN (:status)) AND m.journalpostId IN (:journalpostIder)";
         Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
         return entityManager.createQuery(
