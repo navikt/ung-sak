@@ -46,6 +46,33 @@ public class BehandlingsoppretterTjeneste {
         this.fagsakRepository = behandlingRepositoryProvider.getFagsakRepository();
     }
 
+    public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+        var kanRevurderingOpprettes = kanOppretteRevurdering(fagsak.getId());
+        if (!kanRevurderingOpprettes) {
+            throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
+        }
+        var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
+            .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
+    
+        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        return revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet);
+    }
+
+    public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType());
+        var kanOppretteUnntaksbehandling = kanOppretteUnntaksbehandling(fagsak.getId());
+        if (!kanOppretteUnntaksbehandling) {
+            throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
+        }
+    
+        var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
+            .orElse(null);
+    
+        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
+    }
+
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
         boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, type).size() > 0;
         if (finnesÅpneBehandlingerAvType) {
@@ -82,33 +109,6 @@ public class BehandlingsoppretterTjeneste {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         return FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, fagsak.getYtelseType()).orElseThrow()
             .kanNyBehandlingOpprettes(fagsak);
-    }
-
-    public Behandling opprettRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
-        var kanRevurderingOpprettes = kanOppretteRevurdering(fagsak.getId());
-        if (!kanRevurderingOpprettes) {
-            throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
-        }
-        var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
-            .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
-
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return revurderingTjeneste.opprettManuellRevurdering(fagsak, origBehandling, behandlingÅrsakType, enhet);
-    }
-
-    public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType());
-        var kanOppretteUnntaksbehandling = kanOppretteUnntaksbehandling(fagsak.getId());
-        if (!kanOppretteUnntaksbehandling) {
-            throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
-        }
-
-        var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
-            .orElse(null);
-
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }
 
     private UnntaksbehandlingOppretter getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {

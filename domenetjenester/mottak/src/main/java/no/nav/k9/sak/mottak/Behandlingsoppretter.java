@@ -3,10 +3,11 @@ package no.nav.k9.sak.mottak;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -15,6 +16,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -26,8 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 
 @Dependent
@@ -35,22 +35,23 @@ public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
     private SøknadRepository søknadRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
+    private Instance<NyBehandlingOppretter> nyBehandlingOpprettere;
+
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
-                                MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+                                BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
+        this.nyBehandlingOpprettere = nyBehandlingOpprettere;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
-        this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.revurderingRepository = behandlingRepositoryProvider.getBehandlingRevurderingRepository();
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
@@ -92,7 +93,6 @@ public class Behandlingsoppretter {
         return revurdering;
     }
 
-
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
@@ -133,10 +133,8 @@ public class Behandlingsoppretter {
         return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
-    public Behandling opprettNyFørstegangsbehandling(Collection<MottattDokument> mottattDokument, Fagsak fagsak, Behandling avsluttetBehandling) {
-        var nyFørstegangsbehandling = opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(nyFørstegangsbehandling, mottattDokument);
-        return nyFørstegangsbehandling;
+    public Behandling opprettNyFørstegangsbehandling(Fagsak fagsak, Behandling avsluttetBehandling) {
+        return opprettNyFørstegangsbehandlingFraTidligereSøknad(fagsak, BehandlingÅrsakType.UDEFINERT, avsluttetBehandling);
     }
 
     public Behandling opprettNyFørstegangsbehandlingFraTidligereSøknad(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Behandling behandlingMedSøknad) {
@@ -154,6 +152,11 @@ public class Behandlingsoppretter {
         return behandling;
     }
 
+    public Behandling opprettNyBehandlingFra(Behandling forrigeBehandling, BehandlingÅrsakType behandlingÅrsakType) {
+        Behandling nyBehandling = getNyBehandlingOppretter(forrigeBehandling).opprettNyBehandling(forrigeBehandling, behandlingÅrsakType);
+        return nyBehandling;
+    }
+
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
@@ -166,5 +169,11 @@ public class Behandlingsoppretter {
         }
 
         return Optional.empty();
+    }
+
+    NyBehandlingOppretter getNyBehandlingOppretter(Behandling forrigeBehandling) {
+        return BehandlingTypeRef.Lookup.find(NyBehandlingOppretter.class, nyBehandlingOpprettere, forrigeBehandling.getFagsakYtelseType(), forrigeBehandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException(
+                "NyBehandlingOppretter ikke implementert for ytelse [" + forrigeBehandling.getFagsakYtelseType() + "], behandlingtype [" + forrigeBehandling.getType() + "]"));
     }
 }

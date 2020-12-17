@@ -29,9 +29,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -81,8 +78,6 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class BehandlingRestTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(BehandlingRestTjeneste.class);
 
     public static final String BEHANDLING_PATH = "/behandling";
     public static final String BEHANDLINGER_ALLE = "/behandlinger/alle";
