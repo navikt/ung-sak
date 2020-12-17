@@ -152,7 +152,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilRettigheterLinks(BehandlingDto dto) {
-        dto.leggTil(get(BehandlingRestTjeneste.RETTIGHETER_PATH, "behandling-rettigheter", new BehandlingUuidDto(dto.getUuid())));
+        var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString());
+        dto.leggTil(getFraMap(BehandlingRestTjeneste.RETTIGHETER_PATH, "behandling-rettigheter", uuidQueryParams));
     }
 
     private void leggTilStatusResultaterLinks(Behandling behandling, BehandlingDto dto) {

@@ -16,13 +16,13 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import no.nav.k9.sak.kontrakt.ResourceLink;
+import no.nav.k9.sak.kontrakt.behandling.InitLinksDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.saksbehandler.dto.InitLinksDto;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 
 
@@ -41,9 +41,7 @@ public class InitielleLinksRestTjeneste {
     @Operation(description = "Returnerer ", tags = "init-fetch")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     public InitLinksDto hentInitielleRessurser() {
-        List<ResourceLink> toggleRelatert = new ArrayList<>();
         List<ResourceLink> lenkene = new ArrayList<>();
-        toggleRelatert.add(post(FeatureToggleRestTjeneste.FEATURE_TOGGLE_PATH, "feature-toggle"));
         lenkene.add(get(NavAnsattRestTjeneste.NAV_ANSATT_PATH, "nav-ansatt"));
         lenkene.add(get(KodeverkRestTjeneste.KODERVERK_PATH, "kodeverk"));
         lenkene.add(get(KodeverkRestTjeneste.ENHETER_PATH, "behandlende-enheter"));
@@ -54,7 +52,7 @@ public class InitielleLinksRestTjeneste {
         saklenker.add(get(HistorikkRestTjeneste.PATH, "sak-historikk"));
         saklenker.add(get(DokumentRestTjeneste.DOKUMENTER_PATH, "sak-dokumentliste"));
         saklenker.add(get(BehandlingRestTjeneste.BEHANDLINGER_ALLE, "sak-alle-behandlinger"));
-        return new InitLinksDto(lenkene, toggleRelatert, saklenker);
+        return new InitLinksDto(lenkene, saklenker);
     }
 
     static ResourceLink get(String path, String rel) {
