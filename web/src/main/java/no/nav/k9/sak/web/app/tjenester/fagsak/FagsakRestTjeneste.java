@@ -71,7 +71,11 @@ public class FagsakRestTjeneste {
     public static final String STATUS_PATH = PATH + "/status";
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
+
+    private static final String BRUKER_PART_PATH = "/bruker";
+    public static final String BRUKER_PATH = PATH + BRUKER_PART_PATH;
     private static final String RETTIGHETER_PART_PATH = "/rettigheter";
+    public static final String RETTIGHETER_PATH = PATH + RETTIGHETER_PART_PATH;
 
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;

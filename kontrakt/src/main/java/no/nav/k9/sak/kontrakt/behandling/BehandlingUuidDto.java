@@ -66,6 +66,6 @@ public class BehandlingUuidDto {
 
     @Override
     public String toString() {
-        return String.valueOf(behandlingUuid);
+        return getClass().getSimpleName() + '<' + "" + String.valueOf(behandlingUuid) + '>';
     }
 }
