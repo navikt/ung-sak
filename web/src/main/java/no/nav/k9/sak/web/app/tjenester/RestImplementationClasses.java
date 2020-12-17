@@ -35,7 +35,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRe
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.saksbehandler.FeatureToggleRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
 import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
@@ -47,7 +47,7 @@ public class RestImplementationClasses {
 
         classes.add(FagsakRestTjeneste.class);
         classes.add(NavAnsattRestTjeneste.class);
-        classes.add(FeatureToggleRestTjeneste.class);
+        classes.add(InitielleLinksRestTjeneste.class);
         classes.add(BehandlingRestTjeneste.class);
         classes.add(BehandlingBackendRestTjeneste.class);
         classes.add(BeregningsgrunnlagRestTjeneste.class);
