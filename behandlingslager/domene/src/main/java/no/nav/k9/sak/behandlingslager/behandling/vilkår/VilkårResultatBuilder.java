@@ -95,7 +95,7 @@ public class VilkårResultatBuilder {
         var harPerioderSomGårUtoverGrensen = invalidVilkårMap.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty());
         if (harPerioderSomGårUtoverGrensen) {
             log.warn("Behandligen har vilkår med perioder[{}] som strekker seg utover maks({}) for fagsaken", invalidVilkårMap, boundry);
-            throw new IllegalStateException("Behandligen har perioder som strekker seg utover maks(" + boundry + ") for fagsaken");
+            throw new IllegalStateException("Behandligen har perioder som strekker seg utover maks(" + boundry + ") for fagsaken: " + invalidVilkårMap);
         }
     }
 

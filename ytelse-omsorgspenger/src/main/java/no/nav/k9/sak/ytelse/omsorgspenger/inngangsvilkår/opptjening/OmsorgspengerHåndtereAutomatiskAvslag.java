@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.opptjening;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,11 +13,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.HåndtereAutomatiskAvslag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.RegelResultat;
-import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -52,18 +49,19 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
                                                  DatoIntervallEntitet periode) {
         var inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes();
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
-            .filter(it -> it.getOppgittFravær().stream()
-                .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
-            .map(Inntektsmelding::getRefusjonBeløpPerMnd)
+            .filter(it -> it.getOppgittFravær() != null &&
+                it.getOppgittFravær().stream()
+                    .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
             .collect(Collectors.toSet());
 
         if (inntektsmeldingSomMatcherUttak.isEmpty()) {
             return false;
         } else {
             return inntektsmeldingSomMatcherUttak.stream()
-                .map(Beløp::getVerdi)
-                .filter(Objects::nonNull)
-                .anyMatch(BigDecimal.ZERO::equals);
+                .anyMatch(v -> {
+                    var refusjon = v.getRefusjonBeløpPerMnd();
+                    return refusjon == null || refusjon.getVerdi() == null || BigDecimal.ZERO.compareTo(refusjon.getVerdi()) == 0;
+                });
         }
     }
 }

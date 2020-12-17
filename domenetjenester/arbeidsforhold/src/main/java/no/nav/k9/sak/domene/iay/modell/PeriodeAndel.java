@@ -68,6 +68,9 @@ public class PeriodeAndel {
     }
 
     public static Duration toDuration(BigDecimal timerPerDag) {
+        if (timerPerDag == null) {
+            return null;
+        }
         int timer = timerPerDag.intValue();
         BigDecimal andelAvTime = timerPerDag.subtract(BigDecimal.valueOf(timer));
 
