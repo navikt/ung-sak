@@ -33,7 +33,6 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @Dependent
 public class RegisterdataEndringshåndterer {
 
-    private RegisterdataInnhenter registerdataInnhenter;
     private TemporalAmount oppdatereRegisterdataTidspunkt;
     private BehandlingRepository behandlingRepository;
     private Endringskontroller endringskontroller;
@@ -53,7 +52,6 @@ public class RegisterdataEndringshåndterer {
     @Inject
     public RegisterdataEndringshåndterer( // NOSONAR jobber med å redusere
                                           BehandlingRepositoryProvider repositoryProvider,
-                                          RegisterdataInnhenter registerdataInnhenter,
                                           @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
                                           Endringskontroller endringskontroller,
                                           EndringsresultatSjekker endringsresultatSjekker,
@@ -61,7 +59,6 @@ public class RegisterdataEndringshåndterer {
                                           BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
 
-        this.registerdataInnhenter = registerdataInnhenter;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.endringskontroller = endringskontroller;

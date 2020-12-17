@@ -74,7 +74,7 @@ public class MottatteDokumentTjeneste {
         this.behandlingVedtakRepository = behandlingRepositoryProvider.getBehandlingVedtakRepository();
     }
 
-    public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
+    public void persisterInntektsmeldingForBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
         boolean harPayload = dokumenter.stream().anyMatch(d -> d.harPayload());
         if (!harPayload) {
             return; // quick return
@@ -123,6 +123,10 @@ public class MottatteDokumentTjeneste {
         return mottatteDokumentRepository.hentMottattDokument(mottattDokumentId);
     }
 
+    List<MottattDokument> hentMottatteDokumentPåFagsak(long fagsakId, boolean taSkriveLås, DokumentStatus... statuser) {
+        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, taSkriveLås, statuser);
+    }
+
     boolean erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
         Optional<Behandling> behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
@@ -152,6 +156,10 @@ public class MottatteDokumentTjeneste {
         } else {
             return false;
         }
+    }
+
+    void oppdaterStatus(List<MottattDokument> mottatteDokumenter, DokumentStatus nyStatus) {
+        mottatteDokumentRepository.oppdaterStatus(mottatteDokumenter, nyStatus);
     }
 
 }

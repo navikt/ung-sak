@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,10 +14,6 @@ import org.mockito.quality.Strictness;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
-import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
@@ -139,30 +134,8 @@ public class RegisterdataInnhenterTest {
     private RegisterdataEndringshåndterer lagRegisterdataOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                                                     String durationInstance) {
 
-        RegisterdataInnhenter innhenter = lagRegisterdataInnhenter(repositoryProvider);
-
-        RegisterdataEndringshåndterer oppdaterer = lagRegisterdataOppdaterer(repositoryProvider, durationInstance, innhenter);
+        RegisterdataEndringshåndterer oppdaterer = new RegisterdataEndringshåndterer(repositoryProvider, durationInstance, null, null, null, null, null);
         return oppdaterer;
     }
 
-    private RegisterdataEndringshåndterer lagRegisterdataOppdaterer(BehandlingRepositoryProvider repositoryProvider,
-                                                                    String durationInstance, RegisterdataInnhenter innhenter) {
-
-        RegisterdataEndringshåndterer oppdaterer = new RegisterdataEndringshåndterer(repositoryProvider, innhenter, durationInstance, null, null, null, null, null);
-        return oppdaterer;
-    }
-
-    private RegisterdataInnhenter lagRegisterdataInnhenter(BehandlingRepositoryProvider repositoryProvider) {
-        var skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
-
-        PersoninfoAdapter personinfoAdapter = mock(PersoninfoAdapter.class);
-        MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
-
-        return new RegisterdataInnhenter(personinfoAdapter,
-            medlemTjeneste,
-            repositoryProvider,
-            null,
-            skjæringstidspunktTjeneste, null,
-            new UnitTestLookupInstanceImpl<>(null));
-    }
 }

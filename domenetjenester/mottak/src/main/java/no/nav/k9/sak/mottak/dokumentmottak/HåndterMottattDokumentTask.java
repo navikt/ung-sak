@@ -1,13 +1,15 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -22,6 +24,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 @ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
+
+    private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
 
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";
     public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
@@ -50,27 +54,32 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        List<String> dokumentIder = Arrays.asList(prosessTaskData.getPropertyValue(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY).split("[\\s,]+"));
+        var fagsakId = prosessTaskData.getFagsakId();
+        var behandlingId = prosessTaskData.getBehandlingId();
 
-        List<MottattDokument> mottatteDokumenter = finnDokumenter(prosessTaskData.getBehandlingId(), dokumentIder);
+        // hent alle dokumenter markert mottatt
+        List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT);
+
+        if (mottatteDokumenter.isEmpty()) {
+            log.info("Ingen dokumenter fortsatt markert MOTTATT, avbryter denne tasken (behandlet av tidligere kjøring)");
+            return;
+        }
+
+        mottatteDokumenter.forEach((m -> {
+            if (behandlingId == null && m.harPayload()) {
+                validerMelding(m);
+            }
+        }));
+
+        mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
+
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
         innhentDokumentTjeneste.utfør(fagsak, mottatteDokumenter);
     }
 
-    private List<MottattDokument> finnDokumenter(String behandlingId, List<String> dokumentIder) {
-        List<MottattDokument> dokumenter = new ArrayList<>();
-
-        for (var dokId : dokumentIder) {
-            Long dokumentId = Long.parseLong(dokId);
-            MottattDokument mottattDokument = mottatteDokumentTjeneste.hentMottattDokument(dokumentId)
-                .orElseThrow(() -> new IllegalStateException("Utviklerfeil: HåndterMottattDokument uten gyldig mottatt dokument, id=" + dokumentId));
-
-            if (behandlingId == null && mottattDokument.harPayload()) {
-                inntektsmeldingParser.xmlTilWrapper(mottattDokument); // gjør en tidlig validering
-            }
-            dokumenter.add(mottattDokument);
-        }
-        return dokumenter;
+    private void validerMelding(MottattDokument m) {
+        // TODO støtter bare inntektsmelding her foreløpig
+        inntektsmeldingParser.xmlTilWrapper(m); // gjør en tidlig validering
     }
 
     @Override

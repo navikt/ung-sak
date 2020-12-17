@@ -23,10 +23,15 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentStatus implements Kodeverdi {
     
-    /** Dokument mottatt og validert gyldig. */
-    GYLDIG("GYLDIG", "Gyldig"),
     /** Dokument mottatt, ikke godtatt for behandling ennå (må sette til GYLDIG først). */
     MOTTATT("MOTTATT", "Mottar"),
+
+    /** Dokumentet er {@link #MOTTATT}, vurderer om {@link #GYLDIG}/komplett. */
+    BEHANDLER("BEHANDLER", "Behandler/vurderer dokument"),
+
+    /** Dokument mottatt og validert gyldig. */
+    GYLDIG("GYLDIG", "Gyldig"),
+
     /** Dokument vurdert som ugyldig. */
     UGYLDIG("UGYLDIG", "Ugyldig"),
     ;
@@ -39,6 +44,7 @@ public enum DokumentStatus implements Kodeverdi {
     private String navn;
 
     private String kode;
+
 
     private DokumentStatus(String kode) {
         this.kode = kode;
