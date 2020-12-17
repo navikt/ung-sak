@@ -1,12 +1,10 @@
-package repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.saf.DokumentInfo;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
