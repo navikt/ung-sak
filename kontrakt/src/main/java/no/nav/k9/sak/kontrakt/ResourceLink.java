@@ -5,7 +5,9 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -34,6 +36,7 @@ public class ResourceLink {
 
     @JsonProperty(value = "href", required = true)
     @NotNull
+    @Valid
     private URI href;
 
     /**
@@ -41,9 +44,11 @@ public class ResourceLink {
      */
     @JsonProperty(value = "rel", required = true)
     @NotNull
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{P}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String rel;
 
     @JsonProperty(value = "requestPayload")
+    @Valid
     private Object requestPayload;
 
     /**
@@ -99,7 +104,7 @@ public class ResourceLink {
         }
         return new ResourceLink(uri.toString(), rel, HttpMethod.GET, null);
     }
-    
+
     public static ResourceLink getFraMap(String href, String rel, Map<String, String> queryParams) {
         StringBuilder uri = new StringBuilder();
         uri.append(href);
