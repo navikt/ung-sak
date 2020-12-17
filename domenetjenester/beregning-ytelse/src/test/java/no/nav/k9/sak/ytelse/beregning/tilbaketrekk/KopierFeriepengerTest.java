@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+
 import org.junit.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
@@ -92,13 +93,17 @@ public class KopierFeriepengerTest {
 
 
         assertThat(år1.getValue()).anySatisfy(a -> {
-            assertThat(a.getFeriepengerÅrsbeløp()).isNotNull().satisfies(c -> new Beløp(200).equals(c.getVerdi()));
+            assertThat(a.getFeriepengerÅrsbeløp()).isNotNull().satisfies(c -> equals(c.getVerdi(), 200));
             assertThat(a.erBrukerMottaker()).isFalse();
         });
 
         assertThat(år2.getValue()).allSatisfy(a -> {
             assertThat(a.getFeriepengerÅrsbeløp()).isNull();
         });
+    }
+
+    private static boolean equals(BigDecimal actual, long expected) {
+        return actual.compareTo(BigDecimal.valueOf(expected)) == 0;
     }
 
     private BeregningsresultatPeriode lagBeregningsresultatPeriode(LocalDate fom, LocalDate tom) {

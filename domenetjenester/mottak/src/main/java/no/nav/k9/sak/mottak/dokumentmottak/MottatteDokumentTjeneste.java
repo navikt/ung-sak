@@ -74,7 +74,7 @@ public class MottatteDokumentTjeneste {
         this.behandlingVedtakRepository = behandlingRepositoryProvider.getBehandlingVedtakRepository();
     }
 
-    public void persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
+    public void persisterInntektsmeldingForBehandling(Behandling behandling, Collection<MottattDokument> dokumenter) {
         boolean harPayload = dokumenter.stream().anyMatch(d -> d.harPayload());
         if (!harPayload) {
             return; // quick return
