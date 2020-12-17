@@ -52,7 +52,7 @@ import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingRettigheterDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingOperasjonerDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
 import no.nav.k9.sak.kontrakt.behandling.GjenopptaBehandlingDto;
@@ -97,7 +97,8 @@ public class BehandlingRestTjeneste {
     static public final String HENLEGG_PATH = "/behandlinger/henlegg";
     static public final String OPNE_FOR_ENDRINGER_PATH = "/behandlinger/opne-for-endringer";
     static public final String SETT_PA_VENT_PATH = "/behandlinger/sett-pa-vent";
-    static public final String HANDLING_RETTIGHETER = "/behandlinger/handling-rettigheter";
+    public static final String RETTIGHETER_PART_PATH = "/rettigheter";
+    public static final String RETTIGHETER_PATH = BEHANDLINGER_PATH + RETTIGHETER_PART_PATH;
 
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
@@ -456,15 +457,14 @@ public class BehandlingRestTjeneste {
     }
 
     @GET
-    @Path(HANDLING_RETTIGHETER)
-    @Operation(description = "Henter rettigheter for lovlige behandlingsoperasjoner", tags = "behandlinger")
+    @Path(RETTIGHETER_PATH)
+    @Operation(description = "Henter lovlige operasjoner på behandling for menyvalg", tags = "behandlinger")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public BehandlingRettigheterDto hentBehandlingOperasjonRettigheter(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public BehandlingOperasjonerDto hentLovligeBehandlingsoperasjoner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        Boolean harSoknad = behandlingDtoTjeneste.finnBehandlingOperasjonRettigheter(behandling);
-        // TODO (TOR) Denne skal etterkvart returnere rettighetene knytta til behandlingsmeny i frontend
-        return new BehandlingRettigheterDto(harSoknad);
+
+        return behandlingDtoTjeneste.lovligeOperasjoner(behandling);
     }
 
     private interface BehandlingRestTjenesteFeil extends DeklarerteFeil {

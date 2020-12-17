@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
+import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
@@ -54,6 +55,9 @@ public class BehandlingDtoTjenesteImplTest {
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
 
+    @Inject
+    private TotrinnTjeneste totrinnTjeneste;
+
     private BehandlingDtoTjeneste tjeneste;
 
     private Collection<ResourceLink> existingRoutes;
@@ -61,7 +65,7 @@ public class BehandlingDtoTjenesteImplTest {
     @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository, "/k9/oppdrag/api");
+        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository, totrinnTjeneste, "/k9/oppdrag/api");
     }
 
     @Test

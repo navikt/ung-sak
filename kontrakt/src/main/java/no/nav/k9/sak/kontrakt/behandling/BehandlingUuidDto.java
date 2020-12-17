@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 
@@ -25,7 +25,7 @@ public class BehandlingUuidDto {
     /**
      * Behandling UUID (nytt alternativ til intern behandlingId. Bør brukes av eksterne systemer).
      */
-    @JsonValue
+    @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     @NotNull
     private UUID behandlingUuid;
@@ -66,6 +66,6 @@ public class BehandlingUuidDto {
 
     @Override
     public String toString() {
-        return String.valueOf(behandlingUuid);
+        return getClass().getSimpleName() + '<' + "" + String.valueOf(behandlingUuid) + '>';
     }
 }
