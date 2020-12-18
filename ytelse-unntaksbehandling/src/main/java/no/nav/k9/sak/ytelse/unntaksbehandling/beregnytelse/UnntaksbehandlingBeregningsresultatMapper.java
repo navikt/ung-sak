@@ -71,7 +71,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
             .medOpphoersdato(opphørsdato)
-            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getOverstyrtBeregningsresultat()))
+            .medPerioder(lagPerioder(behandling.getId(), beregningsresultatAggregat.getBgBeregningsresultat()))
             .medSkalHindreTilbaketrekk(beregningsresultatAggregat.skalHindreTilbaketrekk().orElse(null))
             .create();
     }
@@ -81,7 +81,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
 
-        var beregningsresultatEntitet = Optional.ofNullable(beregningsresultatAggregat.getOverstyrtBeregningsresultat())
+        var beregningsresultatEntitet = Optional.ofNullable(beregningsresultatAggregat.getBgBeregningsresultat())
             .orElse(beregningsresultatAggregat.getBgBeregningsresultat());
         var perioder = lagPerioder(behandling.getId(), beregningsresultatEntitet);
         var utbetaltePerioder = lagPerioder(behandling.getId(), beregningsresultatAggregat.getUtbetBeregningsresultat());

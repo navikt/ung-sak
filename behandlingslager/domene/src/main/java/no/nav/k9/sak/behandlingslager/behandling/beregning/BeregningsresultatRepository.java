@@ -60,12 +60,6 @@ public class BeregningsresultatRepository {
         lagreOgFlush(behandling, builder);
     }
 
-    public void lagreOverstyrtBeregningsresultat(Behandling behandling, BeregningsresultatEntitet overstyrtBeregningsresultatFP) {
-        BehandlingBeregningsresultatBuilder builder = opprettResultatBuilderFor(behandling.getId());
-        builder.medOverstyrtBeregningsresultat(overstyrtBeregningsresultatFP);
-        lagreOgFlush(behandling, builder);
-    }
-
     /**
      * Lagrer beregningsresultataggregatet med en verdi for hindreTilbaketrekk
      *
@@ -97,10 +91,6 @@ public class BeregningsresultatRepository {
         BehandlingBeregningsresultatEntitet aggregatEntitet = builder.build(behandling.getId());
         entityManager.persist(aggregatEntitet.getBgBeregningsresultat());
         aggregatEntitet.getBgBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);
-        if (aggregatEntitet.getOverstyrtBeregningsresultat() != null) {
-            entityManager.persist(aggregatEntitet.getOverstyrtBeregningsresultat());
-            aggregatEntitet.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);
-        }
         if (aggregatEntitet.getUtbetBeregningsresultat() != null) {
             entityManager.persist(aggregatEntitet.getUtbetBeregningsresultat());
             aggregatEntitet.getUtbetBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);

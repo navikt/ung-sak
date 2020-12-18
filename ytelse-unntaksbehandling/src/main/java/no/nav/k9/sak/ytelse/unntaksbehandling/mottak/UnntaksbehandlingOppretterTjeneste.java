@@ -81,12 +81,11 @@ public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppr
     private void kopierTilkjentYtelse(Behandling origBehandling, Behandling nyBehandling) {
         beregningsresultatRepository.hentBeregningsresultatAggregat(origBehandling.getId())
             .ifPresent(aggregat -> {
-                if (aggregat.getOverstyrtBeregningsresultat() != null) {
-                    // Videreføre overstyrt tilkjent ytelse
-                    beregningsresultatRepository.lagreOverstyrtBeregningsresultat(nyBehandling, aggregat.getOverstyrtBeregningsresultat());
+                // Initiere overstyrt tilkjent ytelse som forrige tilkjente ytelse
+                if (aggregat.getUtbetBeregningsresultat() != null) {
+                    beregningsresultatRepository.lagre(nyBehandling, aggregat.getUtbetBeregningsresultat());
                 } else if (aggregat.getBgBeregningsresultat() != null) {
-                    // Initiere overstyrt tilkjent ytelse som forrige beregnede tilkjente ytelse
-                    beregningsresultatRepository.lagreOverstyrtBeregningsresultat(nyBehandling, aggregat.getBgBeregningsresultat());
+                    beregningsresultatRepository.lagre(nyBehandling, aggregat.getBgBeregningsresultat());
                 }
             });
     }

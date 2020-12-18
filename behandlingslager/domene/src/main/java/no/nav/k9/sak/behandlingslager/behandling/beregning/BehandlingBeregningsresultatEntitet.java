@@ -42,10 +42,6 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
     @JoinColumn(name = "utbet_beregningsresultat_fp_id", updatable = false, unique = true)
     private BeregningsresultatEntitet utbetBeregningsresultat;
 
-    @OneToOne
-    @JoinColumn(name = "overstyrt_beregningsresultat_id", updatable = false, unique = true)
-    private BeregningsresultatEntitet overstyrtBeregningsresultat;
-
     @Column(name = "hindre_tilbaketrekk")
     private Boolean skalHindreTilbaketrekk = Boolean.FALSE;
 
@@ -56,7 +52,6 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
     public BehandlingBeregningsresultatEntitet(BehandlingBeregningsresultatEntitet kladd) {
         this.behandlingId = kladd.behandlingId;
         this.bgBeregningsresultat = kladd.bgBeregningsresultat;
-        this.overstyrtBeregningsresultat = kladd.overstyrtBeregningsresultat;
         this.skalHindreTilbaketrekk = kladd.skalHindreTilbaketrekk;
     }
 
@@ -70,11 +65,6 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
     public BeregningsresultatEntitet getUtbetBeregningsresultat() {
         return utbetBeregningsresultat;
-    }
-
-
-    public BeregningsresultatEntitet getOverstyrtBeregningsresultat() {
-        return overstyrtBeregningsresultat;
     }
 
     public Optional<Boolean> skalHindreTilbaketrekk() {
@@ -99,10 +89,6 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
 
     void setUtbetBeregningsresultatFP(BeregningsresultatEntitet utbetBeregningsresultatFP) {
         this.utbetBeregningsresultat = utbetBeregningsresultatFP;
-    }
-
-    void setOverstyrtBeregningsresultatFP(BeregningsresultatEntitet overstyrtBeregningsresultat) {
-        this.overstyrtBeregningsresultat = overstyrtBeregningsresultat;
     }
 
     void setSkalHindreTilbaketrekk(Boolean skalHindreTilbaketrekk) {
