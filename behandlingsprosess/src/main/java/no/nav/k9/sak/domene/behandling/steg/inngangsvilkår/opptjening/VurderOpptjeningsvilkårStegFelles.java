@@ -70,12 +70,14 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
     private void oppdaterAksjonspunktMedFristerFraRegel(RegelResultat regelResultat, OpptjeningsvilkårResultat opres) {
         if (opres.getFrist() != null) {
-            var eksisterende = regelResultat.getAksjonspunktDefinisjoner().stream().filter(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER)).findFirst();
+            var eksisterende = regelResultat.getAksjonspunktDefinisjoner().stream().filter(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER))
+                .findFirst();
             if (eksisterende.isPresent()) {
                 var aksjonspunktResultat = eksisterende.get();
                 if (aksjonspunktResultat.getFrist() == null || aksjonspunktResultat.getFrist() != null && aksjonspunktResultat.getFrist().isAfter(opres.getFrist().atStartOfDay())) {
                     regelResultat.getAksjonspunktDefinisjoner().removeIf(it -> it.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER));
-                    regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER, Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST, opres.getFrist().atStartOfDay()));
+                    regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER,
+                        Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST, opres.getFrist().atStartOfDay()));
                 }
             }
         }
@@ -92,14 +94,14 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     protected abstract List<OpptjeningAktivitet> mapTilOpptjeningsaktiviteter(MapTilOpptjeningAktiviteter mapper, OpptjeningsvilkårResultat oppResultat);
 
     private OpptjeningsvilkårResultat getVilkårresultat(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        OpptjeningsvilkårResultat op = (OpptjeningsvilkårResultat) regelResultat.getEkstraResultaterPerPeriode()
-            .get(OPPTJENINGSVILKÅRET)
-            .get(periode);
-        if (op == null) {
+        var vilkårMap = regelResultat.getEkstraResultaterPerPeriode().get(OPPTJENINGSVILKÅRET);
+        if (vilkårMap == null || !vilkårMap.containsKey(periode)) {
             throw new IllegalArgumentException(
-                "Utvikler-feil: finner ikke resultat fra evaluering av Inngangsvilkår/Opptjeningsvilkåret:" + behandling.getId());
+                "Utvikler-feil: finner ikke resultat fra evaluering av Inngangsvilkår/Opptjeningsvilkåret:" + behandling.getId()
+                    + ", periode=" + periode
+                    + ", regelResultat=" + regelResultat);
         }
-        return op;
+        return (OpptjeningsvilkårResultat) vilkårMap.get(periode);
     }
 
     @Override
@@ -108,7 +110,8 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         final var perioder = inngangsvilkårFellesTjeneste.utledPerioderTilVurdering(kontekst.getBehandlingId(), OPPTJENINGSVILKÅRET);
         perioder.forEach(periode -> {
             if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
-                new RyddOpptjening(behandlingRepository, opptjeningRepository, repositoryProvider.getVilkårResultatRepository(), kontekst).ryddOppAktiviteter(periode.getFomDato(), periode.getTomDato());
+                new RyddOpptjening(behandlingRepository, opptjeningRepository, repositoryProvider.getVilkårResultatRepository(), kontekst).ryddOppAktiviteter(periode.getFomDato(),
+                    periode.getTomDato());
             }
         });
     }
