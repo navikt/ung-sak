@@ -51,7 +51,8 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         validerBehandlingsresultat(behandlingResultatType);
         behandling.setBehandlingResultatType(behandlingResultatType);
         if (BehandlingResultatType.AVSLÅTT.equals(behandlingResultatType)) {
-            nullstillTilkjentYtelse(behandling, kontekst);
+            //TODO vurder om dette skal flyttes til neste steg
+            tilbakestillTilkjentYtelse(behandling, kontekst);
         }
 
         var utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
@@ -74,22 +75,19 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
         }
     }
 
-    private void nullstillTilkjentYtelse(Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        var origBehandlingId = behandling.getOriginalBehandlingId();
+    private void tilbakestillTilkjentYtelse(Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        beregningsresultatRepository.deaktiverBeregningsresultat(behandling.getId(), kontekst.getSkriveLås());
+        behandling.getOriginalBehandlingId()
+            .ifPresent(forrigeBehandlingId -> kopierTilkjentYtelseFraForrigeBehandling(behandling, forrigeBehandlingId));
+    }
 
-        if (!origBehandlingId.isPresent()) {
-            beregningsresultatRepository.deaktiverBeregningsresultat(behandling.getId(), kontekst.getSkriveLås());
-            return;
-        }
-
-        // Reverter til beregningsresultat fra forrige behandling
-        beregningsresultatRepository.hentBeregningsresultatAggregat(origBehandlingId.get())
+    private void kopierTilkjentYtelseFraForrigeBehandling(Behandling behandling, Long forrigeBehandlingId) {
+        beregningsresultatRepository.hentBeregningsresultatAggregat(forrigeBehandlingId)
             .ifPresent(origAggregat -> {
-                if (origAggregat.getBgBeregningsresultat() != null) {
+                if (origAggregat.getUtbetBeregningsresultat() != null) {
+                    beregningsresultatRepository.lagre(behandling, origAggregat.getUtbetBeregningsresultat());
+                } else if (origAggregat.getBgBeregningsresultat() != null) {
                     beregningsresultatRepository.lagre(behandling, origAggregat.getBgBeregningsresultat());
-                }
-                if (origAggregat.getOverstyrtBeregningsresultat() != null) {
-                    beregningsresultatRepository.lagre(behandling, origAggregat.getOverstyrtBeregningsresultat());
                 }
             });
     }

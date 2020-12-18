@@ -1,0 +1,1 @@
+alter table BR_RESULTAT_BEHANDLING drop column overstyrt_beregningsresultat_id;

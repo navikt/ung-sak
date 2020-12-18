@@ -71,10 +71,10 @@ public class TilkjentYtelseOppdatererTest {
         // legg til et nytt vilkårsresultat
         final var vilkårResultatBuilder = Vilkårene.builder();
         final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.K9_VILKÅRET)
-                .leggTil(new VilkårPeriodeBuilder()
-                        .medPeriode(LocalDate.now(), LocalDate.now().plusDays(7))
-                        .medUtfallOverstyrt(Utfall.OPPFYLT)
-                )
+            .leggTil(new VilkårPeriodeBuilder()
+                .medPeriode(LocalDate.now(), LocalDate.now().plusDays(7))
+                .medUtfallOverstyrt(Utfall.OPPFYLT)
+            )
         )
             .build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
@@ -114,13 +114,10 @@ public class TilkjentYtelseOppdatererTest {
         // Assert
         var aggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(behandling.getId()).orElseThrow();
         assertThat(aggregat.getBgBeregningsresultat()).isNotNull();
-        assertThat(aggregat.getBgBeregningsresultat().getBeregningsresultatPerioder()).hasSize(0);
+        assertThat(aggregat.getBgBeregningsresultat().getBeregningsresultatPerioder()).hasSize(1);
+        assertThat(aggregat.getBgBeregningsresultat().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList()).hasSize(2);
 
-        assertThat(aggregat.getOverstyrtBeregningsresultat()).isNotNull();
-        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder()).hasSize(1);
-        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList()).hasSize(2);
-
-        assertThat(aggregat.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder()
+        assertThat(aggregat.getBgBeregningsresultat().getBeregningsresultatPerioder()
             .stream().flatMap(e -> e.getBeregningsresultatAndelList().stream())
             .map(BeregningsresultatAndel::getAktivitetStatus)
         )
