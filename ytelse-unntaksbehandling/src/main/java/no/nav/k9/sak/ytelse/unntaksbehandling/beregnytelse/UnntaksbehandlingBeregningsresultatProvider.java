@@ -32,15 +32,16 @@ class UnntaksbehandlingBeregningsresultatProvider implements BeregningsresultatP
     @Override
     public Optional<BeregningsresultatEntitet> hentBeregningsresultat(Long behandlingId) {
         return beregningsresultatRepository.hentBeregningsresultatAggregat(behandlingId)
-            .map(BehandlingBeregningsresultatEntitet::getOverstyrtBeregningsresultat);
+            .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
     @Override
     public Optional<BeregningsresultatEntitet> hentUtbetBeregningsresultat(Long behandlingId) {
         Optional<BehandlingBeregningsresultatEntitet> aggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(behandlingId);
-        Optional<BeregningsresultatEntitet> utbet = aggregat
-            .map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
-
-        return utbet.isPresent() ? utbet : aggregat.map(BehandlingBeregningsresultatEntitet::getOverstyrtBeregningsresultat);
+        Optional<BeregningsresultatEntitet> utbet = aggregat.map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
+        if (utbet.isPresent()) {
+            throw new IllegalStateException("Skal ikke være mulig å ha UtbetBeregningsresultat for Unntaksbehandling, men har det for " + behandlingId);
+        }
+        return aggregat.map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 }

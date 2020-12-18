@@ -109,7 +109,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
 
-        beregningsresultatRepository.lagreOverstyrtBeregningsresultat(behandling, beregningsresultat);
+        beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         return OppdateringResultat.utenOveropp();
     }
