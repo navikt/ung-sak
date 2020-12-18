@@ -54,7 +54,7 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
         assertThat(resultat).isFalse();
     }
 
-    @Ignore("reproduserer feilaktig opprettet aksjonpunkt 5090. Ignorerer nå.. inntil vi har ytelse som skal utbetales både til bruker og arbeidsgiver i samme sak, er det enklere å heller")
+    @Ignore("reproduserer feilaktig opprettet aksjonpunkt 5090. Ignorerer nå.. inntil vi har ytelse som skal utbetales både til bruker og arbeidsgiver i samme sak, er det enklere å heller helt unngår å opprette aksjonspunktet")
     @Test
     void endringerKunIRefusjonSkalGiEmpty() {
         BeregningsresultatEntitet originalBR = BeregningsresultatEntitet.builder().medRegelSporing("regelsporing").medRegelInput("regelinput").build();
