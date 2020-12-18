@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -23,14 +21,13 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
-import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 
@@ -44,7 +41,7 @@ public class TilkjentYtelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
+    private BeregningsresultatRepository beregningsresultatRepository;
 
     TilkjentYtelseTjeneste() {
         // for CDI proxy
@@ -53,12 +50,11 @@ public class TilkjentYtelseTjeneste {
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
-                                  TilbakekrevingRepository tilbakekrevingRepository,
-                                  @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
+                                  TilbakekrevingRepository tilbakekrevingRepository, BeregningsresultatRepository beregningsresultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.beregningsresultatProvidere = beregningsresultatProvidere;
+        this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
@@ -94,19 +90,8 @@ public class TilkjentYtelseTjeneste {
         return tilkjentYtelseOppdrag;
     }
 
-
     private Optional<BeregningsresultatEntitet> hentTilkjentYtelsePerioder(Behandling behandling) {
-        Optional<BeregningsresultatEntitet> resultatOpt = hentResultat(behandling);
-        if (!resultatOpt.isPresent()) {
-            return Optional.empty();
-        }
-        return resultatOpt;
-    }
-
-    private Optional<BeregningsresultatEntitet> hentResultat(Behandling behandling) {
-        var beregningsresultatProvider = BehandlingTypeRef.Lookup.find(BeregningsresultatProvider.class, beregningsresultatProvidere, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
-        return beregningsresultatProvider.hentBeregningsresultat(behandling.getId());
+        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
     }
 
     private void validate(TilkjentYtelseOppdrag tilkjentYtelseOppdrag) {

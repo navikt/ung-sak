@@ -32,12 +32,16 @@ public class BeregningsresultatRepository {
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
     }
 
-    public Optional<BeregningsresultatEntitet> hentBgBeregningsresultat(Long behandlingId) {
-        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
+    public Optional<BeregningsresultatEntitet> hentEndeligBeregningsresultat(Long behandlingId) {
+        Optional<BehandlingBeregningsresultatEntitet> aggregat = hentBeregningsresultatAggregat(behandlingId);
+        Optional<BeregningsresultatEntitet> utbet = aggregat
+            .map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
+
+        return utbet.isPresent() ? utbet : aggregat.map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
-    public Optional<BeregningsresultatEntitet> hentUtbetBeregningsresultat(Long behandlingId) {
-        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
+    public Optional<BeregningsresultatEntitet> hentBgBeregningsresultat(Long behandlingId) {
+        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
     public Optional<BehandlingBeregningsresultatEntitet> hentBeregningsresultatAggregat(Long behandlingId) {
