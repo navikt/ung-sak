@@ -91,4 +91,13 @@ public class RegelResultat {
             .collect(Collectors.toList());
         return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<"
+            + "vilkårene=" + vilkårene
+            + ", aksjonspunkt=" + aksjonspunktDefinisjoner
+            + ", ekstraResultater=" + ekstraResultater
+            + ">";
+    }
 }
