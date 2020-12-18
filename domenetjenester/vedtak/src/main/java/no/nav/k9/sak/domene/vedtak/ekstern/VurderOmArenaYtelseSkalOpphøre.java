@@ -9,8 +9,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -18,9 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryFeil;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -32,7 +30,6 @@ import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
 
 @ApplicationScoped
 public class VurderOmArenaYtelseSkalOpphøre {
@@ -45,7 +42,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OppgaveTjeneste oppgaveTjeneste;
-    private Instance<BeregningsresultatProvider> beregningsresultatProvidere;
+    private BeregningsresultatRepository beregningsresultatRepository;
 
     VurderOmArenaYtelseSkalOpphøre() {
         // for CDI proxy
@@ -55,13 +52,12 @@ public class VurderOmArenaYtelseSkalOpphøre {
     public VurderOmArenaYtelseSkalOpphøre(BehandlingRepository behandlingRepository,
                                           InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           BehandlingVedtakRepository behandlingVedtakRepository,
-                                          OppgaveTjeneste oppgaveTjeneste,
-                                          @Any Instance<BeregningsresultatProvider> beregningsresultatProvidere) {
+                                          OppgaveTjeneste oppgaveTjeneste, BeregningsresultatRepository beregningsresultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.beregningsresultatProvidere = beregningsresultatProvidere;
+        this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
     void opprettOppgaveHvisArenaytelseSkalOpphøre(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
@@ -86,9 +82,9 @@ public class VurderOmArenaYtelseSkalOpphøre {
      * og utbetalt ytelse i ARENA. FPSAK skal benytte lagrede registerdata om meldekortperioder for å vurdere om
      * startdatoen for foreldrepenger overlapper med ytelse i ARENA.
      *
-     * @param behandlingId behandling til saken i FP
+     * @param behandlingId     behandling til saken i FP
      * @param førsteAnvistDato første dato for utbetaling
-     * @param vedtaksDato vedtaksdato
+     * @param vedtaksDato      vedtaksdato
      * @return true hvis det finnes en overlappende ytelse i ARENA, ellers false
      */
     boolean vurderArenaYtelserOpphøres(Long behandlingId, AktørId aktørId, LocalDate førsteAnvistDato, LocalDate vedtaksDato) {
@@ -121,7 +117,8 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     private boolean utbetalesDetTilBrukerDirekte(Long behandlingId) {
-        return getBeregningsresultatProvider(behandlingId).hentUtbetBeregningsresultat(behandlingId)
+        //FIXME espen kan du sjekke om dette er riktig. Jeg endret fra hentUtbet til hentEndelig, tror det er riktig
+        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingId)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
             .flatMap(brp -> brp.getBeregningsresultatAndelList().stream())
             .anyMatch(ba -> ba.erBrukerMottaker() && ba.getDagsats() > 0);
@@ -137,7 +134,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     private Optional<LocalDate> finnFørsteAnvistDato(Long behandlingId) {
-        return getBeregningsresultatProvider(behandlingId).hentUtbetBeregningsresultat(behandlingId)
+        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingId)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
             .filter(brp -> brp.getBeregningsresultatAndelList().stream().anyMatch(a -> a.getDagsats() > 0))
             .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom)
@@ -182,11 +179,5 @@ public class VurderOmArenaYtelseSkalOpphøre {
     private boolean finnesYtelseVedtakPåEtterStartdato(Collection<Ytelse> ytelser, LocalDate startdato) {
         return ytelser.stream()
             .anyMatch(y -> y.getPeriode().inkluderer(startdato) || y.getPeriode().getFomDato().isAfter(startdato));
-    }
-
-    private BeregningsresultatProvider getBeregningsresultatProvider(Long behandlingId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        return BehandlingTypeRef.Lookup.find(BeregningsresultatProvider.class, beregningsresultatProvidere, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() ->  new UnsupportedOperationException("BeregningsresultatProvider ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 }

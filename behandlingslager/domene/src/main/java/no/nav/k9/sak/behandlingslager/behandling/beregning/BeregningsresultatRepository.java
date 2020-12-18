@@ -32,6 +32,10 @@ public class BeregningsresultatRepository {
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
     }
 
+    public Optional<BeregningsresultatEntitet> hentEndeligBeregningsresultat(Long behandlingId) {
+        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getEndeligBeregningsresulat);
+    }
+
     public Optional<BeregningsresultatEntitet> hentBgBeregningsresultat(Long behandlingId) {
         return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }

@@ -63,6 +63,10 @@ public class BehandlingBeregningsresultatEntitet extends BaseEntitet {
         return bgBeregningsresultat;
     }
 
+    public BeregningsresultatEntitet getEndeligBeregningsresulat(){
+        return utbetBeregningsresultat != null ? utbetBeregningsresultat : bgBeregningsresultat;
+    }
+
     public BeregningsresultatEntitet getUtbetBeregningsresultat() {
         return utbetBeregningsresultat;
     }
