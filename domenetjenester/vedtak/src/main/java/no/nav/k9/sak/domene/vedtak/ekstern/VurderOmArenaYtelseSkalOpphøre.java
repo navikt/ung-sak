@@ -117,7 +117,6 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     private boolean utbetalesDetTilBrukerDirekte(Long behandlingId) {
-        //FIXME espen kan du sjekke om dette er riktig. Jeg endret fra hentUtbet til hentEndelig, tror det er riktig
         return beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingId)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
             .flatMap(brp -> brp.getBeregningsresultatAndelList().stream())

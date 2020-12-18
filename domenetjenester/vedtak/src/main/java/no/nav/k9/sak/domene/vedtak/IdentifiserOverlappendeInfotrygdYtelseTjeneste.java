@@ -92,7 +92,6 @@ public class IdentifiserOverlappendeInfotrygdYtelseTjeneste {
     }
 
     private Optional<ÅpenDatoIntervallEntitet> fastsettPeriodeVL(Behandling behandling) {
-        //FIXME Espen - her endret jeg fra hentUtbet til hentEndelig, jeg regner med det egentlig blir riktig - men dobbeltsjekk. Utbet er alltid null inntil vi får aksjonspunkt 5090
         var beregningsresultatOpt = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
         var beregningsresultatPerioder = beregningsresultatOpt.map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
             .orElse(Collections.emptyList());

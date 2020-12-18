@@ -102,8 +102,9 @@ public class BeregningsresultatRepositoryImplTest {
     }
 
     @Test
-    public void lagreOgHenteUtbetBeregningsresultat() {
+    public void lagreOgHenteEndeligBeregningsresultat() {
         // Arrange
+        // bgBeregningsresultat kan bli overskrivet av utbetBeregningsresultat ved vurdering av tilbaketrekk
         var bgBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO), false);
         var utbetBeregningsresultat = buildBeregningsresultat(Optional.of(DAGENSDATO.plusDays(1)), false);
 
@@ -116,7 +117,7 @@ public class BeregningsresultatRepositoryImplTest {
         assertThat(id).isNotNull();
 
         flushAndClear();
-        Optional<BeregningsresultatEntitet> utbetBeregningsresultatLest = beregningsresultatRepository.hentUtbetBeregningsresultat(behandling.getId());
+        Optional<BeregningsresultatEntitet> utbetBeregningsresultatLest = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
 
         assertThat(utbetBeregningsresultatLest).isEqualTo(Optional.of(utbetBeregningsresultat));
     }

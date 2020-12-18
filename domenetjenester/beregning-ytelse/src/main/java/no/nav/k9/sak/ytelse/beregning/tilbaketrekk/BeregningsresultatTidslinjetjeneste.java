@@ -45,7 +45,7 @@ public class BeregningsresultatTidslinjetjeneste {
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Mangler beregningsresultat for behandling " + behandlingId));
 
         // Gammelt resultat, kan være tomt (f.eks ved avslått)
-        Optional<BeregningsresultatEntitet> originaltBeregningsresultat = ref.getOriginalBehandlingId().flatMap(beregningsresultatRepository::hentUtbetBeregningsresultat);
+        Optional<BeregningsresultatEntitet> originaltBeregningsresultat = ref.getOriginalBehandlingId().flatMap(beregningsresultatRepository::hentEndeligBeregningsresultat);
 
         List<BeregningsresultatPeriode> resultatperiodeRevurdering = revurderingBeregningsresultat.getBeregningsresultatPerioder();
         List<BeregningsresultatPeriode> resultatperiodeOriginal = originaltBeregningsresultat.isPresent() ? originaltBeregningsresultat.get().getBeregningsresultatPerioder() : Collections.emptyList();
