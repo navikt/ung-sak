@@ -54,7 +54,7 @@ public class FrisinnMapper {
         if (tomDato.isEqual(SISTE_DAG_I_APRIL)) {
             return new PeriodeDto(SISTE_DAG_I_MARS, tomDato);
         }
-        LocalDate føsteDag = MonthDay.of(tomDato.getMonth(), 1).atYear(LocalDate.now().getYear());
+        LocalDate føsteDag = MonthDay.of(tomDato.getMonth(), 1).atYear(tomDato.getYear());
         return new PeriodeDto(føsteDag, tomDato);
     }
 
