@@ -23,9 +23,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-import repo.sykdom.SykdomVurderingType;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -37,7 +37,7 @@ public class SykdomVurderingRestTjeneste {
     private static final String VURDERING_OVERSIKT = "/oversikt/{sykdomVurderingType}";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + "/oversikt/TO_OMSORGSPERSONER";
-    
+
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper;
 
@@ -67,11 +67,11 @@ public class SykdomVurderingRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid,
-            
+
             @NotNull @Valid @PathParam("sykdomVurderingType")
-            SykdomVurderingType sykdomVurderingType) {
+                SykdomVurderingType sykdomVurderingType) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        
+
         return sykdomVurderingOversiktMapper.map(behandling, sykdomVurderingType);
     }
 }

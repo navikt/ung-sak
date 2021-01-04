@@ -101,6 +101,8 @@ create table if not exists SYKDOM_DOKUMENT_SAK
 (
     ID                  BIGINT                             NOT NULL PRIMARY KEY,
     SYKDOM_DOKUMENT_ID  BIGINT                             NOT NULL,
+    JOURNALPOST_ID      VARCHAR(50)                        NOT NULL,
+    DOKUMENT_INFO_ID    VARCHAR(50)                        NOT NULL,
     SAK_PERSON_ID       BIGINT                             NOT NULL,
     SAKSNUMMMER         VARCHAR(19)                        NOT NULL,
 

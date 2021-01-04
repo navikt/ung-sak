@@ -1,10 +1,9 @@
-package repo.sykdom;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import static repo.sykdom.SykdomFelles.BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomFelles.BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.vedtak.sikkerhet.context.SubjectHandler;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
