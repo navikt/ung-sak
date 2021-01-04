@@ -92,10 +92,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    
+
     private AksjonspunktRepository aksjonspunktRepository;
     private TpsAdapter tpsAdapter;
-    
+
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
 
@@ -108,7 +108,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                         TpsTjeneste tpsTjeneste,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                        AksjonspunktRepository aksjonspunktRepository, 
+                                        AksjonspunktRepository aksjonspunktRepository,
                                                    FagsakTjeneste fagsakTjeneste,
                                         TpsAdapter tpsAdapter,
                                         ProsessTaskRepository prosessTaskRepository) {
@@ -142,7 +142,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return Response.serverError().entity(new FeilDto("Oppgitt personummer er ukjent")).build();
         }
 
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, LocalDate.now(), LocalDate.now());
+        // Samme utledning for fagsakperiode som i k9-fordel
+        LocalDate fom = LocalDate.of(2020, 3, 1);
+        LocalDate tom = manuellSøknadDto.getPeriode().tilOgMed;
+
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, fom, tom);
 
         FrisinnSøknad søknad = FrisinnSøknad.builder()
             .språk(Språk.NORSK_BOKMÅL)
@@ -167,7 +171,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
-    
+
     /**
      * @deprecated Bør fjernes når Omsorgspenger er ajour med behandlinger ifht korona backlogg.
      */
@@ -183,14 +187,14 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid @Parameter(description = "Antall per side") @QueryParam("antall") int antall) {
         final List<AktørId> aktører = new ArrayList<>(aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE));
         Collections.sort(aktører);
-        
+
         final int begin = side * antall;
         if (begin >= aktører.size()) {
             return Response.ok("").build();
         }
-        
+
         final int end = Math.min(begin + antall, aktører.size());
-        
+
         final String[] result = aktører.subList(begin, end).stream()
             .map(a -> tpsAdapter.hentIdentForAktørId(a)
                 .map(v -> v.getIdent())
@@ -198,10 +202,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             )
             .distinct()
             .toArray(String[]::new);
-        
+
         return Response.ok(String.join("\n", result)).build();
     }
-    
+
     @POST
     @Path("/manuell-revurdering")
     @Consumes(MediaType.TEXT_PLAIN)
@@ -222,9 +226,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             prosessTaskRepository.lagre(taskData);
             idx++;
         }
-        
+
     }
-    
+
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {
@@ -255,17 +259,17 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return new Inntekter(null, selvstendigNæringsdrivende, null);
     }
-    
+
     public static class OpprettManuellRevurdering implements AbacDto {
-        
+
         @NotNull
         @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
         private String saksnumre;
-        
+
         public OpprettManuellRevurdering(String saksnumre) {
             this.saksnumre = saksnumre;
         }
-        
+
         public String getSaksnumre() {
             return saksnumre;
         }
