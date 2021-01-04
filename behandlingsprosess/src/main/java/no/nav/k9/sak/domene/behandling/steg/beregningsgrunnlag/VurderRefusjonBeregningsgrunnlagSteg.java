@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -16,7 +17,10 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRUNN;
 
@@ -48,6 +52,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
 
         class HåndterResultat implements FortsettBeregningResultatCallback {
+            List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
 
             @Override
             public void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode) {
@@ -56,6 +61,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
                 } else if (kalkulusResultat.getVilkårOppfylt() != null) {
                     beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, periode, kalkulusResultat.getVilkårOppfylt());
                 }
+                aksjonspunktResultater.addAll(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
             }
         }
 
