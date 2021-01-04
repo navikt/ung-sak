@@ -1,9 +1,22 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "SykdomVurdering")
 @Table(name = "SYKDOM_VURDERING")
@@ -23,9 +36,8 @@ public class SykdomVurdering {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
 
-    @OneToOne
-    @JoinColumn(name = "SYKDOM_VURDERING_ID", nullable = false)
-    private SykdomVurderingVersjon sykdomVurderingVersjon;
+    @OneToMany(mappedBy = "sykdomVurdering")
+    private List<SykdomVurderingVersjon> sykdomVurderingVersjoner;
 
     @Version
     @Column(name = "VERSJON", nullable = false)
@@ -47,14 +59,14 @@ public class SykdomVurdering {
             SykdomVurderingType type,
             Long rangering,
             SykdomVurderinger sykdomVurderinger,
-            SykdomVurderingVersjon sykdomVurderingVersjon,
+            List<SykdomVurderingVersjon> sykdomVurderingVersjoner,
             Long versjon,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.type = type;
         this.rangering = rangering;
         this.sykdomVurderinger = sykdomVurderinger;
-        this.sykdomVurderingVersjon = sykdomVurderingVersjon;
+        this.sykdomVurderingVersjoner = sykdomVurderingVersjoner;
         this.versjon = versjon;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
@@ -80,8 +92,8 @@ public class SykdomVurdering {
         this.sykdomVurderinger = sykdomVurderinger;
     }
 
-    public SykdomVurderingVersjon getSykdomVurderingVersjon() {
-        return sykdomVurderingVersjon;
+    public List<SykdomVurderingVersjon> getSykdomVurderingVersjoner() {
+        return sykdomVurderingVersjoner;
     }
 
     public Long getVersjon() {

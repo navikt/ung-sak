@@ -19,10 +19,10 @@ public class SykdomGrunnlag {
     @Column(name = "SYKDOM_GRUNNLAG_UUID", nullable = false)
     private UUID sykdomGrunnlagUUID;
 
-    @OneToMany(mappedBy = "SYKDOM_GRUNNLAG_ID")
+    @OneToMany(mappedBy = "sykdomGrunnlag")
     private List<SykdomSøktPeriode> søktePerioder = new ArrayList<>();
 
-    @OneToMany(mappedBy = "SYKDOM_GRUNNLAG_ID")
+    @OneToMany(mappedBy = "sykdomGrunnlag")
     private List<SykdomRevurderingPeriode> revurderingPerioder = new ArrayList<>();
 
     @OneToMany()

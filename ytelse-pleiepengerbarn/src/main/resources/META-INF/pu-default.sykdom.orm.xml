@@ -3,20 +3,20 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
       http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
 
-	<sequence-generator name="SEQ_SYKDOM_PERSON" allocation-size="50" sequence-name="SEQ_SYKDOM_PERSON" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERINGER" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERINGER" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERING" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERING" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERING_PERIODE" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERING_PERIODE" />
-	<sequence-generator name="SEQ_SYKDOM_DOKUMENT" allocation-size="50" sequence-name="SEQ_SYKDOM_DOKUMENT" />
-	<sequence-generator name="SEQ_SYKDOM_DOKUMENT_SAK" allocation-size="50" sequence-name="SEQ_SYKDOM_DOKUMENT_SAK" />
-	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" allocation-size="50" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" />
-	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG" allocation-size="50" sequence-name="SEQ_SYKDOM_GRUNNLAG" />
-	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" allocation-size="50" sequence-name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" />
-	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG_VURDERING" allocation-size="50" sequence-name="SEQ_SYKDOM_GRUNNLAG_VURDERING" />
-	<sequence-generator name="SEQ_SYKDOM_SOEKT_PERIODE" allocation-size="50" sequence-name="SEQ_SYKDOM_SOEKT_PERIODE" />
-	<sequence-generator name="SEQ_SYKDOM_REVURDERING_PERIODE" allocation-size="50" sequence-name="SEQ_SYKDOM_REVURDERING_PERIODE" />
+	<sequence-generator name="SEQ_SYKDOM_PERSON" allocation-size="5" sequence-name="SEQ_SYKDOM_PERSON" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERINGER" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERINGER" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERING" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_PERIODE" />
+	<sequence-generator name="SEQ_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT" />
+	<sequence-generator name="SEQ_SYKDOM_DOKUMENT_SAK" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT_SAK" />
+	<sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" />
+	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG" />
+	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_BEHANDLING" />
+	<sequence-generator name="SEQ_SYKDOM_GRUNNLAG_VURDERING" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_VURDERING" />
+	<sequence-generator name="SEQ_SYKDOM_SOEKT_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_SOEKT_PERIODE" />
+	<sequence-generator name="SEQ_SYKDOM_REVURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_REVURDERING_PERIODE" />
 
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderinger" />

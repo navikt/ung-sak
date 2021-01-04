@@ -9,6 +9,10 @@ public class SykdomSøktPeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_SOEKT_PERIODE")
     private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "SYKDOM_GRUNNLAG_ID", nullable = false)
+    private SykdomGrunnlag sykdomGrunnlag;
 
     @Column(name = "FOM", nullable = false)
     private LocalDate fom;

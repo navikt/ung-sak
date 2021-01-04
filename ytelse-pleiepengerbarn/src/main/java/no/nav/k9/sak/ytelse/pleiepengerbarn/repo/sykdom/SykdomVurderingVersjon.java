@@ -18,8 +18,8 @@ public class SykdomVurderingVersjon {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING_VERSJON")
     private Long id;
 
-    @OneToOne
-    @Column(name = "SYKDOM_VURDERING_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers?
+    @ManyToOne
+    @JoinColumn(name = "SYKDOM_VURDERING_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers?
     private SykdomVurdering sykdomVurdering;
 
     @Column(name = "TEKST", nullable = false)
