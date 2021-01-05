@@ -71,7 +71,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
         var callback = new HåndterResultat();
         beregningStegTjeneste.fortsettBeregning(ref, VURDER_REF_BERGRUNN, callback);
 
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(callback.aksjonspunktResultater);
     }
 
     @Override
