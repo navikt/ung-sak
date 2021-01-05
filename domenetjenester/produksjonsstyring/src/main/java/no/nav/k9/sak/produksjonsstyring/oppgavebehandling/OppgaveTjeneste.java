@@ -110,7 +110,7 @@ public class OppgaveTjeneste {
     }
 
     private String mapYtelseTypeTilTema(FagsakYtelseType ytelseType) {
-        var tema = ytelseType.getInfotrygdBehandlingstema();
+        var tema = ytelseType.getOppgavetema();
         if (tema != null) {
             return tema;
         } else {
