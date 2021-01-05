@@ -34,20 +34,23 @@ import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 public class SykdomVurderingRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/sykdom/vurdering";
+    public static final String VURDERING = "/{vurderingId}";
     private static final String VURDERING_OVERSIKT = "/oversikt/{sykdomVurderingType}";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + "/oversikt/TO_OMSORGSPERSONER";
 
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper;
+    private SykdomVurderingMapper sykdomVurderingMapper;
 
     public SykdomVurderingRestTjeneste() {
     }
 
     @Inject
-    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper) {
+    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper, SykdomVurderingMapper sykdomVurderingMapper) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingOversiktMapper = sykdomVurderingOversiktMapper;
+        this.sykdomVurderingMapper = sykdomVurderingMapper;
     }
 
     @GET
@@ -73,5 +76,30 @@ public class SykdomVurderingRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
         return sykdomVurderingOversiktMapper.map(behandling, sykdomVurderingType);
+    }
+    
+    @GET
+    @Path(VURDERING)
+    @Operation(description = "Henter informasjon om én gitt vurdering.",
+        summary = "En gitt vurdering angitt med ID.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomVurderingDto.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public SykdomVurderingDto hentSykdomsInformasjonFor(
+            @NotNull @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid,
+
+            @NotNull @Valid @PathParam("vurderingId")
+            String vurderingId) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        
+        return sykdomVurderingMapper.map(behandling, vurderingId);
     }
 }

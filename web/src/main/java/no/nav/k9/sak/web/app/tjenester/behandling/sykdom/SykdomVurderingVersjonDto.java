@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 
 
 // Sammensetning av SykdomVurdering og SykdomVurderingVersjon. For øverste nivå (dvs ikke de under "tidligereVersjoner") brukes SykdomVurderingVersjon med høyest versjon.
@@ -41,7 +40,7 @@ public class SykdomVurderingVersjonDto {
     // Liste av alle tilgjengelige dokumenter med markering av hvilke som har blitt valgt.
     @JsonProperty(value = "dokumenter")
     @Valid
-    private List<SykdomDokument> dokumenter;
+    private List<SykdomDokumentDto> dokumenter;
 
     /**
      * Saksbehandler eller automatisert prosess som har endret
@@ -57,7 +56,7 @@ public class SykdomVurderingVersjonDto {
 
 
     public SykdomVurderingVersjonDto(String versjon,
-                                     String tekst, Resultat resultat, List<Periode> perioder, List<SykdomDokument> dokumenter, String endretAv,
+                                     String tekst, Resultat resultat, List<Periode> perioder, List<SykdomDokumentDto> dokumenter, String endretAv,
                                      LocalDateTime endretTidspunkt) {
         this.versjon = versjon;
         this.tekst = tekst;
