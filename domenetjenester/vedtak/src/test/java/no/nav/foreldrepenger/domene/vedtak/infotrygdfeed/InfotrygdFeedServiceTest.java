@@ -3,45 +3,30 @@ package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import java.time.LocalDate;
-
-import javax.enterprise.inject.Instance;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
 public class InfotrygdFeedServiceTest {
 
-    private Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
-
-    @Mock
     private ProsessTaskRepository prosessTaskRepository;
 
     private InfotrygdFeedService service;
 
     @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-        initServices(LocalDate.now(), LocalDate.now().plusDays(1));
-    }
-
-    private void initServices(LocalDate fom, LocalDate tom) {
-        InfotrygdFeedPeriodeberegner periodeberegner = new FeedServiceMockHelper.StubPeriodeberegner(fom, tom, "OM");
-        periodeBeregnere = new UnitTestLookupInstanceImpl<>(periodeberegner);
+        prosessTaskRepository = mock(ProsessTaskRepository.class);
         service = new InfotrygdFeedService(prosessTaskRepository);
     }
 
@@ -109,7 +94,8 @@ public class InfotrygdFeedServiceTest {
     }
 
     private FeedServiceMockHelper mockHelper() {
-        return new FeedServiceMockHelper(periodeBeregnere);
+        var periodeberegner = mock(InfotrygdFeedPeriodeberegner.class);
+        return new FeedServiceMockHelper(periodeberegner);
     }
 }
 
