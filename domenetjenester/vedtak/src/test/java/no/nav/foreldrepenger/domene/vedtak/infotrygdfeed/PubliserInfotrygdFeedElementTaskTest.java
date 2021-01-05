@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -9,8 +10,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.UUID;
-
-import javax.enterprise.inject.Instance;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,6 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -37,7 +35,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
     private BehandlingRepository behandlingRepository;
 
     private PubliserInfotrygdFeedElementTask task;
-    private UnitTestLookupInstanceImpl<InfotrygdFeedPeriodeberegner> periodeBeregnere;
+    private InfotrygdFeedPeriodeberegner periodeberegner;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -48,9 +46,9 @@ public class PubliserInfotrygdFeedElementTaskTest {
     }
 
     private void initServices(LocalDate fom, LocalDate tom) {
-        InfotrygdFeedPeriodeberegner periodeberegner = new FeedServiceMockHelper.StubPeriodeberegner(fom, tom, "OM");
-        periodeBeregnere = new UnitTestLookupInstanceImpl<>(periodeberegner);
-        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeBeregnere);
+        periodeberegner = mock(InfotrygdFeedPeriodeberegner.class);
+        when(periodeberegner.finnInnvilgetPeriode(any())).thenReturn(new InfotrygdFeedPeriode(fom, tom));
+        task = new PubliserInfotrygdFeedElementTask(behandlingRepository, meldingProducer, periodeberegner);
     }
 
     @Test
@@ -78,7 +76,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
 
         InfotrygdFeedMessage message = task.getInfotrygdFeedMessage(behandling);
         assertThat(message.getUuid()).hasSameSizeAs(UUID.randomUUID().toString());
-        assertThat(message.getYtelse()).isEqualTo("OM");
+        assertThat(message.getYtelse()).isEqualTo(FagsakYtelseType.OMSORGSPENGER.getInfotrygdBehandlingstema());
         assertThat(message.getSaksnummer()).isEqualTo("saksnummer");
         assertThat(message.getAktoerId()).isEqualTo("123");
         assertThat(message.getAktoerIdPleietrengende()).isEqualTo("321");
@@ -124,13 +122,13 @@ public class PubliserInfotrygdFeedElementTaskTest {
     }
 
     private FeedServiceMockHelper mockHelper() {
-        return new FeedServiceMockHelper(periodeBeregnere);
+        return new FeedServiceMockHelper(periodeberegner);
     }
 }
 
 class FeedServiceMockHelper {
     // Mocks
-    Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
+    InfotrygdFeedPeriodeberegner periodeBeregnere;
 
     // Builder-parametere
     private Saksnummer saksnummer = new Saksnummer("x123");
@@ -143,7 +141,7 @@ class FeedServiceMockHelper {
     // Annen tilstand
     private long sisteBehandlingsId = 0L;
 
-    FeedServiceMockHelper(Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere) {
+    FeedServiceMockHelper(InfotrygdFeedPeriodeberegner periodeBeregnere) {
         this.periodeBeregnere = periodeBeregnere;
 
     }
@@ -228,26 +226,4 @@ class FeedServiceMockHelper {
         return sisteBehandlingsId++;
     }
 
-    static final class StubPeriodeberegner implements InfotrygdFeedPeriodeberegner {
-
-        private final LocalDate fom;
-        private final LocalDate tom;
-        private final String infotrygdYtelseKode;
-
-        StubPeriodeberegner(LocalDate fom, LocalDate tom, String infotrygdYtelseKode) {
-            this.infotrygdYtelseKode = infotrygdYtelseKode;
-            this.fom = fom;
-            this.tom = tom;
-        }
-
-        @Override
-        public String getInfotrygdYtelseKode(Saksnummer saksnummer) {
-            return infotrygdYtelseKode;
-        }
-
-        @Override
-        public InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer) {
-            return new InfotrygdFeedPeriode(fom, tom);
-        }
-    }
 }

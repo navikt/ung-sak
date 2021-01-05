@@ -40,10 +40,10 @@ public enum FagsakYtelseType implements Kodeverdi {
     SYKEPENGER("SP", "Sykepenger", null),
 
     /** Folketrygdloven K9 ytelser. */
-    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "OMS"),
-    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", "OMS"),
-    OMSORGSPENGER("OMP", "Omsorgspenger", "OMS"),
-    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", "OMS"),
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN"),
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", null),
+    OMSORGSPENGER("OMP", "Omsorgspenger", "OM"),
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", null),
 
     /** @deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori. */
     @Deprecated
