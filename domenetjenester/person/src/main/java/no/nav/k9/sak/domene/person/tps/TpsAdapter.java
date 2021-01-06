@@ -7,6 +7,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
@@ -32,4 +33,6 @@ public interface TpsAdapter {
     List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent personIdent);
 
     List<FødtBarnInfo> hentFødteBarn(AktørId aktørId);
+
+    PersoninfoBasis hentKjerneinformasjonBasis(PersonIdent fnr, AktørId aktørId);
 }

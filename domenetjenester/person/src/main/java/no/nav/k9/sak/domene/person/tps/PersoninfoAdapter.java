@@ -8,7 +8,9 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -17,6 +19,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class PersoninfoAdapter {
 
     private TpsAdapter tpsAdapter;
+    private PersonBasisTjeneste personBasisTjeneste;
 
     public PersoninfoAdapter() {
         // for CDI proxy
@@ -38,7 +41,7 @@ public class PersoninfoAdapter {
     public Optional<Personinfo> innhentSaksopplysninger(PersonIdent personIdent) {
         Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
 
-        if(aktørId.isPresent()) {
+        if (aktørId.isPresent()) {
             return hentKjerneinformasjonForBarn(aktørId.get(), personIdent);
         } else {
             return Optional.empty();
@@ -49,9 +52,11 @@ public class PersoninfoAdapter {
         return tpsAdapter.hentPersonhistorikk(aktørId, periode);
     }
 
-    /** Henter PersonInfo for barn, gitt at det ikke er FDAT nummer (sjekkes på format av PersonIdent, evt. ved feilhåndtering fra TPS). Hvis FDAT nummer returneres {@link Optional#empty()} */
+    /**
+     * Henter PersonInfo for barn, gitt at det ikke er FDAT nummer (sjekkes på format av PersonIdent, evt. ved feilhåndtering fra TPS). Hvis FDAT nummer returneres {@link Optional#empty()}
+     */
     public Optional<Personinfo> innhentSaksopplysningerForBarn(PersonIdent personIdent) {
-        if(personIdent.erFdatNummer()) {
+        if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
         Optional<AktørId> optAktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
@@ -70,7 +75,7 @@ public class PersoninfoAdapter {
     }
 
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
-        if(personIdent.erFdatNummer()) {
+        if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
         try {
@@ -100,4 +105,25 @@ public class PersoninfoAdapter {
         return tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
     }
 
+    public Optional<PersonIdent> hentFnr(AktørId aktørId) {
+        return tpsAdapter.hentIdentForAktørId(aktørId);
+    }
+
+    public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
+        Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
+        Optional<PersoninfoArbeidsgiver> pi = funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjonBasis(fnr, aktørId))
+            .map(p ->
+                new PersoninfoArbeidsgiver.Builder()
+                    .medAktørId(aktørId)
+                    .medPersonIdent(p.getPersonIdent())
+                    .medNavn(p.getNavn())
+                    .medFødselsdato(p.getFødselsdato())
+                    .bygg()
+            );
+
+        // Sammnligner det som hentes fra tps og pdl
+        pi.ifPresent(p -> personBasisTjeneste.hentOgSjekkPersoninfoArbeidsgiverFraPDL(aktørId, p.getPersonIdent(), p));
+
+        return pi;
+    }
 }

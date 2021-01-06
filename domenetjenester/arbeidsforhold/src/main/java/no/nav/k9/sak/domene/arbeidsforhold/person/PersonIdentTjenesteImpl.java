@@ -6,6 +6,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
+import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -13,6 +15,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
 
     private TpsAdapterImpl tpsAdapter;
+    private PersoninfoAdapter personinfoAdapter;
 
     public PersonIdentTjenesteImpl() {
         // for CDI proxy
@@ -43,8 +46,12 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
     }
 
     @Override
+    //TODO Skal returnere Optional<PersoninfoArbeidsgiver>, så klientene må endres
     public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
+
+        Optional<PersoninfoArbeidsgiver> personinfo =  personinfoAdapter.hentPersoninfoArbeidsgiver(aktørId);
+
         return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjon(fnr, aktørId));
     }
 
