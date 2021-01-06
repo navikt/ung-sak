@@ -27,7 +27,7 @@ public class SykdomGrunnlagBehandling {
     private Saksnummer saksnummer;
 
     @Column(name = "BEHANDLING_UUID", nullable = false)
-    private UUID behandlingUUID;
+    private UUID behandlingUuid;
 
     @Column(name = "BEHANDLINGSNUMMER", nullable = false)
     private Long behandlingsnummer;

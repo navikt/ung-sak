@@ -2,16 +2,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomFelles.BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
 
-import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,7 +33,7 @@ public class SykdomVurderinger {
     @JoinColumn(name = "SYK_PERSON_ID", nullable = false)
     private SykdomPerson person;
 
-    @OneToMany(mappedBy = "sykdomVurderinger", cascade = {CascadeType.PERSIST, CascadeType.REFRESH}) //TODO: cascades?
+    @OneToMany(mappedBy = "sykdomVurderinger") //TODO: cascades? , cascade = {CascadeType.PERSIST, CascadeType.REFRESH}
     private List<SykdomVurdering> vurderinger = new ArrayList<>();
 
     @DiffIgnore

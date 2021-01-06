@@ -19,7 +19,7 @@ public class SykdomVurderingVersjon {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_VURDERING_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers?
+    @JoinColumn(name = "SYKDOM_VURDERING_ID", nullable = false, updatable = false) //TODO:modifiers?
     private SykdomVurdering sykdomVurdering;
 
     @Column(name = "TEKST", nullable = false)
@@ -44,14 +44,13 @@ public class SykdomVurderingVersjon {
     private UUID endretBehandlingUuid;
 
     @Column(name = "ENDRET_SAKSNUMMER", nullable = false)
-    private Saksnummer endretSaksnummer; //TODO: type?
+    private String endretSaksnummer; //TODO: type?
 
     @ManyToOne
     @JoinColumn(name = "ENDRET_FOR_PERSON_ID", nullable = false)
     private SykdomPerson endretForPerson;
 
-    @OneToOne
-    @JoinColumn(name = "SYKDOM_VURDERING_VERSJON_ID")
+    @OneToOne(mappedBy = "sykdomVurderingVersjon")
     private SykdomVurderingVersjonBesluttet besluttet;
 
     @OneToMany
@@ -78,7 +77,7 @@ public class SykdomVurderingVersjon {
             String endretAv,
             LocalDateTime endretTidspunkt,
             UUID endretBehandlingUuid,
-            Saksnummer endretSaksnummer,
+            String endretSaksnummer,
             SykdomPerson endretForPerson,
             SykdomVurderingVersjonBesluttet besluttet,
             List<SykdomDokument> dokumenter,
@@ -129,7 +128,7 @@ public class SykdomVurderingVersjon {
         return endretBehandlingUuid;
     }
 
-    public Saksnummer getEndretSaksnummer() {
+    public String getEndretSaksnummer() {
         return endretSaksnummer;
     }
 

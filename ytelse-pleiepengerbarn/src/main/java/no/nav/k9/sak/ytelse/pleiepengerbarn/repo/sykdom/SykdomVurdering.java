@@ -3,8 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,11 +12,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType.SykdomVurderingTypeConverter;
 
 @Entity(name = "SykdomVurdering")
 @Table(name = "SYKDOM_VURDERING")
@@ -27,6 +27,7 @@ public class SykdomVurdering {
     private Long id;
 
     @Column(name = "TYPE", nullable = false)
+    @Convert(converter = SykdomVurderingTypeConverter.class)
     private SykdomVurderingType type;
 
     @Column(name = "RANGERING")

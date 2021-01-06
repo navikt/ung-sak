@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Collection;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,7 +13,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -22,13 +22,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -47,6 +50,7 @@ public class SykdomVurderingRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper;
     private SykdomVurderingMapper sykdomVurderingMapper;
+    private SykdomVurderingRepository sykdomVurderingRepository;
     
 
     public SykdomVurderingRestTjeneste() {
@@ -58,10 +62,11 @@ public class SykdomVurderingRestTjeneste {
         */
 
     @Inject
-    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper, SykdomVurderingMapper sykdomVurderingMapper) {
+    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper, SykdomVurderingMapper sykdomVurderingMapper, SykdomVurderingRepository sykdomVurderingRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingOversiktMapper = sykdomVurderingOversiktMapper;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
+        this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
     @GET
@@ -109,15 +114,18 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingOversikt hentSykdomsoversikt(BehandlingUuidDto behandlingUuid, SykdomVurderingType sykdomVurderingType) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        /*
-         * if (aktivBehandling) {
-         *     return sykdomVurderingOversiktMapper.map(sykdomVurderingRepository.hentVurderingerPå(sykdomVurderingType, behandling.getFagsak().getPleietrengendeAktørId()));
-         * } else {
-         *     return sykdomVurderingOversiktMapper.map(sykdomVurderingRepository.hentVurderingerPå(sykdomVurderingType, behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId()));
-         * }
-         */
-        
-        return sykdomVurderingOversiktMapper.map(behandling, sykdomVurderingType);
+        final Collection<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
+        return sykdomVurderingOversiktMapper.map(behandling.getUuid().toString(), vurderinger);
+    }
+
+    private Collection<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
+        final Collection<SykdomVurderingVersjon> vurderinger;
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            vurderinger = sykdomVurderingRepository.hentVurderingerFor(sykdomVurderingType, behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId());
+        } else {
+            vurderinger = sykdomVurderingRepository.hentVurderingerFor(sykdomVurderingType, null, behandling.getFagsak().getPleietrengendeAktørId());
+        }
+        return vurderinger;
     }
     
     @GET
