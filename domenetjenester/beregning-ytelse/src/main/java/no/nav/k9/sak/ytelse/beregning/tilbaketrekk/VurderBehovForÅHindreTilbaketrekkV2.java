@@ -98,14 +98,12 @@ public class VurderBehovForÅHindreTilbaketrekkV2 {
 
         // Hvis vi har en andel på gammelt grunnlag for denne nøkkelen uten referanse kan vi sjekke mot den.
         // Om vi ikke har denne må vi opprette aksjonspunkt så saksbehandler kan avgjøre hva som skal gjøres
-        if (brukersAndelPåGammeltResultatUtenReferanse.isPresent()) { // NOSONAR
-            return måVurdereTilkomneAndeler(andelerINyttResultatSomIkkeSvarerTilNoenIGammelt, brukersAndelPåGammeltResultatUtenReferanse.get());
-        }
-        return true;
+        int brukersDagsatsIGammeltResultat = brukersAndelPåGammeltResultatUtenReferanse.map(BeregningsresultatAndel::getDagsats).orElse(0);
+        return måVurdereTilkomneAndeler(andelerINyttResultatSomIkkeSvarerTilNoenIGammelt, brukersDagsatsIGammeltResultat);
     }
 
     private static boolean måVurdereTilkomneAndeler(List<BeregningsresultatAndel> andelerIRevurderingSomIkkeSvarerTilNoenIOriginal,
-                                                    BeregningsresultatAndel brukersAndelPåOriginaltResultatUtenReferanse) {
+                                                    int brukersDagsatsIGammeltResultat) {
         int aggregertArbeidsgiversDagsats = andelerIRevurderingSomIkkeSvarerTilNoenIOriginal.stream()
             .filter(a -> !a.erBrukerMottaker())
             .mapToInt(BeregningsresultatAndel::getDagsats)
@@ -116,7 +114,7 @@ public class VurderBehovForÅHindreTilbaketrekkV2 {
             .mapToInt(BeregningsresultatAndel::getDagsats)
             .sum();
 
-        int endringIDagsatsBruker = aggregertBrukersDagsats - brukersAndelPåOriginaltResultatUtenReferanse.getDagsats();
+        int endringIDagsatsBruker = aggregertBrukersDagsats - brukersDagsatsIGammeltResultat;
 
         return KanRedusertBeløpTilBrukerDekkesAvNyRefusjon.vurder(
             endringIDagsatsBruker,
