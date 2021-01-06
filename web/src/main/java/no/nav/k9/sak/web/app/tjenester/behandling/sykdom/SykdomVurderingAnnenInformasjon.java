@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,10 +22,12 @@ public class SykdomVurderingAnnenInformasjon {
      * Perioder som skal vurderes.
      */
     @JsonProperty(value = "resterendeVurderingsperioder")
+    @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
     
     @JsonProperty(value = "perioderSomKanVurderes")
+    @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
 

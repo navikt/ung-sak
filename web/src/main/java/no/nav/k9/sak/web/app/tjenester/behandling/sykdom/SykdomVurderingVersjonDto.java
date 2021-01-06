@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -22,10 +25,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 public class SykdomVurderingVersjonDto {
 
     @JsonProperty(value = "versjon")
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String versjon;
 
     @JsonProperty(value = "tekst")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String tekst;
 
@@ -34,11 +42,13 @@ public class SykdomVurderingVersjonDto {
     private Resultat resultat;
 
     @JsonProperty(value = "perioder")
+    @Size(max = 100)
     @Valid
     private List<Periode> perioder = new ArrayList<>();
 
     // Liste av alle tilgjengelige dokumenter med markering av hvilke som har blitt valgt.
     @JsonProperty(value = "dokumenter")
+    @Size(max = 100)
     @Valid
     private List<SykdomDokumentDto> dokumenter;
 
@@ -46,6 +56,8 @@ public class SykdomVurderingVersjonDto {
      * Saksbehandler eller automatisert prosess som har endret
      */
     @JsonProperty(value = "endretAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String endretAv;
 

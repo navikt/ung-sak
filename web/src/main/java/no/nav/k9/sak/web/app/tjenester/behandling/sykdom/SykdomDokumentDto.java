@@ -2,6 +2,9 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import java.time.LocalDate;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -16,6 +19,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
 public class SykdomDokumentDto {
 
     @JsonProperty(value = "id")
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
     

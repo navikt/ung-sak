@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,6 +19,7 @@ import no.nav.k9.sak.typer.Periode;
 public class SykdomVurderingOversikt {
 
     @JsonProperty(value = "vurderingselementer")
+    @Size(max = 1000)
     @Valid
     private List<SykdomVurderingOversiktElement> vurderingselementer = new ArrayList<>();
     
@@ -25,10 +27,12 @@ public class SykdomVurderingOversikt {
      * Perioder som skal vurderes.
      */
     @JsonProperty(value = "resterendeVurderingsperioder")
+    @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
     
     @JsonProperty(value = "søknadsperioderTilBehandling")
+    @Size(max = 1000)
     @Valid
     private List<Periode> søknadsperioderTilBehandling = new ArrayList<>();
     
@@ -36,6 +40,7 @@ public class SykdomVurderingOversikt {
      * Perioder det er tillatt å gjøre vurderinger for (det finnes minst én søknadsperiode på barnet).
      */
     @JsonProperty(value = "perioderSomKanVurderes")
+    @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
 

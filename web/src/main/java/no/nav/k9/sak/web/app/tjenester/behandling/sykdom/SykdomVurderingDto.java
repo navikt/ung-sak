@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,6 +24,9 @@ public class SykdomVurderingDto {
      * IDen til SykdomVurdering (og ikke en gitt SykdomVurderingVersjon).
      */
     @JsonProperty(value = "id")
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
         
@@ -32,6 +38,7 @@ public class SykdomVurderingDto {
      * Index 0 har gjeldende versjon.
      */
     @JsonProperty(value = "versjoner")
+    @Size(max = 100)
     @Valid
     private List<SykdomVurderingVersjonDto> versjoner  = new ArrayList<>();
 

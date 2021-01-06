@@ -1,12 +1,19 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 
@@ -29,6 +36,9 @@ public class SykdomVurderingOversiktElement {
      * IDen til SykdomVurdering (og ikke til en gitt SykdomVurderingVersjon).
      */
     @JsonProperty(value = "id")
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
 
@@ -47,15 +57,21 @@ public class SykdomVurderingOversiktElement {
     @JsonProperty(value = "gjelderForAnnenPart")
     @Valid
     private boolean gjelderForAnnenPart;
+    
+    @JsonProperty(value = "links")
+    @Size(max = 100)
+    @Valid
+    private List<ResourceLink> links = new ArrayList<>();
 
 
     public SykdomVurderingOversiktElement(String id, Resultat resultat, Periode periode,
-            boolean gjelderForSøker, boolean gjelderForAnnenPart) {
+            boolean gjelderForSøker, boolean gjelderForAnnenPart, List<ResourceLink> links) {
         this.id = id;
         this.resultat = resultat;
         this.periode = periode;
         this.gjelderForSøker = gjelderForSøker;
         this.gjelderForAnnenPart = gjelderForAnnenPart;
+        this.links = links;
     }
 
 

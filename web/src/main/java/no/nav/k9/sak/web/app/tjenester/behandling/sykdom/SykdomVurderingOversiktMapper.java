@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,7 +16,10 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.kontrakt.ResourceLink;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
@@ -27,7 +32,7 @@ public class SykdomVurderingOversiktMapper {
     public SykdomVurderingOversikt map(Behandling behandling, SykdomVurderingType type) {
         return new SykdomVurderingOversikt(
             Arrays.asList(
-                new SykdomVurderingOversiktElement("124d15", Resultat.OPPFYLT, new Periode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)), true, false)
+                new SykdomVurderingOversiktElement("124d15", Resultat.OPPFYLT, new Periode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)), true, false, Collections.emptyList())
             ),
             Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))),
             Arrays.asList(new Periode(LocalDate.now().minusDays(8), LocalDate.now())),
@@ -36,26 +41,34 @@ public class SykdomVurderingOversiktMapper {
     }
 
     
-    SykdomVurderingOversikt map(List<SykdomVurderingVersjon> vurderinger) {        
+    SykdomVurderingOversikt map(String behandlingUuid, List<SykdomVurderingVersjon> vurderinger) {        
         final List<SykdomVurderingOversiktElement> elements = tilTidslinje(vurderinger)
             .stream()
             .map(ds -> {
+                final String sykdomVurderingId = "" + ds.getValue().getSykdomVurdering().getId();
                 return new SykdomVurderingOversiktElement(
-                    "" + ds.getValue().getSykdomVurdering().getId(),
+                        sykdomVurderingId,
                     ds.getValue().getResultat(),
                     new Periode(ds.getFom(), ds.getTom()),
                     true,  // TODO: Rette til riktige verdi.
-                    true); // TODO: Rette til riktige verdi.
-            }) // TODO: Rette til riktige verdi.
+                    true,  // TODO: Rette til riktige verdi.
+                    Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId))
+                    ); 
+            })
             .collect(Collectors.toList())
             ;
-        
+
         return new SykdomVurderingOversikt(
                 elements,
                 Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(8), LocalDate.now())), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())) // TODO: Riktig verdi
                 );
+    }
+
+
+    private ResourceLink linkForGetVurdering(String behandlingUuid, String sykdomVurderingId) {
+        return ResourceLink.get(BehandlingDtoUtil.getApiPath(SykdomVurderingRestTjeneste.VURDERING_PATH), "sykdom-vurdering", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomVurderingIdDto.NAME, sykdomVurderingId));
     }       
     
     LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(List<SykdomVurderingVersjon> vurderinger) {
