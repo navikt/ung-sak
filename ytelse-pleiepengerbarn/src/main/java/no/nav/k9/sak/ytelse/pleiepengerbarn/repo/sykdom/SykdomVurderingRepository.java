@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -93,8 +94,8 @@ class SykdomVurderingRepository {
     private SykdomPerson findPerson(EntityManager em, String identitetsnummer) {
         Query q = em.createQuery("SELECT p From SykdomPerson p where p.norskIdentitetsnummer = :idNummer");
         q.setParameter("idNummer", identitetsnummer);
-        SykdomPerson p = (SykdomPerson) q.getSingleResult();
-        return p;
+        ArrayList<SykdomPerson> liste = (ArrayList<SykdomPerson>) q.getResultList();
+        return liste.size() > 0 ? liste.get(0) : null;
     }
 
 }
