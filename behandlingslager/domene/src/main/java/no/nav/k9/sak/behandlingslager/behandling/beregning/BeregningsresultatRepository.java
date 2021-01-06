@@ -32,12 +32,16 @@ public class BeregningsresultatRepository {
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
     }
 
-    public Optional<BeregningsresultatEntitet> hentBgBeregningsresultat(Long behandlingId) {
-        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
+    public Optional<BeregningsresultatEntitet> hentEndeligBeregningsresultat(Long behandlingId) {
+        Optional<BehandlingBeregningsresultatEntitet> aggregat = hentBeregningsresultatAggregat(behandlingId);
+        Optional<BeregningsresultatEntitet> utbet = aggregat
+            .map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
+
+        return utbet.isPresent() ? utbet : aggregat.map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
-    public Optional<BeregningsresultatEntitet> hentUtbetBeregningsresultat(Long behandlingId) {
-        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getUtbetBeregningsresultat);
+    public Optional<BeregningsresultatEntitet> hentBgBeregningsresultat(Long behandlingId) {
+        return hentBeregningsresultatAggregat(behandlingId).map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat);
     }
 
     public Optional<BehandlingBeregningsresultatEntitet> hentBeregningsresultatAggregat(Long behandlingId) {
@@ -57,12 +61,6 @@ public class BeregningsresultatRepository {
     public void lagreUtbetBeregningsresultat(Behandling behandling, BeregningsresultatEntitet utbetBeregningsresultatFP) {
         BehandlingBeregningsresultatBuilder builder = opprettResultatBuilderFor(behandling.getId());
         builder.medUtbetBeregningsresultat(utbetBeregningsresultatFP);
-        lagreOgFlush(behandling, builder);
-    }
-
-    public void lagreOverstyrtBeregningsresultat(Behandling behandling, BeregningsresultatEntitet overstyrtBeregningsresultatFP) {
-        BehandlingBeregningsresultatBuilder builder = opprettResultatBuilderFor(behandling.getId());
-        builder.medOverstyrtBeregningsresultat(overstyrtBeregningsresultatFP);
         lagreOgFlush(behandling, builder);
     }
 
@@ -97,10 +95,6 @@ public class BeregningsresultatRepository {
         BehandlingBeregningsresultatEntitet aggregatEntitet = builder.build(behandling.getId());
         entityManager.persist(aggregatEntitet.getBgBeregningsresultat());
         aggregatEntitet.getBgBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);
-        if (aggregatEntitet.getOverstyrtBeregningsresultat() != null) {
-            entityManager.persist(aggregatEntitet.getOverstyrtBeregningsresultat());
-            aggregatEntitet.getOverstyrtBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);
-        }
         if (aggregatEntitet.getUtbetBeregningsresultat() != null) {
             entityManager.persist(aggregatEntitet.getUtbetBeregningsresultat());
             aggregatEntitet.getUtbetBeregningsresultat().getBeregningsresultatPerioder().forEach(this::lagre);

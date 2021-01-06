@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
@@ -16,25 +17,25 @@ import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Personidenter;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 
 @ApplicationScoped
 class TpsAdapterImpl {
 
-    private AktørConsumerMedCache aktørConsumer;
+    private AktørTjeneste aktørTjeneste;
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
+    @SuppressWarnings("unused")
     public TpsAdapterImpl() {
     }
 
     @Inject
-    TpsAdapterImpl(AktørConsumerMedCache aktørConsumer,
-                          PersonConsumer personConsumer,
-                          TpsOversetter tpsOversetter) {
-        this.aktørConsumer = aktørConsumer;
+    TpsAdapterImpl(AktørTjeneste aktørTjeneste,
+                   PersonConsumer personConsumer,
+                   TpsOversetter tpsOversetter) {
+        this.aktørTjeneste = aktørTjeneste;
         this.personConsumer = personConsumer;
         this.tpsOversetter = tpsOversetter;
     }
@@ -45,7 +46,7 @@ class TpsAdapterImpl {
             return Optional.empty();
         }
         try {
-            return aktørConsumer.hentAktørIdForPersonIdent(personIdent.getIdent()).map(AktørId::new);
+            return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
         } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
             // Her sorterer vi ut dødfødte barn
             return Optional.empty();
@@ -53,7 +54,7 @@ class TpsAdapterImpl {
     }
 
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-        return aktørConsumer.hentPersonIdentForAktørId(aktørId.getId()).map(f -> new PersonIdent(f));
+        return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)
@@ -77,7 +78,7 @@ class TpsAdapterImpl {
             throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(e).toException();
         }
     }
-    
+
     private static no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent lagPersonIdent(String fnr) {
         if (fnr == null || fnr.isEmpty()) {
             throw new IllegalArgumentException("Fødselsnummer kan ikke være null eller tomt");

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -36,6 +37,42 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
     public void ingenEndringSkalGiEmpty() {
         // Arrange
         int inntektBeløp = 1000;
+        BeregningsresultatEntitet forrigeTY = lagBeregningsresultatFP(0, inntektBeløp);
+        BeregningsresultatEntitet denneTY = lagBeregningsresultatFP(0, inntektBeløp);
+        List<BeregningsresultatPeriode> forrigeTYPerioder = forrigeTY.getBeregningsresultatPerioder();
+        List<BeregningsresultatPeriode> denneTYPerioder = denneTY.getBeregningsresultatPerioder();
+        LocalDateTimeline<BRAndelSammenligning> brAndelTidslinje = MapBRAndelSammenligningTidslinje.opprettTidslinje(
+            forrigeTYPerioder,
+            denneTYPerioder,
+            UTBETALT_TOM
+        );
+
+        // Act
+        boolean resultat = VurderBehovForÅHindreTilbaketrekkV2.skalVurdereTilbaketrekk(brAndelTidslinje);
+
+        // Assert
+        assertThat(resultat).isFalse();
+    }
+
+    @Ignore("reproduserer feilaktig opprettet aksjonpunkt 5090. Ignorerer nå.. inntil vi har ytelse som skal utbetales både til bruker og arbeidsgiver i samme sak, er det enklere å heller helt unngår å opprette aksjonspunktet")
+    @Test
+    void endringerKunIRefusjonSkalGiEmpty() {
+        BeregningsresultatEntitet originalBR = BeregningsresultatEntitet.builder().medRegelSporing("regelsporing").medRegelInput("regelinput").build();
+        BeregningsresultatPeriode originalPeriode1 = BeregningsresultatPeriode.builder()
+            .medBeregningsresultatPeriodeFomOgTom(SKJÆRINGSTIDSPUNKT, ANDRE_PERIODE_FOM.minusDays(1))
+            .build(originalBR);
+        lagAndel(originalPeriode1, ARBEIDSGIVER1, true, 200);
+        lagAndel(originalPeriode1, ARBEIDSGIVER1, false, 800);
+        BeregningsresultatPeriode originalPeriode2 = BeregningsresultatPeriode.builder()
+            .medBeregningsresultatPeriodeFomOgTom(ANDRE_PERIODE_FOM, SISTE_UTTAKSDAG)
+            .build(originalBR);
+        lagAndel(originalPeriode2, ARBEIDSGIVER1, true, 0);
+        lagAndel(originalPeriode2, ARBEIDSGIVER1, false, 1000);
+
+        // Arrange
+        int inntektBeløp = 1000;
+
+
         BeregningsresultatEntitet forrigeTY = lagBeregningsresultatFP(0, inntektBeløp);
         BeregningsresultatEntitet denneTY = lagBeregningsresultatFP(0, inntektBeløp);
         List<BeregningsresultatPeriode> forrigeTYPerioder = forrigeTY.getBeregningsresultatPerioder();

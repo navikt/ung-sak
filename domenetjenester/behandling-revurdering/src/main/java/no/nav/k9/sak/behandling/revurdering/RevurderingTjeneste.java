@@ -38,7 +38,7 @@ public class RevurderingTjeneste {
         this.grunnlagKopierere = grunnlagKopierere;
     }
 
-    public Behandling opprettManuellRevurdering(Fagsak fagsak, Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
         validerTilstand(origBehandling);
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
 

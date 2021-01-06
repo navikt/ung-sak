@@ -7,7 +7,6 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
-import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -16,7 +15,6 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.util.StringUtils;
 
 @Dependent
 public class DokumentKafkaBestiller {
@@ -38,20 +36,16 @@ public class DokumentKafkaBestiller {
     }
 
     public void bestillBrevFraKafka(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
-        RevurderingVarslingÅrsak årsak = null;
-        if (!StringUtils.nullOrEmpty(bestillBrevDto.getÅrsakskode())) {
-            årsak = RevurderingVarslingÅrsak.fraKode(bestillBrevDto.getÅrsakskode());
-        }
         Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-        bestillBrev(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), årsak, aktør);
+        bestillBrev(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), aktør);
     }
 
-    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, RevurderingVarslingÅrsak årsak, HistorikkAktør aktør) {
-        opprettKafkaTask(behandling, dokumentMalType, fritekst, årsak, aktør);
+    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, HistorikkAktør aktør) {
+        opprettKafkaTask(behandling, dokumentMalType, fritekst);
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
 
-    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, RevurderingVarslingÅrsak årsak, HistorikkAktør aktør) {
+    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, String fritekst) {
         try {
             ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
             prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());

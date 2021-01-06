@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -42,13 +41,10 @@ import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.beregning.beregningsresultat.BeregningsresultatProvider;
-import no.nav.k9.sak.ytelse.beregning.beregningsresultat.DefaultBeregningsresultatProvider;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.felles.testutilities.db.Repository;
 
@@ -60,21 +56,19 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private EntityManager entityManager;
 
     private BehandlingRepositoryProvider repositoryProvider;
-    private BehandlingRepository behandlingRepository ;
+    private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private Repository repository ;
-    private BeregningsresultatRepository beregningsresultatRepository ;
-
-    private Instance<BeregningsresultatProvider> beregningsresultatProvidere ;
+    private Repository repository;
+    private BeregningsresultatRepository beregningsresultatRepository;
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
     private static Long MELDEKORTPERIODE = 14L;
 
-    private LocalDate stp ;
+    private LocalDate stp;
     private TestScenarioBuilder scenario;
-    private InntektArbeidYtelseTjeneste iayTjeneste ;
-    private VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør ;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
+    private VurderOmArenaYtelseSkalOpphøre vurdereOmArenaYtelseSkalOpphør;
 
     private Behandling behandling;
 
@@ -82,19 +76,17 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private BeregningsresultatPeriode.Builder brPeriodebuilder;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         repository = new Repository(entityManager);
         beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
 
-        beregningsresultatProvidere = new UnitTestLookupInstanceImpl<>(new DefaultBeregningsresultatProvider(repositoryProvider));
-
         stp = LocalDate.parse("2020-08-08");
         scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(behandlingRepository, iayTjeneste, behandlingVedtakRepository, null, beregningsresultatProvidere);
+        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(behandlingRepository, iayTjeneste, behandlingVedtakRepository, null, beregningsresultatRepository);
     }
 
 

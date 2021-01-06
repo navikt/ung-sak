@@ -43,6 +43,9 @@ import no.nav.vedtak.util.LRUCache;
 @Produces(MediaType.APPLICATION_JSON)
 public class KodeverkRestTjeneste {
 
+    public static final String KODERVERK_PATH = "/kodeverk";
+    public static final String ENHETER_PATH = KODERVERK_PATH + "/behandlende-enheter";
+
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private final JacksonJsonConfig jsonMapper = new JacksonJsonConfig(true); // generere kodeverk med navn
 
@@ -78,7 +81,7 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/behandlende-enheter")
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false) 
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
         return hentKodeverkTjeneste.hentBehandlendeEnheter(ytelseType);

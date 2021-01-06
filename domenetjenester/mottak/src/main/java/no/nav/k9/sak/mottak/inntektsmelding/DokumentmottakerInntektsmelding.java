@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -67,64 +66,68 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     @Override
-    public void mottaDokument(MottattDokument mottattDokument, Fagsak fagsak) {
-        doMottaDokument(fagsak, List.of(mottattDokument));
-    }
-
-    @Override
     public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
         inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
 
-    void oppdaterÅpenBehandlingMedDokument(Behandling behandling, Collection<MottattDokument> mottattDokument) { // #I2
-        mottattDokument.forEach(m -> dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
+    void asynkVurderKompletthetForÅpenBehandling(Behandling behandling) { // #I2
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, getBehandlingÅrsakType());
         dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_INNTEKT);
-        kompletthetskontroller.persisterDokumentOgVurderKompletthet(behandling, mottattDokument);
+        kompletthetskontroller.asynkVurderKompletthet(behandling);
     }
 
     protected BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
     }
 
-    private void håndterIngenTidligereBehandling(Fagsak fagsak, Collection<MottattDokument> mottattDokument) { // #I1
-        // Opprett ny førstegangsbehandling
-        Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, mottattDokument);
-        dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, behandling);
-    }
-
-    private void håndterAvsluttetTidligereBehandling(Collection<MottattDokument> mottattDokument, Behandling tidligereAvsluttetBehandling) {
-        var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(tidligereAvsluttetBehandling.getFagsak());
-        if (sisteHenlagteFørstegangsbehandling.isPresent()) { // #I6
-            var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(mottattDokument, sisteHenlagteFørstegangsbehandling.get().getFagsak(),
-                sisteHenlagteFørstegangsbehandling.get());
-            dokumentMottakerFelles.opprettTaskForÅStarteBehandlingFraInntektsmelding(mottattDokument, nyFørstegangsbehandling);
-        } else {
-            dokumentMottakerFelles.opprettNyBehandlingFraInntektsmelding(mottattDokument, tidligereAvsluttetBehandling, getBehandlingÅrsakType());
-        }
-    }
-
     private void doMottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
+        var fagsakId = fagsak.getId();
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
 
         if (sisteYtelsesbehandling.isEmpty()) {
-            håndterIngenTidligereBehandling(fagsak, mottattDokument);
-            return;
-        }
-
-        Behandling sisteBehandling = sisteYtelsesbehandling.get();
-        sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
-
-        boolean sisteYtelseErFerdigbehandlet = sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.FALSE);
-        if (sisteYtelseErFerdigbehandlet) {
-            Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
-            sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
-            // Håndter avsluttet behandling
-            håndterAvsluttetTidligereBehandling(mottattDokument, sisteBehandling);
+            // ingen tidligere behandling - Opprett ny førstegangsbehandling
+            Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+            lagreDokumenter(mottattDokument, behandling);
+            asynkStartBehandling(behandling);
         } else {
-            oppdaterÅpenBehandlingMedDokument(sisteBehandling, mottattDokument);
+            var sisteBehandling = sisteYtelsesbehandling.get();
+            sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
+            if (erBehandlingAvsluttet(sisteYtelsesbehandling)) {
+                // siste behandling er avsluttet, oppretter ny behandling
+                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+                sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
+
+                // Håndter avsluttet behandling
+                var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(sisteBehandling.getFagsak());
+                if (sisteHenlagteFørstegangsbehandling.isPresent()) {
+                    // oppretter ny behandling når siste var henlagt førstegangsbehandling
+                    var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(sisteHenlagteFørstegangsbehandling.get().getFagsak(), sisteHenlagteFørstegangsbehandling.get());
+                    lagreDokumenter(mottattDokument, nyFørstegangsbehandling);
+                    asynkStartBehandling(nyFørstegangsbehandling);
+                } else {
+                    // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
+                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, getBehandlingÅrsakType());
+                    lagreDokumenter(mottattDokument, nyBehandling);
+                    asynkStartBehandling(nyBehandling);
+                }
+            } else {
+                lagreDokumenter(mottattDokument, sisteBehandling);
+                asynkVurderKompletthetForÅpenBehandling(sisteBehandling);
+            }
         }
+    }
+
+    private void lagreDokumenter(Collection<MottattDokument> mottattDokument, Behandling behandling) {
+        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, mottattDokument);
+        mottattDokument.forEach(m -> dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
+    }
+
+    private void asynkStartBehandling(Behandling behandling) {
+        dokumentMottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+    }
+
+    private Boolean erBehandlingAvsluttet(Optional<Behandling> sisteYtelsesbehandling) {
+        return sisteYtelsesbehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(Boolean.FALSE);
     }
 
     private void sjekkBehandlingKanLåses(Behandling behandling) {

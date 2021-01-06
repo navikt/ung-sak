@@ -51,6 +51,6 @@ public class HåndterFortaptDokumentTask implements ProsessTaskHandler {
         var behandling = behandlingRepository.hentBehandling(mottattDokument.getBehandlingId());
         log.info("Lagrer fortapt dokument='{}' på behandling='{}'", mottattDokument, behandling);
 
-        mottatteDokumentTjeneste.persisterInntektsmeldingOgKobleMottattDokumentTilBehandling(behandling, List.of(mottattDokument));
+        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
     }
 }

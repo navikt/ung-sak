@@ -1,14 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.saksbehandler;
 
-import io.swagger.v3.oas.annotations.Operation;
-import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.k9.sak.web.app.util.LdapUtil;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
-import org.apache.commons.lang3.BooleanUtils;
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,15 +12,24 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Collection;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import org.apache.commons.lang3.BooleanUtils;
+
+import io.swagger.v3.oas.annotations.Operation;
+import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
+import no.nav.k9.sak.web.app.util.LdapUtil;
+import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
+import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Path("/nav-ansatt")
 @ApplicationScoped
 @Transactional
 public class NavAnsattRestTjeneste {
+    public static final String NAV_ANSATT_PATH = "/nav-ansatt";
+
     private String gruppenavnSaksbehandler;
     private String gruppenavnVeileder;
     private String gruppenavnBeslutter;

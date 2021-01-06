@@ -40,6 +40,7 @@ import no.nav.k9.sak.kontrakt.ResourceLink.HttpMethod;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingOperasjonerDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingsresultatDto;
 import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
@@ -50,6 +51,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårResultatDto;
+import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
@@ -72,6 +74,7 @@ import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -86,6 +89,7 @@ public class BehandlingDtoTjeneste {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UttakRepository uttakRepository;
+    private TotrinnTjeneste totrinnTjeneste;
 
     /**
      * denne kan overstyres for testing lokalt
@@ -104,6 +108,7 @@ public class BehandlingDtoTjeneste {
                                  UttakRepository uttakRepository,
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
+                                 TotrinnTjeneste totrinnTjeneste,
                                  @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
 
         this.fagsakRepository = fagsakRepository;
@@ -113,6 +118,7 @@ public class BehandlingDtoTjeneste {
         this.søknadRepository = søknadRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.totrinnTjeneste = totrinnTjeneste;
         this.k9OppdragProxyUrl = k9OppdragProxyUrl;
     }
 
@@ -140,16 +146,20 @@ public class BehandlingDtoTjeneste {
         dto.setSpråkkode(getSpråkkode(behandling, søknadRepository));
         dto.setBehandlingsresultat(behandlingsresultatDto);
 
+        leggTilRettigheterLinks(dto);
         leggTilGrunnlagResourceLinks(behandling, dto);
         leggTilStatusResultaterLinks(behandling, dto);
         leggTilHandlingerResourceLinks(behandling, dto);
     }
 
+    private void leggTilRettigheterLinks(BehandlingDto dto) {
+        var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString());
+        dto.leggTil(getFraMap(BehandlingRestTjeneste.RETTIGHETER_PATH, "behandling-rettigheter", uuidQueryParams));
+    }
+
     private void leggTilStatusResultaterLinks(Behandling behandling, BehandlingDto dto) {
         var idQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
-
-        dto.leggTil(getFraMap(BehandlingRestTjeneste.HANDLING_RETTIGHETER, "handling-rettigheter", uuidQueryParams));
 
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
             dto.leggTil(getFraMap(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idQueryParams));
@@ -449,4 +459,28 @@ public class BehandlingDtoTjeneste {
     public Boolean finnBehandlingOperasjonRettigheter(Behandling behandling) {
         return this.søknadRepository.hentSøknadHvisEksisterer(behandling.getId()).isPresent();
     }
+
+    public BehandlingOperasjonerDto lovligeOperasjoner(Behandling b) {
+        if (b.erSaksbehandlingAvsluttet()) {
+            return BehandlingOperasjonerDto.builder(b.getUuid()).build(); // Skal ikke foreta menyvalg lenger
+        } else if (BehandlingStatus.FATTER_VEDTAK.equals(b.getStatus())) {
+            boolean tilgokjenning = b.getAnsvarligSaksbehandler() != null && !b.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
+            return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenning(tilgokjenning).build();
+        } else {
+            boolean kanÅpnesForEndring = b.erRevurdering() && !b.isBehandlingPåVent();
+            boolean totrinnRetur = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(b).stream()
+                .anyMatch(tt -> !tt.isGodkjent());
+            return BehandlingOperasjonerDto.builder(b.getUuid())
+                .medTilGodkjenning(false)
+                .medFraBeslutter(!b.isBehandlingPåVent() && totrinnRetur)
+                .medKanBytteEnhet(true)
+                .medKanHenlegges(true)
+                .medKanSettesPaVent(!b.isBehandlingPåVent())
+                .medKanGjenopptas(b.isBehandlingPåVent())
+                .medKanOpnesForEndringer(kanÅpnesForEndring)
+                .medKanSendeMelding(!b.isBehandlingPåVent())
+                .build();
+        }
+    }
+
 }
