@@ -32,6 +32,19 @@ public class SykdomVurderingPeriode {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
+    
+    public SykdomVurderingPeriode(Long id, SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom,
+            String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        super();
+        this.id = id;
+        this.vurderingVersjon = vurderingVersjon;
+        this.fom = fom;
+        this.tom = tom;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+
+    
     public Long getId() {
         return id;
     }
