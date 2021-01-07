@@ -26,8 +26,9 @@ public class PersoninfoAdapter {
     }
 
     @Inject
-    public PersoninfoAdapter(TpsAdapter tpsAdapter) {
+    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste) {
         this.tpsAdapter = tpsAdapter;
+        this.personBasisTjeneste = personBasisTjeneste;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId aktørId) {
@@ -68,10 +69,7 @@ public class PersoninfoAdapter {
 
     public Adresseinfo innhentAdresseopplysningerForDokumentsending(AktørId aktørId) {
         Optional<PersonIdent> optFnr = tpsAdapter.hentIdentForAktørId(aktørId);
-        if (optFnr.isPresent()) {
-            return tpsAdapter.hentAdresseinformasjon(optFnr.get());
-        }
-        return null;
+        return optFnr.map(personIdent -> tpsAdapter.hentAdresseinformasjon(personIdent)).orElse(null);
     }
 
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
@@ -94,24 +92,21 @@ public class PersoninfoAdapter {
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId) {
         Optional<PersonIdent> personIdent = tpsAdapter.hentIdentForAktørId(aktørId);
-        if (personIdent.isPresent()) {
-            return hentKjerneinformasjon(aktørId, personIdent.get());
-        }
+        return personIdent.map(ident -> hentKjerneinformasjon(aktørId, ident)).orElse(null);
         //FIXME Humle returner Optional
-        return null;
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
         return tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
     }
 
-    public Optional<PersonIdent> hentFnr(AktørId aktørId) {
+    private Optional<PersonIdent> hentFnr(AktørId aktørId) {
         return tpsAdapter.hentIdentForAktørId(aktørId);
     }
 
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
-        Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        Optional<PersoninfoArbeidsgiver> pi = funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjonBasis(fnr, aktørId))
+        Optional<PersonIdent> personIdent = hentFnr(aktørId);
+        Optional<PersoninfoArbeidsgiver> personinfoArbeidsgiver = personIdent.map(i -> tpsAdapter.hentKjerneinformasjonBasis(i, aktørId))
             .map(p ->
                 new PersoninfoArbeidsgiver.Builder()
                     .medAktørId(aktørId)
@@ -122,8 +117,8 @@ public class PersoninfoAdapter {
             );
 
         // Sammnligner det som hentes fra tps og pdl
-        pi.ifPresent(p -> personBasisTjeneste.hentOgSjekkPersoninfoArbeidsgiverFraPDL(aktørId, p.getPersonIdent(), p));
+        personinfoArbeidsgiver.ifPresent(p -> personBasisTjeneste.hentOgSjekkPersoninfoArbeidsgiverFraPDL(aktørId, p.getPersonIdent(), p));
 
-        return pi;
+        return personinfoArbeidsgiver;
     }
 }
