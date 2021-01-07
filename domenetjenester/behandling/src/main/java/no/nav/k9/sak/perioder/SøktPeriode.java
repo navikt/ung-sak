@@ -8,18 +8,20 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.util.Objects;
 
-public class SøktPeriode {
+public class SøktPeriode<T> {
 
     private DatoIntervallEntitet periode;
     private UttakArbeidType type;
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
+    private T raw;
 
-    public SøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+    public SøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, T raw) {
         this.periode = periode;
         this.type = type;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
+        this.raw = raw;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -38,19 +40,23 @@ public class SøktPeriode {
         return arbeidsforholdRef;
     }
 
-    public void justerPeriode(LocalDateSegment<SøktPeriode> segment) {
-        periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
+    public T getRaw() {
+        return raw;
     }
 
-    public static SøktPeriode arbeid(DatoIntervallEntitet periode, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        return new SøktPeriode(periode, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef);
+    public void justerPeriode(LocalDateSegment<SøktPeriode<T>> segment) {
+        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
+    }
+
+    public static <T> SøktPeriode<T> arbeid(DatoIntervallEntitet periode, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, T raw) {
+        return new SøktPeriode<>(periode, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, raw);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SøktPeriode that = (SøktPeriode) o;
+        SøktPeriode<T> that = (SøktPeriode<T>) o;
         return type == that.type &&
             Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);

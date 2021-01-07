@@ -5,7 +5,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Søknad {
+public class Søknad implements Comparable<Søknad> {
 
     private JournalpostId journalpostId;
     private SøknadType type;
@@ -47,5 +47,10 @@ public class Søknad {
             ", type=" + type +
             ", innsendingsTidspunkt=" + innsendingsTidspunkt +
             '}';
+    }
+
+    @Override
+    public int compareTo(Søknad o) {
+        return this.innsendingsTidspunkt.compareTo(o.getInnsendingsTidspunkt());
     }
 }

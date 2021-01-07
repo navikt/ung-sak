@@ -1,21 +1,28 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
-
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class WrappedOppgittFraværPeriode {
     private OppgittFraværPeriode periode;
     private LocalDateTime innsendingstidspunkt;
+    private Utfall søknadsfristUtfall;
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt) {
+    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, Utfall søknadsfristUtfall) {
         this.periode = periode;
         this.innsendingstidspunkt = innsendingstidspunkt;
+        this.søknadsfristUtfall = søknadsfristUtfall;
     }
 
     public OppgittFraværPeriode getPeriode() {
         return periode;
+    }
+
+    public Utfall getSøknadsfristUtfall() {
+        return søknadsfristUtfall;
     }
 
     public LocalDateTime getInnsendingstidspunkt() {

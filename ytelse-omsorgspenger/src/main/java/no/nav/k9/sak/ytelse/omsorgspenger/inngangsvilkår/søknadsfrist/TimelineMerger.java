@@ -14,9 +14,9 @@ public final class TimelineMerger {
     private TimelineMerger() {
     }
 
-    public static LocalDateSegment<VurdertSøktPeriode> mergeSegments(LocalDateInterval di,
-                                                                     LocalDateSegment<VurdertSøktPeriode> førsteVersjon,
-                                                                     LocalDateSegment<VurdertSøktPeriode> sisteVersjon) {
+    public static <T> LocalDateSegment<VurdertSøktPeriode<T>> mergeSegments(LocalDateInterval di,
+                                                                     LocalDateSegment<VurdertSøktPeriode<T>> førsteVersjon,
+                                                                     LocalDateSegment<VurdertSøktPeriode<T>> sisteVersjon) {
         if ((førsteVersjon == null || førsteVersjon.getValue() == null) && sisteVersjon != null) {
             return lagSegment(di, sisteVersjon.getValue());
         } else if ((sisteVersjon == null || sisteVersjon.getValue() == null) && førsteVersjon != null) {
@@ -38,15 +38,15 @@ public final class TimelineMerger {
         }
     }
 
-    private static LocalDateSegment<VurdertSøktPeriode> lagSegment(LocalDateInterval di, VurdertSøktPeriode siste) {
+    private static <T> LocalDateSegment<VurdertSøktPeriode<T>> lagSegment(LocalDateInterval di, VurdertSøktPeriode<T> siste) {
         if (siste == null) {
             return new LocalDateSegment<>(di, null);
         }
-        var aktivitetPeriode = new VurdertSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()), siste.getType(), siste.getArbeidsgiver(), siste.getArbeidsforholdRef(), siste.getUtfall());
+        var aktivitetPeriode = new VurdertSøktPeriode<T>(DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()), siste.getType(), siste.getArbeidsgiver(), siste.getArbeidsforholdRef(), siste.getUtfall(), siste.getRaw());
         return new LocalDateSegment<>(di, aktivitetPeriode);
     }
 
-    public static List<LocalDateSegment<VurdertSøktPeriode>> konsistens(LocalDateSegment<VurdertSøktPeriode> segment) {
+    public static <T> List<LocalDateSegment<VurdertSøktPeriode<T>>> konsistens(LocalDateSegment<VurdertSøktPeriode<T>> segment) {
         segment.getValue().justerPeriode(segment.getLocalDateInterval());
         return List.of(segment);
     }

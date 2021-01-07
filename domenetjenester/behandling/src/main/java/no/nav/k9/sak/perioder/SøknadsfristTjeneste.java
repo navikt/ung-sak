@@ -1,11 +1,9 @@
 package no.nav.k9.sak.perioder;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-
-import java.util.Map;
-import java.util.Set;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 
 public interface SøknadsfristTjeneste {
 
-    Map<Søknad, Set<SøktPeriode>> hentPerioderFor(BehandlingReferanse referanse);
+    VilkårResultatBuilder vurderSøknadsfrist(BehandlingReferanse referanse, VilkårResultatBuilder vilkårResultatBuilder);
 }

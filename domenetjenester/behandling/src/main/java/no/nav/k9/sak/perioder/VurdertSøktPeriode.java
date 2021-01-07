@@ -9,20 +9,22 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.util.Objects;
 
-public class VurdertSøktPeriode {
+public class VurdertSøktPeriode<T> {
 
     private DatoIntervallEntitet periode;
     private UttakArbeidType type;
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
     private Utfall utfall;
+    private T raw;
 
-    public VurdertSøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Utfall utfall) {
+    public VurdertSøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Utfall utfall, T raw) {
         this.periode = periode;
         this.type = type;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.utfall = utfall;
+        this.raw = raw;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -43,6 +45,10 @@ public class VurdertSøktPeriode {
 
     public Utfall getUtfall() {
         return utfall;
+    }
+
+    public T getRaw() {
+        return raw;
     }
 
     public void justerPeriode(LocalDateInterval interval) {

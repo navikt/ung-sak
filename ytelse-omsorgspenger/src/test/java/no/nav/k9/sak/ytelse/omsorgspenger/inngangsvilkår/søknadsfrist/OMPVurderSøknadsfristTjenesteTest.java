@@ -10,8 +10,10 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -28,15 +30,18 @@ public class OMPVurderSøknadsfristTjenesteTest {
     void skal_godkjenne_9_måneder_søknadsfrist_for_covid19_utvidet_frist() {
         Søknad søknad = new Søknad(new JournalpostId(123L), LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), SøknadType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
-        Map<Søknad, Set<SøktPeriode>> map = Map.of(søknad,
-            Set.of(new SøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nyRef())));
+        var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
+        var virksomhet = Arbeidsgiver.virksomhet("000000000");
+        var oppgittFraværPeriode = new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7));
+        Map<Søknad, Set<SøktPeriode<OppgittFraværPeriode>>> map = Map.of(søknad,
+            Set.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode)));
 
-        Map<Søknad, Set<VurdertSøktPeriode>> søknadSetMap = tjeneste.vurderSøknadsfrist(map);
+        var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
 
         assertThat(søknadSetMap).containsKey(søknad);
         assertThat(søknadSetMap.get(søknad)).hasSize(2);
         var actual = søknadSetMap.get(søknad).stream().sorted(Comparator.comparing(it -> it.getPeriode().getFomDato())).iterator();
-        VurdertSøktPeriode next = actual.next();
+        var next = actual.next();
         assertThat(next.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.withMonth(3).withDayOfMonth(31)));
         assertThat(next.getUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         next = actual.next();
@@ -48,10 +53,12 @@ public class OMPVurderSøknadsfristTjenesteTest {
     void skal_vurdere_søknadsfrist() {
         Søknad søknad = new Søknad(new JournalpostId(123L), LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), SøknadType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2021).withMonth(1).withDayOfMonth(1);
-        Map<Søknad, Set<SøktPeriode>> map = Map.of(søknad,
-            Set.of(new SøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nyRef())));
+        var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
+        var virksomhet = Arbeidsgiver.virksomhet("000000000");
+        var map = Map.of(søknad,
+            Set.of(new SøktPeriode<OppgittFraværPeriode>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7)))));
 
-        Map<Søknad, Set<VurdertSøktPeriode>> søknadSetMap = tjeneste.vurderSøknadsfrist(map);
+        var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
 
         assertThat(søknadSetMap).containsKey(søknad);
         assertThat(søknadSetMap.get(søknad)).hasSize(2);

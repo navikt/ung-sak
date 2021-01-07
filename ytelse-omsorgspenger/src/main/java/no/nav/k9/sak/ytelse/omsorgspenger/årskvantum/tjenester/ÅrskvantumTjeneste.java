@@ -1,26 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-
 import no.nav.k9.aarskvantum.kontrakter.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -51,6 +31,18 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 import no.nav.vedtak.util.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Default
@@ -153,7 +145,7 @@ public class ÅrskvantumTjeneste {
 
     private Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioderRelevantForBehandling(Behandling behandling, OppgittFravær grunnlag) {
         var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
-        var fagsakFravær = trekkUtFraværTjeneste.fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(behandling);
+        var fagsakFravær = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsakMedSøknadsfristVurdering(behandling);
 
         var behandlingFravær = grunnlag.getPerioder();
         return utledPerioder(vilkårsperioder, fagsakFravær, behandlingFravær);

@@ -7,9 +7,9 @@ import no.nav.k9.sak.perioder.Søknad;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 
-public interface SøknadsfristPeriodeVurderer {
+public interface SøknadsfristPeriodeVurderer<T> {
 
-    LocalDateTimeline<VurdertSøktPeriode> vurderPeriode(Søknad søknadsDokument, LocalDateTimeline<SøktPeriode> søktPeriode);
+    LocalDateTimeline<VurdertSøktPeriode<T>> vurderPeriode(Søknad søknadsDokument, LocalDateTimeline<SøktPeriode<T>> søktPeriode);
 
     default LocalDateInterval periodeSomVurderes() {
         return new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
