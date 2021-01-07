@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
@@ -191,6 +192,11 @@ public class TpsTjenesteTest {
                 .medNavBrukerKjønn(KVINNE)
                 .medFødselsdato(FØDSELSDATO)
                 .build());
+        }
+
+        @Override
+        public PersoninfoBasis hentKjerneinformasjonBasis(PersonIdent fnr, AktørId aktørId) {
+            return null;
         }
 
         @Override

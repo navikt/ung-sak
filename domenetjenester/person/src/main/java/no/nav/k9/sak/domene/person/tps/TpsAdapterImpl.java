@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -103,6 +104,24 @@ public class TpsAdapterImpl implements TpsAdapter {
         request.getInformasjonsbehov().add(Informasjonsbehov.FAMILIERELASJONER);
         try {
             return håndterPersoninfoRespons(aktørId, request);
+        } catch (HentPersonPersonIkkeFunnet e) {
+            throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
+        } catch (HentPersonSikkerhetsbegrensning e) {
+            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
+        }
+    }
+
+    @Override
+    public PersoninfoBasis hentKjerneinformasjonBasis(PersonIdent personIdent, AktørId aktørId) {
+        HentPersonRequest request = new HentPersonRequest();
+        request.setAktoer(TpsUtil.lagPersonIdent(personIdent.getIdent()));
+        try {
+            HentPersonResponse response = personConsumer.hentPersonResponse(request);
+            Person person = response.getPerson();
+            if (!(person instanceof Bruker)) {
+                throw TpsFeilmeldinger.FACTORY.ukjentBrukerType().toException();
+            }
+            return tpsOversetter.tilBrukerInfoBasis(aktørId, (Bruker) person);
         } catch (HentPersonPersonIkkeFunnet e) {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {

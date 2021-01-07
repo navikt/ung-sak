@@ -5,7 +5,8 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
+import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -13,6 +14,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
 
     private TpsAdapterImpl tpsAdapter;
+    private PersoninfoAdapter personinfoAdapter;
 
     public PersonIdentTjenesteImpl() {
         // for CDI proxy
@@ -42,10 +44,10 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
         return tpsAdapter.hentIdentForAktørId(aktørId);
     }
 
+    //TODO Vurder om denne metoden bør flyttes til annen tjeneste eller om denne tjenesten bør endre navn
     @Override
-    public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
-        Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjon(fnr, aktørId));
+    public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
+        return personinfoAdapter.hentPersoninfoArbeidsgiver(aktørId);
     }
 
 }
