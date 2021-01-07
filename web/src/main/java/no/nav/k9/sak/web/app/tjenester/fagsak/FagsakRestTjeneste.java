@@ -168,7 +168,7 @@ public class FagsakRestTjeneste {
         @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response hentBrukerForFagsak(@NotNull @QueryParam("saksnummer") @Valid SaksnummerDto s) {
+    public Response hentBrukerForFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var personInfo = fagsakApplikasjonTjeneste.hentBruker(s.getVerdi());
         if (personInfo.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
