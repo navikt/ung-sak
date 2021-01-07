@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
@@ -35,12 +36,14 @@ public class FagsakApplikasjonTjenesteTest {
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
+    private PersoninfoAdapter personinfoAdapter;
 
     @BeforeEach
     public void oppsett() {
         tpsTjeneste = mock(TpsTjeneste.class);
         fagsakRepository = mock(FagsakRepository.class);
         behandlingRepository = mock(BehandlingRepository.class);
+        personinfoAdapter = mock(PersoninfoAdapter.class);
 
         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste = mock(ProsesseringAsynkTjeneste.class);
 
@@ -48,7 +51,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(repositoryProvider.getFagsakRepository()).thenReturn(fagsakRepository);
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
-        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste);
+        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste, personinfoAdapter);
     }
 
     @Test

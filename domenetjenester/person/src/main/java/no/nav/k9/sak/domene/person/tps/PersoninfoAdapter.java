@@ -9,6 +9,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -120,5 +121,10 @@ public class PersoninfoAdapter {
         personinfoArbeidsgiver.ifPresent(p -> personBasisTjeneste.hentOgSjekkPersoninfoArbeidsgiverFraPDL(aktørId, p.getPersonIdent(), p));
 
         return personinfoArbeidsgiver;
+    }
+
+    public Optional<PersoninfoBasis> hentBrukerBasisForAktør(AktørId aktørId) {
+        Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
+        return funnetFnr.map(fnr -> personBasisTjeneste.hentBasisPersoninfo(aktørId, fnr));
     }
 }

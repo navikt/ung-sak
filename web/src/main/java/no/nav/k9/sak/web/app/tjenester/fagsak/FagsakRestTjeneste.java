@@ -40,6 +40,7 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
@@ -72,10 +73,8 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
 
-    private static final String BRUKER_PART_PATH = "/bruker";
-    public static final String BRUKER_PATH = PATH + BRUKER_PART_PATH;
-    private static final String RETTIGHETER_PART_PATH = "/rettigheter";
-    public static final String RETTIGHETER_PATH = PATH + RETTIGHETER_PART_PATH;
+    public static final String BRUKER_PATH = PATH + "/bruker";
+    public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
 
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
@@ -163,8 +162,24 @@ public class FagsakRestTjeneste {
     }
 
     @GET
+    @Path(BRUKER_PATH)
+    @Operation(description = "Hent brukerdata for aktørId", tags = "fagsak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
+        @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public Response hentBrukerForFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
+        var personInfo = fagsakApplikasjonTjeneste.hentBruker(s.getVerdi());
+        if (personInfo.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        var dto = mapFraPersoninfoBasis(personInfo.get());
+        return Response.ok(dto).build();
+    }
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(RETTIGHETER_PART_PATH)
+    @Path(RETTIGHETER_PATH)
     @Operation(description = "Hent rettigheter for saksnummer", tags = "fagsak", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
         @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
@@ -235,6 +250,11 @@ public class FagsakRestTjeneste {
             fagsak.getSkalTilInfotrygd(),
             fagsak.getOpprettetTidspunkt(),
             fagsak.getEndretTidspunkt());
+    }
+
+    private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {
+        return new PersonDto(pi.getNavn(), pi.getAlder(), String.valueOf(pi.getPersonIdent().getIdent()),
+            pi.erKvinne(), pi.getPersonstatus(), pi.getDiskresjonskode(), pi.getDødsdato(), pi.getAktørId());
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {

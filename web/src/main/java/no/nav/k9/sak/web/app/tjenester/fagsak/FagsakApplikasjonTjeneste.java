@@ -12,9 +12,11 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.typer.AktørId;
@@ -31,6 +33,7 @@ public class FagsakApplikasjonTjeneste {
     private FagsakRepository fagsakRespository;
 
     private TpsTjeneste tpsTjeneste;
+    private PersoninfoAdapter personinfoAdapter;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
 
     private Predicate<String> predikatErFnr = søkestreng -> søkestreng.matches("\\d{11}");
@@ -41,12 +44,13 @@ public class FagsakApplikasjonTjeneste {
 
     @Inject
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                                         TpsTjeneste tpsTjeneste) {
+                                     ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
+                                     TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter) {
 
         this.fagsakRespository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     public Optional<AsyncPollingStatus> sjekkProsessTaskPågår(Saksnummer saksnummer, String gruppe) {
@@ -109,6 +113,11 @@ public class FagsakApplikasjonTjeneste {
             antallBarnPerFagsak.put(fagsak.getId(), 0); // FIXME: Skal ikke være hardkodet.
         }
         return antallBarnPerFagsak;
+    }
+
+    public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
+        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
+        return fagsak.map(Fagsak::getAktørId).flatMap(personinfoAdapter::hentBrukerBasisForAktør);
     }
 
 }
