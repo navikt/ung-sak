@@ -1,21 +1,51 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.Saksnummer;
 
-public interface InfotrygdFeedPeriodeberegner {
 
-    /**
-     * Infotrygdkode for FagsakYtelseType som er støttet av denne periodeberegneren
-     */
-    String getInfotrygdYtelseKode();
+@ApplicationScoped
+public class InfotrygdFeedPeriodeberegner {
+    private FagsakRepository fagsakRepository;
+    private BehandlingRepository behandlingRepository;
+    private BeregningsresultatRepository beregningsresultatRepository;
 
-    /**
-     * For alle gjeldende perioder: beregn første fom-dato og siste tom-dato.
-     * <p>
-     * Resultatet kan også inneholde fom- og tomdatoer av typen Tid.TIDENES_BEGYNNELSE eller Tid.TIDENES_ENDE. Dette
-     * håndteres av den som kaller denne metoden.
-     *
-     * @return siste fom- og tom-dato.
-     */
-    InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer);
+    @SuppressWarnings("unused")
+    InfotrygdFeedPeriodeberegner() {
+        // for CDI
+    }
+
+    @Inject
+    public InfotrygdFeedPeriodeberegner(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, BeregningsresultatRepository beregningsresultatRepository) {
+        this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.beregningsresultatRepository = beregningsresultatRepository;
+    }
+
+    InfotrygdFeedPeriode finnInnvilgetPeriode(Saksnummer saksnummer) {
+        var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow();
+        var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId()).orElseThrow();
+        Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregat = beregningsresultatRepository.hentBeregningsresultatAggregat(sisteBehandling.getId());
+
+        return beregningsresultatAggregat
+            .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat)
+            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
+            .map(perioder -> {
+                LocalDate fraOgMed = perioder.stream().map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom).min(LocalDate::compareTo).orElseThrow();
+                LocalDate tilOgMed = perioder.stream().map(BeregningsresultatPeriode::getBeregningsresultatPeriodeTom).max(LocalDate::compareTo).orElseThrow();
+                return new InfotrygdFeedPeriode(fraOgMed, tilOgMed);
+            })
+            .orElse(InfotrygdFeedPeriode.annullert());
+    }
 }

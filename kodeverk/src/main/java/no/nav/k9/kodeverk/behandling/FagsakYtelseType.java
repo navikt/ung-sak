@@ -31,37 +31,37 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum FagsakYtelseType implements Kodeverdi {
 
     /** Folketrygdloven K4 ytelser. */
-    DAGPENGER("DAG", "Dagpenger", null),
+    DAGPENGER("DAG", "Dagpenger", null, null),
 
     /** Ny ytelse for kompenasasjon for koronatiltak for Selvstendig næringsdrivende og Frilansere (Anmodning 10). */
-    FRISINN("FRISINN", "FRIlansere og Selvstendig næringsdrivendes INNtektskompensasjon", "FRI"),
+    FRISINN("FRISINN", "FRIlansere og Selvstendig næringsdrivendes INNtektskompensasjon", "FRI", "FRI"),
 
     /** Folketrygdloven K8 ytelser. */
-    SYKEPENGER("SP", "Sykepenger", null),
+    SYKEPENGER("SP", "Sykepenger", null, null),
 
     /** Folketrygdloven K9 ytelser. */
-    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "OMS"),
-    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", "OMS"),
-    OMSORGSPENGER("OMP", "Omsorgspenger", "OMS"),
-    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", "OMS"),
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS"),
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", null, "OMS"),
+    OMSORGSPENGER("OMP", "Omsorgspenger", "OM", "OMS"),
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", null, "OMS"),
 
     /** @deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori. */
     @Deprecated
-    PÅRØRENDESYKDOM("PS", "Pårørende sykdom", null),
+    PÅRØRENDESYKDOM("PS", "Pårørende sykdom", null, null),
 
     /** Folketrygdloven K11 ytelser. */
-    ARBEIDSAVKLARINGSPENGER("AAP", "Arbeidsavklaringspenger", null),
+    ARBEIDSAVKLARINGSPENGER("AAP", "Arbeidsavklaringspenger", null, null),
 
     /** Folketrygdloven K14 ytelser. */
-    ENGANGSTØNAD("ES", "Engangsstønad", null),
-    FORELDREPENGER("FP", "Foreldrepenger", null),
-    SVANGERSKAPSPENGER("SVP", "Svangerskapspenger", null),
+    ENGANGSTØNAD("ES", "Engangsstønad", null, null),
+    FORELDREPENGER("FP", "Foreldrepenger", null, null),
+    SVANGERSKAPSPENGER("SVP", "Svangerskapspenger", null, null),
 
     /** Folketrygdloven K15 ytelser. */
-    ENSLIG_FORSØRGER("EF", "Enslig forsørger", null),
+    ENSLIG_FORSØRGER("EF", "Enslig forsørger", null, null),
 
-    OBSOLETE("OBSOLETE", "Kun brukt for å markere noen som utgått - ikke en gyldig type i seg selv", null),
-    UDEFINERT("-", "Ikke definert", null),
+    OBSOLETE("OBSOLETE", "Kun brukt for å markere noen som utgått - ikke en gyldig type i seg selv", null, null),
+    UDEFINERT("-", "Ikke definert", null, null),
     ;
 
     public static final String KODEVERK = "FAGSAK_YTELSE"; //$NON-NLS-1$
@@ -95,14 +95,18 @@ public enum FagsakYtelseType implements Kodeverdi {
     @JsonIgnore
     private String infotrygdBehandlingstema;
 
+    @JsonIgnore
+    private String oppgavetema;
+
     private FagsakYtelseType(String kode) {
         this.kode = kode;
     }
 
-    private FagsakYtelseType(String kode, String navn, String infotrygdBehandlingstema) {
+    private FagsakYtelseType(String kode, String navn, String infotrygdBehandlingstema, String oppgavetema) {
         this.kode = kode;
         this.navn = navn;
         this.infotrygdBehandlingstema = infotrygdBehandlingstema;
+        this.oppgavetema = oppgavetema;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -146,6 +150,10 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     public String getInfotrygdBehandlingstema() {
         return infotrygdBehandlingstema;
+    }
+
+    public String getOppgavetema() {
+        return oppgavetema;
     }
 
     public static FagsakYtelseType fromString(String kode) {
