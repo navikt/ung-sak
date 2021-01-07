@@ -41,6 +41,7 @@ public class InfotrygdFeedPeriodeberegner {
         return beregningsresultatAggregat
             .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat)
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
+            .filter(perioder -> !perioder.isEmpty())
             .map(perioder -> {
                 LocalDate fraOgMed = perioder.stream().map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom).min(LocalDate::compareTo).orElseThrow();
                 LocalDate tilOgMed = perioder.stream().map(BeregningsresultatPeriode::getBeregningsresultatPeriodeTom).max(LocalDate::compareTo).orElseThrow();
