@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -56,6 +57,9 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     OPPHOLDSRETT_EOS("OPPHOLDSRETT_EOS", "Bruker har oppholdsrett i EØS"),
     OPPHOLDSRETT_IKKE_EOS("OPPHOLDSRETT_IKKE_EOS", "Bruker har ikke oppholdsrett i EØS"),
     UTLAND("UTLAND", "Utland"),
+
+    /** Tilkjent ytelse */
+    TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
 
     /** Tilbakekreving. */
     ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON("ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "Er det særlige grunner til reduksjon"),

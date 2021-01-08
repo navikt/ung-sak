@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +29,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
@@ -53,6 +56,7 @@ public class TilkjentYtelseOppdatererTest {
 
     private TilkjentYtelseOppdaterer oppdaterer;
     private Behandling behandling;
+    private HistorikkTjenesteAdapter historikkAdapter;
 
     @BeforeEach
     public void setUp() {
@@ -63,7 +67,11 @@ public class TilkjentYtelseOppdatererTest {
         vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         arbeidsgiverValidator = mock(ArbeidsgiverValidator.class);
 
-        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator);
+        historikkAdapter = mock(HistorikkTjenesteAdapter.class);
+        HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = new HistorikkInnslagTekstBuilder();
+        when(historikkAdapter.tekstBuilder()).thenReturn(historikkInnslagTekstBuilder);
+
+        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator, historikkAdapter);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
