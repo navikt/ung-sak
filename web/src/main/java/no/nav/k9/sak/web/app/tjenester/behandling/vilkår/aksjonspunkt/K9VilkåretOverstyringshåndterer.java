@@ -55,7 +55,7 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
             tilbakestillTilkjentYtelse(behandling, kontekst);
         }
 
-        var utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+        var utfall = BehandlingResultatType.INNVILGET.equals(behandlingResultatType) ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var periode = dto.getPeriode();
         inngangsvilkårTjeneste.overstyrAksjonspunkt(behandling.getId(), VilkårType.K9_VILKÅRET, utfall, dto.getAvslagskode(),
             kontekst, periode.getFom(), periode.getTom(), dto.getBegrunnelse());
@@ -65,7 +65,8 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, Overstyringk9VilkåretDto dto) {
-        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), dto.getErVilkarOk(), SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING);
+        var vilkårOk = BehandlingResultatType.INNVILGET.equals(dto.getBehandlingResultatType());
+        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), vilkårOk, SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING);
     }
 
 
