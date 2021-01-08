@@ -4,7 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.sak.perioder.Søknad;
+import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -18,7 +18,7 @@ public class KoronaUtvidetSøknadsfristVurderer implements SøknadsfristPeriodeV
     private final Period frist = Period.ofMonths(9);
 
     @Override
-    public LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> vurderPeriode(Søknad søknadsDokument, LocalDateTimeline<SøktPeriode<OppgittFraværPeriode>> søktePeriode) {
+    public LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> vurderPeriode(KravDokument søknadsDokument, LocalDateTimeline<SøktPeriode<OppgittFraværPeriode>> søktePeriode) {
         LocalDateTimeline<SøktPeriode<OppgittFraværPeriode>> søktePerioderInnenforUnntaksperiode = søktePeriode.intersection(unntaksperiode);
         var vurderingsdato = søknadsDokument.getInnsendingsTidspunkt().toLocalDate();
 

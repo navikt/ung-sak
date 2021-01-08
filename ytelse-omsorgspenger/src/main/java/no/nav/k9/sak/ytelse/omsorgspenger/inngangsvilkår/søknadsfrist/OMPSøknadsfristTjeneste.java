@@ -22,7 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.perioder.Søknad;
+import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -49,33 +49,36 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     }
 
     VilkårResultatBuilder mapVurderingerTilVilkårsresultat(VilkårResultatBuilder vilkårResultatBuilder,
-                                                           Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
-                                                           Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder,
+                                                           Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
+                                                           Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder,
                                                            DatoIntervallEntitet fagsakPeriode) {
         // Oversett til vilkårmodell
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.SØKNADSFRIST)
             .tilbakestill(fagsakPeriode);
         var vilkårTimeline = slåSammenTidslinjer(vurdertePerioder);
 
+        String regelInput;
+        String regelEvaluering;
+        try {
+            regelInput = JsonObjectMapper.getJson(søktePerioder);
+            regelEvaluering = JsonObjectMapper.getJson(vurdertePerioder);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Feiler på serialisering av regelsporing", e);
+        }
+
         vilkårTimeline.toSegments()
-            .forEach(it -> leggInnVurdering(vilkårBuilder, it, søktePerioder, vurdertePerioder));
+            .forEach(it -> leggInnVurdering(vilkårBuilder, it, regelInput, regelEvaluering));
 
         return vilkårResultatBuilder.leggTil(vilkårBuilder);
     }
 
     private void leggInnVurdering(VilkårBuilder vilkårBuilder, LocalDateSegment<Utfall> it,
-                                  Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
-                                  Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
+                                  String regelInput, String regelEvaluering) {
         Utfall utfall = it.getValue();
         VilkårPeriodeBuilder builder = vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
-            .medUtfall(utfall);
-
-        try {
-            builder.medRegelInput(JsonObjectMapper.getJson(søktePerioder))
-                .medRegelEvaluering(JsonObjectMapper.getJson(vurdertePerioder));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Feiler på serialisering av regelsporing");
-        }
+            .medUtfall(utfall)
+            .medRegelInput(regelInput)
+            .medRegelEvaluering(regelEvaluering);
 
         if (Utfall.IKKE_OPPFYLT.equals(utfall)) {
             builder.medAvslagsårsak(Avslagsårsak.SØKT_FOR_SENT);
@@ -84,7 +87,7 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
         vilkårBuilder.leggTil(builder);
     }
 
-    private LocalDateTimeline<Utfall> slåSammenTidslinjer(Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
+    private LocalDateTimeline<Utfall> slåSammenTidslinjer(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
         var vilkårTimeline = new LocalDateTimeline<Utfall>(List.of());
         var timelines = vurdertePerioder.values()
             .stream()

@@ -17,8 +17,8 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.perioder.Søknad;
-import no.nav.k9.sak.perioder.SøknadType;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -52,22 +52,22 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     }
 
     @Override
-    public Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
+    public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
         var perioderTilVurdering = hentPerioderTilVurdering(referanse);
 
         return vurderSøknadsfrist(perioderTilVurdering);
     }
 
     @Override
-    public Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
-        HashMap<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> result = new HashMap<>();
+        HashMap<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> result = new HashMap<>();
         inntektsmeldinger.forEach(it -> mapTilMøknadsperiode(result, it));
         return result;
     }
 
-    private void mapTilMøknadsperiode(HashMap<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> result, no.nav.k9.sak.domene.iay.modell.Inntektsmelding it) {
-        result.put(new Søknad(it.getJournalpostId(), it.getInnsendingstidspunkt(), SøknadType.INNTEKTSMELDING),
+    private void mapTilMøknadsperiode(HashMap<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> result, no.nav.k9.sak.domene.iay.modell.Inntektsmelding it) {
+        result.put(new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
             it.getOppgittFravær()
                 .stream()
                 .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag()))
@@ -76,11 +76,11 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     }
 
     @Override
-    public Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> søknaderMedPerioder) {
+    public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søknaderMedPerioder) {
 
-        var result = new HashMap<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>>();
+        var result = new HashMap<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>>();
 
-        for (Map.Entry<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> entry : søknaderMedPerioder.entrySet()) {
+        for (Map.Entry<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> entry : søknaderMedPerioder.entrySet()) {
             if (vurderSøknadsfrist && entry.getKey().getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
                 LocalDateTimeline<SøktPeriode<OppgittFraværPeriode>> timeline = new LocalDateTimeline<>(entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).collect(Collectors.toList()));
                 LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> vurdertTimeline = defaultVurderer.vurderPeriode(entry.getKey(), timeline);

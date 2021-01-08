@@ -7,9 +7,9 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 
 public interface VurderSøknadsfristTjeneste<T> {
 
-    Map<Søknad, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
+    Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
 
-    Map<Søknad, List<SøktPeriode<T>>> hentPerioderTilVurdering(BehandlingReferanse referanse);
+    Map<KravDokument, List<SøktPeriode<T>>> hentPerioderTilVurdering(BehandlingReferanse referanse);
 
     /**
      * Kjøres på nytt etter løsing av aksjonspunkt for å sikre at alle periodene er tatt hensyn til.
@@ -19,5 +19,5 @@ public interface VurderSøknadsfristTjeneste<T> {
      *
      * @return resultatet
      */
-    Map<Søknad, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<Søknad, List<SøktPeriode<T>>> søknaderMedPerioder);
+    Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<T>>> søknaderMedPerioder);
 }

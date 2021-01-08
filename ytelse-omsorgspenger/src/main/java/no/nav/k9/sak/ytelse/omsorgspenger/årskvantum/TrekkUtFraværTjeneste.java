@@ -24,7 +24,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
-import no.nav.k9.sak.perioder.Søknad;
+import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -179,7 +179,7 @@ public class TrekkUtFraværTjeneste {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
     }
 
-    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
+    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(fraværFraInntektsmelding);
     }
 }

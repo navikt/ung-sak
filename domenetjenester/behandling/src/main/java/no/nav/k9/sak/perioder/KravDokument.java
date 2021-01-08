@@ -5,13 +5,13 @@ import no.nav.k9.sak.typer.JournalpostId;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Søknad implements Comparable<Søknad> {
+public class KravDokument implements Comparable<KravDokument> {
 
     private JournalpostId journalpostId;
-    private SøknadType type;
+    private KravDokumentType type;
     private LocalDateTime innsendingsTidspunkt;
 
-    public Søknad(JournalpostId journalpostId, LocalDateTime innsendingsTidspunkt, SøknadType type) {
+    public KravDokument(JournalpostId journalpostId, LocalDateTime innsendingsTidspunkt, KravDokumentType type) {
         this.journalpostId = journalpostId;
         this.innsendingsTidspunkt = innsendingsTidspunkt;
         this.type = type;
@@ -29,7 +29,7 @@ public class Søknad implements Comparable<Søknad> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Søknad that = (Søknad) o;
+        KravDokument that = (KravDokument) o;
         return Objects.equals(journalpostId, that.journalpostId) &&
             Objects.equals(type, that.type) &&
             Objects.equals(innsendingsTidspunkt, that.innsendingsTidspunkt);
@@ -50,7 +50,7 @@ public class Søknad implements Comparable<Søknad> {
     }
 
     @Override
-    public int compareTo(Søknad o) {
+    public int compareTo(KravDokument o) {
         return this.innsendingsTidspunkt.compareTo(o.getInnsendingsTidspunkt());
     }
 }

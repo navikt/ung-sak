@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.Søknad;
-import no.nav.k9.sak.perioder.SøknadType;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -25,11 +25,11 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class OMPVurderSøknadsfristTjenesteTest {
 
-    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste();
+    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, true, LocalDate.of(2021, 1, 1));
 
     @Test
     void skal_godkjenne_9_måneder_søknadsfrist_for_covid19_utvidet_frist() {
-        Søknad søknad = new Søknad(new JournalpostId(123L), LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), SøknadType.INNTEKTSMELDING);
+        KravDokument søknad = new KravDokument(new JournalpostId(123L), LocalDateTime.now().withYear(2021).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
@@ -52,7 +52,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
 
     @Test
     void skal_vurdere_søknadsfrist() {
-        Søknad søknad = new Søknad(new JournalpostId(123L), LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), SøknadType.INNTEKTSMELDING);
+        KravDokument søknad = new KravDokument(new JournalpostId(123L), LocalDateTime.now().withYear(2022).withMonth(1).withDayOfMonth(1), KravDokumentType.INNTEKTSMELDING);
         LocalDate startDato = LocalDate.now().withYear(2021).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
