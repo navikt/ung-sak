@@ -157,6 +157,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         historikkAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
     }
 
+    // FIXME: Ta hensyn for ytelser som ikke er omsorgspenger
     private long beregnTotalsum(BeregningsresultatEntitet beregningsresultatEntitet) {
         return beregningsresultatEntitet.getBeregningsresultatPerioder().stream()
             .mapToLong(b -> ChronoUnit.DAYS.between(b.getBeregningsresultatPeriodeFom(), b.getBeregningsresultatPeriodeTom().minusDays(1)) * b.getDagsats())
