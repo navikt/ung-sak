@@ -1,5 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -13,17 +22,12 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.perioder.*;
+import no.nav.k9.sak.perioder.Søknad;
+import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Dependent
 @FagsakYtelseTypeRef("OMP")
@@ -45,8 +49,8 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     }
 
     VilkårResultatBuilder mapVurderingerTilVilkårsresultat(VilkårResultatBuilder vilkårResultatBuilder,
-                                                           Map<Søknad, Set<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
-                                                           Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder,
+                                                           Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
+                                                           Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder,
                                                            DatoIntervallEntitet fagsakPeriode) {
         // Oversett til vilkårmodell
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.SØKNADSFRIST)
@@ -60,8 +64,8 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     }
 
     private void leggInnVurdering(VilkårBuilder vilkårBuilder, LocalDateSegment<Utfall> it,
-                                  Map<Søknad, Set<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
-                                  Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
+                                  Map<Søknad, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder,
+                                  Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
         Utfall utfall = it.getValue();
         VilkårPeriodeBuilder builder = vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom())
             .medUtfall(utfall);
@@ -80,7 +84,7 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
         vilkårBuilder.leggTil(builder);
     }
 
-    private LocalDateTimeline<Utfall> slåSammenTidslinjer(Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
+    private LocalDateTimeline<Utfall> slåSammenTidslinjer(Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
         var vilkårTimeline = new LocalDateTimeline<Utfall>(List.of());
         var timelines = vurdertePerioder.values()
             .stream()
@@ -124,7 +128,7 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
         return Utfall.IKKE_OPPFYLT;
     }
 
-    private LocalDateTimeline<Utfall> mapTilTimeline(Set<VurdertSøktPeriode<OppgittFraværPeriode>> perioder) {
+    private LocalDateTimeline<Utfall> mapTilTimeline(List<VurdertSøktPeriode<OppgittFraværPeriode>> perioder) {
         List<LocalDateSegment<Utfall>> segments = perioder.stream()
             .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it.getUtfall()))
             .collect(Collectors.toList());

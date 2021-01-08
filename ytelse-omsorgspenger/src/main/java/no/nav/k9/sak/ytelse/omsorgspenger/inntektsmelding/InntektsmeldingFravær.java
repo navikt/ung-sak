@@ -1,5 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.NotNull;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -9,11 +21,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.perioder.Søknad;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import org.jetbrains.annotations.NotNull;
-
-import java.time.Duration;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class InntektsmeldingFravær {
 
@@ -98,13 +105,16 @@ public class InntektsmeldingFravær {
             segment.getValue().getSøknadsfristUtfall());
     }
 
-    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
+    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
         var sortedIm = fraværFraInntektsmelding.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var im : sortedIm) {
             var vurdertSøktPerioder = fraværFraInntektsmelding.get(im);
+            if (vurdertSøktPerioder.isEmpty()) {
+                break;
+            }
             var arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
             var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
             var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));

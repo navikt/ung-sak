@@ -1,13 +1,13 @@
 package no.nav.k9.sak.perioder;
 
+import java.util.Objects;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-
-import java.util.Objects;
 
 public class VurdertSøktPeriode<T> {
 
@@ -60,7 +60,10 @@ public class VurdertSøktPeriode<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VurdertSøktPeriode that = (VurdertSøktPeriode) o;
-        return type == that.type && Objects.equals(arbeidsgiver, that.arbeidsgiver) && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) && utfall == that.utfall;
+        return type == that.type &&
+            Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
+            Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) &&
+            utfall == that.utfall;
     }
 
     @Override

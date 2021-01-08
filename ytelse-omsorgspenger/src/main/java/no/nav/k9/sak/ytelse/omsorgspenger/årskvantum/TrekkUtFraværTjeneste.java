@@ -1,5 +1,19 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -19,13 +33,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværP
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Dependent
 public class TrekkUtFraværTjeneste {
@@ -172,7 +179,7 @@ public class TrekkUtFraværTjeneste {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
     }
 
-    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
+    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(fraværFraInntektsmelding);
     }
 }

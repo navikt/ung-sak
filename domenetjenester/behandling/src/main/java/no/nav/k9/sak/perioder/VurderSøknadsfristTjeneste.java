@@ -1,15 +1,15 @@
 package no.nav.k9.sak.perioder;
 
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 
 public interface VurderSøknadsfristTjeneste<T> {
 
-    Map<Søknad, Set<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
+    Map<Søknad, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
 
-    Map<Søknad, Set<SøktPeriode<T>>> hentPerioderTilVurdering(BehandlingReferanse referanse);
+    Map<Søknad, List<SøktPeriode<T>>> hentPerioderTilVurdering(BehandlingReferanse referanse);
 
     /**
      * Kjøres på nytt etter løsing av aksjonspunkt for å sikre at alle periodene er tatt hensyn til.
@@ -19,5 +19,5 @@ public interface VurderSøknadsfristTjeneste<T> {
      *
      * @return resultatet
      */
-    Map<Søknad, Set<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<Søknad, Set<SøktPeriode<T>>> søknaderMedPerioder);
+    Map<Søknad, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<Søknad, List<SøktPeriode<T>>> søknaderMedPerioder);
 }

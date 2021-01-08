@@ -1,5 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -13,14 +22,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class OMPSøknadsfristTjenesteTest {
 
@@ -31,9 +32,9 @@ public class OMPSøknadsfristTjenesteTest {
 
         var søktPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now());
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
-        Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
+        Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
             new Søknad(new JournalpostId(123L), LocalDateTime.now(), SøknadType.INNTEKTSMELDING),
-            Set.of(vurdertPeriode));
+            List.of(vurdertPeriode));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));
 
@@ -51,11 +52,11 @@ public class OMPSøknadsfristTjenesteTest {
         var søktPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now());
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
         var vurdertPeriode1 = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), Utfall.IKKE_VURDERT, null);
-        Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
+        Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
             new Søknad(new JournalpostId(123L), LocalDateTime.now(), SøknadType.INNTEKTSMELDING),
-            Set.of(vurdertPeriode),
+            List.of(vurdertPeriode),
             new Søknad(new JournalpostId(124L), LocalDateTime.now(), SøknadType.INNTEKTSMELDING),
-            Set.of(vurdertPeriode1));
+            List.of(vurdertPeriode1));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));
 
@@ -73,11 +74,11 @@ public class OMPSøknadsfristTjenesteTest {
         var søktPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now());
         var vurdertPeriode = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), Utfall.OPPFYLT, null);
         var vurdertPeriode1 = new VurdertSøktPeriode<OppgittFraværPeriode>(søktPeriode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), Utfall.IKKE_OPPFYLT, null);
-        Map<Søknad, Set<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
+        Map<Søknad, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder = Map.of(
             new Søknad(new JournalpostId(123L), LocalDateTime.now(), SøknadType.INNTEKTSMELDING),
-            Set.of(vurdertPeriode),
+            List.of(vurdertPeriode),
             new Søknad(new JournalpostId(124L), LocalDateTime.now(), SøknadType.INNTEKTSMELDING),
-            Set.of(vurdertPeriode1));
+            List.of(vurdertPeriode1));
 
         VilkårResultatBuilder resultatBuilder = tjeneste.mapVurderingerTilVilkårsresultat(Vilkårene.builder(), Map.of(), vurdertePerioder, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12)));
 

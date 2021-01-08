@@ -1,6 +1,39 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import no.nav.k9.aarskvantum.kontrakter.*;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
+import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,18 +64,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 import no.nav.vedtak.util.Tuple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Default
@@ -155,10 +176,22 @@ public class ÅrskvantumTjeneste {
                                                                                                       List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær,
                                                                                                       Set<OppgittFraværPeriode> behandlingFravær) {
         return fagsakFravær.stream()
-            .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) || (Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
-                behandlingFravær.stream()
-                    .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at))))
+            .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) ||
+                erNullTimerTilBehandling(behandlingFravær, it) ||
+                erAvslagPåSøknadsfristIBehandling(behandlingFravær, it))
             .collect(Collectors.toSet());
+    }
+
+    private boolean erAvslagPåSøknadsfristIBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
+        return no.nav.k9.kodeverk.vilkår.Utfall.IKKE_OPPFYLT.equals(it.getSøknadsfristUtfall()) &&
+            behandlingFravær.stream()
+                .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && matcherArbeidsforhold(it.getPeriode(), at));
+    }
+
+    private boolean erNullTimerTilBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
+        return Duration.ZERO.equals(it.getPeriode().getFraværPerDag()) &&
+            behandlingFravær.stream()
+                .anyMatch(at -> at.getPeriode().overlapper(it.getPeriode().getPeriode()) && Duration.ZERO.equals(at.getFraværPerDag()) && matcherArbeidsforhold(it.getPeriode(), at));
     }
 
     private boolean matcherArbeidsforhold(OppgittFraværPeriode periode, OppgittFraværPeriode at) {
@@ -269,7 +302,7 @@ public class ÅrskvantumTjeneste {
         var inntektsmeldinger = getInntektsmeldingerFor(alleInntektsmeldinger, arbeidsgiver);
         var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
             .filter(it -> it.getArbeidsforholdRef().gjelderFor(arbeidsforholdRef)) // TODO: Bør vi matcher på gjelderfor her? Perioder som er sendt inn med arbeidsforholdsId vil da matche med
-                                                                                   // inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
+            // inntekstmeldinger uten for samme arbeidsgiver men hvor perioden overlapper
             .filter(it -> it.getOppgittFravær().stream()
                 .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
             .map(Inntektsmelding::getRefusjonBeløpPerMnd)
