@@ -1,8 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -13,14 +17,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType.SykdomVurderingTypeConverter;
 
 @Entity(name = "SykdomVurdering")
 @Table(name = "SYKDOM_VURDERING")
-public class SykdomVurdering {
+public class SykdomVurdering implements Comparable<SykdomVurdering> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING")
@@ -37,12 +40,8 @@ public class SykdomVurdering {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
 
-    @OneToMany(mappedBy = "sykdomVurdering")
+    @OneToMany(mappedBy = "sykdomVurdering", cascade = CascadeType.PERSIST)
     private List<SykdomVurderingVersjon> sykdomVurderingVersjoner;
-
-    @Version
-    @Column(name = "VERSJON", nullable = false)
-    private Long versjon;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
@@ -58,17 +57,11 @@ public class SykdomVurdering {
 
     public SykdomVurdering(
             SykdomVurderingType type,
-            Long rangering,
-            SykdomVurderinger sykdomVurderinger,
             List<SykdomVurderingVersjon> sykdomVurderingVersjoner,
-            Long versjon,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.type = type;
-        this.rangering = rangering;
-        this.sykdomVurderinger = sykdomVurderinger;
-        this.sykdomVurderingVersjoner = sykdomVurderingVersjoner;
-        this.versjon = versjon;
+        this.sykdomVurderingVersjoner = new ArrayList<>(sykdomVurderingVersjoner);
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
@@ -85,20 +78,24 @@ public class SykdomVurdering {
         return rangering;
     }
 
+    public void setRangering(Long rangering) {
+        this.rangering = rangering; 
+    }
+    
     public SykdomVurderinger getSykdomVurderinger() {
         return sykdomVurderinger;
     }
 
-    public void setSykdomVurderinger(SykdomVurderinger sykdomVurderinger) {
+    void setSykdomVurderinger(SykdomVurderinger sykdomVurderinger) {
         this.sykdomVurderinger = sykdomVurderinger;
     }
 
     public List<SykdomVurderingVersjon> getSykdomVurderingVersjoner() {
-        return sykdomVurderingVersjoner;
+        return Collections.unmodifiableList(sykdomVurderingVersjoner);
     }
-
-    public Long getVersjon() {
-        return versjon;
+    
+    public void addVersjon(SykdomVurderingVersjon versjon) {
+        this.sykdomVurderingVersjoner.add(versjon);
     }
 
     public String getOpprettetAv() {
@@ -107,5 +104,14 @@ public class SykdomVurdering {
 
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
+    }
+    
+    public SykdomVurderingVersjon getSisteVersjon() {
+        return sykdomVurderingVersjoner.stream().max(Comparator.naturalOrder()).orElse(null);
+    }
+    
+    @Override
+    public int compareTo(SykdomVurdering v2) {
+        return getRangering().compareTo(v2.getRangering());
     }
 }

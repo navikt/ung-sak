@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,7 +44,6 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
-
     
     /*
     // Om den siste versjonen har blitt besluttet iverksatt eller ikke.
@@ -57,15 +57,21 @@ public class SykdomVurderingOversikt {
     private SykdomAnnenSakDto annenSakSomMåBesluttesFørst;
     */
     
+    @JsonProperty(value = "links")
+    @Size(max = 100)
+    @Valid
+    private List<ResourceLink> links = new ArrayList<>();
     
     
     public SykdomVurderingOversikt(List<SykdomVurderingOversiktElement> vurderingselementer,
             List<Periode> resterendeVurderingsperioder, List<Periode> søknadsperioderTilBehandling,
-            List<Periode> perioderSomKanVurderes) {
+            List<Periode> perioderSomKanVurderes,
+            List<ResourceLink> links) {
         this.vurderingselementer = vurderingselementer;
         this.resterendeVurderingsperioder = resterendeVurderingsperioder;
         this.søknadsperioderTilBehandling = søknadsperioderTilBehandling;
         this.perioderSomKanVurderes = perioderSomKanVurderes;
+        this.links = links;
     }
     
     

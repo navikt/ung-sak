@@ -2,14 +2,15 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
@@ -31,12 +32,21 @@ public class SykdomVurderingRepository {
     }
 
     /////////////////////////////
-
-    public SykdomVurderinger hentVurderingerForBarn(Long personId) {
-        return null;
+    
+    public void lagre(SykdomVurdering vurdering, AktørId pleietrengende) {
+        final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
+        final var sykdomVurderinger = new SykdomVurderinger(sykdomPerson, vurdering.getOpprettetAv(), vurdering.getOpprettetTidspunkt());
+        lagre(vurdering, sykdomVurderinger);
     }
-
-    public void lagre(SykdomVurdering vurdering) {
+    
+    public void lagre(SykdomVurdering vurdering, SykdomVurderinger sykdomVurderinger) {
+        if (sykdomVurderinger.getId() == null) {
+            sykdomVurderinger = hentEllerLagre(sykdomVurderinger);
+        }
+        
+        final SykdomVurdering sisteVurdering = sykdomVurderinger.getSisteVurdering();
+        vurdering.setSykdomVurderinger(sykdomVurderinger);
+        vurdering.setRangering((sisteVurdering == null) ? 0L : sisteVurdering.getRangering() + 1L);
         entityManager.persist(vurdering);
         entityManager.flush();
     }
@@ -46,33 +56,32 @@ public class SykdomVurderingRepository {
         entityManager.flush();
     }
 
-    public SykdomVurdering hentVurdering(Long vurderingId) {
-        SykdomVurdering v = entityManager.find(SykdomVurdering.class, vurderingId);
-
-        if (v == null) {
-            throw new EntityNotFoundException("Finner ikke vurdering for ID " + vurderingId);
-        }
-
-        return v;
+    public List<SykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
+        // TODO:
+        //throw new UnsupportedOperationException("Ikke implementert ennå.");
+        return new ArrayList<SykdomDokument>();
     }
-
-    public Collection<SykdomVurderingVersjon> hentVurderingerFor(SykdomVurderingType sykdomVurderingType, UUID behandlingUuid, AktørId pleietrengende) {
-        if (behandlingUuid != null) {
-            return hentBehandlingVurderingerFor(sykdomVurderingType, behandlingUuid);
-        } else {
-            return hentSisteVurderingerFor(sykdomVurderingType, pleietrengende);
-        }        
+    
+    public Optional<SykdomVurdering> hentVurdering(AktørId pleietrengende, Long vurderingId) {
+        final TypedQuery<SykdomVurdering> q = entityManager.createQuery("SELECT v From SykdomVurdering as v inner join v.sykdomVurderinger as sv inner join sv.person as p where p.aktoerId = :aktoerId and v.id = :vurderingId", SykdomVurdering.class);
+        q.setParameter("aktoerId", pleietrengende); // Sjekk mot pleietrengende gjøres av sikkerhetsgrunner.
+        q.setParameter("vurderingId", vurderingId);
         
+        return q.getResultList().stream().findFirst();
+    }
+    
+    public List<SykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
+        throw new UnsupportedOperationException("Ikke implementert ennå.");
     }
 
-    private Collection<SykdomVurderingVersjon> hentBehandlingVurderingerFor(SykdomVurderingType sykdomVurderingType, UUID behandlingUuid) {
+    public Collection<SykdomVurderingVersjon> hentBehandlingVurderingerFor(SykdomVurderingType sykdomVurderingType, UUID behandlingUuid) {
         final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery("SELECT vv From SykdomGrunnlagBehandling as sgb inner join sgb.grunnlag as sg inner join sg.vurderinger as vv inner join vv.sykdomVurdering as v where sgb.behandlingUuid = :behandlingUuid and v.type = :sykdomVurderingType and sgb.versjon = ( select max(sgb2.versjon) From SykdomGrunnlagBehandling as sgb2 where sgb2.behandlingUuid = sgb.behandlingUuid )", SykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
         q.setParameter("behandlingUuid", behandlingUuid);
         return (Collection<SykdomVurderingVersjon>) q.getResultList();
     }
 
-    private Collection<SykdomVurderingVersjon> hentSisteVurderingerFor(SykdomVurderingType sykdomVurderingType,
+    public Collection<SykdomVurderingVersjon> hentSisteVurderingerFor(SykdomVurderingType sykdomVurderingType,
             AktørId pleietrengende) {
         final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery("SELECT vv From SykdomVurderingVersjon as vv inner join vv.sykdomVurdering as v inner join v.sykdomVurderinger as sv inner join sv.person as p where p.aktoerId = :aktoerId and v.type = :sykdomVurderingType and vv.versjon = ( select max(vv2.versjon) From SykdomVurderingVersjon vv2 where vv2.sykdomVurdering = vv.sykdomVurdering )", SykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
@@ -85,44 +94,73 @@ public class SykdomVurderingRepository {
         return null;
     }
 
+    /*
     public void lagre(SykdomVurderinger vurderinger) {
         entityManager.persist(vurderinger);
         entityManager.flush();
     }
-
-    public SykdomPerson lagreEllerOppdater(SykdomPerson person) {
-
-        EntityManager innerEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
-        innerEntityManager.getTransaction().begin();
+    */
+    
+    public SykdomPerson hentEllerLagrePerson(AktørId aktørId) {
+        return hentEllerLagre(new SykdomPerson(aktørId, null));
+    }
+    
+    public SykdomPerson hentEllerLagre(SykdomPerson person) {
+        final EntityManager innerEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
+        final EntityTransaction transaction = innerEntityManager.getTransaction();
+        transaction.begin();
         try {
-            SykdomPerson eksisterendePerson = findPerson(innerEntityManager, person.getNorskIdentitetsnummer());
-            if(eksisterendePerson == null) {
-                innerEntityManager.persist(person);
-            }
-            innerEntityManager.getTransaction().commit();
-        } catch (PersistenceException e) {
-            innerEntityManager.getTransaction().rollback();
-            SykdomPerson eksisterendePerson = findPerson(innerEntityManager, person.getNorskIdentitetsnummer());
-            if(eksisterendePerson == null) {
-                throw e;
-            } else {
-                return eksisterendePerson;
-            }
+            final Query q = innerEntityManager.createNativeQuery("INSERT INTO SYKDOM_PERSON (ID, AKTOER_ID, NORSK_IDENTITETSNUMMER) VALUES (nextval('SEQ_SYKDOM_PERSON'), :aktorId, :norskIdentitetsnummer) ON CONFLICT DO NOTHING");
+            q.setParameter("aktorId", person.getAktoerId().getId());
+            q.setParameter("norskIdentitetsnummer", person.getNorskIdentitetsnummer());
+            q.executeUpdate();
+            transaction.commit();
         } catch (Throwable t) {
-            innerEntityManager.getTransaction().rollback();
+            transaction.rollback();
             throw t;
         } finally {
             innerEntityManager.close();
         }
 
-        return findPerson(entityManager, person.getNorskIdentitetsnummer());
+        return findPerson(person.getAktoerId());
+    }
+    
+    SykdomVurderinger hentEllerLagre(SykdomVurderinger sykdomVurderinger) {
+        if (sykdomVurderinger.getPerson().getId() == null) {
+            sykdomVurderinger.setPerson(hentEllerLagre(sykdomVurderinger.getPerson()));
+        }
+        
+        final EntityManager innerEntityManager = entityManager.getEntityManagerFactory().createEntityManager();
+        final EntityTransaction transaction = innerEntityManager.getTransaction();
+        transaction.begin();
+        try {
+            final Query q = innerEntityManager.createNativeQuery("INSERT INTO SYKDOM_VURDERINGER (ID, SYK_PERSON_ID, OPPRETTET_AV, OPPRETTET_TID) VALUES (nextval('SEQ_SYKDOM_VURDERINGER'), :personId, :opprettetAv, :opprettetTid) ON CONFLICT DO NOTHING");
+            q.setParameter("personId", sykdomVurderinger.getPerson().getId());
+            q.setParameter("opprettetAv", sykdomVurderinger.getOpprettetAv());
+            q.setParameter("opprettetTid", sykdomVurderinger.getOpprettetTidspunkt());
+            q.executeUpdate();
+            transaction.commit();
+        } catch (Throwable t) {
+            transaction.rollback();
+            throw t;
+        } finally {
+            innerEntityManager.close();
+        }
+
+        return hentVurderingerForBarn(sykdomVurderinger.getPerson().getAktoerId()).get();
     }
 
-    private SykdomPerson findPerson(EntityManager em, String identitetsnummer) {
-        Query q = em.createQuery("SELECT p From SykdomPerson p where p.norskIdentitetsnummer = :idNummer");
-        q.setParameter("idNummer", identitetsnummer);
-        ArrayList<SykdomPerson> liste = (ArrayList<SykdomPerson>) q.getResultList();
-        return liste.size() > 0 ? liste.get(0) : null;
+    private Optional<SykdomVurderinger> hentVurderingerForBarn(AktørId pleietrengende) {
+        final TypedQuery<SykdomVurderinger> q = entityManager.createQuery("select sv From SykdomVurderinger as sv inner join sv.person as p where p.aktoerId = :aktoerId", SykdomVurderinger.class);
+        q.setParameter("aktoerId", pleietrengende);
+        
+        return q.getResultList().stream().findFirst();
+    }
+    
+    private SykdomPerson findPerson(AktørId aktørId) {
+        final TypedQuery<SykdomPerson> q = entityManager.createQuery("select p From SykdomPerson p where p.aktoerId = :aktoerId", SykdomPerson.class);
+        q.setParameter("aktoerId", aktørId);
+        return q.getResultList().stream().findFirst().orElse(null);
     }
 
 }

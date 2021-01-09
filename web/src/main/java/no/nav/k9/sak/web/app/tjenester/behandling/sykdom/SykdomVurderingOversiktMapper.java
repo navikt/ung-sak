@@ -36,7 +36,7 @@ public class SykdomVurderingOversiktMapper {
                     new Periode(ds.getFom(), ds.getTom()),
                     true,  // TODO: Rette til riktige verdi.
                     true,  // TODO: Rette til riktige verdi.
-                    Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId))
+                    Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId), linkForEndreVurdering(behandlingUuid))
                     ); 
             })
             .collect(Collectors.toList())
@@ -46,14 +46,23 @@ public class SykdomVurderingOversiktMapper {
                 elements,
                 Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(8), LocalDate.now())), // TODO: Riktig verdi
-                Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())) // TODO: Riktig verdi
+                Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())), // TODO: Riktig verdi
+                Arrays.asList(linkForNyVurdering(behandlingUuid))
                 );
     }
 
 
     private ResourceLink linkForGetVurdering(String behandlingUuid, String sykdomVurderingId) {
         return ResourceLink.get(BehandlingDtoUtil.getApiPath(SykdomVurderingRestTjeneste.VURDERING_PATH), "sykdom-vurdering", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomVurderingIdDto.NAME, sykdomVurderingId));
-    }       
+    }
+    
+    private ResourceLink linkForNyVurdering(String behandlingUuid) {
+        return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomVurderingRestTjeneste.VURDERING_PATH), "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandlingUuid));
+    }
+    
+    private ResourceLink linkForEndreVurdering(String behandlingUuid) {
+        return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomVurderingRestTjeneste.VURDERING_VERSJON_PATH), "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandlingUuid));
+    }
     
     LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
         final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();

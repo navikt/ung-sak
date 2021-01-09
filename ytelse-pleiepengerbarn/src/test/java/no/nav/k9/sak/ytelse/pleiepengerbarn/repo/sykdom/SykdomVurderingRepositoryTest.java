@@ -30,7 +30,7 @@ class SykdomVurderingRepositoryTest {
             new AktørId(123456789L),
             "11111111111"
         );
-        repo.lagreEllerOppdater(p);
+        repo.hentEllerLagre(p);
     }
 
     @Test
@@ -39,28 +39,29 @@ class SykdomVurderingRepositoryTest {
     }
     
     private void lagreVurdering(AktørId barnAktørId) {
-        final SykdomPerson barn = repo.lagreEllerOppdater(new SykdomPerson(
+        final SykdomPerson barn = repo.hentEllerLagre(new SykdomPerson(
             barnAktørId,
             barnAktørId.getId()
         ));
+        
+        assertThat(barn).isNotNull();
+        assertThat(barn.getId()).isNotNull();
 
-        final SykdomVurderinger vurderinger = new SykdomVurderinger(
+        final SykdomVurderinger vurderinger = repo.hentEllerLagre(new SykdomVurderinger(
             barn,
             "test",
             LocalDateTime.now()
-        );
+        ));
 
         final SykdomVurdering vurdering = new SykdomVurdering(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
-            1L,
-            vurderinger,
             Collections.emptyList(),
-            1L,
             "test",
             LocalDateTime.now()
             );
+        vurdering.setRangering(1L);
         
-        final SykdomPerson mor = repo.lagreEllerOppdater(new SykdomPerson(
+        final SykdomPerson mor = repo.hentEllerLagre(new SykdomPerson(
             new AktørId("222456789"),
             "22211111111"
         ));
@@ -95,8 +96,7 @@ class SykdomVurderingRepositoryTest {
                 Arrays.asList()
             );
 
-        repo.lagre(vurderinger);
-        repo.lagre(vurdering);
+        repo.lagre(vurdering, vurderinger);
         repo.lagre(versjon1);
         repo.lagre(versjon2);
     }
@@ -114,12 +114,12 @@ class SykdomVurderingRepositoryTest {
         lagreVurdering(barn1);
         verifyAntallVurderingerPåBarn(barn1, 1);
         
-        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, null, barn1);
+        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn1);
         assertThat(vurderinger.iterator().next().getResultat()).isEqualTo(Resultat.OPPFYLT);
     }
 
     private void verifyAntallVurderingerPåBarn(final AktørId barn, final int antall) {
-        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, null, barn);
+        final Collection<SykdomVurderingVersjon> vurderinger = repo.hentSisteVurderingerFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, barn);
         assertThat(vurderinger.size()).isEqualTo(antall);
     }
 }

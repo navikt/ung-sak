@@ -2,7 +2,7 @@ create table if not exists SYKDOM_PERSON
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
     AKTOER_ID     VARCHAR(50)                            NOT NULL UNIQUE,
-    NORSK_IDENTITETSNUMMER  VARCHAR(50)                  NOT NULL UNIQUE
+    NORSK_IDENTITETSNUMMER  VARCHAR(50)                  -- NOT NULL UNIQUE
 );
 create sequence if not exists SEQ_SYKDOM_PERSON increment by 5 minvalue 1000000;
 
@@ -24,8 +24,6 @@ create table if not exists SYKDOM_VURDERING
     TYPE          VARCHAR(20)                           NOT NULL,
     SYKDOM_VURDERINGER_ID   BIGINT                      NOT NULL,
     RANGERING               BIGINT                      NOT NULL,
-
-    VERSJON       BIGINT       DEFAULT 0                NOT NULL,
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT FK_SYKDOM_VURDERING_01

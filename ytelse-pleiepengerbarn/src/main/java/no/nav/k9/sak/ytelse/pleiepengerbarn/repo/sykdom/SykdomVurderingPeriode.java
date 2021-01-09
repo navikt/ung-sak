@@ -33,10 +33,11 @@ public class SykdomVurderingPeriode {
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
     
-    public SykdomVurderingPeriode(Long id, SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom,
-            String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        super();
-        this.id = id;
+    SykdomVurderingPeriode() {
+        
+    }
+    
+    public SykdomVurderingPeriode(SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.vurderingVersjon = vurderingVersjon;
         this.fom = fom;
         this.tom = tom;
@@ -51,6 +52,10 @@ public class SykdomVurderingPeriode {
 
     public SykdomVurderingVersjon getVurderingVersjon() {
         return vurderingVersjon;
+    }
+    
+    void setVurderingVersjon(SykdomVurderingVersjon vurderingVersjon) {
+        this.vurderingVersjon = vurderingVersjon;
     }
 
     public LocalDate getFom() {

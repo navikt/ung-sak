@@ -12,10 +12,11 @@ public class SykdomPerson {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_PERSON")
     private Long id;
 
-    @Column(name = "AKTOER_ID", nullable = false)
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "AKTOER_ID", unique = true, nullable = false, updatable = false)))
     private AktørId aktoerId;
 
-    @Column(name = "NORSK_IDENTITETSNUMMER", nullable = false)
+    @Column(name = "NORSK_IDENTITETSNUMMER", nullable = true) // TODO.
     private String norskIdentitetsnummer; //Datatype?
 
     SykdomPerson() {

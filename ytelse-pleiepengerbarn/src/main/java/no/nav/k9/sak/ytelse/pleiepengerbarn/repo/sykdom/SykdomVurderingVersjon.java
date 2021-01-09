@@ -1,18 +1,31 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.typer.Saksnummer;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.typer.Periode;
+
 @Entity(name = "SykdomVurderingVersjon")
 @Table(name = "SYKDOM_VURDERING_VERSJON")
-public class SykdomVurderingVersjon {
+public class SykdomVurderingVersjon implements Comparable<SykdomVurderingVersjon> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_VURDERING_VERSJON")
@@ -61,7 +74,7 @@ public class SykdomVurderingVersjon {
     )
     private List<SykdomDokument> dokumenter = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "SYKDOM_VURDERING_VERSJON_ID")
     private List<SykdomVurderingPeriode> perioder = new ArrayList<>();
 
@@ -81,7 +94,7 @@ public class SykdomVurderingVersjon {
             SykdomPerson endretForPerson,
             SykdomVurderingVersjonBesluttet besluttet,
             List<SykdomDokument> dokumenter,
-            List<SykdomVurderingPeriode> perioder) {
+            List<Periode> perioder) {
         this.sykdomVurdering = sykdomVurdering;
         this.tekst = tekst;
         this.resultat = resultat;
@@ -93,7 +106,7 @@ public class SykdomVurderingVersjon {
         this.endretForPerson = endretForPerson;
         this.besluttet = besluttet;
         this.dokumenter = dokumenter.stream().collect(Collectors.toList());
-        this.perioder = perioder.stream().collect(Collectors.toList());
+        this.perioder = perioder.stream().map(p -> new SykdomVurderingPeriode(this, p.getFom(), p.getTom(), endretAv, endretTidspunkt)).collect(Collectors.toList());
     }
 
     public Long getId() {
@@ -146,5 +159,10 @@ public class SykdomVurderingVersjon {
 
     public List<SykdomVurderingPeriode> getPerioder() {
         return perioder;
+    }
+    
+    @Override
+    public int compareTo(SykdomVurderingVersjon v2) {
+        return getVersjon().compareTo(v2.getVersjon());
     }
 }

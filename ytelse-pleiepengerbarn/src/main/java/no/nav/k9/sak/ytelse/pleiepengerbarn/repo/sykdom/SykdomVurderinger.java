@@ -4,8 +4,8 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomFelles.BRUK
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,9 +53,7 @@ public class SykdomVurderinger {
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.person = person;
-        this.vurderinger = vurderinger.stream()
-            .peek(it -> it.setSykdomVurderinger(this))
-            .collect(Collectors.toList());
+        this.vurderinger = new ArrayList<>();
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
@@ -77,5 +75,21 @@ public class SykdomVurderinger {
 
     public SykdomPerson getPerson() {
         return person;
+    }
+    
+    public void setPerson(SykdomPerson person) {
+        this.person = person;
+    }
+    
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+    
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
+    
+    public SykdomVurdering getSisteVurdering() {
+        return vurderinger.stream().max(Comparator.naturalOrder()).orElse(null);
     }
 }

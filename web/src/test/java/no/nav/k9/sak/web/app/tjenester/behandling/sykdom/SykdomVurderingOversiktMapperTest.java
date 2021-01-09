@@ -13,9 +13,9 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
@@ -26,7 +26,13 @@ public class SykdomVurderingOversiktMapperTest {
     public void tilTidslinjeHåndtererEnVerdi() {
         final SykdomVurderingOversiktMapper mapper = new SykdomVurderingOversiktMapper();
         
-        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(createSykdomVurderingOgVersjonMock(1L, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 10), LocalDate.of(2020, 1, 15)));
+        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
+            createSykdomVurderingOgVersjonMock(
+                1L,
+                new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5)),
+                new Periode(LocalDate.of(2020, 1, 10), LocalDate.of(2020, 1, 15))
+            )
+        );
 
         final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = mapper.tilTidslinje(versjoner).toSegments();
         assertThat(segments.size()).isEqualTo(2);
@@ -36,8 +42,17 @@ public class SykdomVurderingOversiktMapperTest {
     public void tilTidslinjeVelgerPrioritertVersjonOgSlårSammenPerioderMedSammeVerdi() {
         final SykdomVurderingOversiktMapper mapper = new SykdomVurderingOversiktMapper();
         
-        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(createSykdomVurderingOgVersjonMock(1L, LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 10), LocalDate.of(2020, 1, 15)),
-                createSykdomVurderingOgVersjonMock(2L, LocalDate.of(2020, 1, 14), LocalDate.of(2020, 1, 17), LocalDate.of(2020, 1, 18), LocalDate.of(2020, 1, 29)));
+        final List<SykdomVurderingVersjon> versjoner = Arrays.asList(
+            createSykdomVurderingOgVersjonMock(
+                1L,
+                new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5)),
+                new Periode(LocalDate.of(2020, 1, 10), LocalDate.of(2020, 1, 15))
+            ),
+            createSykdomVurderingOgVersjonMock(
+                2L,
+                new Periode(LocalDate.of(2020, 1, 14), LocalDate.of(2020, 1, 17)),
+                new Periode(LocalDate.of(2020, 1, 18), LocalDate.of(2020, 1, 29)))
+            );
         final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = new TreeSet<>(mapper.tilTidslinje(versjoner).toSegments());
         
         assertThat(segments.size()).isEqualTo(3);
@@ -52,14 +67,26 @@ public class SykdomVurderingOversiktMapperTest {
         assertThat(ds.getTom()).isEqualTo(tom);
     }
         
-    private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long rangering, LocalDate fom1, LocalDate tom1, LocalDate fom2, LocalDate tom2) {
-        return new SykdomVurderingVersjon(createSykdomVurderingMock(rangering), "", Resultat.OPPFYLT, Long.valueOf(0L), "", LocalDateTime.now(), null, null, null, null, Collections.emptyList(), Arrays.asList(
-                new SykdomVurderingPeriode(1L, null, fom1, tom1, "", LocalDateTime.now()),
-                new SykdomVurderingPeriode(1L, null, fom2, tom2, "", LocalDateTime.now())
-                ));
+    private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long rangering, Periode... perioder) {
+        return new SykdomVurderingVersjon(
+                createSykdomVurderingMock(rangering),
+                "",
+                Resultat.OPPFYLT,
+                Long.valueOf(0L),
+                "",
+                LocalDateTime.now(),
+                null,
+                null,
+                null,
+                null,
+                Collections.emptyList(),
+                Arrays.asList(perioder)
+            );
     }
     
     private SykdomVurdering createSykdomVurderingMock(long rangering) {
-        return new SykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Long.valueOf(rangering), null, Collections.emptyList(), Long.valueOf(1L), "", LocalDateTime.now());
+        var s = new SykdomVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, Collections.emptyList(), "", LocalDateTime.now());
+        s.setRangering(Long.valueOf(rangering));
+        return s;
     }
 }

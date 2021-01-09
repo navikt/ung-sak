@@ -2,8 +2,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,6 +14,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -25,13 +28,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -41,7 +49,9 @@ public class SykdomVurderingRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/sykdom/vurdering";
     public static final String VURDERING = "/";
+    public static final String VURDERING_VERSJON = "/versjon";
     public static final String VURDERING_PATH = BASE_PATH + VURDERING;
+    public static final String VURDERING_VERSJON_PATH = BASE_PATH + VURDERING_VERSJON;
     private static final String VURDERING_OVERSIKT_KTP = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     private static final String VURDERING_OVERSIKT_TOO = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + VURDERING_OVERSIKT_KTP;
@@ -121,9 +131,9 @@ public class SykdomVurderingRestTjeneste {
     private Collection<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
         final Collection<SykdomVurderingVersjon> vurderinger;
         if (behandling.getStatus().erFerdigbehandletStatus()) {
-            vurderinger = sykdomVurderingRepository.hentVurderingerFor(sykdomVurderingType, behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId());
+            vurderinger = sykdomVurderingRepository.hentBehandlingVurderingerFor(sykdomVurderingType, behandling.getUuid());
         } else {
-            vurderinger = sykdomVurderingRepository.hentVurderingerFor(sykdomVurderingType, null, behandling.getFagsak().getPleietrengendeAktørId());
+            vurderinger = sykdomVurderingRepository.hentSisteVurderingerFor(sykdomVurderingType, behandling.getFagsak().getPleietrengendeAktørId());
         }
         return vurderinger;
     }
@@ -156,7 +166,81 @@ public class SykdomVurderingRestTjeneste {
             SykdomVurderingIdDto vurderingId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         
-        return sykdomVurderingMapper.map(behandling, vurderingId.getSykdomVurderingId());
+        final List<SykdomVurderingVersjon> versjoner;
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
+        } else {
+            versjoner = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.valueOf(vurderingId.getSykdomVurderingId()))
+                    .get()
+                    .getSykdomVurderingVersjoner();
+        }
+        
+        return sykdomVurderingMapper.map(versjoner);
+    }
+    
+    @POST
+    @Path(VURDERING_VERSJON)
+    @Operation(description = "Oppdaterer en vurdering.",
+        summary = "Oppdaterer en vurdering.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomVurderingDto.class)))
+        })
+    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    public void oppdaterSykdomsVurdering(
+            @Parameter
+            @NotNull
+            @Valid 
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            SykdomVurderingEndringDto sykdomVurderingOppdatering) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOppdatering.getBehandlingUuid()).orElseThrow();
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+        
+        final var sporingsinformasjon = lagSporingsinformasjon(behandling);
+        final SykdomVurdering sykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
+        final List<SykdomDokument> alleDokumenter = sykdomVurderingRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
+        
+        sykdomVurderingRepository.lagre(nyVersjon);
+    }
+
+    private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
+        final SykdomPerson endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
+        return new SykdomVurderingMapper.Sporingsinformasjon(getCurrentUserId(), behandling.getUuid(), behandling.getFagsak().getSaksnummer().getVerdi(), endretForPerson);
+    }
+    
+    @POST
+    @Path(VURDERING)
+    @Operation(description = "Oppretter en ny vurdering.",
+        summary = "Oppretter en ny vurdering.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomVurderingDto.class)))
+        })
+    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    public void opprettSykdomsVurdering(
+            @Parameter
+            @NotNull
+            @Valid 
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOpprettelse.getBehandlingUuid()).orElseThrow();
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+        
+        final var sporingsinformasjon = lagSporingsinformasjon(behandling);
+        final List<SykdomDokument> alleDokumenter = sykdomVurderingRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
+        sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());        
     }
     
     /*
@@ -171,5 +255,9 @@ public class SykdomVurderingRestTjeneste {
         public AbacDataAttributter apply(Object obj) {
             return AbacDataAttributter.opprett();
         }
+    }
+    
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

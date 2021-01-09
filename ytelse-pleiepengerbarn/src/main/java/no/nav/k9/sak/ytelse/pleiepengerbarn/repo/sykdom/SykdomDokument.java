@@ -55,4 +55,38 @@ public class SykdomDokument {
     @Column(name = "ENDRET_TID", nullable = false, updatable=false)
     private LocalDateTime endretTidspunkt; // NOSONAR
 
+    
+    public Long getId() {
+        return id;
+    }
+
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
+
+    public String getDokumentInfoId() {
+        return dokumentInfoId;
+    }
+
+    public List<SykdomDokumentSak> getDokumentSaker() {
+        return dokumentSaker;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
+
+    public String getEndretAv() {
+        return endretAv;
+    }
+
+    public LocalDateTime getEndretTidspunkt() {
+        return endretTidspunkt;
+    }
+
+    
 }
