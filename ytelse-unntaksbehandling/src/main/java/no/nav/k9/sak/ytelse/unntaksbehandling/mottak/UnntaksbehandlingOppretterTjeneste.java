@@ -12,6 +12,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjenesteFelles;
@@ -23,9 +25,12 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef("BT-010")
@@ -36,6 +41,7 @@ public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppr
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
+    private HistorikkRepository historikkRepository;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
 
     public UnntaksbehandlingOppretterTjeneste() {
@@ -45,10 +51,12 @@ public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppr
     @Inject
     public UnntaksbehandlingOppretterTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                               RevurderingTjenesteFelles revurderingTjenesteFelles,
+                                              HistorikkRepository historikkRepository,
                                               BehandlingRepositoryProvider behandlingRepositoryProvider,
                                               @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
+        this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = behandlingRepositoryProvider.getBeregningsresultatRepository();
         this.grunnlagKopierere = grunnlagKopierere;
@@ -93,13 +101,16 @@ public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppr
     public Behandling opprettFørsteBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, OrganisasjonsEnhet enhet) {
         var behandlingType = BehandlingType.UNNTAKSBEHANDLING;
 
-        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
+        var behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
             if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
             }
             beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
             beh.setBehandlendeEnhet(enhet);
-        }); // NOSONAR
+        });
+        opprettHistorikkinnslag(behandling, BehandlingÅrsakType.UNNT_GENERELL, true);
+
+        return behandling;
     }
 
 
@@ -107,11 +118,28 @@ public class UnntaksbehandlingOppretterTjeneste implements UnntaksbehandlingOppr
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
         // Opprett revurderingsbehandling
-        Behandling manuellBehandling = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.UNNTAKSBEHANDLING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(manuellBehandling);
-        behandlingskontrollTjeneste.opprettBehandling(kontekst, manuellBehandling);
+        Behandling nyBehandling = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.UNNTAKSBEHANDLING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(nyBehandling);
+        behandlingskontrollTjeneste.opprettBehandling(kontekst, nyBehandling);
+        opprettHistorikkinnslag(nyBehandling, BehandlingÅrsakType.UNNT_GENERELL, true);
 
-        return manuellBehandling;
+        return nyBehandling;
+    }
+
+
+    public void opprettHistorikkinnslag(Behandling behandling, BehandlingÅrsakType revurderingÅrsak, boolean manueltOpprettet) {
+        HistorikkAktør historikkAktør = manueltOpprettet ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN;
+
+        Historikkinnslag revurderingsInnslag = new Historikkinnslag();
+        revurderingsInnslag.setBehandling(behandling);
+        revurderingsInnslag.setType(HistorikkinnslagType.UNNT_OPPR);
+        revurderingsInnslag.setAktør(historikkAktør);
+        HistorikkInnslagTekstBuilder historiebygger = new HistorikkInnslagTekstBuilder()
+            .medHendelse(HistorikkinnslagType.UNNT_OPPR)
+            .medBegrunnelse(revurderingÅrsak);
+        historiebygger.build(revurderingsInnslag);
+
+        historikkRepository.lagre(revurderingsInnslag);
     }
 
     @Override
