@@ -30,6 +30,7 @@ import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdInformasjonDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdOverstyringDto;
+import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.PermisjonDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.YrkesaktivitetDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.InntekterDto;
 import no.nav.folketrygdloven.kalkulus.iay.inntekt.v1.InntektsmeldingDto;
@@ -48,6 +49,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.InntektskildeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektspostType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.NaturalYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
@@ -72,6 +74,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
+import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -345,15 +348,18 @@ public class TilKalkulusMapper {
         List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale -> new AktivitetsAvtaleDto(mapPeriode(aktivitetsAvtale.getPeriode()),
             aktivitetsAvtale.getSisteLønnsendringsdato(),
             aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
-
         ).collect(Collectors.toList());
 
         String arbeidsforholdRef = yrkesaktivitet.getArbeidsforholdRef().getReferanse();
+        List<PermisjonDto> permisjoner = yrkesaktivitet.getPermisjon().stream()
+            .map(TilKalkulusMapper::mapTilPermisjonDto)
+            .collect(Collectors.toList());
         return new YrkesaktivitetDto(
             mapTilAktør(yrkesaktivitet.getArbeidsgiver()),
             arbeidsforholdRef != null ? new InternArbeidsforholdRefDto(arbeidsforholdRef) : null,
             ArbeidType.fraKode(yrkesaktivitet.getArbeidType().getKode()),
-            aktivitetsAvtaleDtos);
+            aktivitetsAvtaleDtos,
+            permisjoner);
     }
 
     public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter) {
@@ -378,6 +384,14 @@ public class TilKalkulusMapper {
             refusjonskravDato.getFørsteDagMedRefusjonskrav(),
             refusjonskravDato.getFørsteInnsendingAvRefusjonskrav(),
             refusjonskravDato.getHarRefusjonFraStart())).collect(Collectors.toList());
+    }
+
+    private static PermisjonDto mapTilPermisjonDto(Permisjon permisjon) {
+        return new PermisjonDto(
+            new Periode(permisjon.getFraOgMed(), permisjon.getTilOgMed()),
+            permisjon.getProsentsats().getVerdi(),
+            PermisjonsbeskrivelseType.fraKode(permisjon.getPermisjonsbeskrivelseType().getKode())
+        );
     }
 
     private static Aktør mapTilDto(OpptjeningPeriode periode) {
