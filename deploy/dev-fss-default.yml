@@ -200,6 +200,8 @@ spec:
       value: "true"
     - name: UNNTAKSBEHANDLING
       value: "true"
+    - name: VURDER_SØKNADSFRIST
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
