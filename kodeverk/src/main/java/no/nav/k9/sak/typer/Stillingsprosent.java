@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.k9.kodeverk.api.IndexKey;
 
 /**
- * Stillingsprosent slik det er oppgitt i arbeidsavtalen
+ * Stillingsprosent slik det er oppgitt i arbeidsavtalen.
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
