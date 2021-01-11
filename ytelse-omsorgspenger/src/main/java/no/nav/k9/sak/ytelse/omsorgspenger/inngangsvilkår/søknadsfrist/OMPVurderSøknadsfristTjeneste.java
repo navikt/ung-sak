@@ -43,7 +43,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Inject
     public OMPVurderSøknadsfristTjeneste(InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste,
-                                         @KonfigVerdi(value = "VURDER_SØKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist,
+                                         @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist,
                                          @KonfigVerdi(value = "enable.søknadsfrist.fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
         this();
         this.inntektsmeldingerPerioderTjeneste = inntektsmeldingerPerioderTjeneste;

@@ -1,10 +1,23 @@
 package no.nav.k9.sak.domene.behandling.steg.søknadsfrist;
 
+import java.util.List;
+import java.util.Optional;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.*;
+import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -12,13 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 import no.nav.vedtak.konfig.KonfigVerdi;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Optional;
 
 @BehandlingStegRef(kode = "VURDER_SØKNADSFRIST")
 @BehandlingTypeRef
@@ -39,7 +45,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     public VurderSøknadsfristSteg(BehandlingRepository behandlingRepository,
                                   VilkårResultatRepository vilkårResultatRepository,
                                   @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester,
-                                  @KonfigVerdi(value = "VURDER_SØKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist) {
+                                  @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vurderSøknadsfristTjenester = vurderSøknadsfristTjenester;
