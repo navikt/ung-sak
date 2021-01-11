@@ -8,13 +8,18 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
@@ -24,6 +29,7 @@ public class RevurderingTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
+    private HistorikkRepository historikkRepository;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -32,10 +38,12 @@ public class RevurderingTjeneste {
     @Inject
     public RevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                RevurderingTjenesteFelles revurderingTjenesteFelles,
-                               @Any Instance<GrunnlagKopierer> grunnlagKopierere) {
+                               @Any Instance<GrunnlagKopierer> grunnlagKopierere,
+                               HistorikkRepository historikkRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
+        this.historikkRepository = historikkRepository;
     }
 
     public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
@@ -71,6 +79,8 @@ public class RevurderingTjeneste {
         // Kopier vilkår (samme vilkår vurderes i Revurdering)
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);
 
+        opprettHistorikkinnslag(revurdering, revurderingsÅrsak, manueltOpprettet);
+
         return revurdering;
     }
 
@@ -91,6 +101,25 @@ public class RevurderingTjeneste {
         if (!revurderingTjenesteFelles.kanRevurderingOpprettes(origBehandling.getFagsak())) {
             throw new IllegalStateException("Kan ikke opprette revurdering på fagsak");
         }
+    }
+
+    public void opprettHistorikkinnslag(Behandling behandling, BehandlingÅrsakType revurderingÅrsak, boolean manueltOpprettet) {
+        if (BehandlingÅrsakType.BERØRT_BEHANDLING.equals(revurderingÅrsak)) {
+            return;
+        }
+
+        HistorikkAktør historikkAktør = manueltOpprettet ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN;
+
+        Historikkinnslag revurderingsInnslag = new Historikkinnslag();
+        revurderingsInnslag.setBehandling(behandling);
+        revurderingsInnslag.setType(HistorikkinnslagType.REVURD_OPPR);
+        revurderingsInnslag.setAktør(historikkAktør);
+        HistorikkInnslagTekstBuilder historiebygger = new HistorikkInnslagTekstBuilder()
+            .medHendelse(HistorikkinnslagType.REVURD_OPPR)
+            .medBegrunnelse(revurderingÅrsak);
+        historiebygger.build(revurderingsInnslag);
+
+        historikkRepository.lagre(revurderingsInnslag);
     }
 
 }

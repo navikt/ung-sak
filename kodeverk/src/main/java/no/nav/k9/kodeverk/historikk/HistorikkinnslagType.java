@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -32,6 +33,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     VEDLEGG_MOTTATT("VEDLEGG_MOTTATT", "Vedlegg mottatt", HistorikkinnslagMal.MAL_TYPE_1),
     SPOLT_TILBAKE("SPOLT_TILBAKE", "Behandlingen er flyttet", HistorikkinnslagMal.MAL_TYPE_1),
     REVURD_OPPR("REVURD_OPPR", "Revurdering opprettet", HistorikkinnslagMal.MAL_TYPE_1),
+    UNNT_OPPR("UNNT_OPPR", "Unntaksbehandling opprettet", HistorikkinnslagMal.MAL_TYPE_1),
     NYE_REGOPPLYSNINGER("NYE_REGOPPLYSNINGER", "Nye registeropplysninger", HistorikkinnslagMal.MAL_TYPE_1),
     MIGRERT_FRA_INFOTRYGD_FJERNET("MIGRERT_FRA_INFOTRYGD_FJERNET", "Behandling gjelder ikke lenger flytting av sak fra Infotrygd", HistorikkinnslagMal.MAL_TYPE_1),
     MIGRERT_FRA_INFOTRYGD("MIGRERT_FRA_INFOTRYGD", "Behandling gjelder flytting av sak fra Infotrygd", HistorikkinnslagMal.MAL_TYPE_1),

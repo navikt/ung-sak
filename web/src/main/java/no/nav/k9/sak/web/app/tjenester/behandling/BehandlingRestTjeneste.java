@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.abac.BeskyttetRessursKoder.VENTEFRIST;
 import static no.nav.vedtak.feil.LogLevel.ERROR;
@@ -372,7 +373,7 @@ public class BehandlingRestTjeneste {
     @Operation(description = "Opprette ny unntaksbehandling", tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
     })
-    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprettNyUnntaksbehandling(@Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto) {
         if (!unntaksbehandlingTogglet) {
