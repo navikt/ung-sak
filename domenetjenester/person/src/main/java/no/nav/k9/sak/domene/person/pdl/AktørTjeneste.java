@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.pdl.HentIdenterQueryRequest;
@@ -25,6 +28,7 @@ import no.nav.vedtak.util.LRUCache;
 
 @ApplicationScoped
 public class AktørTjeneste {
+    private static final Logger log = LoggerFactory.getLogger(AktørTjeneste.class);
     private static final int DEFAULT_CACHE_SIZE = 1000;
     private static final long DEFAULT_CACHE_TIMEOUT = TimeUnit.MILLISECONDS.convert(8, TimeUnit.HOURS);
 
@@ -102,9 +106,10 @@ public class AktørTjeneste {
             );
 
         try {
-            return pdlKlient.hentIdenter(request, projeksjon, Tema.FOR).getIdenter();
+            return pdlKlient.hentIdenter(request, projeksjon, Tema.OMS).getIdenter();
         } catch (VLException e) {
             if (PdlKlient.PDL_KLIENT_NOT_FOUND_KODE.equals(e.getKode())) {
+                log.info("Ident av type {} ikke funnet for ident {}", identGruppe, ident);
                 return emptyList();
             }
             throw e;
