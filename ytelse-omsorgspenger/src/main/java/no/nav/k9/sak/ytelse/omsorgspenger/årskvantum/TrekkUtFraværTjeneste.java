@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,12 +16,17 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.InntektsmeldingFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
@@ -36,14 +42,19 @@ public class TrekkUtFraværTjeneste {
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste;
 
     @Inject
-    public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository, BehandlingRepository behandlingRepository, MottatteDokumentRepository mottatteDokumentRepository,
-                                 InntektArbeidYtelseTjeneste iayTjeneste) {
+    public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository,
+                                 BehandlingRepository behandlingRepository,
+                                 MottatteDokumentRepository mottatteDokumentRepository,
+                                 InntektArbeidYtelseTjeneste iayTjeneste,
+                                 @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
+        this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
     OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
@@ -116,6 +127,10 @@ public class TrekkUtFraværTjeneste {
         return trekkUtPerioderFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
     }
 
+    public List<WrappedOppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsakMedSøknadsfristVurdering(Behandling behandling) {
+        return trekkUtFravær(søknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling)));
+    }
+
     List<WrappedOppgittFraværPeriode> trekkUtPerioderFraInntektsmeldinger(Behandling behandling, Set<JournalpostId> inntektsmeldingerJournalposter) {
         if (inntektsmeldingerJournalposter.isEmpty()) {
             return List.of();
@@ -162,5 +177,9 @@ public class TrekkUtFraværTjeneste {
 
     List<WrappedOppgittFraværPeriode> trekkUtFravær(Set<Inntektsmelding> inntektsmeldinger) {
         return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
+    }
+
+    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
+        return new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(fraværFraInntektsmelding);
     }
 }

@@ -1,21 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
-
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -36,6 +20,17 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapOppgittFraværOgVilkårsResultatTest {
 
@@ -67,12 +62,12 @@ public class MapOppgittFraværOgVilkårsResultatTest {
     }
 
     private Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> mapTilWrappedPeriode(OppgittFravær oppgittFravær) {
-        return oppgittFravær.getPerioder().stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now())).collect(Collectors.toSet());
+        return oppgittFravær.getPerioder().stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), Utfall.OPPFYLT)).collect(Collectors.toSet());
     }
 
     @NotNull
     private BehandlingReferanse opprettRef(AktørId dummy) {
-        return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, java.util.Optional.empty(), null, null);
+        return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
     }
 
     @Test

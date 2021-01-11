@@ -1,17 +1,18 @@
 package no.nav.k9.sak.behandling;
 
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Minimal metadata for en behandling.
@@ -54,6 +55,8 @@ public class BehandlingReferanse {
 
     private BehandlingResultatType behandlingResultatType;
 
+    private DatoIntervallEntitet fagsakPeriode;
+
     BehandlingReferanse() {
     }
 
@@ -68,7 +71,8 @@ public class BehandlingReferanse {
                                 UUID behandlingUuid,
                                 Optional<Long> originalBehandlingId,
                                 BehandlingStatus behandlingStatus,
-                                Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
+                                Skjæringstidspunkt skjæringstidspunkt,
+                                DatoIntervallEntitet fagsakPeriode) { // NOSONAR
         this.fagsakYtelseType = fagsakYtelseType;
         this.behandlingType = behandlingType;
         this.behandlingResultatType = behandlingResultatType;
@@ -81,6 +85,7 @@ public class BehandlingReferanse {
         this.originalBehandlingId = originalBehandlingId;
         this.behandlingStatus = behandlingStatus;
         this.skjæringstidspunkt = skjæringstidspunkt;
+        this.fagsakPeriode = fagsakPeriode;
     }
 
     /**
@@ -104,7 +109,8 @@ public class BehandlingReferanse {
             behandling.getStatus(),
             Skjæringstidspunkt.builder()
                 .medUtledetSkjæringstidspunkt(utledetSkjæringstidspunkt)
-                .build());
+                .build(),
+            behandling.getFagsak().getPeriode());
     }
 
     public static BehandlingReferanse fra(Behandling behandling, Skjæringstidspunkt skjæringstidspunkt) {
@@ -119,7 +125,8 @@ public class BehandlingReferanse {
             behandling.getUuid(),
             behandling.getOriginalBehandlingId(),
             behandling.getStatus(),
-            skjæringstidspunkt);
+            skjæringstidspunkt,
+            behandling.getFagsak().getPeriode());
     }
 
     public static BehandlingReferanse fra(FagsakYtelseType fagsakYtelseType, // NOSONAR
@@ -133,7 +140,7 @@ public class BehandlingReferanse {
                                           UUID behandlingUuid,
                                           Optional<Long> originalBehandlingId,
                                           BehandlingStatus behandlingStatus,
-                                          Skjæringstidspunkt skjæringstidspunkt) { // NOSONAR
+                                          Skjæringstidspunkt skjæringstidspunkt, DatoIntervallEntitet fagsakPeriode) { // NOSONAR
         return new BehandlingReferanse(fagsakYtelseType,
             behandlingType,
             behandlingResultatType,
@@ -145,7 +152,7 @@ public class BehandlingReferanse {
             behandlingUuid,
             originalBehandlingId,
             behandlingStatus,
-            skjæringstidspunkt);
+            skjæringstidspunkt, fagsakPeriode);
     }
 
     public Saksnummer getSaksnummer() {
@@ -220,6 +227,10 @@ public class BehandlingReferanse {
         return BehandlingType.REVURDERING.equals(behandlingType);
     }
 
+    public DatoIntervallEntitet getFagsakPeriode() {
+        return fagsakPeriode;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(saksnummer, behandlingId, originalBehandlingId, fagsakYtelseType, behandlingType, aktørId);
@@ -276,7 +287,8 @@ public class BehandlingReferanse {
             getBehandlingStatus(),
             Skjæringstidspunkt.builder()
                 .medUtledetSkjæringstidspunkt(utledetSkjæringstidspunkt)
-                .build());
+                .build(),
+            getFagsakPeriode());
     }
 
     /**
@@ -294,7 +306,8 @@ public class BehandlingReferanse {
             getBehandlingUuid(),
             getOriginalBehandlingId(),
             getBehandlingStatus(),
-            skjæringstidspunkt);
+            skjæringstidspunkt,
+            getFagsakPeriode());
     }
 
     public BehandlingStatus getBehandlingStatus() {

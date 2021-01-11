@@ -1,6 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -10,13 +16,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ÅrskvantumTjenesteTest {
 
@@ -76,6 +76,6 @@ public class ÅrskvantumTjenesteTest {
     }
 
     private List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> mapTilWrappedPeriode(List<OppgittFraværPeriode> perioder) {
-        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now())).collect(Collectors.toList());
+        return perioder.stream().map(it -> new no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode(it, LocalDateTime.now(), Utfall.OPPFYLT)).collect(Collectors.toList());
     }
 }

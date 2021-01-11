@@ -1,29 +1,20 @@
 package no.nav.k9.kodeverk.vilkår;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
+
+import java.io.IOException;
+import java.util.*;
 
 @JsonSerialize(contentUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
@@ -77,6 +68,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
         Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
         Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+    SØKNADSFRIST(VilkårTypeKoder.FP_VK_3,
+        "Søknadsfristvilkåret",
+        Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 22-13, 2. ledd"),
+        Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT(VilkårTypeKoder.FP_VK_34,
         "Søkers opplysningsplikt",
         Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§§ 21-3 og 21-7",
