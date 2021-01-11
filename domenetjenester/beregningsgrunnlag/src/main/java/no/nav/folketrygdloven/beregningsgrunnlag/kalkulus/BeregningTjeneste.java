@@ -36,8 +36,9 @@ public interface BeregningTjeneste {
      * Kjører en beregning videre fra gitt steg <br>
      * Steg 2. KOFAKBER (Kontroller fakta for beregning)<br>
      * Steg 3. FORS_BERGRUNN (Foreslå beregningsgrunnlag)<br>
-     * Steg 4. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
-     * Steg 5. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
+     * Steg 4. VURDER_REF_BERGRUNN (Vurder vilkår og refusjon)<br>
+     * Steg 5. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
+     * Steg 6. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
      * @param ref {@link BehandlingReferanse}
      * @param skjæringstidspunkt - skjæringstidspunktet
