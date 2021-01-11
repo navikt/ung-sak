@@ -1,4 +1,9 @@
-# Add 'label1' to any changes within 'example' folder or any subfolders
 domene/kontrakt:
   - kontrakt/src/main/java/**/*
   - kodeverk/src/main/java/**/*
+
+migreringer:
+  - migreringer/src/main/**/*
+  
+web:
+  - web/src/main/java/**/*
