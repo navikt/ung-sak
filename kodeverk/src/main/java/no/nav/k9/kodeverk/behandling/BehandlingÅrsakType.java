@@ -63,7 +63,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_TILSTØTENDE_YTELSE_OPPHØRT("RE-TILST-YT-OPPH", "Tilstøtende ytelse opphørt"),
 
     // Unntaksbehandling
-    UNNT_GENERELL("UNNTAK_GENERELL", "Manuell saksbehandling"),
+    UNNT_GENERELL("UNNT_GENERELL", "Manuell saksbehandling"),
 
     UDEFINERT("-", "Ikke definert"),
 
