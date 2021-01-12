@@ -44,7 +44,6 @@ public class StatistikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("behandling_status_v2"))
             .anyMatch(v -> v.toString().contains("fagsak_status_v2"))
             .anyMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
-            .anyMatch(v -> v.toString().contains("aksjonspunkt_ytelse_type_vent_aarsak_v3"))
             .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
 
     }
@@ -65,10 +64,6 @@ public class StatistikkRepositoryTest {
             .allMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
             .anyMatch(v -> v.toString().contains("totalt_antall=0"))
             .anyMatch(v -> v.toString().contains("ytelse_type=" + ytelseType.getKode()) && v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) && v.toString().contains("totalt_antall=1"));
-
-        assertThat(statistikkRepository.aksjonspunktVenteårsakStatistikk()).isNotEmpty()
-            .allMatch(v -> v.toString().contains("aksjonspunkt_ytelse_type_vent_aarsak_v3"))
-            .allMatch(v -> v.toString().contains("totalt_antall=0"));
 
     }
 

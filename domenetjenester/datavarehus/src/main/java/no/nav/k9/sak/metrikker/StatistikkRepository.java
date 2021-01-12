@@ -93,7 +93,6 @@ public class StatistikkRepository {
         metrikker.addAll(mottattDokumentStatistikk());
         metrikker.addAll(aksjonspunktStatistikk());
         metrikker.addAll(aksjonspunktStatistikkDaglig(dag));
-        metrikker.addAll(aksjonspunktVenteårsakStatistikk());
         metrikker.addAll(avslagStatistikk());
         metrikker.addAll(avslagStatistikkDaglig(dag));
         metrikker.addAll(prosessTaskFeilStatistikk());
@@ -398,47 +397,6 @@ public class StatistikkRepository {
 
         return values;
 
-    }
-
-    @SuppressWarnings("unchecked")
-    Collection<SensuEvent> aksjonspunktVenteårsakStatistikk() {
-
-        String sql = "select f.ytelse_type, a.aksjonspunkt_def, a.vent_aarsak, count(*) antall " +
-            "         from aksjonspunkt a" +
-            "         inner join behandling b on b.id =a.behandling_id " +
-            "         inner join fagsak f on f.id=b.fagsak_id" +
-            "         where a.vent_aarsak IS NOT NULL and a.vent_aarsak!='-'" +
-            "         group by 1, 2, 3" +
-            "         order by 1, 2, 3";
-
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
-        Stream<Tuple> stream = query.getResultStream()
-            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
-
-        String metricName = "aksjonspunkt_ytelse_type_vent_aarsak_v3";
-        String metricField = "totalt_antall";
-
-        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "aksjonspunkt", t.get(1, String.class),
-                "vent_aarsak", t.get(2, String.class)),
-            Map.of(
-                metricField, t.get(3, BigInteger.class))))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
-        var zeroValues = emptyEvents(metricName,
-            Map.of(
-                "ytelse_type", YTELSER,
-                "aksjonspunkt", AKSJONSPUNKTER,
-                "vent_aarsak", VENT_ÅRSAKER),
-            Map.of(
-                metricField, BigInteger.ZERO));
-
-        values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
-
-        return values;
     }
 
     @SuppressWarnings("unchecked")
