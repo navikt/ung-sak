@@ -1,47 +1,58 @@
 package no.nav.k9.sak.domene.arbeidsforhold.person;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 
 @Dependent
 class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
 
-    private TpsAdapterImpl tpsAdapter;
     private PersoninfoAdapter personinfoAdapter;
+    private AktørTjeneste aktørTjeneste;
 
+    @SuppressWarnings("unused")
     public PersonIdentTjenesteImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public PersonIdentTjenesteImpl(TpsAdapterImpl tpsAdapter) {
-        this.tpsAdapter = tpsAdapter;
+    public PersonIdentTjenesteImpl(PersoninfoAdapter personinfoAdapter, AktørTjeneste aktørTjeneste) {
+        this.personinfoAdapter = requireNonNull(personinfoAdapter, "personinfoAdapter er påkrevd, men var null");
+        this.aktørTjeneste = requireNonNull(aktørTjeneste, "aktørTjeneste er påkrevd, men var null");
     }
 
     @Override
     public PersonIdent hentFnrForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr;
-        funnetFnr = hentFnr(aktørId);
+        funnetFnr = aktørTjeneste.hentPersonIdentForAktørId(aktørId);
         if (funnetFnr.isPresent()) {
             return funnetFnr.get();
         }
-        throw TpsFeilmeldinger.FACTORY.fantIkkePersonForAktørId().toException();
+        throw PersonIdentFeilmeldinger.FACTORY.fantIkkePersonForAktørId().toException();
     }
 
     @Override
     public Optional<AktørId> hentAktørForFnr(PersonIdent fnr) {
-        return tpsAdapter.hentAktørIdForPersonIdent(fnr);
-    }
-
-    private Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
+        if (fnr.erFdatNummer()) {
+            // har ikke tildelt personnr
+            return Optional.empty();
+        }
+        try {
+            return aktørTjeneste.hentAktørIdForPersonIdent(fnr);
+        } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
+            // Her sorterer vi ut dødfødte barn
+            return Optional.empty();
+        }
     }
 
     //TODO Vurder om denne metoden bør flyttes til annen tjeneste eller om denne tjenesten bør endre navn
@@ -49,5 +60,4 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
         return personinfoAdapter.hentPersoninfoArbeidsgiver(aktørId);
     }
-
 }
