@@ -44,7 +44,6 @@
 			<artifactId>mottak</artifactId>
 		</dependency>
 
-
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
