@@ -8,6 +8,9 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
@@ -65,8 +68,15 @@ public class K9VilkåretOverstyringshåndterer extends AbstractOverstyringshånd
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, Overstyringk9VilkåretDto dto) {
-        var vilkårOk = BehandlingResultatType.INNVILGET.equals(dto.getBehandlingResultatType());
-        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), vilkårOk, SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING);
+        HistorikkEndretFeltVerdiType tilVerdi = BehandlingResultatType.INNVILGET.equals(dto.getBehandlingResultatType())
+            ? HistorikkEndretFeltVerdiType.VILKAR_OPPFYLT
+            : HistorikkEndretFeltVerdiType.VILKAR_IKKE_OPPFYLT;
+
+        getHistorikkAdapter().tekstBuilder()
+            .medHendelse(HistorikkinnslagType.OVERSTYRT)
+            .medBegrunnelse(dto.getBegrunnelse())
+            .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING)
+            .medEndretFelt(HistorikkEndretFeltType.OVERSTYRT_VURDERING, null, tilVerdi);
     }
 
 

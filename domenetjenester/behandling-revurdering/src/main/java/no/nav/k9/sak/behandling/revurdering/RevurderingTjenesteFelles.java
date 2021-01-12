@@ -23,7 +23,6 @@ public class RevurderingTjenesteFelles {
     private BehandlingRepository behandlingRepository;
     private FagsakRevurdering fagsakRevurdering;
     private OpptjeningRepository opptjeningRepository;
-    private RevurderingHistorikk revurderingHistorikk;
     private VilkårResultatRepository vilkårResultatRepository;
 
     public RevurderingTjenesteFelles() {
@@ -35,7 +34,6 @@ public class RevurderingTjenesteFelles {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.fagsakRevurdering = new FagsakRevurdering(repositoryProvider.getBehandlingRepository());
         this.opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        this.revurderingHistorikk = new RevurderingHistorikk(repositoryProvider.getHistorikkRepository());
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
@@ -45,12 +43,10 @@ public class RevurderingTjenesteFelles {
                                           OrganisasjonsEnhet enhet) {
         BehandlingÅrsak.Builder nyBehandlingÅrsak = BehandlingÅrsak.builder(nyBehandlingÅrsakType)
             .medManueltOpprettet(manueltOpprettet);
-        Behandling nyBehandling = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
+        return Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlendeEnhet(enhet)
             .medBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()))
             .medBehandlingÅrsak(nyBehandlingÅrsak).build();
-        revurderingHistorikk.opprettHistorikkinnslagOmRevurdering(nyBehandling, nyBehandlingÅrsakType, manueltOpprettet);
-        return nyBehandling;
     }
 
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {
