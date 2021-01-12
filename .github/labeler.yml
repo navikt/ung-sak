@@ -10,3 +10,5 @@ web:
   
 pom:
   - pom.xml
+  - ./**/pom.xml
+
