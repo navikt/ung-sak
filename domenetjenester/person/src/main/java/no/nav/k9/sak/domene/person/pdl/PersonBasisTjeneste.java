@@ -72,7 +72,7 @@ public class PersonBasisTjeneste {
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
 
-        var person = pdlKlient.hentPerson(query, projection, Tema.FOR);
+        var person = pdlKlient.hentPerson(query, projection, Tema.OMS);
 
         var fødselsdato = person.getFoedsel().stream()
             .map(Foedsel::getFoedselsdato)
