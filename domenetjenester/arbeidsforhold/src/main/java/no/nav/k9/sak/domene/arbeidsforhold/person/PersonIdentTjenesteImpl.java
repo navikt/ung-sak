@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.arbeidsforhold.person;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
@@ -27,8 +25,8 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
 
     @Inject
     public PersonIdentTjenesteImpl(PersoninfoAdapter personinfoAdapter, AktørTjeneste aktørTjeneste) {
-        this.personinfoAdapter = requireNonNull(personinfoAdapter, "personinfoAdapter er påkrevd, men var null");
-        this.aktørTjeneste = requireNonNull(aktørTjeneste, "aktørTjeneste er påkrevd, men var null");
+        this.personinfoAdapter = personinfoAdapter;
+        this.aktørTjeneste = aktørTjeneste;
     }
 
     @Override
