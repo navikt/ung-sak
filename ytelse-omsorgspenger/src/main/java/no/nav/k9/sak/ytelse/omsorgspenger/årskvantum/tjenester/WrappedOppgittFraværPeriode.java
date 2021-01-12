@@ -65,6 +65,7 @@ class WrappedOppgittFraværPeriode {
         if (o == null || getClass() != o.getClass()) return false;
         WrappedOppgittFraværPeriode that = (WrappedOppgittFraværPeriode) o;
         return Objects.equals(avslåttInngangsvilkår, that.avslåttInngangsvilkår)
+            && Objects.equals(innsendingstidspunkt, that.innsendingstidspunkt)
             && Objects.equals(arbeidStatus, that.arbeidStatus)
             && Objects.equals(iPermisjon, that.iPermisjon)
             && Objects.equals(aktivitet, that.aktivitet)
@@ -81,7 +82,7 @@ class WrappedOppgittFraværPeriode {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslåttInngangsvilkår, iPermisjon, arbeidStatus);
+        return Objects.hash(periode.getFraværPerDag(), periode.getAktivitetType(), aktivitet, avslåttInngangsvilkår, iPermisjon, arbeidStatus, innsendingstidspunkt);
     }
 
     @Override
