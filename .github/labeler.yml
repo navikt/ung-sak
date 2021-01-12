@@ -9,4 +9,5 @@ web:
   - web/src/main/java/**/*
   
 pom:
-- any['pom.xml', '**/pom.xml']
+  - **/*/pom.xml
+  - pom.xml
