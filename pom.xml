@@ -38,9 +38,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <felles.version>2.5.0-20201202073637-46afdbd</felles.version>
+        <felles.version>3.0.38</felles.version>
 
-        <fp-kontrakter.version>5.1-20201105192657-fa0dd2a</fp-kontrakter.version>
+        <fp-kontrakter.version>5.1-20201223140505-5ac989f</fp-kontrakter.version>
         <k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
     </properties>
 
@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>no.nav.vedtak.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.5.0-20201202083109-89492c4</version>
+                <version>2.5.10</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -353,7 +353,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
                 <artifactId>fpsak-tidsserie</artifactId>
-                <version>2.3-20201019093601-b2584db</version>
+                <version>2.5.5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
