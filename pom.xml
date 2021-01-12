@@ -773,4 +773,5 @@
             <url>https://maven.pkg.github.com/navikt/k9-sak</url>
         </repository>
     </distributionManagement>
+    
 </project>
