@@ -8,7 +8,6 @@ import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOpp
 import static no.nav.vedtak.feil.LogLevel.INFO;
 
 import java.math.BigDecimal;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 
@@ -149,19 +148,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     }
 
     private void opprettHistorikkinnslag(Behandling behandling, BeregningsresultatEntitet beregningsresultatFør, BeregningsresultatEntitet beregningsresultatEtter) {
-        var sumFør = beregningsresultatFør != null ? beregnTotalsum(beregningsresultatFør) : 0L;
-        var sumEtter = beregnTotalsum(beregningsresultatEtter);
+        KalkulatorForBeregningsresultat kalkulatorForBeregningsresultat = new KalkulatorForBeregningsresultat(behandling.getFagsakYtelseType());
+        var sumFør = beregningsresultatFør != null ? kalkulatorForBeregningsresultat.beregnTotalsum(beregningsresultatFør) : 0L;
+        var sumEtter = kalkulatorForBeregningsresultat.beregnTotalsum(beregningsresultatEtter);
 
         var historikkInnslagTekstBuilder = historikkAdapter.tekstBuilder();
         historikkInnslagTekstBuilder.medEndretFelt(HistorikkEndretFeltType.TILKJENT_YTELSE, sumFør, sumEtter);
         historikkAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
-    }
-
-    // FIXME: Ta hensyn for ytelser som ikke er omsorgspenger
-    private long beregnTotalsum(BeregningsresultatEntitet beregningsresultatEntitet) {
-        return beregningsresultatEntitet.getBeregningsresultatPerioder().stream()
-            .mapToLong(b -> ChronoUnit.DAYS.between(b.getBeregningsresultatPeriodeFom(), b.getBeregningsresultatPeriodeTom().plusDays(1)) * b.getDagsats())
-            .sum();
     }
 
     private BeregnFeriepengerTjeneste getFeriepengerTjeneste(Behandling behandling) {
