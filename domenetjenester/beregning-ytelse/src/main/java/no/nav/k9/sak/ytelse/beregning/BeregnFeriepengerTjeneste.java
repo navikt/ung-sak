@@ -28,21 +28,27 @@ public abstract class BeregnFeriepengerTjeneste {
 
     private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
     private int antallDagerFeriepenger;
+    private boolean feriepengeopptjeningForHelg;
 
     protected BeregnFeriepengerTjeneste() {
         //NOSONAR
     }
 
     public BeregnFeriepengerTjeneste(int antallDagerFeriepenger) {
+        this(antallDagerFeriepenger, false);
+    }
+
+    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg) {
         if (antallDagerFeriepenger == 0) {
             throw new IllegalStateException("Injeksjon av antallDagerFeriepenger feilet. antallDagerFeriepenger kan ikke være 0.");
         }
         this.antallDagerFeriepenger = antallDagerFeriepenger;
+        this.feriepengeopptjeningForHelg = feriepengeopptjeningForHelg;
     }
 
     public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
 
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger, feriepengeopptjeningForHelg);
         String regelInput = toJson(regelModell);
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
