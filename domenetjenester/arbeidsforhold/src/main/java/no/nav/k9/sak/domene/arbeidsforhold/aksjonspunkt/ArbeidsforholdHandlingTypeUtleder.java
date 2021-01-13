@@ -41,7 +41,7 @@ class ArbeidsforholdHandlingTypeUtleder {
         } else if (brukArbeidsforholdet(arbeidsforholdDto)) {
             return BRUK;
         }
-        return IKKE_BRUK;
+        throw new IllegalArgumentException("Ugyldig handling: " + IKKE_BRUK);
     }
 
     private static boolean skalOverstyrePerioder(AvklarArbeidsforholdDto arbeidsforholdDto) {

@@ -27,7 +27,6 @@ public enum ArbeidsforholdHandlingType implements Kodeverdi {
 
     UDEFINERT("-", "Udefinert"),
     BRUK("BRUK", "Bruk"),
-    IKKE_BRUK("IKKE_BRUK", "Ikke bruk"),
 
     LAGT_TIL_AV_SAKSBEHANDLER("LAGT_TIL_AV_SAKSBEHANDLER", "Arbeidsforhold lagt til av saksbehandler"),
     BASERT_PÅ_INNTEKTSMELDING("BASERT_PÅ_INNTEKTSMELDING", "Arbeidsforholdet som ikke ligger i AA-reg er basert på inntektsmelding"),
@@ -35,6 +34,8 @@ public enum ArbeidsforholdHandlingType implements Kodeverdi {
     /** midlertidig med - ønsker annen løsning i følge Marius Glittum. */
     BRUK_UTEN_INNTEKTSMELDING("BRUK_UTEN_INNTEKTSMELDING", "Bruk, men ikke benytt inntektsmelding"),
 
+    @Deprecated(forRemoval = true)
+    IKKE_BRUK("IKKE_BRUK", "Ikke bruk"),
     @Deprecated(forRemoval = true)
     NYTT_ARBEIDSFORHOLD("NYTT_ARBEIDSFORHOLD", "Arbeidsforholdet er ansett som nytt"),
     @Deprecated(forRemoval = true)
@@ -104,7 +105,7 @@ public enum ArbeidsforholdHandlingType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

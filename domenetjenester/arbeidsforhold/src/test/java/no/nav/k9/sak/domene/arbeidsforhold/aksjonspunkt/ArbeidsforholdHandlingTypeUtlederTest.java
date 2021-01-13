@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -106,28 +105,5 @@ public class ArbeidsforholdHandlingTypeUtlederTest {
 
         // Assert
         assertThat(resultat).isEqualTo(BRUK);
-    }
-
-    @Test
-    public void skal_utlede_IKKE_BRUK_hvis_false() {
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukArbeidsforholdet(false);
-
-        // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(IKKE_BRUK);
-    }
-
-    @Test
-    public void skal_utlede_IKKE_BRUK_hvis_null() {
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-
-        // Act
-        ArbeidsforholdHandlingType resultat = ArbeidsforholdHandlingTypeUtleder.utledHandling(arbeidsforholdDto);
-
-        // Assert
-        assertThat(resultat).isEqualTo(IKKE_BRUK);
     }
 }
