@@ -3,6 +3,7 @@ package no.nav.k9.sak.inngangsvilkår;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
@@ -61,8 +61,7 @@ public class RegelOrkestrerer {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         Map<VilkårType, Map<DatoIntervallEntitet, Object>> ekstraResultater = new HashMap<>();
 
-        var kjørPerioder = perioder.stream().filter(p -> !erPeriodenOverstyrt(vilkår, p)).collect(Collectors.toList());
-        var regelResultat = kjørRegelmotor(ref, vilkår, kjørPerioder);
+        var regelResultat = kjørRegelmotor(ref, vilkår, perioder);
         for (var entry : regelResultat.entrySet()) {
             // Ekstraresultat
             var vilkårDataResultat = entry.getValue();
@@ -81,27 +80,18 @@ public class RegelOrkestrerer {
         return new RegelResultat(vilkårene, aksjonspunktDefinisjoner, ekstraResultater);
     }
 
-    private boolean erPeriodenOverstyrt(Vilkår vilkår, DatoIntervallEntitet periode) {
-        return vilkår.getPerioder()
-            .stream()
-            .filter(it -> it.getPeriode().equals(periode))
-            .map(VilkårPeriode::getErOverstyrt)
-            .findFirst()
-            .orElse(false);
-    }
-
     private void validerMaksEttVilkår(List<Vilkår> vilkårSomSkalBehandle) {
         if (vilkårSomSkalBehandle.size() > 1)
             throw new IllegalArgumentException("Kun ett vilkår skal evalueres per regelkall. " +
                 "Her angis vilkår: " + vilkårSomSkalBehandle.stream().map(v -> v.getVilkårType().getKode()).collect(Collectors.joining(",")));
     }
 
-    protected NavigableMap<DatoIntervallEntitet, VilkårData> vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref, List<DatoIntervallEntitet> periode) {
+    protected NavigableMap<DatoIntervallEntitet, VilkårData> vurderVilkår(VilkårType vilkårType, BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> periode) {
         Inngangsvilkår inngangsvilkår = inngangsvilkårTjeneste.finnVilkår(vilkårType, ref.getFagsakYtelseType());
         return inngangsvilkår.vurderVilkår(ref, periode);
     }
 
-    private NavigableMap<DatoIntervallEntitet, VilkårData> kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår, List<DatoIntervallEntitet> perioder) {
+    private NavigableMap<DatoIntervallEntitet, VilkårData> kjørRegelmotor(BehandlingReferanse ref, Vilkår vilkår, NavigableSet<DatoIntervallEntitet> perioder) {
         if (perioder.isEmpty()) {
             return Collections.emptyNavigableMap();
         }
