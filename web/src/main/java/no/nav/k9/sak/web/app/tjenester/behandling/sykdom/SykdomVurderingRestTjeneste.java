@@ -53,7 +53,7 @@ public class SykdomVurderingRestTjeneste {
     public static final String VURDERING_PATH = BASE_PATH + VURDERING;
     public static final String VURDERING_VERSJON_PATH = BASE_PATH + VURDERING_VERSJON;
     private static final String VURDERING_OVERSIKT_KTP = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
-    private static final String VURDERING_OVERSIKT_TOO = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
+    private static final String VURDERING_OVERSIKT_TOO = "/oversikt/TO_OMSORGSPERSONER";
     public static final String VURDERING_OVERSIKT_KTP_PATH = BASE_PATH + VURDERING_OVERSIKT_KTP;
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + VURDERING_OVERSIKT_TOO;
 
