@@ -1,5 +1,18 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -15,12 +28,6 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class MapOppgittFraværOgVilkårsResultat {
 
@@ -176,14 +183,14 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettFraværsTidslinje(DatoIntervallEntitet fagsakPeriode, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder) {
         var perioderPerAktivitet = perioder
             .stream()
-            .map(it -> new WrappedOppgittFraværPeriode(it.getPeriode(), it.getInnsendingstidspunkt(), null, null, Utfall.IKKE_OPPFYLT.equals(it.getSøknadsfristUtfall()) ? true : null))
+            .map(it -> new WrappedOppgittFraværPeriode(it.getPeriode(), it.getInnsendingstidspunkt(), null, null, utledInngangsvilkårUtfallSøknadsfrist(it)))
             .collect(Collectors.groupingBy(WrappedOppgittFraværPeriode::getAktivitet, Collectors.toList()));
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result = new HashMap<>();
         var fagsakInterval = new LocalDateInterval(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato());
 
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> aktivitetsPerioder : perioderPerAktivitet.entrySet()) {
-            LocalDateTimeline<WrappedOppgittFraværPeriode> fraværsTidslinje = new LocalDateTimeline<WrappedOppgittFraværPeriode>(List.of());
+            LocalDateTimeline<WrappedOppgittFraværPeriode> fraværsTidslinje = new LocalDateTimeline<>(List.of());
             for (WrappedOppgittFraværPeriode periode : aktivitetsPerioder.getValue()) {
                 LocalDateSegment<WrappedOppgittFraværPeriode> segment = new LocalDateSegment<>(periode.getPeriode().getFom(), periode.getPeriode().getTom(), periode);
                 fraværsTidslinje = fraværsTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -197,6 +204,13 @@ public class MapOppgittFraværOgVilkårsResultat {
             result.put(aktivitetsPerioder.getKey(), fraværsTidslinje.intersection(fagsakInterval).compress());
         }
         return result;
+    }
+
+    private Boolean utledInngangsvilkårUtfallSøknadsfrist(no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
+        if (Duration.ZERO.equals(it.getPeriode().getFraværPerDag())) {
+            return null;
+        }
+        return Utfall.IKKE_OPPFYLT.equals(it.getSøknadsfristUtfall()) ? true : null;
     }
 
     private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {

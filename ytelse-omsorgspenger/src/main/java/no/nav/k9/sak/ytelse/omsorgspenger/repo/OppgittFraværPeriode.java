@@ -1,5 +1,24 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Immutable;
+
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -8,12 +27,6 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import org.hibernate.annotations.Immutable;
-
-import javax.persistence.*;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity(name = "OmsorgspengerFraværPeriode")
 @Table(name = "OMP_OPPGITT_FRAVAER_PERIODE")
@@ -124,11 +137,6 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     public Duration getFraværPerDag() {
         return fraværPerDag;
-    }
-
-    public OppgittFraværPeriode justerPeriode(DatoIntervallEntitet periode) {
-        this.periode = periode;
-        return this;
     }
 
     @Override

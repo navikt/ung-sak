@@ -1,13 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.util.Objects;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class TimelineMerger {
 
@@ -44,10 +43,5 @@ public final class TimelineMerger {
         }
         var aktivitetPeriode = new VurdertSøktPeriode<T>(DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()), siste.getType(), siste.getArbeidsgiver(), siste.getArbeidsforholdRef(), siste.getUtfall(), siste.getRaw());
         return new LocalDateSegment<>(di, aktivitetPeriode);
-    }
-
-    public static <T> List<LocalDateSegment<VurdertSøktPeriode<T>>> konsistens(LocalDateSegment<VurdertSøktPeriode<T>> segment) {
-        segment.getValue().justerPeriode(segment.getLocalDateInterval());
-        return List.of(segment);
     }
 }
