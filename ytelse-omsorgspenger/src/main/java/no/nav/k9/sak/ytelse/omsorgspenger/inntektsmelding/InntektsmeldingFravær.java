@@ -120,8 +120,7 @@ public class InntektsmeldingFravær {
             var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
             var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
             var liste = vurdertSøktPerioder.stream()
-                .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()) || Duration.ZERO.equals(it.getRaw().getFraværPerDag()))
-                .map(pa -> new WrappedOppgittFraværPeriode(justerPeriode(pa), im.getInnsendingsTidspunkt(), utledUtfall(pa)))
+                .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), im.getInnsendingsTidspunkt(), utledUtfall(pa)))
                 .collect(Collectors.toList());
 
             var timeline = mapTilTimeline(aktiviteter);
@@ -158,12 +157,5 @@ public class InntektsmeldingFravær {
             return Utfall.OPPFYLT;
         }
         return pa.getUtfall();
-    }
-
-    private OppgittFraværPeriode justerPeriode(VurdertSøktPeriode<OppgittFraværPeriode> it) {
-        if (Duration.ZERO.equals(it.getRaw().getFraværPerDag())) {
-            return it.getRaw();
-        }
-        return it.getRaw().justerPeriode(it.getPeriode());
     }
 }

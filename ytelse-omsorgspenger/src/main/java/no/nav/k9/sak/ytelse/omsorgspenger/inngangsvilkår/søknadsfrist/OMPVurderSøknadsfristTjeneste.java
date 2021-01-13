@@ -16,6 +16,7 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
@@ -42,7 +43,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     @Inject
     public OMPVurderSøknadsfristTjeneste(InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste,
                                          @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist,
-                                         @KonfigVerdi(value = "enable.søknadsfrist.fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
+                                         @KonfigVerdi(value = "enable_søknadsfrist_fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
         this();
         this.inntektsmeldingerPerioderTjeneste = inntektsmeldingerPerioderTjeneste;
         this.vurderSøknadsfrist = vurderSøknadsfrist;
@@ -93,9 +94,8 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
                     }
                 }
                 result.put(entry.getKey(), vurdertTimeline.compress()
-                    .map(TimelineMerger::konsistens)
                     .stream()
-                    .map(LocalDateSegment::getValue)
+                    .map(this::konsistens)
                     .collect(Collectors.toList()));
             } else {
                 result.put(entry.getKey(), entry.getValue()
@@ -106,6 +106,15 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
         }
 
         return result;
+    }
+
+    private VurdertSøktPeriode<OppgittFraværPeriode> konsistens(LocalDateSegment<VurdertSøktPeriode<OppgittFraværPeriode>> segment) {
+        var value = segment.getValue();
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
+        var raw = value.getRaw();
+        var fraværPeriode = new OppgittFraværPeriode(segment.getFom(), segment.getTom(), raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag());
+
+        return new VurdertSøktPeriode<>(periode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getUtfall(), fraværPeriode);
     }
 
 }
