@@ -21,7 +21,7 @@ class BeregnFeriepengerEttÅr extends LeafSpecification<BeregningsresultatFeriep
         Map<String, Object> resultater = new LinkedHashMap<>();
 
         LocalDateInterval feriepengerPeriode = regelModell.getFeriepengerPeriode();
-        BeregnFeriepengerForPeriode.beregn(resultater, regelModell.getBeregningsresultatPerioder(), feriepengerPeriode);
+        BeregnFeriepengerForPeriode.beregn(resultater, regelModell.getBeregningsresultatPerioder(), feriepengerPeriode, regelModell.harFeriepengeopptjeningFoHelg());
 
         return beregnet(resultater);
     }

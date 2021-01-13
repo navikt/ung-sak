@@ -48,13 +48,13 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
         Specification<BeregningsresultatFeriepengerRegelModell> finnBrukersFeriepengePeriode =
             rs.beregningsRegel(FinnBrukersFeriepengePeriode.ID, FinnBrukersFeriepengePeriode.BESKRIVELSE, new FinnBrukersFeriepengePeriode(), sjekkOmUttakIFeriepengePeriode);
 
-        // FP_BR 8.2 Har bruker fått utbetalt foreldrepenger i den totale stønadsperioden?
-        Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmBrukerHarFåttUtbetaltFP =
-            rs.beregningHvisRegel(new SjekkOmBrukerHarFåttUtbetaltForeldrepenger(), finnBrukersFeriepengePeriode, new BeregnetFeriepenger());
+        // FP_BR 8.2 Har bruker fått utbetalt ytelse i den totale stønadsperioden?
+        Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmBrukerHarFåttUtbetaltYtelse =
+            rs.beregningHvisRegel(new SjekkOmYtelseErTilkjent(), finnBrukersFeriepengePeriode, new BeregnetFeriepenger());
 
         // FP_BR 8.1 Er brukers inntektskategori arbeidstaker eller sjømann?
         Specification<BeregningsresultatFeriepengerRegelModell> sjekkInntektskatoriATellerSjømann =
-            rs.beregningHvisRegel(new SjekkOmBrukerHarInntektkategoriATellerSjømann(), sjekkOmBrukerHarFåttUtbetaltFP, new BeregnetFeriepenger());
+            rs.beregningHvisRegel(new SjekkOmBrukerHarInntektkategoriATellerSjømann(), sjekkOmBrukerHarFåttUtbetaltYtelse, new BeregnetFeriepenger());
 
         return sjekkInntektskatoriATellerSjømann;
     }

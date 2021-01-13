@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +17,14 @@ class BeregnFeriepengerForPeriode {
     private BeregnFeriepengerForPeriode() {
     }
 
-    static void beregn(Map<String, Object> resultater, List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDateInterval feriepengerPeriode) {
+    static void beregn(Map<String, Object> resultater, List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDateInterval feriepengerPeriode, boolean harFeriepengeopptjeningForHelg) {
         beregningsresultatPerioder.stream()
             .filter(periode -> periode.getPeriode().overlaps(feriepengerPeriode))
             .forEach(periode -> {
                 LocalDateInterval overlapp = periode.getPeriode().overlap(feriepengerPeriode).get();//NOSONAR
-                int antallFeriepengerDager = beregnAntallUkedagerMellom(overlapp.getFomDato(), overlapp.getTomDato());
+                long antallFeriepengerDager = harFeriepengeopptjeningForHelg
+                    ? beregnKalanderdager(overlapp)
+                    : beregnUkedager(overlapp);
                 LocalDate opptjeningÅr = overlapp.getFomDato().withMonth(12).withDayOfMonth(31);
 
                 //Regelsporing
@@ -50,7 +53,15 @@ class BeregnFeriepengerForPeriode {
             });
     }
 
-    private static int beregnAntallUkedagerMellom(LocalDate fom, LocalDate tom) {
+    private static long beregnKalanderdager(LocalDateInterval periode) {
+        return ChronoUnit.DAYS.between(periode.getFomDato(), periode.getTomDato()) + 1;
+    }
+
+    private static int beregnUkedager(LocalDateInterval periode) {
+        return beregnUkedager(periode.getFomDato(), periode.getTomDato());
+    }
+
+    private static int beregnUkedager(LocalDate fom, LocalDate tom) {
         int antallUkedager = 0;
         for (LocalDate d = fom; !d.isAfter(tom); d = d.plusDays(1)) {
             int dag = d.getDayOfWeek().getValue();

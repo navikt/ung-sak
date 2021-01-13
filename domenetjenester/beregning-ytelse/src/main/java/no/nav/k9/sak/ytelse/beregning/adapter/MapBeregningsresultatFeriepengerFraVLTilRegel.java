@@ -20,7 +20,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
         //Skal ikke instansieres
     }
 
-    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, int antallDagerFeriepenger) {
+    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = beregningsresultat.getBeregningsresultatPerioder().stream()
                 .map(MapBeregningsresultatFeriepengerFraVLTilRegel::mapBeregningsresultatPerioder).collect(Collectors.toList());
@@ -30,6 +30,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
                 .medBeregningsresultatPerioder(beregningsresultatPerioder)
                 .medInntektskategorier(inntektskategorier)
                 .medAntallDagerFeriepenger(antallDagerFeriepenger)
+                .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)
                 .build();
     }
 

@@ -15,6 +15,7 @@ public class BeregningsresultatFeriepengerRegelModell {
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
     private LocalDateInterval feriepengerPeriode;
     private int antallDagerFeriepenger;
+    private boolean feriepengeopptjeningForHelg;
 
 
     private BeregningsresultatFeriepengerRegelModell() {
@@ -35,6 +36,10 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public int getAntallDagerFeriepenger() {
         return antallDagerFeriepenger;
+    }
+
+    public boolean harFeriepengeopptjeningFoHelg() {
+        return feriepengeopptjeningForHelg;
     }
 
     public static Builder builder(BeregningsresultatFeriepengerRegelModell regelModell) {
@@ -78,6 +83,11 @@ public class BeregningsresultatFeriepengerRegelModell {
 
         public BeregningsresultatFeriepengerRegelModell build() {
             return kladd;
+        }
+
+        public Builder medFeriepengeopptjeningForHelg(boolean feriepengeopptjeningForHelg) {
+            kladd.feriepengeopptjeningForHelg = feriepengeopptjeningForHelg;
+            return this;
         }
     }
 }
