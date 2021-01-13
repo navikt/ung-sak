@@ -160,7 +160,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     // FIXME: Ta hensyn for ytelser som ikke er omsorgspenger
     private long beregnTotalsum(BeregningsresultatEntitet beregningsresultatEntitet) {
         return beregningsresultatEntitet.getBeregningsresultatPerioder().stream()
-            .mapToLong(b -> ChronoUnit.DAYS.between(b.getBeregningsresultatPeriodeFom(), b.getBeregningsresultatPeriodeTom().minusDays(1)) * b.getDagsats())
+            .mapToLong(b -> ChronoUnit.DAYS.between(b.getBeregningsresultatPeriodeFom(), b.getBeregningsresultatPeriodeTom().plusDays(1)) * b.getDagsats())
             .sum();
     }
 
