@@ -36,3 +36,4 @@ dep.txt
 .temp*.txt
 .env
 APP_LOG_HOME_IS_UNDEFINED
+.factorypath
