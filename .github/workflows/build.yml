@@ -90,8 +90,9 @@ jobs:
         run: |
           docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest --label "version=${TAG}" .
           echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
-          docker push ${IMAGE_BASE}:latest
           docker push ${IMAGE}
+          docker push ${IMAGE_BASE}:latest
+
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
 
