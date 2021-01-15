@@ -57,9 +57,7 @@ public class TpsTjenesteTest {
     // Familierelasjon
     private static final AktørId AKTØR_ID_RELASJON = AktørId.dummy();
     private static final PersonIdent FNR_RELASJON = new PersonIdent("01345678901");
-    private static final LocalDate FØDSELSDATO_RELASJON = LocalDate.of(2017, Month.JANUARY, 1);
-    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, FØDSELSDATO_RELASJON,
-        "Adresse", true);
+    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, true);
     private static Map<AktørId, PersonIdent> FNR_VED_AKTØR_ID = new HashMap<>();
     private static Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
 

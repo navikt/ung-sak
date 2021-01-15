@@ -12,32 +12,32 @@ import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoAdapter {
-
     private TpsAdapter tpsAdapter;
     private PersonBasisTjeneste personBasisTjeneste;
+    private PersoninfoTjeneste personinfoTjeneste;
 
+    @SuppressWarnings("unused")
     public PersoninfoAdapter() {
         // for CDI proxy
     }
 
     @Inject
-    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste) {
+    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste) {
         this.tpsAdapter = tpsAdapter;
         this.personBasisTjeneste = personBasisTjeneste;
+        this.personinfoTjeneste = personinfoTjeneste;
     }
 
-    public Personinfo innhentSaksopplysningerForSøker(AktørId aktørId) {
+    //TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
+    public Personinfo hentPersoninfo(AktørId aktørId) {
         return hentKjerneinformasjon(aktørId);
-    }
-
-    public Optional<Personinfo> innhentSaksopplysningerForEktefelle(Optional<AktørId> aktørId) {
-        return aktørId.map(this::hentKjerneinformasjon);
     }
 
     public Optional<Personinfo> innhentSaksopplysninger(PersonIdent personIdent) {
@@ -73,38 +73,6 @@ public class PersoninfoAdapter {
         return optFnr.map(personIdent -> tpsAdapter.hentAdresseinformasjon(personIdent)).orElse(null);
     }
 
-    private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
-        if (personIdent.erFdatNummer()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(
-                hentKjerneinformasjon(aktørId, personIdent)
-            );
-            // TODO Lag en skikkelig fiks på dette
-            //Her sorterer vi ut dødfødte barn
-        } catch (SOAPFaultException e) {
-            if (e.getCause().getMessage().contains("status: S610006F")) {
-                return Optional.empty();
-            }
-            throw e;
-        }
-    }
-
-    private Personinfo hentKjerneinformasjon(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = tpsAdapter.hentIdentForAktørId(aktørId);
-        return personIdent.map(ident -> hentKjerneinformasjon(aktørId, ident)).orElse(null);
-        //FIXME Humle returner Optional
-    }
-
-    private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
-        return tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
-    }
-
-    private Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
-    }
-
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
         Optional<PersonIdent> personIdent = hentFnr(aktørId);
         Optional<PersoninfoArbeidsgiver> personinfoArbeidsgiver = personIdent.map(i -> tpsAdapter.hentKjerneinformasjonBasis(i, aktørId))
@@ -127,4 +95,40 @@ public class PersoninfoAdapter {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
         return funnetFnr.map(fnr -> personBasisTjeneste.hentBasisPersoninfo(aktørId, fnr));
     }
+
+    private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
+        if (personIdent.erFdatNummer()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(
+                hentKjerneinformasjon(aktørId, personIdent)
+            );
+            // TODO Lag en skikkelig fiks på dette
+            //Her sorterer vi ut dødfødte barn
+        } catch (SOAPFaultException e) {
+            if (e.getCause().getMessage().contains("status: S610006F")) {
+                return Optional.empty();
+            }
+            throw e;
+        }
+    }
+
+    private Personinfo hentKjerneinformasjon(AktørId aktørId) {
+        Optional<PersonIdent> personIdent = tpsAdapter.hentIdentForAktørId(aktørId);
+        return personIdent.map(ident -> hentKjerneinformasjon(aktørId, ident)).orElse(null);
+    }
+
+    private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
+        Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
+
+        // Kaller på personinfoTjeneste som sammenligner resultat
+        personinfoTjeneste.hentKjerneinformasjon(aktørId, personIdent, personinfo);
+        return personinfo;
+    }
+
+    private Optional<PersonIdent> hentFnr(AktørId aktørId) {
+        return tpsAdapter.hentIdentForAktørId(aktørId);
+    }
+
 }

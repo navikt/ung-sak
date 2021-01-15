@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -46,14 +47,15 @@ public class PersoninfoAdapterTest {
         when(mockPersoninfo.getFødselsdato()).thenReturn(LocalDate.now()); // trenger bare en verdi
 
         PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
-        adapter = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste);
+        PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
+        adapter = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste);
     }
 
     @Test
     public void skal_innhente_saksopplysninger_for_søker() {
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_SØKER);
 
-        Personinfo søker = adapter.innhentSaksopplysningerForSøker(AKTØR_ID_SØKER);
+        Personinfo søker = adapter.hentPersoninfo(AKTØR_ID_SØKER);
 
         assertNotNull(søker);
         assertEquals(AKTØR_ID_SØKER, søker.getAktørId());

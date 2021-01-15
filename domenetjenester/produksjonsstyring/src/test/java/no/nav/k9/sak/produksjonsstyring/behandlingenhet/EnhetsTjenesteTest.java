@@ -46,12 +46,12 @@ public class EnhetsTjenesteTest {
     private static AktørId BARN_AKTØR_ID = AktørId.dummy();
     private static PersonIdent BARN_IDENT = new PersonIdent(new FiktiveFnr().nesteBarnFnr());
     private static Personinfo BARN_PINFO;
-    private static LocalDate BARN_FØDT = LocalDate.of(2018,3,3);
+    private static LocalDate BARN_FØDT = LocalDate.of(2018, 3, 3);
 
     private static final Set<AktørId> FAMILIE = Set.of(MOR_AKTØR_ID, FAR_AKTØR_ID, BARN_AKTØR_ID);
 
-    private static Familierelasjon relasjontilBarn = new Familierelasjon(BARN_IDENT, RelasjonsRolleType.BARN, BARN_FØDT, "Vei", true);
-    private static Familierelasjon relasjonEkteFar = new Familierelasjon(FAR_IDENT, RelasjonsRolleType.EKTE, LocalDate.of(1991,11,11), "Vei", true);
+    private static Familierelasjon relasjontilBarn = new Familierelasjon(BARN_IDENT, RelasjonsRolleType.BARN, true);
+    private static Familierelasjon relasjonEkteFar = new Familierelasjon(FAR_IDENT, RelasjonsRolleType.EKTE, true);
 
     private static OrganisasjonsEnhet enhetNormal = new OrganisasjonsEnhet("4802", "NAV Bærum");
     private static OrganisasjonsEnhet enhetKode6 = new OrganisasjonsEnhet("2103", "NAV Viken");
@@ -179,10 +179,10 @@ public class EnhetsTjenesteTest {
             relasjoner.add(relasjonEkteFar);
         }
         MOR_PINFO = new Personinfo.Builder().medAktørId(MOR_AKTØR_ID).medPersonIdent(MOR_IDENT).medNavn("Kari Dunk")
-            .medFødselsdato(LocalDate.of(1989,12,12)).medAdresse("Vei")
+            .medFødselsdato(LocalDate.of(1989, 12, 12)).medAdresse("Vei")
             .medFamilierelasjon(relasjoner).build();
         FAR_PINFO = new Personinfo.Builder().medAktørId(FAR_AKTØR_ID).medPersonIdent(FAR_IDENT).medNavn("Ola Dunk")
-            .medFødselsdato(LocalDate.of(1991,11,11)).medAdresse("Vei").build();
+            .medFødselsdato(LocalDate.of(1991, 11, 11)).medAdresse("Vei").build();
         BARN_PINFO = new Personinfo.Builder().medAktørId(BARN_AKTØR_ID).medPersonIdent(BARN_IDENT).medFødselsdato(BARN_FØDT)
             .medNavn("Dunk junior d.y.").medAdresse("Vei").build();
 
@@ -204,8 +204,8 @@ public class EnhetsTjenesteTest {
         }).when(arbeidsfordelingTjeneste).finnEnhet(Mockito.any());
 
         when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(MOR_IDENT))
-            .thenReturn(barnKode6 || (annenPartKode6 && foreldreRelatertTps) ? Collections.singletonList(relatertKode6): Collections.emptyList());
-        when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(FAR_IDENT)).thenReturn(annenPartKode6 ? Collections.singletonList(relatertKode6): Collections.emptyList());
+            .thenReturn(barnKode6 || (annenPartKode6 && foreldreRelatertTps) ? Collections.singletonList(relatertKode6) : Collections.emptyList());
+        when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(FAR_IDENT)).thenReturn(annenPartKode6 ? Collections.singletonList(relatertKode6) : Collections.emptyList());
     }
 
 }
