@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.person.pdl;
 
 import static java.util.Map.entry;
 import static java.util.Map.ofEntries;
+import static java.util.stream.Collectors.joining;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -238,21 +239,49 @@ public class PersoninfoTjeneste {
         String sivstand = Objects.equals(tps.getSivilstandType(), pdl.getSivilstandType()) ? "" : " sivilst " + tps.getSivilstandType().getKode() + " PDL " + pdl.getSivilstandType().getKode();
         String land = Objects.equals(tps.getLandkode(), pdl.getLandkode()) ? "" : " land " + tps.getLandkode().getKode() + " PDL " + pdl.getLandkode().getKode();
         String region = Objects.equals(tps.getRegion(), pdl.getRegion()) ? "" : " region " + tps.getRegion().getKode() + " PDL " + pdl.getRegion().getKode();
-        String frel = pdl.getFamilierelasjoner().size() == tps.getFamilierelasjoner().size() && pdl.getFamilierelasjoner().containsAll(tps.getFamilierelasjoner()) ?
-            "" : " famrel ";
-        return "Avvik" + navn + kjonn + fdato + ddato + status + sivstand + land + region + frel;
+
+        int famRelPdlSize = pdl.getFamilierelasjoner().size();
+        int famRelTpsSize = tps.getFamilierelasjoner().size();
+        boolean famRelSammeAntall = famRelPdlSize == famRelTpsSize;
+        String famRelAntall = famRelSammeAntall ? "" : String.format(" antall familierelasjon:  PDL=%s  TPS=%s", famRelPdlSize, famRelTpsSize);
+        String famRelAvvik = famRelSammeAntall ? sammenligneFamilierelasjoner(tps, pdl) : "";
+
+        return "Avvik" + navn + kjonn + fdato + ddato + status + sivstand + land + region + famRelAntall + famRelAvvik;
+    }
+
+    private String sammenligneFamilierelasjoner(Personinfo tps, Personinfo pdl) {
+        var pdlRelasjoner =
+            pdl.getFamilierelasjoner()
+                .stream()
+                .collect(Collectors.toMap(famrel -> famrel.getPersonIdent(), famrel -> famrel));
+        return tps.getFamilierelasjoner().stream()
+            .map(tpsRel -> {
+                    var pdlRelasjon = pdlRelasjoner.get(tpsRel.getPersonIdent());
+                    if (pdlRelasjon == null) {
+                        return " familierelasjon-ident-mismatch ";
+                    }
+                    if (!pdlRelasjon.getRelasjonsrolle().equals(tpsRel.getRelasjonsrolle())) {
+                        return " familierelasjon-relasjonsrolle-mismatch ";
+                    }
+                    if (pdlRelasjon.getHarSammeBosted() != tpsRel.getHarSammeBosted()) {
+                        return " familierelasjon-sammeBosted-mismatch ";
+                    }
+                    return "";
+                }
+            )
+            .collect(joining(""));
     }
 
     private void logInnUtOpp(List<InnflyttingTilNorge> inn, List<UtflyttingFraNorge> ut, List<Opphold> opp) {
-        String inns = inn.stream().map(InnflyttingTilNorge::getFraflyttingsland).collect(Collectors.joining(", "));
-        String uts = ut.stream().map(UtflyttingFraNorge::getTilflyttingsland).collect(Collectors.joining(", "));
+        String inns = inn.stream().map(InnflyttingTilNorge::getFraflyttingsland).collect(joining(", "));
+        String uts = ut.stream().map(UtflyttingFraNorge::getTilflyttingsland).collect(joining(", "));
         String opps = opp.stream().map(o -> "OppholdType=" + o.getType().toString() + " Fra=" + o.getOppholdFra() + " Til=" + o.getOppholdTil())
-            .collect(Collectors.joining(", "));
+            .collect(joining(", "));
         if (!inn.isEmpty() || !ut.isEmpty()) {
-            LOG.info("FPSAK PDL FULL inn {} ut {}", inns, uts);
+            LOG.info("K9SAK PDL full inn {} ut {}", inns, uts);
         }
         if (!opp.isEmpty()) {
-            LOG.info("FPSAK PDL FULL opphold {}", opps);
+            LOG.info("K9SAK PDL full opphold {}", opps);
         }
     }
 
