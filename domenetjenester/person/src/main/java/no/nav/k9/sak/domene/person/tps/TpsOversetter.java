@@ -246,8 +246,7 @@ public class TpsOversetter {
         no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(personIdent.getIdent().getIdent());
         Boolean harSammeBosted = familierelasjon.isHarSammeBosted();
 
-        return new Familierelasjon(ident, relasjonsrolle,
-            tilLocalDate(familierelasjon.getTilPerson().getFoedselsdato()), adresse, harSammeBosted);
+        return new Familierelasjon(ident, relasjonsrolle, harSammeBosted);
     }
 
     private NavBrukerKjønn tilBrukerKjønn(Kjoenn kjoenn) {
@@ -357,5 +356,6 @@ public class TpsOversetter {
             .medNavBrukerKjønn(kjønn)
             .medPersonstatusType(personstatus)
             .medDiskresjonsKode(diskresjonskode)
-            .build();    }
+            .build();
+    }
 }

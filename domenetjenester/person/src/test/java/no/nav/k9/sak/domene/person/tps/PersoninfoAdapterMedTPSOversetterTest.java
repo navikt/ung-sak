@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -100,6 +101,8 @@ class PersoninfoAdapterMedTPSOversetterTest {
     private PersonConsumer personConsumer;
     @Mock
     private PersonBasisTjeneste personBasisTjeneste;
+    @Mock
+    private PersoninfoTjeneste personinfoTjeneste;
 
     private TpsAdapter tpsAdapter;
 
@@ -118,7 +121,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
         tpsAdapter = new TpsAdapterImpl(aktørTjeneste, personConsumer, tpsOversetter);
-        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste);
+        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste);
     }
 
     @Test
