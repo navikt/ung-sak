@@ -130,7 +130,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         arbeidsforhold.addAll(utledArbeidsforholdFraArbeidsforholdInformasjon(filter,
             overstyringer, alleYrkesaktiviteter, inntektsmeldingerForGrunnlag, skjæringstidspunkt));
 
-        sjekkHarAksjonspunktForVurderArbeidsforhold(ref, arbeidsforhold, param.getVurderArbeidsforhold());
+        sjekkHarAksjonspunktForVurderArbeidsforhold(ref, arbeidsforhold, param.getVurderArbeidsforhold(), iayGrunnlag);
 
         return arbeidsforhold;
     }
@@ -152,15 +152,21 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         utledArbeidsforholdFraArbeidsforholdInformasjon(arbeidsforhold, filter.getArbeidsforholdOverstyringer(), arbeidsforholdInformasjon);
 
         if (param.getVurderArbeidsforhold()) {
-            markerArbeidsforholdMedAksjonspunktÅrsaker(arbeidsforhold, ref, arbeidsforholdInformasjon);
+            markerArbeidsforholdMedAksjonspunktÅrsaker(arbeidsforhold, ref, arbeidsforholdInformasjon, iayGrunnlag);
         }
 
         return arbeidsforhold;
     }
 
-    private void markerArbeidsforholdMedAksjonspunktÅrsaker(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> arbeidsforhold, BehandlingReferanse ref, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
+    private void markerArbeidsforholdMedAksjonspunktÅrsaker(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> arbeidsforhold, BehandlingReferanse ref, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon, InntektArbeidYtelseGrunnlag grunnlag) {
         if (!arbeidsforhold.isEmpty()) {
-            var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref).entrySet().stream().filter(it -> it.getValue().stream().anyMatch(at -> !at.getÅrsaker().isEmpty())).collect(Collectors.toList());
+            var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag)
+                .entrySet()
+                .stream()
+                .filter(it -> it.getValue()
+                    .stream()
+                    .anyMatch(at -> !at.getÅrsaker().isEmpty()))
+                .collect(Collectors.toList());
             vurderinger.forEach(entry -> mapVurdering(arbeidsforhold, entry, arbeidsforholdInformasjon));
         }
     }
@@ -272,9 +278,9 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     }
 
     private void sjekkHarAksjonspunktForVurderArbeidsforhold(BehandlingReferanse ref, Set<ArbeidsforholdWrapper> arbeidsforhold,
-                                                             boolean vurderArbeidsforhold) {
+                                                             boolean vurderArbeidsforhold, InntektArbeidYtelseGrunnlag grunnlag) {
         if (vurderArbeidsforhold && !arbeidsforhold.isEmpty()) {
-            final Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref);
+            final Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
             for (ArbeidsforholdWrapper arbeidsforholdWrapper : arbeidsforhold) {
                 for (Map.Entry<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetEntry : vurder.entrySet()) {
                     if (erAksjonspunktPå(arbeidsforholdWrapper, arbeidsgiverSetEntry)) {

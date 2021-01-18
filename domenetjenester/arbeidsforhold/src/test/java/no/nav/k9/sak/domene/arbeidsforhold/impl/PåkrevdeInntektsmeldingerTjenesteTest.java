@@ -26,7 +26,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
@@ -55,7 +54,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
     public void setup(){
 
         repositoryProvider = new IAYRepositoryProvider(entityManager);
-        påkrevdeInntektsmeldingerTjeneste = new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, new AbakusInMemoryInntektArbeidYtelseTjeneste(), repositoryProvider.getSøknadRepository());
+        påkrevdeInntektsmeldingerTjeneste = new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository());
     }
 
     @Test
@@ -73,7 +72,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
 
         // Assert
         assertThat(result).isEmpty();
@@ -96,7 +95,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
 
         // Assert
         assertMap(result, virksomhet, ref1, ref2);
@@ -119,7 +118,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse.fra(behandling));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
 
         // Assert
         assertMap(result, person, ref1, ref2);

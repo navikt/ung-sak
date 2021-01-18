@@ -1,13 +1,35 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
+import static java.util.stream.Collectors.flatMapping;
+
+import java.time.Duration;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsforhold.impl.*;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingVurderingInput;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -17,17 +39,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.time.Duration;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.flatMapping;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -51,15 +62,16 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse behandlingReferanse) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(InntektsmeldingVurderingInput input) {
         return Map.of();
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erMottattInntektsmeldingUtenArbeidsforhold(BehandlingReferanse behandlingReferanse) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erMottattInntektsmeldingUtenArbeidsforhold(InntektsmeldingVurderingInput input) {
         var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
+        var behandlingReferanse = input.getReferanse();
 
-        var grunnlagOptional = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId());
+        var grunnlagOptional = Optional.ofNullable(input.getGrunnlag());
         if (grunnlagOptional.isEmpty()) {
             return result;
         }
@@ -119,7 +131,8 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(BehandlingReferanse behandlingReferanse) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(InntektsmeldingVurderingInput input) {
+        var behandlingReferanse = input.getReferanse();
         var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
         var fraværFraInntektsmeldingerPåFagsak = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandling);
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);

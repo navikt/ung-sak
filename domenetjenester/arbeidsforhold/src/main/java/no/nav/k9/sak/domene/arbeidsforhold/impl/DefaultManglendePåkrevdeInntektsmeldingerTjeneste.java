@@ -18,11 +18,11 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.util.Tuple;
@@ -34,7 +34,6 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultManglendePåkrevdeInntektsmeldingerTjeneste.class);
 
     private InntektsmeldingRegisterTjeneste inntektsmeldingTjeneste;
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SøknadRepository søknadRepository;
 
     DefaultManglendePåkrevdeInntektsmeldingerTjeneste() {
@@ -43,16 +42,15 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
 
     @Inject
     public DefaultManglendePåkrevdeInntektsmeldingerTjeneste(InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste,
-                                                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                              SøknadRepository søknadRepository) {
         this.inntektsmeldingTjeneste = inntektsmeldingArkivTjeneste;
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.søknadRepository = søknadRepository;
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(BehandlingReferanse behandlingReferanse) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(InntektsmeldingVurderingInput input) {
         var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
+        var behandlingReferanse = input.getReferanse();
         boolean erEndringssøknad = erEndringssøknad(behandlingReferanse);
         boolean erIkkeEndringssøknad = !erEndringssøknad;
 
@@ -68,16 +66,20 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erMottattInntektsmeldingUtenArbeidsforhold(BehandlingReferanse behandlingReferanse) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erMottattInntektsmeldingUtenArbeidsforhold(InntektsmeldingVurderingInput input) {
         var result = new HashMap<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>>();
-        var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getBehandlingId());
+        var grunnlagOpt = Optional.ofNullable(input.getGrunnlag());
+        if (grunnlagOpt.isEmpty()) {
+            return result;
+        }
+        var grunnlag = grunnlagOpt.get();
         final Optional<InntektsmeldingAggregat> inntektsmeldinger = grunnlag.getInntektsmeldinger();
         if (inntektsmeldinger.isPresent()) {
             final InntektsmeldingAggregat aggregat = inntektsmeldinger.get();
             for (Inntektsmelding inntektsmelding : aggregat.getInntektsmeldingerSomSkalBrukes()) {
-                final Tuple<Long, Long> antallArbeidsforIArbeidsgiveren = antallArbeidsforHosArbeidsgiveren(behandlingReferanse, grunnlag,
+                final Tuple<Long, Long> antallArbeidsforIArbeidsgiveren = antallArbeidsforHosArbeidsgiveren(grunnlag,
                     inntektsmelding.getArbeidsgiver(),
-                    inntektsmelding.getArbeidsforholdRef());
+                    inntektsmelding.getArbeidsforholdRef(), input.getReferanse().getAktørId(), input.getReferanse().getUtledetSkjæringstidspunkt());
                 if (antallArbeidsforIArbeidsgiveren.getElement1() == 0 && antallArbeidsforIArbeidsgiveren.getElement2() == 0
                     && IkkeTattStillingTil.vurder(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef(), grunnlag)) {
                     final Arbeidsgiver arbeidsgiver = inntektsmelding.getArbeidsgiver();
@@ -91,7 +93,7 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
     }
 
     @Override
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(BehandlingReferanse ref) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(InntektsmeldingVurderingInput input) {
         return Map.of();
     }
 
@@ -104,11 +106,9 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
             .count();
     }
 
-    private Tuple<Long, Long> antallArbeidsforHosArbeidsgiveren(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag grunnlag,
-                                                                Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        LocalDate skjæringstidspunkt = behandlingReferanse.getUtledetSkjæringstidspunkt();
-
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
+    private Tuple<Long, Long> antallArbeidsforHosArbeidsgiveren(InntektArbeidYtelseGrunnlag grunnlag,
+                                                                Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, AktørId aktørId, LocalDate skjæringstidspunkt) {
+        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
         long antallFør = antallArbeidsfor(arbeidsgiver, arbeidsforholdRef, filter.før(skjæringstidspunkt));
         long antallEtter = antallArbeidsfor(arbeidsgiver, arbeidsforholdRef, filter.etter(skjæringstidspunkt));
