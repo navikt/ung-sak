@@ -63,7 +63,10 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
             var referanse = BehandlingReferanse.fra(behandling);
 
             // Henter søkte perioder
-            var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårene.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder()));
+            var vilkårResultatBuilder = vilkårene
+                .map(Vilkårene::builderFraEksisterende)
+                .orElse(Vilkårene.builder());
+            var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårResultatBuilder);
 
             Vilkårene oppdatertVilkår = resultatBuilder.build();
             vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår);

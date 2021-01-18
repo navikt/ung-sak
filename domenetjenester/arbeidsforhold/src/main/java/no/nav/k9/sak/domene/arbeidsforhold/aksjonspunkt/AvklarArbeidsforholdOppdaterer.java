@@ -17,9 +17,11 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdAksjonspunktÅrsak;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -59,7 +61,7 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         var informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
         var arbeidsforholdInfo = arbeidsforholdTjeneste.hentArbeidsforhold(param.getRef(), grunnlag, new ArbeidsforholdAdministrasjonTjeneste.UtledArbeidsforholdParametere(true))
             .stream()
-            .filter(it -> !it.getAksjonspunktÅrsaker().isEmpty() || it.getKilde().contains(ArbeidsforholdKilde.SAKSBEHANDLER))
+            .filter(it -> harAksjonspunktForInntektsmeldingUtenArbeidsforhold(it) || harVærtHåndtertVedAksjonspunktFør(it))
             .collect(Collectors.toSet());
 
         var dtoerMedAvklaring = arbeidsforhold.stream()
@@ -76,6 +78,14 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         arbeidsforholdTjeneste.lagre(param.getBehandlingId(), param.getAktørId(), informasjonBuilder);
         return OppdateringResultat.utenTransisjon().medTotrinn().build();
 
+    }
+
+    private boolean harVærtHåndtertVedAksjonspunktFør(no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto it) {
+        return it.getKilde().contains(ArbeidsforholdKilde.SAKSBEHANDLER);
+    }
+
+    private boolean harAksjonspunktForInntektsmeldingUtenArbeidsforhold(no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto it) {
+        return it.getAksjonspunktÅrsaker().contains(ArbeidsforholdAksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD);
     }
 
     private void lagHistorikkinnslag(AvklarArbeidsforholdDto arbeidsforholdDto) {

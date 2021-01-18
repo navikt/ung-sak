@@ -67,8 +67,6 @@ import no.nav.vedtak.konfig.Tid;
 @CdiDbAwareTest
 public class AvklarArbeidsforholdOppdatererTest {
 
-    private static final String NAV_ORGNR = "889640782";
-
     private IAYRepositoryProvider repositoryProvider;
 
     @Inject
