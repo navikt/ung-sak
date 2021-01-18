@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -30,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdAdministrasjonTjeneste;
@@ -85,12 +88,12 @@ public class AvklarArbeidsforholdOppdatererTest {
     public void oppsett() {
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         var arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
-        ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
+        var arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
             vurderArbeidsforholdTjeneste,
             arbeidsgiverTjeneste,
             iayTjeneste);
         var arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
-        ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
+        var arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         oppdaterer = new AvklarArbeidsforholdOppdaterer(
             arbeidsforholdAdministrasjonTjeneste,
             iayTjeneste,
@@ -123,7 +126,6 @@ public class AvklarArbeidsforholdOppdatererTest {
         nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
         nyttArbeidsforhod.setArbeidsgiver(arbeidsgiver);
         nyttArbeidsforhod.setNavn(navn);
-        nyttArbeidsforhod.setArbeidsgiver(Arbeidsgiver.virksomhet(NAV_ORGNR));
         nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING);
         nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
 
@@ -158,6 +160,11 @@ public class AvklarArbeidsforholdOppdatererTest {
         Collection<AktivitetsAvtale> aktivitetsAvtaler = filter.getAktivitetsAvtalerForArbeid();
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
+
+        var ref = BehandlingReferanse.fra(behandling);
+        var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
+
+        assertThat(vurder).isEmpty();
     }
 
     @Test
@@ -185,7 +192,6 @@ public class AvklarArbeidsforholdOppdatererTest {
         nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
         nyttArbeidsforhod.setArbeidsgiver(arbeidsgiver);
         nyttArbeidsforhod.setNavn(navn);
-        nyttArbeidsforhod.setArbeidsgiver(Arbeidsgiver.virksomhet(NAV_ORGNR));
         nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING);
 
         List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
@@ -219,6 +225,12 @@ public class AvklarArbeidsforholdOppdatererTest {
         Collection<AktivitetsAvtale> aktivitetsAvtaler = filter.getAktivitetsAvtalerForArbeid();
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
+
+        var ref = BehandlingReferanse.fra(behandling);
+        var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
+
+        // Sjekker om aksjonspunktet er løst
+        assertThat(vurder).isEmpty();
     }
 
     private InntektArbeidYtelseGrunnlag hentGrunnlag(Behandling behandling) {
