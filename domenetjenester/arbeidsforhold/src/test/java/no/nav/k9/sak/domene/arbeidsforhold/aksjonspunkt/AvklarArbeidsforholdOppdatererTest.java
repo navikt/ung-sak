@@ -161,7 +161,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
 
-        var ref = BehandlingReferanse.fra(behandling);
+        var ref = BehandlingReferanse.fra(behandling, stp);
         var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
 
         assertThat(vurder).isEmpty();
@@ -226,7 +226,7 @@ public class AvklarArbeidsforholdOppdatererTest {
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
 
-        var ref = BehandlingReferanse.fra(behandling);
+        var ref = BehandlingReferanse.fra(behandling, stp);
         var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
 
         // Sjekker om aksjonspunktet er løst
