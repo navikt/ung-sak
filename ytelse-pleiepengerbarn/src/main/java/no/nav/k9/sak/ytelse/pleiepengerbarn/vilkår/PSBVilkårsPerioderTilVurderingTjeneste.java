@@ -62,8 +62,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
         return vilkår.getPerioder()
             .stream()
-            .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p)))
             .map(VilkårPeriode::getPeriode)
+            .filter(datoIntervallEntitet -> perioder.stream().anyMatch(datoIntervallEntitet::overlapper))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 

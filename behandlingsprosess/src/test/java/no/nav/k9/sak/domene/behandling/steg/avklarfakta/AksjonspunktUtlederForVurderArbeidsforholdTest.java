@@ -83,8 +83,8 @@ public class AksjonspunktUtlederForVurderArbeidsforholdTest {
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
         inntektsmeldingArkivTjeneste = new InntektsmeldingRegisterTjeneste(iayTjeneste, inntektsmeldingTjeneste, null, new UnitTestLookupInstanceImpl<>(new InntektsmeldingFilterYtelseImpl()));
-        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, iayTjeneste, repositoryProvider.getSøknadRepository()));
-        tjeneste = new VurderArbeidsforholdTjeneste(påkrevdeInntektsmeldingerTjeneste);
+        påkrevdeInntektsmeldingerTjeneste = new UnitTestLookupInstanceImpl<>(new DefaultManglendePåkrevdeInntektsmeldingerTjeneste(inntektsmeldingArkivTjeneste, repositoryProvider.getSøknadRepository()));
+        tjeneste = new VurderArbeidsforholdTjeneste(iayTjeneste, påkrevdeInntektsmeldingerTjeneste);
 
         utleder = new AksjonspunktUtlederForVurderArbeidsforhold(
             iayTjeneste,
