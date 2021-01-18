@@ -24,14 +24,12 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarArbeidsforhold.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<AvklarArbeidsforhold> {
 
-    private static final String FIKTIVT_ORG = OrgNummer.KUNSTIG_ORG;
     private ArbeidsforholdAdministrasjonTjeneste arbeidsforholdTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste;

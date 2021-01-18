@@ -100,7 +100,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     /**
      * Avsjekk arbeidsforhold mot inntektsmeldinger.
+     *
+     *
+     * @deprecated erstattes
      */
+    @Deprecated
     public Set<ArbeidsforholdWrapper> hentArbeidsforholdFerdigUtledet(BehandlingReferanse ref,
                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                       UtledArbeidsforholdParametere param) {
@@ -166,6 +170,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                 .filter(it -> it.getValue()
                     .stream()
                     .anyMatch(at -> !at.getÅrsaker().isEmpty()))
+                .distinct()
                 .collect(Collectors.toList());
             vurderinger.forEach(entry -> mapVurdering(arbeidsforhold, entry, arbeidsforholdInformasjon));
         }
