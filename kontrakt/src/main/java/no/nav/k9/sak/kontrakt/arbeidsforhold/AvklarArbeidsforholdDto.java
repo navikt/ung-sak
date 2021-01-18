@@ -43,18 +43,19 @@ public class AvklarArbeidsforholdDto {
     @JsonProperty(value = "arbeidsforhold", required = true)
     private ArbeidsforholdIdDto arbeidsforhold;
 
-    @JsonProperty(value = "handlingType", required = true)
     @NotNull
     @Valid
+    @JsonProperty(value = "handlingType", required = true)
     private ArbeidsforholdHandlingType handlingType = ArbeidsforholdHandlingType.BRUK;
 
-    @JsonProperty(value = "navn")
     @Size(max = 100)
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @JsonProperty(value = "navn")
     private String navn;
 
-    @JsonProperty(value = "perioder")
     @Size
+    @Valid
+    @JsonProperty(value = "perioder")
     private Set<PeriodeDto> ansettelsesPerioder;
 
     @JsonProperty(value = "stillingsprosent")
