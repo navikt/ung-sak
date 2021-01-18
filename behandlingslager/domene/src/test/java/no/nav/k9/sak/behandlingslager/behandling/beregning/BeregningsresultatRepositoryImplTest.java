@@ -29,7 +29,7 @@ public class BeregningsresultatRepositoryImplTest {
 
     private static final String ORGNR = "55";
 
-    private static final LocalDate DAGENSDATO = LocalDate.now().withMonth(2);
+    private static final LocalDate DAGENSDATO = LocalDate.now().withDayOfMonth(15).withMonth(2);
 
     @RegisterExtension
     public static final JpaExtension extension = new JpaExtension();
