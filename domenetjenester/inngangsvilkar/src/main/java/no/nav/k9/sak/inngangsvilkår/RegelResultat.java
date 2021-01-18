@@ -65,19 +65,7 @@ public class RegelResultat {
             .flatMap(Collection::stream)
             .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
             .collect(Collectors.toList());
-        return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT));
-    }
-
-    public boolean vilkårErInnvilget(LocalDate fom, LocalDate tom, VilkårType vilkårType) {
-        final var berørtePerioder = vilkårene
-            .getVilkårene()
-            .stream()
-            .filter(v -> v.getVilkårType().equals(vilkårType))
-            .map(Vilkår::getPerioder)
-            .flatMap(Collection::stream)
-            .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
-            .collect(Collectors.toList());
-        return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT));
+        return berørtePerioder.stream().noneMatch(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT));
     }
 
     public boolean vilkårErIkkeOppfylt(LocalDate fom, LocalDate tom, VilkårType vilkårType) {
@@ -89,7 +77,7 @@ public class RegelResultat {
             .flatMap(Collection::stream)
             .filter(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
             .collect(Collectors.toList());
-        return berørtePerioder.stream().noneMatch(it -> it.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
+        return berørtePerioder.stream().noneMatch(it -> it.getUtfall().equals(Utfall.OPPFYLT));
     }
 
     @Override
