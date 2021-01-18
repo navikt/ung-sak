@@ -29,7 +29,7 @@ public class BeregningsresultatRepositoryImplTest {
 
     private static final String ORGNR = "55";
 
-    private static final LocalDate DAGENSDATO = LocalDate.now();
+    private static final LocalDate DAGENSDATO = LocalDate.now().withDayOfMonth(15).withMonth(2);
 
     @RegisterExtension
     public static final JpaExtension extension = new JpaExtension();
@@ -300,7 +300,7 @@ public class BeregningsresultatRepositoryImplTest {
 
     private BeregningsresultatPeriode buildBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat) {
         return BeregningsresultatPeriode.builder()
-            .medBeregningsresultatPeriodeFomOgTom(LocalDate.now().minusDays(20), LocalDate.now().minusDays(15))
+            .medBeregningsresultatPeriodeFomOgTom(DAGENSDATO.minusDays(20), DAGENSDATO.minusDays(15))
             .build(beregningsresultat);
     }
 
