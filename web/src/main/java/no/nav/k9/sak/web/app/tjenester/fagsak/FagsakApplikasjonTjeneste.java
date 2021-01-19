@@ -46,7 +46,6 @@ public class FagsakApplikasjonTjeneste {
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                      TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter) {
-
         this.fagsakRespository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
