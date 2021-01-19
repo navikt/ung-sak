@@ -1,7 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -16,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.AndelKilde;
+import no.nav.k9.kodeverk.beregningsgrunnlag.AndelKilde;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 

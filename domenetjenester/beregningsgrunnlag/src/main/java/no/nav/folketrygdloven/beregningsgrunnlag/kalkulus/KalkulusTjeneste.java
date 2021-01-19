@@ -35,7 +35,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
@@ -206,30 +205,47 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
      * @return Respons fra kalkulus
      */
     private TilstandListeResponse fortsettMedOppdatertInput(BehandlingReferanse referanse,
-                                                            Collection<BgRef> bgReferanser, BehandlingStegType stegType,
+                                                            Collection<BgRef> bgReferanser,
+                                                            BehandlingStegType stegType,
                                                             YtelseTyperKalkulusStøtterKontrakt ytelseType) {
-        FortsettBeregningListeRequest request;
-        TilstandListeResponse tilstandResponse;
-        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-
-        Map<UUID, LocalDate> stpMap = bgReferanser.stream().collect(Collectors.toMap(BgRef::getRef, BgRef::getStp));
-        Map<UUID, KalkulatorInputDto> input = getReferanseTilInputMap(referanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, stpMap);
-        List<UUID> referanser = bgReferanser.stream().map(BgRef::getRef).collect(Collectors.toList());
-        request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), referanser, input, ytelseType, new StegType(stegType.getKode()));
-        tilstandResponse = restTjeneste.fortsettBeregning(request);
-        return tilstandResponse;
+        Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
+        List<UUID> referanser = BgRef.getRefs(bgReferanser);
+        var request = new FortsettBeregningListeRequest(referanse.getSaksnummer().getVerdi(), referanser, input, ytelseType, new StegType(stegType.getKode()));
+        return restTjeneste.fortsettBeregning(request);
     }
 
     @Override
-    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterberegningMap) {
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse,
+                                                                           Collection<BgRef> bgReferanser,
+                                                                           Map<UUID, HåndterBeregningDto> håndterberegningMap) {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
-        OppdateringListeRespons oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe, behandlingReferanse.getBehandlingUuid()));
+        var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe, behandlingReferanse.getBehandlingUuid()));
+        if (oppdateringRespons.trengerNyInput()) {
+            oppdateringRespons = oppdaterMedOppdatertInput(requestListe, bgReferanser, behandlingReferanse);
+        }
         return oppdateringRespons.getOppdateringer().stream()
             .map(oppdatering -> MapEndringsresultat.mapFraOppdateringRespons(oppdatering.getOppdatering(), oppdatering.getEksternReferanse()))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Kalkulus lagrer input, men kan kreve oppdatert input i enkelte situasjoner der kontrakten har endret seg.
+     * I slike tilfeller må k9-sak kalle kalkulus med oppdatert input pr referanse
+     * <p>
+     * Metoden bygger kalkulatorinput med den gjeldende kontrakten og kaller oppdater hos kalkulus.
+     *
+     * @param requestListe requester for oppdatering
+     * @param bgReferanser referanser til bg
+     * @param referanse    Behandlingreferanse
+     * @return Respons fra kalkulus
+     */
+    private OppdateringListeRespons oppdaterMedOppdatertInput(List<HåndterBeregningRequest> requestListe,
+                                                              Collection<BgRef> bgReferanser,
+                                                              BehandlingReferanse referanse) {
+        Map<UUID, KalkulatorInputDto> input = lagInputMap(bgReferanser, referanse);
+        var request = new HåndterBeregningListeRequest(requestListe, input, referanse.getSaksnummer().getVerdi(), referanse.getBehandlingUuid());
+        return restTjeneste.oppdaterBeregningListe(request);
     }
 
     @Override
@@ -348,6 +364,15 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()));
     }
 
+    private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {
+        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+
+        Map<UUID, LocalDate> stpMap = bgReferanser.stream().collect(Collectors.toMap(BgRef::getRef, BgRef::getStp));
+        return getReferanseTilInputMap(referanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, stpMap);
+    }
+
     private Map<UUID, KalkulatorInputDto> getReferanseTilInputMap(BehandlingReferanse behandlingReferanse,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger,
@@ -355,20 +380,23 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                                   Map<UUID, LocalDate> referanseSkjæringstidspunktMap) {
         Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
-        return referanseSkjæringstidspunktMap.entrySet().stream().map(entry -> {
-            UUID bgReferanse = entry.getKey();
-            var vilkårsPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue()).getPeriode();
-            var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriode);
-            return new AbstractMap.SimpleEntry<>(bgReferanse,
-                kalkulatorInputTjeneste.byggDto(
-                    behandlingReferanse,
-                    bgReferanse,
-                    iayGrunnlag,
-                    sakInntektsmeldinger,
-                    refusjonskravDatoer,
-                    ytelsesGrunnlag,
-                    vilkårsPeriode));
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        return referanseSkjæringstidspunktMap.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByValue())
+            .map(entry -> {
+                UUID bgReferanse = entry.getKey();
+                var vilkårsPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue()).getPeriode();
+                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriode);
+                return new AbstractMap.SimpleEntry<>(bgReferanse,
+                    kalkulatorInputTjeneste.byggDto(
+                        behandlingReferanse,
+                        bgReferanse,
+                        iayGrunnlag,
+                        sakInntektsmeldinger,
+                        refusjonskravDatoer,
+                        ytelsesGrunnlag,
+                        vilkårsPeriode));
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {

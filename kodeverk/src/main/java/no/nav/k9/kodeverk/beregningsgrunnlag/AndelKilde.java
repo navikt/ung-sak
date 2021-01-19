@@ -1,4 +1,4 @@
-package no.nav.k9.kodeverk.arbeidsforhold;
+package no.nav.k9.kodeverk.beregningsgrunnlag;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
