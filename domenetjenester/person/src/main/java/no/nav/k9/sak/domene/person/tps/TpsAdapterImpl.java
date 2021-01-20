@@ -8,7 +8,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
@@ -26,7 +25,6 @@ import no.nav.tjeneste.virksomhet.person.v3.feil.Kodeverdi;
 import no.nav.tjeneste.virksomhet.person.v3.feil.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Periode;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
@@ -66,8 +64,7 @@ public class TpsAdapterImpl implements TpsAdapter {
             return Optional.empty();
         }
         try {
-            Optional<AktørId> aktørId = aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
-            return aktørId;
+            return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
         } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
             // Her sorterer vi ut dødfødte barn
             return Optional.empty();
@@ -212,47 +209,6 @@ public class TpsAdapterImpl implements TpsAdapter {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
             throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
-        }
-    }
-
-    @Override
-    public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = hentIdentForAktørId(aktørId);
-        if (personIdent.isEmpty()) {
-            throw TpsFeilmeldinger.FACTORY.fantIkkePersonForAktørId().toException();
-        }
-        HentPersonRequest request = new HentPersonRequest();
-        request.setAktoer(TpsUtil.lagPersonIdent(personIdent.get().getIdent()));
-        request.getInformasjonsbehov().add(Informasjonsbehov.FAMILIERELASJONER);
-        try {
-            HentPersonResponse response = personConsumer.hentPersonResponse(request);
-            Person person = response.getPerson();
-            return person.getHarFraRolleI()
-                .stream()
-                .filter(rel -> tpsOversetter.erBarnRolle(rel.getTilRolle()))
-                .map(this::mapTilInfo)
-                .collect(Collectors.toList());
-        } catch (HentPersonPersonIkkeFunnet e) {
-            throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
-        } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
-        }
-    }
-
-    private FødtBarnInfo mapTilInfo(Familierelasjon familierelasjon) {
-        String identNr = ((no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent) familierelasjon.getTilPerson().getAktoer()).getIdent().getIdent();
-        no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(identNr);
-        if (ident.erFdatNummer()) {
-            return tpsOversetter.relasjonTilPersoninfo(familierelasjon);
-        } else {
-            final PersonIdent fra = PersonIdent.fra(identNr);
-            Optional<AktørId> aktørId = hentAktørIdForPersonIdent(fra);
-            if (aktørId.isEmpty()) {
-                return tpsOversetter.relasjonTilPersoninfo(familierelasjon);
-            }
-
-            final Personinfo personinfo = hentKjerneinformasjon(fra, aktørId.get());
-            return tpsOversetter.tilFødteBarn(personinfo);
         }
     }
 }

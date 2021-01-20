@@ -121,7 +121,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
         tpsAdapter = new TpsAdapterImpl(aktørTjeneste, personConsumer, tpsOversetter);
-        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste);
+        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
     }
 
     @Test

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -48,7 +49,8 @@ public class PersoninfoAdapterTest {
 
         PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
         PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
-        adapter = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste);
+        AktørTjeneste aktørTjeneste = mock(AktørTjeneste.class);
+        adapter = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
     }
 
     @Test

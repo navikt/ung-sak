@@ -26,7 +26,6 @@ import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
@@ -180,16 +179,6 @@ public class TpsTjenesteTest {
             }
             throw TpsFeilmeldinger.FACTORY.geografiskTilknytningIkkeFunnet(
                 new HentGeografiskTilknytningPersonIkkeFunnet("finner ikke person", new PersonIkkeFunnet())).toException();
-        }
-
-        @Override
-        public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
-            return Collections.singletonList(new FødtBarnInfo.Builder()
-                .medIdent(FNR)
-                .medNavn(NAVN)
-                .medNavBrukerKjønn(KVINNE)
-                .medFødselsdato(FØDSELSDATO)
-                .build());
         }
 
         @Override
