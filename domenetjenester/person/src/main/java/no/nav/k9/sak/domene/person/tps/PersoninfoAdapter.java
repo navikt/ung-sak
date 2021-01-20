@@ -44,7 +44,7 @@ public class PersoninfoAdapter {
     }
 
     public Optional<Personinfo> innhentSaksopplysninger(PersonIdent personIdent) {
-        Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
+        Optional<AktørId> aktørId = hentAktørIdForPersonIdent(personIdent);
 
         if (aktørId.isPresent()) {
             return hentKjerneinformasjonForBarn(aktørId.get(), personIdent);
@@ -64,7 +64,7 @@ public class PersoninfoAdapter {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
-        Optional<AktørId> optAktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
+        Optional<AktørId> optAktørId = hentAktørIdForPersonIdent(personIdent);
         if (optAktørId.isPresent()) {
             return hentKjerneinformasjonForBarn(optAktørId.get(), personIdent);
         }
@@ -103,6 +103,14 @@ public class PersoninfoAdapter {
         return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
     }
 
+    public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent) {
+        if (personIdent.erFdatNummer()) {
+            return Optional.empty();
+        }
+        return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
+    }
+
+
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
@@ -111,9 +119,9 @@ public class PersoninfoAdapter {
             return Optional.of(
                 hentKjerneinformasjon(aktørId, personIdent)
             );
-            // TODO Lag en skikkelig fiks på dette
             //Her sorterer vi ut dødfødte barn
         } catch (SOAPFaultException e) {
+            //TODO PDL vil aldri kaste denne feilen. Fjern derfor try/catch når TPS er fjernet
             if (e.getCause().getMessage().contains("status: S610006F")) {
                 return Optional.empty();
             }
@@ -127,6 +135,7 @@ public class PersoninfoAdapter {
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
+
         Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
 
         // Kaller på personinfoTjeneste som sammenligner resultat
