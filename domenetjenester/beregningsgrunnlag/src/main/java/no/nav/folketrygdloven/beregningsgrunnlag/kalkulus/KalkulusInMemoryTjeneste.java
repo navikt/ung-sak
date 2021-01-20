@@ -60,12 +60,12 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
+    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
     @Override
-    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap) {
+    public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Collection<BgRef> referanser, Map<UUID, HåndterBeregningDto> håndterMap) {
         return List.of();
     }
 

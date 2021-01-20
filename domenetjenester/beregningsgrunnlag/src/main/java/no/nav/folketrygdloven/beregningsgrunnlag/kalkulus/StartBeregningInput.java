@@ -1,34 +1,34 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class StartBeregningInput {
 
-    private final YtelsespesifiktGrunnlagDto ytelseGrunnlag;
-
     private final UUID bgReferanse;
 
-    private final LocalDate skjæringstidspunkt;
+    private final DatoIntervallEntitet vilkårsperiode;
 
-    public StartBeregningInput(UUID bgReferanse, LocalDate skjæringstidspunkt, YtelsespesifiktGrunnlagDto ytelseGrunnlag) {
+    public StartBeregningInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode) {
         this.bgReferanse = bgReferanse;
-        this.skjæringstidspunkt = skjæringstidspunkt;
-        this.ytelseGrunnlag = ytelseGrunnlag;
-    }
-
-    public YtelsespesifiktGrunnlagDto getYtelseGrunnlag() {
-        return ytelseGrunnlag;
+        this.vilkårsperiode = vilkårsperiode;
     }
 
     public UUID getBgReferanse() {
         return bgReferanse;
     }
 
+    public DatoIntervallEntitet getVilkårsperiode() {
+        return vilkårsperiode;
+    }
+
     public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
+        return vilkårsperiode.getFomDato();
     }
 
 }

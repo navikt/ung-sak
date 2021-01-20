@@ -21,7 +21,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;

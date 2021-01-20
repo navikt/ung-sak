@@ -10,13 +10,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FastsettBeregningsaktiviteterSteg;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -28,19 +26,17 @@ public class FastsettBeregningsaktiviteterStegTest {
     private @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper> instances;
 
     @Inject
-    @FagsakYtelseTypeRef
-    @BehandlingStegRef(kode = "FASTSETT_STP_BER")
-    @BehandlingTypeRef
-    private FastsettBeregningsaktiviteterSteg steg;
+    @FagsakYtelseTypeRef("FRISINN")
+    private KalkulusTjeneste tjeneste;
 
     @Disabled("venter på kalkulus ytelsespesifikt grunnlag")
     @Test
     public void skal_få_injected_steg() throws Exception {
-        assertThat(steg).isNotNull();
+        assertThat(tjeneste).isNotNull();
         assertThat(instances).isNotEmpty();
         var mapper = FagsakYtelseTypeRef.Lookup.find(instances, FagsakYtelseType.FRISINN);
         assertThat(mapper).isNotNull();
 
-        assertThat(steg.getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN)).isNotNull();
+        assertThat(tjeneste.getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN)).isNotNull();
     }
 }

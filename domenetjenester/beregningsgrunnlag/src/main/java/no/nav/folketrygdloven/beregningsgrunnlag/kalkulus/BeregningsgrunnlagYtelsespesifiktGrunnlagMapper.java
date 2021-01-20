@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
+package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

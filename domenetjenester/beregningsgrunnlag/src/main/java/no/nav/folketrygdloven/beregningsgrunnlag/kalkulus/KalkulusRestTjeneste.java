@@ -101,12 +101,11 @@ public class KalkulusRestTjeneste {
         }
     }
 
-    public List<TilstandResponse> fortsettBeregning(FortsettBeregningListeRequest request) {
+    public TilstandListeResponse fortsettBeregning(FortsettBeregningListeRequest request) {
         var endpoint = fortsettEndpoint;
 
         try {
-            TilstandListeResponse response = getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilstandReader);
-            return response.getTilstand();
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilstandReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }

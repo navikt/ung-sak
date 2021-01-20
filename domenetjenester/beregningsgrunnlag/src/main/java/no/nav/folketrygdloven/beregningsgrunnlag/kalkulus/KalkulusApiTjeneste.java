@@ -46,20 +46,20 @@ public interface KalkulusApiTjeneste {
      * Steg 5. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 6. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
-     * @param fagsakYtelseType
-     * @param saksnummer
-     * @param bgReferanse per skjæringstidspunkt
+     * @param behandlingReferanse behandlingreferanse
+     * @param bgReferanser per skjæringstidspunkt
      * @param stegType {@link BehandlingStegType}
      * @return KalkulusResultat {@link KalkulusResultat}
      */
-    SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType);
+    SamletKalkulusResultat fortsettBeregning(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType);
 
     /**
      * @param behandlingReferanse Behandlingreferanse
+     * @param bgReferanser Liste med referanser og skjæringstidspunkt
      * @param håndterMap Map med dto for håndtering av beregning aksjonspunkt
      * @return Liste av OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
-    List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Map<UUID, HåndterBeregningDto> håndterMap);
+    List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(BehandlingReferanse behandlingReferanse, Collection<BgRef> bgReferanser, Map<UUID, HåndterBeregningDto> håndterMap);
 
     List<Beregningsgrunnlag> hentEksaktFastsatt(BehandlingReferanse ref, Collection<BgRef> bgReferanse);
 

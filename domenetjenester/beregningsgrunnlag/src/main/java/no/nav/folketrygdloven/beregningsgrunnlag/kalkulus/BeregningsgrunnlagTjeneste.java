@@ -25,7 +25,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.BeregningsgrunnlagPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
@@ -38,6 +37,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -59,11 +59,14 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, Map<LocalDate, YtelsespesifiktGrunnlagDto> ytelseGrunnlag) {
-        if(ytelseGrunnlag == null || ytelseGrunnlag.isEmpty()){
-            throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
+    public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder) {
+        if(vilkårsperioder == null || vilkårsperioder.isEmpty()){
+            throw new IllegalArgumentException("Forventer minst en vilkårsperiode");
         }
-        var skjæringstidspunkter = new TreeSet<>(ytelseGrunnlag.keySet());
+        var skjæringstidspunkter = vilkårsperioder.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .collect(Collectors.toCollection(TreeSet::new));
+
         var bgReferanser = finnReferanseEllerLagNy(referanse.getBehandlingId(), skjæringstidspunkter, false, BehandlingType.REVURDERING.equals(referanse.getBehandlingType()));
 
         if (bgReferanser.size() != skjæringstidspunkter.size()) {
@@ -75,9 +78,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         var beregningInput = bgReferanser.stream().map(e -> {
             var bgRef = e.getRef();
             var stp = e.getStp();
-            var inputData = ytelseGrunnlag.get(stp);
+            var vilkårsperiode = vilkårsperioder.stream().filter(p -> p.getFomDato().equals(stp)).findFirst().orElseThrow();
             grunnlagRepository.lagre(referanse.getBehandlingId(), new BeregningsgrunnlagPeriode(bgRef, stp));
-            return new StartBeregningInput(bgRef, stp, inputData);
+            return new StartBeregningInput(bgRef, vilkårsperiode);
         }).collect(Collectors.toList());
 
         return finnTjeneste(referanse.getFagsakYtelseType()).startBeregning(referanse, beregningInput);
@@ -93,7 +96,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             throw new IllegalStateException("Mismatch størrelse bgReferanser: " + bgReferanser + ", skjæringstidspunkter:" + skjæringstidspunkter);
         }
         var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
-        return tjeneste.fortsettBeregning(ref.getFagsakYtelseType(), ref.getSaksnummer(), bgReferanser, stegType);
+        return tjeneste.fortsettBeregning(ref, bgReferanser, stegType);
     }
 
     @Override
@@ -123,11 +126,11 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             throw new IllegalStateException("Mismatch størrelse bgReferanser: " + bgReferanser + ", skjæringstidspunkter:" + sortertMap.keySet());
         }
 
-        Map<UUID, LocalDate> referanseTilStpMap = bgReferanser.stream().collect(Collectors.toMap(v -> v.getRef(), v -> v.getStp()));
+        Map<UUID, LocalDate> referanseTilStpMap = bgReferanser.stream().collect(Collectors.toMap(BgRef::getRef, BgRef::getStp));
 
         Map<LocalDate, UUID> stpTilReferanseMap = referanseTilStpMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey, (e1, e2) -> e1, TreeMap::new));
         Map<UUID, HåndterBeregningDto> referanseTilDtoMap = sortertMap.entrySet().stream().collect(Collectors.toMap(e -> stpTilReferanseMap.get(e.getKey()), Map.Entry::getValue));
-        List<OppdaterBeregningsgrunnlagResultat> resultatListe = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregningListe(ref, referanseTilDtoMap);
+        List<OppdaterBeregningsgrunnlagResultat> resultatListe = finnTjeneste(ref.getFagsakYtelseType()).oppdaterBeregningListe(ref, bgReferanser, referanseTilDtoMap);
 
         resultatListe.forEach(e -> e.setSkjæringstidspunkt(referanseTilStpMap.get(e.getReferanse()))); // sett stp for hvert resultat resultater
 
