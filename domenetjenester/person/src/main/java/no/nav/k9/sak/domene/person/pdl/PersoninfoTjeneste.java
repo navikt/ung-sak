@@ -58,7 +58,6 @@ import no.nav.pdl.StatsborgerskapResponseProjection;
 import no.nav.pdl.UtflyttingFraNorge;
 import no.nav.pdl.UtflyttingFraNorgeResponseProjection;
 import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
-import no.nav.vedtak.felles.integrasjon.pdl.Tema;
 
 @ApplicationScoped
 public class PersoninfoTjeneste {
@@ -171,7 +170,7 @@ public class PersoninfoTjeneste {
                 .statsborgerskap(new StatsborgerskapResponseProjection().land())
                 .familierelasjoner(new FamilierelasjonResponseProjection().relatertPersonsRolle().relatertPersonsIdent().minRolleForPerson());
 
-            var person = pdlKlient.hentPerson(query, projection, Tema.OMS);
+            var person = pdlKlient.hentPerson(query, projection);
 
             var fødselsdato = person.getFoedsel().stream()
                 .map(Foedsel::getFoedselsdato)

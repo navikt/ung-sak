@@ -23,7 +23,6 @@ import no.nav.pdl.IdentInformasjonResponseProjection;
 import no.nav.pdl.IdentlisteResponseProjection;
 import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
-import no.nav.vedtak.felles.integrasjon.pdl.Tema;
 import no.nav.vedtak.util.LRUCache;
 
 @ApplicationScoped
@@ -106,7 +105,7 @@ public class AktørTjeneste {
             );
 
         try {
-            return pdlKlient.hentIdenter(request, projeksjon, Tema.OMS).getIdenter();
+            return pdlKlient.hentIdenter(request, projeksjon).getIdenter();
         } catch (VLException e) {
             if (PdlKlient.PDL_KLIENT_NOT_FOUND_KODE.equals(e.getKode())) {
                 log.info("Ident av type {} ikke funnet for ident {}", identGruppe, ident);
