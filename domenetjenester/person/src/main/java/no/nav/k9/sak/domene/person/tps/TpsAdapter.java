@@ -13,10 +13,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 public interface TpsAdapter {
-
     Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent);
-
-    Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId);
 
     Personinfo hentKjerneinformasjon(PersonIdent personIdent, AktørId aktørId);
 

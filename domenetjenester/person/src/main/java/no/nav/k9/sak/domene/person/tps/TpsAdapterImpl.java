@@ -45,7 +45,9 @@ public class TpsAdapterImpl implements TpsAdapter {
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
+    @SuppressWarnings("unused")
     public TpsAdapterImpl() {
+        // CDI
     }
 
     @Inject
@@ -69,11 +71,6 @@ public class TpsAdapterImpl implements TpsAdapter {
             // Her sorterer vi ut dødfødte barn
             return Optional.empty();
         }
-    }
-
-    @Override
-    public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-        return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)

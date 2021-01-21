@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.person.tps;
 import static java.util.Collections.singletonList;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -12,9 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,20 +33,15 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet;
 import no.nav.vedtak.exception.TekniskException;
-import no.nav.vedtak.feil.FeilFactory;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.felles.testutilities.db.Repository;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class TpsTjenesteTest {
-
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final AktørId ENDRET_AKTØR_ID = AktørId.dummy();
-    private static final AktørId AKTØR_ID_SOM_TRIGGER_EXCEPTION = AktørId.dummy();
     private static final PersonIdent FNR = new PersonIdent("12345678901");
     private static final PersonIdent ENDRET_FNR = new PersonIdent("02345678901");
     private static final LocalDate FØDSELSDATO = LocalDate.of(1992, Month.OCTOBER, 13);
@@ -57,27 +50,16 @@ public class TpsTjenesteTest {
     private static final AktørId AKTØR_ID_RELASJON = AktørId.dummy();
     private static final PersonIdent FNR_RELASJON = new PersonIdent("01345678901");
     private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, true);
-    private static Map<AktørId, PersonIdent> FNR_VED_AKTØR_ID = new HashMap<>();
-    private static Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
+    private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
 
-    @Inject
-    private EntityManager entityManager;
-    public Repository repository;
     private TpsTjeneste tpsTjeneste;
 
     @BeforeEach
     public void oppsett() {
-
-        repository = new Repository(entityManager);
-
-        FNR_VED_AKTØR_ID.put(AKTØR_ID, FNR);
-        FNR_VED_AKTØR_ID.put(ENDRET_AKTØR_ID, ENDRET_FNR);
         AKTØR_ID_VED_FNR.put(FNR, AKTØR_ID);
         AKTØR_ID_VED_FNR.put(ENDRET_FNR, ENDRET_AKTØR_ID);
-
         AKTØR_ID_VED_FNR.put(FNR_RELASJON, AKTØR_ID_RELASJON);
-
-        tpsTjeneste = new TpsTjenesteImpl(new TpsAdapterMock());
+        tpsTjeneste = new TpsTjenesteImpl(new TpsAdapterMock(), mock(PersoninfoAdapter.class));
     }
 
     @Test
@@ -106,19 +88,10 @@ public class TpsTjenesteTest {
 
     @Test
     public void test_hentGeografiskTilknytning_finnes_ikke() {
-        Assertions.assertThrows(TekniskException.class, () -> {
-            tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666"));
-        });
+        Assertions.assertThrows(TekniskException.class, () -> tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666")));
     }
 
-    @Test
-    public void skal_kaste_feil_ved_tjenesteexception_dersom_aktør_ikke_er_cachet() {
-        Assertions.assertThrows(TpsException.class, () -> {
-            tpsTjeneste.hentBrukerForAktør(AKTØR_ID_SOM_TRIGGER_EXCEPTION);
-        });
-    }
-
-    private class TpsAdapterMock implements TpsAdapter {
+    private static class TpsAdapterMock implements TpsAdapter {
         private static final String ADR1 = "Adresselinje1";
         private static final String ADR2 = "Adresselinje2";
         private static final String ADR3 = "Adresselinje3";
@@ -129,15 +102,6 @@ public class TpsTjenesteTest {
         @Override
         public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent fnr) {
             return Optional.ofNullable(AKTØR_ID_VED_FNR.get(fnr));
-        }
-
-        @Override
-        public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-            if (aktørId == AKTØR_ID_SOM_TRIGGER_EXCEPTION) {
-                throw new TpsException(FeilFactory.create(TpsFeilmeldinger.class)
-                    .tpsUtilgjengeligSikkerhetsbegrensning(null, new HentPersonSikkerhetsbegrensning("String", null)));
-            }
-            return Optional.ofNullable(FNR_VED_AKTØR_ID.get(aktørId));
         }
 
         @Override

@@ -17,14 +17,17 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class TpsTjenesteImpl implements TpsTjeneste {
 
     private TpsAdapter tpsAdapter;
+    private PersoninfoAdapter personinfoAdapter;
 
+    @SuppressWarnings("unused")
     public TpsTjenesteImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public TpsTjenesteImpl(TpsAdapter tpsAdapter) {
+    public TpsTjenesteImpl(TpsAdapter tpsAdapter, PersoninfoAdapter personinfoAdapter) {
         this.tpsAdapter = tpsAdapter;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
+        return personinfoAdapter.hentIdentForAktørId(aktørId);
     }
 
     @Override
