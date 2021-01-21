@@ -35,7 +35,6 @@ import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.Person;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
-import no.nav.vedtak.felles.integrasjon.pdl.Tema;
 import no.nav.vedtak.util.env.Environment;
 
 @ApplicationScoped
@@ -72,7 +71,7 @@ public class PersonBasisTjeneste {
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
 
-        var person = pdlKlient.hentPerson(query, projection, Tema.OMS);
+        var person = pdlKlient.hentPerson(query, projection);
 
         var fødselsdato = person.getFoedsel().stream()
             .map(Foedsel::getFoedselsdato)
@@ -122,7 +121,7 @@ public class PersonBasisTjeneste {
             var projection = new PersonResponseProjection()
                 .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
                 .foedsel(new FoedselResponseProjection().foedselsdato());
-            var personFraPDL = pdlKlient.hentPerson(query, projection, Tema.OMS); // K9-sak spør som "omsorgsbruker". Vurder å lage konstant.
+            var personFraPDL = pdlKlient.hentPerson(query, projection);
 
             var fødselsdato = personFraPDL.getFoedsel().stream()
                 .map(Foedsel::getFoedselsdato)

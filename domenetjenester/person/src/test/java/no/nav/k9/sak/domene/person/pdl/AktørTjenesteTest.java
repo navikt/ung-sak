@@ -32,7 +32,7 @@ public class AktørTjenesteTest {
 
     @Test
     public void hent_aktørid_for_personident_skal_ikke_feile_selv_om_pdlklient_ikke_finner_den() {
-        when(pdlMock.hentIdenter(any(), any(), any())).thenReturn(new Identliste(List.of(new IdentInformasjon(aktørId.getId(), IdentGruppe.AKTORID, false))));
+        when(pdlMock.hentIdenter(any(), any())).thenReturn(new Identliste(List.of(new IdentInformasjon(aktørId.getId(), IdentGruppe.AKTORID, false))));
 
         assertThat(testSubject.hentAktørIdForPersonIdent(personIdent))
             .hasValue(aktørId);
@@ -40,7 +40,7 @@ public class AktørTjenesteTest {
 
     @Test
     public void hent_personident_for_aktørid_skal_ikke_feile_selv_om_pdlklient_ikke_finner_den() {
-        when(pdlMock.hentIdenter(any(), any(), any())).thenReturn(new Identliste(List.of(new IdentInformasjon(personIdent.getIdent(), IdentGruppe.FOLKEREGISTERIDENT, false))));
+        when(pdlMock.hentIdenter(any(), any())).thenReturn(new Identliste(List.of(new IdentInformasjon(personIdent.getIdent(), IdentGruppe.FOLKEREGISTERIDENT, false))));
 
         assertThat(testSubject.hentPersonIdentForAktørId(aktørId))
             .hasValue(personIdent);
