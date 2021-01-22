@@ -86,7 +86,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         stp = LocalDate.parse("2020-08-08");
         scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(behandlingRepository, iayTjeneste, behandlingVedtakRepository, null, beregningsresultatRepository);
+        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(iayTjeneste, behandlingVedtakRepository, null, beregningsresultatRepository);
     }
 
 

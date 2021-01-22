@@ -41,7 +41,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE = "6006";
     public static final String OVERSTYRING_AV_BEREGNING_KODE = "6007";
     public static final String OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE = "6011";
-    public static final String OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE = "6012";
     public static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     public static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
     public static final String OVERSTYRING_AV_K9_VILKÅRET_KODE = "6016";

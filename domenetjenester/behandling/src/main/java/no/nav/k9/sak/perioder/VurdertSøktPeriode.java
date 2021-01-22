@@ -55,11 +55,12 @@ public class VurdertSøktPeriode<T> {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(interval.getFomDato(), interval.getTomDato());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VurdertSøktPeriode that = (VurdertSøktPeriode) o;
+        var that = (VurdertSøktPeriode) o;
         return type == that.type &&
             Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) &&

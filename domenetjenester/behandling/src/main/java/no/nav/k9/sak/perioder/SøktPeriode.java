@@ -52,11 +52,12 @@ public class SøktPeriode<T> {
         return new SøktPeriode<>(periode, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, raw);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SøktPeriode<T> that = (SøktPeriode<T>) o;
+        var that = (SøktPeriode) o;
         return type == that.type &&
             Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);

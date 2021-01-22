@@ -1,20 +1,29 @@
 package no.nav.k9.kodeverk.vilkår;
 
-import com.fasterxml.jackson.annotation.*;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
-
-import java.io.IOException;
-import java.util.*;
 
 @JsonSerialize(contentUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
@@ -30,17 +39,6 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.UDEFINERT),
     MEDLEMSKAPSVILKÅRET(VilkårTypeKoder.FP_VK_2,
         "Medlemskapsvilkåret",
-        Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 2",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 2"),
-        Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
-        Avslagsårsak.SØKER_ER_UTVANDRET,
-        Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
-        Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT,
-        Avslagsårsak.SØKER_ER_IKKE_BOSATT),
-    MEDLEMSKAPSVILKÅRET_LØPENDE(VilkårTypeKoder.FP_VK_2_L,
-        "Løpende medlemskapsvilkår",
         Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 2",
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 2",
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 2",
