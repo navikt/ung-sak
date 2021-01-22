@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;

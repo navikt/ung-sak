@@ -10,13 +10,13 @@ import javax.xml.ws.soap.SOAPFaultException;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
 public class TpsTjenesteImpl implements TpsTjeneste {
 
-    private TpsAdapter tpsAdapter;
     private PersoninfoAdapter personinfoAdapter;
 
     @SuppressWarnings("unused")
@@ -25,8 +25,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     }
 
     @Inject
-    public TpsTjenesteImpl(TpsAdapter tpsAdapter, PersoninfoAdapter personinfoAdapter) {
-        this.tpsAdapter = tpsAdapter;
+    public TpsTjenesteImpl(PersoninfoAdapter personinfoAdapter) {
         this.personinfoAdapter = personinfoAdapter;
     }
 
@@ -40,7 +39,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
             return Optional.empty();
         }
         try {
-            Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(fnr, aktørId.get());
+            Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get());
             return Optional.ofNullable(personinfo);
         } catch (SOAPFaultException e) {
             if (e.getMessage().contains("status: S100008F")) {
@@ -75,7 +74,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     @Override
     public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjon(fnr, aktørId));
+        return funnetFnr.map(fnr -> personinfoAdapter.hentKjerneinformasjon(aktørId));
     }
 
     @Override
@@ -88,17 +87,17 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent fnr) {
-        return tpsAdapter.hentGeografiskTilknytning(fnr);
+        return personinfoAdapter.hentGeografiskTilknytning(fnr);
     }
 
     @Override
     public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent fnr) {
-        return tpsAdapter.hentDiskresjonskoderForFamilierelasjoner(fnr);
+        return personinfoAdapter.hentDiskresjonskoderForFamilierelasjoner(fnr);
     }
 
     @Override
     public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
-        return tpsAdapter.hentAdresseinformasjon(personIdent);
+        return personinfoAdapter.hentAdresseinformasjon(personIdent);
     }
 
 }
