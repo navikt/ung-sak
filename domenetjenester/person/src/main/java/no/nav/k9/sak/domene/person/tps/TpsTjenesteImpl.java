@@ -10,6 +10,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -75,7 +76,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     @Override
     public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjon(fnr, aktørId));
+        return funnetFnr.map(fnr -> personinfoAdapter.hentKjerneinformasjon(aktørId));
     }
 
     @Override

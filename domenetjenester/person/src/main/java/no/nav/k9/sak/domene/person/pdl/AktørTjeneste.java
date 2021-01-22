@@ -59,12 +59,12 @@ public class AktørTjeneste {
         }
 
         Optional<AktørId> aktørId = hentAktørIdFraPDL(personIdent.getIdent());
-            aktørId.ifPresent(aid -> {
-                    // Kan ikke legge til i cache aktørId -> ident ettersom ident kan være ikke-current
-                    cacheIdentTilAktørId.put(personIdent, aid);
-                }
-            );
-            return aktørId;
+        aktørId.ifPresent(aid -> {
+                // Kan ikke legge til i cache aktørId -> ident ettersom ident kan være ikke-current
+                cacheIdentTilAktørId.put(personIdent, aid);
+            }
+        );
+        return aktørId;
     }
 
     public Optional<PersonIdent> hentPersonIdentForAktørId(AktørId aktørId) {
@@ -74,10 +74,12 @@ public class AktørTjeneste {
         }
 
         Optional<PersonIdent> personIdent = hentPersonIdentFraPDL(aktørId.getId());
-        personIdent.ifPresent(i -> {
+        personIdent.ifPresentOrElse(
+            i -> {
                 cacheAktørIdTilIdent.put(aktørId, i);
                 cacheIdentTilAktørId.put(i, aktørId); // OK her, men ikke over ettersom dette er gjeldende mapping
             }
+            , () -> log.info("Uventet resultat fra PDL: Fant ikke person med oppgitt aktørId.")
         );
         return personIdent;
     }
