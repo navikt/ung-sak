@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.person.pdl;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -7,6 +8,7 @@ import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
+import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
@@ -145,4 +147,15 @@ public class PersoninfoAdapter {
         return hentIdentForAktørId(aktørId);
     }
 
+    public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {
+        return tpsAdapter.hentGeografiskTilknytning(personIdent);
+    }
+
+    public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent personIdent) {
+        return tpsAdapter.hentDiskresjonskoderForFamilierelasjoner(personIdent);
+    }
+
+    public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
+        return tpsAdapter.hentAdresseinformasjon(personIdent);
+    }
 }
