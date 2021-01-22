@@ -17,7 +17,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -64,7 +63,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         assertThat(søknadSetMap).containsKey(søknad);
         assertThat(søknadSetMap.get(søknad)).hasSize(2);
         var actual = søknadSetMap.get(søknad).stream().sorted(Comparator.comparing(it -> it.getPeriode().getFomDato())).iterator();
-        VurdertSøktPeriode next = actual.next();
+        var next = actual.next();
         assertThat(next.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.withMonth(9).withDayOfMonth(30)));
         assertThat(next.getUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         next = actual.next();

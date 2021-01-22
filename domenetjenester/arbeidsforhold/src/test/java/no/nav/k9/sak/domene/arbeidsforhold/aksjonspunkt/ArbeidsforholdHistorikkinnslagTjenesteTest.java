@@ -42,8 +42,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(JpaExtension.class)
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
 
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
-
     @Inject
     private EntityManager entityManager;
 
@@ -97,7 +95,8 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
         when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
 
         // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()), arbeidsforholdDto, virksomhet, ref, List.of());
+        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
+            arbeidsforholdDto, virksomhet, ref, List.of());
 
         // Assert
         assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(0);

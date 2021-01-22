@@ -30,7 +30,6 @@ public class VurderBehovForÅHindreTilbaketrekkV2Test {
 
     private static final InternArbeidsforholdRef REF1 = InternArbeidsforholdRef.nyRef();
     private static final InternArbeidsforholdRef REF2 = InternArbeidsforholdRef.nyRef();
-    private static final InternArbeidsforholdRef REF3 = InternArbeidsforholdRef.nyRef();
 
     @Test
     public void ingenEndringSkalGiEmpty() {

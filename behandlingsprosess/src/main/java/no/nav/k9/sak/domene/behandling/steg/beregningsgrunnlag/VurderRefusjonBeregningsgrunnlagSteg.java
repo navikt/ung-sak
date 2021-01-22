@@ -18,7 +18,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

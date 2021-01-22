@@ -1,11 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class StartBeregningInput {
