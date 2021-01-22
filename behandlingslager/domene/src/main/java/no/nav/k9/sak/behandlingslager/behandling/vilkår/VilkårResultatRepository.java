@@ -117,7 +117,7 @@ public class VilkårResultatRepository {
 
     /** Optimalisert spørring for å hente vilkårsresultater uten regelsporing. */
     public List<VilkårPeriodeResultatDto> hentVilkårResultater(Long behandlingId) {
-        String sql = "select vv.vilkar_type, vp.fom, vp.tom, vp.utfall, vp.avslag_kode" +
+        String sql = "select vv.vilkar_type, vp.fom, vp.tom, nullif('-', vp.utfall) as utfall, nullif('-', vp.overstyrt_utfall) as overstyrt_utfall, vp.avslag_kode" +
             " from rs_vilkars_resultat rv " +
             " inner join vr_vilkar vv on vv.vilkar_resultat_id=rv.vilkarene_id " +
             " inner join vr_vilkar_periode vp on vp.vilkar_id=vv.id " +
@@ -136,7 +136,9 @@ public class VilkårResultatRepository {
             var tom = t.get("tom", Date.class).toLocalDate();
             var avslagsårsak = Avslagsårsak.fraKode(t.get("avslag_kode", String.class));
             var utfall = Utfall.fraKode(t.get("utfall", String.class));
-            dtoer.add(new VilkårPeriodeResultatDto(vt, new Periode(fom, tom), avslagsårsak, utfall));
+            var overstyrtUtfall = Utfall.fraKode(t.get("overstyrt_utfall", String.class));
+            var angittUtfall = overstyrtUtfall != null ? overstyrtUtfall : utfall;
+            dtoer.add(new VilkårPeriodeResultatDto(vt, new Periode(fom, tom), avslagsårsak, angittUtfall));
         }
         
         return List.copyOf(dtoer);
