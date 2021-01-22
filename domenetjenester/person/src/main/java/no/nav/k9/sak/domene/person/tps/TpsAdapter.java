@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.person.tps;
 
 import java.util.List;
-import java.util.Optional;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
@@ -13,8 +12,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 public interface TpsAdapter {
-    Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent);
-
     Personinfo hentKjerneinformasjon(PersonIdent personIdent, AktørId aktørId);
 
     Personhistorikkinfo hentPersonhistorikk(AktørId aktørId, Periode periode);

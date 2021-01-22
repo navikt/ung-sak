@@ -35,7 +35,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        Optional<AktørId> aktørId = personinfoAdapter.hentAktørIdForPersonIdent(fnr);
         if (aktørId.isEmpty()) {
             return Optional.empty();
         }
@@ -64,7 +64,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public Optional<AktørId> hentAktørForFnr(PersonIdent fnr) {
-        return tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        return personinfoAdapter.hentAktørIdForPersonIdent(fnr);
     }
 
     @Override

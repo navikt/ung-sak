@@ -1,9 +1,11 @@
 package no.nav.k9.sak.domene.person.tps;
 
 import static java.util.Collections.singletonList;
+import static java.util.Optional.of;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -40,6 +42,8 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class TpsTjenesteTest {
+    private TpsTjeneste testSubject;
+
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final AktørId ENDRET_AKTØR_ID = AktørId.dummy();
     private static final PersonIdent FNR = new PersonIdent("12345678901");
@@ -52,43 +56,46 @@ public class TpsTjenesteTest {
     private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, true);
     private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
 
-    private TpsTjeneste tpsTjeneste;
-
     @BeforeEach
     public void oppsett() {
         AKTØR_ID_VED_FNR.put(FNR, AKTØR_ID);
         AKTØR_ID_VED_FNR.put(ENDRET_FNR, ENDRET_AKTØR_ID);
         AKTØR_ID_VED_FNR.put(FNR_RELASJON, AKTØR_ID_RELASJON);
-        tpsTjeneste = new TpsTjenesteImpl(new TpsAdapterMock(), mock(PersoninfoAdapter.class));
+
+        PersoninfoAdapter personinfoAdapter = mock(PersoninfoAdapter.class);
+        when(personinfoAdapter.hentAktørIdForPersonIdent(FNR)).thenReturn(of(AKTØR_ID_VED_FNR.get(FNR)));
+
+        testSubject = new TpsTjenesteImpl(new TpsAdapterMock(), personinfoAdapter);
     }
 
     @Test
     public void skal_ikke_hente_bruker_for_ukjent_aktør() {
-        Optional<Personinfo> funnetBruker = tpsTjeneste.hentBrukerForAktør(AktørId.dummy());
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForAktør(AktørId.dummy());
         assertThat(funnetBruker).isNotPresent();
     }
 
     @Test
     public void skal_hente_bruker_for_kjent_fnr() {
-        Optional<Personinfo> funnetBruker = tpsTjeneste.hentBrukerForFnr(FNR);
+        // mocke PersoninfoAdapter.hentAktørIdForPersonIdent(fnr) da denne nå benyttes
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(FNR);
         assertThat(funnetBruker).isPresent();
     }
 
     @Test
     public void skal_ikke_hente_bruker_for_ukjent_fnr() {
-        Optional<Personinfo> funnetBruker = tpsTjeneste.hentBrukerForFnr(new PersonIdent("666"));
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(new PersonIdent("666"));
         assertThat(funnetBruker).isNotPresent();
     }
 
     @Test
     public void test_hentGeografiskTilknytning_finnes() {
-        GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(FNR);
+        GeografiskTilknytning geografiskTilknytning = testSubject.hentGeografiskTilknytning(FNR);
         assertThat(geografiskTilknytning).isNotNull();
     }
 
     @Test
     public void test_hentGeografiskTilknytning_finnes_ikke() {
-        Assertions.assertThrows(TekniskException.class, () -> tpsTjeneste.hentGeografiskTilknytning(new PersonIdent("666")));
+        Assertions.assertThrows(TekniskException.class, () -> testSubject.hentGeografiskTilknytning(new PersonIdent("666")));
     }
 
     private static class TpsAdapterMock implements TpsAdapter {
@@ -98,11 +105,6 @@ public class TpsTjenesteTest {
         private static final String POSTNR = "1234";
         private static final String POSTSTED = "Oslo";
         private static final String LAND = "Norge";
-
-        @Override
-        public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent fnr) {
-            return Optional.ofNullable(AKTØR_ID_VED_FNR.get(fnr));
-        }
 
         @Override
         public Personinfo hentKjerneinformasjon(PersonIdent fnr, AktørId aktørId) {
