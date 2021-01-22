@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.person.tps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -104,9 +104,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     @Mock
     private PersoninfoTjeneste personinfoTjeneste;
 
-    private TpsAdapter tpsAdapter;
-
-    private Landkoder landkodeNor = new Landkoder();
+    private final Landkoder landkodeNor = new Landkoder();
 
     private final PersonIdent personIdent = PersonIdent.fra(FIKTIVE_FNR.nesteFnr());
 
@@ -120,8 +118,8 @@ class PersoninfoAdapterMedTPSOversetterTest {
         when(tpsOversetter.tilBrukerInfo(Mockito.any(AktørId.class), any(Bruker.class))).thenReturn(mockPersoninfo);
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
-        tpsAdapter = new TpsAdapterImpl(aktørTjeneste, personConsumer, tpsOversetter);
-        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste);
+        TpsAdapter tpsAdapter = new TpsAdapterImpl(personConsumer, tpsOversetter);
+        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
     }
 
     @Test

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
@@ -33,6 +32,4 @@ public interface TpsTjeneste {
     Optional<PersonIdent> hentFnr(AktørId aktørId);
 
     Adresseinfo hentAdresseinformasjon(PersonIdent personIdent);
-
-    List<FødtBarnInfo> hentFødteBarn(AktørId aktørId);
 }

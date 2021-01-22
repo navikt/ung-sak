@@ -1,19 +1,16 @@
 package no.nav.k9.sak.domene.person.tps;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
@@ -26,7 +23,6 @@ import no.nav.tjeneste.virksomhet.person.v3.feil.Kodeverdi;
 import no.nav.tjeneste.virksomhet.person.v3.feil.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.AktoerId;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bruker;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Periode;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Person;
@@ -36,47 +32,23 @@ import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkRequest;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 import no.nav.vedtak.felles.integrasjon.felles.ws.DateUtil;
 import no.nav.vedtak.felles.integrasjon.person.PersonConsumer;
 
 @ApplicationScoped
 public class TpsAdapterImpl implements TpsAdapter {
-
-    private AktørTjeneste aktørTjeneste;
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
+    @SuppressWarnings("unused")
     public TpsAdapterImpl() {
+        // CDI
     }
 
     @Inject
-    public TpsAdapterImpl(AktørTjeneste aktørTjeneste,
-                          PersonConsumer personConsumer,
-                          TpsOversetter tpsOversetter) {
-        this.aktørTjeneste = aktørTjeneste;
+    public TpsAdapterImpl(PersonConsumer personConsumer, TpsOversetter tpsOversetter) {
         this.personConsumer = personConsumer;
         this.tpsOversetter = tpsOversetter;
-    }
-
-    @Override
-    public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent) {
-        if (personIdent.erFdatNummer()) {
-            // har ikke tildelt personnr
-            return Optional.empty();
-        }
-        try {
-            Optional<AktørId> aktørId = aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
-            return aktørId;
-        } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
-            // Her sorterer vi ut dødfødte barn
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
-        return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
     }
 
     private Personinfo håndterPersoninfoRespons(AktørId aktørId, HentPersonRequest request)
@@ -212,47 +184,6 @@ public class TpsAdapterImpl implements TpsAdapter {
             throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
         } catch (HentPersonSikkerhetsbegrensning e) {
             throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
-        }
-    }
-
-    @Override
-    public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = hentIdentForAktørId(aktørId);
-        if (personIdent.isEmpty()) {
-            throw TpsFeilmeldinger.FACTORY.fantIkkePersonForAktørId().toException();
-        }
-        HentPersonRequest request = new HentPersonRequest();
-        request.setAktoer(TpsUtil.lagPersonIdent(personIdent.get().getIdent()));
-        request.getInformasjonsbehov().add(Informasjonsbehov.FAMILIERELASJONER);
-        try {
-            HentPersonResponse response = personConsumer.hentPersonResponse(request);
-            Person person = response.getPerson();
-            return person.getHarFraRolleI()
-                .stream()
-                .filter(rel -> tpsOversetter.erBarnRolle(rel.getTilRolle()))
-                .map(this::mapTilInfo)
-                .collect(Collectors.toList());
-        } catch (HentPersonPersonIkkeFunnet e) {
-            throw TpsFeilmeldinger.FACTORY.fantIkkePerson(e).toException();
-        } catch (HentPersonSikkerhetsbegrensning e) {
-            throw TpsFeilmeldinger.FACTORY.tpsUtilgjengeligSikkerhetsbegrensning(formatter(e.getFaultInfo()), e).toException();
-        }
-    }
-
-    private FødtBarnInfo mapTilInfo(Familierelasjon familierelasjon) {
-        String identNr = ((no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent) familierelasjon.getTilPerson().getAktoer()).getIdent().getIdent();
-        no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(identNr);
-        if (ident.erFdatNummer()) {
-            return tpsOversetter.relasjonTilPersoninfo(familierelasjon);
-        } else {
-            final PersonIdent fra = PersonIdent.fra(identNr);
-            Optional<AktørId> aktørId = hentAktørIdForPersonIdent(fra);
-            if (aktørId.isEmpty()) {
-                return tpsOversetter.relasjonTilPersoninfo(familierelasjon);
-            }
-
-            final Personinfo personinfo = hentKjerneinformasjon(fra, aktørId.get());
-            return tpsOversetter.tilFødteBarn(personinfo);
         }
     }
 }

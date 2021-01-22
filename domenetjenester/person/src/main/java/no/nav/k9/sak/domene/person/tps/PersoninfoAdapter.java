@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -22,6 +23,7 @@ public class PersoninfoAdapter {
     private TpsAdapter tpsAdapter;
     private PersonBasisTjeneste personBasisTjeneste;
     private PersoninfoTjeneste personinfoTjeneste;
+    private AktørTjeneste aktørTjeneste;
 
     @SuppressWarnings("unused")
     public PersoninfoAdapter() {
@@ -29,10 +31,11 @@ public class PersoninfoAdapter {
     }
 
     @Inject
-    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste) {
+    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste) {
         this.tpsAdapter = tpsAdapter;
         this.personBasisTjeneste = personBasisTjeneste;
         this.personinfoTjeneste = personinfoTjeneste;
+        this.aktørTjeneste = aktørTjeneste;
     }
 
     //TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
@@ -41,7 +44,7 @@ public class PersoninfoAdapter {
     }
 
     public Optional<Personinfo> innhentSaksopplysninger(PersonIdent personIdent) {
-        Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
+        Optional<AktørId> aktørId = hentAktørIdForPersonIdent(personIdent);
 
         if (aktørId.isPresent()) {
             return hentKjerneinformasjonForBarn(aktørId.get(), personIdent);
@@ -61,7 +64,7 @@ public class PersoninfoAdapter {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
-        Optional<AktørId> optAktørId = tpsAdapter.hentAktørIdForPersonIdent(personIdent);
+        Optional<AktørId> optAktørId = hentAktørIdForPersonIdent(personIdent);
         if (optAktørId.isPresent()) {
             return hentKjerneinformasjonForBarn(optAktørId.get(), personIdent);
         }
@@ -69,7 +72,7 @@ public class PersoninfoAdapter {
     }
 
     public Adresseinfo innhentAdresseopplysningerForDokumentsending(AktørId aktørId) {
-        Optional<PersonIdent> optFnr = tpsAdapter.hentIdentForAktørId(aktørId);
+        Optional<PersonIdent> optFnr = hentIdentForAktørId(aktørId);
         return optFnr.map(personIdent -> tpsAdapter.hentAdresseinformasjon(personIdent)).orElse(null);
     }
 
@@ -96,6 +99,18 @@ public class PersoninfoAdapter {
         return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjonBasis(fnr, aktørId));
     }
 
+    public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
+        return aktørTjeneste.hentPersonIdentForAktørId(aktørId);
+    }
+
+    public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent) {
+        if (personIdent.erFdatNummer()) {
+            return Optional.empty();
+        }
+        return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
+    }
+
+
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
@@ -104,9 +119,9 @@ public class PersoninfoAdapter {
             return Optional.of(
                 hentKjerneinformasjon(aktørId, personIdent)
             );
-            // TODO Lag en skikkelig fiks på dette
             //Her sorterer vi ut dødfødte barn
         } catch (SOAPFaultException e) {
+            //TODO PDL vil aldri kaste denne feilen. Fjern derfor try/catch når TPS er fjernet
             if (e.getCause().getMessage().contains("status: S610006F")) {
                 return Optional.empty();
             }
@@ -115,11 +130,12 @@ public class PersoninfoAdapter {
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = tpsAdapter.hentIdentForAktørId(aktørId);
+        Optional<PersonIdent> personIdent = hentIdentForAktørId(aktørId);
         return personIdent.map(ident -> hentKjerneinformasjon(aktørId, ident)).orElse(null);
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
+
         Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
 
         // Kaller på personinfoTjeneste som sammenligner resultat
@@ -128,7 +144,7 @@ public class PersoninfoAdapter {
     }
 
     private Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
+        return hentIdentForAktørId(aktørId);
     }
 
 }

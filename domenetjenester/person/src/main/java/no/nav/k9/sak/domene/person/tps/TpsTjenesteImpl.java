@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
@@ -18,14 +17,17 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class TpsTjenesteImpl implements TpsTjeneste {
 
     private TpsAdapter tpsAdapter;
+    private PersoninfoAdapter personinfoAdapter;
 
+    @SuppressWarnings("unused")
     public TpsTjenesteImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public TpsTjenesteImpl(TpsAdapter tpsAdapter) {
+    public TpsTjenesteImpl(TpsAdapter tpsAdapter, PersoninfoAdapter personinfoAdapter) {
         this.tpsAdapter = tpsAdapter;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        Optional<AktørId> aktørId = personinfoAdapter.hentAktørIdForPersonIdent(fnr);
         if (aktørId.isEmpty()) {
             return Optional.empty();
         }
@@ -62,12 +64,12 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public Optional<AktørId> hentAktørForFnr(PersonIdent fnr) {
-        return tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        return personinfoAdapter.hentAktørIdForPersonIdent(fnr);
     }
 
     @Override
     public Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
+        return personinfoAdapter.hentIdentForAktørId(aktørId);
     }
 
     @Override
@@ -97,11 +99,6 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     @Override
     public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
         return tpsAdapter.hentAdresseinformasjon(personIdent);
-    }
-
-    @Override
-    public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
-        return tpsAdapter.hentFødteBarn(aktørId);
     }
 
 }
