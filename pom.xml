@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.1-20201123130241-efd2844</version>
+                <version>0.0.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
@@ -174,7 +174,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.2-2020.11.10.101913-83af8af</version>
+                <version>1.3.1</version>
             </dependency>
 
             <dependency>
@@ -186,7 +186,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven</groupId>
                 <artifactId>beregningsgrunnlag-regelmodell</artifactId>
-                <version>2.1-20200304122043-f794ebb</version>
+                <version>2.1.4</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
