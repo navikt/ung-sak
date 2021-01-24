@@ -26,6 +26,12 @@
 			<!-- trengs for integrasjon mellom Weld og jakarta.el -->
 			<groupId>org.jboss.weld.module</groupId>
 			<artifactId>weld-web</artifactId>
+			<exclusions>
+			    <exclusion>
+			        <groupId>org.jboss.spec.javax.el</groupId>
+			        <artifactId>jboss-el-api_3.0_spec</artifactId>
+			    </exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Modul interne avhengigheter -->
