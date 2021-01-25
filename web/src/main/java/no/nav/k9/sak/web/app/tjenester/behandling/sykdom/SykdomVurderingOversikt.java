@@ -23,7 +23,7 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<SykdomVurderingOversiktElement> vurderingselementer = new ArrayList<>();
-    
+
     /**
      * Perioder som skal vurderes.
      */
@@ -31,12 +31,12 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
-    
+
     @JsonProperty(value = "søknadsperioderTilBehandling")
     @Size(max = 1000)
     @Valid
     private List<Periode> søknadsperioderTilBehandling = new ArrayList<>();
-    
+
     /**
      * Perioder det er tillatt å gjøre vurderinger for (det finnes minst én søknadsperiode på barnet).
      */
@@ -44,27 +44,28 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
-    
+
     /*
     // Om den siste versjonen har blitt besluttet iverksatt eller ikke.
     @JsonProperty(value = "besluttetIverksatt")
     @Valid
     private boolean besluttetIverksatt;
-    
+
     // Saksnummeret til den saken som må besluttes før denne versjonen kan bli gjeldende (hvis annen sak en den man spør for).
     @JsonProperty(value = "annenSakSomMåBesluttesFørst")
     @Valid
     private SykdomAnnenSakDto annenSakSomMåBesluttesFørst;
     */
-    
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
-    
-    
-    public SykdomVurderingOversikt(List<SykdomVurderingOversiktElement> vurderingselementer,
-            List<Periode> resterendeVurderingsperioder, List<Periode> søknadsperioderTilBehandling,
+
+    public SykdomVurderingOversikt(
+            List<SykdomVurderingOversiktElement> vurderingselementer,
+            List<Periode> resterendeVurderingsperioder,
+            List<Periode> søknadsperioderTilBehandling,
             List<Periode> perioderSomKanVurderes,
             List<ResourceLink> links) {
         this.vurderingselementer = vurderingselementer;
@@ -73,20 +74,20 @@ public class SykdomVurderingOversikt {
         this.perioderSomKanVurderes = perioderSomKanVurderes;
         this.links = links;
     }
-    
-    
+
+
     public List<SykdomVurderingOversiktElement> getVurderingselementer() {
         return vurderingselementer;
     }
-    
+
     public List<Periode> getResterendeVurderingsperioder() {
         return resterendeVurderingsperioder;
     }
-    
+
     public List<Periode> getSøknadsperioderTilBehandling() {
         return søknadsperioderTilBehandling;
     }
-    
+
     public List<Periode> getPerioderSomKanVurderes() {
         return perioderSomKanVurderes;
     }
