@@ -78,7 +78,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
 
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
-        innhentDokumentTjeneste.utfør(fagsak, mottatteDokumenter);
+        innhentDokumentTjeneste.mottaDokument(fagsak, mottatteDokumenter);
     }
 
     private void validerMelding(MottattDokument m) {
