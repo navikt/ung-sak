@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -137,25 +136,13 @@ public class ÅrskvantumTjeneste {
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-        var inntektsmeldingAggregat = inntektArbeidYtelseGrunnlag.getInntektsmeldinger().orElseThrow();
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         var perioder = utledPerioderRelevantForBehandling(behandling, grunnlag);
 
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
 
-        /**
-         * @deprecated FIXME TSF-1101 Frode Lindås: innsendingstidpsunktet er ikke nødvendigvis satt korrekt. Årskvantum etablerer ny måte å sortere
-         *             uttaksplaner på.
-         */
-        @Deprecated
-        var datoForSisteInntektsmelding = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes()
-            .stream()
-            .map(Inntektsmelding::getInnsendingstidspunkt)
-            .max(LocalDateTime::compareTo)
-            .orElseThrow();
-
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
-            datoForSisteInntektsmelding,
+            null, // FIXME: Oppdater kontrakt
             ref.getBehandlingUuid().toString(),
             fraværPerioder,
             personMedRelasjoner.getPersonIdent().getIdent(),
