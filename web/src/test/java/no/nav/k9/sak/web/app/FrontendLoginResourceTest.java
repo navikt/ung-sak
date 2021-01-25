@@ -1,11 +1,10 @@
 package no.nav.k9.sak.web.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import javax.ws.rs.core.Response;
 
 import java.net.URI;
+
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,22 +33,22 @@ public class FrontendLoginResourceTest {
     public void innlogging_fra_k9_sak_web() {
         var basepath = "https://app.adeo.no";
         var response = resource.login(basepath);
-        assertEquals(URI.create("/"), response.getLocation());
+        assertThat(URI.create("/")).isEqualTo(response.getLocation());
 
         var hovedside = "/k9/web/";
         response = resource.login(hovedside);
-        assertEquals(URI.create(hovedside), response.getLocation());
+        assertThat(URI.create(hovedside)).isEqualTo(response.getLocation());
 
         var medQuery = "/k9/web/fagsak/1234/behandling/?collapsed=true";
         response = resource.login(medQuery);
-        assertEquals(URI.create(medQuery), response.getLocation());
+        assertThat(URI.create(medQuery)).isEqualTo(response.getLocation());
 
         var medFragment = "/k9/web/fagsak/1234/behandling/#panel-42";
         response = resource.login(medFragment);
-        assertEquals(URI.create(medFragment), response.getLocation());
+        assertThat(URI.create(medFragment)).isEqualTo(response.getLocation());
 
         var medQueryOgFragment = "/k9/web/fagsak/1234/behandling/?collapsed=true#panel42";
         response = resource.login(medQueryOgFragment);
-        assertEquals(URI.create(medQueryOgFragment), response.getLocation());
+        assertThat(URI.create(medQueryOgFragment)).isEqualTo(response.getLocation());
     }
 }

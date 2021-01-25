@@ -3,7 +3,7 @@ package no.nav.k9.sak.typer;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
