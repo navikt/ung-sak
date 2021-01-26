@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -63,7 +64,7 @@ public class MapFraÅrskvantumResultatTest {
 
 
     private Uttaksplan lagUttaksplan() {
-        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET, null);
+        Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), LocalDateTime.now(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET, null, emptyList());
 
         return uttaksplanOmsorgspenger;
     }
