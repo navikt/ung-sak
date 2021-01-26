@@ -10,7 +10,6 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.DetFinnesFlereAktørerMedSammePersonIdentException;
 
 @Dependent
 class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
@@ -44,12 +43,7 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
             // har ikke tildelt personnr
             return Optional.empty();
         }
-        try {
             return aktørTjeneste.hentAktørIdForPersonIdent(fnr);
-        } catch (DetFinnesFlereAktørerMedSammePersonIdentException e) { // NOSONAR
-            // Her sorterer vi ut dødfødte barn
-            return Optional.empty();
-        }
     }
 
     //TODO Vurder om denne metoden bør flyttes til annen tjeneste eller om denne tjenesten bør endre navn
