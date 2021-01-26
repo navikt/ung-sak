@@ -83,7 +83,8 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     private void validerMelding(MottattDokument m) {
         // TODO støtter bare inntektsmelding her foreløpig
-        inntektsmeldingParser.xmlTilWrapper(m); // gjør en tidlig validering
+        // TODO (Tore, se her): Må fikses slik at vi kan ta imot søknad
+        //inntektsmeldingParser.xmlTilWrapper(m); // gjør en tidlig validering
     }
 
     @Override
