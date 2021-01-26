@@ -1,5 +1,7 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
+import static no.nav.k9.sak.dokument.bestill.kafka.DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +18,8 @@ import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametre
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
 import no.nav.k9.formidling.kontrakt.kodeverk.FagsakYtelseType;
+import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
+import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -78,12 +82,22 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dto.setEksternReferanse(behandling.getUuid().toString());
         dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
+        dto.setOverstyrtMottaker(mapMottaker(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER)));
         dto.setDokumentdata(dokumentdataParametre(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class)));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
         valider(dto);
 
         return dto;
+    }
+
+    private Mottaker mapMottaker(String prosessDataProperty) {
+        if (prosessDataProperty == null) {
+            return null;
+        }
+
+        var mottaker = prosessDataProperty.split(OVERSTYRT_MOTTAKER_SEPARATOR);
+        return new Mottaker(mottaker[0], IdType.valueOf(mottaker[1]));
     }
 
     private DokumentdataParametreK9 dokumentdataParametre(String payloadAsString) {
