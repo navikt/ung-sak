@@ -1,5 +1,7 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
+import static no.nav.k9.sak.dokument.bestill.kafka.DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -38,11 +40,16 @@ public class DokumentKafkaBestiller {
 
     public void bestillBrevFraKafka(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
         Behandling behandling = behandlingRepository.hentBehandling(bestillBrevDto.getBehandlingId());
-        bestillBrev(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), bestillBrevDto.getOverstyrtMottaker(), aktør);
+        bestillBrevMedMottaker(behandling, DokumentMalType.fraKode(bestillBrevDto.getBrevmalkode()), bestillBrevDto.getFritekst(), bestillBrevDto.getOverstyrtMottaker(), aktør);
     }
 
-    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, HistorikkAktør aktør) {
+    public void bestillBrevMedMottaker(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, HistorikkAktør aktør) {
         opprettKafkaTask(behandling, dokumentMalType, overstyrtMottaker, fritekst);
+        brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
+    }
+
+    public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, String fritekst, HistorikkAktør aktør) {
+        opprettKafkaTask(behandling, dokumentMalType, null, fritekst);
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
 
@@ -56,8 +63,8 @@ public class DokumentKafkaBestiller {
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());
 
             if (overstyrtMottaker != null) {
-                prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_ID, overstyrtMottaker.id);
-                prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_TYPE, overstyrtMottaker.type);
+                prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER,
+                    overstyrtMottaker.id+DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR+overstyrtMottaker.type);
             }
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
             prosessTaskData.setCallIdFraEksisterende();

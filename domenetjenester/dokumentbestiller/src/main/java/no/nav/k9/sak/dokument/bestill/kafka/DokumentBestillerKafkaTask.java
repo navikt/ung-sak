@@ -1,5 +1,7 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
+import static no.nav.k9.sak.dokument.bestill.kafka.DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -80,8 +82,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         dto.setEksternReferanse(behandling.getUuid().toString());
         dto.setDokumentbestillingId(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID));
         dto.setDokumentMal(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE));
-        dto.setOverstyrtMottaker(mapMottaker(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_ID),
-                                             prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_TYPE)));
+        dto.setOverstyrtMottaker(mapMottaker(prosessTaskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER)));
         dto.setDokumentdata(dokumentdataParametre(JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), String.class)));
         dto.setYtelseType(mapYtelse(behandling.getFagsakYtelseType()));
         dto.setAvsenderApplikasjon(AvsenderApplikasjon.K9SAK);
@@ -90,11 +91,13 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         return dto;
     }
 
-    private Mottaker mapMottaker(String id, String type) {
-        if (id == null || type ==null) {
+    private Mottaker mapMottaker(String prosessDataProperty) {
+        if (prosessDataProperty == null) {
             return null;
         }
-        return new Mottaker(id, IdType.valueOf(type));
+
+        var mottaker = prosessDataProperty.split(OVERSTYRT_MOTTAKER_SEPARATOR);
+        return new Mottaker(mottaker[0], IdType.valueOf(mottaker[1]));
     }
 
     private DokumentdataParametreK9 dokumentdataParametre(String payloadAsString) {

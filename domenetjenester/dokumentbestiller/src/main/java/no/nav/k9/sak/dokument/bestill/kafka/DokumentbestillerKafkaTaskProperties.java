@@ -6,8 +6,9 @@ public class DokumentbestillerKafkaTaskProperties {
 
     public static final String BEHANDLING_ID = "behandlingId";
     public static final String DOKUMENT_MAL_TYPE = "dokumentMalType";
-    public static final String OVERSTYRT_MOTTAKER_ID = "overstyrtMottakerId";
-    public static final String OVERSTYRT_MOTTAKER_TYPE = "overstyrtMottakerType";
+    public static final String OVERSTYRT_MOTTAKER = "overstyrtMottaker";
+    public static final String OVERSTYRT_MOTTAKER_SEPARATOR = ";";
+
     public static final String BESTILLING_UUID = "bestillingUuid";
 
 

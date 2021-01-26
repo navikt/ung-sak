@@ -44,7 +44,7 @@ public class DokumentBestillerApplikasjonTjeneste {
         }
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         DokumentMalType dokumentMal = velgDokumentMalForVedtak(ref, behandlingsresultat.getVedtaksbrev(), behandlingVedtak);
-        dokumentKafkaBestiller.bestillBrev(behandling, dokumentMal, null, null, HistorikkAktør.VEDTAKSLØSNINGEN);
+        dokumentKafkaBestiller.bestillBrev(behandling, dokumentMal, null, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
     public void bestillDokument(BestillBrevDto bestillBrevDto, HistorikkAktør aktør) {
