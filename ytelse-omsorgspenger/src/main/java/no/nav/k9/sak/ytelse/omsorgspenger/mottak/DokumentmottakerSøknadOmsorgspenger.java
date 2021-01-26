@@ -40,6 +40,7 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
+import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.vedtak.konfig.Tid;
@@ -119,7 +120,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
 
         // Uttaksperioder og oppgitt opptjening
-        lagreUttakOgOpptjening(søknadInnhold, behandling, fagsakId);
+        lagreUttakOgOpptjening(søknadInnhold, behandling, fagsakId, søknad.getSøker());
     }
 
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
@@ -140,7 +141,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    private void lagreUttakOgOpptjening(OmsorgspengerUtbetaling ytelse, Behandling behandling, Long fagsakId) {
+    private void lagreUttakOgOpptjening(OmsorgspengerUtbetaling ytelse, Behandling behandling, Long fagsakId, Søker søker) {
         var behandlingId = behandling.getId();
 
         // Uttak - basert på frisinn
@@ -149,9 +150,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         if (sisteBehandling.isPresent()) {
             // TODO: Gir det mening å kopiere tidligere fastsatt uttak? => JA, søknader blir delta. Selvbetjening viser ikke tidligere resultat til bruker
             UttakAktivitet uttakAktivitet = uttakRepository.hentFastsattUttak(sisteBehandling.get().getId());
-            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, uttakAktivitet.getPerioder());
+            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, uttakAktivitet.getPerioder(), søker);
         } else {
-            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, Collections.emptySet());
+            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, Collections.emptySet(), søker);
         }
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
