@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.person.tps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -32,6 +33,7 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
+import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -120,7 +122,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
         TpsAdapter tpsAdapter = new TpsAdapterImpl(personConsumer, tpsOversetter);
-        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
+        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class));
     }
 
     @Test

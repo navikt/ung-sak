@@ -24,17 +24,20 @@ public class PersoninfoAdapter {
     private PersonBasisTjeneste personBasisTjeneste;
     private PersoninfoTjeneste personinfoTjeneste;
     private AktørTjeneste aktørTjeneste;
+    private TilknytningTjeneste tilknytningTjeneste;
 
+    @SuppressWarnings("unused")
     public PersoninfoAdapter() {
         // for CDI proxy
     }
 
     @Inject
-    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste) {
+    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste) {
         this.tpsAdapter = tpsAdapter;
         this.personBasisTjeneste = personBasisTjeneste;
         this.personinfoTjeneste = personinfoTjeneste;
         this.aktørTjeneste = aktørTjeneste;
+        this.tilknytningTjeneste = tilknytningTjeneste;
     }
 
     //TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
@@ -147,7 +150,12 @@ public class PersoninfoAdapter {
     }
 
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {
-        return tpsAdapter.hentGeografiskTilknytning(personIdent);
+        GeografiskTilknytning geografiskTilknytningFraTps = tpsAdapter.hentGeografiskTilknytning(personIdent);
+
+        hentAktørIdForPersonIdent(personIdent)
+        .ifPresent(aid -> tilknytningTjeneste.hentGeografiskTilknytning(aid, geografiskTilknytningFraTps));
+
+        return geografiskTilknytningFraTps;
     }
 
     public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent personIdent) {

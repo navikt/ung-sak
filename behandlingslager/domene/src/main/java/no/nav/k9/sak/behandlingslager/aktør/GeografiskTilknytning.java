@@ -1,11 +1,12 @@
 package no.nav.k9.sak.behandlingslager.aktør;
 
+import no.nav.k9.kodeverk.person.Diskresjonskode;
+
 public class GeografiskTilknytning {
+    private final String tilknytning;
+    private final Diskresjonskode diskresjonskode;
 
-    private String tilknytning;
-    private String diskresjonskode;
-
-    public GeografiskTilknytning(String geografiskTilknytning, String diskresjonskode) {
+    public GeografiskTilknytning(String geografiskTilknytning, Diskresjonskode diskresjonskode) {
         this.tilknytning = geografiskTilknytning;
         this.diskresjonskode = diskresjonskode;
     }
@@ -14,7 +15,7 @@ public class GeografiskTilknytning {
         return tilknytning;
     }
 
-    public String getDiskresjonskode() {
+    public Diskresjonskode getDiskresjonskode() {
         return diskresjonskode;
     }
 }
