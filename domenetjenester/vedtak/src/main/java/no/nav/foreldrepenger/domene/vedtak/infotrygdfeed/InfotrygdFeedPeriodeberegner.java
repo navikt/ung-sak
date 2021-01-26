@@ -21,7 +21,6 @@ public class InfotrygdFeedPeriodeberegner {
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
 
-    @SuppressWarnings("unused")
     InfotrygdFeedPeriodeberegner() {
         // for CDI
     }

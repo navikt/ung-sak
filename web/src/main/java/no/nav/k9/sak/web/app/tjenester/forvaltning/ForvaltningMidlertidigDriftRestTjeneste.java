@@ -97,7 +97,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
 
-    @SuppressWarnings("unused")
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }

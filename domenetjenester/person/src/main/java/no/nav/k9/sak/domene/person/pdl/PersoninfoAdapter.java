@@ -25,7 +25,6 @@ public class PersoninfoAdapter {
     private PersoninfoTjeneste personinfoTjeneste;
     private AktørTjeneste aktørTjeneste;
 
-    @SuppressWarnings("unused")
     public PersoninfoAdapter() {
         // for CDI proxy
     }

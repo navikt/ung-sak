@@ -92,7 +92,6 @@ public class PersoninfoTjeneste {
 
     private PdlKlient pdlKlient;
 
-    @SuppressWarnings("unused")
     PersoninfoTjeneste() {
         // CDI
     }

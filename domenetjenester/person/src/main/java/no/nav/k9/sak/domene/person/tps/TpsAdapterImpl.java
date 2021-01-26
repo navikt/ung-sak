@@ -40,7 +40,6 @@ public class TpsAdapterImpl implements TpsAdapter {
     private PersonConsumer personConsumer;
     private TpsOversetter tpsOversetter;
 
-    @SuppressWarnings("unused")
     public TpsAdapterImpl() {
         // CDI
     }
