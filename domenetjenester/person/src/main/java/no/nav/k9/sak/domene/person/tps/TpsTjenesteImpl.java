@@ -19,7 +19,6 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     private PersoninfoAdapter personinfoAdapter;
 
-    @SuppressWarnings("unused")
     public TpsTjenesteImpl() {
         // for CDI proxy
     }

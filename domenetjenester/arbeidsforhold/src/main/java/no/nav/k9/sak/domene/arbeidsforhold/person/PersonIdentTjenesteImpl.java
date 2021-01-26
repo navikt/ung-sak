@@ -18,7 +18,6 @@ class PersonIdentTjenesteImpl implements PersonIdentTjeneste {
     private PersoninfoAdapter personinfoAdapter;
     private AktørTjeneste aktørTjeneste;
 
-    @SuppressWarnings("unused")
     public PersonIdentTjenesteImpl() {
         // for CDI proxy
     }

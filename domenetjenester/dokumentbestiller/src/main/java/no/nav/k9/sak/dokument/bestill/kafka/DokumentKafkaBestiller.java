@@ -1,7 +1,5 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
-import static no.nav.k9.sak.dokument.bestill.kafka.DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR;
-
 import java.io.IOException;
 import java.util.UUID;
 
