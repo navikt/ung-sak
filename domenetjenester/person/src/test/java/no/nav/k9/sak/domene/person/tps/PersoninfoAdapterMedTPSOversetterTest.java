@@ -37,8 +37,6 @@ import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse;
@@ -112,7 +110,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     private final PersonIdent personIdent = PersonIdent.fra(FIKTIVE_FNR.nesteFnr());
 
     @BeforeEach
-    public void setup() throws HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+    public void setup()  {
         landkodeNor.setValue("NOR");
 
         when(aktørTjeneste.hentAktørIdForPersonIdent(any())).thenReturn(Optional.of(AKTØR_ID__ADRESSE));
