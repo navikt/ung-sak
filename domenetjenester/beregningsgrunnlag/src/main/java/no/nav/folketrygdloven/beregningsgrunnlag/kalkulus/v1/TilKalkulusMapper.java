@@ -413,7 +413,7 @@ public class TilKalkulusMapper {
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
         var inntektsmeldinger = grunnlag.getInntektsmeldinger();
-        var yrkesaktiviteterForBeregning = new ArrayList<>(yrkesaktivitetFilter.getYrkesaktiviteterForBeregning());
+        var yrkesaktiviteterForBeregning = new ArrayList<>(yrkesaktivitetFilter.getYrkesaktiviteter());
         yrkesaktiviteterForBeregning.addAll(yrkesaktivitetFilter.getFrilansOppdrag());
         var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();

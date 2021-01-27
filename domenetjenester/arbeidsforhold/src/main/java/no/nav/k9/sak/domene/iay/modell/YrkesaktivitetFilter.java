@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -93,20 +94,6 @@ public class YrkesaktivitetFilter {
     }
 
     public Collection<Yrkesaktivitet> getYrkesaktiviteter() {
-        var ya = getYrkesaktiviteterInklusiveFiktive().stream()
-            .filter(this::erIkkeFrilansOppdrag)
-            .filter(it -> (erArbeidsforholdOgStarterPåRettSideAvSkjæringstidspunkt(it) || !getAktivitetsAvtalerForArbeid(it).isEmpty()))
-            .collect(Collectors.toUnmodifiableSet());
-        return ya;
-    }
-
-    /**
-     * Collection av aktiviteter filtrert iht ArbeidsforholdInformasjon.
-     * Aktiviteter hvor overstyring har satt ArbeidsforholdHandlingType til INNTEKT_IKKE_MED_I_BG filtreres ut.
-     *
-     * @return Liste av {@link Yrkesaktivitet}
-     */
-    public Collection<Yrkesaktivitet> getYrkesaktiviteterForBeregning() {
         return getYrkesaktiviteterInklusiveFiktive()
             .stream()
             .filter(this::erIkkeFrilansOppdrag)
