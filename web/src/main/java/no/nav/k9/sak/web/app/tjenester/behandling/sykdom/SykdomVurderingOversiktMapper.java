@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -36,6 +37,7 @@ public class SykdomVurderingOversiktMapper {
                     new Periode(ds.getFom(), ds.getTom()),
                     true,  // TODO: Rette til riktige verdi.
                     true,  // TODO: Rette til riktige verdi.
+                    UUID.fromString(behandlingUuid).equals(ds.getValue().getEndretBehandlingUuid()),
                     Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId), linkForEndreVurdering(behandlingUuid))
                     ); 
             })

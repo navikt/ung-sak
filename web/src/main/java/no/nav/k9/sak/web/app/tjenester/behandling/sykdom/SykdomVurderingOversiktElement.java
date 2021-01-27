@@ -58,6 +58,11 @@ public class SykdomVurderingOversiktElement {
     @Valid
     private boolean gjelderForAnnenPart;
     
+    @JsonProperty(value = "endretIDenneBehandlingen")
+    @Valid
+    private boolean endretIDenneBehandlingen;
+    
+    
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -65,12 +70,13 @@ public class SykdomVurderingOversiktElement {
 
 
     public SykdomVurderingOversiktElement(String id, Resultat resultat, Periode periode,
-            boolean gjelderForSøker, boolean gjelderForAnnenPart, List<ResourceLink> links) {
+            boolean gjelderForSøker, boolean gjelderForAnnenPart, boolean endretIDenneBehandlingen, List<ResourceLink> links) {
         this.id = id;
         this.resultat = resultat;
         this.periode = periode;
         this.gjelderForSøker = gjelderForSøker;
         this.gjelderForAnnenPart = gjelderForAnnenPart;
+        this.endretIDenneBehandlingen = endretIDenneBehandlingen;
         this.links = links;
     }
 
