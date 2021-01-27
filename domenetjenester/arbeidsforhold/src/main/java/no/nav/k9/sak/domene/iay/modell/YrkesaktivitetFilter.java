@@ -10,6 +10,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -83,14 +85,14 @@ public class YrkesaktivitetFilter {
             .filter(av -> (!ya.erArbeidsforhold() || !av.erAnsettelsesPeriode()))
             .filter(this::skalMedEtterSkjæringstidspunktVurdering)
             .distinct()
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     public Collection<Yrkesaktivitet> getFrilansOppdrag() {
         return getAlleYrkesaktiviteter().stream()
             .filter(this::erFrilansOppdrag)
             .filter(it -> !getAktivitetsAvtalerForArbeid(it).isEmpty())
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     public Collection<Yrkesaktivitet> getYrkesaktiviteter() {
@@ -98,7 +100,7 @@ public class YrkesaktivitetFilter {
             .stream()
             .filter(this::erIkkeFrilansOppdrag)
             .filter(it -> (erArbeidsforholdOgStarterPåRettSideAvSkjæringstidspunkt(it) || !getAktivitetsAvtalerForArbeid(it).isEmpty()))
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private List<Yrkesaktivitet> arbeidsforholdLagtTilAvSaksbehandler() {
@@ -150,9 +152,9 @@ public class YrkesaktivitetFilter {
     }
 
     private Set<Yrkesaktivitet> getYrkesaktiviteterInklusiveFiktive() {
-        var aktiviteter = new HashSet<>(getAlleYrkesaktiviteter());
+        var aktiviteter = new TreeSet<>(getAlleYrkesaktiviteter());
         aktiviteter.addAll(arbeidsforholdLagtTilAvSaksbehandler());
-        return Collections.unmodifiableSet(aktiviteter);
+        return Collections.unmodifiableSortedSet(aktiviteter);
     }
 
     public Collection<Yrkesaktivitet> getAlleYrkesaktiviteter() {
