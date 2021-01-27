@@ -8,7 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -57,11 +57,11 @@ public class ArbeidsgiverTjeneste {
         } else if (arbeidsgiver.getErVirksomhet() && Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr())) {
             return new ArbeidsgiverOpplysninger(OrgNummer.KUNSTIG_ORG, "Kunstig(Lagt til av saksbehandling)");
         } else if (arbeidsgiver.erAktørId()) {
-            Optional<Personinfo> personinfo = hentInformasjonFraTps(arbeidsgiver);
+            Optional<PersoninfoArbeidsgiver> personinfo = hentInformasjonFraTps(arbeidsgiver);
             if (personinfo.isPresent()) {
-                Personinfo info = personinfo.get();
-                String fødselsdato = info.getFødselsdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-                ArbeidsgiverOpplysninger nyOpplysninger = new ArbeidsgiverOpplysninger(fødselsdato, info.getNavn(), info.getFødselsdato());
+                PersoninfoArbeidsgiver personinfoArbeidsgiver = personinfo.get();
+                String fødselsdato = personinfoArbeidsgiver.getFødselsdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                ArbeidsgiverOpplysninger nyOpplysninger = new ArbeidsgiverOpplysninger(fødselsdato, personinfoArbeidsgiver.getNavn(), personinfoArbeidsgiver.getFødselsdato());
                 cache.put(arbeidsgiver.getIdentifikator(), nyOpplysninger);
                 return nyOpplysninger;
             } else {
@@ -82,9 +82,9 @@ public class ArbeidsgiverTjeneste {
         return Arbeidsgiver.virksomhet(virksomhet.getOrgnr());
     }
 
-    private Optional<Personinfo> hentInformasjonFraTps(Arbeidsgiver arbeidsgiver) {
+    private Optional<PersoninfoArbeidsgiver> hentInformasjonFraTps(Arbeidsgiver arbeidsgiver) {
         try {
-            return tpsTjeneste.hentBrukerForAktør(arbeidsgiver.getAktørId());
+            return tpsTjeneste.hentPersoninfoArbeidsgiver(arbeidsgiver.getAktørId());
         } catch (VLException feil) {
             // Ønsker ikke å gi GUI problemer ved å eksponere exceptions
             return Optional.empty();

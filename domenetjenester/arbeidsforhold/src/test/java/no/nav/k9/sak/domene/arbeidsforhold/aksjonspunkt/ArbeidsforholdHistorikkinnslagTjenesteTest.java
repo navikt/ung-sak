@@ -17,9 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -41,8 +41,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
-
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
 
     @Inject
     private EntityManager entityManager;
@@ -92,136 +90,7 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
 
         // Arrange
         AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()), arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(0);
-
-    }
-
-    @Test
-    public void skal_opprette_kun_et_historikkinnslag_når_arbeidsforholdet_skal_kun_bruke_permisjon() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukPermisjon(true);
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
-            arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(1);
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).anySatisfy(del -> {
-            assertThat(del.getHistorikkinnslagFelt()).hasSize(3);
-            assertThat(del.getHistorikkinnslagFelt()).anySatisfy(felt ->
-                assertThat(felt.getTilVerdi()).isEqualTo(VurderArbeidsforholdHistorikkinnslag.SØKER_ER_I_PERMISJON.getKode())
-            );
-        });
-
-    }
-
-    @Test
-    public void skal_opprette_kun_et_historikkinnslag_når_arbeidsforholdet_skal_forsette_uten_inntektsmelding() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(true);
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
-            arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(1);
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).anySatisfy(del -> {
-            assertThat(del.getHistorikkinnslagFelt()).hasSize(3);
-            assertThat(del.getHistorikkinnslagFelt()).anySatisfy(felt ->
-                assertThat(felt.getTilVerdi()).isEqualTo(VurderArbeidsforholdHistorikkinnslag.BENYTT_A_INNTEKT_I_BG.getKode())
-            );
-        });
-
-    }
-
-    @Test
-    public void skal_opprette_to_historikkinnslag_når_arbeidsforholdet_skal_forsette_uten_inntektsmelding_og_ikke_bruke_permisjon() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukPermisjon(false);
-        arbeidsforholdDto.setFortsettBehandlingUtenInntektsmelding(true);
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
-            arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(2);
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).anySatisfy(del -> {
-            assertThat(del.getHistorikkinnslagFelt()).hasSize(3);
-            assertThat(del.getHistorikkinnslagFelt()).anySatisfy(felt ->
-                assertThat(felt.getTilVerdi()).isEqualTo(VurderArbeidsforholdHistorikkinnslag.SØKER_ER_IKKE_I_PERMISJON.getKode())
-            );
-        });
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).anySatisfy(del -> {
-            assertThat(del.getHistorikkinnslagFelt()).hasSize(2);
-            assertThat(del.getHistorikkinnslagFelt()).anySatisfy(felt ->
-                assertThat(felt.getTilVerdi()).isEqualTo(VurderArbeidsforholdHistorikkinnslag.BENYTT_A_INNTEKT_I_BG.getKode())
-            );
-        });
-
-    }
-
-    @Test
-    public void skal_opprette_et_historikkinnslag_når_arbeidsforholdet_ikke_skal_brukes() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukArbeidsforholdet(false);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.minusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
-            arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(1);
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).anySatisfy(del -> {
-            assertThat(del.getHistorikkinnslagFelt()).hasSize(3);
-            assertThat(del.getHistorikkinnslagFelt()).anySatisfy(felt ->
-                assertThat(felt.getTilVerdi()).isEqualTo(VurderArbeidsforholdHistorikkinnslag.IKKE_BRUK.getKode())
-            );
-        });
-
-    }
-
-    @Test
-    public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_starter_på_stp() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT);
+        arbeidsforholdDto.setHandlingType(ArbeidsforholdHandlingType.BRUK);
 
         when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
 
@@ -233,24 +102,4 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
         assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(0);
 
     }
-
-    @Test
-    public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_starter_etter_stp() {
-
-        // Arrange
-        AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        arbeidsforholdDto.setBrukArbeidsforholdet(true);
-        arbeidsforholdDto.setFomDato(SKJÆRINGSTIDSPUNKT.plusDays(1));
-
-        when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
-
-        // Act
-        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
-            arbeidsforholdDto, virksomhet, ref, List.of());
-
-        // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(0);
-
-    }
-
 }

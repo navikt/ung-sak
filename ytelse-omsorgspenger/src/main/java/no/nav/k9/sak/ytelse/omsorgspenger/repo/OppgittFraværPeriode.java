@@ -170,5 +170,4 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             ", versjon=" + versjon +
             '>';
     }
-
 }

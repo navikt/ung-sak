@@ -1,0 +1,13 @@
+domene/kontrakt:
+  - kontrakt/src/main/java/**/*
+  - kodeverk/src/main/java/**/*
+
+migreringer:
+  - migreringer/src/main/**/*
+  
+web:
+  - web/src/main/java/**/*
+  
+pom:
+  - '**/*/pom.xml'
+  - pom.xml

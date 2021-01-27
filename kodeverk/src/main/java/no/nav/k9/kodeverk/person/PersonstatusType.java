@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
@@ -38,6 +39,18 @@ public enum PersonstatusType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", false),
 
     ;
+
+    private static final Map<String, PersonstatusType> FRA_FREG = Map.ofEntries(
+        Map.entry("inaktiv", ADNR),
+        Map.entry("midlertidig", ADNR),
+        Map.entry("bosatt", PersonstatusType.BOSA),
+        Map.entry("doed", PersonstatusType.DØD),
+        Map.entry("forsvunnet", PersonstatusType.FOSV),
+        Map.entry("foedselsregistrert", PersonstatusType.FØDR),
+        Map.entry("opphoert", PersonstatusType.UTPE),
+        Map.entry("utflyttet", UTVA),
+        Map.entry("ikkeBosatt", UREG)
+    );
 
     private static final Map<String, PersonstatusType> KODER = new LinkedHashMap<>();
 
@@ -114,6 +127,10 @@ public enum PersonstatusType implements Kodeverdi {
 
     public static Set<PersonstatusType> personstatusTyperFortsattBehandling() {
         return List.of(values()).stream().filter(s -> s.fortsettBehandling).collect(Collectors.toSet());
+    }
+
+    public static PersonstatusType fraFregPersonstatus(String fregStatus) {
+        return fregStatus != null ? FRA_FREG.getOrDefault(fregStatus, UDEFINERT) : UDEFINERT;
     }
 
 }

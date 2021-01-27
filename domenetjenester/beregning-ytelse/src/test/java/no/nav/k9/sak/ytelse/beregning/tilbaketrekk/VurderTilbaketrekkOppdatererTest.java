@@ -37,6 +37,8 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(JpaExtension.class)
 public class VurderTilbaketrekkOppdatererTest {
 
+    private static final LocalDate DAGENSDATO = LocalDate.now().withDayOfMonth(15).withMonth(2);
+
     @Inject
     private EntityManager entityManager;
 
@@ -107,7 +109,7 @@ public class VurderTilbaketrekkOppdatererTest {
 
     private BeregningsresultatPeriode buildBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat) {
         return BeregningsresultatPeriode.builder()
-            .medBeregningsresultatPeriodeFomOgTom(LocalDate.now().minusDays(20), LocalDate.now().minusDays(15))
+            .medBeregningsresultatPeriodeFomOgTom(DAGENSDATO.minusDays(20), DAGENSDATO.minusDays(15))
             .build(beregningsresultat);
     }
 

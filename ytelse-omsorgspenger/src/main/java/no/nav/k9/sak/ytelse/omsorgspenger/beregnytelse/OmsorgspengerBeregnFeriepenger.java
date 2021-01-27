@@ -12,6 +12,6 @@ public class OmsorgspengerBeregnFeriepenger extends BeregnFeriepengerTjeneste {
     // FIXME K9 Hvordan håndterer vi dete for PSB.
 
     public OmsorgspengerBeregnFeriepenger() {
-        super(60);
+        super(60, true);
     }
 }

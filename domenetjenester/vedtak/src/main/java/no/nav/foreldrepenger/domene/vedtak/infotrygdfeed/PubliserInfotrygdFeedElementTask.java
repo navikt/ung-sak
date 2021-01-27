@@ -5,17 +5,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -35,7 +31,7 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
 
     private BehandlingRepository behandlingRepository;
     private InfotrygdFeedMeldingProducer meldingProducer;
-    private Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere;
+    private InfotrygdFeedPeriodeberegner periodeberegner;
 
     public PubliserInfotrygdFeedElementTask() {
         // CDI
@@ -44,10 +40,10 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
     @Inject
     public PubliserInfotrygdFeedElementTask(BehandlingRepository behandlingRepository,
                                             InfotrygdFeedMeldingProducer meldingProducer,
-                                            @Any Instance<InfotrygdFeedPeriodeberegner> periodeBeregnere) {
+                                            InfotrygdFeedPeriodeberegner periodeberegner) {
         this.behandlingRepository = behandlingRepository;
         this.meldingProducer = meldingProducer;
-        this.periodeBeregnere = periodeBeregnere;
+        this.periodeberegner = periodeberegner;
     }
 
     @Override
@@ -67,7 +63,8 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
             .uuid(UUID.randomUUID().toString());
 
         setSaksnummerOgAktørId(builder, behandling.getFagsak());
-        setPeriodeOgYtelse(builder, behandling);
+        setPeriode(builder, behandling);
+        setInfotrygdYtelseKode(builder, behandling);
         setAktørIdPleietrengende(builder, behandling);
 
         return builder.build();
@@ -79,12 +76,9 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
             .aktoerId(fagsak.getAktørId().getId());
     }
 
-    private void setPeriodeOgYtelse(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
-        InfotrygdFeedPeriodeberegner periodeBeregner = getInfotrygdFeedPeriodeBeregner(behandling);
-        builder.ytelse(periodeBeregner.getInfotrygdYtelseKode());
-
+    private void setPeriode(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
         Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
-        InfotrygdFeedPeriode periode = periodeBeregner.finnInnvilgetPeriode(saksnummer);
+        InfotrygdFeedPeriode periode = periodeberegner.finnInnvilgetPeriode(saksnummer);
 
         LocalDate fom = periode.getFom();
         LocalDate tom = periode.getTom();
@@ -97,17 +91,19 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         }
     }
 
+
+    private InfotrygdFeedMessage.Builder setInfotrygdYtelseKode(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
+        var fagsakYtelseType = behandling.getFagsakYtelseType();
+        var infotrygdBehandlingstema = fagsakYtelseType.getInfotrygdBehandlingstema();
+        Objects.requireNonNull(infotrygdBehandlingstema, "mangler mapping mot Infotrygd-kode for ytelsekode: " + fagsakYtelseType.getKode());
+
+        return builder.ytelse(infotrygdBehandlingstema);
+    }
+
     private void setAktørIdPleietrengende(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
         AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
         if (pleietrengendeAktørId != null) {
             builder.aktoerIdPleietrengende(pleietrengendeAktørId.getId());
         }
-    }
-
-    private InfotrygdFeedPeriodeberegner getInfotrygdFeedPeriodeBeregner(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsak().getYtelseType();
-
-        return FagsakYtelseTypeRef.Lookup.find(periodeBeregnere, ytelseType)
-            .orElseThrow(() -> new IllegalArgumentException("Kan ikke beregne periode for ytelse: " + ytelseType));
     }
 }

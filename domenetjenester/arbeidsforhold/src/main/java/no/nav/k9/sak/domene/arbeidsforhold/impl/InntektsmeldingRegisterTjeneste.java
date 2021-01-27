@@ -52,7 +52,6 @@ public class InntektsmeldingRegisterTjeneste {
     private ArbeidsforholdTjeneste abakusArbeidsforholdTjeneste;
     private Instance<InntektsmeldingFilterYtelse> inntektsmeldingFiltere;
 
-
     InntektsmeldingRegisterTjeneste() {
         // CDI-runner
     }
@@ -73,7 +72,8 @@ public class InntektsmeldingRegisterTjeneste {
 
         Skjæringstidspunkt skjæringstidspunkt = referanse.getSkjæringstidspunkt();
         LocalDate dato = skjæringstidspunkt.getUtledetSkjæringstidspunkt();
-        Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> påkrevdeInntektsmeldinger = abakusArbeidsforholdTjeneste.finnArbeidsforholdForIdentPåDag(referanse.getAktørId(), dato);
+        Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> påkrevdeInntektsmeldinger = abakusArbeidsforholdTjeneste
+            .finnArbeidsforholdForIdentPåDag(referanse.getAktørId(), dato, referanse.getFagsakYtelseType());
 
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             return Collections.emptyMap();
@@ -149,7 +149,6 @@ public class InntektsmeldingRegisterTjeneste {
 
         return filtrerInntektsmeldingerForYtelse(referanse, inntektArbeidYtelseGrunnlag, påkrevdeInntektsmeldinger);
     }
-
 
     private <V> void filtrerUtMottatteInntektsmeldinger(BehandlingReferanse referanse, Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger,
                                                         boolean erEndringssøknad,
@@ -275,13 +274,15 @@ public class InntektsmeldingRegisterTjeneste {
      * Skal ikke benytte sjekk mot arkivet slik som gjøres i utledManglendeInntektsmeldingerFraAAreg da
      * disse verdiene skal ikke påvirkes av endringer i arkivet.
      */
-    private <V> Map<Arbeidsgiver, Set<V>> filtrerInntektsmeldingerForYtelse(BehandlingReferanse referanse, Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag, Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
+    private <V> Map<Arbeidsgiver, Set<V>> filtrerInntektsmeldingerForYtelse(BehandlingReferanse referanse, Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag,
+                                                                            Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
         InntektsmeldingFilterYtelse filter = FagsakYtelseTypeRef.Lookup.find(inntektsmeldingFiltere, referanse.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + referanse.getFagsakYtelseType().getKode()));
         return filter.filtrerInntektsmeldingerForYtelse(referanse, inntektArbeidYtelseGrunnlag, påkrevdeInntektsmeldinger);
     }
 
-    private <V> Map<Arbeidsgiver, Set<V>> filtrerInntektsmeldingerForYtelseUtvidet(BehandlingReferanse referanse, Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag, Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
+    private <V> Map<Arbeidsgiver, Set<V>> filtrerInntektsmeldingerForYtelseUtvidet(BehandlingReferanse referanse, Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag,
+                                                                                   Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
         InntektsmeldingFilterYtelse filter = FagsakYtelseTypeRef.Lookup.find(inntektsmeldingFiltere, referanse.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + referanse.getFagsakYtelseType().getKode()));
         return filter.filtrerInntektsmeldingerForYtelseUtvidet(referanse, inntektArbeidYtelseGrunnlag, påkrevdeInntektsmeldinger);

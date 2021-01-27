@@ -128,6 +128,10 @@ spec:
     - name: LDAP_SERVICEUSER_BASEDN
       value: "ou=ServiceAccounts,dc=preprod,dc=local"
 
+    # PDL
+    - name: PDL_TEMA
+      value: OMS
+
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelse-api.default/infotrygd/hendelser
@@ -166,7 +170,7 @@ spec:
     - name: PERSON_V3_URL
       value: https://wasapp-q1.adeo.no/tpsws/ws/Person/v3
     - name: PDL_BASE_URL
-      value: http://pdl-api.default
+      value: http://pdl-api.default/graphql
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
     - name: MEDLEM_V2_URL
@@ -199,6 +203,8 @@ spec:
     - name: K9TILBAKE_AKTIVERT
       value: "true"
     - name: UNNTAKSBEHANDLING
+      value: "true"
+    - name: VURDER_SOKNADSFRIST
       value: "true"
 
     # Audit logging

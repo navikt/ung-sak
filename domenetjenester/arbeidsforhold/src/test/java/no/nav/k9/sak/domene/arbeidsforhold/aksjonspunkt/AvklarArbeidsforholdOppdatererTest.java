@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -16,10 +17,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -36,31 +40,31 @@ import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioB
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
-import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
-import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforhold;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.vedtak.konfig.Tid;
 
 @CdiDbAwareTest
 public class AvklarArbeidsforholdOppdatererTest {
 
-    private static final String NAV_ORGNR = "889640782";
-
-    private static final InternArbeidsforholdRef ARBEIDSFORHOLD_REF = InternArbeidsforholdRef.namedRef("TEST-REF");
     private IAYRepositoryProvider repositoryProvider;
 
     @Inject
@@ -80,12 +84,12 @@ public class AvklarArbeidsforholdOppdatererTest {
     public void oppsett() {
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         var arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
-        ArbeidsforholdAdministrasjonTjeneste arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
+        var arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(
             vurderArbeidsforholdTjeneste,
             arbeidsgiverTjeneste,
             iayTjeneste);
         var arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
-        ArbeidsforholdHistorikkinnslagTjeneste arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
+        var arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         oppdaterer = new AvklarArbeidsforholdOppdaterer(
             arbeidsforholdAdministrasjonTjeneste,
             iayTjeneste,
@@ -97,7 +101,9 @@ public class AvklarArbeidsforholdOppdatererTest {
         // Arrange
         var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
-
+        var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
+        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
+        opprettIAYMedInntektsmeldingOgInntekt(behandling, arbeidsgiver, arbeidsforholdId);
         // simulere at 5080 har oppstått
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
@@ -105,13 +111,19 @@ public class AvklarArbeidsforholdOppdatererTest {
 
         AvklarArbeidsforholdDto nyttArbeidsforhod = new AvklarArbeidsforholdDto();
         String navn = "Utlandet";
-        nyttArbeidsforhod.setNavn(navn);
         LocalDate fomDato = stp.minusYears(3);
-        nyttArbeidsforhod.setFomDato(fomDato);
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
         nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
-        nyttArbeidsforhod.setLagtTilAvSaksbehandler(true);
-        nyttArbeidsforhod.setBrukArbeidsforholdet(true);
+        nyttArbeidsforhod.setNavn(navn);
+        nyttArbeidsforhod.setArbeidsforhold(new ArbeidsforholdIdDto(arbeidsforholdId.getUUIDReferanse(), "1234"));
+        nyttArbeidsforhod.setId(arbeidsgiver.getIdentifikator() + "-" + arbeidsforholdId.getUUIDReferanse()); // identifikator + "-" + arbeidsforholdsIdIntern
+        nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
+        nyttArbeidsforhod.setAnsettelsesPerioder(Set.of(new PeriodeDto(fomDato, Tid.TIDENES_ENDE)));
+        nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
+        nyttArbeidsforhod.setArbeidsgiver(arbeidsgiver);
+        nyttArbeidsforhod.setNavn(navn);
+        nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING);
+        nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
 
         List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
         AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
@@ -144,6 +156,11 @@ public class AvklarArbeidsforholdOppdatererTest {
         Collection<AktivitetsAvtale> aktivitetsAvtaler = filter.getAktivitetsAvtalerForArbeid();
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
+
+        var ref = BehandlingReferanse.fra(behandling, stp);
+        var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
+
+        assertThat(vurder).isEmpty();
     }
 
     @Test
@@ -151,7 +168,9 @@ public class AvklarArbeidsforholdOppdatererTest {
         // Arrange
         var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
         Behandling behandling = scenario.lagre(repositoryProvider);
-
+        var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
+        var arbeidsforholdId = InternArbeidsforholdRef.nullRef();
+        opprettIAYMedInntektsmeldingOgInntekt(behandling, arbeidsgiver, arbeidsforholdId);
         // simulere at 5080 har oppstått
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
 
@@ -161,13 +180,15 @@ public class AvklarArbeidsforholdOppdatererTest {
         String navn = "Utlandet";
         nyttArbeidsforhod.setNavn(navn);
         LocalDate fomDato = stp.minusYears(3);
-        nyttArbeidsforhod.setFomDato(fomDato);
         BigDecimal stillingsprosent = BigDecimal.valueOf(100);
+        nyttArbeidsforhod.setArbeidsforhold(new ArbeidsforholdIdDto(null, null));
+        nyttArbeidsforhod.setId(arbeidsgiver.getIdentifikator() + "-" + arbeidsforholdId.getUUIDReferanse()); // identifikator + "-" + arbeidsforholdsIdIntern
         nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
-        nyttArbeidsforhod.setLagtTilAvSaksbehandler(false);
-        nyttArbeidsforhod.setBasertPaInntektsmelding(true);
-        nyttArbeidsforhod.setBrukArbeidsforholdet(true);
-        nyttArbeidsforhod.setArbeidsgiverIdentifikator(NAV_ORGNR);
+        nyttArbeidsforhod.setAnsettelsesPerioder(Set.of(new PeriodeDto(fomDato, Tid.TIDENES_ENDE)));
+        nyttArbeidsforhod.setStillingsprosent(stillingsprosent);
+        nyttArbeidsforhod.setArbeidsgiver(arbeidsgiver);
+        nyttArbeidsforhod.setNavn(navn);
+        nyttArbeidsforhod.setHandlingType(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING);
 
         List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(nyttArbeidsforhod);
         AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
@@ -200,81 +221,40 @@ public class AvklarArbeidsforholdOppdatererTest {
         Collection<AktivitetsAvtale> aktivitetsAvtaler = filter.getAktivitetsAvtalerForArbeid();
         assertThat(aktivitetsAvtaler).hasSize(1);
         assertThat(aktivitetsAvtaler.iterator().next().getProsentsats().getVerdi()).isEqualByComparingTo(stillingsprosent);
-    }
 
+        var ref = BehandlingReferanse.fra(behandling, stp);
+        var vurder = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag);
 
-    @Test
-    public void skal_utlede_handling_lik_lagt_til_av_saksbehandler() {
-
-        // Arrange
-        String navn = "Utlandet";
-        String arbeidsforholdId = InternArbeidsforholdRef.nyRef().getReferanse();
-        LocalDate stpDato = LocalDate.of(2019, 1, 1);
-        LocalDate fomDato = stpDato.minusYears(3);
-        BigDecimal stillingsprosent = BigDecimal.valueOf(100);
-
-        var scenario = IAYScenarioBuilder.nyttScenario(FagsakYtelseType.FORELDREPENGER);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettIAYAggregat(behandling, false, LocalDate.of(2018, 1, 1));
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
-
-        AvklarArbeidsforholdDto arbeidsforhold = new AvklarArbeidsforholdDto();
-        arbeidsforhold.setNavn(navn);
-        arbeidsforhold.setFomDato(fomDato);
-        arbeidsforhold.setStillingsprosent(stillingsprosent);
-        arbeidsforhold.setLagtTilAvSaksbehandler(true);
-        arbeidsforhold.setArbeidsforholdId(arbeidsforholdId);
-        arbeidsforhold.setArbeidsgiverIdentifikator(NAV_ORGNR);
-        arbeidsforhold.setBrukArbeidsforholdet(true);
-
-        List<AvklarArbeidsforholdDto> nyeArbeidsforhold = List.of(arbeidsforhold);
-        AvklarArbeidsforhold avklarArbeidsforholdDto = new AvklarArbeidsforhold("Har lagt til et nytt arbeidsforhold", nyeArbeidsforhold);
-
-        Skjæringstidspunkt stp = Skjæringstidspunkt.builder()
-            .medUtledetSkjæringstidspunkt(stpDato)
-            .build();
-
-        AksjonspunktOppdaterParameter params = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, stp, avklarArbeidsforholdDto.getBegrunnelse());
-
-        // Act
-        oppdaterer.oppdater(avklarArbeidsforholdDto, params);
-
-        // Assert
-        List<ArbeidsforholdOverstyring> overstyring = hentGrunnlag(behandling)
-            .getArbeidsforholdInformasjon()
-            .map(ArbeidsforholdInformasjon::getOverstyringer)
-            .orElse(Collections.emptyList());
-
-        assertThat(overstyring).hasSize(1);
-        ArbeidsforholdOverstyring overstyrtArbeidsforhold = overstyring.get(0);
-        assertThat(overstyrtArbeidsforhold.getHandling()).isEqualTo(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
+        // Sjekker om aksjonspunktet er løst
+        assertThat(vurder).isEmpty();
     }
 
     private InntektArbeidYtelseGrunnlag hentGrunnlag(Behandling behandling) {
         return iayTjeneste.finnGrunnlag(behandling.getId()).orElseThrow();
     }
 
-    private void opprettIAYAggregat(Behandling behandling, boolean medArbeidsforholdRef, LocalDate fom) {
-        LocalDate tom = AbstractLocalDateInterval.TIDENES_ENDE;
-        YrkesaktivitetBuilder yrkesaktivitetBuilder = YrkesaktivitetBuilder.oppdatere(Optional.empty());
-        AktivitetsAvtaleBuilder aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder();
-        AktivitetsAvtaleBuilder aktivitetsAvtale = aktivitetsAvtaleBuilder
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-            .medProsentsats(BigDecimal.valueOf(100));
-        AktivitetsAvtaleBuilder ansettelsesperiode = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder()
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-        yrkesaktivitetBuilder
-            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-            .medArbeidsgiver(Arbeidsgiver.virksomhet(NAV_ORGNR))
-            .medArbeidsforholdId(medArbeidsforholdRef ? ARBEIDSFORHOLD_REF : null)
-            .leggTilAktivitetsAvtale(aktivitetsAvtale)
-            .leggTilAktivitetsAvtale(ansettelsesperiode);
+    private void opprettIAYMedInntektsmeldingOgInntekt(Behandling behandling, Arbeidsgiver virksomhet, InternArbeidsforholdRef arbeidsforholdId) {
         InntektArbeidYtelseAggregatBuilder builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
-        InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeidBuilder = builder.getAktørArbeidBuilder(behandling.getAktørId());
-        InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeid = aktørArbeidBuilder.leggTilYrkesaktivitet(yrkesaktivitetBuilder);
-        builder.leggTilAktørArbeid(aktørArbeid);
+        var aiBuilder = builder.getAktørInntektBuilder(behandling.getAktørId());
+        var ibuilder = aiBuilder.getInntektBuilder(InntektsKilde.INNTEKT_OPPTJENING, Opptjeningsnøkkel.forArbeidsgiver(virksomhet));
+        ibuilder.leggTilInntektspost(ibuilder.getInntektspostBuilder()
+            .medInntektspostType(InntektspostType.LØNN)
+            .medPeriode(LocalDate.now().minusMonths(3), LocalDate.now())
+            .medBeløp(BigDecimal.TEN)
+            .medSkatteOgAvgiftsregelType(SkatteOgAvgiftsregelType.NETTOLØNN));
+        var aktørInntekt = aiBuilder.leggTilInntekt(ibuilder);
+        builder.leggTilAktørInntekt(aktørInntekt);
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);
+
+        var inntektsmeldinger = List.of(InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(virksomhet)
+            .medYtelse(FagsakYtelseType.OMSORGSPENGER)
+            .medJournalpostId("1")
+            .medArbeidsforholdId(arbeidsforholdId)
+            .medArbeidsforholdId(EksternArbeidsforholdRef.ref(arbeidsforholdId.getReferanse()))
+            .medKanalreferanse("AR1")
+            .medBeløp(BigDecimal.TEN));
+        iayTjeneste.lagreInntektsmeldinger(behandling.getFagsak().getSaksnummer(), behandling.getId(), inntektsmeldinger);
     }
 
     public void setEntityManager(EntityManager entityManager) {

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningTilfelleDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.AktivitetStatus;
+import no.nav.folketrygdloven.kalkulus.kodeverk.AndelKilde;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
@@ -363,7 +364,8 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getLagtTilAvSaksbehandler(),
             redigerbarAndel.getBeregningsperiodeFom(),
             redigerbarAndel.getBeregningsperiodeTom(),
-            null /** AndelKilde */);
+            redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : AndelKilde.fraKode(redigerbarAndel.getKilde().getKode())
+            );
     }
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.RedigerbarAndelDto mapTilRedigerbarAndelDto(RedigerbarAndelDto redigerbarAndel) {

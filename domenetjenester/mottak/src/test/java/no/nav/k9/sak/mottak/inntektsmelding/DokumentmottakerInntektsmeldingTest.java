@@ -39,7 +39,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.NyBehandlingOppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakTestUtil;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;

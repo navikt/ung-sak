@@ -62,7 +62,7 @@ public class Vilkårene extends BaseEntitet {
     Vilkårene(Vilkårene resultat) {
         if (resultat != null) {
             // For kopi mellom behandlinger
-            this.vilkårne.addAll(resultat.vilkårne);
+            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).collect(Collectors.toSet());
         }
     }
 

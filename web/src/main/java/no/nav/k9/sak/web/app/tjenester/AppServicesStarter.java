@@ -6,8 +6,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
+import no.nav.vedtak.felles.prosesstask.impl.BatchTaskScheduler;
 import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
-import no.nav.vedtak.felles.prosesstask.impl.cron.BatchTaskScheduler;
 
 /**
  * Initialiserer bakgrunns tasks.

@@ -140,7 +140,7 @@ public class UttakRestKlient {
         }
     }
 
-    private <T> T utførOgHent(HttpUriRequest request, String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
+    private <T> T utførOgHent(HttpUriRequest request, @SuppressWarnings("unused") String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {

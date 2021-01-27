@@ -1,13 +1,13 @@
 package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
@@ -37,32 +37,20 @@ class ArbeidsforholdHistorikkinnslagTjeneste {
     }
 
     public void opprettHistorikkinnslag(AksjonspunktOppdaterParameter param, AvklarArbeidsforholdDto arbeidsforholdDto, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref, List<ArbeidsforholdOverstyring> overstyringer) {
-        final LocalDate stp = param.getSkjæringstidspunkt().getUtledetSkjæringstidspunkt();
         String arbeidsforholdNavn = arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(arbeidsgiver, ref, overstyringer);
-        opprettHistorikkinnslag(arbeidsforholdDto, arbeidsforholdNavn, Optional.of(stp));
+        opprettHistorikkinnslag(arbeidsforholdDto, arbeidsforholdNavn);
     }
 
-    public void opprettHistorikkinnslag(AvklarArbeidsforholdDto arbeidsforholdDto, String arbeidsforholdNavn, Optional<LocalDate> stpOpt){
-        List<VurderArbeidsforholdHistorikkinnslag> historikkinnslagKoder = utledKoderForHistorikkinnslagdeler(arbeidsforholdDto, stpOpt);
+    public void opprettHistorikkinnslag(AvklarArbeidsforholdDto arbeidsforholdDto, String arbeidsforholdNavn) {
+        List<VurderArbeidsforholdHistorikkinnslag> historikkinnslagKoder = utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(arbeidsforholdDto);
         historikkinnslagKoder.forEach(kode -> opprettHistorikkinnslagDel(kode, arbeidsforholdDto.getBegrunnelse(), arbeidsforholdNavn));
     }
 
-    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdeler(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
-        if (Boolean.FALSE.equals(arbeidsforholdDto.getBrukArbeidsforholdet())) {
-            return List.of(VurderArbeidsforholdHistorikkinnslag.IKKE_BRUK);
-        }
-        if (Boolean.TRUE.equals(arbeidsforholdDto.getBrukArbeidsforholdet())){
-            return utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(arbeidsforholdDto, stpOpt);
-        }
-        return List.of();
-    }
-
-    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(AvklarArbeidsforholdDto arbeidsforholdDto, Optional<LocalDate> stpOpt) {
+    private List<VurderArbeidsforholdHistorikkinnslag> utledKoderForHistorikkinnslagdelerForArbeidsforholdSomSkalBrukes(AvklarArbeidsforholdDto arbeidsforholdDto) {
         List<VurderArbeidsforholdHistorikkinnslag> list = new ArrayList<>();
-        UtledKoderForHistorikkinnslagdelerForArbeidsforholdMedPermisjon.utled(arbeidsforholdDto).ifPresent(list::add);
-        UtledKoderForHistorikkinnslagdelerForNyttEllerErstattetArbeidsforhold.utled(arbeidsforholdDto).ifPresent(list::add);
-        if (UtledOmHistorikkinnslagForInntektsmeldingErNødvendig.utled(arbeidsforholdDto, stpOpt)) {
-            UtledKoderForHistorikkinnslagdelerForArbeidsforholdUtenInnteksmelding.utled(arbeidsforholdDto).ifPresent(list::add);
+        var handlingType = arbeidsforholdDto.getHandlingType();
+        if (EnumSet.of(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER, ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING).contains(handlingType)) {
+            list.add(VurderArbeidsforholdHistorikkinnslag.LAGT_TIL_AV_SAKSBEHANDLER);
         }
         return list;
     }

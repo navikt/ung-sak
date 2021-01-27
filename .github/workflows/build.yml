@@ -16,6 +16,7 @@ on:
       
 env:
   IMAGE_BASE: docker.pkg.github.com/${{ github.repository }}/k9-sak
+  IMAGE_BASE_CR: ghcr.io/${{ github.repository }}
   CLUSTER: dev-fss
   NAMESPACE: default
 
@@ -68,27 +69,31 @@ jobs:
         shell: bash
         run: |
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
-          mvn deploy -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
+          mvn install -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
           echo "Deployed artifacts"
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-          echo "IMAGE=$IMAGE_BASE:$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-          echo "MVN_VERSION=$(mvn help:evaluate -e --batch-mode --file .flattened -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
+      
+      - name: Release Drafter
+        uses: release-drafter/release-drafter@v5
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bygg og laste opp docker-image
         run: |
-          docker build --tag ${IMAGE} --tag ${IMAGE_BASE}:latest --label "version=${TAG}" .
-          echo "$GITHUB_ACCESS_TOKEN" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
+          docker build --pull --tag ${IMAGE_BASE}:${TAG} --tag ${IMAGE_BASE}:latest --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
+          echo "${{ secrets.GITHUB_ACCESS_TOKEN }}" | docker login --username "x-access-token" --password-stdin https://docker.pkg.github.com
+          echo "${{ secrets.GITHUB_ACCESS_TOKEN }}" | docker login --username "x-access-token" --password-stdin ghcr.io
+          docker push ${IMAGE_BASE}:${TAG}
           docker push ${IMAGE_BASE}:latest
-          docker push ${IMAGE}
-        env:
-          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
+          docker push ${IMAGE_BASE_CR}:${TAG}
+          docker push ${IMAGE_BASE_CR}:latest
 
       - name: Lukk gamle issues
         uses: actions/github-script@v3
@@ -140,14 +145,3 @@ jobs:
                       "version": "${{ env.TAG }}",
                       "issue_number": "${{ steps.createdeployissue.outputs.number }}"
                   }}'
-
-      - name: Publiser Release Note
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.MVN_VERSION }}
-          release_name: Release ${{ env.MVN_VERSION }}
-          draft: false
-          prerelease: false

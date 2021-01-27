@@ -128,6 +128,10 @@ spec:
     - name: LDAP_SERVICEUSER_BASEDN
       value: "ou=ServiceAccounts,dc=adeo,dc=no"
 
+    # PDL
+    - name: PDL_TEMA
+      value: OMS
+
     # Restservice Generelle
     - name: INFOTRYGD_HENDELSER_API_URL
       value: http://infotrygd-hendelser.default/infotrygd/hendelser
@@ -166,7 +170,7 @@ spec:
     - name: PERSON_V3_URL
       value: https://wasapp.adeo.no/tpsws/ws/Person/v3
     - name: PDL_BASE_URL
-      value: http://pdl-api.default
+      value: http://pdl-api.default/graphql
     - name: ORGANISASJON_RS_URL
       value: https://modapp.adeo.no/ereg/api/v1/organisasjon
 

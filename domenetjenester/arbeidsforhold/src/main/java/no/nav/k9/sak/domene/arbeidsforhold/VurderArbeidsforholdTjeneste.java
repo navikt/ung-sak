@@ -13,13 +13,16 @@ import javax.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
+import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingVurderingInput;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
 public class VurderArbeidsforholdTjeneste {
 
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester;
 
     VurderArbeidsforholdTjeneste() {
@@ -27,7 +30,9 @@ public class VurderArbeidsforholdTjeneste {
     }
 
     @Inject
-    public VurderArbeidsforholdTjeneste(@Any Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester) {
+    public VurderArbeidsforholdTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                        @Any Instance<YtelsespesifikkeInntektsmeldingTjeneste> påkrevdeInntektsmeldingerTjenester) {
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.påkrevdeInntektsmeldingerTjenester = påkrevdeInntektsmeldingerTjenester;
     }
 
@@ -48,7 +53,8 @@ public class VurderArbeidsforholdTjeneste {
      * @return Arbeidsforholdene det må tas stilling til
      */
     public Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> vurder(BehandlingReferanse behandlingReferanse) {
-        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse);
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId()).orElse(null);
+        Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverSetMap = vurderMedÅrsak(behandlingReferanse, inntektArbeidYtelseGrunnlag);
         return arbeidsgiverSetMap.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, VurderArbeidsforholdTjeneste::mapTilArbeidsforholdRef));
     }
@@ -62,28 +68,30 @@ public class VurderArbeidsforholdTjeneste {
      * Legger også på en årsak for hvorfor arbeidsforholdet har fått et aksjonspunkt.
      * <p>
      *
-     * @param ref         behandlingen
+     * @param ref      behandlingen
+     * @param grunnlag
      * @return Arbeidsforholdene det må tas stilling til
      */
-    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurderMedÅrsak(BehandlingReferanse ref) {
+    public Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> vurderMedÅrsak(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag) {
 
         Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result = new HashMap<>();
 
+        var vurderingInput = new InntektsmeldingVurderingInput(ref, grunnlag);
         // Ikke relevant å sjekke permisjonen da dette går til avslag ..
         var ytelsespesifikkeInntektsmeldingTjeneste = finnPåkrevdeInntektsmeldingerTjeneste(ref);
-        leggTilManglendePåkrevdeInntektsmeldinger(ref, result, ytelsespesifikkeInntektsmeldingTjeneste);
-        erMottattInntektsmeldingUtenArbeidsforhold(result, ref, ytelsespesifikkeInntektsmeldingTjeneste);
-        erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(result, ref, ytelsespesifikkeInntektsmeldingTjeneste);
+        leggTilManglendePåkrevdeInntektsmeldinger(vurderingInput, result, ytelsespesifikkeInntektsmeldingTjeneste);
+        erMottattInntektsmeldingUtenArbeidsforhold(result, vurderingInput, ytelsespesifikkeInntektsmeldingTjeneste);
+        erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(result, vurderingInput, ytelsespesifikkeInntektsmeldingTjeneste);
 
         return result;
     }
 
-    private void erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, BehandlingReferanse ref, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
+    private void erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, InntektsmeldingVurderingInput ref, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
         var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erOvergangMedArbeidsforholdsIdHosSammeArbeidsgiver(ref);
         resultMap.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
 
-    private void leggTilManglendePåkrevdeInntektsmeldinger(BehandlingReferanse ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
+    private void leggTilManglendePåkrevdeInntektsmeldinger(InntektsmeldingVurderingInput ref, Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result, YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
         var manglendePåkrevdeInntektsmeldinger = ytelsespesifikkeInntektsmeldingTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(ref);
         manglendePåkrevdeInntektsmeldinger.forEach((k, v) -> result.merge(k, v, this::mergeSets));
     }
@@ -99,7 +107,7 @@ public class VurderArbeidsforholdTjeneste {
     }
 
     private void erMottattInntektsmeldingUtenArbeidsforhold(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> result,
-                                                            BehandlingReferanse behandlingReferanse,
+                                                            InntektsmeldingVurderingInput behandlingReferanse,
                                                             YtelsespesifikkeInntektsmeldingTjeneste ytelsespesifikkeInntektsmeldingTjeneste) {
 
         var resultMap = ytelsespesifikkeInntektsmeldingTjeneste.erMottattInntektsmeldingUtenArbeidsforhold(behandlingReferanse);

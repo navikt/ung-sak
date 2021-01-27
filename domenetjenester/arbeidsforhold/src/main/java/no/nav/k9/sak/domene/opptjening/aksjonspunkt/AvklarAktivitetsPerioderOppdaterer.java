@@ -20,7 +20,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
@@ -199,8 +199,8 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
         } else if (OrgNummer.erKunstig(arbeidsgiverIdentifikator)) {
             return hentNavnTilManueltArbeidsforhold(overstyringer);
         } else if (arbeidsgiverIdentifikator != null && AKTØRID_VALIDATOR.matcher(arbeidsgiverIdentifikator).matches()) {
-            final Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(new AktørId(arbeidsgiverIdentifikator));
-            return OpptjeningAktivitetType.ARBEID.getNavn() + " for " + personinfo.map(Personinfo::getNavn).orElse("N/A");
+            final Optional<PersoninfoArbeidsgiver> personinfo = tpsTjeneste.hentPersoninfoArbeidsgiver(new AktørId(arbeidsgiverIdentifikator));
+            return OpptjeningAktivitetType.ARBEID.getNavn() + " for " + personinfo.map(PersoninfoArbeidsgiver::getNavn).orElse("N/A");
         } else {
             return OpptjeningAktivitetType.ARBEID.getNavn() + " for organisasjonsnr. " + arbeidsgiverIdentifikator;
         }
@@ -292,8 +292,8 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
         } else if (OrgNummer.erKunstig(arbeidsgiverIdentifikator)) {
             adapter.setArbeidsgiverNavn(hentNavnTilManueltArbeidsforhold(overstyringer));
         } else if (arbeidsgiverIdentifikator != null && AKTØRID_VALIDATOR.matcher(arbeidsgiverIdentifikator).matches()) {
-            final Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(new AktørId(arbeidsgiverIdentifikator));
-            adapter.setArbeidsgiverNavn(personinfo.map(Personinfo::getNavn).orElse("N/A"));
+            final Optional<PersoninfoArbeidsgiver> personinfo = tpsTjeneste.hentPersoninfoArbeidsgiver(new AktørId(arbeidsgiverIdentifikator));
+            adapter.setArbeidsgiverNavn(personinfo.map(PersoninfoArbeidsgiver::getNavn).orElse("N/A"));
         } else {
             adapter.setArbeidsgiverNavn("N/A");
         }

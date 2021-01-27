@@ -17,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -48,7 +47,7 @@ public class ArbeidsgiverHistorikkinnslagTjenesteImplTest {
 
     @BeforeEach
     public void setup() {
-        when(tpsTjeneste.hentBrukerForAktør(any(AktørId.class))).thenReturn(Optional.of(lagPersoninfo()));
+        when(tpsTjeneste.hentPersoninfoArbeidsgiver(any(AktørId.class))).thenReturn(Optional.of(lagPersoninfo()));
 
         var virksomhetTjeneste = mock(VirksomhetTjeneste.class);
         when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(VIRKSOMHET);
@@ -56,14 +55,13 @@ public class ArbeidsgiverHistorikkinnslagTjenesteImplTest {
         arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
     }
 
-    private Personinfo lagPersoninfo() {
-        return new Personinfo.Builder()
+    private PersoninfoArbeidsgiver lagPersoninfo() {
+        return new PersoninfoArbeidsgiver.Builder()
             .medAktørId(AKTØR_ID)
             .medPersonIdent(new PersonIdent("123123123"))
-            .medKjønn(NavBrukerKjønn.MANN)
             .medFødselsdato(FØDSELSDATO)
             .medNavn(PRIVATPERSON_NAVN)
-            .build();
+            .bygg();
     }
 
     @Test

@@ -29,6 +29,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
@@ -51,6 +52,9 @@ public class RevurderingTjenesteImplTest {
 
     @Inject
     private BehandlingskontrollServiceProvider serviceProvider;
+
+    @Inject
+    private HistorikkRepository historikkRepository;
 
     private BehandlingRepositoryProvider repositoryProvider ;
 
@@ -87,7 +91,7 @@ public class RevurderingTjenesteImplTest {
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
-            revurderingTjenesteFelles, grunnlagKopierer);
+            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository);
 
         // Act
         Behandling revurdering = revurderingTjeneste

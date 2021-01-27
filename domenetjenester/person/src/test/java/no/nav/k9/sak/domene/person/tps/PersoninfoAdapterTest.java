@@ -1,25 +1,27 @@
 package no.nav.k9.sak.domene.person.tps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static java.util.Optional.of;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
 public class PersoninfoAdapterTest {
 
-    private PersoninfoAdapter adapter; // objektet vi tester
+    private PersoninfoAdapter testSubject;
 
     private static final AktørId AKTØR_ID_SØKER = AktørId.dummy();
     private static final AktørId AKTØR_ID_BARN = AktørId.dummy();
@@ -35,37 +37,47 @@ public class PersoninfoAdapterTest {
         Personinfo kjerneinfobarn = lagHentPersonResponseForBarn();
 
         TpsAdapter mockTpsAdapter = mock(TpsAdapter.class);
-        when(mockTpsAdapter.hentAktørIdForPersonIdent(FNR_BARN)).thenReturn(Optional.of(AKTØR_ID_BARN));
-        when(mockTpsAdapter.hentIdentForAktørId(AKTØR_ID_SØKER)).thenReturn(Optional.of(FNR_SØKER));
-        when(mockTpsAdapter.hentIdentForAktørId(AKTØR_ID_BARN)).thenReturn(Optional.of(FNR_BARN));
+        AktørTjeneste aktørTjeneste = mock(AktørTjeneste.class);
+
+        when(aktørTjeneste.hentAktørIdForPersonIdent(FNR_BARN)).thenReturn(of(AKTØR_ID_BARN));
+        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_SØKER)).thenReturn(of(FNR_SØKER));
+        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_BARN)).thenReturn(of(FNR_BARN));
+
         when(mockTpsAdapter.hentKjerneinformasjon(FNR_BARN, AKTØR_ID_BARN)).thenReturn(kjerneinfobarn);
         when(mockTpsAdapter.hentKjerneinformasjon(FNR_SØKER, AKTØR_ID_SØKER)).thenReturn(kjerneinfoSøker);
 
         mockPersoninfo = mock(Personinfo.class);
         when(mockPersoninfo.getFødselsdato()).thenReturn(LocalDate.now()); // trenger bare en verdi
 
-        adapter = new PersoninfoAdapter(mockTpsAdapter);
+        PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
+        PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
+        testSubject = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
     }
 
     @Test
     public void skal_innhente_saksopplysninger_for_søker() {
+        // Arrange
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_SØKER);
 
-        Personinfo søker = adapter.innhentSaksopplysningerForSøker(AKTØR_ID_SØKER);
-
-        assertNotNull(søker);
-        assertEquals(AKTØR_ID_SØKER, søker.getAktørId());
+        // Act and assert
+        assertThat(testSubject.hentPersoninfo(AKTØR_ID_SØKER))
+            .isNotNull()
+            .extracting(Personinfo::getAktørId)
+            .isEqualTo(AKTØR_ID_SØKER);
     }
 
     @Test
     public void skal_innhente_saksopplysninger_for_barn() {
+        // Arrange
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_BARN);
 
-        Optional<Personinfo> barn = adapter.innhentSaksopplysningerForBarn(FNR_BARN);
-
-        assertTrue(barn.isPresent());
-        assertEquals(AKTØR_ID_BARN, barn.get().getAktørId());
-        assertNotNull(barn.get().getFødselsdato());
+        // Act and assert
+        assertThat(testSubject.innhentSaksopplysningerForBarn(FNR_BARN))
+            .hasValueSatisfying(barn -> {
+                    assertThat(barn.getAktørId()).isEqualTo(AKTØR_ID_BARN);
+                    assertThat(barn.getFødselsdato()).isNotNull();
+                }
+            );
     }
 
     private Personinfo lagHentPersonResponseForSøker() {

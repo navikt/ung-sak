@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.person.tps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +29,9 @@ import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -70,7 +73,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     }
     private static final FiktiveFnr FIKTIVE_FNR = new FiktiveFnr();
 
-    private PersoninfoAdapter adapterMedVanligOversetter; // objektet vi tester
+    private PersoninfoAdapter testSubject;
 
     private static final AktørId AKTØR_ID__ADRESSE = AktørId.dummy();
     private static final PersonIdent FNR_ADRESSE = PersonIdent.fra(FIKTIVE_FNR.nesteFnr());
@@ -97,10 +100,12 @@ class PersoninfoAdapterMedTPSOversetterTest {
     private AktørTjeneste aktørTjeneste;
     @Mock
     private PersonConsumer personConsumer;
+    @Mock
+    private PersonBasisTjeneste personBasisTjeneste;
+    @Mock
+    private PersoninfoTjeneste personinfoTjeneste;
 
-    private TpsAdapter tpsAdapter;
-
-    private Landkoder landkodeNor = new Landkoder();
+    private final Landkoder landkodeNor = new Landkoder();
 
     private final PersonIdent personIdent = PersonIdent.fra(FIKTIVE_FNR.nesteFnr());
 
@@ -114,15 +119,15 @@ class PersoninfoAdapterMedTPSOversetterTest {
         when(tpsOversetter.tilBrukerInfo(Mockito.any(AktørId.class), any(Bruker.class))).thenReturn(mockPersoninfo);
         tpsAdresseOversetter = new TpsAdresseOversetter();
         tpsOversetter = new TpsOversetter(tpsAdresseOversetter);
-        tpsAdapter = new TpsAdapterImpl(aktørTjeneste, personConsumer, tpsOversetter);
-        adapterMedVanligOversetter = new PersoninfoAdapter(tpsAdapter);
+        TpsAdapter tpsAdapter = new TpsAdapterImpl(personConsumer, tpsOversetter);
+        testSubject = new PersoninfoAdapter(tpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
     }
 
     @Test
     public void innhente_adresseopplysninger_for_søker_midlertidig_utland() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForMidlertidigPostAdresseUtland());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoPostAdresseUtland(), adresseinfo);
     }
@@ -131,7 +136,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_midlertidig_norge() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForMidlertidigPostAdresseNorge());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoMidlertidigPostAdresseNorge(), adresseinfo);
     }
@@ -140,7 +145,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_med_kode_6() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForKode6());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoKode6(), adresseinfo);
     }
@@ -149,7 +154,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_adresse_utland() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForPostAdresseUtland());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoPostAdresseUtland(), adresseinfo);
     }
@@ -158,7 +163,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_adresse_norge() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForPostAdresseNorge());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoPostAdresseNorge(), adresseinfo);
     }
@@ -167,7 +172,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_matrikkeladresse_norge() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForMatrikkelAdresseNorge());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoMatrikkelAdresseNorge(), adresseinfo);
     }
@@ -176,7 +181,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_postboks_adresse_norge() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForPostboksAdresseNorge());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoPostboksAdresseNorge(), adresseinfo);
     }
@@ -185,7 +190,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_steds_adresse_norge() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForStedsAdresseNorge());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoStedsAdresseNorge(), adresseinfo);
     }
@@ -194,7 +199,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     public void innhente_adresseopplysninger_for_søker_bosteds_adresse_norge_med_tillegg() throws HentPersonPersonIkkeFunnet, HentPersonSikkerhetsbegrensning {
         when(personConsumer.hentPersonResponse(any())).thenReturn(lagHentPersonResponseForBostedsadresseMedTillegg());
 
-        Adresseinfo adresseinfo = adapterMedVanligOversetter.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
+        Adresseinfo adresseinfo = testSubject.innhentAdresseopplysningerForDokumentsending(AKTØR_ID__ADRESSE);
         assertNotNull(adresseinfo);
         assertAdresse(lagReferanseAdresseinfoStedsAdresseNorgeMedTillegg(), adresseinfo);
     }

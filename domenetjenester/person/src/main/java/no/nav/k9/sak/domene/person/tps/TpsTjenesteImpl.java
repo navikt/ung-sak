@@ -8,24 +8,24 @@ import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
-import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
 public class TpsTjenesteImpl implements TpsTjeneste {
 
-    private TpsAdapter tpsAdapter;
+    private PersoninfoAdapter personinfoAdapter;
 
     public TpsTjenesteImpl() {
         // for CDI proxy
     }
 
     @Inject
-    public TpsTjenesteImpl(TpsAdapter tpsAdapter) {
-        this.tpsAdapter = tpsAdapter;
+    public TpsTjenesteImpl(PersoninfoAdapter personinfoAdapter) {
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @Override
@@ -33,12 +33,12 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        Optional<AktørId> aktørId = tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        Optional<AktørId> aktørId = personinfoAdapter.hentAktørIdForPersonIdent(fnr);
         if (aktørId.isEmpty()) {
             return Optional.empty();
         }
         try {
-            Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(fnr, aktørId.get());
+            Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get());
             return Optional.ofNullable(personinfo);
         } catch (SOAPFaultException e) {
             if (e.getMessage().contains("status: S100008F")) {
@@ -62,18 +62,18 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public Optional<AktørId> hentAktørForFnr(PersonIdent fnr) {
-        return tpsAdapter.hentAktørIdForPersonIdent(fnr);
+        return personinfoAdapter.hentAktørIdForPersonIdent(fnr);
     }
 
     @Override
     public Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return tpsAdapter.hentIdentForAktørId(aktørId);
+        return personinfoAdapter.hentIdentForAktørId(aktørId);
     }
 
     @Override
     public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjon(fnr, aktørId));
+        return funnetFnr.map(fnr -> personinfoAdapter.hentKjerneinformasjon(aktørId));
     }
 
     @Override
@@ -86,22 +86,17 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     @Override
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent fnr) {
-        return tpsAdapter.hentGeografiskTilknytning(fnr);
+        return personinfoAdapter.hentGeografiskTilknytning(fnr);
     }
 
     @Override
     public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent fnr) {
-        return tpsAdapter.hentDiskresjonskoderForFamilierelasjoner(fnr);
+        return personinfoAdapter.hentDiskresjonskoderForFamilierelasjoner(fnr);
     }
 
     @Override
     public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
-        return tpsAdapter.hentAdresseinformasjon(personIdent);
-    }
-
-    @Override
-    public List<FødtBarnInfo> hentFødteBarn(AktørId aktørId) {
-        return tpsAdapter.hentFødteBarn(aktørId);
+        return personinfoAdapter.hentAdresseinformasjon(personIdent);
     }
 
 }

@@ -3,27 +3,19 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-
-import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -47,8 +39,6 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     private BeregningTjeneste kalkulusTjeneste;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
-
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
     protected FastsettBeregningsaktiviteterSteg() {
@@ -58,12 +48,10 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     @Inject
     public FastsettBeregningsaktiviteterSteg(BeregningTjeneste kalkulusTjeneste,
                                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                              BehandlingRepository behandlingRepository,
                                              BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
-        this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -100,12 +88,7 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
     }
 
     private List<AksjonspunktResultat> utførBeregningForPeriode(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref, List<DatoIntervallEntitet> vilkårsperioder) {
-        var mapper = getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-
-        Map<LocalDate, YtelsespesifiktGrunnlagDto> stpTilYtelseGrunnlag = vilkårsperioder.stream()
-            .collect(Collectors.toMap(v -> v.getFomDato(), v -> mapper.lagYtelsespesifiktGrunnlag(ref, v), (e1, e2) -> e1, LinkedHashMap::new));
-
-        var resultat = kalkulusTjeneste.startBeregning(ref, stpTilYtelseGrunnlag);
+        var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder);
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {
             var kalkulusResultat = entry.getValue();
@@ -157,10 +140,4 @@ public class FastsettBeregningsaktiviteterSteg implements BeregningsgrunnlagSteg
         kalkulusTjeneste.deaktiverBeregningsgrunnlag(ref, skjæringstidspunkter);
     }
 
-    public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
-        String ytelseTypeKode = ytelseType.getKode();
-        var mapper = FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
-            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
-        return mapper;
-    }
 }

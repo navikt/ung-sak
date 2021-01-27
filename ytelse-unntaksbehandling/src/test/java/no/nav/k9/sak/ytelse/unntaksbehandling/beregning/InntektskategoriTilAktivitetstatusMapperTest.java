@@ -4,7 +4,7 @@ import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 

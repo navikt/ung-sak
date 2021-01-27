@@ -57,7 +57,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
-import no.nav.k9.sak.domene.person.tps.PersoninfoAdapter;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
@@ -127,7 +127,7 @@ public class RegisterdataInnhenter {
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
-        return personinfoAdapter.innhentSaksopplysningerForSøker(søkerAktørId);
+        return personinfoAdapter.hentPersoninfo(søkerAktørId);
     }
 
     public Personinfo innhentPersonopplysninger(Behandling behandling) {
@@ -190,7 +190,7 @@ public class RegisterdataInnhenter {
         final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
             final var aktørId = pleietrengende.get();
-            final var personinfo = personinfoAdapter.innhentSaksopplysningerForSøker(aktørId);
+            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
             }

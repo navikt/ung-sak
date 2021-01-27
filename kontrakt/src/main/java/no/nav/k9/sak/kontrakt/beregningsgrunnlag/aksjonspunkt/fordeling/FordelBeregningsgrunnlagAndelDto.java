@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -40,17 +39,6 @@ public class FordelBeregningsgrunnlagAndelDto extends FordelRedigerbarAndelDto {
 
     public FordelBeregningsgrunnlagAndelDto() {
         //
-    }
-
-    public FordelBeregningsgrunnlagAndelDto(FordelRedigerbarAndelDto andelDto,
-                                            FordelFastsatteVerdierDto fastsatteVerdier, Inntektskategori forrigeInntektskategori, Integer forrigeRefusjonPrÅr,
-                                            Integer forrigeArbeidsinntektPrÅr) {
-        super(andelDto.getNyAndel(), andelDto.getArbeidsgiverId(), andelDto.getArbeidsforholdId(),
-            andelDto.getAndelsnr(), andelDto.getLagtTilAvSaksbehandler(), andelDto.getAktivitetStatus(), OpptjeningAktivitetType.ARBEID);
-        this.fastsatteVerdier = fastsatteVerdier;
-        this.forrigeArbeidsinntektPrÅr = forrigeArbeidsinntektPrÅr;
-        this.forrigeInntektskategori = forrigeInntektskategori;
-        this.forrigeRefusjonPrÅr = forrigeRefusjonPrÅr;
     }
 
     public FordelFastsatteVerdierDto getFastsatteVerdier() {

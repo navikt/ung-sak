@@ -31,8 +31,8 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
-    protected OverstyringAksjonspunktDto() { // NOSONAR
-        // For Jackson
+    protected OverstyringAksjonspunktDto() {
+        // default ctor
     }
 
     protected OverstyringAksjonspunktDto(Periode periode, String begrunnelse) {

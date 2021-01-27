@@ -38,9 +38,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <felles.version>2.5.0-20201202073637-46afdbd</felles.version>
+        <felles.version>3.0.76</felles.version>
 
-        <fp-kontrakter.version>5.1-20201105192657-fa0dd2a</fp-kontrakter.version>
+        <fp-kontrakter.version>5.1-20201223140505-5ac989f</fp-kontrakter.version>
         <k9format.version>5.0.0-20201012152137-55d2fa9</k9format.version>
     </properties>
 
@@ -63,7 +63,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.12.0</version>
+                <version>2.12.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -71,13 +71,13 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>7.4.0</version>
+                <version>7.5.1</version>
             </dependency>
-            
+
             <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>javax.el-api</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.glassfish</groupId>
+                <artifactId>jakarta.el</artifactId>
+                <version>3.0.3</version>
             </dependency>
 
             <!-- Felles biblioteker - Importerte avhengigheter. -->
@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>no.nav.vedtak.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.5.0-20201202083109-89492c4</version>
+                <version>2.5.15</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -133,18 +133,18 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>1.1-20201113125302-3aed71f</version>
+                <version>1.1.3</version>
             </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>2.0_20201218140900_ec6bf9d</version>
+                <version>2.0_20210126093244_f2a9db5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>0.0.1-20201123130241-efd2844</version>
+                <version>0.0.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
@@ -174,19 +174,19 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.2-2020.11.10.101913-83af8af</version>
+                <version>1.3.6</version>
             </dependency>
 
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.1-2020.12.15.102322-866ca80</version>
+                <version>1.2.8</version>
             </dependency>
 
             <dependency>
                 <groupId>no.nav.folketrygdloven</groupId>
                 <artifactId>beregningsgrunnlag-regelmodell</artifactId>
-                <version>2.1-20200304122043-f794ebb</version>
+                <version>2.1.5</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -353,7 +353,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
                 <artifactId>fpsak-tidsserie</artifactId>
-                <version>2.3-20201019093601-b2584db</version>
+                <version>2.5.5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
@@ -457,11 +457,6 @@
                 <version>1.2.3</version>
             </dependency>
             <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>3.18.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>5.7.0</version>
@@ -503,13 +498,6 @@
                 <version>2.1.4</version>
             </dependency>
 
-            <!-- bean validation -->
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>3.0.3</version>
-            </dependency>
-
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -541,11 +529,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
@@ -557,20 +540,44 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.web</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.el</groupId>
+                    <artifactId>javax.el-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>javax.activation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.web</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.el</groupId>
+                    <artifactId>javax.el-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>javax.activation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.messaging.saaj</groupId>
@@ -666,7 +673,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.7.0.1746</version>
+                    <version>3.8.0.2131</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -759,7 +766,6 @@
             </plugin>
         </plugins>
     </build>
-
     <scm>
         <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
@@ -774,3 +780,4 @@
         </repository>
     </distributionManagement>
 </project>
+

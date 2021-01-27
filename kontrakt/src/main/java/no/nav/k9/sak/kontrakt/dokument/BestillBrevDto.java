@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.dokument;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -42,11 +43,9 @@ public class BestillBrevDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String brevmalkode;
 
-    @JsonProperty(value = "mottaker", required = true)
-    @NotNull
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @Size(max = 256)
-    private String mottaker;
+    @JsonProperty(value = "overstyrtMottaker")
+    @Valid
+    private MottakerDto overstyrtMottaker;
 
     public BestillBrevDto() { // NOSONAR
     }
@@ -63,7 +62,7 @@ public class BestillBrevDto {
         this.behandlingId = behandlingId;
         this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
         this.fritekst = fritekst;
-        this.mottaker = "Søker";
+        this.overstyrtMottaker = null;
         this.arsakskode = arsakskode;
     }
 
@@ -88,8 +87,8 @@ public class BestillBrevDto {
         return fritekst;
     }
 
-    public String getMottaker() {
-        return mottaker;
+    public MottakerDto getOverstyrtMottaker() {
+        return overstyrtMottaker;
     }
 
     public void setArsakskode(String arsakskode) {
@@ -112,8 +111,8 @@ public class BestillBrevDto {
         this.fritekst = fritekst;
     }
 
-    public void setMottaker(String mottaker) {
-        this.mottaker = mottaker;
+    public void setOverstyrtMottaker(MottakerDto overstyrtMottaker) {
+        this.overstyrtMottaker = overstyrtMottaker;
     }
 
 }

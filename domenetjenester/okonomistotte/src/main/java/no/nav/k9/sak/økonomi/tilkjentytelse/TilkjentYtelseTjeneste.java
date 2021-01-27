@@ -118,6 +118,7 @@ public class TilkjentYtelseTjeneste {
         info.setBehandlingId(behandling.getUuid());
         info.setYtelseType(MapperForYtelseType.mapYtelseType(behandling.getFagsakYtelseType()));
         info.setAnsvarligSaksbehandler(vedtak == null ? behandling.getAnsvarligSaksbehandler() : vedtak.getAnsvarligSaksbehandler());
+        info.setBehandlendeEnhet(behandling.getBehandlendeEnhet());
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak == null ? LocalDate.now() : vedtak.getVedtaksdato());
         behandling.getOriginalBehandlingId().ifPresent(ob -> info.setForrigeBehandlingId(behandlingRepository.hentBehandling(ob).getUuid()));

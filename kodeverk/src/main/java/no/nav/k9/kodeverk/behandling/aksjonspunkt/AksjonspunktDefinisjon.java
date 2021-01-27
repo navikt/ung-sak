@@ -174,6 +174,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_FARESIGNALER(AksjonspunktKodeDefinisjon.VURDER_FARESIGNALER_KODE,
         AksjonspunktType.MANUELL, "Vurder Faresignaler", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FARESIGNALER, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.VURDER_FARESIGNALER, TOTRINN, EnumSet.of(OMP, PSB)),
+    KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
+        AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT,
+        VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, EnumSet.of(OMP, PSB)),
 
     // Gruppe : 60xx
 
@@ -196,9 +199,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     OVERSTYRING_AV_OPPTJENINGSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av opptjeningsvilkåret",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
         SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, EnumSet.of(OMP, PSB)),
-    OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_LØPENDE_KODE, AksjonspunktType.OVERSTYRING,
-        "Overstyring av løpende medlemskapsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VULOMED,
-        VurderingspunktType.UT, VilkårType.MEDLEMSKAPSVILKÅRET_LØPENDE, SkjermlenkeType.PUNKT_FOR_MEDLEMSKAP_LØPENDE, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_BEREGNINGSAKTIVITETER(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE, AksjonspunktType.OVERSTYRING,
         "Overstyring av beregningsaktiviteter", BehandlingStatus.UTREDES, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING,
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),

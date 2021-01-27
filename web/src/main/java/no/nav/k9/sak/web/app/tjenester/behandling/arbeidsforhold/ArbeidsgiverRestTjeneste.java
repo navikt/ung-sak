@@ -1,15 +1,23 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.k9.sak.domene.iay.modell.*;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,35 +29,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
-import no.nav.k9.sak.domene.iay.modell.AktørInntekt;
-import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
-import no.nav.k9.sak.domene.iay.modell.Inntekt;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -153,7 +137,7 @@ public class ArbeidsgiverRestTjeneste {
         Map<String, ArbeidsgiverOpplysningerDto> oversikt = new HashMap<>();
         arbeidsgivere.stream()
             .map(this::mapFra)
-            .collect(Collectors.groupingBy(ArbeidsgiverOpplysningerDto::getReferanse))
+            .collect(Collectors.groupingBy(ArbeidsgiverOpplysningerDto::getIdentifikator))
             .forEach((key, value) -> oversikt.putIfAbsent(key, value.stream().findFirst().orElseGet(() -> new ArbeidsgiverOpplysningerDto(key, "Ukjent"))));
         return new ArbeidsgiverOversiktDto(oversikt);
     }
@@ -165,7 +149,7 @@ public class ArbeidsgiverRestTjeneste {
             if (arbeidsgiver.getErVirksomhet()) {
                 return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getNavn());
             } else {
-                return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getIdentifikator(), opplysninger.getNavn(), opplysninger.getFødselsdato());
+                return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), opplysninger.getNavn(), opplysninger.getFødselsdato());
             }
         } catch (Exception e) {
             return new ArbeidsgiverOpplysningerDto(arbeidsgiver.getIdentifikator(), "Feil ved oppslag");

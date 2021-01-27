@@ -51,7 +51,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.person.tps.TpsAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -94,7 +93,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     private AksjonspunktRepository aksjonspunktRepository;
-    private TpsAdapter tpsAdapter;
 
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
@@ -106,19 +104,17 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     @Inject
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
-                                        TpsTjeneste tpsTjeneste,
-                                        BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                        AksjonspunktRepository aksjonspunktRepository,
+                                                   TpsTjeneste tpsTjeneste,
+                                                   BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                                   AksjonspunktRepository aksjonspunktRepository,
                                                    FagsakTjeneste fagsakTjeneste,
-                                        TpsAdapter tpsAdapter,
-                                        ProsessTaskRepository prosessTaskRepository) {
+                                                   ProsessTaskRepository prosessTaskRepository) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.tpsAdapter = tpsAdapter;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
@@ -196,9 +192,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final int end = Math.min(begin + antall, aktører.size());
 
         final String[] result = aktører.subList(begin, end).stream()
-            .map(a -> tpsAdapter.hentIdentForAktørId(a)
-                .map(v -> v.getIdent())
-                .orElseGet(() -> "UKJENT AKTØRID")
+            .map(a -> tpsTjeneste.hentFnr(a)
+                .map(PersonIdent::getIdent)
+                .orElse("UKJENT AKTØRID")
             )
             .distinct()
             .toArray(String[]::new);
@@ -221,7 +217,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
             var taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
             taskData.setSaksnummer(fagsak.getSaksnummer().getVerdi());
-            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500 * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sek.
+            taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sek.
             // lagrer direkte til prosessTaskRepository så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
             prosessTaskRepository.lagre(taskData);
             idx++;
@@ -264,12 +260,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         @NotNull
         @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-        private String saksnumre;
+        private final String saksnumre;
 
-        public OpprettManuellRevurdering(String saksnumre) {
+        public OpprettManuellRevurdering(@NotNull String saksnumre) {
             this.saksnumre = saksnumre;
         }
 
+        @NotNull
         public String getSaksnumre() {
             return saksnumre;
         }

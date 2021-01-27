@@ -31,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.FødtBarnInfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.PersonstatusPeriode;
@@ -245,8 +246,7 @@ public class TpsOversetter {
         no.nav.k9.sak.typer.PersonIdent ident = no.nav.k9.sak.typer.PersonIdent.fra(personIdent.getIdent().getIdent());
         Boolean harSammeBosted = familierelasjon.isHarSammeBosted();
 
-        return new Familierelasjon(ident, relasjonsrolle,
-            tilLocalDate(familierelasjon.getTilPerson().getFoedselsdato()), adresse, harSammeBosted);
+        return new Familierelasjon(ident, relasjonsrolle, harSammeBosted);
     }
 
     private NavBrukerKjønn tilBrukerKjønn(Kjoenn kjoenn) {
@@ -330,6 +330,32 @@ public class TpsOversetter {
             .medNavn(personinfo.getNavn())
             .medFødselsdato(personinfo.getFødselsdato())
             .medDødsdato(personinfo.getDødsdato())
+            .build();
+    }
+
+    public PersoninfoBasis tilBrukerInfoBasis(AktørId aktørId, Bruker bruker) {
+// NOSONAR - ingen forbedring å forkorte metoden her
+        String navn = bruker.getPersonnavn().getSammensattNavn();
+
+        LocalDate fødselsdato = finnFødselsdato(bruker);
+        LocalDate dødsdato = finnDødsdato(bruker);
+
+        Aktoer aktoer = bruker.getAktoer();
+        PersonIdent pi = (PersonIdent) aktoer;
+        String ident = pi.getIdent().getIdent();
+        NavBrukerKjønn kjønn = tilBrukerKjønn(bruker.getKjoenn());
+        PersonstatusType personstatus = tilPersonstatusType(bruker.getPersonstatus());
+        String diskresjonskode = bruker.getDiskresjonskode() == null ? null : bruker.getDiskresjonskode().getValue();
+
+        return new PersoninfoBasis.Builder()
+            .medAktørId(aktørId)
+            .medPersonIdent(no.nav.k9.sak.typer.PersonIdent.fra(ident))
+            .medNavn(navn)
+            .medFødselsdato(fødselsdato)
+            .medDødsdato(dødsdato)
+            .medNavBrukerKjønn(kjønn)
+            .medPersonstatusType(personstatus)
+            .medDiskresjonsKode(diskresjonskode)
             .build();
     }
 }

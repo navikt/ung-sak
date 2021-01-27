@@ -78,7 +78,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     private BigDecimal stillingsprosent;
 
     @JsonProperty(value = "aksjonspunktÅrsaker")
-    private Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker;
+    private Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker = new HashSet<>();
 
     @JsonProperty(value = "inntektsmeldinger")
     private Set<MottattInntektsmeldingDto> inntektsmeldinger;

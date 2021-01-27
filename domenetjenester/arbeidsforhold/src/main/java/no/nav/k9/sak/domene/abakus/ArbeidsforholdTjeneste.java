@@ -14,7 +14,9 @@ import javax.inject.Inject;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.AktørDatoRequest;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
@@ -33,8 +35,8 @@ public class ArbeidsforholdTjeneste {
         this.abakusTjeneste = abakusTjeneste;
     }
 
-    public Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> finnArbeidsforholdForIdentPåDag(AktørId ident, LocalDate dato) {
-        final var request = new AktørDatoRequest(new AktørIdPersonident(ident.getId()), new Periode(dato, dato));
+    public Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> finnArbeidsforholdForIdentPåDag(AktørId ident, LocalDate dato, FagsakYtelseType ytelseType) {
+        final var request = new AktørDatoRequest(new AktørIdPersonident(ident.getId()), new Periode(dato, dato), YtelseType.fraKode(ytelseType.getKode()));
 
         return abakusTjeneste.hentArbeidsforholdIPerioden(request)
             .stream()

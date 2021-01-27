@@ -50,7 +50,7 @@ public class SystemNedeDto {
     }
 
     protected SystemNedeDto() {
-        //
+        // default
     }
 
     public String getEndepunkt() {

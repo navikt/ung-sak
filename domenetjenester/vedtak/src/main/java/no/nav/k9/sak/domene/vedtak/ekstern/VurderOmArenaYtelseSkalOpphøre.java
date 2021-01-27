@@ -19,7 +19,6 @@ import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryFeil;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -38,7 +37,6 @@ public class VurderOmArenaYtelseSkalOpphøre {
     private static final long HALV_MELDEKORT_PERIODE = 9;
     private static final Period MELDEKORT_PERIODE = Period.ofDays(14);
 
-    private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OppgaveTjeneste oppgaveTjeneste;
@@ -49,11 +47,10 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     @Inject
-    public VurderOmArenaYtelseSkalOpphøre(BehandlingRepository behandlingRepository,
-                                          InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+    public VurderOmArenaYtelseSkalOpphøre(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           BehandlingVedtakRepository behandlingVedtakRepository,
-                                          OppgaveTjeneste oppgaveTjeneste, BeregningsresultatRepository beregningsresultatRepository) {
-        this.behandlingRepository = behandlingRepository;
+                                          OppgaveTjeneste oppgaveTjeneste,
+                                          BeregningsresultatRepository beregningsresultatRepository) {
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;

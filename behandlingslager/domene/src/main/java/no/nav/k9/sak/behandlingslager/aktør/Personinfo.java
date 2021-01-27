@@ -180,6 +180,11 @@ public class Personinfo {
             return this;
         }
 
+        public Builder medNavBrukerKjønn(NavBrukerKjønn kjønn) {
+            personinfoMal.kjønn = kjønn;
+            return this;
+        }
+
         public Builder medPersonstatusType(PersonstatusType personstatus) {
             personinfoMal.personstatus = personstatus;
             return this;

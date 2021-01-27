@@ -2,8 +2,8 @@ package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
 
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,29 +28,29 @@ public class BehandlingPåVentTest {
 
     @Test
     public void testErIkkePåVentUtenInnslag() {
-        Assert.assertFalse(behandling.isBehandlingPåVent());
+        assertThat(behandling.isBehandlingPåVent()).isFalse();
     }
 
     @Test
     public void testErPåVentEttInnslag() {
         aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_MANUELT_SATT_PÅ_VENT);
-        Assert.assertTrue(behandling.isBehandlingPåVent());
+        assertThat(behandling.isBehandlingPåVent());
     }
 
     @Test
     public void testErIkkePåVentEttInnslag() {
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_MANUELT_SATT_PÅ_VENT);
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");
-        Assert.assertFalse(behandling.isBehandlingPåVent());
+        assertThat(behandling.isBehandlingPåVent()).isFalse();
     }
 
     @Test
     // TODO PKMANTIS-1137 Har satt midlertidig frist, må endres når dynamisk frist er implementert
     public void testErPåVentNårVenterPåOpptjeningsopplysninger() {
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER);
-        Assert.assertTrue(behandling.isBehandlingPåVent());
-        Assert.assertEquals(behandling.getOpprettetDato().plusWeeks(2).toLocalDate(), aksjonspunkt.getFristTid().toLocalDate());
+        assertThat(behandling.isBehandlingPåVent()).isTrue();
+        assertThat(behandling.getOpprettetDato().plusWeeks(2).toLocalDate()).isEqualTo(aksjonspunkt.getFristTid().toLocalDate());
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");
-        Assert.assertFalse(behandling.isBehandlingPåVent());
+        assertThat(behandling.isBehandlingPåVent()).isFalse();
     }
 }

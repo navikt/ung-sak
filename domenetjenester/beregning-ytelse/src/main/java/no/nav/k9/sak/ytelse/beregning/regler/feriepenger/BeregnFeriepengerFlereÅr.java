@@ -28,7 +28,7 @@ class BeregnFeriepengerFlereÅr extends LeafSpecification<BeregningsresultatFeri
         List<LocalDateInterval> feriepengerPerioderPrÅr = periodiserLocalDateIntervalPrÅr(feriepengerPeriode);
 
         feriepengerPerioderPrÅr.forEach(feriepengerPeriodePrÅr ->
-            BeregnFeriepengerForPeriode.beregn(resultater, regelModell.getBeregningsresultatPerioder(), feriepengerPeriodePrÅr)
+            BeregnFeriepengerForPeriode.beregn(resultater, regelModell.getBeregningsresultatPerioder(), feriepengerPeriodePrÅr, regelModell.harFeriepengeopptjeningFoHelg())
         );
 
         return beregnet(resultater);

@@ -18,6 +18,8 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -33,6 +35,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
@@ -59,6 +62,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
+    private HistorikkTjenesteAdapter historikkAdapter;
 
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
@@ -67,12 +71,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator) {
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.arbeidsgiverValidator = arbeidsgiverValidator;
+        this.historikkAdapter = historikkAdapter;
     }
 
     @Override
@@ -80,41 +85,44 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         validerDto(dto, behandling);
 
-        var beregningsresultat = BeregningsresultatEntitet.builder().medRegelInput("unntaksbehandling")
+        var gammeltBeregningsresultat = beregningsresultatRepository.hentBgBeregningsresultat(behandling.getId()).orElse(null);
+        var nyttBeregningsresultat = BeregningsresultatEntitet.builder().medRegelInput("unntaksbehandling")
             .medRegelSporing("unntaksbehandling").build();
-
-        for (TilkjentYtelsePeriodeDto tyPeriode : dto.getTilkjentYtelse().getPerioder()) {
-            var brPeriode = BeregningsresultatPeriode.builder()
-                .medBeregningsresultatPeriodeFomOgTom(tyPeriode.getFom(), tyPeriode.getTom())
-                .build(beregningsresultat);
-
-            for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
-                var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
-                var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
-
-                // Søkers andel  - obligatorisk for Beregningsresultat
-                var søkersAndel = byggBrAndel(tyAndel, tilSøker, true);
-                søkersAndel.buildFor(brPeriode);
-
-                // Arbeidsgivers andel (refusjon) - opsjonell for Beregningsresultat
-                if (refusjon > 0) {
-                    var arbeidsgiversAndel = byggBrAndel(tyAndel, refusjon, false);
-                    arbeidsgiversAndel.buildFor(brPeriode);
-                }
-            }
+        for (TilkjentYtelsePeriodeDto nyPeriode : dto.getTilkjentYtelse().getPerioder()) {
+            byggAndelForSøkerOgArbeidsgiver(nyttBeregningsresultat, nyPeriode);
         }
-        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
 
-        // Beregn feriepenger
-        var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
-        feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+        BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
+        getFeriepengerTjeneste(behandling).beregnFeriepenger(nyttBeregningsresultat);
+        beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
-        beregningsresultatRepository.lagre(behandling, beregningsresultat);
+        opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private BeregningsresultatAndel.Builder byggBrAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
+    private void byggAndelForSøkerOgArbeidsgiver(BeregningsresultatEntitet beregningsresultat, TilkjentYtelsePeriodeDto tyPeriode) {
+        var brPeriode = BeregningsresultatPeriode.builder()
+            .medBeregningsresultatPeriodeFomOgTom(tyPeriode.getFom(), tyPeriode.getTom())
+            .build(beregningsresultat);
+
+        for (TilkjentYtelseAndelDto tyAndel : tyPeriode.getAndeler()) {
+            var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
+            var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
+
+            // Søkers andel  - obligatorisk for Beregningsresultat
+            var søkersAndel = byggAndel(tyAndel, tilSøker, true);
+            søkersAndel.buildFor(brPeriode);
+
+            // Arbeidsgivers andel (refusjon) - opsjonell for Beregningsresultat
+            if (refusjon > 0) {
+                var arbeidsgiversAndel = byggAndel(tyAndel, refusjon, false);
+                arbeidsgiversAndel.buildFor(brPeriode);
+            }
+        }
+    }
+
+    private BeregningsresultatAndel.Builder byggAndel(TilkjentYtelseAndelDto tyAndel, Integer dagsats, Boolean erBrukerMottaker) {
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(erBrukerMottaker)
             .medDagsats(dagsats)
@@ -137,6 +145,20 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         TilkjentYtelsePerioderValidator.valider(dto.getTilkjentYtelse().getPerioder(), k9Vilkåret);
 
         arbeidsgiverValidator.valider(dto.getTilkjentYtelse().getPerioder(), behandling.getAktørId());
+    }
+
+    private void opprettHistorikkinnslag(Behandling behandling, BeregningsresultatEntitet beregningsresultatFør, BeregningsresultatEntitet beregningsresultatEtter) {
+        KalkulatorForBeregningsresultat kalkulatorForBeregningsresultat = new KalkulatorForBeregningsresultat(behandling.getFagsakYtelseType());
+        var sumFør = beregningsresultatFør != null ? kalkulatorForBeregningsresultat.beregnTotalsum(beregningsresultatFør) : 0L;
+        var sumEtter = kalkulatorForBeregningsresultat.beregnTotalsum(beregningsresultatEtter);
+
+        var historikkInnslagTekstBuilder = historikkAdapter.tekstBuilder();
+        historikkInnslagTekstBuilder.medEndretFelt(HistorikkEndretFeltType.TILKJENT_YTELSE, sumFør, sumEtter);
+        historikkAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
+    }
+
+    private BeregnFeriepengerTjeneste getFeriepengerTjeneste(Behandling behandling) {
+        return FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
     }
 
     interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {

@@ -1,7 +1,6 @@
 package no.nav.k9.sak.kontrakt.beregningsresultat;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -21,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -48,18 +46,10 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiver")
     @Valid
     private ArbeidsgiverDto arbeidsgiver;
-    @JsonProperty(value = "arbeidsforholdType")
-    @Valid
-    private OpptjeningAktivitetType arbeidsforholdType;
     @JsonAlias("orgNummer")
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
-    @JsonProperty(value = "stillingsprosent")
-    @DecimalMin("0.00")
-    @DecimalMax("500.00")
-    @Digits(integer = 3, fraction = 2)
-    private BigDecimal stillingsprosent;
     @JsonProperty(value = "refusjon")
     @Min(0)
     @Max(1000000)
@@ -73,10 +63,6 @@ public class TilkjentYtelseAndelDto {
     @DecimalMax("100.00")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal utbetalingsgrad;
-    @JsonProperty(value = "uttak")
-    @Size(max = 100)
-    @Valid
-    private List<UttakDto> uttak;
 
     public TilkjentYtelseAndelDto() {
         // Deserialisering av JSON
@@ -86,13 +72,10 @@ public class TilkjentYtelseAndelDto {
         this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
         this.tilSoker = builder.tilSoker;
         this.refusjon = builder.refusjon;
-        this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
         this.arbeidsforholdId = builder.arbeidsforholdId;
         this.arbeidsforholdRef = builder.arbeidsforholdRef;
         this.aktørId = builder.aktørId;
-        this.arbeidsforholdType = builder.arbeidsforholdType;
-        this.stillingsprosent = builder.stillingsprosent;
         this.arbeidsgiver = builder.arbeidsgiver;
         this.inntektskategori = Objects.requireNonNull(builder.inntektskategori, "inntektskategori");
     }
@@ -107,10 +90,6 @@ public class TilkjentYtelseAndelDto {
 
     public String getArbeidsforholdId() {
         return arbeidsforholdId;
-    }
-
-    public OpptjeningAktivitetType getArbeidsforholdType() {
-        return arbeidsforholdType;
     }
 
     public ArbeidsgiverDto getArbeidsgiver() {
@@ -129,10 +108,6 @@ public class TilkjentYtelseAndelDto {
         return inntektskategori;
     }
 
-    public BigDecimal getStillingsprosent() {
-        return stillingsprosent;
-    }
-
     public Integer getRefusjon() {
         return refusjon;
     }
@@ -145,22 +120,15 @@ public class TilkjentYtelseAndelDto {
         return utbetalingsgrad;
     }
 
-    public List<UttakDto> getUttak() {
-        return uttak;
-    }
-
     public static class Builder {
         private AktørId aktørId;
         private String arbeidsforholdId;
         public String arbeidsforholdRef;
-        private OpptjeningAktivitetType arbeidsforholdType;
         private ArbeidsgiverDto arbeidsgiver;
         private OrgNummer arbeidsgiverOrgnr;
-        private BigDecimal stillingsprosent;
         private Integer refusjon;
         private Integer tilSoker;
         private BigDecimal utbetalingsgrad;
-        private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
 
         private Builder() {
@@ -190,21 +158,6 @@ public class TilkjentYtelseAndelDto {
             return this;
         }
 
-        public Builder medArbeidsforholdType(OpptjeningAktivitetType arbeidsforholdType) {
-            this.arbeidsforholdType = arbeidsforholdType;
-            return this;
-        }
-
-        public Builder medArbeidsgiverOrgnr(OrgNummer arbeidsgiverOrgnr) {
-            this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
-            return this;
-        }
-
-        public Builder medStillingsprosent(BigDecimal stillingsprosent) {
-            this.stillingsprosent = stillingsprosent;
-            return this;
-        }
-
         public Builder medRefusjon(Integer refusjon) {
             this.refusjon = refusjon;
             return this;
@@ -217,11 +170,6 @@ public class TilkjentYtelseAndelDto {
 
         public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
             this.utbetalingsgrad = utbetalingsgrad;
-            return this;
-        }
-
-        public Builder medUttak(List<UttakDto> uttak) {
-            this.uttak = uttak;
             return this;
         }
 

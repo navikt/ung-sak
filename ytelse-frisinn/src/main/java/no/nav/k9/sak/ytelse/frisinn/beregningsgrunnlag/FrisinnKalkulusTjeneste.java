@@ -13,9 +13,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
@@ -38,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.typer.Saksnummer;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -59,14 +60,16 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                                   VilkårResultatRepository vilkårResultatRepository) {
-        super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste, inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste);
+                                   VilkårResultatRepository vilkårResultatRepository,
+                                   @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
+        super(restTjeneste, fagsakRepository, vilkårResultatRepository, kalkulatorInputTjeneste,
+            inntektArbeidYtelseTjeneste, arbeidsgiverTjeneste, ytelseGrunnlagMapper);
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
     }
 
     @Override
-    public SamletKalkulusResultat fortsettBeregning(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
-        return super.fortsettBeregning(fagsakYtelseType, saksnummer, bgReferanser, stegType);
+    public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse referanse, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
+        return super.fortsettBeregning(referanse, bgReferanser, stegType);
     }
 
     @Override
@@ -80,9 +83,10 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
         var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+        var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN);
 
         for (var input : sortertInput) {
-            var ytelseGrunnlag = input.getYtelseGrunnlag();
+            var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());
             var bgReferanse = input.getBgReferanse();
             var skjæringstidspunkt = input.getSkjæringstidspunkt();
             FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
@@ -92,7 +96,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             } else {
                 // tar en og en
                 var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
-                    , refusjonskravDatoer, List.of(new StartBeregningInput(bgReferanse, skjæringstidspunkt, ytelseGrunnlag)));
+                    , refusjonskravDatoer, List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode())));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {

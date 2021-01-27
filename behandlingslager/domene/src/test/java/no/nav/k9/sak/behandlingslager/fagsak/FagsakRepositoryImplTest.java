@@ -1,7 +1,6 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -130,7 +129,7 @@ public class FagsakRepositoryImplTest {
         opprettJournalpost(journalpostId, saksnummer, aktørId);
 
         Optional<Journalpost> journalpost = fagsakRepository.hentJournalpost(journalpostId);
-        assertTrue(journalpost.isPresent());
+        assertThat(journalpost).isPresent();
 
     }
 
