@@ -27,9 +27,9 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
         SØKERSOPPLYSNINGSPLIKT,
-        MEDLEMSKAPSVILKÅRET,
         OMSORGEN_FOR,
         MEDISINSKEVILKÅR_UNDER_18_ÅR,
+        MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,
         BEREGNINGSGRUNNLAGVILKÅR);

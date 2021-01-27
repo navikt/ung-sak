@@ -23,9 +23,9 @@ public final class VilkårTypeKoder {
 
     public static final String SVP_VK_1 = "SVP_VK_1";
 
-    public static final String PSB_VK_1 = "PSB_VK_1";
-    public static final String PSB_VK_2a = "PSB_VK_2_a";
-    public static final String PSB_VK_2b = "PSB_VK_2_b";
-    public static final String PSB_VK_3 = "PSB_VK_3";
+    public static final String K9_VK_1 = "K9_VK_1";
+    public static final String K9_VK_2a = "K9_VK_2_a";
+    public static final String K9_VK_2b = "K9_VK_2_b";
+    public static final String K9_VK_3 = "K9_VK_3";
 
 }
