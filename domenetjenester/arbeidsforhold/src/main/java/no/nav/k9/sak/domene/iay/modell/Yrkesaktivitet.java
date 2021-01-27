@@ -19,7 +19,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
-public class Yrkesaktivitet implements IndexKey {
+public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
 
     @ChangeTracked
     private Set<AktivitetsAvtale> aktivitetsAvtale = new LinkedHashSet<>();
@@ -253,4 +253,8 @@ public class Yrkesaktivitet implements IndexKey {
         aktivitetsAvtale.removeIf(aa -> aa.matcherPeriode(aktivitetsPeriode));
     }
 
+    @Override
+    public int compareTo(Yrkesaktivitet o) {
+        return this.getIndexKey().compareTo(o.getIndexKey());
+    }
 }
