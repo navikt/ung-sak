@@ -182,8 +182,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         if (fnr == null || fnr.isEmpty()) {
             return Collections.emptySet();
         }
-        //TODO lage funksjonalitet i AktørTjeneste for å hente Collection<AktørId> eller iterere over AktørTjeneste.hentAktørIdForPersonIdent??
-        //return aktørConsumer.hentAktørIdForPersonIdentSet(fnr).stream().map(id -> new AktørId(id)).collect(Collectors.toSet());
         return aktørTjeneste.hentAktørIdForPersonIdentSet(fnr.stream().map(PersonIdent::new).collect(Collectors.toSet()));
     }
 }
