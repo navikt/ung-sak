@@ -46,7 +46,6 @@ public class AktørTjeneste {
 
     private PdlKlient pdlKlient;
 
-    @SuppressWarnings("unused")
     AktørTjeneste() {
         // CDI
     }

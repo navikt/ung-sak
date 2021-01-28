@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.søknad.felles.Periode;
+import no.nav.k9.søknad.felles.type.Periode;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

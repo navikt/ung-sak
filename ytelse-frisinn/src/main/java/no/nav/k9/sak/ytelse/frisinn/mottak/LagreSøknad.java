@@ -20,7 +20,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.søknad.felles.Språk;
+import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
 @Dependent

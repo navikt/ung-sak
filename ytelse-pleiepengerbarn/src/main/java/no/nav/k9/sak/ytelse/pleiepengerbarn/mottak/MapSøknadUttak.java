@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -24,78 +23,64 @@ import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.LovbestemtFerie;
-import no.nav.k9.søknad.felles.Periode;
-import no.nav.k9.søknad.pleiepengerbarn.Arbeid;
-import no.nav.k9.søknad.pleiepengerbarn.Arbeidstaker;
-import no.nav.k9.søknad.pleiepengerbarn.Frilanser;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
-import no.nav.k9.søknad.pleiepengerbarn.SelvstendigNæringsdrivende;
-import no.nav.k9.søknad.pleiepengerbarn.SøknadsperiodeInfo;
-import no.nav.k9.søknad.pleiepengerbarn.Tilsynsordning;
-import no.nav.k9.søknad.pleiepengerbarn.TilsynsordningOpphold;
-import no.nav.k9.søknad.pleiepengerbarn.TilsynsordningSvar;
+import no.nav.k9.søknad.felles.aktivitet.ArbeidAktivitet;
+import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
+import no.nav.k9.søknad.felles.aktivitet.Frilanser;
+import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
+import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
+import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning;
 
 class MapSøknadUttak {
-    private PleiepengerBarnSøknad søknad;
+    @SuppressWarnings("unused")
+    private Søknad søknad;
+    private PleiepengerSyktBarn ytelse;
 
-    MapSøknadUttak(PleiepengerBarnSøknad søknad) {
+    MapSøknadUttak(Søknad søknad) {
         this.søknad = søknad;
+        this.ytelse = søknad.getYtelse();
     }
 
     UttakGrunnlag getUttakGrunnlag(Long behandlingId) {
-        var ferie = mapFerie(søknad.lovbestemtFerie);
-        var søknadsperioder = mapSøknadsperioder(søknad.perioder);
-        var oppgittUttak = mapOppgittUttak(søknad.arbeid);
-        var tilsynsordning = mapOppgittTilsynsordning(søknad.tilsynsordning);
+        var ferie = mapFerie(ytelse.getLovbestemtFerie());
+        var søknadsperioder = mapSøknadsperioder(ytelse.getUttak().getPerioder().keySet());
+        var oppgittUttak = mapOppgittUttak(ytelse.getArbeidAktivitet()); // TODO
+        var tilsynsordning = mapOppgittTilsynsordning(ytelse.getTilsynsordning());
         return new UttakGrunnlag(behandlingId, oppgittUttak, søknadsperioder, ferie, tilsynsordning);
     }
 
     private OppgittTilsynsordning mapOppgittTilsynsordning(Tilsynsordning input) {
-        if (input == null || input.opphold == null || input.opphold.isEmpty()) {
+        if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return null;
         }
-        var tilsynSvar = mapTilsynSvar(input.iTilsynsordning);
-        var mappedPerioder = input.opphold.entrySet().stream()
+
+        var tilsynSvar = OppgittTilsynSvar.JA; // TODO hvordan mappe denne
+        var mappedPerioder = input.getPerioder().entrySet().stream()
             .map(entry -> lagTilsynsordningPeriode(entry.getKey(), entry.getValue()))
             .collect(Collectors.toList());
         return new OppgittTilsynsordning(mappedPerioder, tilsynSvar);
     }
 
-    private TilsynsordningPeriode lagTilsynsordningPeriode(Periode periode, TilsynsordningOpphold opphold) {
-        return new TilsynsordningPeriode(periode.fraOgMed, periode.tilOgMed, opphold == null ? Duration.ofHours(0) : opphold.lengde);
+    private TilsynsordningPeriode lagTilsynsordningPeriode(Periode periode, TilsynPeriodeInfo tilsynPeriodeInfo) {
+        return new TilsynsordningPeriode(periode.getFraOgMed(), periode.getTilOgMed(), tilsynPeriodeInfo == null ? Duration.ofHours(0) : tilsynPeriodeInfo.getEtablertTilsynTimerPerDag());
     }
 
-    private OppgittTilsynSvar mapTilsynSvar(TilsynsordningSvar iTilsynsordning) {
-        if (iTilsynsordning == null) {
-            return null;
-        }
-        switch (iTilsynsordning) {
-            case JA:
-                return OppgittTilsynSvar.JA;
-            case NEI:
-                return OppgittTilsynSvar.NEI;
-            case VET_IKKE:
-                return OppgittTilsynSvar.VET_IKKE;
-            default:
-                throw new IllegalArgumentException("Ukjent tilsynsordning: " + iTilsynsordning);
-        }
-    }
-
-    private UttakAktivitet mapOppgittUttak(Arbeid arbeid) {
+    private UttakAktivitet mapOppgittUttak(ArbeidAktivitet arbeid) {
         if (arbeid == null) {
             return null;
         }
-        var mappedArbeid = nullableList(arbeid.arbeidstaker).stream()
+        var mappedArbeid = nullableList(arbeid.getArbeidstaker()).stream()
             .flatMap(a -> lagUttakAktivitetPeriode(a).stream()).collect(Collectors.toList());
-        var mappedFrilanser = nullableList(arbeid.frilanser).stream()
-            .flatMap(f -> lagUttakAktivitetPeriode(f).stream()).collect(Collectors.toList());
-        var mappedSelvstendigNæringsdrivende = nullableList(arbeid.selvstendigNæringsdrivende).stream()
+        var mappedFrilanser = lagUttakAktivitetPeriode(arbeid.getFrilanser());
+        var mappedSelvstendigNæringsdrivende = nullableList(arbeid.getSelvstendigNæringsdrivende()).stream()
             .flatMap(sn -> lagUttakAktivitetPeriode(sn).stream()).collect(Collectors.toList());
 
         var mappedPerioder = new ArrayList<UttakAktivitetPeriode>();
         mappedPerioder.addAll(mappedArbeid);
-        mappedPerioder.addAll(mappedFrilanser);
+        mappedPerioder.addAll(mappedFrilanser == null ? List.of() : List.of(mappedFrilanser));
         mappedPerioder.addAll(mappedSelvstendigNæringsdrivende);
         if (mappedPerioder.isEmpty()) {
             return null;
@@ -113,67 +98,60 @@ class MapSøknadUttak {
                 // TODO prosent, normal uke:
                 var skalJobbeProsent = BigDecimal.valueOf(100L);
                 var jobberNormaltPerUke = Duration.parse("PT37H30M");
-                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, jobberNormaltPerUke, skalJobbeProsent);
+                return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, jobberNormaltPerUke, skalJobbeProsent);
             })
             .collect(Collectors.toList());
         return mappedPerioder;
 
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Frilanser input) {
-        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
-            return Collections.emptyList();
+    private UttakAktivitetPeriode lagUttakAktivitetPeriode(Frilanser input) {
+        if (input == null || input.startdato == null) {
+            return null;
         }
-        var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> {
-                Periode k = entry.getKey();
-             // TODO prosent, normal uke:
-                var skalJobbeProsent = BigDecimal.valueOf(100L);
-                var jobberNormaltPerUke = Duration.parse("PT37H30M");
-                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.FRILANSER, jobberNormaltPerUke, skalJobbeProsent);
-            })
-            .collect(Collectors.toList());
-        return mappedPerioder;
+        // TODO: trengs noen perioder for frilanser?
+        return new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, DatoIntervallEntitet.fraOgMed(input.startdato));
     }
 
     private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Arbeidstaker input) {
-        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+        if (input == null || input.getArbeidstidInfo() == null || input.getArbeidstidInfo().getPerioder() == null || input.getArbeidstidInfo().getPerioder().isEmpty()) {
             return Collections.emptyList();
         }
+
         InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
-        var arbeidsgiver = input.organisasjonsnummer != null
-            ? Arbeidsgiver.virksomhet(input.organisasjonsnummer.verdi)
-            : (input.norskIdentitetsnummer != null
-                ? Arbeidsgiver.fra(new AktørId(input.norskIdentitetsnummer.verdi))
+        var arbeidsgiver = input.getOrganisasjonsnummer() != null
+            ? Arbeidsgiver.virksomhet(input.getOrganisasjonsnummer().verdi)
+            : (input.getNorskIdentitetsnummer() != null
+                ? Arbeidsgiver.fra(new AktørId(input.getNorskIdentitetsnummer().verdi))
                 : null);
 
-        var mappedPerioder = input.perioder.entrySet().stream()
+        var mappedPerioder = input.getArbeidstidInfo().getPerioder().entrySet().stream()
             .map(entry -> {
                 Periode k = entry.getKey();
-                var v = entry.getValue();
-                return new UttakAktivitetPeriode(k.fraOgMed, k.tilOgMed, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, v.jobberNormaltPerUke, v.skalJobbeProsent);
+                var v = entry.getValue(); // TODO: skrive omt til entry.getValue().getFaktiskArbeidTimerPerDag()?
+                return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null, null);
             })
             .collect(Collectors.toList());
         return mappedPerioder;
     }
 
     private Ferie mapFerie(LovbestemtFerie input) {
-        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
+        if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return null;
         }
-        var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().fraOgMed, entry.getKey().tilOgMed)))
+        var mappedPerioder = input.getPerioder().stream()
+            .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed())))
             .collect(Collectors.toSet());
 
         return new Ferie(mappedPerioder);
     }
 
-    private Søknadsperioder mapSøknadsperioder(Map<Periode, SøknadsperiodeInfo> input) {
+    private Søknadsperioder mapSøknadsperioder(Collection<Periode> input) {
         if (input == null || input.isEmpty()) {
             return null;
         }
-        var mappedPerioder = input.entrySet().stream()
-            .map(entry -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey().fraOgMed, entry.getKey().tilOgMed)))
+        var mappedPerioder = input.stream()
+            .map(entry -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed())))
             .collect(Collectors.toSet());
 
         return new Søknadsperioder(mappedPerioder);

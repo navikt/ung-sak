@@ -19,8 +19,8 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknadValidator;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
 @Dependent
 class SøknadDokumentmottaker {
@@ -60,11 +60,11 @@ class SøknadDokumentmottaker {
         return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato);
     }
 
-    Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, PleiepengerBarnSøknad søknad) {
+    Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, Søknad søknad) {
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(søknad);
 
-        new PleiepengerBarnSøknadValidator().forsikreValidert(søknad);
+        new PleiepengerSyktBarnValidator().forsikreValidert(søknad.getYtelse());
 
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
