@@ -5,6 +5,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -193,12 +194,12 @@ public class SykdomVurderingRestTjeneste {
         tags = "sykdom",
         responses = {
             @ApiResponse(responseCode = "200",
-                description = "",
+                description = "Et resultatobjekt som viser vurderinger som blir erstattet.",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SykdomVurderingDto.class)))
+                    schema = @Schema(implementation = SykdomVurderingEndringResultatDto.class)))
         })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
-    public void oppdaterSykdomsVurdering(
+    public SykdomVurderingEndringResultatDto oppdaterSykdomsVurdering(
             @Parameter
             @NotNull
             @Valid 
@@ -215,6 +216,9 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
         
         sykdomVurderingRepository.lagre(nyVersjon);
+               
+        // TODO: Mapping av resultat
+        return new SykdomVurderingEndringResultatDto(Collections.emptyList());
     }
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
@@ -229,12 +233,12 @@ public class SykdomVurderingRestTjeneste {
         tags = "sykdom",
         responses = {
             @ApiResponse(responseCode = "200",
-                description = "",
+                description = "Et resultatobjekt som viser vurderinger som blir erstattet.",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SykdomVurderingDto.class)))
+                    schema = @Schema(implementation = SykdomVurderingEndringResultatDto.class)))
         })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
-    public void opprettSykdomsVurdering(
+    public SykdomVurderingEndringResultatDto opprettSykdomsVurdering(
             @Parameter
             @NotNull
             @Valid 
@@ -248,7 +252,10 @@ public class SykdomVurderingRestTjeneste {
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
-        sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());        
+        sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
+        
+        // TODO: Mapping av resultat
+        return new SykdomVurderingEndringResultatDto(Collections.emptyList());
     }
     
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
