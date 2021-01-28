@@ -21,11 +21,14 @@ public class SykdomVurderingEndringResultatDto {
     private List<SykdomPeriodeMedEndringDto> perioderMedEndringer = new ArrayList<>();
 
     
+    SykdomVurderingEndringResultatDto() {
+        
+    }
+    
     public SykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndringDto> perioderMedEndringer) {
         this.perioderMedEndringer = Objects.requireNonNull(perioderMedEndringer, "perioderMedEndringer");
     }
-
-    
+        
     public List<SykdomPeriodeMedEndringDto> getPerioderMedEndringer() {
         return perioderMedEndringer;
     }

@@ -4,11 +4,10 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -40,6 +39,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.S
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
@@ -136,21 +136,18 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingOversikt hentSykdomsoversikt(BehandlingUuidDto behandlingUuid, SykdomVurderingType sykdomVurderingType) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final Collection<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
-
+        final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
         return sykdomVurderingOversiktMapper.map(behandling.getUuid().toString(), vurderinger, saksnummerForPerioder);
     }
 
-    private Collection<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
-        final Collection<SykdomVurderingVersjon> vurderinger;
+    private LocalDateTimeline<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
         if (behandling.getStatus().erFerdigbehandletStatus()) {
-            vurderinger = sykdomVurderingRepository.hentBehandlingVurderingerFor(sykdomVurderingType, behandling.getUuid());
+            return sykdomVurderingRepository.getVurderingstidslinjeFor(sykdomVurderingType, behandling.getUuid());
         } else {
-            vurderinger = sykdomVurderingRepository.hentSisteVurderingerFor(sykdomVurderingType, behandling.getFagsak().getPleietrengendeAktørId());
+            return sykdomVurderingRepository.getSisteVurderingstidslinjeFor(sykdomVurderingType, behandling.getFagsak().getPleietrengendeAktørId());
         }
-        return vurderinger;
     }
 
     @GET
@@ -221,10 +218,14 @@ public class SykdomVurderingRestTjeneste {
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
 
+        final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVersjon);
         sykdomVurderingRepository.lagre(nyVersjon);
+        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+            // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
+            throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
+        });
 
-        // TODO: Mapping av resultat
-        return new SykdomVurderingEndringResultatDto(Collections.emptyList());
+        return toSykdomVurderingEndringResultatDto(endringer);
     }
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
@@ -258,10 +259,15 @@ public class SykdomVurderingRestTjeneste {
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
+       
+        final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVurdering.getSisteVersjon());
         sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
+        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+            // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
+            throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
+        });
 
-        // TODO: Mapping av resultat
-        return new SykdomVurderingEndringResultatDto(Collections.emptyList());
+        return toSykdomVurderingEndringResultatDto(endringer);
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
@@ -278,5 +284,14 @@ public class SykdomVurderingRestTjeneste {
 
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
+    }
+    
+    private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, SykdomVurderingVersjon nyEndring) {
+        var vurderinger = hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
+        return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
+    }
+    
+    public SykdomVurderingEndringResultatDto toSykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndring> perioderMedEndringer) {
+        return new SykdomVurderingEndringResultatDto(perioderMedEndringer.stream().map(p -> new SykdomPeriodeMedEndringDto(p)).collect(Collectors.toList()));
     }
 }

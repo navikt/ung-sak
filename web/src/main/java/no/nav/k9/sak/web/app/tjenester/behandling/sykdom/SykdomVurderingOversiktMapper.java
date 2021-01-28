@@ -1,15 +1,12 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,16 +21,15 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 
 @ApplicationScoped
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(String behandlingUuid, Collection<SykdomVurderingVersjon> vurderinger, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
+    public SykdomVurderingOversikt map(String behandlingUuid,  LocalDateTimeline<SykdomVurderingVersjon> vurderinger, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
         final String saksnummer = "";
 
-        LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje = tilTidslinje(vurderinger);
+        LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje = vurderinger;
 
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
                 behandlingUuid, saksnummer, saksnummerForPerioder, vurderingerTidslinje
@@ -85,38 +81,6 @@ public class SykdomVurderingOversiktMapper {
         return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomVurderingRestTjeneste.VURDERING_VERSJON_PATH), "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandlingUuid));
     }
 
-    LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
-        final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
-        for (SykdomVurderingVersjon vurdering : vurderinger) {
-            for (SykdomVurderingPeriode periode : vurdering.getPerioder()) {
-                segments.add(new LocalDateSegment<SykdomVurderingVersjon>(periode.getFom(), periode.getTom(), vurdering));
-            }
-        }
 
-        final LocalDateTimeline<SykdomVurderingVersjon> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<SykdomVurderingVersjon, SykdomVurderingVersjon, SykdomVurderingVersjon>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingVersjon> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<SykdomVurderingVersjon> datoSegment,
-                    LocalDateSegment<SykdomVurderingVersjon> datoSegment2) {
-                final Long rangering1 = datoSegment.getValue().getSykdomVurdering().getRangering();
-                final Long rangering2 = datoSegment2.getValue().getSykdomVurdering().getRangering();
-                final Long versjon1 = datoSegment.getValue().getVersjon();
-                final Long versjon2 = datoSegment2.getValue().getVersjon();
-
-                final SykdomVurderingVersjon valgtVurdering;
-                if (rangering1.compareTo(rangering2) > 0) {
-                    valgtVurdering = datoSegment.getValue();
-                } else if (rangering1.compareTo(rangering2) < 0) {
-                    valgtVurdering = datoSegment2.getValue();
-                } else {
-                    valgtVurdering = (versjon1.compareTo(versjon2) > 0) ? datoSegment.getValue() : datoSegment2.getValue();
-                }
-
-                return new LocalDateSegment<>(datoInterval, valgtVurdering);
-            }
-        });
-
-        return tidslinje.compress();
-    }
 
 }

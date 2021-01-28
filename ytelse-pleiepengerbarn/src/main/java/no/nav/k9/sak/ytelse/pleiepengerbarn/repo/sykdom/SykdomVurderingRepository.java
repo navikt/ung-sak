@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -20,7 +21,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -264,4 +267,69 @@ public class SykdomVurderingRepository {
     }
 
 
+    public LocalDateTimeline<SykdomVurderingVersjon> getVurderingstidslinjeFor(SykdomVurderingType type, UUID behandlingUuid) {
+        return tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
+    }
+    
+    public LocalDateTimeline<SykdomVurderingVersjon> getSisteVurderingstidslinjeFor(SykdomVurderingType type, AktørId pleietrengende) {
+        return tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
+    }
+    
+    
+    private LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
+        final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
+        for (SykdomVurderingVersjon vurdering : vurderinger) {
+            for (SykdomVurderingPeriode periode : vurdering.getPerioder()) {
+                segments.add(new LocalDateSegment<SykdomVurderingVersjon>(periode.getFom(), periode.getTom(), vurdering));
+            }
+        }
+
+        final LocalDateTimeline<SykdomVurderingVersjon> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<SykdomVurderingVersjon, SykdomVurderingVersjon, SykdomVurderingVersjon>() {
+            @Override
+            public LocalDateSegment<SykdomVurderingVersjon> combine(LocalDateInterval datoInterval,
+                    LocalDateSegment<SykdomVurderingVersjon> datoSegment,
+                    LocalDateSegment<SykdomVurderingVersjon> datoSegment2) {
+                final Long rangering1 = datoSegment.getValue().getSykdomVurdering().getRangering();
+                final Long rangering2 = datoSegment2.getValue().getSykdomVurdering().getRangering();
+                final Long versjon1 = datoSegment.getValue().getVersjon();
+                final Long versjon2 = datoSegment2.getValue().getVersjon();
+
+                final SykdomVurderingVersjon valgtVurdering;
+                if (rangering1.compareTo(rangering2) > 0) {
+                    valgtVurdering = datoSegment.getValue();
+                } else if (rangering1.compareTo(rangering2) < 0) {
+                    valgtVurdering = datoSegment2.getValue();
+                } else {
+                    valgtVurdering = (versjon1.compareTo(versjon2) > 0) ? datoSegment.getValue() : datoSegment2.getValue();
+                }
+
+                return new LocalDateSegment<>(datoInterval, valgtVurdering);
+            }
+        });
+
+        return tidslinje.compress();
+    }
+    
+    public List<SykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<SykdomVurderingVersjon> tidslinje, SykdomVurderingVersjon nyEndring) {
+        final LocalDateTimeline<SykdomVurderingVersjon> endret = new LocalDateTimeline<>(nyEndring.getPerioder().stream().map(p -> new LocalDateSegment<SykdomVurderingVersjon>(p.getFom(), p.getTom(), p.getVurderingVersjon())).collect(Collectors.toList()));
+        return endret.combine(tidslinje, new LocalDateSegmentCombinator<SykdomVurderingVersjon, SykdomVurderingVersjon, SykdomPeriodeMedEndring>() {
+            @Override
+            public LocalDateSegment<SykdomPeriodeMedEndring> combine(LocalDateInterval datoInterval,
+                    LocalDateSegment<SykdomVurderingVersjon> datoSegment, LocalDateSegment<SykdomVurderingVersjon> datoSegment2) {
+                if (datoSegment2 == null) {
+                    return null;
+                }
+                var nyVersjon = datoSegment.getValue();
+                var gammelVersjon = datoSegment2.getValue();
+                if (nyVersjon.getSykdomVurdering().getId() != null
+                        && nyVersjon.getSykdomVurdering().getId().equals(gammelVersjon.getSykdomVurdering().getId())) {
+                    return null;
+                }
+                
+                final boolean endrerVurderingSammeBehandling = nyVersjon.getEndretBehandlingUuid().equals(gammelVersjon.getEndretBehandlingUuid());
+                final boolean endrerAnnenVurdering = !endrerVurderingSammeBehandling;
+                return new LocalDateSegment<>(datoInterval, new SykdomPeriodeMedEndring(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()), endrerVurderingSammeBehandling, endrerAnnenVurdering, gammelVersjon));
+            }
+        }, JoinStyle.LEFT_JOIN).compress().stream().map(l -> l.getValue()).collect(Collectors.toList());
+    }
 }
