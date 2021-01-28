@@ -19,8 +19,9 @@ public class SykdomDokumentRepository {
 
     
     @Inject
-    public SykdomDokumentRepository(EntityManager entityManager) {
+    public SykdomDokumentRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
+        this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
     }
 
 

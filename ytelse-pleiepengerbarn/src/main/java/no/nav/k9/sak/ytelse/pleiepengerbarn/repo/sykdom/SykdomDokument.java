@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -42,7 +43,7 @@ public class SykdomDokument {
     @Column(name = "JOURNALPOST_ID", nullable = false)
     private JournalpostId journalpostId;
 
-    @Column(name = "DOKUMENT_INFO_ID", nullable = false)
+    @Column(name = "DOKUMENT_INFO_ID", nullable = true)
     private String dokumentInfoId;
 
     @OneToMany
@@ -72,13 +73,13 @@ public class SykdomDokument {
     
     public SykdomDokument(SykdomDokumentType type, JournalpostId journalpostId, String dokumentInfoId,
             String opprettetAv, LocalDateTime opprettetTidspunkt, String endretAv, LocalDateTime endretTidspunkt) {
-        this.type = type;
-        this.journalpostId = journalpostId;
+        this.type = Objects.requireNonNull(type, "type");
+        this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
-        this.opprettetAv = opprettetAv;
-        this.opprettetTidspunkt = opprettetTidspunkt;
-        this.endretAv = endretAv;
-        this.endretTidspunkt = endretTidspunkt;
+        this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
+        this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
+        this.endretAv = Objects.requireNonNull(endretAv, "endretAv");
+        this.endretTidspunkt = Objects.requireNonNull(endretTidspunkt, "endretTidspunkt");
     }
     
 
