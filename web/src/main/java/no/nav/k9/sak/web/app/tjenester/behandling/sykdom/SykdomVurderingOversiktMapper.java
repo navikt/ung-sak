@@ -26,8 +26,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @ApplicationScoped
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(String behandlingUuid,  LocalDateTimeline<SykdomVurderingVersjon> vurderinger, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
-        final String saksnummer = "";
+    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderinger, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
 
         LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje = vurderinger;
 
@@ -44,11 +43,11 @@ public class SykdomVurderingOversiktMapper {
                 Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(8), LocalDate.now())), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())), // TODO: Riktig verdi
-                Arrays.asList(linkForNyVurdering(behandlingUuid))
+                Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
                 );
     }
 
-    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(String behandlingUuid, String saksnummer, LocalDateTimeline<HashSet<Saksnummer>> søktePerioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
+    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<HashSet<Saksnummer>> søktePerioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
         return vurderingerTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingVersjon, HashSet<Saksnummer>, SykdomVurderingOversiktElement>() {
             @Override
             public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingVersjon> vurdering, LocalDateSegment<HashSet<Saksnummer>> relevanteSaksnummer) {
@@ -59,10 +58,10 @@ public class SykdomVurderingOversiktMapper {
                     sykdomVurderingId,
                     vurdering.getValue().getResultat(),
                     new Periode(vurdering.getFom(), vurdering.getTom()),
-                    s.contains(new Saksnummer(saksnummer)),
-                    antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(new Saksnummer(saksnummer))),
-                    UUID.fromString(behandlingUuid).equals(vurdering.getValue().getEndretBehandlingUuid()),
-                    Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId), linkForEndreVurdering(behandlingUuid))
+                    s.contains(saksnummer),
+                    antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer)),
+                    behandlingUuid.equals(vurdering.getValue().getEndretBehandlingUuid()),
+                    Arrays.asList(linkForGetVurdering(behandlingUuid.toString(), sykdomVurderingId), linkForEndreVurdering(behandlingUuid.toString()))
                 ));
             }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
