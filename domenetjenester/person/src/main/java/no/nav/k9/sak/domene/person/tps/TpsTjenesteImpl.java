@@ -19,6 +19,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
 
     private PersoninfoAdapter personinfoAdapter;
 
+    @SuppressWarnings("unused")
     public TpsTjenesteImpl() {
         // for CDI proxy
     }
@@ -81,7 +82,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(hentGeografiskTilknytning(fnr).getDiskresjonskode());
+        return Optional.ofNullable(hentGeografiskTilknytning(fnr).getDiskresjonskode().getKode());
     }
 
     @Override

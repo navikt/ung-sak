@@ -16,6 +16,7 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoTjeneste;
+import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -51,7 +52,7 @@ public class PersoninfoAdapterTest {
 
         PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
         PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
-        testSubject = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste);
+        testSubject = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class));
     }
 
     @Test
