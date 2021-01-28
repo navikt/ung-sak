@@ -7,6 +7,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
+import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -81,7 +82,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(hentGeografiskTilknytning(fnr).getDiskresjonskode().getKode());
+        return Optional.ofNullable(hentGeografiskTilknytning(fnr).getDiskresjonskode()).map(Diskresjonskode::getKode);
     }
 
     @Override
