@@ -53,6 +53,10 @@ public class SykdomVurderingOpprettelseDto {
     @Size(max = 100)
     @Valid
     private Set<String> tilknyttedeDokumenter;
+    
+    @JsonProperty(value = "dryRun")
+    @Valid
+    private boolean dryRun;
 
     public SykdomVurderingOpprettelseDto() {
      
@@ -89,6 +93,10 @@ public class SykdomVurderingOpprettelseDto {
 
     public Set<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
+    }
+    
+    public boolean isDryRun() {
+        return dryRun;
     }
     
     public SykdomVurderingOpprettelseDto medTekst(String tekst) {

@@ -67,6 +67,10 @@ public class SykdomVurderingEndringDto {
     @Size(max = 100)
     @Valid
     private Set<String> tilknyttedeDokumenter;
+    
+    @JsonProperty(value = "dryRun")
+    @Valid
+    private boolean dryRun;
 
     
     public SykdomVurderingEndringDto() {
@@ -111,6 +115,10 @@ public class SykdomVurderingEndringDto {
         return tilknyttedeDokumenter;
     }
 
+    public boolean isDryRun() {
+        return dryRun;
+    }
+    
     public SykdomVurderingEndringDto medId(String id) {
         this.id = id;
         return this;

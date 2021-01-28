@@ -219,11 +219,13 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
 
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVersjon);
-        sykdomVurderingRepository.lagre(nyVersjon);
-        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-            // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
-            throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
-        });
+        if (!sykdomVurderingOppdatering.isDryRun()) {
+            sykdomVurderingRepository.lagre(nyVersjon);
+            endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+                // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
+                throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
+            });
+        }
 
         return toSykdomVurderingEndringResultatDto(endringer);
     }
@@ -261,11 +263,13 @@ public class SykdomVurderingRestTjeneste {
         final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
        
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVurdering.getSisteVersjon());
-        sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
-        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-            // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
-            throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
-        });
+        if (!sykdomVurderingOpprettelse.isDryRun()) {
+            sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
+            endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+                // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
+                throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
+            });
+        }
 
         return toSykdomVurderingEndringResultatDto(endringer);
     }
