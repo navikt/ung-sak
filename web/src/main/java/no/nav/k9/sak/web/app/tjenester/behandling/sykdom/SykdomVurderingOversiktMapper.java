@@ -59,8 +59,8 @@ public class SykdomVurderingOversiktMapper {
                     sykdomVurderingId,
                     vurdering.getValue().getResultat(),
                     new Periode(vurdering.getFom(), vurdering.getTom()),
-                    s.contains(saksnummer),
-                    antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer)),
+                    s.contains(new Saksnummer(saksnummer)),
+                    antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(new Saksnummer(saksnummer))),
                     UUID.fromString(behandlingUuid).equals(vurdering.getValue().getEndretBehandlingUuid()),
                     Arrays.asList(linkForGetVurdering(behandlingUuid, sykdomVurderingId), linkForEndreVurdering(behandlingUuid))
                 ));
