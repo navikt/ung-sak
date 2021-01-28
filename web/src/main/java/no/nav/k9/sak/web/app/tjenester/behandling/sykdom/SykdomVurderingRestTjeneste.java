@@ -6,6 +6,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 
@@ -28,11 +29,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
@@ -69,11 +72,11 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingMapper sykdomVurderingMapper;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
-    
+
 
     public SykdomVurderingRestTjeneste() {
     }
-    
+
 
     @Inject
     public SykdomVurderingRestTjeneste(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
@@ -105,10 +108,10 @@ public class SykdomVurderingRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        
+
         return hentSykdomsoversikt(behandlingUuid, SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
     }
-    
+
     @GET
     @Path(VURDERING_OVERSIKT_TOO)
     @Operation(description = "En oversikt over sykdomsvurderinger for to omsorgspersoner",
@@ -126,15 +129,18 @@ public class SykdomVurderingRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        
+
         return hentSykdomsoversikt(behandlingUuid, SykdomVurderingType.TO_OMSORGSPERSONER);
     }
-    
+
     private SykdomVurderingOversikt hentSykdomsoversikt(BehandlingUuidDto behandlingUuid, SykdomVurderingType sykdomVurderingType) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
         final Collection<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid().toString(), vurderinger);
+
+        final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+
+        return sykdomVurderingOversiktMapper.map(behandling.getUuid().toString(), vurderinger, saksnummerForPerioder);
     }
 
     private Collection<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
@@ -146,7 +152,7 @@ public class SykdomVurderingRestTjeneste {
         }
         return vurderinger;
     }
-    
+
     @GET
     @Path(VURDERING)
     @Operation(description = "Henter informasjon om én gitt vurdering.",
@@ -170,11 +176,11 @@ public class SykdomVurderingRestTjeneste {
             @QueryParam(SykdomVurderingIdDto.NAME)
             @Parameter(description = SykdomVurderingIdDto.DESC)
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
             SykdomVurderingIdDto vurderingId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        
+
         final List<SykdomVurderingVersjon> versjoner;
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
@@ -183,10 +189,10 @@ public class SykdomVurderingRestTjeneste {
                     .get()
                     .getSykdomVurderingVersjoner();
         }
-        
+
         return sykdomVurderingMapper.map(versjoner);
     }
-    
+
     @POST
     @Path(VURDERING_VERSJON)
     @Operation(description = "Oppdaterer en vurdering.",
@@ -202,21 +208,21 @@ public class SykdomVurderingRestTjeneste {
     public SykdomVurderingEndringResultatDto oppdaterSykdomsVurdering(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomVurderingEndringDto sykdomVurderingOppdatering) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOppdatering.getBehandlingUuid()).orElseThrow();
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final SykdomVurdering sykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurderingVersjon nyVersjon = sykdomVurderingMapper.map(sykdomVurdering, sykdomVurderingOppdatering, sporingsinformasjon, alleDokumenter);
-        
+
         sykdomVurderingRepository.lagre(nyVersjon);
-               
+
         // TODO: Mapping av resultat
         return new SykdomVurderingEndringResultatDto(Collections.emptyList());
     }
@@ -225,7 +231,7 @@ public class SykdomVurderingRestTjeneste {
         final SykdomPerson endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
         return new SykdomVurderingMapper.Sporingsinformasjon(getCurrentUserId(), behandling.getUuid(), behandling.getFagsak().getSaksnummer().getVerdi(), endretForPerson);
     }
-    
+
     @POST
     @Path(VURDERING)
     @Operation(description = "Oppretter en ny vurdering.",
@@ -241,35 +247,35 @@ public class SykdomVurderingRestTjeneste {
     public SykdomVurderingEndringResultatDto opprettSykdomsVurdering(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOpprettelse.getBehandlingUuid()).orElseThrow();
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
         sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
-        
+
         // TODO: Mapping av resultat
         return new SykdomVurderingEndringResultatDto(Collections.emptyList());
     }
-    
+
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
         return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
-    
+
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {
             return AbacDataAttributter.opprett();
         }
     }
-    
+
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
     }

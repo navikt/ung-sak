@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +16,10 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -33,12 +39,12 @@ public class SykdomVurderingRepository {
     }
 
     /////////////////////////////
-    
+
     public SykdomVurderinger hentEllerLagreSykdomVurderinger(AktørId pleietrengende, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
         return hentEllerLagre(new SykdomVurderinger(sykdomPerson, opprettetAv, opprettetTidspunkt));
     }
-    
+
     public void lagre(SykdomVurdering vurdering, AktørId pleietrengende) {
         final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
         final var sykdomVurderinger = new SykdomVurderinger(sykdomPerson, vurdering.getOpprettetAv(), vurdering.getOpprettetTidspunkt());
@@ -94,17 +100,45 @@ public class SykdomVurderingRepository {
         return q.getResultList();
     }
 
-    public List<SykdomSøktPeriode> hentAlleSøktePerioder(List<Saksnummer> saksnummer) {
+    public List<SykdomSøktPeriode> hentAlleSøktePerioder(Saksnummer saksnummer) {
         final TypedQuery<SykdomSøktPeriode> q = entityManager.createQuery(
             "SELECT ssp " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
                 "   inner join SykdomGrunnlag as sg " +
                 "   inner join SykdomSøktPeriode as ssp " +
-                "where sgb.saksnummer in (:saksnummer) "
+                "where sgb.saksnummer = :saksnummer "
                 , SykdomSøktPeriode.class);
         q.setParameter("saksnummer", saksnummer);
 
         return q.getResultList();
+    }
+
+    public LocalDateTimeline<HashSet<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
+        final Collection<Saksnummer> saksnummere =  hentAlleSaksnummer(pleietrengendeAktørId);
+
+        final Collection<LocalDateSegment<HashSet<Saksnummer>>> segments = new ArrayList<>();
+
+        for (Saksnummer saksnummer : saksnummere) {
+            final Collection<SykdomSøktPeriode> søktePerioder = hentAlleSøktePerioder(saksnummer);
+            for (SykdomSøktPeriode periode : søktePerioder) {
+                HashSet<Saksnummer> sett = new HashSet<>();
+                sett.add(saksnummer);
+                segments.add(new LocalDateSegment<HashSet<Saksnummer>>(periode.getFom(), periode.getTom(), sett));
+            }
+        }
+
+        final LocalDateTimeline<HashSet<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<HashSet<Saksnummer>, HashSet<Saksnummer>, HashSet<Saksnummer>>() {
+            @Override
+            public LocalDateSegment<HashSet<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<HashSet<Saksnummer>> datoSegment, LocalDateSegment<HashSet<Saksnummer>> datoSegment2) {
+                HashSet<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
+                kombinerteSaksnumre.addAll(datoSegment2.getValue());
+
+                return new LocalDateSegment<>(datoInterval, kombinerteSaksnumre);
+            }
+        });
+
+        final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = tidslinje.compress();
+        return saksnummerForPerioder;
     }
 
     public List<SykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
@@ -228,5 +262,6 @@ public class SykdomVurderingRepository {
         q.setParameter("aktoerId", aktørId);
         return q.getResultList().stream().findFirst().orElse(null);
     }
+
 
 }
