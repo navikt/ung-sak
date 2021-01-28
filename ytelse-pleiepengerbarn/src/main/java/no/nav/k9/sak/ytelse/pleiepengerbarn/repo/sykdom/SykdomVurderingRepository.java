@@ -276,7 +276,7 @@ public class SykdomVurderingRepository {
     }
     
     
-    private LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
+    LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
         final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
         for (SykdomVurderingVersjon vurdering : vurderinger) {
             for (SykdomVurderingPeriode periode : vurdering.getPerioder()) {
