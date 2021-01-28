@@ -100,6 +100,7 @@ public class TilKalkulusMapper {
             {
                 addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
                 addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
+                addAll(inntektFilter.getAlleInntektBeregnetSkatt());
             }
         };
     }
