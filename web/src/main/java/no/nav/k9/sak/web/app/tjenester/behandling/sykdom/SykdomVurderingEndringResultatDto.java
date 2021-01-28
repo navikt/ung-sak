@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SykdomVurderingEndringResultatDto {
 
     @JsonProperty(value = "perioderMedEndringer", required = true)
+    @Size(max = 100)
     @Valid
     private List<SykdomPeriodeMedEndringDto> perioderMedEndringer = new ArrayList<>();
 
