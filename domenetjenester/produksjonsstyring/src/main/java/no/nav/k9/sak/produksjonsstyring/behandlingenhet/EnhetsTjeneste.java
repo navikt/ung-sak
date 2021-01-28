@@ -50,7 +50,6 @@ public class EnhetsTjeneste {
         Arrays.stream(FagsakYtelseType.values())
             .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
 
-    @SuppressWarnings("unused")
     public EnhetsTjeneste() {
         // For CDI proxy
     }

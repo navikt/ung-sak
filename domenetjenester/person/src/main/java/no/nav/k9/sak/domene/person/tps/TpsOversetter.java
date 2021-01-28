@@ -61,7 +61,6 @@ public class TpsOversetter {
 
     private TpsAdresseOversetter tpsAdresseOversetter;
 
-    @SuppressWarnings("unused")
     TpsOversetter() {
         // for CDI proxy
     }

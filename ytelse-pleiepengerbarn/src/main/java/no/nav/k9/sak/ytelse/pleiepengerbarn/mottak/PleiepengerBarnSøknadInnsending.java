@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
+import no.nav.k9.søknad.Søknad;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
@@ -28,23 +28,23 @@ public class PleiepengerBarnSøknadInnsending extends InnsendingInnhold {
     @JsonProperty(value = "søknad", required = true)
     @NotNull
     @Valid
-    private PleiepengerBarnSøknad søknad;
+    private Søknad søknad;
 
     public PleiepengerBarnSøknadInnsending() {
         super(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
     }
     
     @JsonCreator
-    public PleiepengerBarnSøknadInnsending(@JsonProperty(value = "søknad", required = true) @NotNull @Valid PleiepengerBarnSøknad søknad) {
+    public PleiepengerBarnSøknadInnsending(@JsonProperty(value = "søknad", required = true) @NotNull @Valid Søknad søknad) {
         this();
         this.søknad = søknad;
     }
 
-    public PleiepengerBarnSøknad getSøknad() {
+    public Søknad getSøknad() {
         return søknad;
     }
 
-    public void setSøknad(PleiepengerBarnSøknad søknad) {
+    public void setSøknad(Søknad søknad) {
         this.søknad = søknad;
     }
 }

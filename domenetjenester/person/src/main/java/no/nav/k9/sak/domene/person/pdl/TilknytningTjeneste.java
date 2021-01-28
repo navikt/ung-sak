@@ -29,7 +29,6 @@ public class TilknytningTjeneste {
 
     private PdlKlient pdlKlient;
 
-    @SuppressWarnings("unused")
     TilknytningTjeneste() {
         // CDI
     }

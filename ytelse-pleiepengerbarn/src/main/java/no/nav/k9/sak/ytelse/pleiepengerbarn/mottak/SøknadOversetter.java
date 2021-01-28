@@ -1,9 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Objects;
-import java.util.TreeSet;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -22,10 +20,11 @@ import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.søknad.felles.Barn;
-import no.nav.k9.søknad.felles.Bosteder;
-import no.nav.k9.søknad.felles.Språk;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.personopplysninger.Barn;
+import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
+import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.vedtak.konfig.Tid;
 
 @Dependent
@@ -52,22 +51,23 @@ class SøknadOversetter {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    void persister(PleiepengerBarnSøknad søknad, Behandling behandling) {
+    void persister(Søknad søknad, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
-        var søknadsperioder = new TreeSet<>(søknad.perioder == null ? Collections.emptySortedSet() : søknad.perioder.keySet());
-        var maksSøknadsperiode = søknadsperioder.isEmpty() ? null : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperioder.first().fraOgMed, søknadsperioder.last().tilOgMed);
+        PleiepengerSyktBarn ytelse = søknad.getYtelse();
+        var maksSøknadsperiode = ytelse.getSøknadsperiode();
         
         // TODO:
         final boolean elektroniskSøknad = false;
+        LocalDate mottattDato = søknad.getMottattDato().toLocalDate();
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(maksSøknadsperiode)
+            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()))
             .medElektroniskRegistrert(elektroniskSøknad)
-            .medMottattDato(søknad.mottattDato.toLocalDate())
+            .medMottattDato(mottattDato)
             .medErEndringssøknad(false)
-            .medSøknadsdato(søknad.mottattDato.toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
-            .medSpråkkode(getSpraakValg(søknad.språk));
+            .medSøknadsdato(mottattDato) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
+            .medSpråkkode(getSpraakValg(Språk.NORSK_BOKMÅL)); // TODO
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
@@ -75,13 +75,13 @@ class SøknadOversetter {
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
 
-        lagreMedlemskapinfo(søknad.bosteder, behandlingId, søknad.mottattDato.toLocalDate());
-        lagrePleietrengende(fagsakId, søknad.barn);
+        lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
+        lagrePleietrengende(fagsakId, ytelse.getBarn());
 
         lagreUttakOgPerioder(søknad, behandlingId, fagsakId);
     }
 
-    private void lagreUttakOgPerioder(PleiepengerBarnSøknad soknad, final Long behandlingId, Long fagsakId) {
+    private void lagreUttakOgPerioder(Søknad soknad, final Long behandlingId, Long fagsakId) {
         var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
@@ -108,14 +108,14 @@ class SøknadOversetter {
         // oppgittTilknytningBuilder.medOppholdNå(Boolean.TRUE.equals(iNorgeVedFoedselstidspunkt));
 
         if (bosteder != null) {
-            bosteder.perioder.forEach((periode, opphold) -> {
+            bosteder.getPerioder().forEach((periode, opphold) -> {
                 // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
                 // boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.land.landkode))
+                    .medLand(finnLandkode(opphold.getLand().landkode))
                     .medPeriode(
-                        Objects.requireNonNull(periode.fraOgMed),
-                        Objects.requireNonNullElse(periode.tilOgMed, Tid.TIDENES_ENDE))
+                        Objects.requireNonNull(periode.getFraOgMed()),
+                        Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
                     // .erTidligereOpphold(tidligereOpphold)
                     .build());
             });

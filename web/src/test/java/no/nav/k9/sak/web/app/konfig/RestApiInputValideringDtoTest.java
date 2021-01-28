@@ -55,7 +55,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.jackson.IndexClasses;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
 
 public class RestApiInputValideringDtoTest extends RestApiTester {
 
@@ -91,8 +90,6 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             // Enforces av UUID selv
             put(UUID.class, singletonList(emptyList()));
 
-            // Sjekkes av separat validator
-            put(PleiepengerBarnSøknad.class, singletonList(emptyList()));
         }
     };
 

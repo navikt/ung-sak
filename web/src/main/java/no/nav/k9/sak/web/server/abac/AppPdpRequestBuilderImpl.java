@@ -41,7 +41,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
 
-    @SuppressWarnings("unused")
     public AppPdpRequestBuilderImpl() {
     }
 
