@@ -113,7 +113,7 @@ public class SykdomVurderingRepository {
         return q.getResultList();
     }
 
-    public LocalDateTimeline<HashSet<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
+     public LocalDateTimeline<HashSet<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
         final Collection<Saksnummer> saksnummere =  hentAlleSaksnummer(pleietrengendeAktørId);
 
         final Collection<LocalDateSegment<HashSet<Saksnummer>>> segments = new ArrayList<>();
