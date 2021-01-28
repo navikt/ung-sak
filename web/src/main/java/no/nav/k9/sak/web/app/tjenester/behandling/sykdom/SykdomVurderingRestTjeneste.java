@@ -139,7 +139,7 @@ public class SykdomVurderingRestTjeneste {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid().toString(), vurderinger, saksnummerForPerioder);
+        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), vurderinger, saksnummerForPerioder);
     }
 
     private LocalDateTimeline<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
