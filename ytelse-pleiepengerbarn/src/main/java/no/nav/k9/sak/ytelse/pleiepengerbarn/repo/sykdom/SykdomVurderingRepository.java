@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +14,6 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.behandlingslager.aktør.Aktør;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -34,7 +33,12 @@ public class SykdomVurderingRepository {
     }
 
     /////////////////////////////
-
+    
+    public SykdomVurderinger hentEllerLagreSykdomVurderinger(AktørId pleietrengende, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
+        return hentEllerLagre(new SykdomVurderinger(sykdomPerson, opprettetAv, opprettetTidspunkt));
+    }
+    
     public void lagre(SykdomVurdering vurdering, AktørId pleietrengende) {
         final var sykdomPerson = hentEllerLagrePerson(pleietrengende);
         final var sykdomVurderinger = new SykdomVurderinger(sykdomPerson, vurdering.getOpprettetAv(), vurdering.getOpprettetTidspunkt());
@@ -56,12 +60,6 @@ public class SykdomVurderingRepository {
     public void lagre(SykdomVurderingVersjon versjon) {
         entityManager.persist(versjon);
         entityManager.flush();
-    }
-
-    public List<SykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
-        // TODO:
-        //throw new UnsupportedOperationException("Ikke implementert ennå.");
-        return new ArrayList<SykdomDokument>();
     }
 
     public Optional<SykdomVurdering> hentVurdering(AktørId pleietrengende, Long vurderingId) {

@@ -84,14 +84,18 @@ create sequence if not exists SEQ_SYKDOM_VURDERING_PERIODE increment by 5 minval
 create table if not exists SYKDOM_DOKUMENT
 (
     ID                  BIGINT                             NOT NULL PRIMARY KEY,
+    SYKDOM_VURDERINGER_ID   BIGINT                         NOT NULL,
+    TYPE                VARCHAR(20)                        NOT NULL,
+    DATERT              DATE                               ,
     JOURNALPOST_ID      VARCHAR(50)                        NOT NULL,
-    DOKUMENT_INFO_ID    VARCHAR(50)                        NOT NULL,
+    DOKUMENT_INFO_ID    VARCHAR(50)                        ,
     --variant?
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'                NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP   NOT NULL,
     ENDRET_AV     VARCHAR(20)                              NOT NULL,
     ENDRET_TID    TIMESTAMP(3)                             NOT NULL,
-    UNIQUE(JOURNALPOST_ID, DOKUMENT_INFO_ID)
+    UNIQUE(JOURNALPOST_ID, DOKUMENT_INFO_ID),
+    CONSTRAINT FK_SYKDOM_VURDERING_01 FOREIGN KEY(SYKDOM_VURDERINGER_ID) REFERENCES SYKDOM_VURDERINGER(ID)
 );
 create sequence if not exists SEQ_SYKDOM_DOKUMENT increment by 5 minvalue 1000000;
 
