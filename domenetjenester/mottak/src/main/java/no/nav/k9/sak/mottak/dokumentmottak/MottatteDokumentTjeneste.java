@@ -55,7 +55,7 @@ public class MottatteDokumentTjeneste {
     }
 
     /**
-     * 
+     *
      * @param fristForInnsendingAvDokumentasjon - Frist i uker fom siste vedtaksdato
      */
     @Inject
@@ -119,6 +119,7 @@ public class MottatteDokumentTjeneste {
         return mottattDokument.getId();
     }
 
+    //TODO fjern ubrukt kode, eller skal det tas i bruk?
     Optional<MottattDokument> hentMottattDokument(Long mottattDokumentId) {
         return mottatteDokumentRepository.hentMottattDokument(mottattDokumentId);
     }
@@ -127,12 +128,14 @@ public class MottatteDokumentTjeneste {
         return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId, taSkriveLås, statuser);
     }
 
+    //TODO fjern ubrukt kode, eller skal det tas i bruk?
     boolean erSisteYtelsesbehandlingAvslåttPgaManglendeDokumentasjon(Fagsak sak) {
         Objects.requireNonNull(sak, "Fagsak");
         Optional<Behandling> behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(sak.getId());
         return behandling.map(this::erAvsluttetPgaManglendeDokumentasjon).orElse(Boolean.FALSE);
     }
 
+    //TODO fjern ubrukt kode, eller skal det tas i bruk?
     /**
      * Beregnes fra vedtaksdato
      */
@@ -144,6 +147,7 @@ public class MottatteDokumentTjeneste {
             .map(dato -> dato.isBefore(LocalDate.now().minus(fristForInnsendingAvDokumentasjon))).orElse(Boolean.FALSE);
     }
 
+    //TODO fjern ubrukt kode, eller skal det tas i bruk?
     private boolean erAvsluttetPgaManglendeDokumentasjon(Behandling behandling) {
         Objects.requireNonNull(behandling, "Behandling");
         var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandling.getId());
