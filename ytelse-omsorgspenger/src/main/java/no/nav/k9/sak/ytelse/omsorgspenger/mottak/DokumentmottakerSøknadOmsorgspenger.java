@@ -6,15 +6,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -47,7 +47,7 @@ import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@DokumentGruppeRef("INNTEKTKOMP_FRILANS") // TODO: Allokere ekte brevkode
+@DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
@@ -60,6 +60,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
+    private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
+
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
     }
@@ -69,7 +71,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         UttakRepository uttakRepository,
                                         TpsTjeneste tpsTjeneste, BehandlingRepository behandlingRepository,
                                         LagreOppgittOpptjening lagreOppgittOpptjening,
-                                        SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository) {
+                                        SøknadParser søknadParser,
+                                        MottatteDokumentRepository mottatteDokumentRepository,
+                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -79,24 +83,19 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.lagreOppgittOpptjening = lagreOppgittOpptjening;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.dokumentValidator = dokumentValidator;
     }
 
     @Override
     public void mottaDokument(Collection<MottattDokument> dokumenter, Behandling behandling) {
-        boolean harPayload = dokumenter.stream().anyMatch(d -> d.harPayload());
-        if (!harPayload) {
-            return; // quick return
-        }
         Long behandlingId = behandling.getId();
+        dokumentValidator.validerDokumenter(Long.toString(behandlingId), dokumenter);
 
         var søknader = søknadParser.parseSøknader(dokumenter);
         for (var dokument : dokumenter) {
             var søknad = søknader.get(0);
-            /*var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
-            dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());*/
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
-            /*dokument.setKildesystem(søknad.getKildesystem());*/
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG); //TODO: Heller sette DokumentStatus.MOTTATT? Se kommentar nedenfor
         }
         // TODO (se her, Tore): Mulig at vi må bruke denne på annen side av asynkron lagring? Sammenlign med InntektsmeldingParser
@@ -125,7 +124,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
         var søknadsperioder = new TreeSet<>(søknadInnhold.getFraværsperioder() == null ? Collections.emptySortedSet() : søknadInnhold.getFraværsperioder().stream().map(FraværPeriode::getPeriode).sorted().collect(Collectors.toList()));
-        var maksSøknadsperiode = søknadsperioder.isEmpty() ? null : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperioder.first().  getFraOgMed(), søknadsperioder.last().getTilOgMed());
+        var maksSøknadsperiode = søknadsperioder.isEmpty() ? null : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperioder.first().getFraOgMed(), søknadsperioder.last().getTilOgMed());
 
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
@@ -134,8 +133,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
-            .medSpråkkode(getSpraakValg(Språk.NORSK_BOKMÅL))
-        //.medSpråkkode(getSpraakValg(ytelse.språk)) // TODO: Er ikke språk støttet i søknad lenger?
+            .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL))
+            //.medSpråkkode(getSpraakValg(ytelse.språk)) // TODO: Er ikke språk støttet i søknad lenger?
             ;
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
@@ -188,9 +187,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
     }
 
-    private Språkkode getSpraakValg(Språk spraak) {
-        if (spraak != null) {
-            return Språkkode.fraKode(spraak.dto.toUpperCase());
+    private Språkkode getSpråkValg(Språk språk) {
+        if (språk != null) {
+            return Språkkode.fraKode(språk.dto.toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }
@@ -199,15 +198,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         return Landkoder.fraKode(landKode);
     }
 
-
-
-    @Override
-    public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
-        søknadParser.parseSøknader(Set.of(mottattDokument));
-    }
-
     @Override
     public BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
+
 }

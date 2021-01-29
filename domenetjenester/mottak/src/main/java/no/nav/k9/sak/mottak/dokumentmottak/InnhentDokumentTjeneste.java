@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -102,7 +101,7 @@ public class InnhentDokumentTjeneste {
     }
 
     private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
-        var brevkode = getBrevkode(mottattDokument);
+        var brevkode = DokumentBrevkodeUtil.unikBrevkode(mottattDokument);
         var dokumentmottaker = finnMottaker(brevkode, fagsak.getYtelseType());
         return dokumentmottaker;
     }
@@ -150,18 +149,6 @@ public class InnhentDokumentTjeneste {
 
         private static BehandlingMedOpprettelseResultat eksisterendeBehandling(Behandling behandling) {
             return new BehandlingMedOpprettelseResultat(behandling, false);
-        }
-    }
-
-    private Brevkode getBrevkode(Collection<MottattDokument> mottattDokument) {
-        if (mottattDokument == null || mottattDokument.isEmpty()) {
-            throw new IllegalArgumentException("MottattDokument er null eller empty");
-        }
-        var typer = mottattDokument.stream().map(m -> m.getType()).distinct().collect(Collectors.toList());
-        if (typer.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke mottatt dokument med ulike typer: " + typer);
-        } else {
-            return typer.get(0);
         }
     }
 

@@ -3,15 +3,12 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.util.Collection;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public interface Dokumentmottaker {
 
     void mottaDokument(Collection<MottattDokument> mottattDokument, Behandling behandling);
-
-    void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType);
 
     BehandlingÅrsakType getBehandlingÅrsakType();
 }

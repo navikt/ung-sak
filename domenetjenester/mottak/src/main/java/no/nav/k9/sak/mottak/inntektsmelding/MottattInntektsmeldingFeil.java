@@ -20,10 +20,10 @@ public interface MottattInntektsmeldingFeil extends DeklarerteFeil {
 
     @TekniskFeil(feilkode = "FP-187532", feilmelding = "Behandling [%s] pågår, avventer å håndtere mottatt dokument til det er prosessert", logLevel = WARN, exceptionClass = MottattInntektsmeldingException.class)
     Feil behandlingPågårAvventerKnytteMottattDokumentTilBehandling(Long id);
-    
+
     @TekniskFeil(feilkode = "FP-187533", feilmelding = "Ugyldig inntektsmelding , bryter med forretningsregel validering: %s", logLevel = WARN, exceptionClass = MottattInntektsmeldingException.class)
     Feil inntektsmeldingSemantiskValideringFeil(String feilmelding);
-    
+
     @TekniskFeil(feilkode = "FP-958724", feilmelding = "Fant ikke xsd for namespacet '%s'", logLevel = WARN, exceptionClass = MottattInntektsmeldingException.class)
     Feil ukjentNamespace(String namespace);
 

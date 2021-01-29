@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -24,8 +23,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentmottakerFelles dokumentMottakerFelles;
 
-    private InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
-
     DokumentmottakerInntektsmelding() {
         // for CDI
     }
@@ -41,11 +38,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     @Override
     public BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING;
-    }
-
-    @Override
-    public void validerDokument(MottattDokument mottattDokument, FagsakYtelseType ytelseType) {
-        inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
     }
 
     @Override
