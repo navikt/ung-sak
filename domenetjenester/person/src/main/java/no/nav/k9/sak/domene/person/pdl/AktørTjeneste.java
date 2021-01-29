@@ -5,6 +5,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static no.nav.pdl.IdentGruppe.AKTORID;
 import static org.jboss.weld.util.collections.ImmutableList.of;
 
@@ -103,9 +104,12 @@ public class AktørTjeneste {
             personIdentSet.stream()
                 .map(pid -> ofNullable(cacheIdentTilAktørId.get(pid)))
                 .flatMap(Optional::stream),
-            hentBolkMedAktørId(personIdentIkkeICache)
-                .peek(aktørInfo -> cacheIdentTilAktørId.put(aktørInfo.getElement1(), aktørInfo.getElement2()))
-                .map(Tuple::getElement2)
+            personIdentIkkeICache.isEmpty() ?
+                empty()
+                :
+                hentBolkMedAktørId(personIdentIkkeICache)
+                    .peek(aktørInfo -> cacheIdentTilAktørId.put(aktørInfo.getElement1(), aktørInfo.getElement2()))
+                    .map(Tuple::getElement2)
         )
             .collect(toSet());
     }
