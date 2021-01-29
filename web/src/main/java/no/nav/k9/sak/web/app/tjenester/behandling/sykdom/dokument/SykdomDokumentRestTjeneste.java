@@ -5,6 +5,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -45,6 +46,8 @@ public class SykdomDokumentRestTjeneste {
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
     private static final String DOKUMENT_NY = "/";
+    private static final String SYKDOM_INNLEGGELSE = "/innleggelse/";
+    public static final String SYKDOM_INNLEGGELSE_PATH = BASE_PATH + SYKDOM_INNLEGGELSE;
     public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
@@ -65,6 +68,50 @@ public class SykdomDokumentRestTjeneste {
         this.sykdomDokumentRepository = sykdomDokumentRepository;
     }
 
+    @GET
+    @Path(SYKDOM_INNLEGGELSE)
+    @Operation(description = "Henter alle perioder den pleietrengende er innlagt på sykehus og liknende.",
+        summary = "Henter alle perioder den pleietrengende er innlagt på sykehus og liknende.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomInnleggelse.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public SykdomInnleggelse hentSykdomInnleggelse(
+            @NotNull @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+        
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        
+        // TODO: Mapping av sykdominnleggelse:
+        return new SykdomInnleggelse(behandling.getUuid(), "0", Collections.emptyList());
+    }
+    
+    @POST
+    @Path(SYKDOM_INNLEGGELSE)
+    @Operation(description = "Oppdaterer perioder den pleietrengende er innlagt på sykehus og liknende.",
+        summary = "Oppdaterer perioder den pleietrengende er innlagt på sykehus og liknende.",
+        tags = "sykdom",
+        responses = {
+                @ApiResponse(responseCode = "201",
+                        description = "Dokumentet har blitt opprettet.")
+        })
+    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    public void oppdaterSykdomInnleggelse(
+            @Parameter
+            @NotNull
+            @Valid 
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            SykdomInnleggelse sykdomInnleggelse) {
+        
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
+        // TODO: Mapping av sykdominnleggelse:
+    }
     
     @GET
     @Path(DOKUMENT_OVERSIKT)
