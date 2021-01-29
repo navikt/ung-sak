@@ -15,12 +15,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SykdomInnleggelse {
+public class SykdomDiagnosekoderDto {
 
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
@@ -36,28 +35,28 @@ public class SykdomInnleggelse {
     @Valid
     private String versjon;
     
-    @JsonProperty(value = "perioder")
+    @JsonProperty(value = "diagnosekoder")
     @Size(max = 1000)
     @Valid
-    private List<Periode> perioder = new ArrayList<>();
+    private List<SykdomDiagnosekodeDto> diagnosekoder = new ArrayList<>();
     
     
-    public SykdomInnleggelse() {
+    public SykdomDiagnosekoderDto() {
         
     }
     
-    public SykdomInnleggelse(String behandlingUuid) {
+    public SykdomDiagnosekoderDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
     
-    public SykdomInnleggelse(UUID behandlingUuid) {
+    public SykdomDiagnosekoderDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
     
-    public SykdomInnleggelse(UUID behandlingUuid, String versjon, List<Periode> perioder) {
+    public SykdomDiagnosekoderDto(UUID behandlingUuid, String versjon, List<SykdomDiagnosekodeDto> diagnosekoder) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
-        this.perioder = perioder;
+        this.diagnosekoder = diagnosekoder;
     }
     
     
@@ -70,7 +69,7 @@ public class SykdomInnleggelse {
         return versjon;
     }
     
-    public List<Periode> getPerioder() {
-        return perioder;
+    public List<SykdomDiagnosekodeDto> getDiagnosekoder() {
+        return diagnosekoder;
     }
 }

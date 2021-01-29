@@ -48,6 +48,8 @@ public class SykdomDokumentRestTjeneste {
     private static final String DOKUMENT_NY = "/";
     private static final String SYKDOM_INNLEGGELSE = "/innleggelse/";
     public static final String SYKDOM_INNLEGGELSE_PATH = BASE_PATH + SYKDOM_INNLEGGELSE;
+    private static final String DIAGNOSEKODER = "/diagnosekoder/";
+    public static final String DIAGNOSEKODER_PATH = BASE_PATH + DIAGNOSEKODER;
     public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
@@ -77,10 +79,10 @@ public class SykdomDokumentRestTjeneste {
             @ApiResponse(responseCode = "200",
                 description = "",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SykdomInnleggelse.class)))
+                    schema = @Schema(implementation = SykdomInnleggelseDto.class)))
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public SykdomInnleggelse hentSykdomInnleggelse(
+    public SykdomInnleggelseDto hentSykdomInnleggelse(
             @NotNull @QueryParam(BehandlingUuidDto.NAME)
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
@@ -89,7 +91,7 @@ public class SykdomDokumentRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         
         // TODO: Mapping av sykdominnleggelse:
-        return new SykdomInnleggelse(behandling.getUuid(), "0", Collections.emptyList());
+        return new SykdomInnleggelseDto(behandling.getUuid(), "0", Collections.emptyList());
     }
     
     @POST
@@ -107,10 +109,55 @@ public class SykdomDokumentRestTjeneste {
             @NotNull
             @Valid 
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            SykdomInnleggelse sykdomInnleggelse) {
+            SykdomInnleggelseDto sykdomInnleggelse) {
         
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
         // TODO: Mapping av sykdominnleggelse:
+    }
+    
+    @GET
+    @Path(DIAGNOSEKODER)
+    @Operation(description = "Henter alle registrerte diagnosekoder på den pleietrengende.",
+        summary = "Henter alle registrerte diagnosekoder på den pleietrengende..",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomDiagnosekoderDto.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public SykdomDiagnosekoderDto hentDiagnosekoder(
+            @NotNull @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+        
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        
+        // TODO: Mapping av diagnosekoder:
+        return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.emptyList());
+    }
+    
+    @POST
+    @Path(DIAGNOSEKODER)
+    @Operation(description = "Oppdaterer diagnosekoder på den pleietrengende.",
+        summary = "Oppdaterer diagnosekoder på den pleietrengende.",
+        tags = "sykdom",
+        responses = {
+                @ApiResponse(responseCode = "201",
+                        description = "Dokumentet har blitt opprettet.")
+        })
+    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    public void oppdaterDiagnosekoder(
+            @Parameter
+            @NotNull
+            @Valid 
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            SykdomDiagnosekoderDto sykdomDiagnosekoder) {
+        
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoder.getBehandlingUuid()).orElseThrow();
+        // TODO: Mapping av diagnosekoder:
     }
     
     @GET
