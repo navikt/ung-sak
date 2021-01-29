@@ -33,6 +33,22 @@ public class SykdomGrunnlag {
     )
     private List<SykdomVurderingVersjon> vurderinger = new ArrayList<>();
 
+    @OneToMany()
+    @JoinTable(
+        name="SYKDOM_GRUNNLAG_INNLEGGELSE",
+        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
+        inverseJoinColumns = @JoinColumn( name="SYKDOM_INNLEGGELSE_ID")
+    )
+    private List<SykdomInnleggelse> innleggelser = new ArrayList<>();
+
+    @OneToMany()
+    @JoinTable(
+        name="SYKDOM_GRUNNLAG_DIAGNOSEKODER",
+        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
+        inverseJoinColumns = @JoinColumn( name="SYKDOM_DIAGNOSEKODER_ID")
+    )
+    private List<SykdomDiagnosekoder> diagnosekoder = new ArrayList<>();
+
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
     private String opprettetAv;

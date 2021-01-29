@@ -41,7 +41,6 @@ public class SykdomVurderingVersjon implements Comparable<SykdomVurderingVersjon
     @Column(name = "RESULTAT", nullable = false)
     private Resultat resultat;
 
-    @Version //TODO: ?
     @Column(name = "VERSJON", nullable = false)
     private Long versjon;
 
@@ -160,7 +159,7 @@ public class SykdomVurderingVersjon implements Comparable<SykdomVurderingVersjon
     public List<SykdomVurderingPeriode> getPerioder() {
         return perioder;
     }
-    
+
     @Override
     public int compareTo(SykdomVurderingVersjon v2) {
         return getVersjon().compareTo(v2.getVersjon());

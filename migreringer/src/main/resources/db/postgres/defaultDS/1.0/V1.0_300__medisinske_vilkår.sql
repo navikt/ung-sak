@@ -223,14 +223,14 @@ create sequence if not exists SEQ_SYKDOM_INNLEGGELSE increment by 5 minvalue 100
 create table if not exists SYKDOM_INNLEGGELSE_PERIODE
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
-    SYKDOM_INNLEGGELSE          BIGINT                      NOT NULL,
+    SYKDOM_INNLEGGELSE_ID          BIGINT                      NOT NULL,
     FOM             DATE                                NOT NULL,
     TOM             DATE                                NOT NULL,
 
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINt FK_SYKDOM_INNLEGGELSE_PERIODE_01
-        FOREIGN KEY(SYKDOM_INNLEGGELSE) REFERENCES SYKDOM_INNLEGGELSE(ID)
+        FOREIGN KEY(SYKDOM_INNLEGGELSE_ID) REFERENCES SYKDOM_INNLEGGELSE(ID)
 );
 create sequence if not exists SEQ_SYKDOM_INNLEGGELSE_PERIODE increment by 5 minvalue 1000000;
 
