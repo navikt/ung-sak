@@ -1,17 +1,22 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
@@ -51,7 +56,23 @@ class RepositoryTestTidslinje {
 
         LocalDateTimeline<HashSet<Saksnummer>> timeline = repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør);
 
-        timeline.stream().count();
+        assertThat(timeline.stream().count()).isEqualTo(3);
 
+        List<LocalDateSegment<HashSet<Saksnummer>>> segments = timeline.stream().collect(Collectors.toList());
+
+        LocalDateSegment<HashSet<Saksnummer>> segment = segments.get(0);
+        assertThat(segment.getFom()).isEqualTo(LocalDate.of(2021, 1, 1).toString());
+        assertThat(segment.getTom()).isEqualTo(LocalDate.of(2021, 1, 10).toString());
+        assertThat(segment.getValue().containsAll(Arrays.asList(s1, s2)));
+
+        segment = segments.get(1);
+        assertThat(segment.getFom()).isEqualTo(LocalDate.of(2021, 1, 11).toString());
+        assertThat(segment.getTom()).isEqualTo(LocalDate.of(2021, 1, 15).toString());
+        assertThat(segment.getValue().containsAll(Arrays.asList(s1)));
+
+        segment = segments.get(2);
+        assertThat(segment.getFom()).isEqualTo(LocalDate.of(2021, 1, 16).toString());
+        assertThat(segment.getTom()).isEqualTo(LocalDate.of(2021, 1, 20).toString());
+        assertThat(segment.getValue().containsAll(Arrays.asList(s1, s2)));
     }
 }

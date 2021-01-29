@@ -26,9 +26,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @ApplicationScoped
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderinger, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
-
-        LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje = vurderinger;
+    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
 
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
                 behandlingUuid, saksnummer, saksnummerForPerioder, vurderingerTidslinje
