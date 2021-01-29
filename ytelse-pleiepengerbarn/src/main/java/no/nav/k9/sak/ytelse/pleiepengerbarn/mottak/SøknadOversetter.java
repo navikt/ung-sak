@@ -57,7 +57,7 @@ class SøknadOversetter {
 
         PleiepengerSyktBarn ytelse = søknad.getYtelse();
         var maksSøknadsperiode = ytelse.getSøknadsperiode();
-        
+
         // TODO:
         final boolean elektroniskSøknad = false;
         LocalDate mottattDato = søknad.getMottattDato().toLocalDate();
@@ -85,7 +85,7 @@ class SøknadOversetter {
         var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
-        var maksPeriode = mapUttakGrunnlag.getOppgittUttak().getMaksPeriode();
+        var maksPeriode = mapUttakGrunnlag.getOppgittSøknadsperioder().getMaksPeriode();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 

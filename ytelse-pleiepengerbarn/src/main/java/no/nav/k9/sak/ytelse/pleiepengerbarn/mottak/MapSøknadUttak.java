@@ -25,12 +25,14 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.LovbestemtFerie;
-import no.nav.k9.søknad.felles.aktivitet.ArbeidAktivitet;
 import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.felles.aktivitet.Frilanser;
 import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
+import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
+import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
+import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning;
 
@@ -47,9 +49,9 @@ class MapSøknadUttak {
     UttakGrunnlag getUttakGrunnlag(Long behandlingId) {
         var ferie = mapFerie(ytelse.getLovbestemtFerie());
         var søknadsperioder = mapSøknadsperioder(ytelse.getUttak().getPerioder().keySet());
-        var oppgittUttak = mapOppgittUttak(ytelse.getArbeidAktivitet()); // TODO
+        var oppgittArbeidstid = mapOppgittArbeidstid(ytelse.getArbeidstid()); // TODO FUNKER IKKE
         var tilsynsordning = mapOppgittTilsynsordning(ytelse.getTilsynsordning());
-        return new UttakGrunnlag(behandlingId, oppgittUttak, søknadsperioder, ferie, tilsynsordning);
+        return new UttakGrunnlag(behandlingId, oppgittArbeidstid, søknadsperioder, ferie, tilsynsordning);
     }
 
     private OppgittTilsynsordning mapOppgittTilsynsordning(Tilsynsordning input) {
@@ -68,20 +70,20 @@ class MapSøknadUttak {
         return new TilsynsordningPeriode(periode.getFraOgMed(), periode.getTilOgMed(), tilsynPeriodeInfo == null ? Duration.ofHours(0) : tilsynPeriodeInfo.getEtablertTilsynTimerPerDag());
     }
 
-    private UttakAktivitet mapOppgittUttak(ArbeidAktivitet arbeid) {
-        if (arbeid == null) {
+    private UttakAktivitet mapOppgittArbeidstid(Arbeidstid arbeidstid) {
+        if (arbeidstid == null) {
             return null;
         }
-        var mappedArbeid = nullableList(arbeid.getArbeidstaker()).stream()
+        var mappedUttak = nullableList(arbeidstid.getArbeidstakerList()).stream()
             .flatMap(a -> lagUttakAktivitetPeriode(a).stream()).collect(Collectors.toList());
-        var mappedFrilanser = lagUttakAktivitetPeriode(arbeid.getFrilanser());
-        var mappedSelvstendigNæringsdrivende = nullableList(arbeid.getSelvstendigNæringsdrivende()).stream()
-            .flatMap(sn -> lagUttakAktivitetPeriode(sn).stream()).collect(Collectors.toList());
+//        var mappedFrilanser = lagUttakAktivitetPeriode(arbeid.getFrilanser());
+//        var mappedSelvstendigNæringsdrivende = nullableList(arbeid.getSelvstendigNæringsdrivende()).stream()
+//            .flatMap(sn -> lagUttakAktivitetPeriode(sn).stream()).collect(Collectors.toList());
 
         var mappedPerioder = new ArrayList<UttakAktivitetPeriode>();
-        mappedPerioder.addAll(mappedArbeid);
-        mappedPerioder.addAll(mappedFrilanser == null ? List.of() : List.of(mappedFrilanser));
-        mappedPerioder.addAll(mappedSelvstendigNæringsdrivende);
+        mappedPerioder.addAll(mappedUttak);
+//        mappedPerioder.addAll(mappedFrilanser == null ? List.of() : List.of(mappedFrilanser));
+//        mappedPerioder.addAll(mappedSelvstendigNæringsdrivende);
         if (mappedPerioder.isEmpty()) {
             return null;
         }
