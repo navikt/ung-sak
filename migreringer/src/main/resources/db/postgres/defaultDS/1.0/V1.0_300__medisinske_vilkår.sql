@@ -205,3 +205,57 @@ create table if not exists SYKDOM_REVURDERING_PERIODE
         FOREIGN KEY(SYKDOM_GRUNNLAG_ID) REFERENCES SYKDOM_GRUNNLAG(ID)
 );
 create sequence if not exists SEQ_SYKDOM_REVURDERING_PERIODE increment by 5 minvalue 1000000;
+
+create table if not exists SYKDOM_INNLEGGELSE
+(
+    ID            BIGINT                                 NOT NULL PRIMARY KEY,
+    SYKDOM_VURDERINGER_ID          BIGINT                      NOT NULL,
+    VERSJON                 BIGINT  DEFAULT 0           NOT NULL,
+
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINt FK_SYKDOM_INNLEGGELSE_01
+        FOREIGN KEY(SYKDOM_VURDERINGER_ID) REFERENCES SYKDOM_VURDERINGER(ID)
+);
+create sequence if not exists SEQ_SYKDOM_INNLEGGELSE increment by 5 minvalue 1000000;
+
+
+create table if not exists SYKDOM_INNLEGGELSE_PERIODE
+(
+    ID            BIGINT                                 NOT NULL PRIMARY KEY,
+    SYKDOM_INNLEGGELSE          BIGINT                      NOT NULL,
+    FOM             DATE                                NOT NULL,
+    TOM             DATE                                NOT NULL,
+
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINt FK_SYKDOM_INNLEGGELSE_PERIODE_01
+        FOREIGN KEY(SYKDOM_INNLEGGELSE) REFERENCES SYKDOM_INNLEGGELSE(ID)
+);
+create sequence if not exists SEQ_SYKDOM_INNLEGGELSE_PERIODE increment by 5 minvalue 1000000;
+
+create table if not exists SYKDOM_DIAGNOSEKODER
+(
+    ID            BIGINT                                 NOT NULL PRIMARY KEY,
+    SYKDOM_VURDERINGER_ID          BIGINT                      NOT NULL,
+    VERSJON                 BIGINT  DEFAULT 0           NOT NULL,
+
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINt FK_SYKDOM_DIAGNOSEKODER_01
+        FOREIGN KEY(SYKDOM_VURDERINGER_ID) REFERENCES SYKDOM_VURDERINGER(ID)
+);
+create sequence if not exists SEQ_SYKDOM_DIAGNOSEKODER increment by 5 minvalue 1000000;
+
+create table if not exists SYKDOM_DIAGNOSEKODE
+(
+    ID            BIGINT                                 NOT NULL PRIMARY KEY,
+    SYKDOM_DIAGNOSEKODER          BIGINT                      NOT NULL,
+    DIAGNOSEKODE                  VARCHAR(20)            NOT NULL,
+
+    OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
+    OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINt FK_SYKDOM_DIAGNOSEKODE_01
+        FOREIGN KEY(SYKDOM_DIAGNOSEKODER) REFERENCES SYKDOM_DIAGNOSEKODER(ID)
+);
+create sequence if not exists SEQ_SYKDOM_DIAGNOSEKODE increment by 5 minvalue 1000000;
