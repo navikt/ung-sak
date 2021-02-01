@@ -92,18 +92,13 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         Long behandlingId = behandling.getId();
         dokumentValidator.validerDokumenter(Long.toString(behandlingId), dokumenter);
 
-        var søknader = søknadParser.parseSøknader(dokumenter);
-        for (var dokument : dokumenter) {
-            var søknad = søknader.get(0);
+        for (MottattDokument dokument : dokumenter) {
+            Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
-        }
-
-        for (Søknad søknad : søknader) {
             persister(søknad, behandling);
         }
-
         lagreOppgittOpptjeningFraSøknader(behandlingId);
     }
 

@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import static no.nav.vedtak.feil.LogLevel.WARN;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -13,16 +11,11 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.vedtak.exception.VLException;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
@@ -42,7 +35,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     @Override
     public void validerDokumenter(String behandlingId, Collection<MottattDokument> meldinger) {
         validerHarInnhold(meldinger);
-        List<Søknad> søknader = søknadParser.parseSøknader(meldinger);
+        var søknader = søknadParser.parseSøknader(meldinger);
         for (Søknad søknad : søknader) {
             validerInnhold(søknad);
         }
@@ -94,13 +87,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     }
 
     private static VLException valideringsfeil(String tekst) {
-        return SøknadUtbetalingOmsorgspengerValideringFeil.FACTORY.valideringsfeilSøknadUtbetalingOmsorgspenger(tekst).toException();
+        return SøknadUtbetalingOmsorgspengerFeil.FACTORY.valideringsfeilSøknadUtbetalingOmsorgspenger(tekst).toException();
     }
 
-    interface SøknadUtbetalingOmsorgspengerValideringFeil extends DeklarerteFeil {
-        SøknadUtbetalingOmsorgspengerValideringFeil FACTORY = FeilFactory.create(SøknadUtbetalingOmsorgspengerValideringFeil.class);
-
-        @TekniskFeil(feilkode = "FP-642746", feilmelding = "Feil i søknad om utbetaling av omsorgspenger: %s", logLevel = WARN, exceptionClass = DokumentValideringException.class)
-        Feil valideringsfeilSøknadUtbetalingOmsorgspenger(String detaljer);
-    }
 }

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -66,12 +67,12 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
 
         mottatteDokumentRepository.oppdaterStatus(ubehandledeDokumenter, DokumentStatus.GYLDIG);
 
-        List<Søknad> søknader = søknadParser.parseSøknader(ubehandledeDokumenter);
+        Collection<Søknad> søknader = søknadParser.parseSøknader(ubehandledeDokumenter);
         if (søknader.size() != 1) {
             //TODO skal egentlig støtte dette
             throw new UnsupportedOperationException("Støtter ikke å behandle mer enn 1 søknad om gangen, fikk: " + søknader.size());
         }
-        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, ZonedDateTime.now(), søknader.get(0).getYtelse());
+        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, ZonedDateTime.now(), søknader.iterator().next().getYtelse());
     }
 
 }
