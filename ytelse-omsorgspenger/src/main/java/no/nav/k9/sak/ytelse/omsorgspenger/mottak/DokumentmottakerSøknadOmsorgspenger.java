@@ -5,8 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -37,7 +35,6 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
@@ -134,7 +131,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         lagreSøknad(behandlingId, søknad, søknadInnhold);
 
         // Medlemskapsinfo
-        Bosteder bosteder = null; // TODO: ikke eksponert i kontrakt
+        Bosteder bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
         lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
 
         // Uttaksperioder og oppgitt opptjening
@@ -142,18 +139,15 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     }
 
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
-        var søknadsperioder = new TreeSet<>(søknadInnhold.getFraværsperioder() == null ? Collections.emptySortedSet() : søknadInnhold.getFraværsperioder().stream().map(FraværPeriode::getPeriode).sorted().collect(Collectors.toList()));
-        var maksSøknadsperiode = søknadsperioder.isEmpty() ? null : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperioder.first().getFraOgMed(), søknadsperioder.last().getTilOgMed());
-
+        var søknadsperiode = søknadInnhold.getSøknadsperiode();
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(maksSøknadsperiode)
+            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed()))
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
-            .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL))
-            //.medSpråkkode(getSpraakValg(ytelse.språk)) // TODO: Er ikke språk støttet i søknad lenger?
+            .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
@@ -185,21 +179,15 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
-
-        // TODO: Hva skal vi ha som "oppholdNå"?
-        // Boolean iNorgeVedFoedselstidspunkt = medlemskap.isINorgeVedFoedselstidspunkt();
-        // oppgittTilknytningBuilder.medOppholdNå(Boolean.TRUE.equals(iNorgeVedFoedselstidspunkt));
-
+        // TODO: Hva skal vi ha som "oppholdNå"? Er dette relevant for k9 eller bruker vi en annen tolkning for medlemskap?
+        // TODO kontrakt har utenlandsopphold, skal dette benyttes?
         if (bosteder != null) {
             bosteder.perioder.forEach((periode, opphold) -> {
-                // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
-                // boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
                     .medLand(finnLandkode(opphold.land.landkode))
                     .medPeriode(
                         Objects.requireNonNull(periode.getFraOgMed()),
                         Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
-                    // .erTidligereOpphold(tidligereOpphold)
                     .build());
             });
         }

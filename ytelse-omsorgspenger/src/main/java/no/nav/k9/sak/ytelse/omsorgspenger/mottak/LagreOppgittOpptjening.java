@@ -24,10 +24,6 @@ public class LagreOppgittOpptjening {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingRepository behandlingRepository;
 
-    LagreOppgittOpptjening() {
-        // for proxy
-    }
-
     @Inject
     LagreOppgittOpptjening(BehandlingRepository behandlingRepository,
                            InntektArbeidYtelseTjeneste iayTjeneste) {
@@ -53,7 +49,7 @@ public class LagreOppgittOpptjening {
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
-                .map(akt -> mapEgenNæring(akt))
+                .map(this::mapEgenNæring)
                 .collect(Collectors.toList());
             opptjeningBuilder.leggTilEgneNæringer(egenNæringBuilders);
 
@@ -69,7 +65,6 @@ public class LagreOppgittOpptjening {
         OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
 
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
-        // TODO: håndtere korreksjoner senere?  vil nå bare akkumulere innrapportert.
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
         if (sisteBehandling.isPresent()) {
             Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = sisteBehandling.isPresent() ? iayTjeneste.finnGrunnlag(sisteBehandling.get().getId()) : Optional.empty();
