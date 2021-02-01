@@ -261,9 +261,6 @@ public class PersoninfoTjeneste {
                     if (!pdlRelasjon.getRelasjonsrolle().equals(tpsRel.getRelasjonsrolle())) {
                         return " familierelasjon-relasjonsrolle-mismatch ";
                     }
-                    if (pdlRelasjon.getHarSammeBosted() != tpsRel.getHarSammeBosted()) {
-                        return " familierelasjon-sammeBosted-mismatch ";
-                    }
                     return "";
                 }
             )
