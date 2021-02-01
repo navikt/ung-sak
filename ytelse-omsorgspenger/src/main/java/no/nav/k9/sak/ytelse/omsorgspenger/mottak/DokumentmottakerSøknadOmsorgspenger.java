@@ -91,7 +91,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     }
 
     @Override
-    public void mottaDokument(Collection<MottattDokument> dokumenter, Behandling behandling) {
+    public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
         Long behandlingId = behandling.getId();
         dokumentValidator.validerDokumenter(Long.toString(behandlingId), dokumenter);
 

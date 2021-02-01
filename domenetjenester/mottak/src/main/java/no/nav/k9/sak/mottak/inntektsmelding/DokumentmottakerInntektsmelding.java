@@ -41,7 +41,7 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
     }
 
     @Override
-    public void mottaDokument(Collection<MottattDokument> mottattDokument, Behandling behandling) {
+    public void lagreDokumentinnhold(Collection<MottattDokument> mottattDokument, Behandling behandling) {
         mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, mottattDokument);
         mottattDokument.forEach(m -> dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), m.getJournalpostId(), m.getType()));
     }

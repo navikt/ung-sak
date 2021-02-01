@@ -8,7 +8,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public interface Dokumentmottaker {
 
-    void mottaDokument(Collection<MottattDokument> mottattDokument, Behandling behandling);
+    void lagreDokumentinnhold(Collection<MottattDokument> mottattDokument, Behandling behandling);
 
     BehandlingÅrsakType getBehandlingÅrsakType();
 }

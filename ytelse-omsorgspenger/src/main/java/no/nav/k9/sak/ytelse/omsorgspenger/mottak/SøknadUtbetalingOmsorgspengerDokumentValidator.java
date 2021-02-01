@@ -69,7 +69,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
 
     private void validerIkkeImplementertFunksjonalitet(OmsorgspengerUtbetaling ytelse) {
         if (ytelse.getFosterbarn() != null && !ytelse.getFosterbarn().isEmpty()) {
-            throw new IllegalArgumentException("Fosterbarn er ikke (enda?) støttet i løsningen");
+            throw new IllegalArgumentException("Fosterbarn er ikke støttet i løsningen");
         }
     }
 

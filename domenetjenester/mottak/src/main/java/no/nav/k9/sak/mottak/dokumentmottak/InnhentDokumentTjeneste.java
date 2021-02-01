@@ -97,7 +97,7 @@ public class InnhentDokumentTjeneste {
 
     public void lagreDokumenter(Collection<MottattDokument> mottattDokument, Behandling behandling) {
         Dokumentmottaker dokumentmottaker = getDokumentmottaker(mottattDokument, behandling.getFagsak());
-        dokumentmottaker.mottaDokument(mottattDokument, behandling);
+        dokumentmottaker.lagreDokumentinnhold(mottattDokument, behandling);
     }
 
     private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
