@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -65,14 +65,20 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
             return;
         }
 
+        //kan sette til GYLDIG, siden ugyldige blir plukket bort tidligere i prosessen
         mottatteDokumentRepository.oppdaterStatus(ubehandledeDokumenter, DokumentStatus.GYLDIG);
 
-        Collection<Søknad> søknader = søknadParser.parseSøknader(ubehandledeDokumenter);
-        if (søknader.size() != 1) {
-            //TODO skal egentlig støtte dette
-            throw new UnsupportedOperationException("Støtter ikke å behandle mer enn 1 søknad om gangen, fikk: " + søknader.size());
+        MottattDokument sistMottatteDokument = ubehandledeDokumenter.stream()
+            .max(Comparator.comparing(MottattDokument::getMottattTidspunkt)).orElseThrow();
+
+        for (MottattDokument dokument : ubehandledeDokumenter) {
+            if (dokument != sistMottatteDokument) {
+                log.info("Sender ikke oppgitt opptjening fra søknaden med journalpostId={}, sender heller oppgitt opptjening fra senere mottatt søknad.", dokument.getJournalpostId() != null ? dokument.getJournalpostId().getVerdi() : null);
+            }
         }
-        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, ZonedDateTime.now(), søknader.iterator().next().getYtelse());
+
+        Søknad sisteMottatteSøknad = søknadParser.parseSøknad(sistMottatteDokument);
+        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, ZonedDateTime.now(), sisteMottatteSøknad.getYtelse());
     }
 
 }
