@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -168,10 +167,7 @@ public class TpsAdapterImplTest {
         final String addresse = "Veien 17";
 
         TpsOversetter tpsOversetterMock = mock(TpsOversetter.class);
-        Adresseinfo.Builder builder = new Adresseinfo.Builder(AdresseType.BOSTEDSADRESSE,
-            new PersonIdent("31018143212"),
-            "Tjoms",
-            PersonstatusType.BOSA);
+        Adresseinfo.Builder builder = new Adresseinfo.Builder(AdresseType.BOSTEDSADRESSE);
         Adresseinfo adresseinfoExpected = builder.medAdresselinje1(addresse).build();
 
         when(tpsOversetterMock.tilAdresseInfo(eq(person))).thenReturn(adresseinfoExpected);

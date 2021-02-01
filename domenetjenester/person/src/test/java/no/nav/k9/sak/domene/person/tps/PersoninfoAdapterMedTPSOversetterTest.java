@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -253,7 +252,7 @@ class PersoninfoAdapterMedTPSOversetterTest {
     }
 
     private Adresseinfo.Builder builderWithDefault(AdresseType postadresse) {
-        return new Adresseinfo.Builder(postadresse, personIdent, "Bingo Bango", PersonstatusType.BOSA);
+        return new Adresseinfo.Builder(postadresse);
     }
 
     private Adresseinfo lagReferanseAdresseinfoStedsAdresseNorge() {
@@ -273,7 +272,6 @@ class PersoninfoAdapterMedTPSOversetterTest {
     }
 
     private void assertAdresse(Adresseinfo adresseinfo, Adresseinfo adresseinfo2) {
-        assertEquals(adresseinfo.getMottakerNavn(), adresseinfo2.getMottakerNavn());
         assertEquals(adresseinfo.getAdresselinje1(), adresseinfo2.getAdresselinje1());
         assertEquals(adresseinfo.getAdresselinje2(), adresseinfo2.getAdresselinje2());
         assertEquals(adresseinfo.getAdresselinje3(), adresseinfo2.getAdresselinje3());
