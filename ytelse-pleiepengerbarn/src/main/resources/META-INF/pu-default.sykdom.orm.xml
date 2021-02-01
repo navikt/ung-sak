@@ -17,6 +17,12 @@
     <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_VURDERING" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_VURDERING" />
     <sequence-generator name="SEQ_SYKDOM_SOEKT_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_SOEKT_PERIODE" />
     <sequence-generator name="SEQ_SYKDOM_REVURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_REVURDERING_PERIODE" />
+    <sequence-generator name="SEQ_SYKDOM_INNLEGGELSE" allocation-size="5" sequence-name="SEQ_SYKDOM_INNLEGGELSE" />
+    <sequence-generator name="SEQ_SYKDOM_INNLEGGELSE_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_INNLEGGELSE_PERIODE" />
+    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_INNLEGGELSE" />
+    <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODER" />
+    <sequence-generator name="SEQ_SYKDOM_DIAGNOSEKODE" allocation-size="5" sequence-name="SEQ_SYKDOM_DIAGNOSEKODE" />
+    <sequence-generator name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG_DIAGNOSEKODER" />   
     
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderinger" />
