@@ -46,6 +46,7 @@ public class LagreOppgittOpptjening {
             throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
         }
         if (søknad.getAktivitet().getArbeidstaker() != null){
+            // TODO: arbeidstaker
             throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
         }
 
