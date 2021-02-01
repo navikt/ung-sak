@@ -1,8 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -11,16 +9,13 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 @Dependent
@@ -50,6 +45,9 @@ public class LagreOppgittOpptjening {
             // TODO: Frilanser
             throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
         }
+        if (søknad.getAktivitet().getArbeidstaker() != null){
+            throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
+        }
 
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
@@ -59,15 +57,6 @@ public class LagreOppgittOpptjening {
             opptjeningBuilder.leggTilEgneNæringer(egenNæringBuilders);
 
             erNyeOpplysninger |= !snAktiviteter.isEmpty();
-        }
-
-        if (søknad.getAktivitet().getArbeidstaker() != null) {
-            List<Arbeidstaker> atAktiviteter = søknad.getAktivitet().getArbeidstaker();
-            atAktiviteter.stream()
-                .map(akt -> mapArbeidsforhold(akt))
-                .forEach(opptjeningBuilder::leggTilOppgittArbeidsforhold);
-
-            erNyeOpplysninger |= !atAktiviteter.isEmpty();
         }
 
         if (erNyeOpplysninger) {
@@ -105,13 +94,4 @@ public class LagreOppgittOpptjening {
         return builder;
     }
 
-    private OppgittArbeidsforholdBuilder mapArbeidsforhold(no.nav.k9.søknad.felles.aktivitet.Arbeidstaker arbeidstaker) {
-        var builder = OppgittArbeidsforholdBuilder.ny();
-        arbeidstaker.perioder.forEach((per, info) -> {
-            builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(per.getFraOgMed(), per.getTilOgMed()));
-            builder.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-            builder.medInntekt(BigDecimal.valueOf(10000)); // TODO: Hvor får vi denne fra? Skal kanskje bare kunne settes av Frisinn? Sjekk ut FP sin løsning. Gjelder bare utenlandske arbeidsforhold?
-        });
-        return builder;
-    }
 }
