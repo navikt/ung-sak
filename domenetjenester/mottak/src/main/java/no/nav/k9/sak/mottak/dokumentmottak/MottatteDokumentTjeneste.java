@@ -84,12 +84,17 @@ public class MottatteDokumentTjeneste {
         var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokumenter);
         for (var dokument : dokumenter) {
             // sendte bare ett dokument her, så forventer kun et svar:
+            if (inntektsmeldinger.size() != 1){
+                throw new IllegalStateException("Forventet 1 inntektsmelding, men har " + inntektsmeldinger.size());
+            }
             InntektsmeldingBuilder im = inntektsmeldinger.get(0);
             var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
+
+            //FIXME? Frode, denne endrer status fra BEHANDLER til MOTTATT, vil hindre LagreMottattInnteksmeldingerTask i å bruke 'NY' måte å oppdage dokumenter på
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);// setter status MOTTATT; oppdatres senere til GYLDIG når er lagret i Abakus
         }
 

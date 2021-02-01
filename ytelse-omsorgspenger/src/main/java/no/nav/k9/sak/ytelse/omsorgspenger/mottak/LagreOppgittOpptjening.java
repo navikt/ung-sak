@@ -48,7 +48,7 @@ public class LagreOppgittOpptjening {
         boolean erNyeOpplysninger = false;
         if (søknad.getAktivitet().getFrilanser() != null) {
             // TODO: Frilanser
-            throw new UnsupportedOperationException("Støtter ikke frisinn for OMS");
+            throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
         }
 
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {

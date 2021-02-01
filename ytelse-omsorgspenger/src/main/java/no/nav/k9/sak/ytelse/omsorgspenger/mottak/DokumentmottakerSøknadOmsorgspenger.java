@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -28,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
@@ -37,12 +35,15 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
@@ -53,12 +54,14 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
-    private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private ProsessTaskRepository prosessTaskRepository;
+
     private LagreOppgittOpptjening lagreOppgittOpptjening;
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
+
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
 
@@ -69,7 +72,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
                                         UttakRepository uttakRepository,
-                                        TpsTjeneste tpsTjeneste, BehandlingRepository behandlingRepository,
+                                        BehandlingRepository behandlingRepository,
+                                        ProsessTaskRepository prosessTaskRepository,
                                         LagreOppgittOpptjening lagreOppgittOpptjening,
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
@@ -78,8 +82,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.uttakRepository = uttakRepository;
-        this.tpsTjeneste = tpsTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.prosessTaskRepository = prosessTaskRepository;
         this.lagreOppgittOpptjening = lagreOppgittOpptjening;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -96,14 +100,29 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             var søknad = søknader.get(0);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
-            mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG); //TODO: Heller sette DokumentStatus.MOTTATT? Se kommentar nedenfor
+            mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
         }
-        // TODO (se her, Tore): Mulig at vi må bruke denne på annen side av asynkron lagring? Sammenlign med InntektsmeldingParser
-        var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
 
         for (Søknad søknad : søknader) {
             persister(søknad, behandling);
         }
+
+        lagreOppgittOpptjeningFraSøknader(behandlingId);
+    }
+
+    /**
+     * Lagrer inntektsmeldinger til abakus fra mottatt dokument.
+     */
+    private void lagreOppgittOpptjeningFraSøknader(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        AktørId aktørId = behandling.getAktørId();
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+
+        var enkeltTask = new ProsessTaskData(LagreOppgittOpptjeningFraSøknadTask.TASKTYPE);
+        enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
+        enkeltTask.setSaksnummer(saksnummer.getVerdi());
+        enkeltTask.setCallIdFraEksisterende();
+        prosessTaskRepository.lagre(enkeltTask);
     }
 
     void persister(Søknad søknad, Behandling behandling) {

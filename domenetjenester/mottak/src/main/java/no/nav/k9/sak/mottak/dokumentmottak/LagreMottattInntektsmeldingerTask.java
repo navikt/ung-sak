@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -76,7 +77,7 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
         mottatteDokumenter.addAll(mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG));
 
         // ny - henter alle som er til BEHANDLER
-        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, true, DokumentStatus.BEHANDLER);
+        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.INNTEKTSMELDING,true, DokumentStatus.BEHANDLER);
         mottatteDokumenter.addAll(mottatteDokumentBehandler);
 
         if (mottatteDokumenter.isEmpty()) {
