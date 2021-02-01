@@ -49,7 +49,8 @@ public enum Diskresjonskode implements Kodeverdi {
         String kode = TempAvledeKode.getVerdi(Diskresjonskode.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent Diskresjonskode: " + kode);
+            // Diskresjonskode som ikke anvendes av k9
+            return UDEFINERT;
         }
         return ad;
     }
