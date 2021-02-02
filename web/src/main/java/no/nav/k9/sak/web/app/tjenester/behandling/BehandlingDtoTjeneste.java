@@ -362,10 +362,10 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
                 dto.leggTil(post(SykdomDokumentRestTjeneste.DOKUMENT_PATH, "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandling.getUuid().toString())));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse-endring", uuidQueryParams));
-                dto.leggTil(post(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", new SykdomInnleggelseDto(behandling.getUuid().toString())));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DIAGNOSEKODER_PATH, "sykdom-diagnosekoder-endring", uuidQueryParams));
-                dto.leggTil(post(SykdomDokumentRestTjeneste.DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", new SykdomDiagnosekoderDto(behandling.getUuid().toString())));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
+                dto.leggTil(post(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse-endring", new SykdomInnleggelseDto(behandling.getUuid().toString())));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
+                dto.leggTil(post(SykdomDokumentRestTjeneste.DIAGNOSEKODER_PATH, "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString())));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
                 break;
