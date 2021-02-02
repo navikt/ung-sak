@@ -321,6 +321,10 @@ public class PersoninfoTjeneste {
                 .medFamilierelasjon(familierelasjoner)
                 .medAdresseInfoList(adresser)
                 .build();
+
+            // Kun midlertidig: Legg PDL-adresseinfo på TPS (for å kunne sammenligne i Familierelasjoner)
+            fraTPS.setAddresseInfoListPdl(adresser);
+
             logInnUtOpp(person.getInnflyttingTilNorge(), person.getUtflyttingFraNorge(), person.getOpphold());
             if (erLike(fraPDL, fraTPS)) {
                 LOG.info("K9SAK PDL full personinfo: like svar");

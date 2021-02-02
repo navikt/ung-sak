@@ -61,10 +61,11 @@ public class Familierelasjon {
     }
 
     private boolean utledSammeBosted(Personinfo fra, Personinfo til) {
-        var tilAdresser = til.getAdresseInfoList().stream()
+        // FIXME: Erstatt getAdresseInfoListPdl() ned getAdresseInfoList()  når TPS utfases
+        var tilAdresser = til.getAdresseInfoListPdl().stream()
             .filter(ad -> AdresseType.BOSTEDSADRESSE.equals(ad.getGjeldendePostadresseType()))
             .collect(Collectors.toList());
-        return fra.getAdresseInfoList().stream()
+        return fra.getAdresseInfoListPdl().stream()
             .filter(a -> AdresseType.BOSTEDSADRESSE.equals(a.getGjeldendePostadresseType()))
             .anyMatch(adr1 -> tilAdresser.stream().anyMatch(adr2 -> Adresseinfo.likeAdresser(adr1, adr2)));
     }
