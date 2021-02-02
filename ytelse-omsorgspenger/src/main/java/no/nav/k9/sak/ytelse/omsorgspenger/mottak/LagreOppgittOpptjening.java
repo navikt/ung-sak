@@ -38,7 +38,6 @@ public class LagreOppgittOpptjening {
         Long behandlingId = behandling.getId();
         OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling, tidspunkt);
 
-        boolean erNyeOpplysninger = false;
         if (søknad.getAktivitet().getFrilanser() != null) {
             // TODO: Frilanser
             throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
@@ -54,13 +53,8 @@ public class LagreOppgittOpptjening {
                 .map(this::mapEgenNæring)
                 .collect(Collectors.toList());
             opptjeningBuilder.leggTilEgneNæringer(egenNæringBuilders);
-
-            erNyeOpplysninger |= !snAktiviteter.isEmpty();
         }
-
-        if (erNyeOpplysninger) {
-            iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
-        }
+        iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
     }
 
     private OppgittOpptjeningBuilder initOpptjeningBuilder(Behandling behandling, ZonedDateTime tidspunkt) {
