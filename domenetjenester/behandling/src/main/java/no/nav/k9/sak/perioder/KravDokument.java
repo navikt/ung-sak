@@ -21,6 +21,10 @@ public class KravDokument implements Comparable<KravDokument> {
         return journalpostId;
     }
 
+    public KravDokumentType getType() {
+        return type;
+    }
+
     public LocalDateTime getInnsendingsTidspunkt() {
         return innsendingsTidspunkt;
     }

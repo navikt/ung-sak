@@ -14,7 +14,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 @ApplicationScoped
-@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef
 @FagsakYtelseTypeRef
 public class DefaultKompletthetssjekkerInntektsmelding implements KompletthetssjekkerInntektsmelding {
 
@@ -45,8 +45,8 @@ public class DefaultKompletthetssjekkerInntektsmelding implements Kompletthetssj
         return doUtledManglendeInntektsmeldinger(ref, false);
     }
 
-    private List<ManglendeVedlegg> doUtledManglendeInntektsmeldinger(BehandlingReferanse ref, boolean brukArkiv) {
-        List<ManglendeVedlegg> manglendeVedlegg = (brukArkiv ? inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(ref, false)
+    private List<ManglendeVedlegg> doUtledManglendeInntektsmeldinger(BehandlingReferanse ref, boolean spørAAregDirekte) {
+        List<ManglendeVedlegg> manglendeVedlegg = (spørAAregDirekte ? inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(ref, false)
             : inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(ref, false))
             .keySet()
             .stream()

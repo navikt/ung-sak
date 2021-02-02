@@ -32,10 +32,10 @@ import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
-@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
-public class KompletthetsjekkerImpl implements Kompletthetsjekker {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KompletthetsjekkerImpl.class);
+public class PsbKompletthetsjekker implements Kompletthetsjekker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PsbKompletthetsjekker.class);
 
     private static final Integer TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER = 3;
     private static final Integer VENTEFRIST_ETTER_MOTATT_DATO_UKER = 1;
@@ -47,16 +47,16 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     private KompletthetsjekkerFelles fellesUtil;
     private SøknadRepository søknadRepository;
 
-    KompletthetsjekkerImpl() {
+    PsbKompletthetsjekker() {
         // CDI
     }
 
     @Inject
-    public KompletthetsjekkerImpl(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
-                                  @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
-                                  InntektsmeldingTjeneste inntektsmeldingTjeneste,
-                                  KompletthetsjekkerFelles fellesUtil,
-                                  SøknadRepository søknadRepository) {
+    public PsbKompletthetsjekker(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
+                                 @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
+                                 InntektsmeldingTjeneste inntektsmeldingTjeneste,
+                                 KompletthetsjekkerFelles fellesUtil,
+                                 SøknadRepository søknadRepository) {
         this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
@@ -85,10 +85,7 @@ public class KompletthetsjekkerImpl implements Kompletthetsjekker {
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
-        if (forTidligFrist.isPresent()) {
-            return KompletthetResultat.ikkeOppfylt(forTidligFrist.get(), Venteårsak.FOR_TIDLIG_SOKNAD);
-        }
-        return KompletthetResultat.oppfylt();
+        return forTidligFrist.map(localDateTime -> KompletthetResultat.ikkeOppfylt(localDateTime, Venteårsak.FOR_TIDLIG_SOKNAD)).orElseGet(KompletthetResultat::oppfylt);
     }
 
     @Override

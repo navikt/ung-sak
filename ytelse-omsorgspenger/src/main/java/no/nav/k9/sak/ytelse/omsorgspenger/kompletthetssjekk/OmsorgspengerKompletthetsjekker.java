@@ -30,7 +30,7 @@ import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
-@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP")
 public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(OmsorgspengerKompletthetsjekker.class);
@@ -72,10 +72,9 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
-        if (forTidligFrist.isPresent()) {
-            return KompletthetResultat.ikkeOppfylt(forTidligFrist.get(), Venteårsak.FOR_TIDLIG_SOKNAD);
-        }
-        return KompletthetResultat.oppfylt();
+        return forTidligFrist
+            .map(localDateTime -> KompletthetResultat.ikkeOppfylt(localDateTime, Venteårsak.FOR_TIDLIG_SOKNAD))
+            .orElseGet(KompletthetResultat::oppfylt);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref);
         if (!manglendeInntektsmeldinger.isEmpty()) {
-            LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size(), manglendeInntektsmeldinger.size()); // NOSONAR //$NON-NLS-1$
+            LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere mangler.", ref.getBehandlingId(), manglendeInntektsmeldinger.size()); // NOSONAR //$NON-NLS-1$
             Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
             return ventefristManglendeIM
                 .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
