@@ -41,7 +41,7 @@
         <felles.version>3.0.82</felles.version>
 
         <fp-kontrakter.version>5.1-20201223140505-5ac989f</fp-kontrakter.version>
-        <k9format.version>5.1.8</k9format.version>
+        <k9format.version>5.1.10</k9format.version>
     </properties>
 
     <repositories>
@@ -365,16 +365,6 @@
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad-frisinn</artifactId>
                 <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-pleiepenger-barn</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-omsorgspenger-utbetaling</artifactId>
-                <version>5.1.10</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
