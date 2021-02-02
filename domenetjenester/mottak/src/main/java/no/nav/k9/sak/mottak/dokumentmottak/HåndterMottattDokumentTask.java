@@ -63,7 +63,6 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
             .stream()
-            // TODO Espen S: kommentar under nevner inntektsmeldinger, gjelder den for alle typer dokumenter?
             // gamle inntektsmeldinger kan ha status null, men vil være koblet til behandlingId (skal ikke ta på nytt her)
             .filter(m -> m.getBehandlingId() == null)
             .collect(Collectors.toList());
