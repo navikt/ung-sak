@@ -16,24 +16,28 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.vedtak.exception.VLException;
+import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 public class SøknadUtbetalingOmsorgspengerDokumentValidator implements DokumentValidator {
 
     private SøknadParser søknadParser;
+    private Boolean lansert;
 
     SøknadUtbetalingOmsorgspengerDokumentValidator() {
         //for CDI proxy
     }
 
     @Inject
-    public SøknadUtbetalingOmsorgspengerDokumentValidator(SøknadParser søknadParser) {
+    public SøknadUtbetalingOmsorgspengerDokumentValidator(SøknadParser søknadParser, @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.søknadParser = søknadParser;
+        this.lansert = lansert;
     }
 
     @Override
     public void validerDokumenter(String behandlingId, Collection<MottattDokument> meldinger) {
+        validerLansert();
         validerHarInnhold(meldinger);
         var søknader = søknadParser.parseSøknader(meldinger);
         for (Søknad søknad : søknader) {
@@ -43,7 +47,14 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
 
     @Override
     public void validerDokument(MottattDokument mottattDokument) {
+        validerLansert();
         validerDokumenter(null, Set.of(mottattDokument));
+    }
+
+    private void validerLansert() {
+        if (!lansert){
+            throw new IllegalArgumentException("Funksjonalitet for å ta i mot søknad om utbetaling av omsorgspenger er ikke lansert i dette miljøet");
+        }
     }
 
     private void validerInnhold(Søknad søknad) {

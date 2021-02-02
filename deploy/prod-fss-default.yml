@@ -191,6 +191,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: MOTTAK_SOKNAD_UTBETALING_OMS
+      value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: FRISINN_VILKARSPERIODER
