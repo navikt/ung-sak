@@ -19,12 +19,13 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
 import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.vedtak.sikkerhet.abac.PdpKlient;
@@ -38,15 +39,15 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     public static final String ABAC_DOMAIN = "k9";
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
-    private AktørConsumerMedCache aktørConsumer;
+    private AktørTjeneste aktørTjeneste;
 
     public AppPdpRequestBuilderImpl() {
     }
 
     @Inject
-    public AppPdpRequestBuilderImpl(PipRepository pipRepository, AktørConsumerMedCache aktørConsumer) {
+    public AppPdpRequestBuilderImpl(PipRepository pipRepository, AktørTjeneste aktørTjeneste) {
         this.pipRepository = pipRepository;
-        this.aktørConsumer = aktørConsumer;
+        this.aktørTjeneste = aktørTjeneste;
     }
 
     private static void validerSamsvarBehandlingOgFagsak(Long behandlingId, Long fagsakId, Set<Long> fagsakIder) {
@@ -180,6 +181,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         if (fnr == null || fnr.isEmpty()) {
             return Collections.emptySet();
         }
-        return aktørConsumer.hentAktørIdForPersonIdentSet(fnr).stream().map(id -> new AktørId(id)).collect(Collectors.toSet());
+        return aktørTjeneste.hentAktørIdForPersonIdentSet(fnr.stream().map(PersonIdent::new).collect(Collectors.toSet()));
     }
 }

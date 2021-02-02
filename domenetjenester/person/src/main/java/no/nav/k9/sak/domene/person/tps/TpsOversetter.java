@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.person.tps;
 
 import static java.util.stream.Collectors.toSet;
+import static no.nav.k9.kodeverk.person.Diskresjonskode.fraKode;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -217,7 +218,7 @@ public class TpsOversetter {
                                                    Diskresjonskoder diskresjonskoder) {
         String geoTilkn = geografiskTilknytning != null ? geografiskTilknytning.getGeografiskTilknytning() : null;
         String diskKode = diskresjonskoder != null ? diskresjonskoder.getValue() : null;
-        return new GeografiskTilknytning(geoTilkn, diskKode);
+        return new GeografiskTilknytning(geoTilkn, fraKode(diskKode));
     }
 
     public List<GeografiskTilknytning> tilDiskresjonsKoder(Person person) {
@@ -235,7 +236,7 @@ public class TpsOversetter {
 
         String diskresjonskode = person.getDiskresjonskode() == null ? null : person.getDiskresjonskode().getValue();
 
-        return diskresjonskode == null ? null : new GeografiskTilknytning(null, diskresjonskode);
+        return diskresjonskode == null ? null : new GeografiskTilknytning(null, fraKode(diskresjonskode));
     }
 
     private Familierelasjon tilRelasjon(no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon familierelasjon) {

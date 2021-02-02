@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -54,6 +55,13 @@ public class Periode implements Comparable<Periode> {
         this.tom = tom;
     }
 
+    public Periode(String iso8601) {
+        verifiserKanVæreGyldigPeriode(iso8601);
+        String[] split = iso8601.split("/");
+        this.fom = parseLocalDate(split[0]);
+        this.tom = parseLocalDate(split[1]);
+    }
+
     @AssertTrue(message = "fom dato må være <= tom dato")
     private boolean ok() {
         return getFom().isEqual(getTom()) || getFom().isBefore(getTom());
@@ -95,6 +103,19 @@ public class Periode implements Comparable<Periode> {
     @Override
     public int compareTo(Periode o) {
         return COMP.compare(this, o);
+    }
+
+    private static void verifiserKanVæreGyldigPeriode(String iso8601) {
+        if (iso8601 == null || iso8601.split("/").length != 2) {
+            throw new IllegalArgumentException("Periode på ugylig format '" + iso8601 + "'.");
+        }
+    }
+
+    private static LocalDate parseLocalDate(String iso8601) {
+        if ("..".equals(iso8601))
+            return null;
+        else
+            return LocalDate.parse(iso8601);
     }
 
     private static final Comparator<Periode> COMP = Comparator

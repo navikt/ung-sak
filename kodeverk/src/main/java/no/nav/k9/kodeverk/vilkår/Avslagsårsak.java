@@ -71,6 +71,9 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.",
         Map.of(FagsakYtelseType.PSB, "9-10")),
 
+    SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
+        Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
+
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen",
         Map.of()),
     UDEFINERT("-", "Ikke definert",

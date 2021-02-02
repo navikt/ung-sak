@@ -28,7 +28,7 @@ import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.omsorgspenger.mottak.OmsorgspengerSøknadInnsending;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.søknad.JsonUtils;
-import no.nav.k9.søknad.pleiepengerbarn.PleiepengerBarnSøknad;
+import no.nav.k9.søknad.Søknad;
 
 @Provider
 @Produces({ MediaType.APPLICATION_JSON })
@@ -111,7 +111,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     @Override
     public ObjectMapper getContext(Class<?> type) {
         // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
-        if (type.isAssignableFrom(PleiepengerBarnSøknad.class)) {
+        if (type.isAssignableFrom(Søknad.class)) {
             return JsonUtils.getObjectMapper();
         }
         return objectMapper;

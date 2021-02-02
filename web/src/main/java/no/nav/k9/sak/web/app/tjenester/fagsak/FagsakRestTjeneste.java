@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
@@ -140,7 +139,7 @@ public class FagsakRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Finn siste eksisterende fagsak.", summary = ("Finn siste fagsak som matcher søkekriteriene"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public Response finnSisteFagsak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnSak finnSakDto) {
         var ytelseType = finnSakDto.getYtelseType();
 
@@ -184,7 +183,7 @@ public class FagsakRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
         @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
     })
-    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentRettigheter(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);

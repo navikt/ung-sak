@@ -1,14 +1,21 @@
 package no.nav.k9.sak.domene.iay.modell;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Brukt til å filtrere registrerte yrkesaktiviteter, overstyrte arbeidsforhold og frilans arbeidsforhold etter skjæringstidspunkt.
@@ -16,7 +23,9 @@ import java.util.stream.Collectors;
  */
 public class YrkesaktivitetFilter {
 
-    /** Filter uten innhold. Forenkler NP håndtering. */
+    /**
+     * Filter uten innhold. Forenkler NP håndtering.
+     */
     public static final YrkesaktivitetFilter EMPTY = new YrkesaktivitetFilter(null, Collections.emptyList());
 
     private ArbeidsforholdInformasjon arbeidsforholdOverstyringer;
@@ -49,7 +58,9 @@ public class YrkesaktivitetFilter {
         this(arbeidsforholdInformasjon.orElse(null), yrkesaktivitet == null ? Collections.emptyList() : List.of(yrkesaktivitet));
     }
 
-    /** Tar inn angitte yrkesaktiviteter, uten hensyn til overstyringer. */
+    /**
+     * Tar inn angitte yrkesaktiviteter, uten hensyn til overstyringer.
+     */
     public YrkesaktivitetFilter(Collection<Yrkesaktivitet> yrkesaktiviteter) {
         this(null, yrkesaktiviteter);
     }
@@ -74,38 +85,22 @@ public class YrkesaktivitetFilter {
         return ya.getAlleAktivitetsAvtaler().stream()
             .filter(av -> (!ya.erArbeidsforhold() || !av.erAnsettelsesPeriode()))
             .filter(this::skalMedEtterSkjæringstidspunktVurdering)
-            .distinct()
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Collection<Yrkesaktivitet> getFrilansOppdrag() {
         return getAlleYrkesaktiviteter().stream()
             .filter(this::erFrilansOppdrag)
             .filter(it -> !getAktivitetsAvtalerForArbeid(it).isEmpty())
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Collection<Yrkesaktivitet> getYrkesaktiviteter() {
-        var ya = getYrkesaktiviteterInklusiveFiktive().stream()
+        return getYrkesaktiviteterInklusiveFiktive()
+            .stream()
             .filter(this::erIkkeFrilansOppdrag)
-            .filter(this::skalBrukes)
             .filter(it -> (erArbeidsforholdOgStarterPåRettSideAvSkjæringstidspunkt(it) || !getAktivitetsAvtalerForArbeid(it).isEmpty()))
-            .collect(Collectors.toUnmodifiableSet());
-        return ya;
-    }
-
-    /**
-     * Collection av aktiviteter filtrert iht ArbeidsforholdInformasjon.
-     * Aktiviteter hvor overstyring har satt ArbeidsforholdHandlingType til INNTEKT_IKKE_MED_I_BG filtreres ut.
-     *
-     * @return Liste av {@link Yrkesaktivitet}
-     */
-    public Collection<Yrkesaktivitet> getYrkesaktiviteterForBeregning() {
-        return getYrkesaktiviteterInklusiveFiktive().stream()
-            .filter(this::erIkkeFrilansOppdrag)
-            .filter(this::skalBrukesIBeregning)
-            .filter(it -> (erArbeidsforholdOgStarterPåRettSideAvSkjæringstidspunkt(it) || !getAktivitetsAvtalerForArbeid(it).isEmpty()))
-            .collect(Collectors.toUnmodifiableSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private List<Yrkesaktivitet> arbeidsforholdLagtTilAvSaksbehandler() {
@@ -157,27 +152,13 @@ public class YrkesaktivitetFilter {
     }
 
     private Set<Yrkesaktivitet> getYrkesaktiviteterInklusiveFiktive() {
-        var aktiviteter = new HashSet<>(getAlleYrkesaktiviteter());
+        var aktiviteter = new TreeSet<>(getAlleYrkesaktiviteter());
         aktiviteter.addAll(arbeidsforholdLagtTilAvSaksbehandler());
-        return Collections.unmodifiableSet(aktiviteter);
+        return Collections.unmodifiableSortedSet(aktiviteter);
     }
 
     public Collection<Yrkesaktivitet> getAlleYrkesaktiviteter() {
         return yrkesaktiviteter == null ? Collections.emptyList() : Collections.unmodifiableCollection(yrkesaktiviteter);
-    }
-
-    private boolean skalBrukes(Yrkesaktivitet entitet) {
-        return arbeidsforholdOverstyringer == null || arbeidsforholdOverstyringer.getOverstyringer()
-            .stream()
-            .noneMatch(ov -> entitet.gjelderFor(ov.getArbeidsgiver(), ov.getArbeidsforholdRef())
-                && Objects.equals(ArbeidsforholdHandlingType.IKKE_BRUK, ov.getHandling()));
-    }
-
-    private boolean skalBrukesIBeregning(Yrkesaktivitet entitet) {
-        return arbeidsforholdOverstyringer != null && arbeidsforholdOverstyringer.getOverstyringer().stream()
-            .noneMatch(ov -> entitet.gjelderFor(ov.getArbeidsgiver(), ov.getArbeidsforholdRef()) &&
-                (Objects.equals(ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG, ov.getHandling()) ||
-                    Objects.equals(ArbeidsforholdHandlingType.IKKE_BRUK, ov.getHandling())));
     }
 
     public YrkesaktivitetFilter etter(LocalDate skjæringstidspunkt) {
@@ -230,7 +211,7 @@ public class YrkesaktivitetFilter {
         ArbeidsforholdHandlingType handling = overstyring.getHandling();
 
         List<ArbeidsforholdOverstyrtePerioder> overstyrtePerioder = overstyring.getArbeidsforholdOverstyrtePerioder();
-        if ((ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE.equals(handling) || ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling)) && !overstyrtePerioder.isEmpty()) {
+        if ((ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling)) && !overstyrtePerioder.isEmpty()) {
             Set<AktivitetsAvtale> avtaler = new LinkedHashSet<>();
             overstyrtePerioder.forEach(overstyrtPeriode -> yaAvtaler.stream()
                 .filter(AktivitetsAvtale::erAnsettelsesPeriode)
@@ -253,7 +234,7 @@ public class YrkesaktivitetFilter {
             return Optional.empty(); // ikke initialisert, så kan ikke ha overstyringer
         }
         List<ArbeidsforholdOverstyring> overstyringer = arbeidsforholdOverstyringer.getOverstyringer();
-        if(overstyringer.isEmpty()) {
+        if (overstyringer.isEmpty()) {
             return Optional.empty();
         }
         return overstyringer.stream()
@@ -289,6 +270,7 @@ public class YrkesaktivitetFilter {
 
     /**
      * Gir ansettelsesperioder for angitte arbeidsforhold.
+     *
      * @see #getAnsettelsesPerioder(Yrkesaktivitet)
      */
     public Collection<AktivitetsAvtale> getAnsettelsesPerioder(Collection<Yrkesaktivitet> yrkesaktiviteter) {
@@ -298,6 +280,7 @@ public class YrkesaktivitetFilter {
 
     /**
      * Gir alle ansettelsesperioder for filteret, inklusiv fiktive fra saksbehandler hvis konfigurert på filteret.
+     *
      * @see #getAnsettelsesPerioder(Yrkesaktivitet)
      */
     public Collection<AktivitetsAvtale> getAnsettelsesPerioder() {
@@ -306,6 +289,6 @@ public class YrkesaktivitetFilter {
     }
 
     public Collection<ArbeidsforholdOverstyring> getArbeidsforholdOverstyringer() {
-        return arbeidsforholdOverstyringer==null ? Collections.emptyList() : arbeidsforholdOverstyringer.getOverstyringer();
+        return arbeidsforholdOverstyringer == null ? Collections.emptyList() : arbeidsforholdOverstyringer.getOverstyringer();
     }
 }

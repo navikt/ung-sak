@@ -1,5 +1,7 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
+import static java.util.Optional.ofNullable;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,16 +40,15 @@ public class EnhetsTjeneste {
         }
     }
 
-    private static final String DISKRESJON_K6 = Diskresjonskode.KODE6.getOffisiellKode(); // Kodeverk Diskresjonskoder
     private static final String NK_ENHET_ID = "4292";
     private static final OrganisasjonsEnhet KLAGE_ENHET = new OrganisasjonsEnhet(NK_ENHET_ID, "NAV Klageinstans Midt-Norge");
 
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
 
-    private Map<FagsakYtelseType, EnhetsTjenesteData> cache = Arrays.asList(FagsakYtelseType.values())
-        .stream()
-        .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
+    private final Map<FagsakYtelseType, EnhetsTjenesteData> cache =
+        Arrays.stream(FagsakYtelseType.values())
+            .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
 
     public EnhetsTjeneste() {
         // For CDI proxy
@@ -99,7 +100,7 @@ public class EnhetsTjeneste {
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr);
-        return hentEnheterFor(geografiskTilknytning.getTilknytning(), geografiskTilknytning.getDiskresjonskode(), ytelseType).get(0);
+        return hentEnheterFor(geografiskTilknytning.getTilknytning(), ofNullable(geografiskTilknytning.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null), ytelseType).get(0);
     }
 
     OrganisasjonsEnhet enhetsPresedens(FagsakYtelseType ytelseType, OrganisasjonsEnhet enhetSak1, OrganisasjonsEnhet enhetSak2) {
@@ -116,7 +117,7 @@ public class EnhetsTjeneste {
             .map(tpsTjeneste::hentGeografiskTilknytning)
             .map(GeografiskTilknytning::getDiskresjonskode)
             .filter(Objects::nonNull)
-            .anyMatch(DISKRESJON_K6::equalsIgnoreCase);
+            .anyMatch(Diskresjonskode.KODE6::equals);
     }
 
     private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType) {

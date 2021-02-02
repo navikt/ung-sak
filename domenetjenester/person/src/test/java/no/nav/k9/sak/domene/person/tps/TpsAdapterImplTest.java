@@ -90,7 +90,7 @@ public class TpsAdapterImplTest {
 
     @Test
     public void test_hentGegrafiskTilknytning_vha_fnr() throws Exception {
-        final String diskresjonskode = "KLIE";
+        final String diskresjonskode = "SPSF";
         final String kommune = "0219";
 
         HentGeografiskTilknytningResponse response = mockHentGeografiskTilknytningResponse(kommune, diskresjonskode);
@@ -98,10 +98,11 @@ public class TpsAdapterImplTest {
 
         GeografiskTilknytning tilknytning = testSubject.hentGeografiskTilknytning(fnr);
         assertNotNull(tilknytning);
-        assertThat(tilknytning.getDiskresjonskode()).isEqualTo(diskresjonskode);
+        assertThat(tilknytning.getDiskresjonskode().getKode()).isEqualTo(diskresjonskode);
         assertThat(tilknytning.getTilknytning()).isEqualTo(kommune);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private HentGeografiskTilknytningResponse mockHentGeografiskTilknytningResponse(String kommune, String diskresjonskode) {
         HentGeografiskTilknytningResponse response = new HentGeografiskTilknytningResponse();
         Kommune k = new Kommune();

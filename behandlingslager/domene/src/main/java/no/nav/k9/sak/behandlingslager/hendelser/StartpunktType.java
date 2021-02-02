@@ -22,10 +22,12 @@ public enum StartpunktType implements Kodeverdi {
     KONTROLLER_ARBEIDSFORHOLD("KONTROLLER_ARBEIDSFORHOLD", "Startpunkt kontroller arbeidsforhold", 2),
     KONTROLLER_FAKTA("KONTROLLER_FAKTA", "Kontroller fakta", 3),
     INNGANGSVILKÅR_OPPLYSNINGSPLIKT("INNGANGSVILKÅR_OPPL", "Inngangsvilkår opplysningsplikt", 4),
-    INNGANGSVILKÅR_MEDLEMSKAP("INNGANGSVILKÅR_MEDL", "Inngangsvilkår medlemskapsvilkår", 5),
-    OPPTJENING("OPPTJENING", "Opptjening", 6),
-    BEREGNING("BEREGNING", "Beregning", 7),
-    UTTAKSVILKÅR("UTTAKSVILKÅR", "Uttaksvilkår", 8),
+    INNGANGSVILKÅR_OMSORGENFOR("INNGANGSVILKÅR_OMSORGENFOR", "Inngangsvilkår omsorgen for", 10),
+    INNGANGSVILKÅR_MEDISINSK("INNGANGSVILKÅR_MEDISINSK", "Inngangsvilkår sykdom", 12),
+    INNGANGSVILKÅR_MEDLEMSKAP("INNGANGSVILKÅR_MEDL", "Inngangsvilkår medlemskapsvilkår", 15),
+    OPPTJENING("OPPTJENING", "Opptjening", 20),
+    BEREGNING("BEREGNING", "Beregning", 25),
+    UTTAKSVILKÅR("UTTAKSVILKÅR", "Uttaksvilkår", 30),
 
     UDEFINERT("-", "Ikke definert", 99),
     ;

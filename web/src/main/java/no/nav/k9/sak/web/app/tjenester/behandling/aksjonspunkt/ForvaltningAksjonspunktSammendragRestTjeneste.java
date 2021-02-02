@@ -39,8 +39,8 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktReposi
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BehandlingAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.k9.søknad.felles.Periode;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -119,7 +119,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             : new AksjonspunktStatus[] { AksjonspunktStatus.OPPRETTET };
 
         var map = aksjonspunktRepository.hentAksjonspunkter(
-            opprettetPeriode.fraOgMed, opprettetPeriode.tilOgMed.plusDays(1), aksjonspunktStatuser);
+            opprettetPeriode.getFom(), opprettetPeriode.getTom().plusDays(1), aksjonspunktStatuser);
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);

@@ -10,19 +10,19 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.exception.ManglerTilgangException;
-import no.nav.vedtak.felles.integrasjon.aktør.klient.AktørConsumerMedCache;
 import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
@@ -46,10 +46,10 @@ public class PdpRequestBuilderTest {
 
     private static final String PERSON_0 = "00000000000";
 
-    private PipRepository pipRepository = Mockito.mock(PipRepository.class);
-    private AktørConsumerMedCache aktørConsumer = Mockito.mock(AktørConsumerMedCache.class);
+    private final PipRepository pipRepository = Mockito.mock(PipRepository.class);
+    private final AktørTjeneste aktørTjeneste = Mockito.mock(AktørTjeneste.class);
 
-    private AppPdpRequestBuilderImpl requestBuilder = new AppPdpRequestBuilderImpl(pipRepository, aktørConsumer);
+    private final AppPdpRequestBuilderImpl requestBuilder = new AppPdpRequestBuilderImpl(pipRepository, aktørTjeneste);
 
     @Test
     public void skal_hente_saksstatus_og_behandlingsstatus_når_behandlingId_er_input() {
@@ -89,7 +89,7 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKER_MED_FNR, PERSON_0));
 
-        when(aktørConsumer.hentAktørIdForPersonIdentSet(any())).thenReturn(Collections.singleton(AKTØR_0.getId()));
+        when(aktørTjeneste.hentAktørIdForPersonIdentSet(any())).thenReturn(Collections.singleton(AKTØR_0));
 
         Set<Long> fagsakIder = new HashSet<>();
         fagsakIder.add(FAGSAK_ID);
@@ -116,7 +116,7 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
-    public void skal_ta_inn_aksjonspunkt_id_og_sende_videre_aksjonspunkt_typer() throws Exception {
+    public void skal_ta_inn_aksjonspunkt_id_og_sende_videre_aksjonspunkt_typer() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.AKSJONSPUNKT_KODE, "0000")
@@ -135,7 +135,7 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
-    public void skal_slå_opp_og_sende_videre_fnr_når_aktør_id_er_input() throws Exception {
+    public void skal_slå_opp_og_sende_videre_fnr_når_aktør_id_er_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.AKTØR_ID, AKTØR_1.getId()));
 
@@ -145,7 +145,7 @@ public class PdpRequestBuilderTest {
 
     // TODO: FLytt til junit 5
     @Test
-    public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_og_behandling_id_som_ikke_stemmer_overens() throws Exception {
+    public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_og_behandling_id_som_ikke_stemmer_overens() {
 
         // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();

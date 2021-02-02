@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
@@ -59,8 +60,8 @@ public class EnhetsTjenesteTest {
     private static ArbeidsfordelingResponse respKode6 = new ArbeidsfordelingResponse("2103", "NAV Viken", "Aktiv", "KO");
 
     private static GeografiskTilknytning tilknytningNormal = new GeografiskTilknytning("0219", null);
-    private static GeografiskTilknytning tilknytningKode6 = new GeografiskTilknytning("0219", "SPSF");
-    private static GeografiskTilknytning relatertKode6 = new GeografiskTilknytning(null, "SPSF");
+    private static GeografiskTilknytning tilknytningKode6 = new GeografiskTilknytning("0219", Diskresjonskode.KODE6);
+    private static GeografiskTilknytning relatertKode6 = new GeografiskTilknytning(null, Diskresjonskode.KODE6);
 
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;

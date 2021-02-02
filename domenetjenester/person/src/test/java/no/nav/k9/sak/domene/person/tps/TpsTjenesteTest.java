@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
@@ -95,7 +96,7 @@ public class TpsTjenesteTest {
 
     @Test
     public void test_hentGeografiskTilknytning_finnes() {
-        when(personinfoAdapter.hentGeografiskTilknytning(FNR)).thenReturn(new GeografiskTilknytning("0219", "KLIE"));
+        when(personinfoAdapter.hentGeografiskTilknytning(FNR)).thenReturn(new GeografiskTilknytning("0219", Diskresjonskode.UDEFINERT));
 
         GeografiskTilknytning geografiskTilknytning = testSubject.hentGeografiskTilknytning(FNR);
         assertThat(geografiskTilknytning).isNotNull();

@@ -28,7 +28,7 @@
 		<!-- Integrasjon avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-felles</artifactId>
+            <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>

@@ -61,11 +61,10 @@ import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
-import no.nav.k9.søknad.felles.NorskIdentitetsnummer;
-import no.nav.k9.søknad.felles.Periode;
-import no.nav.k9.søknad.felles.Språk;
-import no.nav.k9.søknad.felles.Søker;
-import no.nav.k9.søknad.felles.SøknadId;
+import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
+import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
@@ -140,7 +139,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         // Samme utledning for fagsakperiode som i k9-fordel
         LocalDate fom = LocalDate.of(2020, 3, 1);
-        LocalDate tom = manuellSøknadDto.getPeriode().tilOgMed;
+        LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
 
         Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, fom, tom);
 
@@ -150,7 +149,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .inntekter(lagDummyInntekt(manuellSøknadDto))
             .søknadsperiode(manuellSøknadDto.getPeriode())
             .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
-            .søker(Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
+            .søker(no.nav.k9.søknad.felles.personopplysninger.Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
             .build();
         var valideringsfeil = validerSøknad(fagsak, søknad);
         if (valideringsfeil.isPresent()) {

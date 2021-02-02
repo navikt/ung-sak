@@ -25,7 +25,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsfo
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.søknad.felles.Periode;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;

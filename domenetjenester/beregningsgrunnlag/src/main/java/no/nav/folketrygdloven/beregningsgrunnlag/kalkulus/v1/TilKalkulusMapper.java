@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,7 +59,6 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
-import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -77,6 +75,7 @@ import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
@@ -101,6 +100,7 @@ public class TilKalkulusMapper {
             {
                 addAll(inntektFilter.getAlleInntektSammenligningsgrunnlag());
                 addAll(inntektFilter.getAlleInntektBeregningsgrunnlag());
+                addAll(inntektFilter.getAlleInntektBeregnetSkatt());
             }
         };
     }
@@ -411,10 +411,11 @@ public class TilKalkulusMapper {
         var skjæringstidspunktBeregning = vilkårsPeriode.getFomDato();
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
         var ytelseFilter = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId));
-        Optional<AktørArbeid> arbeid = grunnlag.getAktørArbeidFraRegister(aktørId);
+        var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId));
 
         var inntektsmeldinger = grunnlag.getInntektsmeldinger();
-        var yrkesaktiviteterForBeregning = arbeid.map(AktørArbeid::hentAlleYrkesaktiviteter).orElse(Collections.emptyList());
+        var yrkesaktiviteterForBeregning = new ArrayList<>(yrkesaktivitetFilter.getYrkesaktiviteter());
+        yrkesaktiviteterForBeregning.addAll(yrkesaktivitetFilter.getFrilansOppdrag());
         var alleRelevanteInntekter = finnRelevanteInntekter(inntektFilter);
         var inntektArbeidYtelseGrunnlagDto = new InntektArbeidYtelseGrunnlagDto();
 
