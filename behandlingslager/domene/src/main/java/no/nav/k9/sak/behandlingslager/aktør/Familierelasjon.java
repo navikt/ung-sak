@@ -22,14 +22,6 @@ public class Familierelasjon {
         this.harSammeBostedTps = harSammeBosted;
     }
 
-    /**
-     * @deprecated bruk {@link #getPersonIdent()}
-     */
-    @Deprecated
-    public String getFnr() {
-        return personIdent.getIdent();
-    }
-
     public PersonIdent getPersonIdent() {
         return personIdent;
     }
