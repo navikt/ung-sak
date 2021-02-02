@@ -17,7 +17,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 public class SykdomDokumentOversiktMapper {
     
     public SykdomDokumentOversikt map(String behandlingUuid, Collection<SykdomDokument> dokumenter) {        
-        final List<SykdomDokumentOversiktElement> elementer = hentDokumenter()
+        final List<SykdomDokumentOversiktElement> elementer = dokumenter
             .stream()
             .map(d -> {
                 return new SykdomDokumentOversiktElement(
@@ -39,10 +39,6 @@ public class SykdomDokumentOversiktMapper {
                 elementer,
                 Arrays.asList()
                 );
-    }
-       
-    private List<SykdomDokument> hentDokumenter() {
-        return Collections.emptyList();
     }
 
 }

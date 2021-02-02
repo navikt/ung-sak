@@ -45,10 +45,10 @@ public class SykdomDokumentRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
-    private static final String DOKUMENT_NY = "/";
-    private static final String SYKDOM_INNLEGGELSE = "/innleggelse/";
+    private static final String DOKUMENT_NY = "/ny";
+    private static final String SYKDOM_INNLEGGELSE = "/innleggelse";
     public static final String SYKDOM_INNLEGGELSE_PATH = BASE_PATH + SYKDOM_INNLEGGELSE;
-    private static final String DIAGNOSEKODER = "/diagnosekoder/";
+    private static final String DIAGNOSEKODER = "/diagnosekoder";
     public static final String DIAGNOSEKODER_PATH = BASE_PATH + DIAGNOSEKODER;
     public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
