@@ -56,8 +56,10 @@ public class SykdomDokumentEndringDto {
         
     }
     
-    public SykdomDokumentEndringDto(String behandlingUuid) {
+    public SykdomDokumentEndringDto(String behandlingUuid, String id, String versjon) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
+        this.id = id;
+        this.versjon = versjon;
     }
     
     public SykdomDokumentEndringDto(UUID behandlingUuid) {

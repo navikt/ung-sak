@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import no.nav.k9.sak.kontrakt.ResourceLink;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 
 
@@ -29,7 +31,7 @@ public class SykdomDokumentOversiktMapper {
                         LocalDate.now(), // TODO: Sette riktig verdi.
                         LocalDateTime.now(), // TODO: Sette riktig verdi.
                         false,  // TODO: Sette riktig verdi.
-                        Collections.emptyList()
+                        Collections.singletonList(linkForEndreDokument(behandlingUuid, "" + d.getId(), "1")) // TODO: Sett riktig verdi på versjon.
                     ); 
             })
             .collect(Collectors.toList())
@@ -39,6 +41,10 @@ public class SykdomDokumentOversiktMapper {
                 elementer,
                 Arrays.asList()
                 );
+    }
+    
+    private ResourceLink linkForEndreDokument(String behandlingUuid, String id, String versjon) {        
+        return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_PATH), "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandlingUuid, id, versjon));
     }
 
 }
