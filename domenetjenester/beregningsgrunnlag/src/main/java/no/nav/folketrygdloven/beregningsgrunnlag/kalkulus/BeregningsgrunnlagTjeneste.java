@@ -195,7 +195,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .filter(it -> Objects.nonNull(it.getReferanse()))
                 .collect(Collectors.toSet());
 
-            return tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
+            return bgReferanser.isEmpty() ? List.of() : tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
                 .stream()
                 .filter(bg -> bg.getBeregningsgrunnlag() != null)
                 .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
