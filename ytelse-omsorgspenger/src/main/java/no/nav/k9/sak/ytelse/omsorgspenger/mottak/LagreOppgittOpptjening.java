@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -34,14 +36,14 @@ public class LagreOppgittOpptjening {
 
     public void lagreOpptjening(Behandling behandling, ZonedDateTime tidspunkt, OmsorgspengerUtbetaling søknad) {
         Long behandlingId = behandling.getId();
-        OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling.getFagsakId(), tidspunkt);
+        OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling, tidspunkt);
 
         boolean erNyeOpplysninger = false;
         if (søknad.getAktivitet().getFrilanser() != null) {
             // TODO: Frilanser
             throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
         }
-        if (søknad.getAktivitet().getArbeidstaker() != null){
+        if (søknad.getAktivitet().getArbeidstaker() != null) {
             // TODO: arbeidstaker
             throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
         }
@@ -61,22 +63,24 @@ public class LagreOppgittOpptjening {
         }
     }
 
-    private OppgittOpptjeningBuilder initOpptjeningBuilder(Long fagsakId, ZonedDateTime tidspunkt) {
-        OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
+    private OppgittOpptjeningBuilder initOpptjeningBuilder(Behandling behandling, ZonedDateTime tidspunkt) {
+        //oppdater hvis det allerede finnes oppgitt opptjening på behandlingen
+        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
+        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getOppgittOpptjening().isPresent()) {
+            OppgittOpptjening tidligerOppgittOpptjening = iayGrunnlag.get().getOppgittOpptjening().get();
+            return OppgittOpptjeningBuilder.oppdater(behandling.getUuid(), tidligerOppgittOpptjening.getOpprettetTidspunkt().atOffset(ZoneOffset.UTC));
+        }
 
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
-        // FIXME: Hvis det finnes en behandling som ikke er avsluttet, er det denne som må bygges på (forutsatt at vi skal støtte flere søknader i samme behandling)
-        var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-        if (sisteBehandling.isPresent()) {
-            Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = sisteBehandling.isPresent() ? iayTjeneste.finnGrunnlag(sisteBehandling.get().getId()) : Optional.empty();
-            if (iayGrunnlagOpt.isPresent()) {
-                var tidligereRegistrertOpptjening = iayGrunnlagOpt.get().getOppgittOpptjening();
-                if (tidligereRegistrertOpptjening.isPresent()) {
-                    builder = OppgittOpptjeningBuilder.nyFraEksisterende(tidligereRegistrertOpptjening.get(), UUID.randomUUID(), tidspunkt.toLocalDateTime());
-                }
+        var forrigeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsakId());
+        if (forrigeBehandling.isPresent()) {
+            Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = iayTjeneste.finnGrunnlag(forrigeBehandling.get().getId());
+            if (iayGrunnlagOpt.isPresent() && iayGrunnlagOpt.get().getOppgittOpptjening().isPresent()) {
+                OppgittOpptjening tidligereOppgittOpptjening = iayGrunnlagOpt.get().getOppgittOpptjening().get();
+                return OppgittOpptjeningBuilder.nyFraEksisterende(tidligereOppgittOpptjening, UUID.randomUUID(), tidspunkt.toLocalDateTime());
             }
         }
-        return builder;
+        return OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
     }
 
     private EgenNæringBuilder mapEgenNæring(no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende sn) {
