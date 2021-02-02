@@ -63,9 +63,9 @@ public class LagreOppgittOpptjening {
 
     private OppgittOpptjeningBuilder initOpptjeningBuilder(Long fagsakId, ZonedDateTime tidspunkt) {
         OppgittOpptjeningBuilder builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
-        // Mulig FIXME? hvis det finnes en behandling som ikke er avsluttet og denne har en søknad, skal ikke builder baseres på den?
 
         // bygg på eksisterende hvis tidligere innrapportert for denne ytelsen (sikrer at vi får med originalt rapportert inntektsgrunnlag).
+        // FIXME: Hvis det finnes en behandling som ikke er avsluttet, er det denne som må bygges på (forutsatt at vi skal støtte flere søknader i samme behandling)
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
         if (sisteBehandling.isPresent()) {
             Optional<InntektArbeidYtelseGrunnlag> iayGrunnlagOpt = sisteBehandling.isPresent() ? iayTjeneste.finnGrunnlag(sisteBehandling.get().getId()) : Optional.empty();

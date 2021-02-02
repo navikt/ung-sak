@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -26,7 +25,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -55,7 +53,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
 
-    private LagreOppgittOpptjening lagreOppgittOpptjening;
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
@@ -71,7 +68,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         UttakRepository uttakRepository,
                                         BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
-                                        LagreOppgittOpptjening lagreOppgittOpptjening,
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
@@ -81,7 +77,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.uttakRepository = uttakRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
-        this.lagreOppgittOpptjening = lagreOppgittOpptjening;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.dokumentValidator = dokumentValidator;
@@ -97,8 +92,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
+            // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling);
         }
+        // Søknadsinnhold som persisteres eksternt (abakus)
         lagreOppgittOpptjeningFraSøknader(behandlingId);
     }
 
@@ -121,16 +118,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
+        var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
 
-        // Søknad
         lagreSøknad(behandlingId, søknad, søknadInnhold);
-
-        // Medlemskapsinfo
-        Bosteder bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
         lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
-
-        // Uttaksperioder og oppgitt opptjening
-        lagreUttakOgOpptjening(søknadInnhold, behandling, fagsakId, søknad.getSøker());
+        lagreUttakOgUtvidPeriode(søknadInnhold, behandling, fagsakId, søknad.getSøker());
     }
 
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
@@ -141,33 +133,28 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
-            .medSøknadsdato(søknad.getMottattDato().toLocalDate()) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
+            .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    private void lagreUttakOgOpptjening(OmsorgspengerUtbetaling ytelse, Behandling behandling, Long fagsakId, Søker søker) {
+    private void lagreUttakOgUtvidPeriode(OmsorgspengerUtbetaling ytelse, Behandling behandling, Long fagsakId, Søker søker) {
         var behandlingId = behandling.getId();
-
-        // Uttak - basert på frisinn
         var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-        UttakGrunnlag mapUttakGrunnlag;
-        if (sisteBehandling.isPresent()) {
-            // TODO: Gir det mening å kopiere tidligere fastsatt uttak? => JA, søknader blir delta. Selvbetjening viser ikke tidligere resultat til bruker
-            UttakAktivitet uttakAktivitet = uttakRepository.hentFastsattUttak(sisteBehandling.get().getId());
-            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, uttakAktivitet.getPerioder(), søker);
-        } else {
-            mapUttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, Collections.emptySet(), søker);
-        }
-        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
-        // Oppgitt opptjening - lagres i abakus
-        lagreOppgittOpptjening.lagreOpptjening(behandling, ZonedDateTime.now(), ytelse);
+        UttakGrunnlag uttakGrunnlag;
+        if (sisteBehandling.isPresent()) {
+            var uttakAktivitet = uttakRepository.hentFastsattUttak(sisteBehandling.get().getId());
+            uttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, uttakAktivitet.getPerioder(), søker);
+        } else {
+            uttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, Collections.emptySet(), søker);
+        }
+        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, uttakGrunnlag);
 
         // Utvide fagsakperiode
-        var maksPeriode = mapUttakGrunnlag.getOppgittUttak().getMaksPeriode();
+        var maksPeriode = uttakGrunnlag.getOppgittUttak().getMaksPeriode();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 

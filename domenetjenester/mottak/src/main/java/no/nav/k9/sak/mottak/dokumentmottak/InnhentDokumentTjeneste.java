@@ -100,11 +100,6 @@ public class InnhentDokumentTjeneste {
         dokumentmottaker.lagreDokumentinnhold(mottattDokument, behandling);
     }
 
-    private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
-        var brevkode = DokumentBrevkodeUtil.unikBrevkode(mottattDokument);
-        var dokumentmottaker = finnMottaker(brevkode, fagsak.getYtelseType());
-        return dokumentmottaker;
-    }
 
     void asynkVurderKompletthetForÅpenBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
@@ -150,6 +145,11 @@ public class InnhentDokumentTjeneste {
         private static BehandlingMedOpprettelseResultat eksisterendeBehandling(Behandling behandling) {
             return new BehandlingMedOpprettelseResultat(behandling, false);
         }
+    }
+
+    private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
+        var brevkode = DokumentBrevkodeUtil.unikBrevkode(mottattDokument);
+        return finnMottaker(brevkode, fagsak.getYtelseType());
     }
 
     private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
