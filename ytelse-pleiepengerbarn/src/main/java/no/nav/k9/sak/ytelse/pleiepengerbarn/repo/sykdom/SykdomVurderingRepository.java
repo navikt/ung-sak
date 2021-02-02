@@ -88,13 +88,13 @@ public class SykdomVurderingRepository {
 
     public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
         final TypedQuery<Saksnummer> q = entityManager.createQuery(
-            "SELECT distinct saksnummer " +
+            "SELECT distinct sgb.saksnummer " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
-                "   inner join SykdomGrunnlag as sg " +
-                "   inner join SykdomVurderingVersjon as svv " +
-                "   inner join SykdomVurdering as sv " +
-                "   inner join SykdomVurderinger as svs " +
-                "   inner join SykdomPerson as sp " +
+                "   inner join sgb.grunnlag as sg " +
+                "   inner join sg.vurderinger as svv " +
+                "   inner join svv.sykdomVurdering as sv " +
+                "   inner join sv.sykdomVurderinger as svs " +
+                "   inner join svs.person as sp " +
                 "where sp.aktoerId = :aktoerId"
                 , Saksnummer.class);
 
@@ -107,8 +107,8 @@ public class SykdomVurderingRepository {
         final TypedQuery<SykdomSøktPeriode> q = entityManager.createQuery(
             "SELECT ssp " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
-                "   inner join SykdomGrunnlag as sg " +
-                "   inner join SykdomSøktPeriode as ssp " +
+                "   inner join sgb.grunnlag as sg " +
+                "   inner join sg.søktePerioder as ssp " +
                 "where sgb.saksnummer = :saksnummer "
                 , SykdomSøktPeriode.class);
         q.setParameter("saksnummer", saksnummer);
