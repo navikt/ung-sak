@@ -22,8 +22,14 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Diskresjonskode implements Kodeverdi {
     UDEFINERT("UDEF", "Udefinert", "UDEF"),
+    UTENRIKS_TJENST("URIK", "I utenrikstjeneste", "URIK"),
+    UTEN_FAST_BO("UFB", "Uten fast bopel", "UFB"),
+    SVALBARD("SVAL", "Svalbard", "SVAL"),
     KODE6("SPSF", "Sperret adresse, strengt fortrolig", "SPSF"),
     KODE7("SPFO", "Sperret adresse, fortrolig", "SPFO"),
+    PENDLER("PEND", "Pendler", "PEND"),
+    MILITÆR("MILI", "Militær", "MILI"),
+    KLIENT_ADRESSE("KLIE", "Klientadresse", "KLIE"),
     ;
 
     private static final String KODEVERK = "DISKRESJONSKODE";
@@ -49,8 +55,7 @@ public enum Diskresjonskode implements Kodeverdi {
         String kode = TempAvledeKode.getVerdi(Diskresjonskode.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            // Diskresjonskode som ikke anvendes av k9
-            return UDEFINERT;
+            throw new IllegalArgumentException("Ukjent Diskresjonskode: " + kode);
         }
         return ad;
     }
