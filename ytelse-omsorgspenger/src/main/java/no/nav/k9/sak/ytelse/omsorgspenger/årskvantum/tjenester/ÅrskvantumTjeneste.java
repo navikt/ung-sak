@@ -129,7 +129,7 @@ public class ÅrskvantumTjeneste {
             .filter(it -> it.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
             .filter(it -> !it.getPersonIdent().erFdatNummer())
             .map(this::innhentPersonopplysningForBarn)
-            .map(this::mapBarn)
+            .map((Tuple<Familierelasjon, Optional<Personinfo>> relasjonBarn) -> mapBarn(personMedRelasjoner, relasjonBarn))
             .collect(Collectors.toList());
 
         var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
@@ -276,9 +276,10 @@ public class ÅrskvantumTjeneste {
         return new Tuple<>(it, tpsTjeneste.hentBrukerForFnr(it.getPersonIdent()));
     }
 
-    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Tuple<Familierelasjon, Optional<Personinfo>> it) {
-        var personinfo = it.getElement2().orElseThrow();
-        return new Barn(personinfo.getPersonIdent().getIdent(), personinfo.getFødselsdato(), personinfo.getDødsdato(), it.getElement1().getHarSammeBosted(), BarnType.VANLIG);
+    private no.nav.k9.aarskvantum.kontrakter.Barn mapBarn(Personinfo personinfoSøker, Tuple<Familierelasjon, Optional<Personinfo>> relasjonMedBarn) {
+        var personinfoBarn = relasjonMedBarn.getElement2().orElseThrow();
+        var harSammeBosted = relasjonMedBarn.getElement1().getHarSammeBosted(personinfoSøker, personinfoBarn);
+        return new Barn(personinfoBarn.getPersonIdent().getIdent(), personinfoBarn.getFødselsdato(), personinfoBarn.getDødsdato(), harSammeBosted, BarnType.VANLIG);
     }
 
     private boolean kreverArbeidsgiverRefusjon(Set<Inntektsmelding> sakInntektsmeldinger,

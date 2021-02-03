@@ -39,6 +39,8 @@ public class Personinfo {
     private Landkoder landkode;
 
     private List<Adresseinfo> adresseInfoList = new ArrayList<>();
+    // FIXME: Kun for sammenligning TPS . PDL. Fjern når TPS utfases
+    private List<Adresseinfo> adresseInfoListPdl = new ArrayList<>();
     private SivilstandType sivilstand;
 
     private Personinfo() {
@@ -120,6 +122,10 @@ public class Personinfo {
         return adresseInfoList;
     }
 
+    public List<Adresseinfo> getAdresseInfoListPdl() {
+        return adresseInfoListPdl;
+    }
+
     public SivilstandType getSivilstandType() {
         return sivilstand;
     }
@@ -134,6 +140,10 @@ public class Personinfo {
         return getClass().getSimpleName() + "<fødselsdato=" + fødselsdato +
             ", statsborgerskap=" + statsborgerskap +
             ", landkode=" + landkode + ">"; //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    public void setAddresseInfoListPdl(List<Adresseinfo> adresseInfoListPdl) {
+        this.adresseInfoListPdl = adresseInfoListPdl;
     }
 
     public static class Builder {
