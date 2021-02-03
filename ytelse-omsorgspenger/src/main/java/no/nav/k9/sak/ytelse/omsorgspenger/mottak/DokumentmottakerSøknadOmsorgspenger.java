@@ -165,7 +165,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         // TODO kontrakt har utenlandsopphold, skal dette benyttes?
         if (bosteder != null) {
             bosteder.perioder.forEach((periode, opphold) -> {
-                oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
+                oppgittTilknytningBuilder
+                    .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
                     .medLand(finnLandkode(opphold.land.landkode))
                     .medPeriode(
                         Objects.requireNonNull(periode.getFraOgMed()),

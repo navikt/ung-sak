@@ -34,7 +34,15 @@ class MapSøknadUttak {
 
         var snAktiviteter = Optional.ofNullable(søknad.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
-        // TODO: Frilans, Arbeistaker
+
+        if (søknad.getAktivitet().getArbeidstaker() != null){
+            // TODO: Arbeistaker
+            throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
+        }
+        if (søknad.getAktivitet().getFrilanser() != null){
+            // TODO: Frilans
+            throw new UnsupportedOperationException("Støtter ikke frilanser for OMS");
+        }
 
         // Eksisterende uttakaktivitetsperioder
         var uttakPerioder = perioder.stream()

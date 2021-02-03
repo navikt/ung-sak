@@ -1,20 +1,16 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
 
-@ApplicationScoped
+@Dependent
 public class DokumentValidatorProvider {
 
     private Instance<DokumentValidator> dokumentValidatorerer;
-
-    DokumentValidatorProvider() {
-        //for CDI proxy
-    }
 
     @Inject
     public DokumentValidatorProvider(@Any Instance<DokumentValidator> dokumentValidatorerer) {

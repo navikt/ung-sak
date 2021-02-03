@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 
 import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 
 @Dependent
@@ -14,7 +15,7 @@ public class SøknadParser {
 
     public Søknad parseSøknad(MottattDokument mottattDokument) {
         var payload = mottattDokument.getPayload();
-        var jsonReader = SøknadOmsorgspengerUtbetalingJsonMapper.getMapper().readerFor(Søknad.class);
+        var jsonReader = JsonUtils.getObjectMapper().readerFor(Søknad.class);
         try {
             return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
         } catch (Exception e) {
