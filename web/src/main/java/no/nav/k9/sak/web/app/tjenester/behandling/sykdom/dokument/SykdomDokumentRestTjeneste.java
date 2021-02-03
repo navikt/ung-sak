@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,11 +30,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
+import no.nav.vedtak.exception.ManglerTilgangException;
+import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -46,17 +53,20 @@ public class SykdomDokumentRestTjeneste {
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
     private static final String DOKUMENT_NY = "/ny";
+    private static final String DOKUMENT_INNHOLD = "/innhold";
     private static final String SYKDOM_INNLEGGELSE = "/innleggelse";
     public static final String SYKDOM_INNLEGGELSE_PATH = BASE_PATH + SYKDOM_INNLEGGELSE;
     private static final String DIAGNOSEKODER = "/diagnosekoder";
     public static final String DIAGNOSEKODER_PATH = BASE_PATH + DIAGNOSEKODER;
     public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
+    public static final String DOKUMENT_INNHOLD_PATH = BASE_PATH + DOKUMENT_INNHOLD;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
 
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
     private SykdomDokumentRepository sykdomDokumentRepository;
+    private DokumentArkivTjeneste dokumentArkivTjeneste;
     
 
     public SykdomDokumentRestTjeneste() {
@@ -64,10 +74,11 @@ public class SykdomDokumentRestTjeneste {
     
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
     @GET
@@ -240,6 +251,38 @@ public class SykdomDokumentRestTjeneste {
         final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, sykdomDokumentOpprettelseDto.getJournalpostId(), null, getCurrentUserId(), nå, getCurrentUserId(), nå);
         
         sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+    }
+    
+    @GET
+    @Path(DOKUMENT_INNHOLD)
+    @Operation(description = "Laster ned selve dokumentet (innholdet).", summary = ("Laster ned selve dokumentet (innholdet)."), tags = "dokument")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public Response hentDokumentinnhold(
+            @NotNull @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid,
+            
+            @QueryParam(SykdomDokumentIdDto.NAME)
+            @Parameter(description = SykdomDokumentIdDto.DESC)
+            @NotNull
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
+            SykdomDokumentIdDto dokumentId) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+        final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(dokumentId.getSykdomDokumentId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
+        try {
+            ResponseBuilder responseBuilder = Response.ok(
+                new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(dokument.getJournalpostId(), dokument.getDokumentInfoId())));
+            responseBuilder.type("application/pdf");
+            responseBuilder.header("Content-Disposition", "filename=dokument.pdf");
+            return responseBuilder.build();
+        } catch (TekniskException e) {
+            throw DokumentRestTjenesteFeil.FACTORY.dokumentIkkeFunnet(dokument.getJournalpostId(), dokument.getDokumentInfoId(), e).toException();
+        } catch (ManglerTilgangException e) {
+            throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentDokumentTjeneste(e).toException();
+        }
     }
     
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
