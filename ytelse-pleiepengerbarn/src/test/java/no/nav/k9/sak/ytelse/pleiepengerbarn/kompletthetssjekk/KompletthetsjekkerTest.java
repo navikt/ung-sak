@@ -80,7 +80,7 @@ public class KompletthetsjekkerTest {
     private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
     private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
     private KompletthetsjekkerFelles kompletthetsjekkerFelles;
-    private KompletthetsjekkerImpl kompletthetsjekkerImpl;
+    private PsbKompletthetsjekker psbKompletthetsjekker;
     private Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(STARTDATO).build();
     private EntityManager entityManager;
 
@@ -99,7 +99,7 @@ public class KompletthetsjekkerTest {
         kompletthetssjekkerInntektsmelding = new DefaultKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
-        kompletthetsjekkerImpl = new KompletthetsjekkerImpl(
+        psbKompletthetsjekker = new PsbKompletthetsjekker(
             new UnitTestLookupInstanceImpl<>(kompletthetssjekkerSøknad),
             new UnitTestLookupInstanceImpl<>(kompletthetssjekkerInntektsmelding),
             inntektsmeldingTjeneste,
@@ -117,7 +117,7 @@ public class KompletthetsjekkerTest {
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
 
         // Act
-        KompletthetResultat kompletthetResultat = kompletthetsjekkerImpl.vurderForsendelseKomplett(lagRef(behandling));
+        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderForsendelseKomplett(lagRef(behandling));
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isTrue();
@@ -134,7 +134,7 @@ public class KompletthetsjekkerTest {
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act
-        KompletthetResultat kompletthetResultat = kompletthetsjekkerImpl.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
+        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
@@ -143,7 +143,7 @@ public class KompletthetsjekkerTest {
 
         // Act 2
         stp = LocalDate.now().plusWeeks(3);
-        KompletthetResultat kompletthetResultat2 = kompletthetsjekkerImpl.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
+        KompletthetResultat kompletthetResultat2 = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
 
         // Assert
         assertThat(kompletthetResultat2.erOppfylt()).isFalse();
@@ -160,7 +160,7 @@ public class KompletthetsjekkerTest {
         when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
 
         // Act
-        KompletthetResultat kompletthetResultat = kompletthetsjekkerImpl.vurderEtterlysningInntektsmelding(lagRef(behandling, STARTDATO));
+        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, STARTDATO));
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isFalse();
@@ -176,7 +176,7 @@ public class KompletthetsjekkerTest {
         opprettSøknadMedPåkrevdVedlegg(behandling);
 
         // Act
-        KompletthetResultat kompletthetResultat = kompletthetsjekkerImpl.vurderForsendelseKomplett(lagRef(behandling));
+        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderForsendelseKomplett(lagRef(behandling));
 
         // Assert
         assertThat(kompletthetResultat.erOppfylt()).isTrue();

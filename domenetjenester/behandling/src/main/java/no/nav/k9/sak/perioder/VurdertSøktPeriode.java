@@ -51,8 +51,8 @@ public class VurdertSøktPeriode<T> {
         return raw;
     }
 
-    public void justerPeriode(LocalDateInterval interval) {
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(interval.getFomDato(), interval.getTomDato());
+    public void justerUtfall(Utfall utfall) {
+        this.utfall = utfall;
     }
 
     @SuppressWarnings("rawtypes")
