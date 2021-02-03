@@ -1,6 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -11,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -45,15 +49,21 @@ public class SykdomDokumentDto {
     @Valid
     private boolean fremhevet;
 
+    @JsonProperty(value = "links")
+    @Size(max = 100)
+    @Valid
+    private List<ResourceLink> links = new ArrayList<>();
     
     public SykdomDokumentDto(String id, SykdomDokumentType type, boolean benyttet,
-            boolean annenPartErKilde, LocalDate datert, boolean fremhevet) {
+            boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
+            List<ResourceLink> links) {
         this.id = id;
         this.type = type;
         this.benyttet = benyttet;
         this.annenPartErKilde = annenPartErKilde;
         this.datert = datert;
         this.fremhevet = fremhevet;
+        this.links = links;
     }
     
     

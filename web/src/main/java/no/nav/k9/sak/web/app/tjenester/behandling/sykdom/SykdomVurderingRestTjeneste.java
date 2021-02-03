@@ -187,7 +187,7 @@ public class SykdomVurderingRestTjeneste {
                     .getSykdomVurderingVersjoner();
         }
 
-        return sykdomVurderingMapper.map(versjoner);
+        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner);
     }
 
     @POST
