@@ -153,7 +153,6 @@ public class PersoninfoTjeneste {
 
     private static Set<Familierelasjon> mapFamilierelasjoner(List<no.nav.pdl.Familierelasjon> familierelasjoner, List<Sivilstand> sivilstandliste) {
         Set<Familierelasjon> relasjoner = new HashSet<>();
-        // FIXME: utled samme bosted ut fra adresse
 
         familierelasjoner.stream()
             .map(r -> new Familierelasjon(
@@ -286,34 +285,34 @@ public class PersoninfoTjeneste {
                     .utenlandskAdresse(new UtenlandskAdresseResponseProjection().adressenavnNummer().bygningEtasjeLeilighet().postboksNummerNavn().bySted().regionDistriktOmraade().postkode().landkode())
                     .utenlandskAdresseIFrittFormat(new UtenlandskAdresseIFrittFormatResponseProjection().adresselinje1().adresselinje2().adresselinje3().byEllerStedsnavn().postkode().landkode()));
 
-            var person = pdlKlient.hentPerson(query, projection);
+            var personFraPdl = pdlKlient.hentPerson(query, projection);
 
-            var fødselsdato = person.getFoedsel().stream()
+            var fødselsdato = personFraPdl.getFoedsel().stream()
                 .map(Foedsel::getFoedselsdato)
                 .filter(Objects::nonNull)
                 .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
-            var dødssdato = person.getDoedsfall().stream()
+            var dødssdato = personFraPdl.getDoedsfall().stream()
                 .map(Doedsfall::getDoedsdato)
                 .filter(Objects::nonNull)
                 .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
-            var pdlStatus = person.getFolkeregisterpersonstatus().stream()
+            var pdlStatus = personFraPdl.getFolkeregisterpersonstatus().stream()
                 .map(Folkeregisterpersonstatus::getStatus)
                 .findFirst().map(PersonstatusType::fraFregPersonstatus).orElse(PersonstatusType.UDEFINERT);
-            var sivilstand = person.getSivilstand().stream()
+            var sivilstand = personFraPdl.getSivilstand().stream()
                 .map(Sivilstand::getType)
                 .map(st -> SIVSTAND_FRA_FREG.getOrDefault(st, SivilstandType.UOPPGITT))
                 .findFirst().orElse(SivilstandType.UOPPGITT);
-            var statsborgerskap = mapStatsborgerskap(person.getStatsborgerskap());
-            var familierelasjoner = mapFamilierelasjoner(person.getFamilierelasjoner(), person.getSivilstand());
-            var adresser = mapAdresser(person.getBostedsadresse(), person.getKontaktadresse(), person.getOppholdsadresse());
+            var statsborgerskap = mapStatsborgerskap(personFraPdl.getStatsborgerskap());
+            var familierelasjoner = mapFamilierelasjoner(personFraPdl.getFamilierelasjoner(), personFraPdl.getSivilstand());
+            var adresser = mapAdresser(personFraPdl.getBostedsadresse(), personFraPdl.getKontaktadresse(), personFraPdl.getOppholdsadresse());
 
             var fraPDL = new Personinfo.Builder()
                 .medAktørId(aktørId)
                 .medPersonIdent(personIdent)
-                .medNavn(person.getNavn().stream().map(PersoninfoTjeneste::mapNavn).filter(Objects::nonNull).findFirst().orElse(null))
+                .medNavn(personFraPdl.getNavn().stream().map(PersoninfoTjeneste::mapNavn).filter(Objects::nonNull).findFirst().orElse(null))
                 .medFødselsdato(fødselsdato)
                 .medDødsdato(dødssdato)
-                .medNavBrukerKjønn(mapKjønn(person))
+                .medNavBrukerKjønn(mapKjønn(personFraPdl))
                 .medPersonstatusType(pdlStatus)
                 .medSivilstandType(sivilstand)
                 .medLandkode(statsborgerskap)
@@ -325,11 +324,11 @@ public class PersoninfoTjeneste {
             // Kun midlertidig: Legg PDL-adresseinfo på TPS (for å kunne sammenligne i Familierelasjoner)
             fraTPS.setAddresseInfoListPdl(adresser);
 
-            logInnUtOpp(person.getInnflyttingTilNorge(), person.getUtflyttingFraNorge(), person.getOpphold());
+            logInnUtOpp(personFraPdl.getInnflyttingTilNorge(), personFraPdl.getUtflyttingFraNorge(), personFraPdl.getOpphold());
             if (erLike(fraPDL, fraTPS)) {
                 LOG.info("K9SAK PDL full personinfo: like svar");
             } else {
-                LOG.info("K9SAK PDL full personinfo: avvik {}", finnAvvik(fraTPS, fraPDL));
+                LOG.info("K9SAK PDL full personinfo: ulike svar {}", finnAvvik(fraTPS, fraPDL));
             }
         } catch (Exception e) {
             LOG.info("K9SAK PDL full personinfo: error", e);

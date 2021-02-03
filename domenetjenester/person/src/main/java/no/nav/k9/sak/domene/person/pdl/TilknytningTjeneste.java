@@ -47,21 +47,21 @@ public class TilknytningTjeneste {
 
             var geografiskTilknytning = pdlKlient.hentGT(queryGT, projectionGT);
 
-            var diskresjon = hentDiskresjonskode(aktørId);
-            var tilknytning = getTilknytning(geografiskTilknytning);
+            var diskresjonskodeFraPdl = hentDiskresjonskode(aktørId);
+            var tilknytningFraPdl = getTilknytning(geografiskTilknytning);
 
-            if (Objects.equals(geografiskTilknytningFraTps.getDiskresjonskode(), diskresjon)) {
+            if (Objects.equals(geografiskTilknytningFraTps.getDiskresjonskode(), diskresjonskodeFraPdl)) {
                 LOG.info("K9SAK PDL diskresjonskode: like svar");
             } else {
-                LOG.info("K9SAK PDL diskresjonskode: avvik");
+                LOG.info("K9SAK PDL diskresjonskode: ulike svar");
             }
-            if (Objects.equals(geografiskTilknytningFraTps.getTilknytning(), tilknytning)) {
+            if (Objects.equals(geografiskTilknytningFraTps.getTilknytning(), tilknytningFraPdl)) {
                 LOG.info("K9SAK PDL tilknytning: like svar");
             } else {
-                LOG.info("K9SAK PDL tilknytning: avvik tps {} pdl {}", geografiskTilknytningFraTps.getTilknytning(), tilknytning);
+                LOG.info("K9SAK PDL tilknytning: ulike svar TPS->PDL {} {}", geografiskTilknytningFraTps.getTilknytning(), tilknytningFraPdl);
             }
         } catch (Exception e) {
-            LOG.info("K9SAK PDL geografiskTilknytning error", e);
+            LOG.info("K9SAK PDL geografiskTilknytning: error", e);
         }
     }
 
