@@ -75,6 +75,10 @@ public class OrgNummer implements Comparable<OrgNummer>, IndexKey {
         return orgNummer;
     }
     
+    public String getOrgNummer() {
+        return orgNummer;
+    }
+
     @Override
     public String getIndexKey() {
         return orgNummer;

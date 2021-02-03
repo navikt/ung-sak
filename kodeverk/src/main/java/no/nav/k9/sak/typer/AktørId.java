@@ -55,6 +55,10 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
     public String getId() {
         return aktørId;
     }
+
+    public String getAktørId() {
+        return aktørId;
+    }
     
     @Override
     public boolean equals(Object obj) {
