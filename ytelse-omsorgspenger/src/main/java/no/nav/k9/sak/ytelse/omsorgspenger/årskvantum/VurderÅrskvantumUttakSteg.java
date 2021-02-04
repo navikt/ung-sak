@@ -104,6 +104,8 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
             aksjonspunkter.forEach(aksjonspunkt -> {
                 if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(aksjonspunkt)) {
                     aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
+                } else {
+                    throw new IllegalStateException("Ukjent aksjonspunkt fra årskvantum. [Kode=" + aksjonspunkt + "]");
                 }
             });
             return aksjonspunktDefinisjoner;
