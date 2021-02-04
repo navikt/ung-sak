@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
@@ -19,7 +20,7 @@ public class SøknadParser {
         try {
             return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
         } catch (Exception e) {
-            throw SøknadUtbetalingOmsorgspengerFeil.FACTORY.parsefeil(e).toException();
+            throw new DokumentValideringException("Parsefeil i søknad om utbetaling av omsorgspenger", e);
         }
     }
 

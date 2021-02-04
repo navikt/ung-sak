@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingFeil;
+import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @Dependent
@@ -125,7 +125,7 @@ public class InnhentDokumentTjeneste {
         var lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
         if (lås == null) {
             // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-            throw MottattInntektsmeldingFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
+            throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
         }
     }
 

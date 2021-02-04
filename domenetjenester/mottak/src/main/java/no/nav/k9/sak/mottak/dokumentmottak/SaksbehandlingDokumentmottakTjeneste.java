@@ -30,7 +30,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentValidatorProvider dokumentValidatorProvider;
 
-     SaksbehandlingDokumentmottakTjeneste() {
+    SaksbehandlingDokumentmottakTjeneste() {
         // for CDI, jaja
     }
 
@@ -105,7 +105,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
             String feilmelding = toFeilmelding(e);
             // skriver på feilmelding
             m.setFeilmelding(feilmelding);
-            e.getFeil().log(log);
+            log.warn(e.getMessageWithoutLinebreaks(), e);
             valid = false;
         }
 
@@ -117,8 +117,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         try (var pw = new PrintWriter(sw, true)) {
             e.printStackTrace(pw);
             pw.flush();
-            var f = e.getFeil();
-            return String.format("%s: %s\n%s", f.getKode(), f.getFeilmelding(), sw);
+            return String.format("%s\n%s", e.getMessageWithoutLinebreaks(), sw);
         }
     }
 

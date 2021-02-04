@@ -11,11 +11,11 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
-import no.nav.vedtak.exception.VLException;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -52,7 +52,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     }
 
     private void validerLansert() {
-        if (!lansert){
+        if (!lansert) {
             throw new IllegalArgumentException("Funksjonalitet for å ta i mot søknad om utbetaling av omsorgspenger er ikke lansert i dette miljøet");
         }
     }
@@ -97,8 +97,8 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
         }
     }
 
-    private static VLException valideringsfeil(String tekst) {
-        return SøknadUtbetalingOmsorgspengerFeil.FACTORY.valideringsfeilSøknadUtbetalingOmsorgspenger(tekst).toException();
+    private static DokumentValideringException valideringsfeil(String tekst) {
+        return new DokumentValideringException("Feil i søknad om utbetaling av omsorgspenger: " + tekst);
     }
 
 }
