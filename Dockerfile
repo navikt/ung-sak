@@ -14,7 +14,8 @@ COPY web/target/classes/jetty/jaspi-conf.xml /app/conf/
 COPY web/target/app.jar /app/
 COPY web/target/lib/*.jar /app/lib/
 
-# Application Start Command
-COPY build/run-java.sh /
-RUN chmod +x /run-java.sh
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo "
+
+# Application Start Konfigurasjon
+COPY build/init-app.sh /init-scripts/init-app.sh
 
