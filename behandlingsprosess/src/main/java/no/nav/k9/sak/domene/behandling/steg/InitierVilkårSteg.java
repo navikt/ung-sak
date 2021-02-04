@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg;
 
+import java.util.Map;
 import java.util.NavigableSet;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -8,6 +10,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -17,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -85,7 +89,18 @@ public class InitierVilkårSteg implements BehandlingSteg {
             .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
         var vilkårResultat = vilkårBuilder.build();
 
+        validerResultat(vilkårResultat, vilkårPeriodeMap);
+
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+    }
+
+    private void validerResultat(Vilkårene vilkårResultat, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {
+        var vilårene = vilkårResultat.getVilkårene().stream().map(Vilkår::getVilkårType).collect(Collectors.toSet());
+        if (!vilårene.containsAll(vilkårPeriodeMap.keySet())) {
+            throw new IllegalStateException("Vilkårsresultat inneholder ikke alle forventede vilkårtyper: "
+                + vilkårPeriodeMap.keySet()
+                + ", vilkårResultat" + vilkårResultat);
+        }
     }
 
     /**
