@@ -317,32 +317,6 @@ public class VilkårResultatTest {
         assertThat(vilkårPeriode.getUtfall()).isEqualTo(Utfall.OPPFYLT);
     }
 
-    @Test
-    public void skal_fjerne_vilkår() throws Exception {
-        // Arrange
-        final var vilkårResultatBuilder = Vilkårene.builder()
-            .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), Tid.TIDENES_ENDE)), VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.OPPTJENINGSVILKÅRET);
-        final var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
-            .medUtfall(Utfall.IKKE_OPPFYLT)
-            .medAvslagsårsak(Avslagsårsak.SØKER_ER_IKKE_MEDLEM));
-        Vilkårene opprinneligVilkårene = vilkårResultatBuilder.leggTil(vilkårBuilder)
-            .build();
-
-        // Act
-        Vilkårene oppdatertVilkårene = Vilkårene.builderFraEksisterende(opprinneligVilkårene)
-            .fjernVilkår(VilkårType.OPPTJENINGSVILKÅRET)
-            .build();
-
-        // Assert
-        assertThat(oppdatertVilkårene.getVilkårene()).hasSize(1);
-        Vilkår vilkår = oppdatertVilkårene.getVilkårene().get(0);
-        assertThat(vilkår.getVilkårType()).isEqualTo(VilkårType.MEDLEMSKAPSVILKÅRET);
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        final var vilkårPeriode = vilkår.getPerioder().get(0);
-        assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
-    }
-
     private void lagreOgGjenopphenteBehandlingsresultat(Behandling behandling) {
 
         lagreBehandling(behandling);

@@ -106,11 +106,6 @@ public class VilkårResultatBuilder {
         return boundry.getTomDato().isBefore(periode.getTomDato());
     }
 
-    public VilkårResultatBuilder fjernVilkår(VilkårType vilkårType) {
-        kladd.fjernVilkår(vilkårType);
-        return this;
-    }
-
     public VilkårResultatBuilder leggTilIkkeVurderteVilkår(List<DatoIntervallEntitet> intervaller, List<VilkårType> vilkår) {
         vilkår.stream()
             .map(type -> hentBuilderFor(type)
