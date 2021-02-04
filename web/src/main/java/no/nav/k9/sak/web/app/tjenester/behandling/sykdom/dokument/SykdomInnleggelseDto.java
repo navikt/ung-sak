@@ -25,51 +25,50 @@ public class SykdomInnleggelseDto {
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
-    
+
     /**
      * Versjonen man tok utgangspunkt i før endring.
      */
     @JsonProperty(value = "versjon")
     @Size(max = 50)
-    @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String versjon;
-    
+
     @JsonProperty(value = "perioder")
     @Size(max = 1000)
     @Valid
     private List<Periode> perioder = new ArrayList<>();
-    
-    
+
+
     public SykdomInnleggelseDto() {
-        
+
     }
-    
+
     public SykdomInnleggelseDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
-    
+
     public SykdomInnleggelseDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
-    
+
     public SykdomInnleggelseDto(UUID behandlingUuid, String versjon, List<Periode> perioder) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
         this.perioder = perioder;
     }
-    
-    
+
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
+
     public String getVersjon() {
         return versjon;
     }
-    
+
     public List<Periode> getPerioder() {
         return perioder;
     }

@@ -76,19 +76,19 @@ public class SykdomVurderinger {
     public SykdomPerson getPerson() {
         return person;
     }
-    
+
     public void setPerson(SykdomPerson person) {
         this.person = person;
     }
-    
+
     public String getOpprettetAv() {
         return opprettetAv;
     }
-    
+
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
     }
-    
+
     public SykdomVurdering getSisteVurdering() {
         return vurderinger.stream().max(Comparator.naturalOrder()).orElse(null);
     }

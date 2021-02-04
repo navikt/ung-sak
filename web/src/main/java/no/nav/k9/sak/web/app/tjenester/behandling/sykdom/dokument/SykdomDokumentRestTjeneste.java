@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -32,11 +33,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.vedtak.exception.ManglerTilgangException;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
@@ -67,11 +70,11 @@ public class SykdomDokumentRestTjeneste {
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
     private SykdomDokumentRepository sykdomDokumentRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
-    
+
 
     public SykdomDokumentRestTjeneste() {
     }
-    
+
 
     @Inject
     public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
@@ -98,13 +101,21 @@ public class SykdomDokumentRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        
+
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        
-        // TODO: Mapping av sykdominnleggelse:
-        return new SykdomInnleggelseDto(behandling.getUuid(), "0", Collections.emptyList());
+
+        final SykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+
+        return new SykdomInnleggelseDto(
+            behandling.getUuid(),
+            innleggelser.getVersjon().toString(),
+            innleggelser.getPerioder()
+                .stream()
+                .map(
+                    p -> new Periode(p.getFom(), p.getTom()))
+                .collect(Collectors.toList()));
     }
-    
+
     @POST
     @Path(SYKDOM_INNLEGGELSE)
     @Operation(description = "Oppdaterer perioder den pleietrengende er innlagt på sykehus og liknende.",
@@ -118,14 +129,17 @@ public class SykdomDokumentRestTjeneste {
     public void oppdaterSykdomInnleggelse(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomInnleggelseDto sykdomInnleggelse) {
-        
+
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
-        // TODO: Mapping av sykdominnleggelse:
+
+        final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.innleggelseDTOTilSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
+
+        sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
     }
-    
+
     @GET
     @Path(DIAGNOSEKODER)
     @Operation(description = "Henter alle registrerte diagnosekoder på den pleietrengende.",
@@ -143,13 +157,13 @@ public class SykdomDokumentRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        
+
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        
+
         // TODO: Mapping av diagnosekoder:
         return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.emptyList());
     }
-    
+
     @POST
     @Path(DIAGNOSEKODER)
     @Operation(description = "Oppdaterer diagnosekoder på den pleietrengende.",
@@ -163,14 +177,14 @@ public class SykdomDokumentRestTjeneste {
     public void oppdaterDiagnosekoder(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDiagnosekoderDto sykdomDiagnosekoder) {
-        
+
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoder.getBehandlingUuid()).orElseThrow();
         // TODO: Mapping av diagnosekoder:
     }
-    
+
     @GET
     @Path(DOKUMENT_OVERSIKT)
     @Operation(description = "En oversikt over alle dokumenter som er koblet på den pleietrengende behandlingen refererer til.",
@@ -188,12 +202,12 @@ public class SykdomDokumentRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        
+
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         return sykdomDokumentOversiktMapper.map(behandling.getUuid().toString(), dokumenter);
     }
-    
+
     @POST
     @Path(DOKUMENT)
     @Operation(description = "Oppdaterer metainformasjonen om et dokument.",
@@ -207,19 +221,19 @@ public class SykdomDokumentRestTjeneste {
     public void oppdaterDokument(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentEndringDto sykdomDokumentEndringDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentEndringDto.getBehandlingUuid()).orElseThrow();
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
         dokument.setDatert(sykdomDokumentEndringDto.getDatert());
         dokument.setType(sykdomDokumentEndringDto.getType());
         // TODO: Håndtering av versjoner/historikk.
-        
+
         sykdomDokumentRepository.oppdater(dokument);
     }
 
@@ -239,7 +253,7 @@ public class SykdomDokumentRestTjeneste {
     public void leggTilNyttDokument(
             @Parameter
             @NotNull
-            @Valid 
+            @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentOpprettelseDto sykdomDokumentOpprettelseDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentOpprettelseDto.getBehandlingUuid()).orElseThrow();
@@ -249,10 +263,10 @@ public class SykdomDokumentRestTjeneste {
 
         final LocalDateTime nå = LocalDateTime.now();
         final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, sykdomDokumentOpprettelseDto.getJournalpostId(), null, getCurrentUserId(), nå, getCurrentUserId(), nå);
-        
+
         sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
     }
-    
+
     @GET
     @Path(DOKUMENT_INNHOLD)
     @Operation(description = "Laster ned selve dokumentet (innholdet).", summary = ("Laster ned selve dokumentet (innholdet)."), tags = "dokument")
@@ -263,7 +277,7 @@ public class SykdomDokumentRestTjeneste {
             @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid,
-            
+
             @QueryParam(SykdomDokumentIdDto.NAME)
             @Parameter(description = SykdomDokumentIdDto.DESC)
             @NotNull
@@ -284,14 +298,14 @@ public class SykdomDokumentRestTjeneste {
             throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentDokumentTjeneste(e).toException();
         }
     }
-    
+
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {
             return AbacDataAttributter.opprett();
         }
     }
-    
+
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
     }

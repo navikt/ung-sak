@@ -16,14 +16,14 @@ import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "SykdomInnleggelsePeriode")
 @Table(name = "SYKDOM_INNLEGGELSE_PERIODE")
-class SykdomInnleggelsePeriode {
+public class SykdomInnleggelsePeriode {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_INNLEGGELSE_PERIODE")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "SYKDOM_INNLEGGELSE_ID")
-    private SykdomInnleggelse innleggelse;
+    @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
+    private SykdomInnleggelser innleggelser;
 
     @Column(name = "FOM", nullable = false)
     private LocalDate fom;
@@ -43,20 +43,28 @@ class SykdomInnleggelsePeriode {
         //HIBERNATE
     }
 
-    public SykdomInnleggelsePeriode(SykdomInnleggelse innleggelse, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        this.innleggelse = innleggelse;
+    public SykdomInnleggelsePeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.fom = fom;
         this.tom = tom;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
+    public SykdomInnleggelsePeriode(SykdomInnleggelser innleggelser, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        this(fom, tom, opprettetAv, opprettetTidspunkt);
+        this.innleggelser = innleggelser;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public SykdomInnleggelse getInnleggelse() {
-        return innleggelse;
+    public SykdomInnleggelser getInnleggelser() {
+        return innleggelser;
+    }
+
+    public void setInnleggelser(SykdomInnleggelser innleggelser) {
+        this.innleggelser = innleggelser;
     }
 
     public LocalDate getFom() {

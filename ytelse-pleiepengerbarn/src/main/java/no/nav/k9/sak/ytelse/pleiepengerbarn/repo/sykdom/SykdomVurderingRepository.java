@@ -77,10 +77,10 @@ public class SykdomVurderingRepository {
             "From SykdomVurdering as v " +
                 "inner join v.sykdomVurderinger as sv " +
                 "inner join sv.person as p " +
-            "where p.aktoerId = :aktoerId " +
+            "where p.aktørId = :aktørId " +
                 "and v.id = :vurderingId"
             , SykdomVurdering.class);
-        q.setParameter("aktoerId", pleietrengende); // Sjekk mot pleietrengende gjøres av sikkerhetsgrunner.
+        q.setParameter("aktørId", pleietrengende); // Sjekk mot pleietrengende gjøres av sikkerhetsgrunner.
         q.setParameter("vurderingId", vurderingId);
 
         return q.getResultList().stream().findFirst();
@@ -95,10 +95,10 @@ public class SykdomVurderingRepository {
                 "   inner join svv.sykdomVurdering as sv " +
                 "   inner join sv.sykdomVurderinger as svs " +
                 "   inner join svs.person as sp " +
-                "where sp.aktoerId = :aktoerId"
+                "where sp.aktørId = :aktørId"
                 , Saksnummer.class);
 
-        q.setParameter("aktoerId", pleietrengende);
+        q.setParameter("aktørId", pleietrengende);
 
         return q.getResultList();
     }
@@ -175,7 +175,7 @@ public class SykdomVurderingRepository {
                 "inner join vv.sykdomVurdering as v " +
                 "inner join v.sykdomVurderinger as sv " +
                 "inner join sv.person as p " +
-            "where p.aktoerId = :aktoerId " +
+            "where p.aktørId = :aktørId " +
                 "and v.type = :sykdomVurderingType " +
                 "and vv.versjon = " +
                     "( select max(vv2.versjon) " +
@@ -183,7 +183,7 @@ public class SykdomVurderingRepository {
                     "where vv2.sykdomVurdering = vv.sykdomVurdering )"
             , SykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
-        q.setParameter("aktoerId", pleietrengende);
+        q.setParameter("aktørId", pleietrengende);
         return (Collection<SykdomVurderingVersjon>) q.getResultList();
     }
 
@@ -209,7 +209,7 @@ public class SykdomVurderingRepository {
         transaction.begin();
         try {
             final Query q = innerEntityManager.createNativeQuery("INSERT INTO SYKDOM_PERSON (ID, AKTOER_ID, NORSK_IDENTITETSNUMMER) VALUES (nextval('SEQ_SYKDOM_PERSON'), :aktorId, :norskIdentitetsnummer) ON CONFLICT DO NOTHING");
-            q.setParameter("aktorId", person.getAktoerId().getId());
+            q.setParameter("aktorId", person.getAktørId().getId());
             q.setParameter("norskIdentitetsnummer", person.getNorskIdentitetsnummer());
             q.executeUpdate();
             transaction.commit();
@@ -220,7 +220,7 @@ public class SykdomVurderingRepository {
             innerEntityManager.close();
         }
 
-        return findPerson(person.getAktoerId());
+        return findPerson(person.getAktørId());
     }
 
     SykdomVurderinger hentEllerLagre(SykdomVurderinger sykdomVurderinger) {
@@ -245,7 +245,7 @@ public class SykdomVurderingRepository {
             innerEntityManager.close();
         }
 
-        return hentVurderingerForBarn(sykdomVurderinger.getPerson().getAktoerId()).get();
+        return hentVurderingerForBarn(sykdomVurderinger.getPerson().getAktørId()).get();
     }
 
     private Optional<SykdomVurderinger> hentVurderingerForBarn(AktørId pleietrengende) {
@@ -253,16 +253,16 @@ public class SykdomVurderingRepository {
             "select sv " +
                 "From SykdomVurderinger as sv " +
                     "inner join sv.person as p " +
-                "where p.aktoerId = :aktoerId"
+                "where p.aktørId = :aktørId"
             , SykdomVurderinger.class);
-        q.setParameter("aktoerId", pleietrengende);
+        q.setParameter("aktørId", pleietrengende);
 
         return q.getResultList().stream().findFirst();
     }
 
     private SykdomPerson findPerson(AktørId aktørId) {
-        final TypedQuery<SykdomPerson> q = entityManager.createQuery("select p From SykdomPerson p where p.aktoerId = :aktoerId", SykdomPerson.class);
-        q.setParameter("aktoerId", aktørId);
+        final TypedQuery<SykdomPerson> q = entityManager.createQuery("select p From SykdomPerson p where p.aktørId = :aktørId", SykdomPerson.class);
+        q.setParameter("aktørId", aktørId);
         return q.getResultList().stream().findFirst().orElse(null);
     }
 
@@ -270,12 +270,12 @@ public class SykdomVurderingRepository {
     public LocalDateTimeline<SykdomVurderingVersjon> getVurderingstidslinjeFor(SykdomVurderingType type, UUID behandlingUuid) {
         return tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
     }
-    
+
     public LocalDateTimeline<SykdomVurderingVersjon> getSisteVurderingstidslinjeFor(SykdomVurderingType type, AktørId pleietrengende) {
         return tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
     }
-    
-    
+
+
     LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
         final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
         for (SykdomVurderingVersjon vurdering : vurderinger) {
@@ -309,7 +309,7 @@ public class SykdomVurderingRepository {
 
         return tidslinje.compress();
     }
-    
+
     public List<SykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<SykdomVurderingVersjon> tidslinje, SykdomVurderingVersjon nyEndring) {
         final LocalDateTimeline<SykdomVurderingVersjon> endret = new LocalDateTimeline<>(nyEndring.getPerioder().stream().map(p -> new LocalDateSegment<SykdomVurderingVersjon>(p.getFom(), p.getTom(), p.getVurderingVersjon())).collect(Collectors.toList()));
         return endret.combine(tidslinje, new LocalDateSegmentCombinator<SykdomVurderingVersjon, SykdomVurderingVersjon, SykdomPeriodeMedEndring>() {
@@ -325,7 +325,7 @@ public class SykdomVurderingRepository {
                         && nyVersjon.getSykdomVurdering().getId().equals(gammelVersjon.getSykdomVurdering().getId())) {
                     return null;
                 }
-                
+
                 final boolean endrerVurderingSammeBehandling = nyVersjon.getEndretBehandlingUuid().equals(gammelVersjon.getEndretBehandlingUuid());
                 final boolean endrerAnnenVurdering = !endrerVurderingSammeBehandling;
                 return new LocalDateSegment<>(datoInterval, new SykdomPeriodeMedEndring(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()), endrerVurderingSammeBehandling, endrerAnnenVurdering, gammelVersjon));
