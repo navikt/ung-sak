@@ -24,6 +24,7 @@ import no.nav.k9.sak.typer.Periode;
 public class SykdomInnleggelseDto {
 
     @JsonProperty(value = "behandlingUuid", required = true)
+    @NotNull
     @Valid
     private UUID behandlingUuid;
 

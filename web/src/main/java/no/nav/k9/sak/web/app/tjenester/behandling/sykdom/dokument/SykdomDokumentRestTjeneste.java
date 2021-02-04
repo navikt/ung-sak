@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,6 +26,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,6 +58,8 @@ import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 @Path(SykdomDokumentRestTjeneste.BASE_PATH)
 @Transactional
 public class SykdomDokumentRestTjeneste {
+    
+    private static final Logger log = LoggerFactory.getLogger(SykdomDokumentRestTjeneste.class);
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
@@ -121,6 +127,7 @@ public class SykdomDokumentRestTjeneste {
 
     @POST
     @Path(SYKDOM_INNLEGGELSE)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer perioder den pleietrengende er innlagt på sykehus og liknende.",
         summary = "Oppdaterer perioder den pleietrengende er innlagt på sykehus og liknende.",
         tags = "sykdom",
@@ -138,7 +145,7 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
 
-        final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.innleggelseDTOTilSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
+        final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
 
         sykdomDokumentRepository.opprettEllerOppdaterInnleggelser(innleggelser, behandling.getFagsak().getPleietrengendeAktørId());
     }
@@ -169,6 +176,7 @@ public class SykdomDokumentRestTjeneste {
 
     @POST
     @Path(DIAGNOSEKODER)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer diagnosekoder på den pleietrengende.",
         summary = "Oppdaterer diagnosekoder på den pleietrengende.",
         tags = "sykdom",
@@ -213,6 +221,7 @@ public class SykdomDokumentRestTjeneste {
 
     @POST
     @Path(DOKUMENT)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer metainformasjonen om et dokument.",
         summary = "Oppdaterer metainformasjonen om et dokument.",
         tags = "sykdom",
@@ -245,6 +254,7 @@ public class SykdomDokumentRestTjeneste {
      */
     @POST
     @Path(DOKUMENT_NY)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "TEST TEST TEST Oppretter et dokument.",
         summary = "TEST TEST TEST Oppretter et dokument.",
         tags = "sykdom",

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -192,6 +193,7 @@ public class SykdomVurderingRestTjeneste {
 
     @POST
     @Path(VURDERING_VERSJON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer en vurdering.",
         summary = "Oppdaterer en vurdering.",
         tags = "sykdom",
@@ -237,6 +239,7 @@ public class SykdomVurderingRestTjeneste {
 
     @POST
     @Path(VURDERING)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter en ny vurdering.",
         summary = "Oppretter en ny vurdering.",
         tags = "sykdom",

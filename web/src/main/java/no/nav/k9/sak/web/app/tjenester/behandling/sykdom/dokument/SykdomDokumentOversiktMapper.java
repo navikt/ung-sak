@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -58,7 +57,7 @@ public class SykdomDokumentOversiktMapper {
         return ResourceLink.post(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_PATH), "sykdom-dokument-endring", new SykdomDokumentEndringDto(behandlingUuid, id, versjon));
     }
 
-    public SykdomInnleggelser innleggelseDTOTilSykdomInnleggelser(SykdomInnleggelseDto sykdomInnleggelse, String brukerId) {
+    public SykdomInnleggelser toSykdomInnleggelser(SykdomInnleggelseDto sykdomInnleggelse, String brukerId) {
 
         LocalDateTime opprettetTidspunkt = LocalDateTime.now();
         List<SykdomInnleggelsePeriode> perioder = sykdomInnleggelse.getPerioder()
@@ -66,7 +65,7 @@ public class SykdomDokumentOversiktMapper {
             .map(p -> new SykdomInnleggelsePeriode(null, p.getFom(), p.getTom(), brukerId, opprettetTidspunkt))
             .collect(Collectors.toList());
         SykdomInnleggelser innleggelser = new SykdomInnleggelser(
-            Long.parseLong(sykdomInnleggelse.getVersjon()),
+            (sykdomInnleggelse.getVersjon() != null) ? Long.valueOf(sykdomInnleggelse.getVersjon()): null,
             null,
             perioder,
             brukerId,
