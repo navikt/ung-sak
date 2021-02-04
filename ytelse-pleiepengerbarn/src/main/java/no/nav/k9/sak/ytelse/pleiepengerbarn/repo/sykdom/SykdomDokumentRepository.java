@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,7 +11,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.sak.typer.AktørId;
@@ -83,7 +83,14 @@ public class SykdomDokumentRepository {
                     "where p.aktørId = :aktørId )", SykdomInnleggelser.class);
         q.setParameter("aktørId", pleietrengende);
 
-        return q.getSingleResult();
+        final List<SykdomInnleggelser> result = q.getResultList();
+        if (result.isEmpty()) {
+            return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+        }
+        if (result.size() != 1) {
+            throw new IllegalStateException("Forventer maksimalt én rad som svar.");
+        }
+        return result.get(0);
     }
 
     public SykdomInnleggelser hentInnleggelse(UUID behandlingUUID) {
@@ -133,7 +140,7 @@ public class SykdomDokumentRepository {
         q.setParameter("aktørId", pleietrengende);
 
         try {
-            SykdomInnleggelser eksisterende = q.getSingleResult();
+            q.getSingleResult();
         } catch (NoResultException | NonUniqueResultException e) {
             throw new IllegalStateException("Fant ikke unik SykdomInnleggelser å erstatte", e);
         }

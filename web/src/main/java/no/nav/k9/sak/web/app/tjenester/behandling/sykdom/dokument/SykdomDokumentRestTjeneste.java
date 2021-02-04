@@ -6,6 +6,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
@@ -108,12 +110,13 @@ public class SykdomDokumentRestTjeneste {
 
         return new SykdomInnleggelseDto(
             behandling.getUuid(),
-            innleggelser.getVersjon().toString(),
+            (innleggelser.getVersjon() != null) ? innleggelser.getVersjon().toString() : null,
             innleggelser.getPerioder()
                 .stream()
                 .map(
                     p -> new Periode(p.getFom(), p.getTom()))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()),
+            Arrays.asList(ResourceLink.post(SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse-endring", new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
 
     @POST

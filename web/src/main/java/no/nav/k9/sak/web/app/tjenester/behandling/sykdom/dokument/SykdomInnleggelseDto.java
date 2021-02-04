@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -39,6 +40,11 @@ public class SykdomInnleggelseDto {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioder = new ArrayList<>();
+    
+    @JsonProperty(value = "links")
+    @Size(max = 100)
+    @Valid
+    private List<ResourceLink> links = new ArrayList<>();
 
 
     public SykdomInnleggelseDto() {
@@ -53,10 +59,11 @@ public class SykdomInnleggelseDto {
         this.behandlingUuid = behandlingUuid;
     }
 
-    public SykdomInnleggelseDto(UUID behandlingUuid, String versjon, List<Periode> perioder) {
+    public SykdomInnleggelseDto(UUID behandlingUuid, String versjon, List<Periode> perioder, List<ResourceLink> links) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
         this.perioder = perioder;
+        this.links = links;
     }
 
 
