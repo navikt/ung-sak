@@ -4,13 +4,12 @@ import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.k9.sak.mottak.dokumentmottak.InntektsmeldingDokumentType;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @ApplicationScoped
-@DokumentGruppeRef(Brevkode.INNTEKTSMELDING_KODE)
+@InntektsmeldingDokumentType
 public class InntekstsmeldingDokumentValidator implements DokumentValidator {
 
     private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();

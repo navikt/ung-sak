@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -86,8 +85,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     }
 
     private void validerDokumenter(String behandlingId, Collection<MottattDokument> mottatteDokumenter) {
-        Brevkode brevkode = DokumentBrevkodeUtil.unikBrevkode(mottatteDokumenter);
-        DokumentValidator validator = dokumentValidatorProvider.finnValidator(brevkode);
+        DokumentValidator validator = dokumentValidatorProvider.finnValidator(mottatteDokumenter);
         validator.validerDokumenter(behandlingId, mottatteDokumenter);
     }
 
