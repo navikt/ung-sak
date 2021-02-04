@@ -60,7 +60,14 @@ public class SykdomInnleggelser {
             LocalDateTime opprettetTidspunkt) {
         this.versjon = versjon;
         this.vurderinger = vurderinger;
-        this.perioder = perioder.stream().peek(p -> p.setInnleggelser(this)).collect(Collectors.toList());
+        this.perioder = perioder.stream()
+            .map(p -> {
+                if(p.getInnleggelser() != null && p.getInnleggelser() != this) {
+                    throw new IllegalStateException("Potensiell krysskobling av perioder fra andre innleggelser!");
+                }
+                p.setInnleggelser(this);
+                return p;
+            }).collect(Collectors.toCollection(ArrayList::new));
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
@@ -90,6 +97,9 @@ public class SykdomInnleggelser {
     }
 
     public void leggTilPeriode(SykdomInnleggelsePeriode periode) {
+        if(periode.getInnleggelser() != null && periode.getInnleggelser() != this) {
+            throw new IllegalStateException("Potensiell krysskobling av perioder fra andre innleggelser!");
+        }
         periode.setInnleggelser(this);
         perioder.add(periode);
     }
