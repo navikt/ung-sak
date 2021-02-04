@@ -1,5 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Periodetype;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
@@ -10,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -25,18 +38,13 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.util.*;
-import java.util.stream.Collectors;
-
 @FagsakYtelseTypeRef("OMP")
 @BehandlingTypeRef
 @ApplicationScoped
 public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
-    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new EnumMap<>(VilkårType.class);
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private NulledePerioder nulledePerioder;
@@ -152,7 +160,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
-        final var vilkårPeriodeSet = new HashMap<VilkårType, NavigableSet<DatoIntervallEntitet>>();
+        final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));

@@ -364,12 +364,4 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår.getPerioder()).hasSize(3);
         assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(2);
     }
-
-    @Test
-    public void name() {
-        var zero = Duration.ZERO;
-        var string = Duration.parse("PT0S");
-
-        assertThat(zero.equals(string)).isTrue();
-    }
 }

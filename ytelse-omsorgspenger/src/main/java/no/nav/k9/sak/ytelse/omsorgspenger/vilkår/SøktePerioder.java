@@ -45,7 +45,7 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
         var timeline = new LocalDateTimeline<Boolean>(List.of());
         for (LocalDateSegment<Boolean> periode : perioder) {
-            timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            timeline = timeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
         return Collections.unmodifiableNavigableSet(timeline.compress()

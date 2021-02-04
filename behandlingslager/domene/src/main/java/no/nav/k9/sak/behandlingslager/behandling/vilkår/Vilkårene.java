@@ -90,10 +90,6 @@ public class Vilkårene extends BaseEntitet {
         vilkårne.add(vilkår);
     }
 
-    void fjernVilkår(VilkårType vilkårType) {
-        vilkårne.removeIf(it -> it.getVilkårType().equals(vilkårType));
-    }
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{" +
