@@ -84,6 +84,14 @@ public class Arbeidsgiver implements IndexKey {
         return arbeidsgiverAktørId;
     }
 
+    public AktørId getArbeidsgiverAktørId() {
+        return arbeidsgiverAktørId;
+    }
+
+    public String getArbeidsgiverOrgnr() {
+        return arbeidsgiverOrgnr;
+    }
+
     /**
      * Returneer ident for arbeidsgiver. Kan være Org nummer eller Aktør id (dersom arbeidsgiver er en enkelt person -
      * f.eks. for Frilans el.)

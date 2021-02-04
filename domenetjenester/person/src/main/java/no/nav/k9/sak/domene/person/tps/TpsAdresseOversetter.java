@@ -159,13 +159,13 @@ public class TpsAdresseOversetter {
     }
 
     private Adresseinfo konverterMidlertidigPostadresseNorge(Bruker bruker,
-                                                                    AdresseType gjeldende) {
+                                                             AdresseType gjeldende) {
         StrukturertAdresse midlertidigAdresse = ((MidlertidigPostadresseNorge) bruker.getMidlertidigPostadresse()).getStrukturertAdresse();
         return konverterStrukturertAdresse(bruker, midlertidigAdresse, gjeldende);
     }
 
     private Adresseinfo konverterMidlertidigPostadresseUtland(Bruker bruker,
-                                                                     AdresseType gjeldende) {
+                                                              AdresseType gjeldende) {
         UstrukturertAdresse midlertidigAdresse = ((MidlertidigPostadresseUtland) bruker.getMidlertidigPostadresse()).getUstrukturertAdresse();
         return konverterUstrukturertAdresse(bruker, midlertidigAdresse, gjeldende);
     }
@@ -175,13 +175,13 @@ public class TpsAdresseOversetter {
     }
 
     Adresseinfo konverterStrukturertAdresse(Bruker bruker,
-                                                   StrukturertAdresse adresse,
-                                                   AdresseType adresseType) {
+                                            StrukturertAdresse adresse,
+                                            AdresseType adresseType) {
         requireNonNull(adresse);
         if (adresse instanceof Gateadresse) {
             return konverterStrukturertAdresse(bruker, adresseType, (Gateadresse) adresse);
         } else if (adresse instanceof Matrikkeladresse) {
-            return konverterStrukturertAdresse(bruker, adresseType, (Matrikkeladresse) adresse);
+            return konverterStrukturertAdresse(adresseType, (Matrikkeladresse) adresse);
         } else if (adresse instanceof PostboksadresseNorsk) {
             return konverterStrukturertAdresse(bruker, adresseType, (PostboksadresseNorsk) adresse);
         } else if (adresse instanceof StedsadresseNorge) {
@@ -219,13 +219,12 @@ public class TpsAdresseOversetter {
         return byggAdressePeriode(adresseType, adresse, gyldighetsperiode);
     }
 
-    private Adresseinfo konverterStrukturertAdresse(Bruker bruker,
-                                                           AdresseType gjeldende,
-                                                           Matrikkeladresse matrikkeladresse) {
+    private Adresseinfo konverterStrukturertAdresse(AdresseType gjeldende,
+                                                    Matrikkeladresse matrikkeladresse) {
 
         Adresse adresse = konverterStrukturertAdresse(matrikkeladresse);
 
-        return byggAddresseinfo(bruker, gjeldende, adresse);
+        return byggAddresseinfo(gjeldende, adresse);
     }
 
     private String adresseFraBolignummerOgEiendomsnavn(Matrikkeladresse matrikkeladresse) {
@@ -237,11 +236,11 @@ public class TpsAdresseOversetter {
     }
 
     private Adresseinfo konverterStrukturertAdresse(Bruker bruker,
-                                                           AdresseType gjeldende,
-                                                           Gateadresse gateadresse) {
+                                                    AdresseType gjeldende,
+                                                    Gateadresse gateadresse) {
 
         Adresse adresse = konverterStrukturertAdresse(gateadresse);
-        return byggAddresseinfo(bruker, gjeldende, adresse);
+        return byggAddresseinfo(gjeldende, adresse);
     }
 
     private String adresseFraGateadresse(Gateadresse gateadresse) {
@@ -251,34 +250,31 @@ public class TpsAdresseOversetter {
     }
 
     Adresseinfo byggUkjentAdresse(Bruker bruker) {
-        return new Adresseinfo.Builder(AdresseType.UKJENT_ADRESSE,
-            TpsUtil.getPersonIdent(bruker),
-            bruker.getPersonnavn().getSammensattNavn(),
-            tilPersonstatusType(bruker.getPersonstatus())).build();
+        return new Adresseinfo.Builder(
+            AdresseType.UKJENT_ADRESSE
+        )
+            .build();
     }
 
     private Adresseinfo konverterStrukturertAdresse(Bruker bruker,
-                                                           AdresseType gjeldende,
-                                                           StedsadresseNorge stedsadresseNorge) {
+                                                    AdresseType gjeldende,
+                                                    StedsadresseNorge stedsadresseNorge) {
 
         Adresse adresse = konverterStrukturertAdresse(stedsadresseNorge);
-        return byggAddresseinfo(bruker, gjeldende, adresse);
+        return byggAddresseinfo(gjeldende, adresse);
     }
 
     private Adresseinfo konverterStrukturertAdresse(Bruker bruker,
-                                                           AdresseType gjeldende,
-                                                           PostboksadresseNorsk postboksadresseNorsk) {
+                                                    AdresseType gjeldende,
+                                                    PostboksadresseNorsk postboksadresseNorsk) {
         Adresse adresse = konverterStrukturertAdresse(postboksadresseNorsk);
-        return byggAddresseinfo(bruker, gjeldende, adresse);
+        return byggAddresseinfo(gjeldende, adresse);
     }
 
-    private Adresseinfo.Builder adresseBuilderForPerson(Bruker bruker,
-                                                               AdresseType gjeldende) {
-        Personstatus personstatus = bruker.getPersonstatus();
-        return new Adresseinfo.Builder(gjeldende,
-            TpsUtil.getPersonIdent(bruker),
-            TpsUtil.getPersonnavn(bruker),
-            personstatus == null ? null : tilPersonstatusType(personstatus));
+    private Adresseinfo.Builder adresseBuilderForPerson(AdresseType gjeldende) {
+        return new Adresseinfo.Builder(
+            gjeldende
+        );
     }
 
     private String postboksadresselinje(PostboksadresseNorsk postboksadresseNorsk) {
@@ -287,15 +283,15 @@ public class TpsAdresseOversetter {
     }
 
     Adresseinfo konverterUstrukturertAdresse(Bruker bruker,
-                                                    UstrukturertAdresse ustrukturertAdresse,
-                                                    AdresseType gjeldende) {
+                                             UstrukturertAdresse ustrukturertAdresse,
+                                             AdresseType gjeldende) {
 
         Adresse adresse = konverterUstrukturertAdresse(ustrukturertAdresse);
-        return byggAddresseinfo(bruker, gjeldende, adresse);
+        return byggAddresseinfo(gjeldende, adresse);
     }
 
-    private Adresseinfo byggAddresseinfo(Bruker bruker, AdresseType gjeldende, Adresse adresse) {
-        return adresseBuilderForPerson(bruker, gjeldende)
+    private Adresseinfo byggAddresseinfo(AdresseType gjeldende, Adresse adresse) {
+        return adresseBuilderForPerson(gjeldende)
             .medPostNr(adresse.postnummer)
             .medPoststed(adresse.poststed)
             .medLand(adresse.land)

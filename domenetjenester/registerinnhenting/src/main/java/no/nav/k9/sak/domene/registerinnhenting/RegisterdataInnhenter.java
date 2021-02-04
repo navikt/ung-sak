@@ -292,7 +292,7 @@ public class RegisterdataInnhenter {
         final Optional<Boolean> sammeBosted = personinfo.getFamilierelasjoner().stream()
             .filter(fr -> fr.getRelasjonsrolle().equals(rolle) && fr.getPersonIdent().equals(barn.getPersonIdent()))
             .findAny()
-            .map(Familierelasjon::getHarSammeBosted);
+            .map(familierelasjon -> familierelasjon.getHarSammeBosted(personinfo, barn));
         return sammeBosted.orElse(false);
     }
 
