@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -65,15 +67,15 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
         var årskvantumAksjonspunkt = skalDetLagesAksjonspunkt(årskvantumResultat);
 
-        if (årskvantumAksjonspunkt != null) {
+        if (!årskvantumAksjonspunkt.isEmpty()) {
             try {
                 if (log.isDebugEnabled()) { log.debug("Setter behandling på vent etter følgende respons fra årskvantum" +
                     "\nrespons='{}'", JsonObjectMapper.getJson(årskvantumResultat)); }
             } catch (IOException e) {
                 log.info("Feilet i serialisering av årskvantum respons='{}' og exception='{}'", årskvantumResultat, e);
             }
-
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkt).getAksjonspunktDefinisjon()));
+            opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkt);
+            return BehandleStegResultat.utførtMedAksjonspunkter(årskvantumAksjonspunkt);
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -87,18 +89,28 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         }
     }
 
-
-    private AksjonspunktResultat opprettAksjonspunktForÅrskvantum(AksjonspunktDefinisjon apDef) {
-        return AksjonspunktResultat.opprettForAksjonspunkt(apDef);
+    private List<AksjonspunktResultat> opprettAksjonspunktForÅrskvantum(List<AksjonspunktDefinisjon> apDef) {
+        var aksjonspunktResultat = new ArrayList<AksjonspunktResultat>();
+        apDef.forEach(aksjonspunktDefinisjon ->
+            aksjonspunktResultat.add(AksjonspunktResultat.opprettForAksjonspunkt(aksjonspunktDefinisjon))
+        );
+        return aksjonspunktResultat;
     }
 
-    public AksjonspunktDefinisjon skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
-        if (årskvantumResultat.getUttaksplan().getAksjonspunkt() != null) {
-            if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(årskvantumResultat.getUttaksplan().getAksjonspunkt())) {
-                return AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE;
-            }
+    public List<AksjonspunktDefinisjon> skalDetLagesAksjonspunkt(ÅrskvantumResultat årskvantumResultat) {
+        var aksjonspunkter = årskvantumResultat.getUttaksplan().getAksjonspunkter();
+        if (!aksjonspunkter.isEmpty()) {
+            var aksjonspunktDefinisjoner = new ArrayList<AksjonspunktDefinisjon>();
+            aksjonspunkter.forEach(aksjonspunkt -> {
+                if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(aksjonspunkt)) {
+                    aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
+                } else {
+                    throw new IllegalStateException("Ukjent aksjonspunkt fra årskvantum. [Kode=" + aksjonspunkt + "]");
+                }
+            });
+            return aksjonspunktDefinisjoner;
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }
