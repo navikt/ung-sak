@@ -16,6 +16,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 
@@ -35,7 +36,7 @@ public class SykdomDokumentOversiktMapper {
                         LocalDate.now(), // TODO: Sette riktig verdi.
                         LocalDate.now(), // TODO: Sette riktig verdi.
                         LocalDateTime.now(), // TODO: Sette riktig verdi.
-                        false,  // TODO: Sette riktig verdi.
+                        d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
                             linkForEndreDokument(behandlingUuid, "" + d.getId(), "1") // TODO: Sett riktig verdi på versjon.
