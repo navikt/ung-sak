@@ -69,33 +69,36 @@ public class SykdomVurderingOversiktMapper {
 
     
     private List<Periode> finnResterendeVurderingsperioder(NavigableSet<DatoIntervallEntitet> vurderingsperioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
-        final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = new LocalDateTimeline<Boolean>(vurderingsperioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList()));
-
-        return vurderingsperioderTidslinje.combine(vurderingerTidslinje, new LocalDateSegmentCombinator<Boolean, SykdomVurderingVersjon, Boolean>() {
-            @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<Boolean> datoSegment, LocalDateSegment<SykdomVurderingVersjon> datoSegment2) {
-                if (datoSegment2 == null) {
-                    return null;
-                }
-                return new LocalDateSegment<>(datoInterval, true);
-            }
-        }, JoinStyle.LEFT_JOIN).compress().stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
+        return toPeriodeList(
+                    kunPerioderSomIkkeFinnesI(toLocalDateTimeline(vurderingsperioder), vurderingerTidslinje)
+                );
     }
     
     private List<Periode> finnNyeSøknadsperioder(NavigableSet<DatoIntervallEntitet> søknadsperioder, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
-        final LocalDateTimeline<Boolean> søknadsperioderTidslinje = new LocalDateTimeline<Boolean>(søknadsperioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList()));
+        return toPeriodeList(
+                    kunPerioderSomIkkeFinnesI(toLocalDateTimeline(søknadsperioder), saksnummerForPerioder)
+               );
+    }
 
-        return søknadsperioderTidslinje.combine(saksnummerForPerioder, new LocalDateSegmentCombinator<Boolean, HashSet<Saksnummer>, Boolean>() {
+    private static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {
+        return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
+    }
+    
+    private static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
+        return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList()));
+    }
+    
+    private static <T, U> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<U> perioderSomSkalTrekkesFra) {
+        return perioder.combine(perioderSomSkalTrekkesFra, new LocalDateSegmentCombinator<T, U, T>() {
             @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<Boolean> datoSegment, LocalDateSegment<HashSet<Saksnummer>> datoSegment2) {
+            public LocalDateSegment<T> combine(LocalDateInterval datoInterval,
+                    LocalDateSegment<T> datoSegment, LocalDateSegment<U> datoSegment2) {
                 if (datoSegment2 == null) {
-                    return new LocalDateSegment<>(datoInterval, true);
+                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
                 }
                 return null;
             }
-        }, JoinStyle.LEFT_JOIN).compress().stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
+        }, JoinStyle.LEFT_JOIN).compress();
     }
 
     private ResourceLink linkForGetVurdering(String behandlingUuid, String sykdomVurderingId) {
