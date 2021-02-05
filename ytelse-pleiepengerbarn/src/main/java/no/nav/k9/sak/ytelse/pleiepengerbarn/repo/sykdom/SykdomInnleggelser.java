@@ -72,6 +72,10 @@ public class SykdomInnleggelser {
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Long getVersjon() {
         return versjon;
     }

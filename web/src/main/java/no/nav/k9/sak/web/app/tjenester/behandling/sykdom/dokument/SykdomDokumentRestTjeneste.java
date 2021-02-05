@@ -58,7 +58,7 @@ import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 @Path(SykdomDokumentRestTjeneste.BASE_PATH)
 @Transactional
 public class SykdomDokumentRestTjeneste {
-    
+
     private static final Logger log = LoggerFactory.getLogger(SykdomDokumentRestTjeneste.class);
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
@@ -169,6 +169,8 @@ public class SykdomDokumentRestTjeneste {
             BehandlingUuidDto behandlingUuid) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+
+
 
         // TODO: Mapping av diagnosekoder:
         return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.emptyList());

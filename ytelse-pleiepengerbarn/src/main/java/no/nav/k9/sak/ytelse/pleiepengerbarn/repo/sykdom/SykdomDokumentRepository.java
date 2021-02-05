@@ -111,6 +111,9 @@ public class SykdomDokumentRepository {
     }
 
     public void opprettEllerOppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
+        if(innleggelser.getId() != null) {
+            throw new IllegalStateException("Innleggelser skal aldri oppdateres. Man skal alltid inserte ny");
+        }
         SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, innleggelser.getOpprettetAv(), innleggelser.getOpprettetTidspunkt());
         innleggelser.setVurderinger(vurderinger);
         boolean lagNy = innleggelser.getVersjon() == null;
@@ -127,7 +130,7 @@ public class SykdomDokumentRepository {
         entityManager.flush();
     }
 
-    void oppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
+    private void oppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
             "Select si " +
                 "FROM SykdomInnleggelser as si" +

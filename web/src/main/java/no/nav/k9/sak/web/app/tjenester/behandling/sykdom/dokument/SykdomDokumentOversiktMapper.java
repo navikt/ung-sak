@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
@@ -63,7 +65,7 @@ public class SykdomDokumentOversiktMapper {
         List<SykdomInnleggelsePeriode> perioder = sykdomInnleggelse.getPerioder()
             .stream()
             .map(p -> new SykdomInnleggelsePeriode(null, p.getFom(), p.getTom(), brukerId, opprettetTidspunkt))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(ArrayList::new));
         SykdomInnleggelser innleggelser = new SykdomInnleggelser(
             (sykdomInnleggelse.getVersjon() != null) ? Long.valueOf(sykdomInnleggelse.getVersjon()): null,
             null,

@@ -2,8 +2,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -74,6 +76,8 @@ class SykdomDokumentRepositoryTest {
         assertThat(perioderLagret.get(1).getFom()).isEqualTo(LocalDate.of(2021, 1, 15));
         assertThat(perioderLagret.get(1).getTom()).isEqualTo(LocalDate.of(2021, 1, 20));
 
+        innleggelser = kopierInnleggelser(innleggelser);
+
         innleggelser.leggTilPeriode(
             new SykdomInnleggelsePeriode(
                 LocalDate.of(2021, 2, 1),
@@ -84,6 +88,8 @@ class SykdomDokumentRepositoryTest {
         repo.opprettEllerOppdaterInnleggelser(innleggelser, pleietrengende);
 
         innleggelser = repo.hentInnleggelse(pleietrengende);
+
+        perioderLagret = innleggelser.getPerioder();
 
         assertThat(perioderLagret.size()).isEqualTo(3);
         assertThat(perioderLagret.get(0).getInnleggelser()).isEqualTo(innleggelser);
@@ -113,7 +119,7 @@ class SykdomDokumentRepositoryTest {
         assertThat(innleggelser.getOpprettetAv()).isEqualTo(opprettetAv);
 
         List<SykdomInnleggelsePeriode> perioderLagret = innleggelser.getPerioder();
-
+        innleggelser = kopierInnleggelser(innleggelser);
         innleggelser.leggTilPeriode(
             new SykdomInnleggelsePeriode(
                 LocalDate.of(2021, 2, 1),
@@ -146,5 +152,13 @@ class SykdomDokumentRepositoryTest {
                 nå));
         final SykdomInnleggelser innleggelser = new SykdomInnleggelser(null, null, perioder, opprettetAv, nå);
         return innleggelser;
+    }
+
+    private SykdomInnleggelser kopierInnleggelser(SykdomInnleggelser i) {
+        List<SykdomInnleggelsePeriode> perioder = i.getPerioder().stream().map(p -> {
+            return new SykdomInnleggelsePeriode(p.getFom(), p.getTom(), p.getOpprettetAv(), p.getOpprettetTidspunkt());
+        }).collect(Collectors.toCollection(ArrayList::new));
+
+        return new SykdomInnleggelser(i.getVersjon(), i.getVurderinger(), perioder, i.getOpprettetAv(), i.getOpprettetTidspunkt());
     }
 }
