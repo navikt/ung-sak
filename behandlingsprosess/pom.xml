@@ -43,13 +43,6 @@
 			<artifactId>sensu-klient</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <version>5.7.1</version>
-            <scope>test</scope>
-        </dependency>
-
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
