@@ -53,6 +53,12 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>risikoklassifisering</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-migrationsupport</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 </project>
