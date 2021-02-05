@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
@@ -26,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @ApplicationScoped
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
+    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder, NavigableSet<DatoIntervallEntitet> søknadsperioder) {
 
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
                 behandlingUuid, saksnummer, saksnummerForPerioder, vurderingerTidslinje
@@ -35,12 +37,13 @@ public class SykdomVurderingOversiktMapper {
             .stream()
             .map(ds -> ds.getValue())
             .collect(Collectors.toList());
-
+        
         return new SykdomVurderingOversikt(
                 elements,
                 Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))), // TODO: Riktig verdi
                 Arrays.asList(new Periode(LocalDate.now().minusDays(8), LocalDate.now())), // TODO: Riktig verdi
-                Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())), // TODO: Riktig verdi
+                //Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())), // TODO: Riktig verdi
+                søknadsperioder.stream().map(d -> new Periode(d.getFomDato(), d.getTomDato())).collect(Collectors.toList()),
                 Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
                 );
     }

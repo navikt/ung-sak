@@ -4,8 +4,13 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -73,6 +80,7 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingMapper sykdomVurderingMapper;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
+    private UttakRepository uttakRepository;
 
 
     public SykdomVurderingRestTjeneste() {
@@ -83,13 +91,14 @@ public class SykdomVurderingRestTjeneste {
     public SykdomVurderingRestTjeneste(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
             BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper,
             SykdomVurderingMapper sykdomVurderingMapper, SykdomVurderingRepository sykdomVurderingRepository,
-            SykdomDokumentRepository sykdomDokumentRepository) {
+            SykdomDokumentRepository sykdomDokumentRepository, UttakRepository uttakRepository) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingOversiktMapper = sykdomVurderingOversiktMapper;
         this.sykdomVurderingMapper = sykdomVurderingMapper;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.uttakRepository = uttakRepository;
     }
 
     @GET
@@ -140,7 +149,9 @@ public class SykdomVurderingRestTjeneste {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
 
-        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), vurderinger, saksnummerForPerioder);
+        final NavigableSet<DatoIntervallEntitet> søknadsperioder = getSøknadsperioder(behandling.getUuid());
+        
+        return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), vurderinger, saksnummerForPerioder, søknadsperioder);
     }
 
     private LocalDateTimeline<SykdomVurderingVersjon> hentVurderinger(SykdomVurderingType sykdomVurderingType, final Behandling behandling) {
@@ -300,5 +311,15 @@ public class SykdomVurderingRestTjeneste {
     
     private static SykdomVurderingEndringResultatDto toSykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndring> perioderMedEndringer) {
         return new SykdomVurderingEndringResultatDto(perioderMedEndringer.stream().map(p -> new SykdomPeriodeMedEndringDto(p)).collect(Collectors.toList()));
+    }
+    
+    
+    public NavigableSet<DatoIntervallEntitet> getSøknadsperioder(UUID behandlingUuid) {
+        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingUuid);
+        if (søknadsperioder.isEmpty()) {
+            return Collections.emptyNavigableSet();
+        } else {
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(søknadsperioder.get().getMaksPeriode())));
+        }
     }
 }
