@@ -28,29 +28,32 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @ApplicationScoped
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder, NavigableSet<DatoIntervallEntitet> søknadsperioder, NavigableSet<DatoIntervallEntitet> vurderingsperioder) {
+    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder, NavigableSet<DatoIntervallEntitet> søknadsperioder, NavigableSet<DatoIntervallEntitet> vurderingsperioder) {
 
+        final List<Periode> nyeSøknadsperioder = finnNyeSøknadsperioder(søknadsperioder, saksnummerForPerioder);
+        final LocalDateTimeline<Set<Saksnummer>> saksnummertidslinjeeMedNyePerioder = saksnummertidslinjeeMedNyePerioder(saksnummerForPerioder, søknadsperioder, saksnummer);
+        
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
-                behandlingUuid, saksnummer, saksnummerForPerioder, vurderingerTidslinje
+                behandlingUuid, saksnummer, saksnummertidslinjeeMedNyePerioder, vurderingerTidslinje
             )
             .compress()
             .stream()
             .map(ds -> ds.getValue())
             .collect(Collectors.toList());
-        
+        // TODO: saksnummerForPerioder + finnNyeSøknadsperioder
         return new SykdomVurderingOversikt(
                 elements,
                 finnResterendeVurderingsperioder(vurderingsperioder, vurderingerTidslinje),
-                finnNyeSøknadsperioder(søknadsperioder, saksnummerForPerioder),
+                nyeSøknadsperioder,
                 søknadsperioder.stream().map(d -> new Periode(d.getFomDato(), d.getTomDato())).collect(Collectors.toList()),
                 Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
                 );
     }
     
-    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<HashSet<Saksnummer>> søktePerioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
-        return vurderingerTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingVersjon, HashSet<Saksnummer>, SykdomVurderingOversiktElement>() {
+    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<Set<Saksnummer>> søktePerioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
+        return vurderingerTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingVersjon, Set<Saksnummer>, SykdomVurderingOversiktElement>() {
             @Override
-            public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingVersjon> vurdering, LocalDateSegment<HashSet<Saksnummer>> relevanteSaksnummer) {
+            public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingVersjon> vurdering, LocalDateSegment<Set<Saksnummer>> relevanteSaksnummer) {
                 final String sykdomVurderingId = "" + vurdering.getValue().getSykdomVurdering().getId();
                 final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
                 final int antallSomBrukerVurdering = s.size();
@@ -74,10 +77,31 @@ public class SykdomVurderingOversiktMapper {
                 );
     }
     
-    private List<Periode> finnNyeSøknadsperioder(NavigableSet<DatoIntervallEntitet> søknadsperioder, LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder) {
+    private List<Periode> finnNyeSøknadsperioder(NavigableSet<DatoIntervallEntitet> søknadsperioder, LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder) {
         return toPeriodeList(
                     kunPerioderSomIkkeFinnesI(toLocalDateTimeline(søknadsperioder), saksnummerForPerioder)
                );
+    }
+    
+    private static LocalDateTimeline<Set<Saksnummer>> saksnummertidslinjeeMedNyePerioder(LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder, NavigableSet<DatoIntervallEntitet> nyeSøknadsperioder, Saksnummer saksnummer) {
+        final LocalDateTimeline<Set<Saksnummer>> nyTidslinje = new LocalDateTimeline<Set<Saksnummer>>(nyeSøknadsperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Collections.singleton(saksnummer))).collect(Collectors.toList()));
+        return saksnummerForPerioder.union(nyTidslinje, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
+            @Override
+            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval,
+                    LocalDateSegment<Set<Saksnummer>> datoSegment,
+                    LocalDateSegment<Set<Saksnummer>> datoSegment2) {
+                if (datoSegment == null) {
+                    return new LocalDateSegment<Set<Saksnummer>>(datoInterval, datoSegment2.getValue());
+                }
+                if (datoSegment2 == null) {
+                    return new LocalDateSegment<Set<Saksnummer>>(datoInterval, datoSegment.getValue());
+                }
+                
+                final Set<Saksnummer> saksnumre = new HashSet<>(datoSegment.getValue());
+                saksnumre.addAll(datoSegment2.getValue());
+                return new LocalDateSegment<Set<Saksnummer>>(datoInterval, saksnumre);
+            }
+        });
     }
 
     private static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {

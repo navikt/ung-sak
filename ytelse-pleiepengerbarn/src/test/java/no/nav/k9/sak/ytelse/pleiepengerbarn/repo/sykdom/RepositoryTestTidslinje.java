@@ -6,11 +6,10 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -54,13 +53,13 @@ class RepositoryTestTidslinje {
 
         when(repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør)).thenCallRealMethod();
 
-        LocalDateTimeline<HashSet<Saksnummer>> timeline = repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør);
+        LocalDateTimeline<Set<Saksnummer>> timeline = repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør);
 
         assertThat(timeline.stream().count()).isEqualTo(3);
 
-        List<LocalDateSegment<HashSet<Saksnummer>>> segments = timeline.stream().collect(Collectors.toList());
+        List<LocalDateSegment<Set<Saksnummer>>> segments = timeline.stream().collect(Collectors.toList());
 
-        LocalDateSegment<HashSet<Saksnummer>> segment = segments.get(0);
+        LocalDateSegment<Set<Saksnummer>> segment = segments.get(0);
         assertThat(segment.getFom()).isEqualTo(LocalDate.of(2021, 1, 1).toString());
         assertThat(segment.getTom()).isEqualTo(LocalDate.of(2021, 1, 10).toString());
         assertThat(segment.getValue().containsAll(Arrays.asList(s1, s2)));

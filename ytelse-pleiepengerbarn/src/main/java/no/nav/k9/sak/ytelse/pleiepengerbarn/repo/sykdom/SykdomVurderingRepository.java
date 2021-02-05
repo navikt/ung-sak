@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -116,32 +117,30 @@ public class SykdomVurderingRepository {
         return q.getResultList();
     }
 
-     public LocalDateTimeline<HashSet<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
-        final Collection<Saksnummer> saksnummere =  hentAlleSaksnummer(pleietrengendeAktørId);
-
-        final Collection<LocalDateSegment<HashSet<Saksnummer>>> segments = new ArrayList<>();
+     public LocalDateTimeline<Set<Saksnummer>> hentSaksnummerForSøktePerioder(AktørId pleietrengendeAktørId) {
+        final Collection<Saksnummer> saksnummere = hentAlleSaksnummer(pleietrengendeAktørId);
+        final Collection<LocalDateSegment<Set<Saksnummer>>> segments = new ArrayList<>();
 
         for (Saksnummer saksnummer : saksnummere) {
             final Collection<SykdomSøktPeriode> søktePerioder = hentAlleSøktePerioder(saksnummer);
             for (SykdomSøktPeriode periode : søktePerioder) {
-                HashSet<Saksnummer> sett = new HashSet<>();
+                Set<Saksnummer> sett = new HashSet<>();
                 sett.add(saksnummer);
-                segments.add(new LocalDateSegment<HashSet<Saksnummer>>(periode.getFom(), periode.getTom(), sett));
+                segments.add(new LocalDateSegment<Set<Saksnummer>>(periode.getFom(), periode.getTom(), sett));
             }
         }
 
-        final LocalDateTimeline<HashSet<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<HashSet<Saksnummer>, HashSet<Saksnummer>, HashSet<Saksnummer>>() {
+        final LocalDateTimeline<Set<Saksnummer>> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
             @Override
-            public LocalDateSegment<HashSet<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<HashSet<Saksnummer>> datoSegment, LocalDateSegment<HashSet<Saksnummer>> datoSegment2) {
-                HashSet<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
+            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval, LocalDateSegment<Set<Saksnummer>> datoSegment, LocalDateSegment<Set<Saksnummer>> datoSegment2) {
+                Set<Saksnummer> kombinerteSaksnumre = new HashSet<>(datoSegment.getValue());
                 kombinerteSaksnumre.addAll(datoSegment2.getValue());
 
                 return new LocalDateSegment<>(datoInterval, kombinerteSaksnumre);
             }
         });
 
-        final LocalDateTimeline<HashSet<Saksnummer>> saksnummerForPerioder = tidslinje.compress();
-        return saksnummerForPerioder;
+        return tidslinje.compress();
     }
 
     public List<SykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
