@@ -37,7 +37,7 @@
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+        <junit.version>5.7.1</junit.version>
         <felles.version>3.0.82</felles.version>
 
         <fp-kontrakter.version>5.1-20201223140505-5ac989f</fp-kontrakter.version>
@@ -454,13 +454,13 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
-                <version>5.7.1</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
-                <version>5.7.1</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
 

@@ -43,13 +43,6 @@
 			<artifactId>sensu-klient</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
@@ -60,6 +53,12 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>risikoklassifisering</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-migrationsupport</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 </project>
