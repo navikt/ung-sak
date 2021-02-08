@@ -89,6 +89,9 @@ public class PersoninfoTjeneste {
     private static final String HARDKODET_POSTNR = "XXXX";
     private static final String HARDKODET_POSTSTED = "UKJENT";
 
+    private static final Set<Sivilstandstype> JURIDISK_GIFT = Set.of(Sivilstandstype.GIFT, Sivilstandstype.SEPARERT,
+        Sivilstandstype.REGISTRERT_PARTNER, Sivilstandstype.SEPARERT_PARTNER);
+
     private static final Map<Sivilstandstype, SivilstandType> SIVSTAND_FRA_FREG = ofEntries(
         entry(Sivilstandstype.UOPPGITT, SivilstandType.UOPPGITT),
         entry(Sivilstandstype.UGIFT, SivilstandType.UGIFT),
@@ -163,7 +166,8 @@ public class PersoninfoTjeneste {
             )
             .forEach(relasjoner::add);
         sivilstandliste.stream()
-            .filter(rel -> Sivilstandstype.GIFT.equals(rel.getType()) || Sivilstandstype.REGISTRERT_PARTNER.equals(rel.getType()))
+            .filter(rel -> JURIDISK_GIFT.contains(rel.getType()))
+            .filter(rel -> rel.getRelatertVedSivilstand() != null)
             .map(r -> new Familierelasjon(new PersonIdent(r.getRelatertVedSivilstand()), mapRelasjonsrolle(r.getType()), false))
             .forEach(relasjoner::add);
         return relasjoner;
@@ -178,7 +182,7 @@ public class PersoninfoTjeneste {
     }
 
     private static Adresseinfo mapUkjentadresse(UkjentBosted ukjentBosted) {
-        return Adresseinfo.builder(AdresseType.UKJENT_ADRESSE).build();
+        return Adresseinfo.builder(AdresseType.UKJENT_ADRESSE).medLand(Landkoder.UOPPGITT_UKJENT.getKode()).build();
     }
 
     private static Adresseinfo mapUtenlandskadresse(AdresseType type, UtenlandskAdresse utenlandskAdresse) {
@@ -256,7 +260,7 @@ public class PersoninfoTjeneste {
     public void hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent, Personinfo fraTPS) {
         try {
             var query = new HentPersonQueryRequest();
-            query.setIdent(aktørId.getId());
+            query.setIdent(personIdent.getIdent());
             var projection = new PersonResponseProjection()
                 .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
                 .foedsel(new FoedselResponseProjection().foedselsdato())
@@ -370,11 +374,11 @@ public class PersoninfoTjeneste {
         String famRelAntall = famRelSammeAntall ? "" : String.format(" antall familierelasjon:  PDL=%s  TPS=%s", famRelPdlSize, famRelTpsSize);
         String famRelAvvik = famRelSammeAntall ? sammenligneFamilierelasjoner(tps, pdl) : "";
 
-        String adresse = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList())  ? ""
+        String adresse = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList()) ? ""
             : " adresse " + tps.getAdresseInfoList().stream().map(Adresseinfo::getGjeldendePostadresseType).collect(Collectors.toList()) + " PDL " + pdl.getAdresseInfoList().stream().map(Adresseinfo::getGjeldendePostadresseType).collect(Collectors.toList());
-        String adresse2 = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList())  ? ""
+        String adresse2 = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList()) ? ""
             : " adresse2 " + tps.getAdresseInfoList().stream().map(Adresseinfo::getPostNr).collect(Collectors.toList()) + " PDL " + pdl.getAdresseInfoList().stream().map(Adresseinfo::getPostNr).collect(Collectors.toList());
-        String adresse3 = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList())  ? ""
+        String adresse3 = pdl.getAdresseInfoList().size() == tps.getAdresseInfoList().size() && pdl.getAdresseInfoList().containsAll(tps.getAdresseInfoList()) ? ""
             : " adresse3 " + tps.getAdresseInfoList().stream().map(Adresseinfo::getLand).collect(Collectors.toList()) + " PDL " + pdl.getAdresseInfoList().stream().map(Adresseinfo::getLand).collect(Collectors.toList());
 
         return "Avvik" + navn + kjonn + fdato + ddato + status + sivstand + land + region + famRelAntall + famRelAvvik + adresse + adresse2 + adresse3;
