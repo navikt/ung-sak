@@ -24,6 +24,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class Brevkode implements Kodeverdi {
 
+    public static final String SØKNAD_UTBETALING_OMS_KODE = "SØKNAD_UTBETALING_OMS";
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
     private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
@@ -31,6 +32,8 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
     public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023");
     public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02");
+    public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01");
+
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null);
 
@@ -41,7 +44,9 @@ public class Brevkode implements Kodeverdi {
     @JsonValue
     private String kode;
 
-    /** intern ctor for registrerte koder. */
+    /**
+     * intern ctor for registrerte koder.
+     */
     private Brevkode(String kode, String offisiellKode) {
         this(kode);
         this.offisiellKode = offisiellKode;
@@ -54,7 +59,9 @@ public class Brevkode implements Kodeverdi {
         }
     }
 
-    /** value object ctor - brukes f.eks av Jax-Rs dersom spesifiseres direkte. */
+    /**
+     * value object ctor - brukes f.eks av Jax-Rs dersom spesifiseres direkte.
+     */
     protected Brevkode(String kode) {
         this.kode = Objects.requireNonNull(kode, "kode");
     }

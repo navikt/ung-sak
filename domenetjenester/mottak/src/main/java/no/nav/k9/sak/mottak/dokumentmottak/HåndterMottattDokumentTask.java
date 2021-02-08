@@ -1,5 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,13 +10,13 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
-import no.nav.k9.sak.mottak.inntektsmelding.InntektsmeldingParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -35,7 +36,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
-    private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
+    private DokumentValidatorProvider dokumentValidatorProvider;
 
     HåndterMottattDokumentTask() {
         // for CDI proxy
@@ -44,18 +45,20 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     @Inject
     public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider,
                                       InnhentDokumentTjeneste innhentDokumentTjeneste,
-                                      MottatteDokumentTjeneste mottatteDokumentTjeneste) {
+                                      MottatteDokumentTjeneste mottatteDokumentTjeneste,
+                                      DokumentValidatorProvider dokumentValidatorProvider) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.innhentDokumentTjeneste = innhentDokumentTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
+        this.dokumentValidatorProvider = dokumentValidatorProvider;
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var fagsakId = prosessTaskData.getFagsakId();
-        var behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
 
         // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
@@ -69,25 +72,23 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
             return;
         }
 
-        mottatteDokumenter.forEach((m -> {
-            if (behandlingId == null && m.harPayload()) {
-                validerMelding(m);
-            }
-        }));
+        validerDokumenter(behandlingId, mottatteDokumenter);
 
         mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
 
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
-        innhentDokumentTjeneste.utfør(fagsak, mottatteDokumenter);
-    }
-
-    private void validerMelding(MottattDokument m) {
-        // TODO støtter bare inntektsmelding her foreløpig
-        inntektsmeldingParser.xmlTilWrapper(m); // gjør en tidlig validering
+        innhentDokumentTjeneste.mottaDokument(fagsak, mottatteDokumenter);
     }
 
     @Override
     protected List<String> identifiserBehandling(ProsessTaskData prosessTaskData) {
         return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId()).stream().map(String::valueOf).collect(Collectors.toList());
     }
+
+    private void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter) {
+        Brevkode brevkode = DokumentBrevkodeUtil.unikBrevkode(mottatteDokumenter);
+        DokumentValidator validator = dokumentValidatorProvider.finnValidator(brevkode);
+        validator.validerDokumenter(behandlingId, mottatteDokumenter);
+    }
+
 }

@@ -22,7 +22,7 @@ public abstract class MottattInntektsmeldingWrapper<S> {
         } else if (skjema instanceof no.seres.xsd.nav.inntektsmelding_m._20181211.InntektsmeldingM) {
             return new MottattDokumentWrapperInntektsmelding(journalpostId, (no.seres.xsd.nav.inntektsmelding_m._20181211.InntektsmeldingM) skjema);
         }
-        throw MottattInntektsmeldingFeil.FACTORY.ukjentSkjemaType(skjema.getClass().getCanonicalName()).toException();
+        throw MottattInntektsmeldingException.FACTORY.ukjentSkjemaType(skjema.getClass().getCanonicalName());
     }
 
     public S getSkjema() {

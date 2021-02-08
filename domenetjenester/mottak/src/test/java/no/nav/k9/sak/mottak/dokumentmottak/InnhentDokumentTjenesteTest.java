@@ -1,4 +1,4 @@
-package no.nav.k9.sak.mottak.inntektsmelding;
+package no.nav.k9.sak.mottak.dokumentmottak;
 
 import static java.time.LocalDate.now;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,15 +37,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakTestUtil;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
-import no.nav.k9.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
-import no.nav.k9.sak.mottak.dokumentmottak.Kompletthetskontroller;
-import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -56,7 +51,7 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(JpaExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class DokumentmottakerInntektsmeldingTest {
+public class InnhentDokumentTjenesteTest {
 
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
@@ -80,9 +75,9 @@ public class DokumentmottakerInntektsmeldingTest {
     @Mock
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     @Mock
-    private UttakTjeneste uttakTjeneste;
+    private Dokumentmottaker dokumentmottaker;
 
-    private DokumentmottakerInntektsmelding dokumentmottaker;
+    private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private DokumentmottakerFelles dokumentmottakerFelles;
 
     @BeforeEach
@@ -96,14 +91,17 @@ public class DokumentmottakerInntektsmeldingTest {
             behandlendeEnhetTjeneste,
             historikkinnslagTjeneste));
 
-        dokumentmottaker = Mockito.spy(new DokumentmottakerInntektsmelding(dokumentmottakerFelles,
-            mottatteDokumentTjeneste,
+        innhentDokumentTjeneste = Mockito.spy(new InnhentDokumentTjeneste(
+            new UnitTestLookupInstanceImpl<>(dokumentmottaker),
+            dokumentmottakerFelles,
             behandlingsoppretter,
             kompletthetskontroller,
             repositoryProvider));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
+
+        when(dokumentmottaker.getBehandlingÅrsakType()).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
     }
 
     @Test
@@ -123,11 +121,11 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), revurderingBehandling.getFagsak());
+        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
         verify(kompletthetskontroller).asynkVurderKompletthet(revurderingBehandling);
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
     @Test
@@ -150,12 +148,12 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), revurderingBehandling.getFagsak());
+        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
-        verify(dokumentmottaker).asynkVurderKompletthetForÅpenBehandling(revurderingBehandling);
+        verify(innhentDokumentTjeneste).asynkVurderKompletthetForÅpenBehandling(revurderingBehandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
         verify(kompletthetskontroller).asynkVurderKompletthet(revurderingBehandling);
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
     }
 
     @Test
@@ -170,11 +168,11 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), behandling.getFagsak());
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
         verify(kompletthetskontroller).asynkVurderKompletthet(behandling);
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
     @Test
@@ -189,11 +187,11 @@ public class DokumentmottakerInntektsmeldingTest {
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), behandling.getFagsak());
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert - sjekk flyt
         verify(kompletthetskontroller).asynkVurderKompletthet(behandling);
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
     }
 
     @Test
@@ -210,16 +208,15 @@ public class DokumentmottakerInntektsmeldingTest {
         when(revurdering.getFagsakId()).thenReturn(behandling.getFagsakId());
         when(revurdering.getFagsak()).thenReturn(behandling.getFagsak());
         when(revurdering.getAktørId()).thenReturn(behandling.getAktørId());
-        
+
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
         when(behandlingsoppretter.opprettNyBehandlingFra(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), behandling.getFagsak());
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
 
         // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(revurdering, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurdering);
     }
 
     @Test
@@ -228,16 +225,17 @@ public class DokumentmottakerInntektsmeldingTest {
         Fagsak fagsak = DokumentmottakTestUtil.byggFagsak(AktørId.dummy(), new Saksnummer("123"), fagsakRepository);
         MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(123L, "", now(), "123", Brevkode.INNTEKTSMELDING);
         Behandling førstegangsbehandling = mock(Behandling.class);
+        when(førstegangsbehandling.getFagsak()).thenReturn(fagsak);
         when(førstegangsbehandling.getAktørId()).thenReturn(AktørId.dummy());
         when(førstegangsbehandling.getFagsakId()).thenReturn(fagsak.getId());
         when(behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty())).thenReturn(førstegangsbehandling);
 
         // Act
-        dokumentmottaker.mottaDokument(List.of(mottattDokument), fagsak);
+        innhentDokumentTjeneste.mottaDokument(fagsak, List.of(mottattDokument));
 
         // Assert
         verify(behandlingsoppretter).opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVedlegg(fagsak.getId(), mottattDokument.getJournalpostId(), mottattDokument.getType());
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), førstegangsbehandling);
     }
 
     private Aksjonspunkt opprettAksjonspunkt(Behandling behandling,

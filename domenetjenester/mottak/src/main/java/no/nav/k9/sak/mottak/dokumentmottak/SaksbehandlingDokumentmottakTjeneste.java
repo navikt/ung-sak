@@ -11,19 +11,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 
@@ -34,18 +29,18 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private ProsessTaskRepository prosessTaskRepository;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
-    private Instance<Dokumentmottaker> mottakere;
+    private DokumentValidatorProvider dokumentValidatorProvider;
 
-    public SaksbehandlingDokumentmottakTjeneste() {
+    SaksbehandlingDokumentmottakTjeneste() {
         // for CDI, jaja
     }
 
     @Inject
     public SaksbehandlingDokumentmottakTjeneste(ProsessTaskRepository prosessTaskRepository,
-                                                @Any Instance<Dokumentmottaker> mottakere,
+                                                DokumentValidatorProvider dokumentValidatorProvider,
                                                 MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
-        this.mottakere = mottakere;
+        this.dokumentValidatorProvider = dokumentValidatorProvider;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
     }
 
@@ -54,7 +49,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         int antallOk = 0;
         int antall = 0;
 
-        var fagsakIder = saksdokumenter.stream().map(s -> s.getFagsakId()).collect(Collectors.toSet());
+        var fagsakIder = saksdokumenter.stream().map(InngåendeSaksdokument::getFagsakId).collect(Collectors.toSet());
         if (fagsakIder.size() != 1) {
             throw new UnsupportedOperationException("Kan kun angi saksdokumenter for samme fagsak. Fikk: " + fagsakIder);
         }
@@ -81,7 +76,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
             }
             MottattDokument mottattDokument = builder.build();
 
-            boolean ok = valider(mottattDokument, saksdokument.getFagsakYtelseType());
+            boolean ok = valider(mottattDokument);
             if (ok) {
                 antallOk++;
             }
@@ -102,37 +97,41 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
     }
 
-    private boolean valider(MottattDokument m, FagsakYtelseType ytelseType) {
+    private boolean valider(MottattDokument m) {
+        validerBrevkode(m); //feiler hardt ved feil brevkode
+
         boolean valid = true;
-        var dokumentmottaker = finnMottaker(m.getType().getKode(), ytelseType);
+        DokumentValidator dokumentValidator = dokumentValidatorProvider.finnValidator(m.getType());
         try {
-            dokumentmottaker.validerDokument(m, ytelseType);
-        } catch (MottattInntektsmeldingException e) {
+            dokumentValidator.validerDokument(m);
+        } catch (DokumentValideringException e) {
             String feilmelding = toFeilmelding(e);
             // skriver på feilmelding
             m.setFeilmelding(feilmelding);
-            e.getFeil().log(log);
+            log.warn(e.getMessageWithoutLinebreaks(), e);
             valid = false;
         }
 
         return valid;
     }
 
-    private String toFeilmelding(TekniskException e) {
+    private void validerBrevkode(MottattDokument mottattDokument) {
+        Brevkode brevkodeBasertPåInnhold = InnholdTilBrevkodeUtleder.utledForventetBrevkode(mottattDokument.getPayload());
+        if (brevkodeBasertPåInnhold == null) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men innholdet hadde ikke forventet format. Gjelder " + mottattDokument.getJournalpostId());
+        }
+        else if (!brevkodeBasertPåInnhold.equals(mottattDokument.getType())) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men forventer " + brevkodeBasertPåInnhold + " basert på innhold. Gjelder " + mottattDokument.getJournalpostId());
+        }
+    }
+
+    private String toFeilmelding(DokumentValideringException e) {
         var sw = new StringWriter(1000);
         try (var pw = new PrintWriter(sw, true)) {
             e.printStackTrace(pw);
             pw.flush();
-            var f = e.getFeil();
-            return String.format("%s: %s\n%s", f.getKode(), f.getFeilmelding(), sw);
+            return String.format("%s\n%s", e.getMessageWithoutLinebreaks(), sw);
         }
     }
 
-    private Dokumentmottaker finnMottaker(String brevkode, FagsakYtelseType fagsakYtelseType) {
-        String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
-        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode));
-
-        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
-    }
 }
