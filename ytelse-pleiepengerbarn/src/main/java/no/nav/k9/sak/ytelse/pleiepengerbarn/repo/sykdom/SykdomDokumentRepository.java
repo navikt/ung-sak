@@ -82,7 +82,7 @@ public class SykdomDokumentRepository {
                 + "  select max(si2.versjon) "
                 + "  from SykdomInnleggelser as si2 "
                 + "  where si2.vurderinger = si.vurderinger "
-                + ") " 
+                + ") "
                 + "and p.aktørId = :aktørId", SykdomInnleggelser.class);
         q.setParameter("aktørId", pleietrengende);
 
@@ -161,12 +161,14 @@ public class SykdomDokumentRepository {
         final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
             "SELECT sd " +
                 "FROM SykdomDiagnosekoder as sd " +
-                "where sd.versjon = " +
-                "(select max(sd2.versjon) " +
-                "from SykdomDiagnosekoder as sd2 " +
-                "inner join sd2.vurderinger as sv2 " +
-                "inner join sv2.person as p " +
-                "where p.aktørId = :aktørId )", SykdomDiagnosekoder.class);
+                "   inner join sd.vurderinger as sv " +
+                "   inner join sv.person as p " +
+                "where sd.versjon = ( " +
+                "   select max(sd2.versjon) " +
+                "   from SykdomDiagnosekoder as sd2 " +
+                "   where sd2.vurderinger = sd.vurderinger " +
+                ") " +
+                "and p.aktørId = :aktørId", SykdomDiagnosekoder.class);
         q.setParameter("aktørId", pleietrengende);
 
         final List<SykdomDiagnosekoder> result = q.getResultList();
