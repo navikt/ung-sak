@@ -29,6 +29,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
     private ProsessTaskRepository prosessTaskRepository;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentValidatorProvider dokumentValidatorProvider;
+    private BrevKodeDokumentInnholdSamsvarValidator brevKodeDokumentInnholdSamsvarValidator;
 
     SaksbehandlingDokumentmottakTjeneste() {
         // for CDI, jaja
@@ -37,10 +38,12 @@ public class SaksbehandlingDokumentmottakTjeneste {
     @Inject
     public SaksbehandlingDokumentmottakTjeneste(ProsessTaskRepository prosessTaskRepository,
                                                 DokumentValidatorProvider dokumentValidatorProvider,
-                                                MottatteDokumentTjeneste mottatteDokumentTjeneste) {
+                                                MottatteDokumentTjeneste mottatteDokumentTjeneste,
+                                                BrevKodeDokumentInnholdSamsvarValidator brevKodeDokumentInnholdSamsvarValidator) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.dokumentValidatorProvider = dokumentValidatorProvider;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
+        this.brevKodeDokumentInnholdSamsvarValidator = brevKodeDokumentInnholdSamsvarValidator;
     }
 
     public void dokumenterAnkommet(Collection<InngåendeSaksdokument> saksdokumenter) {
@@ -74,6 +77,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
                 builder.medJournalPostId(new JournalpostId(saksdokument.getJournalpostId().getVerdi()));
             }
             MottattDokument mottattDokument = builder.build();
+
+            brevKodeDokumentInnholdSamsvarValidator.validerSamsvarBrevkodeOgInnhold(mottattDokument);
 
             boolean ok = valider(mottattDokument);
             if (ok) {
