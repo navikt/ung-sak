@@ -40,6 +40,7 @@ import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
@@ -122,7 +123,7 @@ public class SykdomDokumentRestTjeneste {
                 .map(
                     p -> new Periode(p.getFom(), p.getTom()))
                 .collect(Collectors.toList()),
-            Arrays.asList(ResourceLink.post(SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse-endring", new SykdomInnleggelseDto(behandling.getUuid().toString()))));
+            Arrays.asList(ResourceLink.post(BehandlingDtoUtil.getApiPath(SYKDOM_INNLEGGELSE_PATH), "sykdom-innleggelse-endring", new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
 
     @POST
@@ -171,7 +172,7 @@ public class SykdomDokumentRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
         // TODO: Mapping av diagnosekoder:
-        final var endreDiagnosekoderLink = ResourceLink.post(DIAGNOSEKODER_PATH, "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
+        final var endreDiagnosekoderLink = ResourceLink.post(BehandlingDtoUtil.getApiPath(DIAGNOSEKODER_PATH), "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
         return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.singletonList(new SykdomDiagnosekodeDto("A123")), Arrays.asList(endreDiagnosekoderLink));
     }
 
