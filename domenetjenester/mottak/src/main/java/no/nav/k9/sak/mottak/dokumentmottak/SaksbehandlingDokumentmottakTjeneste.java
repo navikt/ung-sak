@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -29,7 +30,6 @@ public class SaksbehandlingDokumentmottakTjeneste {
     private ProsessTaskRepository prosessTaskRepository;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private DokumentValidatorProvider dokumentValidatorProvider;
-    private BrevKodeDokumentInnholdSamsvarValidator brevKodeDokumentInnholdSamsvarValidator;
 
     SaksbehandlingDokumentmottakTjeneste() {
         // for CDI, jaja
@@ -38,12 +38,10 @@ public class SaksbehandlingDokumentmottakTjeneste {
     @Inject
     public SaksbehandlingDokumentmottakTjeneste(ProsessTaskRepository prosessTaskRepository,
                                                 DokumentValidatorProvider dokumentValidatorProvider,
-                                                MottatteDokumentTjeneste mottatteDokumentTjeneste,
-                                                BrevKodeDokumentInnholdSamsvarValidator brevKodeDokumentInnholdSamsvarValidator) {
+                                                MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.dokumentValidatorProvider = dokumentValidatorProvider;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
-        this.brevKodeDokumentInnholdSamsvarValidator = brevKodeDokumentInnholdSamsvarValidator;
     }
 
     public void dokumenterAnkommet(Collection<InngåendeSaksdokument> saksdokumenter) {
@@ -78,8 +76,6 @@ public class SaksbehandlingDokumentmottakTjeneste {
             }
             MottattDokument mottattDokument = builder.build();
 
-            brevKodeDokumentInnholdSamsvarValidator.validerSamsvarBrevkodeOgInnhold(mottattDokument);
-
             boolean ok = valider(mottattDokument);
             if (ok) {
                 antallOk++;
@@ -102,6 +98,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
     }
 
     private boolean valider(MottattDokument m) {
+        validerBrevkode(m); //feiler hardt ved feil brevkode
+
         boolean valid = true;
         DokumentValidator dokumentValidator = dokumentValidatorProvider.finnValidator(m.getType());
         try {
@@ -115,6 +113,16 @@ public class SaksbehandlingDokumentmottakTjeneste {
         }
 
         return valid;
+    }
+
+    private void validerBrevkode(MottattDokument mottattDokument) {
+        Brevkode brevkodeBasertPåInnhold = InnholdTilBrevkodeUtleder.utledForventetBrevkode(mottattDokument.getPayload());
+        if (brevkodeBasertPåInnhold != null && brevkodeBasertPåInnhold != mottattDokument.getType()) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men forventer " + brevkodeBasertPåInnhold + " basert på innhold. Gjelder " + mottattDokument.getJournalpostId());
+        }
+        if (brevkodeBasertPåInnhold == null && (mottattDokument.getType() == Brevkode.INNTEKTSMELDING || mottattDokument.getType() == Brevkode.SØKNAD_UTBETALING_OMS)) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men innholdet hadde ikke formentet format. Gjelder " + mottattDokument.getJournalpostId());
+        }
     }
 
     private String toFeilmelding(DokumentValideringException e) {
