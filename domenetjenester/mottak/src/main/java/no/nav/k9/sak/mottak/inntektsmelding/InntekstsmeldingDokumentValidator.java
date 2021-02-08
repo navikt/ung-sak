@@ -16,7 +16,7 @@ public class InntekstsmeldingDokumentValidator implements DokumentValidator {
     private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
     @Override
-    public void validerDokumenter(String behandlingId, Collection<MottattDokument> inntektsmeldinger) {
+    public void validerDokumenter(Long behandlingId, Collection<MottattDokument> inntektsmeldinger) {
         //TODO hvorfor er ikke validering lik i validerDokument og i validerDokumenter?
         inntektsmeldinger.forEach((m -> {
             if (behandlingId == null && m.harPayload()) {

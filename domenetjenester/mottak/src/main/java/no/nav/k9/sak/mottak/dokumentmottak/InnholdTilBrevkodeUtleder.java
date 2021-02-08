@@ -9,6 +9,7 @@ public class InnholdTilBrevkodeUtleder {
             return Brevkode.INNTEKTSMELDING;
         }
         if (erJson(dokumentinnhold)) {
+            // Eneste søknadsformatet som er støttet
             return Brevkode.SØKNAD_UTBETALING_OMS;
         }
         return null;

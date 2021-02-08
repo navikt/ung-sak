@@ -117,11 +117,11 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private void validerBrevkode(MottattDokument mottattDokument) {
         Brevkode brevkodeBasertPåInnhold = InnholdTilBrevkodeUtleder.utledForventetBrevkode(mottattDokument.getPayload());
-        if (brevkodeBasertPåInnhold != null && brevkodeBasertPåInnhold != mottattDokument.getType()) {
-            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men forventer " + brevkodeBasertPåInnhold + " basert på innhold. Gjelder " + mottattDokument.getJournalpostId());
+        if (brevkodeBasertPåInnhold == null) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men innholdet hadde ikke forventet format. Gjelder " + mottattDokument.getJournalpostId());
         }
-        if (brevkodeBasertPåInnhold == null && (mottattDokument.getType() == Brevkode.INNTEKTSMELDING || mottattDokument.getType() == Brevkode.SØKNAD_UTBETALING_OMS)) {
-            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men innholdet hadde ikke formentet format. Gjelder " + mottattDokument.getJournalpostId());
+        else if (!brevkodeBasertPåInnhold.equals(mottattDokument.getType())) {
+            throw new DokumentValideringException("Brevkode var " + mottattDokument.getType() + ", men forventer " + brevkodeBasertPåInnhold + " basert på innhold. Gjelder " + mottattDokument.getJournalpostId());
         }
     }
 

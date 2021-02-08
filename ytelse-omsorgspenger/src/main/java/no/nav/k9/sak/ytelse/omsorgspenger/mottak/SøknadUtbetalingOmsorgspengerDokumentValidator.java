@@ -36,7 +36,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     }
 
     @Override
-    public void validerDokumenter(String behandlingId, Collection<MottattDokument> meldinger) {
+    public void validerDokumenter(Long behandlingId, Collection<MottattDokument> meldinger) {
         validerLansert();
         validerHarInnhold(meldinger);
         var søknader = søknadParser.parseSøknader(meldinger);

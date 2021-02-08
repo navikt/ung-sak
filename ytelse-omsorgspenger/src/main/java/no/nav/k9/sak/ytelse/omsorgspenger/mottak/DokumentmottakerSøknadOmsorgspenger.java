@@ -85,7 +85,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
         Long behandlingId = behandling.getId();
-        dokumentValidator.validerDokumenter(Long.toString(behandlingId), dokumenter);
+        dokumentValidator.validerDokumenter(behandlingId, dokumenter);
 
         for (MottattDokument dokument : dokumenter) {
             Søknad søknad = søknadParser.parseSøknad(dokument);

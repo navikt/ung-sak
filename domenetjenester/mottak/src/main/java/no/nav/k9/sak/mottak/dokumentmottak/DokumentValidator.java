@@ -6,7 +6,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 public interface DokumentValidator {
 
-    void validerDokumenter(String behandlingId, Collection<MottattDokument> mottatteDokumenter);
+    void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter);
 
     void validerDokument(MottattDokument mottatteDokumenter);
 }

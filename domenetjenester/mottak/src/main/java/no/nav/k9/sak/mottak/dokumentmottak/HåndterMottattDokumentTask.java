@@ -58,7 +58,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var fagsakId = prosessTaskData.getFagsakId();
-        var behandlingId = prosessTaskData.getBehandlingId();
+        var behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
 
         // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
@@ -85,7 +85,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId()).stream().map(String::valueOf).collect(Collectors.toList());
     }
 
-    private void validerDokumenter(String behandlingId, Collection<MottattDokument> mottatteDokumenter) {
+    private void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter) {
         Brevkode brevkode = DokumentBrevkodeUtil.unikBrevkode(mottatteDokumenter);
         DokumentValidator validator = dokumentValidatorProvider.finnValidator(brevkode);
         validator.validerDokumenter(behandlingId, mottatteDokumenter);
