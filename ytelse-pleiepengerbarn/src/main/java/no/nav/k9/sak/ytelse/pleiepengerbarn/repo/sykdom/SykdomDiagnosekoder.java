@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -34,7 +35,7 @@ public class SykdomDiagnosekoder {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID" )
     private SykdomVurderinger vurderinger;
 
-    @OneToMany(mappedBy = "diagnosekode", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "diagnosekoder", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<SykdomDiagnosekode> diagnosekoder;
 
     @DiffIgnore
