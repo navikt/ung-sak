@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.kontrakt.ResourceLink;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -40,6 +41,11 @@ public class SykdomDiagnosekoderDto {
     @Valid
     private List<SykdomDiagnosekodeDto> diagnosekoder = new ArrayList<>();
     
+    @JsonProperty(value = "links")
+    @Size(max = 100)
+    @Valid
+    private List<ResourceLink> links = new ArrayList<>();
+    
     
     public SykdomDiagnosekoderDto() {
         
@@ -53,10 +59,11 @@ public class SykdomDiagnosekoderDto {
         this.behandlingUuid = behandlingUuid;
     }
     
-    public SykdomDiagnosekoderDto(UUID behandlingUuid, String versjon, List<SykdomDiagnosekodeDto> diagnosekoder) {
+    public SykdomDiagnosekoderDto(UUID behandlingUuid, String versjon, List<SykdomDiagnosekodeDto> diagnosekoder, List<ResourceLink> links) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
         this.diagnosekoder = diagnosekoder;
+        this.links = links;
     }
     
     
