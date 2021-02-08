@@ -58,7 +58,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var fagsakId = prosessTaskData.getFagsakId();
-        var behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
+        var behandlingId = prosessTaskData.getBehandlingId() != null ? Long.valueOf(prosessTaskData.getBehandlingId()) : null;
 
         // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
