@@ -170,10 +170,9 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-
-
         // TODO: Mapping av diagnosekoder:
-        return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.emptyList());
+        final var endreDiagnosekoderLink = ResourceLink.post(DIAGNOSEKODER_PATH, "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
+        return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.singletonList(new SykdomDiagnosekodeDto("A123")), Arrays.asList(endreDiagnosekoderLink));
     }
 
     @POST
