@@ -54,7 +54,7 @@ public class SykdomVurderingService {
     
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
         final var vurderingerOgPerioder = utledPerioder(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        trekkFraInnleggelsesperioder(vurderingerOgPerioder, behandling);
+        vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
         
         return vurderingerOgPerioder;
     }
@@ -62,14 +62,14 @@ public class SykdomVurderingService {
     public SykdomVurderingerOgPerioder hentVurderingerForToOmsorgspersoner(Behandling behandling) {
         final SykdomVurderingerOgPerioder vurderingerOgPerioder = utledPerioder(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);        
         vurderingerOgPerioder.beholdKunResterendeVurderingsperioderSomFinnesI(hentKontinuerligTilsynOgPleiePerioder(behandling));
+        vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
         
         return vurderingerOgPerioder;
     }
     
-    private void trekkFraInnleggelsesperioder(SykdomVurderingerOgPerioder vurderingerOgPerioder, Behandling behandling) {
+    private List<Periode> hentInnleggelsesperioder( Behandling behandling) {
         final var innleggelser = hentInnleggelser(behandling);
-        final var innleggelsesperioder = innleggelser.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
-        vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(innleggelsesperioder);
+        return innleggelser.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
     }
     
     private List<Periode> hentKontinuerligTilsynOgPleiePerioder(Behandling behandling) {
