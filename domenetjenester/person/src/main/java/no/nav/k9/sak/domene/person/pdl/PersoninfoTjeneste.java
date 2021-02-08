@@ -182,7 +182,7 @@ public class PersoninfoTjeneste {
     }
 
     private static Adresseinfo mapUkjentadresse(UkjentBosted ukjentBosted) {
-        return Adresseinfo.builder(AdresseType.UKJENT_ADRESSE).build();
+        return Adresseinfo.builder(AdresseType.UKJENT_ADRESSE).medLand(Landkoder.UOPPGITT_UKJENT.getKode()).build();
     }
 
     private static Adresseinfo mapUtenlandskadresse(AdresseType type, UtenlandskAdresse utenlandskAdresse) {
@@ -260,7 +260,7 @@ public class PersoninfoTjeneste {
     public void hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent, Personinfo fraTPS) {
         try {
             var query = new HentPersonQueryRequest();
-            query.setIdent(aktørId.getId());
+            query.setIdent(personIdent.getIdent());
             var projection = new PersonResponseProjection()
                 .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
                 .foedsel(new FoedselResponseProjection().foedselsdato())
