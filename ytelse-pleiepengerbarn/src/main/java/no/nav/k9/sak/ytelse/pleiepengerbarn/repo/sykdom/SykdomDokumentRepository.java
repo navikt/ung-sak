@@ -73,14 +73,16 @@ public class SykdomDokumentRepository {
 
     public SykdomInnleggelser hentInnleggelse(AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
-                "SELECT si " +
-                    "FROM SykdomInnleggelser as si " +
-                    "where si.versjon = " +
-                    "(select max(si2.versjon) " +
-                    "from SykdomInnleggelser as si2 " +
-                        "inner join si2.vurderinger as sv2 " +
-                        "inner join sv2.person as p " +
-                    "where p.aktørId = :aktørId )", SykdomInnleggelser.class);
+                "SELECT si "
+                + "FROM SykdomInnleggelser as si "
+                + "  inner join si.vurderinger as sv "
+                + "  inner join sv.person as p "
+                + "where si.versjon = ( "
+                + "  select max(si2.versjon) "
+                + "  from SykdomInnleggelser as si2 "
+                + "  where si2.vurderinger = si.vurderinger "
+                + ") " 
+                + "and p.aktørId = :aktørId", SykdomInnleggelser.class);
         q.setParameter("aktørId", pleietrengende);
 
         final List<SykdomInnleggelser> result = q.getResultList();

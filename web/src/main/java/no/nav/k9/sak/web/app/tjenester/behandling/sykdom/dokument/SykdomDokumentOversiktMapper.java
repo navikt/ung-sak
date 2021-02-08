@@ -67,7 +67,7 @@ public class SykdomDokumentOversiktMapper {
             .map(p -> new SykdomInnleggelsePeriode(null, p.getFom(), p.getTom(), brukerId, opprettetTidspunkt))
             .collect(Collectors.toCollection(ArrayList::new));
         SykdomInnleggelser innleggelser = new SykdomInnleggelser(
-            (sykdomInnleggelse.getVersjon() != null) ? Long.valueOf(sykdomInnleggelse.getVersjon()) + 1L: null,
+            (sykdomInnleggelse.getVersjon() != null) ? Long.valueOf(sykdomInnleggelse.getVersjon()) : null,
             null,
             perioder,
             brukerId,
