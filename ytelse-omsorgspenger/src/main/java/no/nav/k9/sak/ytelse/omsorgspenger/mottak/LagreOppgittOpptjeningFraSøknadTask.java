@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.k9.sak.mottak.dokumentmottak.søknad.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.søknad.Søknad;

@@ -11,39 +11,35 @@ import java.util.Objects;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
-import no.nav.k9.søknad.ytelse.Ytelse;
-
 /**
  * Marker type som implementerer interface {@link Dokumentmottaker}.
  */
 @Qualifier
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.ANNOTATION_TYPE })
 @Documented
-public @interface SøknadDokumentType {
+public @interface DokumentGruppeRef {
 
     /**
      * Settes til kode på dokumentgruppe slik det defineres i KODELISTE-tabellen.
      * Av historiske årsaker brukes brevkode kodeverket her ved oppslag
-     *
+     * 
      * @see @Brevkode
      */
-    Class<? extends Ytelse> value();
+    String value();
 
-    /**
-     * AnnotationLiteral som kan brukes ved CDI søk.
-     */
-    class SøknadDokumentTypeLiteral extends AnnotationLiteral<SøknadDokumentType> implements SøknadDokumentType {
+    /** AnnotationLiteral som kan brukes ved CDI søk. */
+    class DokumentGruppeRefLiteral extends AnnotationLiteral<DokumentGruppeRef> implements DokumentGruppeRef {
 
-        private Class<? extends Ytelse> kode;
+        private String kode;
 
-        SøknadDokumentTypeLiteral(Class<? extends Ytelse> kode) {
-            this.kode = Objects.requireNonNull(kode, "ytelse");
+        DokumentGruppeRefLiteral(String kode) {
+            this.kode = Objects.requireNonNull(kode, "Brevkode.kode");
         }
 
         @Override
-        public Class<? extends Ytelse> value() {
+        public String value() {
             return kode;
         }
     }

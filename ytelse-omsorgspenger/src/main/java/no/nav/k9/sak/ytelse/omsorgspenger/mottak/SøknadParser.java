@@ -1,12 +1,10 @@
-package no.nav.k9.sak.mottak.dokumentmottak.søknad;
+package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -21,8 +19,8 @@ public class SøknadParser {
         var jsonReader = JsonUtils.getObjectMapper().readerFor(Søknad.class);
         try {
             return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
-        } catch (RuntimeException | JsonProcessingException e) {
-            throw new DokumentValideringException("Parsefeil i søknad ", e);
+        } catch (Exception e) {
+            throw new DokumentValideringException("Parsefeil i søknad om utbetaling av omsorgspenger", e);
         }
     }
 

@@ -6,17 +6,18 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
-import no.nav.k9.sak.mottak.dokumentmottak.InntektsmeldingDokumentType;
 import no.nav.k9.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@InntektsmeldingDokumentType
+@DokumentGruppeRef(Brevkode.INNTEKTSMELDING_KODE)
 public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
 
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;

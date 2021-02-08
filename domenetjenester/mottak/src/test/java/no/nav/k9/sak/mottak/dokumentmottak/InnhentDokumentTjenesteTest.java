@@ -40,6 +40,7 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -75,8 +76,6 @@ public class InnhentDokumentTjenesteTest {
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     @Mock
     private Dokumentmottaker dokumentmottaker;
-    @Mock
-    private DokumentmottakerProvider dokumentmottakerProvider;
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private DokumentmottakerFelles dokumentmottakerFelles;
@@ -93,13 +92,11 @@ public class InnhentDokumentTjenesteTest {
             historikkinnslagTjeneste));
 
         innhentDokumentTjeneste = Mockito.spy(new InnhentDokumentTjeneste(
-            dokumentmottakerProvider,
+            new UnitTestLookupInstanceImpl<>(dokumentmottaker),
             dokumentmottakerFelles,
             behandlingsoppretter,
             kompletthetskontroller,
             repositoryProvider));
-
-        Mockito.when(dokumentmottakerProvider.getDokumentmottaker(Mockito.anyCollection())).thenReturn(dokumentmottaker);
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);

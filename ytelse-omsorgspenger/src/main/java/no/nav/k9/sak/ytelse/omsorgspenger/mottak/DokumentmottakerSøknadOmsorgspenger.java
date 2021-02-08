@@ -10,6 +10,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -26,9 +27,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.k9.sak.mottak.dokumentmottak.SøknadDokumentType;
-import no.nav.k9.sak.mottak.dokumentmottak.søknad.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.AktørId;
@@ -43,7 +43,7 @@ import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@SøknadDokumentType(no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling.class)
+@DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;

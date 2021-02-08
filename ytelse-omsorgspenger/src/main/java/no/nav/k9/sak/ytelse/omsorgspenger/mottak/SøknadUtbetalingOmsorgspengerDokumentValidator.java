@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
-import no.nav.k9.sak.mottak.dokumentmottak.SøknadDokumentType;
-import no.nav.k9.sak.mottak.dokumentmottak.søknad.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
@@ -19,7 +19,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
-@SøknadDokumentType(no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling.class)
+@DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 public class SøknadUtbetalingOmsorgspengerDokumentValidator implements DokumentValidator {
 
     private SøknadParser søknadParser;

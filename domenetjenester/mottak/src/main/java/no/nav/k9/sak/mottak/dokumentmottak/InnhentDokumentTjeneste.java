@@ -4,9 +4,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -20,7 +25,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 @Dependent
 public class InnhentDokumentTjeneste {
 
-    private DokumentmottakerProvider dokumentmottakerProvider;
+    private Instance<Dokumentmottaker> mottakere;
 
     private Behandlingsoppretter behandlingsoppretter;
     private Kompletthetskontroller kompletthetskontroller;
@@ -31,12 +36,12 @@ public class InnhentDokumentTjeneste {
     private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
-    public InnhentDokumentTjeneste(DokumentmottakerProvider dokumentmottakerProvider,
+    public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
                                    DokumentmottakerFelles dokumentMottakerFelles,
                                    Behandlingsoppretter behandlingsoppretter,
                                    Kompletthetskontroller kompletthetskontroller,
                                    BehandlingRepositoryProvider repositoryProvider) {
-        this.dokumentmottakerProvider = dokumentmottakerProvider;
+        this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
         this.kompletthetskontroller = kompletthetskontroller;
@@ -91,7 +96,7 @@ public class InnhentDokumentTjeneste {
     }
 
     public void lagreDokumenter(Collection<MottattDokument> mottattDokument, Behandling behandling) {
-        Dokumentmottaker dokumentmottaker = getDokumentmottaker(mottattDokument);
+        Dokumentmottaker dokumentmottaker = getDokumentmottaker(mottattDokument, behandling.getFagsak());
         dokumentmottaker.lagreDokumentinnhold(mottattDokument, behandling);
     }
 
@@ -103,7 +108,7 @@ public class InnhentDokumentTjeneste {
     }
 
     private BehandlingÅrsakType getBehandlingÅrsakType(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
-        var dokumentmottaker = getDokumentmottaker(mottattDokument);
+        var dokumentmottaker = getDokumentmottaker(mottattDokument, fagsak);
         var behandlingÅrsakType = dokumentmottaker.getBehandlingÅrsakType();
         return behandlingÅrsakType;
     }
@@ -142,7 +147,16 @@ public class InnhentDokumentTjeneste {
         }
     }
 
-    private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument) {
-        return dokumentmottakerProvider.getDokumentmottaker(mottattDokument);
+    private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
+        var brevkode = DokumentBrevkodeUtil.unikBrevkode(mottattDokument);
+        return finnMottaker(brevkode, fagsak.getYtelseType());
+    }
+
+    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
+        String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
+        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode.getKode()));
+
+        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 }

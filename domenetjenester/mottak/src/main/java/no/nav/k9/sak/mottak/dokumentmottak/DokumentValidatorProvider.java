@@ -1,32 +1,30 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.util.Collection;
-import java.util.Set;
-
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.k9.sak.mottak.dokumentmottak.søknad.SøknadParser;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 
 @Dependent
 public class DokumentValidatorProvider {
 
-    private DokumentmottakImplementasjonsvelger<DokumentValidator> dokumentmottakImplementasjonsvelger;
+    private Instance<DokumentValidator> dokumentValidatorerer;
 
     @Inject
-    public DokumentValidatorProvider(@Any Instance<DokumentValidator> dokumentValidatorerer, SøknadParser søknadParser) {
-        this.dokumentmottakImplementasjonsvelger = new DokumentmottakImplementasjonsvelger<>(dokumentValidatorerer, søknadParser);
+    public DokumentValidatorProvider(@Any Instance<DokumentValidator> dokumentValidatorerer) {
+        this.dokumentValidatorerer = dokumentValidatorerer;
     }
 
-    public DokumentValidator finnValidator(MottattDokument mottattDokument) {
-        return dokumentmottakImplementasjonsvelger.velgImplementasjon(Set.of(mottattDokument));
+    public DokumentValidator finnValidator(Brevkode brevkode) {
+        Instance<DokumentValidator> selected = dokumentValidatorerer.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode.getKode()));
+        if (selected.isUnsatisfied()) {
+            throw new IllegalArgumentException("Har ingen " + DokumentValidator.class.getSimpleName() + " for brevkode=" + brevkode);
+        }
+        if (selected.isAmbiguous()) {
+            throw new IllegalArgumentException("Klarte ikke finne unik " + DokumentValidator.class.getSimpleName() + " for brevkode=" + brevkode + ", har følgende kandidater: " + selected);
+        }
+        return selected.get();
     }
-
-    public DokumentValidator finnValidator(Collection<MottattDokument> mottattDokument) {
-        return dokumentmottakImplementasjonsvelger.velgImplementasjon(mottattDokument);
-    }
-
 }
