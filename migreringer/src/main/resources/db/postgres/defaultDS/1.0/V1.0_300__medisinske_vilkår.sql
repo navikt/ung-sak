@@ -178,13 +178,13 @@ create sequence if not exists SEQ_SYKDOM_DIAGNOSEKODER increment by 5 minvalue 1
 create table if not exists SYKDOM_DIAGNOSEKODE
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
-    SYKDOM_DIAGNOSEKODER          BIGINT                      NOT NULL,
+    SYKDOM_DIAGNOSEKODER_ID       BIGINT                      NOT NULL,
     DIAGNOSEKODE                  VARCHAR(20)            NOT NULL,
 
     OPPRETTET_AV  VARCHAR(20)  DEFAULT 'VL'              NOT NULL,
     OPPRETTET_TID TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINt FK_SYKDOM_DIAGNOSEKODE_01
-        FOREIGN KEY(SYKDOM_DIAGNOSEKODER) REFERENCES SYKDOM_DIAGNOSEKODER(ID)
+        FOREIGN KEY(SYKDOM_DIAGNOSEKODER_ID) REFERENCES SYKDOM_DIAGNOSEKODER(ID)
 );
 create sequence if not exists SEQ_SYKDOM_DIAGNOSEKODE increment by 5 minvalue 1000000;
 

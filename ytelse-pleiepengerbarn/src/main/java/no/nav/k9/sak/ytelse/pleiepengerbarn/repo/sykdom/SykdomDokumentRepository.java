@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -135,7 +136,7 @@ public class SykdomDokumentRepository {
     private void oppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
             "Select si " +
-                "FROM SykdomInnleggelser as si" +
+                "FROM SykdomInnleggelser as si " +
                 "   inner join si.vurderinger as sv " +
                 "   inner join sv.person as sp " +
                 "where si.versjon = :versjon " +
@@ -153,6 +154,72 @@ public class SykdomDokumentRepository {
         innleggelser.setVersjon(innleggelser.getVersjon()+1);
 
         entityManager.persist(innleggelser);
+        entityManager.flush();
+    }
+
+    public SykdomDiagnosekoder hentDiagnosekoder(AktørId pleietrengende) {
+        final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
+            "SELECT sd " +
+                "FROM SykdomDiagnosekoder as sd " +
+                "where sd.versjon = " +
+                "(select max(sd2.versjon) " +
+                "from SykdomDiagnosekoder as sd2 " +
+                "inner join sd2.vurderinger as sv2 " +
+                "inner join sv2.person as p " +
+                "where p.aktørId = :aktørId )", SykdomDiagnosekoder.class);
+        q.setParameter("aktørId", pleietrengende);
+
+        final List<SykdomDiagnosekoder> result = q.getResultList();
+        if (result.isEmpty()) {
+            return new SykdomDiagnosekoder(null, null, new ArrayList<>(), null, null);
+        }
+        if (result.size() != 1) {
+            throw new IllegalStateException("Forventer maksimalt én rad som svar.");
+        }
+        return result.get(0);
+    }
+
+    public void opprettEllerOppdaterDiagnosekoder(SykdomDiagnosekoder diagnosekoder, AktørId pleietrengende) {
+        if(diagnosekoder.getId() != null) {
+            throw new IllegalStateException("Diagnosekoder skal aldri oppdateres. Man skal alltid inserte ny");
+        }
+        SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, diagnosekoder.getOpprettetAv(), diagnosekoder.getOpprettetTidspunkt());
+        diagnosekoder.setVurderinger(vurderinger);
+        boolean lagNy = diagnosekoder.getVersjon() == null;
+        if(lagNy) {
+            opprettDiagnosekoder(diagnosekoder);
+        } else {
+            oppdaterDiagnosekoder(diagnosekoder, pleietrengende);
+        }
+    }
+
+    private void opprettDiagnosekoder(SykdomDiagnosekoder diagnosekoder) {
+        diagnosekoder.setVersjon(0L);
+        entityManager.persist(diagnosekoder);
+        entityManager.flush();
+    }
+
+    private void oppdaterDiagnosekoder(SykdomDiagnosekoder diagnosekoder, AktørId pleietrengende) {
+        final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
+            "Select sd " +
+                "FROM SykdomDiagnosekoder as sd " +
+                "   inner join sd.vurderinger as sv " +
+                "   inner join sv.person as sp " +
+                "where sd.versjon = :versjon " +
+                "and sp.aktørId = :aktørId "
+            , SykdomDiagnosekoder.class);
+        q.setParameter("versjon", diagnosekoder.getVersjon());
+        q.setParameter("aktørId", pleietrengende);
+
+        try {
+            q.getSingleResult();
+        } catch (NoResultException | NonUniqueResultException e) {
+            throw new IllegalStateException("Fant ikke unik SykdomDiagnosekoder å erstatte", e);
+        }
+
+        diagnosekoder.setVersjon(diagnosekoder.getVersjon() + 1);
+
+        entityManager.persist(diagnosekoder);
         entityManager.flush();
     }
 }

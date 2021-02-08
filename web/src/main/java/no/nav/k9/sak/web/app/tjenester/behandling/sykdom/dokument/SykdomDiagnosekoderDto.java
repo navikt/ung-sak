@@ -25,7 +25,7 @@ public class SykdomDiagnosekoderDto {
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
-    
+
     /**
      * Versjonen man tok utgangspunkt i før endring.
      */
@@ -35,47 +35,46 @@ public class SykdomDiagnosekoderDto {
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String versjon;
-    
+
     @JsonProperty(value = "diagnosekoder")
     @Size(max = 1000)
     @Valid
     private List<SykdomDiagnosekodeDto> diagnosekoder = new ArrayList<>();
-    
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
-    
-    
+
     public SykdomDiagnosekoderDto() {
-        
+
     }
-    
+
     public SykdomDiagnosekoderDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
-    
+
     public SykdomDiagnosekoderDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
-    
+
     public SykdomDiagnosekoderDto(UUID behandlingUuid, String versjon, List<SykdomDiagnosekodeDto> diagnosekoder, List<ResourceLink> links) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
         this.diagnosekoder = diagnosekoder;
         this.links = links;
     }
-    
-    
+
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
+
     public String getVersjon() {
         return versjon;
     }
-    
+
     public List<SykdomDiagnosekodeDto> getDiagnosekoder() {
         return diagnosekoder;
     }

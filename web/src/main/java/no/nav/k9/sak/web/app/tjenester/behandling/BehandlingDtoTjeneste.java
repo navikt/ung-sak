@@ -67,9 +67,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingEndringD
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingOpprettelseDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDiagnosekoderDto;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentEndringDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomInnleggelseDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -362,7 +360,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
                 break;

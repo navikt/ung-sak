@@ -54,12 +54,10 @@ public class SykdomInnleggelser {
 
     public SykdomInnleggelser(
             Long versjon,
-            SykdomVurderinger vurderinger,
             List<SykdomInnleggelsePeriode> perioder,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.versjon = versjon;
-        this.vurderinger = vurderinger;
         this.perioder = perioder.stream()
             .map(p -> {
                 if(p.getInnleggelser() != null && p.getInnleggelser() != this) {
@@ -70,6 +68,16 @@ public class SykdomInnleggelser {
             }).collect(Collectors.toCollection(ArrayList::new));
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+
+    public SykdomInnleggelser(
+        Long versjon,
+        SykdomVurderinger vurderinger,
+        List<SykdomInnleggelsePeriode> perioder,
+        String opprettetAv,
+        LocalDateTime opprettetTidspunkt) {
+        this(versjon, perioder, opprettetAv, opprettetTidspunkt);
+        this.vurderinger = vurderinger;
     }
 
     public Long getId() {

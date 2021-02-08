@@ -6,11 +6,8 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -37,12 +34,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
@@ -68,8 +63,8 @@ public class SykdomDokumentRestTjeneste {
     private static final String DOKUMENT_INNHOLD = "/innhold";
     private static final String SYKDOM_INNLEGGELSE = "/innleggelse";
     public static final String SYKDOM_INNLEGGELSE_PATH = BASE_PATH + SYKDOM_INNLEGGELSE;
-    private static final String DIAGNOSEKODER = "/diagnosekoder";
-    public static final String DIAGNOSEKODER_PATH = BASE_PATH + DIAGNOSEKODER;
+    private static final String SYKDOM_DIAGNOSEKODER = "/diagnosekoder";
+    public static final String SYKDOM_DIAGNOSEKODER_PATH = BASE_PATH + SYKDOM_DIAGNOSEKODER;
     public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
     public static final String DOKUMENT_INNHOLD_PATH = BASE_PATH + DOKUMENT_INNHOLD;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
@@ -115,15 +110,7 @@ public class SykdomDokumentRestTjeneste {
 
         final SykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
 
-        return new SykdomInnleggelseDto(
-            behandling.getUuid(),
-            (innleggelser.getVersjon() != null) ? innleggelser.getVersjon().toString() : null,
-            innleggelser.getPerioder()
-                .stream()
-                .map(
-                    p -> new Periode(p.getFom(), p.getTom()))
-                .collect(Collectors.toList()),
-            Arrays.asList(ResourceLink.post(BehandlingDtoUtil.getApiPath(SYKDOM_INNLEGGELSE_PATH), "sykdom-innleggelse-endring", new SykdomInnleggelseDto(behandling.getUuid().toString()))));
+        return sykdomDokumentOversiktMapper.toSykdomInnleggelseDto(innleggelser, behandling);
     }
 
     @POST
@@ -152,7 +139,7 @@ public class SykdomDokumentRestTjeneste {
     }
 
     @GET
-    @Path(DIAGNOSEKODER)
+    @Path(SYKDOM_DIAGNOSEKODER)
     @Operation(description = "Henter alle registrerte diagnosekoder på den pleietrengende.",
         summary = "Henter alle registrerte diagnosekoder på den pleietrengende..",
         tags = "sykdom",
@@ -171,13 +158,13 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        // TODO: Mapping av diagnosekoder:
-        final var endreDiagnosekoderLink = ResourceLink.post(BehandlingDtoUtil.getApiPath(DIAGNOSEKODER_PATH), "sykdom-diagnosekoder-endring", new SykdomDiagnosekoderDto(behandling.getUuid().toString()));
-        return new SykdomDiagnosekoderDto(behandling.getUuid(), "0", Collections.singletonList(new SykdomDiagnosekodeDto("A123")), Arrays.asList(endreDiagnosekoderLink));
+        final SykdomDiagnosekoder diagnosekoder = sykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
+
+        return sykdomDokumentOversiktMapper.toSykdomDiagnosekoderDto(diagnosekoder, behandling);
     }
 
     @POST
-    @Path(DIAGNOSEKODER)
+    @Path(SYKDOM_DIAGNOSEKODER)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer diagnosekoder på den pleietrengende.",
         summary = "Oppdaterer diagnosekoder på den pleietrengende.",
@@ -192,10 +179,11 @@ public class SykdomDokumentRestTjeneste {
             @NotNull
             @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            SykdomDiagnosekoderDto sykdomDiagnosekoder) {
+            SykdomDiagnosekoderDto sykdomDiagnosekoderDto) {
 
-        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoder.getBehandlingUuid()).orElseThrow();
-        // TODO: Mapping av diagnosekoder:
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoderDto.getBehandlingUuid()).orElseThrow();
+        final SykdomDiagnosekoder diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
+        sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
     }
 
     @GET
