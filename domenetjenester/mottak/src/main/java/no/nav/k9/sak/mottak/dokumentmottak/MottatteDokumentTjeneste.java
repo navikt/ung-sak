@@ -57,11 +57,10 @@ public class MottatteDokumentTjeneste {
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
 
-            mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);// oppdateres senere til GYLDIG når er lagret i Abakus
+            //FIXME? Frode, denne endrer status fra BEHANDLER til MOTTATT, vil hindre LagreMottattInnteksmeldingerTask i å bruke 'NY' måte å oppdage dokumenter på
+            mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);// setter status MOTTATT, oppdatres senere til GYLDIG når er lagret i Abakus
         }
 
-        //TODO journalpostId på prosesstasken er død kode. Beholder for nå i tilfelle det skulle være nødvendig å rulle tilbake til logikk som ikke henter dokumenter kun basert på BEHANDLER-statusen
-        //TODO kan fjernes etter 15.februar 2021
         var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
 
         lagreInntektsmeldinger(behandlingId, journalpostder);

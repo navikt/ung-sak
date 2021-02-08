@@ -72,14 +72,14 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
         String dokumenter = input.getPropertyValue(MOTTATT_DOKUMENT);
 
         // TODO fjern denne - skal alltid lese fra mottatt_dokument status BEHANDLER
-        // TODO kan fjernes etter branchen "mottak_søknad_omsorgspenger" har vært i prod
         Collection<JournalpostId> journalpostIder = dokumenter == null || dokumenter.isEmpty() ? Collections.emptyList()
             : Arrays.asList(dokumenter.split(",")).stream().map(s -> new JournalpostId(s)).collect(Collectors.toCollection(LinkedHashSet::new));
         mottatteDokumenter.addAll(mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG));
 
         // ny - henter alle som er til BEHANDLER
-        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.INNTEKTSMELDING, true, DokumentStatus.BEHANDLER);
+        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.INNTEKTSMELDING,true, DokumentStatus.BEHANDLER);
         mottatteDokumenter.addAll(mottatteDokumentBehandler);
+
         if (mottatteDokumenter.isEmpty()) {
             log.info("Fant ingen inntektsmeldinger å lagre nå - er allerede håndtert. Avbryter task");
             return;
