@@ -31,7 +31,6 @@ public class SykdomDiagnosekoderDto {
      */
     @JsonProperty(value = "versjon")
     @Size(max = 50)
-    @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String versjon;
