@@ -55,7 +55,11 @@ public class PersoninfoAdapter {
     }
 
     public Personhistorikkinfo innhentPersonopplysningerHistorikk(AktørId aktørId, Periode periode) {
-        return tpsAdapter.hentPersonhistorikk(aktørId, periode);
+        Personhistorikkinfo personhistorikkinfoFraTps = tpsAdapter.hentPersonhistorikk(aktørId, periode);
+
+        personinfoTjeneste.hentPersoninfoHistorikk(aktørId, periode, personhistorikkinfoFraTps);
+
+        return personhistorikkinfoFraTps;
     }
 
     /**
