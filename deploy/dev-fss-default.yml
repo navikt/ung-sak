@@ -207,7 +207,7 @@ spec:
     - name: UNNTAKSBEHANDLING
       value: "true"
     - name: VURDER_SOKNADSFRIST
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
