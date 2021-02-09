@@ -83,7 +83,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
-        var fraværPåSak = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsak(behandlingRepository.hentBehandling(behandlingId));
+        var fraværPåSak = trekkUtFraværTjeneste.fraværPåFagsak(behandlingRepository.hentBehandling(behandlingId));
         // filtrer bort perioder som ikke kan tilbakestilles pga andre krav fra andre arbeidsgivere på samme dato
         return nulledePerioder.utledPeriode(behandlingId, fraværPåSak);
     }

@@ -22,7 +22,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-public class InntektsmeldingFravær {
+public class KravDokumentFravær {
 
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Set<Inntektsmelding> inntektsmeldinger) {
         var sortedIm = inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -105,40 +105,45 @@ public class InntektsmeldingFravær {
             segment.getValue().getSøknadsfristUtfall());
     }
 
-    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
-        var sortedIm = fraværFraInntektsmelding.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+    public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
+        var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        var aktivitetTyper = fraværFraKravdokumenter.values().stream().flatMap(Collection::stream).map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
 
-        var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
-        for (var im : sortedIm) {
-            var vurdertSøktPerioder = fraværFraInntektsmelding.get(im);
-            if (vurdertSøktPerioder.isEmpty()) {
-                break;
+        for (var aktivitetType : aktivitetTyper) {
+            for (var dok : sorterteKravdokumenter) {
+                var vurdertSøktPerioder = fraværFraKravdokumenter.get(dok);
+                if (vurdertSøktPerioder.isEmpty()) {
+                    break;
+                }
+                if (!vurdertSøktPerioder.stream().anyMatch(it -> it.getType().equals(aktivitetType))) {
+                    continue;
+                }
+                var arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
+                var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
+                var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
+                var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
+                var liste = vurdertSøktPerioder.stream()
+                    .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(pa)))
+                    .collect(Collectors.toList());
+
+                var timeline = mapTilTimeline(aktiviteter);
+                var imTidslinje = mapTilTimeline(liste);
+
+                ryddOppIBerørteTidslinjer(mapByAktivitet, gruppe, imTidslinje);
+
+                timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+                var oppdatertListe = timeline.compress()
+                    .toSegments()
+                    .stream()
+                    .filter(it -> it.getValue() != null)
+                    .filter(it -> it.getValue().getPeriode() != null)
+                    .map(this::opprettHoldKonsistens)
+                    .collect(Collectors.toList());
+
+                mapByAktivitet.put(gruppe, oppdatertListe);
             }
-            var arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
-            var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
-            var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
-            var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
-            var liste = vurdertSøktPerioder.stream()
-                .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), im.getInnsendingsTidspunkt(), utledUtfall(pa)))
-                .collect(Collectors.toList());
-
-            var timeline = mapTilTimeline(aktiviteter);
-            var imTidslinje = mapTilTimeline(liste);
-
-            ryddOppIBerørteTidslinjer(mapByAktivitet, gruppe, imTidslinje);
-
-            timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
-            var oppdatertListe = timeline.compress()
-                .toSegments()
-                .stream()
-                .filter(it -> it.getValue() != null)
-                .filter(it -> it.getValue().getPeriode() != null)
-                .map(this::opprettHoldKonsistens)
-                .collect(Collectors.toList());
-
-            mapByAktivitet.put(gruppe, oppdatertListe);
         }
 
         // sjekker mot overlappende data - foreløpig krasj and burn hvis overlappende segmenter
