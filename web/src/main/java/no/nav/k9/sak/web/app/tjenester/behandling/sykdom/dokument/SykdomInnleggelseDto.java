@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -79,5 +80,16 @@ public class SykdomInnleggelseDto {
 
     public List<Periode> getPerioder() {
         return perioder;
+    }
+    
+    @AssertFalse(message = "Det er ikke tillatt med overlappende perioder.")
+    private boolean isOverlappendePerioder() {
+        for (Periode p : perioder) {
+            var result = perioder.stream().anyMatch(p2 -> p != p2 && p.overlaps(p2));
+            if (result) {
+                return true;
+            }
+        }
+        return false;
     }
 }

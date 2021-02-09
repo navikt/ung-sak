@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -77,6 +76,12 @@ public class Periode implements Comparable<Periode> {
 
     public boolean starterFørEllerSamtidigSom(Periode periode) {
         return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
+    }
+    
+    public boolean overlaps(Periode other) {
+        boolean fomBeforeOrEqual = getFom().isBefore(other.getTom()) || getFom().isEqual(other.getTom());
+        boolean tomAfterOrEqual = getTom().isAfter(other.getFom()) || getTom().isEqual(other.getFom());
+        return fomBeforeOrEqual && tomAfterOrEqual;
     }
 
     @Override
