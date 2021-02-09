@@ -31,22 +31,14 @@ public class Familierelasjon {
     }
 
     public Boolean getHarSammeBosted(Personinfo fra, Personinfo til) {
-        var harSammeBostedPdl = utledSammeBosted(fra, til);
-        if (harSammeBostedPdl == harSammeBostedTps) {
-            LOG.info("K9SAK PDL sammeBosted match tps {} pdl {}", harSammeBostedTps, harSammeBostedPdl);
-        } else {
-            LOG.info("K9SAK PDL sammeBosted mismatch tps {} pdl {}", harSammeBostedTps, harSammeBostedPdl);
-        }
-
-        return harSammeBostedTps;
+        return utledSammeBosted(fra, til);
     }
 
     private boolean utledSammeBosted(Personinfo fra, Personinfo til) {
-        // FIXME: Erstatt getAdresseInfoListPdl() ned getAdresseInfoList()  når TPS utfases
-        var tilAdresser = til.getAdresseInfoListPdl().stream()
+        var tilAdresser = til.getAdresseInfoList().stream()
             .filter(ad -> AdresseType.BOSTEDSADRESSE.equals(ad.getGjeldendePostadresseType()))
             .collect(Collectors.toList());
-        return fra.getAdresseInfoListPdl().stream()
+        return fra.getAdresseInfoList().stream()
             .filter(a -> AdresseType.BOSTEDSADRESSE.equals(a.getGjeldendePostadresseType()))
             .anyMatch(adr1 -> tilAdresser.stream().anyMatch(adr2 -> Adresseinfo.likeAdresser(adr1, adr2)));
     }
