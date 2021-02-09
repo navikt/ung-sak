@@ -7,7 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
-import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
@@ -76,11 +75,6 @@ public class PersoninfoAdapter {
         return Optional.empty();
     }
 
-    public Adresseinfo innhentAdresseopplysningerForDokumentsending(AktørId aktørId) {
-        Optional<PersonIdent> optFnr = hentIdentForAktørId(aktørId);
-        return optFnr.map(personIdent -> tpsAdapter.hentAdresseinformasjon(personIdent)).orElse(null);
-    }
-
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
         Optional<PersonIdent> personIdent = hentFnr(aktørId);
         Optional<PersoninfoArbeidsgiver> personinfoArbeidsgiver = personIdent.map(i -> tpsAdapter.hentKjerneinformasjonBasis(i, aktørId))
@@ -101,7 +95,7 @@ public class PersoninfoAdapter {
 
     public Optional<PersoninfoBasis> hentBrukerBasisForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjonBasis(fnr, aktørId));
+        return funnetFnr.map(personIdent -> personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent));
     }
 
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
@@ -165,7 +159,4 @@ public class PersoninfoAdapter {
         return tpsAdapter.hentDiskresjonskoderForFamilierelasjoner(personIdent);
     }
 
-    public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
-        return tpsAdapter.hentAdresseinformasjon(personIdent);
-    }
 }
