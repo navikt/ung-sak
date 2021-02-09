@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -204,9 +203,6 @@ public class EnhetsTjenesteTest {
             return Objects.equals("SPSF", data.getDiskresjonskode()) ? List.of(respKode6) : List.of(respNormal);
         }).when(arbeidsfordelingTjeneste).finnEnhet(Mockito.any());
 
-        when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(MOR_IDENT))
-            .thenReturn(barnKode6 || (annenPartKode6 && foreldreRelatertTps) ? Collections.singletonList(relatertKode6) : Collections.emptyList());
-        when(tpsTjeneste.hentDiskresjonskoderForFamilierelasjoner(FAR_IDENT)).thenReturn(annenPartKode6 ? Collections.singletonList(relatertKode6) : Collections.emptyList());
     }
 
 }
