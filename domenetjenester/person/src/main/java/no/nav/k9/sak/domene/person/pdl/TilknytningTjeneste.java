@@ -64,7 +64,7 @@ public class TilknytningTjeneste {
             .findFirst().orElse(null);
         if (AdressebeskyttelseGradering.STRENGT_FORTROLIG.equals(kode) || AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.equals(kode))
             return Diskresjonskode.KODE6;
-        return AdressebeskyttelseGradering.FORTROLIG.equals(kode) ? Diskresjonskode.KODE7 : Diskresjonskode.UDEFINERT;
+        return AdressebeskyttelseGradering.FORTROLIG.equals(kode) ? Diskresjonskode.KODE7 : null;
     }
 
     private String getTilknytning(no.nav.pdl.GeografiskTilknytning gt) {
