@@ -6,12 +6,17 @@ import no.nav.k9.kodeverk.geografisk.AdresseType;
 
 public class AdressePeriode {
 
-    private Gyldighetsperiode gyldighetsperiode;
-    private Adresse adresse;
+    private final Gyldighetsperiode gyldighetsperiode;
+    private final Adresse adresse;
 
-    private AdressePeriode(Gyldighetsperiode gyldighetsperiode, Adresse adresse) {
+    public AdressePeriode(Gyldighetsperiode gyldighetsperiode, Adresse adresse) {
         this.gyldighetsperiode = gyldighetsperiode;
         this.adresse = adresse;
+    }
+
+    public static boolean fuzzyEquals(AdressePeriode a1, AdressePeriode a2) {
+        return Gyldighetsperiode.fuzzyEquals(a1.gyldighetsperiode, a2.gyldighetsperiode) &&
+            Adresse.passeLik(a1.adresse, a2.adresse);
     }
 
     public Gyldighetsperiode getGyldighetsperiode() {
@@ -49,6 +54,7 @@ public class AdressePeriode {
 
     public static class Adresse {
         private AdresseType adresseType;
+        private String matrikkelId;
         private String adresselinje1;
         private String adresselinje2;
         private String adresselinje3;
@@ -60,8 +66,22 @@ public class AdressePeriode {
         private Adresse() {
         }
 
+        public static boolean passeLik(Adresse a, Adresse adresse) {
+            if (a == null && adresse == null) return true;
+            if (a == null || adresse == null) return false;
+            if (a == adresse) return true;
+            return Objects.equals(a.adresseType, adresse.adresseType) &&
+                // TODO: enable når slutt sammenligning Objects.equals(matrikkelId, adresse.matrikkelId) &&
+                Objects.equals(a.postnummer, adresse.postnummer) &&
+                (Objects.equals(a.land, adresse.land) || a.land == null || adresse.land == null);
+        }
+
         public AdresseType getAdresseType() {
             return adresseType;
+        }
+
+        public String getMatrikkelId() {
+            return matrikkelId;
         }
 
         public String getAdresselinje1() {
@@ -84,17 +104,15 @@ public class AdressePeriode {
             return postnummer;
         }
 
-        public String getPoststed() {
-            return poststed;
-        }
-
         public String getLand() {
             return land;
         }
 
         @Override
         public String toString() {
-            return "Adresse{" + "adresseType=" + adresseType +
+            return "Adresse{" +
+                "adresseType=" + adresseType +
+                ", matrikkelId='" + matrikkelId + '\'' +
                 ", adresselinje1='" + adresselinje1 + '\'' +
                 ", adresselinje2='" + adresselinje2 + '\'' +
                 ", adresselinje3='" + adresselinje3 + '\'' +
@@ -110,7 +128,8 @@ public class AdressePeriode {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Adresse adresse = (Adresse) o;
-            return Objects.equals(adresseType, adresse.adresseType) &&
+            return adresseType == adresse.adresseType &&
+                Objects.equals(matrikkelId, adresse.matrikkelId) &&
                 Objects.equals(adresselinje1, adresse.adresselinje1) &&
                 Objects.equals(adresselinje2, adresse.adresselinje2) &&
                 Objects.equals(adresselinje3, adresse.adresselinje3) &&
@@ -122,14 +141,13 @@ public class AdressePeriode {
 
         @Override
         public int hashCode() {
-            return Objects.hash(adresseType, adresselinje1, adresselinje2, adresselinje3, adresselinje4, postnummer, poststed, land);
+            return Objects.hash(adresseType, matrikkelId, adresselinje1, adresselinje2, adresselinje3, adresselinje4, postnummer, poststed, land);
         }
     }
 
-
     public static final class Builder {
         private Gyldighetsperiode gyldighetsperiodeKladd;
-        private Adresse adresseKladd;
+        private final Adresse adresseKladd;
 
         private Builder() {
             this.adresseKladd = new Adresse();
@@ -142,6 +160,11 @@ public class AdressePeriode {
 
         public Builder medAdresseType(AdresseType adresseType) {
             adresseKladd.adresseType = adresseType;
+            return this;
+        }
+
+        public Builder medMatrikkelId(String matrikkelId) {
+            adresseKladd.matrikkelId = matrikkelId;
             return this;
         }
 
