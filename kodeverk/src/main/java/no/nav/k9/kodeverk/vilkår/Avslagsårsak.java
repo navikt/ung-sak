@@ -24,7 +24,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-        Map.of()),
+        Map.of(FagsakYtelseType.OMSORGSPENGER, "22-13, 2. ledd")),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.FP, "21-3,21-7",
             FagsakYtelseType.OMP, "21-3")),

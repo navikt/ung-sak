@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,10 +11,11 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "INIT_PERIODER")
@@ -23,6 +23,9 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 @FagsakYtelseTypeRef("PSB")
 public class InitierPerioderSteg implements BehandlingSteg {
 
+    private BehandlingRepository behandlingRepository;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private UttakRepository uttakRepository;
 
     protected InitierPerioderSteg() {
@@ -30,32 +33,40 @@ public class InitierPerioderSteg implements BehandlingSteg {
     }
 
     @Inject
-    public InitierPerioderSteg(UttakRepository uttakRepository) {
+    public InitierPerioderSteg(BehandlingRepository behandlingRepository,
+                               SøknadsperiodeRepository søknadsperiodeRepository,
+                               MottatteDokumentRepository mottatteDokumentRepository,
+                               UttakRepository uttakRepository) {
+        this.behandlingRepository = behandlingRepository;
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.uttakRepository = uttakRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        var oppgittUttak = uttakRepository.hentOppgittUttak(behandlingId);
 
-        // TODO (FC): åpne aksjonspunkter når følgende
-        // 1. sjekk mismatch mellom uttakaktiviteter og godkjente arbeidsforhold (ta utgangspunkt i godkjent for beregningsgrunnlag?)
-        // 2. sjekk om flere arbeisforhold godkjent per arbeidsgiver
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        // tar rå kopi av dataene i første omgang
-        List<UttakAktivitetPeriode> mappedPerioder = oppgittUttak.getPerioder().stream().map(this::mapUttakAktivitetPeriode).collect(Collectors.toList());
-        var fastsattUttak = new UttakAktivitet(mappedPerioder);
-        uttakRepository.lagreOgFlushFastsattUttak(behandlingId, fastsattUttak);
+        if (behandling.erManueltOpprettet()) {
+            var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+                .stream()
+                .map(MottattDokument::getJournalpostId)
+                .collect(Collectors.toSet());
 
+            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(mottatteDokumenter);
+            // Tar søknadsperioder fra søknader ankommet på fagsaken etter kronologisk rekkefølge og lagrer ned på søknadsperiodegrunnlag elns
+        } else {
+            var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+                .stream()
+                .filter(it -> it.getBehandlingId().equals(behandlingId))
+                .map(MottattDokument::getJournalpostId)
+                .collect(Collectors.toSet());
+
+            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(mottatteDokumenter);
+            // Tar søknadsperioder fra søknader ankommet på behandlingen og lagrer ned på søknadsperiodegrunnlag elns
+        }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private UttakAktivitetPeriode mapUttakAktivitetPeriode(UttakAktivitetPeriode p) {
-        return new UttakAktivitetPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(),
-            p.getAktivitetType(), p.getArbeidsgiver(),
-            p.getArbeidsforholdRef() != null ? p.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef(), // legger på null objekt her for sammenligne enklere senre
-            p.getJobberNormaltPerUke(),
-            p.getSkalJobbeProsent());
     }
 }
