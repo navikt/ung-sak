@@ -178,7 +178,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     }
 
     private boolean matcherAktivitet(no.nav.k9.sak.typer.Arbeidsgiver arbeidsgiver, no.nav.k9.sak.typer.InternArbeidsforholdRef arbeidsforhold, VurdertSøktPeriode<OppgittFraværPeriode> at) {
-        return at.getArbeidsgiver().equals(arbeidsgiver) && at.getArbeidsforholdRef().equals(arbeidsforhold);
+        return at.getArbeidsgiver().equals(arbeidsgiver) && at.getArbeidsforholdRef().gjelderFor(arbeidsforhold);
     }
 
     private VurdertSøktPeriode<OppgittFraværPeriode> konsistens(LocalDateSegment<VurdertSøktPeriode<OppgittFraværPeriode>> segment) {
