@@ -114,36 +114,25 @@ public class PersonBasisTjeneste {
         return KjoennType.KVINNE.equals(kode) ? NavBrukerKjønn.KVINNE : NavBrukerKjønn.UDEFINERT;
     }
 
-    public void hentOgSjekkPersoninfoArbeidsgiverFraPDL(AktørId aktørId, PersonIdent personIdent, PersoninfoArbeidsgiver fraTPS) {
-        try {
-            var query = new HentPersonQueryRequest();
-            query.setIdent(aktørId.getId());
-            var projection = new PersonResponseProjection()
-                .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
-                .foedsel(new FoedselResponseProjection().foedselsdato());
-            var personFraPDL = pdlKlient.hentPerson(query, projection);
+    public PersoninfoArbeidsgiver hentPersoninfoArbeidsgiver(AktørId aktørId, PersonIdent personIdent) {
+        var query = new HentPersonQueryRequest();
+        query.setIdent(aktørId.getId());
+        var projection = new PersonResponseProjection()
+            .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
+            .foedsel(new FoedselResponseProjection().foedselsdato());
+        var personFraPDL = pdlKlient.hentPerson(query, projection);
 
-            var fødselsdato = personFraPDL.getFoedsel().stream()
-                .map(Foedsel::getFoedselsdato)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
+        var fødselsdato = personFraPDL.getFoedsel().stream()
+            .map(Foedsel::getFoedselsdato)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
 
-            var fraPDL =
-                new PersoninfoArbeidsgiver.Builder()
-                    .medAktørId(aktørId)
-                    .medPersonIdent(personIdent)
-                    .medNavn(personFraPDL.getNavn().stream().map(PersonBasisTjeneste::mapNavn).filter(Objects::nonNull).findFirst().orElse(null))
-                    .medFødselsdato(fødselsdato)
-                    .bygg();
-
-            if (Objects.equals(fraPDL, fraTPS)) {
-                LOG.info("K9-SAK TPSvsPDL PersoninfoArbeidsgiver: like svar");
-            } else {
-                LOG.info("K9-SAK TPSvsPDL PersoninfoArbeidsgiver: avvik");
-            }
-        } catch (Exception e) {
-            LOG.info("K9-SAK TPSvsPDL PersoninfoArbeidsgiver error", e);
-        }
+        return new PersoninfoArbeidsgiver.Builder()
+            .medAktørId(aktørId)
+            .medPersonIdent(personIdent)
+            .medNavn(personFraPDL.getNavn().stream().map(PersonBasisTjeneste::mapNavn).filter(Objects::nonNull).findFirst().orElse(null))
+            .medFødselsdato(fødselsdato)
+            .bygg();
     }
 }

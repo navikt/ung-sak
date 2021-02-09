@@ -27,8 +27,8 @@ public class PersoninfoAdapterTest {
     private static final AktørId AKTØR_ID_SØKER = AktørId.dummy();
     private static final AktørId AKTØR_ID_BARN = AktørId.dummy();
 
-    private static final PersonIdent FNR_SØKER = new PersonIdent("07078516261");
-    private static final PersonIdent FNR_BARN = new PersonIdent("02028033445");
+    private static final PersonIdent PERSONIDENT_FNR_SØKER = new PersonIdent("07078516261");
+    private static final PersonIdent PERSONIDENT_FNR_BARN = new PersonIdent("02028033445");
 
     private Personinfo mockPersoninfo;
 
@@ -37,22 +37,21 @@ public class PersoninfoAdapterTest {
         Personinfo kjerneinfoSøker = lagHentPersonResponseForSøker();
         Personinfo kjerneinfobarn = lagHentPersonResponseForBarn();
 
-        TpsAdapter mockTpsAdapter = mock(TpsAdapter.class);
         AktørTjeneste aktørTjeneste = mock(AktørTjeneste.class);
 
-        when(aktørTjeneste.hentAktørIdForPersonIdent(FNR_BARN)).thenReturn(of(AKTØR_ID_BARN));
-        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_SØKER)).thenReturn(of(FNR_SØKER));
-        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_BARN)).thenReturn(of(FNR_BARN));
-
-        when(mockTpsAdapter.hentKjerneinformasjon(FNR_BARN, AKTØR_ID_BARN)).thenReturn(kjerneinfobarn);
-        when(mockTpsAdapter.hentKjerneinformasjon(FNR_SØKER, AKTØR_ID_SØKER)).thenReturn(kjerneinfoSøker);
+        when(aktørTjeneste.hentAktørIdForPersonIdent(PERSONIDENT_FNR_BARN)).thenReturn(of(AKTØR_ID_BARN));
+        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_SØKER)).thenReturn(of(PERSONIDENT_FNR_SØKER));
+        when(aktørTjeneste.hentPersonIdentForAktørId(AKTØR_ID_BARN)).thenReturn(of(PERSONIDENT_FNR_BARN));
 
         mockPersoninfo = mock(Personinfo.class);
         when(mockPersoninfo.getFødselsdato()).thenReturn(LocalDate.now()); // trenger bare en verdi
 
         PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
         PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
-        testSubject = new PersoninfoAdapter(mockTpsAdapter, personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class));
+        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_BARN, PERSONIDENT_FNR_BARN)).thenReturn(kjerneinfobarn);
+        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_SØKER, PERSONIDENT_FNR_SØKER)).thenReturn(kjerneinfoSøker);
+
+        testSubject = new PersoninfoAdapter(personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class));
     }
 
     @Test
@@ -73,7 +72,7 @@ public class PersoninfoAdapterTest {
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_BARN);
 
         // Act and assert
-        assertThat(testSubject.innhentSaksopplysningerForBarn(FNR_BARN))
+        assertThat(testSubject.innhentSaksopplysningerForBarn(PERSONIDENT_FNR_BARN))
             .hasValueSatisfying(barn -> {
                     assertThat(barn.getAktørId()).isEqualTo(AKTØR_ID_BARN);
                     assertThat(barn.getFødselsdato()).isNotNull();
@@ -82,10 +81,10 @@ public class PersoninfoAdapterTest {
     }
 
     private Personinfo lagHentPersonResponseForSøker() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_SØKER).medPersonIdent(FNR_SØKER).medNavn("Kari Nordmann").medFødselsdato(LocalDate.of(1985, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
+        return new Personinfo.Builder().medAktørId(AKTØR_ID_SØKER).medPersonIdent(PERSONIDENT_FNR_SØKER).medNavn("Kari Nordmann").medFødselsdato(LocalDate.of(1985, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
     }
 
     private Personinfo lagHentPersonResponseForBarn() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_BARN).medPersonIdent(FNR_BARN).medNavn("Kari Nordmann Junior").medFødselsdato(LocalDate.of(2000, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
+        return new Personinfo.Builder().medAktørId(AKTØR_ID_BARN).medPersonIdent(PERSONIDENT_FNR_BARN).medNavn("Kari Nordmann Junior").medFødselsdato(LocalDate.of(2000, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
     }
 }
