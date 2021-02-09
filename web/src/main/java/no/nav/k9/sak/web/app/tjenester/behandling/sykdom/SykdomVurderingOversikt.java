@@ -44,6 +44,10 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
+    
+    @JsonProperty(value = "harGyldigSignatur")
+    @Valid
+    private boolean harGyldigSignatur = true;
 
     /*
     // Om den siste versjonen har blitt besluttet iverksatt eller ikke.
