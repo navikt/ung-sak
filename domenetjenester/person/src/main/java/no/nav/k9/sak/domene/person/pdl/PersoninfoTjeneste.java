@@ -496,7 +496,6 @@ public class PersoninfoTjeneste {
             .medAdresselinje4(adresseinfo.getAdresselinje4())
             .medAdresseType(adresseinfo.getGjeldendePostadresseType())
             .medPostnummer(adresseinfo.getPostNr())
-            .medPoststed(adresseinfo.getPoststed())
             .medLand(adresseinfo.getLand())
             .build();
     }
@@ -640,7 +639,6 @@ public class PersoninfoTjeneste {
             .medMatrikkelId(vegadresse.getMatrikkelId())
             .medAdresselinje1(gateadresse)
             .medPostNr(postnummer)
-            .medPoststed(tilPoststed(postnummer))
             .medLand(Landkoder.NOR.getKode())
             .build();
     }
@@ -654,7 +652,6 @@ public class PersoninfoTjeneste {
             .medAdresselinje1(matrikkeladresse.getTilleggsnavn() != null ? matrikkeladresse.getTilleggsnavn().toUpperCase() : matrikkeladresse.getBruksenhetsnummer())
             .medAdresselinje2(matrikkeladresse.getTilleggsnavn() != null ? matrikkeladresse.getBruksenhetsnummer() : null)
             .medPostNr(postnummer)
-            .medPoststed(tilPoststed(postnummer))
             .medLand(Landkoder.NOR.getKode())
             .build();
     }
@@ -668,7 +665,6 @@ public class PersoninfoTjeneste {
             .medAdresselinje1(postboksadresse.getPostbokseier() != null ? postboksadresse.getPostbokseier().toUpperCase() : postboks)
             .medAdresselinje2(postboksadresse.getPostbokseier() != null ? postboks : null)
             .medPostNr(postnummer)
-            .medPoststed(tilPoststed(postnummer))
             .medLand(Landkoder.NOR.getKode())
             .build();
     }
@@ -682,17 +678,7 @@ public class PersoninfoTjeneste {
             .medAdresselinje2(postadresse.getAdresselinje2() != null ? postadresse.getAdresselinje2().toUpperCase() : null)
             .medAdresselinje3(postadresse.getAdresselinje3() != null ? postadresse.getAdresselinje3().toUpperCase() : null)
             .medPostNr(postnummer)
-            .medPoststed(tilPoststed(postnummer))
             .medLand(Landkoder.NOR.getKode())
             .build();
-    }
-
-    private String tilPoststed(String postnummer) {
-        if (HARDKODET_POSTNR.equals(postnummer)) {
-            return HARDKODET_POSTSTED;
-        }
-        //TODO Trenger vi poststed? I såfall må det hentes fra et sted og hvor?
-        //return poststedKodeverkRepository.finnPoststed(postnummer).map(Poststed::getPoststednavn).orElse(HARDKODET_POSTSTED);
-        return postnummer;
     }
 }

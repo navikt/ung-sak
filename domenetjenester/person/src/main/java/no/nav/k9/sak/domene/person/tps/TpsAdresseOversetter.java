@@ -293,7 +293,6 @@ public class TpsAdresseOversetter {
     private Adresseinfo byggAddresseinfo(AdresseType gjeldende, Adresse adresse) {
         return adresseBuilderForPerson(gjeldende)
             .medPostNr(adresse.postnummer)
-            .medPoststed(adresse.poststed)
             .medLand(adresse.land)
             .medAdresselinje1(adresse.adresselinje1)
             .medAdresselinje2(adresse.adresselinje2)
@@ -439,9 +438,8 @@ public class TpsAdresseOversetter {
         String linje3 = Optional.ofNullable(adresseinfo.getAdresselinje3()).map(linje -> "\n" + linje).orElse("");
         String linje4 = Optional.ofNullable(adresseinfo.getAdresselinje4()).map(linje -> "\n" + linje).orElse("");
         String postnr = Optional.ofNullable(adresseinfo.getPostNr()).map(nr -> "\n" + nr).orElse("");
-        String poststed = Optional.ofNullable(adresseinfo.getPoststed()).map(sted -> " " + sted).orElse("");
         String land = Optional.ofNullable(adresseinfo.getLand()).map(landKode -> "\n" + landKode).orElse("");
-        return linje1 + linje2 + linje3 + linje4 + postnr + poststed + land;
+        return linje1 + linje2 + linje3 + linje4 + postnr + land;
     }
 
     Adresseinfo tilAdresseInfo(Person person) {
