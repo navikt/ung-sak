@@ -11,7 +11,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import net.bytebuddy.asm.Advice;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "SykdomDiagnosekode")
