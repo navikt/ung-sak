@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -14,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 
 /**
  * Fellesklasse for gjenbrukte metode av subklasser for {@link KompletthetsjekkerImpl}.
@@ -60,8 +62,8 @@ public class KompletthetsjekkerFelles {
         return LocalDateTime.now().plusWeeks(VENTEFRIST_FOR_MANGLENDE_SØKNAD);
     }
 
-    public void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, String årsakskode) {
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, null, årsakskode);
+    public void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
+        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString()));
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
     }
 
