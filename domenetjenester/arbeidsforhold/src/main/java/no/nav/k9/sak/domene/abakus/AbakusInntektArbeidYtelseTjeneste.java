@@ -41,7 +41,6 @@ import no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.MapInntektsmeldinger;
-import no.nav.k9.sak.domene.abakus.mapping.MapRefusjonskravDatoer;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -55,7 +54,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -203,19 +201,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
         }
         return Set.of();
-    }
-
-    @Override
-    public List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-
-        if (fagsakOpt.isPresent()) {
-            Fagsak fagsak = fagsakOpt.get();
-            // Hent grunnlag fra abakus
-            return hentOgMapAlleRefusjonskravDatoer(fagsak);
-
-        }
-        return List.of();
     }
 
     private SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
@@ -388,10 +373,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return mapInntektsmeldinger.map(dummyBuilder, dto);
     }
 
-    private List<RefusjonskravDato> mapResult(RefusjonskravDatoerDto dto) {
-        return MapRefusjonskravDatoer.map(dto);
-    }
-
     private InntektArbeidYtelseGrunnlag mapResult(AktørId aktørId, InntektArbeidYtelseGrunnlagDto dto, boolean isAktiv) {
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = new IAYFraDtoMapper(aktørId).mapTilGrunnlagInklusivRegisterdata(dto, isAktiv);
         return new AbakusInntektArbeidYtelseGrunnlag(inntektArbeidYtelseGrunnlag, dto.getKoblingReferanse());
@@ -431,12 +412,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return inntektsmeldinger.stream()
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private List<RefusjonskravDato> hentOgMapAlleRefusjonskravDatoer(Fagsak fagsak) {
-        var request = initInntektsmeldingerRequest(fagsak.getAktørId(), fagsak.getSaksnummer(), fagsak.getYtelseType());
-        var dto = hentRefusjonskravDatoer(request);
-        return mapResult(dto);
     }
 
     private List<InntektArbeidYtelseGrunnlag> hentOgMapAlleGrunnlag(Fagsak fagsak) {

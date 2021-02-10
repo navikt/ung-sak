@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -133,8 +131,6 @@ public interface InntektArbeidYtelseTjeneste {
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
 
     Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
-
-    List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer);
 
     Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId);
 
