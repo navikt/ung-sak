@@ -1,12 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -23,8 +23,12 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_SOEKNADSPERIODE")
     private Long id;
 
-    private Set<Søknadsperioder> søknadsperioder;
+    @ManyToOne
+    @Immutable
+    @JoinColumn(name = "søknadsperioder_id", nullable = false, updatable = false, unique = true)
+    private SøknadsperioderHolder søknadsperioder;
 
+    @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
     @Version
@@ -34,5 +38,19 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
     SøknadsperiodeGrunnlag() {
     }
 
+    SøknadsperiodeGrunnlag(SøknadsperiodeGrunnlag grunnlag) {
+        søknadsperioder = grunnlag.søknadsperioder;
+    }
 
+    public Long getId() {
+        return id;
+    }
+
+    public SøknadsperioderHolder getSøknadsperioder() {
+        return søknadsperioder;
+    }
+
+    public boolean isAktiv() {
+        return aktiv;
+    }
 }

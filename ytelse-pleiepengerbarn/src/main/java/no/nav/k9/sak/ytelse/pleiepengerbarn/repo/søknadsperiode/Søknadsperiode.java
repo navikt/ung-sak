@@ -37,10 +37,6 @@ public class Søknadsperiode extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    @ManyToOne
-    @JoinColumn(name = "soeknadsperioder_id", nullable = false, updatable = false, unique = true)
-    private Søknadsperioder søknadsperioder;
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -58,10 +54,6 @@ public class Søknadsperiode extends BaseEntitet {
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
-    }
-
-    void setFordeling(Søknadsperioder fordeling) {
-        this.søknadsperioder = fordeling;
     }
 
     @Override
