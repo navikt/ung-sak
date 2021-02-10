@@ -61,7 +61,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        if (!getKomplethetsjekker(ref).erSøknadMottatt(ref)) {
+        if (!getKomplethetsjekkerSøknad(ref).erSøknadMottatt(ref)) {
             // Litt implisitt forutsetning her, men denne sjekken skal bare ha bli kalt dersom søknad eller IM er mottatt
             LOGGER.info("Behandling {} er ikke komplett - søknad er ikke mottatt", ref.getBehandlingId()); // NOSONAR //$NON-NLS-1$
             return KompletthetResultat.ikkeOppfylt(fellesUtil.finnVentefristTilManglendeSøknad(), Venteårsak.AVV_DOK);
@@ -71,7 +71,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
-        Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
+        Optional<LocalDateTime> forTidligFrist = getKomplethetsjekkerSøknad(ref).erSøknadMottattForTidlig(ref);
         if (forTidligFrist.isPresent()) {
             return KompletthetResultat.ikkeOppfylt(forTidligFrist.get(), Venteårsak.FOR_TIDLIG_SOKNAD);
         }
@@ -83,6 +83,11 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
         }
+        if (getKomplethetsjekkerSøknad(ref).erSøknadMottatt(ref)) {
+            //venter ikke på inntektsmeldinger når søknad er mottatt
+            return KompletthetResultat.oppfylt();
+        }
+
         // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
@@ -127,7 +132,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         return fellesUtil.finnVentefrist(muligFrist);
     }
 
-    private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
+    private KompletthetssjekkerSøknad getKomplethetsjekkerSøknad(BehandlingReferanse ref) {
         return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
     }
 

@@ -47,7 +47,7 @@ public class KompletthetssjekkerSøknad {
         return Optional.empty();
     }
 
-    public Boolean erSøknadMottatt(BehandlingReferanse ref) {
+    public boolean erSøknadMottatt(BehandlingReferanse ref) {
         final Optional<SøknadEntitet> søknad = søknadRepository.hentSøknadHvisEksisterer(ref.getBehandlingId());
         return søknad.isPresent();
     }
