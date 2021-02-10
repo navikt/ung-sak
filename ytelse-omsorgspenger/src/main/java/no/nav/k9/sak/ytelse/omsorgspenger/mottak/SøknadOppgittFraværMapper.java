@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +31,7 @@ class SøknadOppgittFraværMapper {
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
         if (søknadsinnhold.getAktivitet().getArbeidstaker() != null){
-            // TODO: Arbeistaker
+            // TODO: Arbeidstaker. Se også {@link KravDokumentFravær#trekkUtAlleFraværOgValiderOverlapp}
             throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
         }
         if (søknadsinnhold.getAktivitet().getFrilanser() != null){
@@ -45,11 +44,10 @@ class SøknadOppgittFraværMapper {
         for (FraværPeriode fp : fraværsperioder) {
             for (SelvstendigNæringsdrivende sn : snAktiviteter) {
                 InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
-                BigDecimal skalJobbeProsent = null; // får ikke fra søknad, må settes til null dersom jobberNormaltPerUke er satt til null
                 var arbeidsgiver = sn.organisasjonsnummer != null
                     ? Arbeidsgiver.virksomhet(sn.organisasjonsnummer.verdi)
-                    : (søker.norskIdentitetsnummer != null
-                    ? Arbeidsgiver.fra(new AktørId(søker.norskIdentitetsnummer.verdi))
+                    : (søker.getPersonIdent() != null
+                    ? Arbeidsgiver.fra(new AktørId(søker.getPersonIdent().getVerdi()))
                     : null);
 
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fp.getPeriode().getFraOgMed(), fp.getPeriode().getTilOgMed(),
