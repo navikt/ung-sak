@@ -45,11 +45,11 @@ public class MottatteDokumentTjeneste {
         }
         Long behandlingId = behandling.getId();
 
-        var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokumenter);
-        if (inntektsmeldinger.size() != 1) {
-            throw new IllegalStateException("Forventet 1 inntektsmelding, men har " + inntektsmeldinger.size());
-        }
         for (var dokument : dokumenter) {
+            var inntektsmeldinger = inntektsmeldingParser.parseInntektsmeldinger(dokument);
+            if (inntektsmeldinger.size() != 1) {
+                throw new IllegalStateException("Forventet 1 inntektsmelding, men har " + inntektsmeldinger.size());
+            }
             InntektsmeldingBuilder im = inntektsmeldinger.get(0); // sendte bare ett dokument her, så forventer kun et svar
             var arbeidsgiver = im.getArbeidsgiver(); // NOSONAR
             dokument.setArbeidsgiver(arbeidsgiver.getIdentifikator());
