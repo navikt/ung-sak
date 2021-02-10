@@ -155,6 +155,8 @@ spec:
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum
+    - name: K9_OMS_UTVIDETRETT_URL
+      value: https://omsorgsdager.dev.intern.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL

@@ -2,7 +2,6 @@ package no.nav.k9.sak.perioder;
 
 import java.util.Objects;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;

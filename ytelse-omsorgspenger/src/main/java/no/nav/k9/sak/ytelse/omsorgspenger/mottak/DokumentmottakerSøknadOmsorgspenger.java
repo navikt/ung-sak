@@ -42,7 +42,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
 import no.nav.vedtak.konfig.Tid;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef("OMP")
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 

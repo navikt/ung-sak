@@ -1,0 +1,84 @@
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.omsorgspenger.mottak.SøknadParser;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.ytelse.Ytelse;
+import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerUtvidetRett;
+
+@ApplicationScoped
+@FagsakYtelseTypeRef("OMP_KS")
+@FagsakYtelseTypeRef("OMP_MA")
+@DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_KS_KODE)
+@DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
+public class SøknadDokumentValidator implements DokumentValidator {
+
+    @Inject
+    public SøknadDokumentValidator() {
+    }
+
+    @Override
+    public void validerDokumenter(Long behandlingId, Collection<MottattDokument> meldinger) {
+        validerHarInnhold(meldinger);
+        var søknader = new SøknadParser().parseSøknader(meldinger);
+        for (Søknad søknad : søknader) {
+            validerInnhold(søknad);
+        }
+    }
+
+    @Override
+    public void validerDokument(MottattDokument mottattDokument) {
+        validerDokumenter(null, Set.of(mottattDokument));
+    }
+
+    private void validerInnhold(Søknad søknad) {
+        OmsorgspengerUtvidetRett ytelse = søknad.getYtelse();
+        defaultValidering(ytelse);
+        validerIkkeImplementertFunksjonalitet(ytelse);
+    }
+
+    private void validerIkkeImplementertFunksjonalitet(OmsorgspengerUtvidetRett ytelse) {
+        if (ytelse.getType() != Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN) {
+            throw new UnsupportedOperationException("Støtter kun kronisk sykt barn p.t., fikk:" + ytelse.getType());
+        }
+    }
+
+    private void defaultValidering(OmsorgspengerUtvidetRett ytelse) {
+        List<no.nav.k9.søknad.felles.Feil> feil = ytelse.getValidator().valider(ytelse);
+        if (!feil.isEmpty()) {
+            // kaster DokumentValideringException pga håndtering i SaksbehandlingDokumentmottakTjeneste
+            throw valideringsfeil(feil.stream()
+                .map(f -> "kode=" + f.feilkode + " for " + f.felt + ": " + f.feilmelding)
+                .reduce((a, b) -> a + "; " + b).orElseThrow());
+        }
+    }
+
+    private static void validerHarInnhold(Collection<MottattDokument> dokumenter) {
+        Set<JournalpostId> dokumenterUtenInnhold = dokumenter.stream()
+            .filter(d -> !d.harPayload())
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+        if (!dokumenterUtenInnhold.isEmpty()) {
+            throw valideringsfeil("Mottok søknad uten innhold. Gjelder journalpostId=" + dokumenterUtenInnhold);
+        }
+    }
+
+    private static DokumentValideringException valideringsfeil(String tekst) {
+        return new DokumentValideringException("Feil i søknad om utbetaling av omsorgspenger: " + tekst);
+    }
+
+}
