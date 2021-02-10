@@ -43,6 +43,10 @@ public enum FagsakYtelseType implements Kodeverdi {
     PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS"),
     PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger nærstående", null, "OMS"),
     OMSORGSPENGER("OMP", "Omsorgspenger", "OM", "OMS"),
+
+    OMSORGSPENGER_KS("OMP_KS", "Omsorgspenger - Utvidet rett Kronisk sykdom", "OM", "OMS"),
+    OMSORGSPENGER_MA("OMP_MA", "Omsorgspenger - Utvidet rett Midlertidig Alene", "OM", "OMS"),
+
     OPPLÆRINGSPENGER("OLP", "Opplæringspenger", null, "OMS"),
 
     /** @deprecated Gammel infotrygd kode for K9 ytelser. Må tolkes om til ovenstående sammen med TemaUnderkategori. */
@@ -201,6 +205,8 @@ public enum FagsakYtelseType implements Kodeverdi {
         PLEIEPENGER_NÆRSTÅENDE,
         OPPLÆRINGSPENGER,
         OMSORGSPENGER,
+        OMSORGSPENGER_KS,
+        OMSORGSPENGER_MA,
         FORELDREPENGER,
         ENGANGSTØNAD));
 
@@ -236,8 +242,13 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     }
 
+
     public boolean harRelatertePersoner() {
         return HAR_RELATERTE_PERSONER.contains(this);
+    }
+
+    public boolean erRammevedtak() {
+        return this == OMSORGSPENGER_KS || this == OMSORGSPENGER_MA;
     }
 
 }

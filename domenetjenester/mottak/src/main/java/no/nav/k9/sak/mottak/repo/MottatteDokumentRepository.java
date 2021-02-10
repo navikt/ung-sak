@@ -31,7 +31,20 @@ public class MottatteDokumentRepository {
     }
 
     public MottattDokument lagre(MottattDokument mottattDokument, DokumentStatus status) {
-        mottattDokument.setStatus(status);
+        if (!mottattDokument.getStatus().erGyldigTransisjon(status)) {
+            throw new IllegalArgumentException("Ugyldig transisjon: " + mottattDokument.getStatus() + " -> " + status);
+        }
+        mottattDokument.setStatus(Objects.requireNonNull(status, "status"));
+        entityManager.persist(mottattDokument);
+        entityManager.flush();
+        return mottattDokument;
+    }
+
+    /** Lagrer kun, endrer ikke status . */
+    public MottattDokument oppdater(MottattDokument mottattDokument) {
+        if (mottattDokument.getId() == null) {
+            throw new IllegalStateException("Kan kun oppdatere eksisterende dokument her, ikke lagre nytt: journalpostId=" + mottattDokument.getJournalpostId());
+        }
         entityManager.persist(mottattDokument);
         entityManager.flush();
         return mottattDokument;
@@ -127,6 +140,5 @@ public class MottatteDokumentRepository {
         entityManager.flush();
 
     }
-
 
 }

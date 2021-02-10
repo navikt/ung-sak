@@ -24,16 +24,16 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum DokumentStatus implements Kodeverdi {
     
     /** Dokument mottatt, ikke godtatt for behandling ennå (må sette til GYLDIG først). */
-    MOTTATT("MOTTATT", "Mottar"),
+    MOTTATT("MOTTATT", "Mottar", 1),
 
     /** Dokumentet er {@link #MOTTATT}, vurderer om {@link #GYLDIG}/komplett. */
-    BEHANDLER("BEHANDLER", "Behandler/vurderer dokument"),
+    BEHANDLER("BEHANDLER", "Behandler/vurderer dokument", 2),
 
     /** Dokument mottatt og validert gyldig. */
-    GYLDIG("GYLDIG", "Gyldig"),
+    GYLDIG("GYLDIG", "Gyldig", 3),
 
     /** Dokument vurdert som ugyldig. */
-    UGYLDIG("UGYLDIG", "Ugyldig"),
+    UGYLDIG("UGYLDIG", "Ugyldig", 4),
     ;
 
     private static final Map<String, DokumentStatus> KODER = new LinkedHashMap<>();
@@ -45,14 +45,17 @@ public enum DokumentStatus implements Kodeverdi {
 
     private String kode;
 
+    @JsonIgnore
+    private int rank;
 
     private DokumentStatus(String kode) {
         this.kode = kode;
     }
 
-    private DokumentStatus(String kode, String navn) {
+    private DokumentStatus(String kode, String navn, int rank) {
         this.kode = kode;
         this.navn = navn;
+        this.rank = rank;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -92,6 +95,10 @@ public enum DokumentStatus implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return getKode();
+    }
+
+    public boolean erGyldigTransisjon(DokumentStatus tilStatus) {
+        return this.rank <= tilStatus.rank;
     }
 
     static {

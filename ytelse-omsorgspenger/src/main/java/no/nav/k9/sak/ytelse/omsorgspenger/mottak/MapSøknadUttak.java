@@ -57,8 +57,8 @@ class MapSøknadUttak {
                 BigDecimal skalJobbeProsent = null; // får ikke fra søknad, må settes til null dersom jobberNormaltPerUke er satt til null
                 var arbeidsgiver = sn.organisasjonsnummer != null
                     ? Arbeidsgiver.virksomhet(sn.organisasjonsnummer.verdi)
-                    : (søker.norskIdentitetsnummer != null
-                    ? Arbeidsgiver.fra(new AktørId(søker.norskIdentitetsnummer.verdi))
+                    : (søker.getPersonIdent() != null
+                        ? Arbeidsgiver.fra(new AktørId(søker.getPersonIdent().getVerdi()))
                     : null);
                 UttakAktivitetPeriode uttakAktivitetPeriode = new UttakAktivitetPeriode(fraværPeriode.getPeriode().getFraOgMed(), fraværPeriode.getPeriode().getTilOgMed(),
                     UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, arbeidsforholdRef, fraværPeriode.getDuration(), skalJobbeProsent);
