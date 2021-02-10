@@ -79,9 +79,18 @@ public class OmsorgspengerGrunnlagRepository {
 
     public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
+        var eksisterendeFraværFraSøknad = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad).orElse(null);
         entityManager.persist(input);
         deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
-        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, input));
+        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, input, eksisterendeFraværFraSøknad));
+    }
+
+    public void lagreOgFlushOppgittFraværFraSøknad(Long behandlingId, OppgittFravær input) {
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
+        var eksisterendeFravær = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær).orElse(null);
+        entityManager.persist(input);
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, eksisterendeFravær, input));
     }
 
     /**

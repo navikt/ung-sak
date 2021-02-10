@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,13 +24,14 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
@@ -48,7 +48,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
-    private UttakRepository uttakRepository;
+    private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
@@ -65,7 +65,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
-                                        UttakRepository uttakRepository,
+                                        OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                         BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
                                         SøknadParser søknadParser,
@@ -74,7 +74,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.uttakRepository = uttakRepository;
+        this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
         this.søknadParser = søknadParser;
@@ -93,7 +93,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
-            persister(søknad, behandling);
+            persister(søknad, behandling, dokument.getJournalpostId());
         }
         // Søknadsinnhold som persisteres eksternt (abakus)
         lagreOppgittOpptjeningFraSøknader(behandlingId);
@@ -114,15 +114,14 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         prosessTaskRepository.lagre(enkeltTask);
     }
 
-    void persister(Søknad søknad, Behandling behandling) {
-        var fagsakId = behandling.getFagsakId();
+    void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
         var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
 
         lagreSøknad(behandlingId, søknad, søknadInnhold);
         lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
-        lagreUttakOgUtvidPeriode(søknadInnhold, behandling, fagsakId, søknad.getSøker());
+        lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søknad.getSøker());
     }
 
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
@@ -140,21 +139,18 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    private void lagreUttakOgUtvidPeriode(OmsorgspengerUtbetaling ytelse, Behandling behandling, Long fagsakId, Søker søker) {
+    private void lagreUttakOgUtvidPeriode(Behandling behandling, JournalpostId journalpostId, OmsorgspengerUtbetaling ytelse, Søker søker) {
         var behandlingId = behandling.getId();
-        var sisteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+        var fagsakId = behandling.getFagsakId();
 
-        UttakGrunnlag uttakGrunnlag;
-        if (sisteBehandling.isPresent()) {
-            var uttakAktivitet = uttakRepository.hentFastsattUttak(sisteBehandling.get().getId());
-            uttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, uttakAktivitet.getPerioder(), søker);
-        } else {
-            uttakGrunnlag = new MapSøknadUttak(ytelse).lagGrunnlag(behandlingId, Collections.emptySet(), søker);
-        }
-        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, uttakGrunnlag);
+        var fraværPerioderFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId).map();
+        var fraværFraSøknad = new OppgittFravær(fraværPerioderFraSøknad);
+        omsorgspengerGrunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
         // Utvide fagsakperiode
-        var maksPeriode = uttakGrunnlag.getOppgittUttak().getMaksPeriode();
+        var maksPeriode = omsorgspengerGrunnlagRepository.hentGrunnlag(behandlingId)
+            .map(grunnlag -> grunnlag.getOppgittFraværFraSøknad().getMaksPeriode())
+            .orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
