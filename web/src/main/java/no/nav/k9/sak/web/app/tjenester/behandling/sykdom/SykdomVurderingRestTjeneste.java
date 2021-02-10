@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
@@ -160,17 +161,20 @@ public class SykdomVurderingRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
             SykdomVurderingIdDto vurderingId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-
+        final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
+        
+        final List<SykdomDokument> dokumenterSomErRelevanteForSykdom = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(pleietrengende);
+        
         final List<SykdomVurderingVersjon> versjoner;
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
         } else {
-            versjoner = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.valueOf(vurderingId.getSykdomVurderingId()))
+            versjoner = sykdomVurderingRepository.hentVurdering(pleietrengende, Long.valueOf(vurderingId.getSykdomVurderingId()))
                     .get()
                     .getSykdomVurderingVersjoner();
         }
 
-        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner);
+        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, dokumenterSomErRelevanteForSykdom);
     }
 
     @POST

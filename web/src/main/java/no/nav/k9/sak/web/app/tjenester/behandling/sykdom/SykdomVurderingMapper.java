@@ -6,20 +6,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-import no.nav.k9.sak.kontrakt.ResourceLink;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentIdDto;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentOversiktMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
@@ -29,13 +25,26 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 @ApplicationScoped
 public class SykdomVurderingMapper {
 
+    private SykdomDokumentOversiktMapper dokumentMapper;
+    
+    
+    SykdomVurderingMapper() {
+        
+    }
+    
+    @Inject
+    public SykdomVurderingMapper(SykdomDokumentOversiktMapper dokumentMapper) {
+        this.dokumentMapper = dokumentMapper;
+    }
+    
+    
     /**
      * Mapper angitte versjoner til SykdomVurderingDto.
      * 
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
-    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner) {
+    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> relevanteDokumenterForSykdom) {
         final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
         
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
@@ -48,7 +57,7 @@ public class SykdomVurderingMapper {
                     v.getTekst(),
                     v.getResultat(),
                     mapPerioder(v.getPerioder()),
-                    mapDokumenter(behandlingUuid, v.getDokumenter()),
+                    mapDokumenter(behandlingUuid, v.getDokumenter(), relevanteDokumenterForSykdom),
                     v.getEndretAv(),
                     v.getEndretTidspunkt())
             )
@@ -66,24 +75,14 @@ public class SykdomVurderingMapper {
     }
 
     
+    private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> relevanteDokumenterForSykdom) {
+        final Set<Long> ids = tilknyttedeDokumenter.stream().map(d -> d.getId()).collect(Collectors.toUnmodifiableSet());
+        return dokumentMapper.mapDokumenter(behandlingUuid, relevanteDokumenterForSykdom, ids);
+    }
+
+
     private List<Periode> mapPerioder(List<SykdomVurderingPeriode> perioder) {
         return perioder.stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
-    }
-    
-    private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter) {
-        return dokumenter.stream().map(d -> new SykdomDokumentDto(
-                    "" + d.getId(),
-                    SykdomDokumentType.MEDISINSKE_OPPLYSNINGER, // TODO: Legg til støtte for dokumenttyper.
-                    true, // TODO: Riktig med true her, men vi må også legge til alle dokumentene som finnes.
-                    true, // TODO: AnnenPartErKilde
-                    LocalDate.now(), // TODO: Må få inn dateringsdato
-                    true, // TODO: Må finne ut om dokumentet er fremhevet (nytt dokument i behandlingen.
-                    Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
-                )).collect(Collectors.toList());
-    }
-    
-    private ResourceLink linkForGetDokumentinnhold(String behandlingUuid, String sykdomDokumentId) {
-        return ResourceLink.get(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_INNHOLD_PATH), "sykdom-dokument-innhold", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomDokumentIdDto.NAME, sykdomDokumentId));
     }
     
     public SykdomVurderingVersjon map(SykdomVurdering sykdomVurdering, SykdomVurderingEndringDto oppdatering, Sporingsinformasjon sporingsinformasjon, List<SykdomDokument> alleDokumenter) {

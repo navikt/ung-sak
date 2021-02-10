@@ -6,6 +6,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -35,6 +36,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomDokumentDto;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
@@ -69,7 +71,9 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_INNHOLD_PATH = BASE_PATH + DOKUMENT_INNHOLD;
     private static final String DOKUMENT_OVERSIKT = "/oversikt";
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
-
+    private static final String DOKUMENT_LISTE = "/liste";
+    public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
+    
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
     private SykdomDokumentRepository sykdomDokumentRepository;
@@ -88,6 +92,31 @@ public class SykdomDokumentRestTjeneste {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
+    @GET
+    @Path(DOKUMENT_LISTE)
+    @Operation(description = "Henter en liste over dokumenter som kan brukes i vurdering.",
+        summary = "Henter en liste over dokumenter som kan brukes i vurdering.",
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomDokumentDto.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public List<SykdomDokumentDto> hentSykdomsdokumenter(
+            @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @NotNull
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
+
+        final List<SykdomDokument> dokumenter = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
+        return sykdomDokumentOversiktMapper.mapDokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
+    }
+    
     @GET
     @Path(SYKDOM_INNLEGGELSE)
     @Operation(description = "Henter alle perioder den pleietrengende er innlagt på sykehus og liknende.",

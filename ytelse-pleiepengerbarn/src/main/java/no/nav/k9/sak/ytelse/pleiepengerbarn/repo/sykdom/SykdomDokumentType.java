@@ -8,10 +8,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum SykdomDokumentType {
-    LEGEERKLÆRING_SYKEHUS("LEGEERKLÆRING_SYKEHUS", "L"),
-    MEDISINSKE_OPPLYSNINGER("MEDISINSKE_OPPLYSNINGER", "M"),
-    ANNET("ANNET", "A"),
-    UKLASSIFISERT("UKLASSIFISERT", "U");
+    LEGEERKLÆRING_SYKEHUS("LEGEERKLÆRING_SYKEHUS", "L", true),
+    MEDISINSKE_OPPLYSNINGER("MEDISINSKE_OPPLYSNINGER", "M", true),
+    ANNET("ANNET", "A", false),
+    UKLASSIFISERT("UKLASSIFISERT", "U", false);
     
     
     @JsonValue
@@ -20,12 +20,20 @@ public enum SykdomDokumentType {
     @JsonIgnore
     private final String databasekode;
     
+    @JsonIgnore
+    private final boolean relevantForSykdom;
     
-    SykdomDokumentType(String apikode, String databasekode) {
+    
+    SykdomDokumentType(String apikode, String databasekode, boolean relevantForSykdom) {
         this.apikode = apikode;
         this.databasekode = databasekode;
+        this.relevantForSykdom = relevantForSykdom;
     }
     
+    
+    public boolean isRelevantForSykdom() {
+        return relevantForSykdom;
+    }
     
     @JsonCreator(mode = Mode.DELEGATING)
     public static SykdomDokumentType fraApikode(String s) {

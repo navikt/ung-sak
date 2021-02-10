@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -40,6 +41,13 @@ public class SykdomDokumentRepository {
         q.setParameter("aktørId", pleietrengende);
 
         return q.getResultList();
+    }
+    
+    public List<SykdomDokument> henDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
+        return hentAlleDokumenterFor(pleietrengende)
+                .stream()
+                .filter(d -> d.getType().isRelevantForSykdom())
+                .collect(Collectors.toList());
     }
 
     public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {

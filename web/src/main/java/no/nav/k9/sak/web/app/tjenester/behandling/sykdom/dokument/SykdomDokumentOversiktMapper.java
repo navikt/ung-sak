@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,6 +18,7 @@ import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomDokumentDto;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
@@ -119,5 +122,17 @@ public class SykdomDokumentOversiktMapper {
                 BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH),
                 "sykdom-innleggelse-endring",
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
+    }
+    
+    public List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
+        return dokumenter.stream().map(d -> new SykdomDokumentDto(
+                    "" + d.getId(),
+                    d.getType(),
+                    ids.contains(d.getId()),
+                    true, // TODO: AnnenPartErKilde
+                    d.getDatert(),
+                    true, // TODO: Må finne ut om dokumentet er fremhevet (nytt dokument i behandlingen.
+                    Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
+                )).collect(Collectors.toList());
     }
 }
