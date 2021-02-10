@@ -1,13 +1,9 @@
 package no.nav.k9.sak.domene.abakus;
 
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
-
 import java.lang.StackWalker.StackFrame;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -41,8 +37,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.Refusjon;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -156,34 +150,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     @Override
     public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
         return hentUnikeInntektsmeldingerForSak(saksnummer);
-    }
-
-    @Override
-    public List<RefusjonskravDato> hentRefusjonskravDatoerForSak(Saksnummer saksnummer) {
-        return hentUnikeInntektsmeldingerForSak(saksnummer).stream()
-            .filter(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall() || !im.getEndringerRefusjon().isEmpty())
-            .collect(Collectors.groupingBy(Inntektsmelding::getArbeidsgiver)).entrySet().stream()
-            .map(entry -> {
-                // FIXME (Espen Velsvik) TSF-1102: innsendingstidspunktet her blir feil for april-august 2020. Kan ikke brukes til å vurdere dato krav ble
-                // fremstatt vs. refusjonsdato for omsorgspenger/pleiepenger.
-                // for OMP/PSB må innsending av refusjon dato knyttes til perioden det bes om refusjon for, ikke kun første tidspunkte. Må løses i k9-sak
-                // istdf. kalkulus antagelig.
-                LocalDate førsteInnsendingAvRefusjon = entry.getValue().stream().map(Inntektsmelding::getInnsendingstidspunkt).min(Comparator.naturalOrder()).map(LocalDateTime::toLocalDate)
-                    .orElse(TIDENES_ENDE);
-                LocalDate førsteDatoForRefusjon = entry.getValue().stream()
-                    .map(im -> {
-                        if (!im.getRefusjonBeløpPerMnd().erNullEllerNulltall()) {
-                            return im.getStartDatoPermisjon().orElse(TIDENES_ENDE);
-                        } else {
-                            return im.getEndringerRefusjon().stream()
-                                .filter(er -> !er.getRefusjonsbeløp().erNullEllerNulltall())
-                                .min(Comparator.comparing(Refusjon::getFom))
-                                .map(Refusjon::getFom).orElse(TIDENES_ENDE);
-                        }
-                    }).min(Comparator.naturalOrder()).orElse(TIDENES_ENDE);
-                return new RefusjonskravDato(entry.getKey(), førsteDatoForRefusjon, førsteInnsendingAvRefusjon,
-                    entry.getValue().stream().anyMatch(im -> !im.getRefusjonBeløpPerMnd().erNullEllerNulltall()));
-            }).collect(Collectors.toList());
     }
 
     @Override
