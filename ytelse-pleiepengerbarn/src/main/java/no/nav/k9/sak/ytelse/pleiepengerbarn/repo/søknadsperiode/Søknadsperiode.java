@@ -22,12 +22,12 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Søknadsperiode")
-@Table(name = "PSB_SOEKNADSPERIODE")
+@Table(name = "SP_SOEKNADSPERIODE")
 @Immutable
 public class Søknadsperiode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_SOEKNADSPERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODE")
     private Long id;
 
     @Embedded
@@ -77,5 +77,4 @@ public class Søknadsperiode extends BaseEntitet {
             ", versjon=" + versjon +
             '>';
     }
-
 }

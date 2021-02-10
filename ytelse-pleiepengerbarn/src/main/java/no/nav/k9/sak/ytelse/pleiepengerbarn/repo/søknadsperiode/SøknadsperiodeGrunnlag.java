@@ -14,7 +14,7 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
-@Entity(name = "Søknadsperiode")
+@Entity(name = "SøknadsperiodeGrunnlag")
 @Table(name = "GR_SOEKNADSPERIODE")
 @Immutable
 public class SøknadsperiodeGrunnlag extends BaseEntitet {

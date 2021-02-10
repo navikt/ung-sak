@@ -24,13 +24,13 @@ import org.hibernate.annotations.Immutable;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
-@Entity(name = "Søknadsperioder")
-@Table(name = "PSB_SOEKNADSPERIODER_HOLDER")
+@Entity(name = "SøknadsperioderHolder")
+@Table(name = "SP_SOEKNADSPERIODER_HOLDER")
 @Immutable
 public class SøknadsperioderHolder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_SOEKNADSPERIODER_HOLDER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODER_HOLDER")
     private Long id;
 
     @ChangeTracked

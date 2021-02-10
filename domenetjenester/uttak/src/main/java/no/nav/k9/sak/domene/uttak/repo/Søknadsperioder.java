@@ -24,7 +24,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "Søknadsperioder")
+@Entity(name = "UTSøknadsperioder")
 @Table(name = "UT_SOEKNADSPERIODER")
 @Immutable
 public class Søknadsperioder extends BaseEntitet {
@@ -48,7 +48,7 @@ public class Søknadsperioder extends BaseEntitet {
     public Søknadsperioder(Søknadsperiode... perioder) {
         this(Arrays.asList(perioder));
     }
-    
+
     public Søknadsperioder(Collection<Søknadsperiode> perioder) {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
@@ -63,7 +63,7 @@ public class Søknadsperioder extends BaseEntitet {
     public Set<Søknadsperiode> getPerioder() {
         return perioder;
     }
-    
+
     public DatoIntervallEntitet getMaksPeriode() {
         var perioder = getPerioder();
         var fom = perioder.stream()

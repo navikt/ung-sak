@@ -24,12 +24,12 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "Søknadsperioder")
-@Table(name = "PSB_SOEKNADSPERIODER")
+@Table(name = "SP_SOEKNADSPERIODER")
 @Immutable
 public class Søknadsperioder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_SOEKNADSPERIODER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODER")
     private Long id;
 
     @ChangeTracked
@@ -73,5 +73,12 @@ public class Søknadsperioder extends BaseEntitet {
     @Override
     public int hashCode() {
         return Objects.hash(perioder);
+    }
+
+    @Override
+    public String toString() {
+        return "Søknadsperioder{" +
+            "perioder=" + perioder +
+            '}';
     }
 }
