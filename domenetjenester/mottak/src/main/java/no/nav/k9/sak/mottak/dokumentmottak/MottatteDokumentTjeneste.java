@@ -1,6 +1,7 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,11 +58,11 @@ public class MottatteDokumentTjeneste {
             dokument.setInnsendingstidspunkt(im.getInnsendingstidspunkt());
             dokument.setKildesystem(im.getKildesystem());
 
-            //FIXME? Frode, denne endrer status fra BEHANDLER til MOTTATT, vil hindre LagreMottattInnteksmeldingerTask i å bruke 'NY' måte å oppdage dokumenter på
-            mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);// setter status MOTTATT, oppdatres senere til GYLDIG når er lagret i Abakus
+            mottatteDokumentRepository.oppdater(dokument);// lagrer, endrer ikke status
         }
 
-        var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toCollection(LinkedHashSet::new));
+        var journalpostder = dokumenter.stream().map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         lagreInntektsmeldinger(behandlingId, journalpostder);
     }
@@ -79,7 +80,7 @@ public class MottatteDokumentTjeneste {
         enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         enkeltTask.setSaksnummer(saksnummer.getVerdi());
         enkeltTask.setCallIdFraEksisterende();
-        List<String> journalpostIder = mottatteDokumenter.stream().map(j -> j.getVerdi()).collect(Collectors.toList());
+        List<String> journalpostIder = mottatteDokumenter.stream().map(j -> j.getVerdi()).sorted().collect(Collectors.toList());
         enkeltTask.setProperty(LagreMottattInntektsmeldingerTask.MOTTATT_DOKUMENT, String.join(",", journalpostIder));
         prosessTaskRepository.lagre(enkeltTask);
     }
