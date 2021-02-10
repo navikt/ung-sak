@@ -17,7 +17,12 @@ class MapperForYtelseType {
         Map<FagsakYtelseType, YtelseType> map = Arrays.stream(YtelseType.values())
             .collect(Collectors.toMap(yt -> FagsakYtelseType.fraKode(yt.getKode()), Function.identity()));
 
-        Set<FagsakYtelseType> ignored = Set.of(FagsakYtelseType.UDEFINERT, FagsakYtelseType.OBSOLETE);
+        Set<FagsakYtelseType> ignored = Set.of(
+            FagsakYtelseType.UDEFINERT,
+            FagsakYtelseType.OBSOLETE,
+            FagsakYtelseType.OMSORGSPENGER_KS, //rammevedtak - medfører ikke utbetaling
+            FagsakYtelseType.OMSORGSPENGER_MA //rammevedtak - medfører ikke utbetaling
+        );
         for (FagsakYtelseType egenKode : FagsakYtelseType.values()) {
             if (ignored.contains(egenKode)) {
                 continue;
