@@ -1,18 +1,15 @@
 package no.nav.k9.sak.domene.person.pdl;
 
+
 import static java.util.function.Predicate.not;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE6;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE7;
 import static no.nav.pdl.AdressebeskyttelseGradering.UGRADERT;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
@@ -29,11 +26,9 @@ import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
 
 @ApplicationScoped
 public class TilknytningTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(TilknytningTjeneste.class);
-
     private PdlKlient pdlKlient;
 
+    @SuppressWarnings("unused")
     TilknytningTjeneste() {
         // CDI
     }
@@ -64,44 +59,6 @@ public class TilknytningTjeneste {
         }
     }
 
-    public void hentGeografiskTilknytning(AktørId aktørId, GeografiskTilknytning geografiskTilknytningFraTps) {
-        try {
-            var queryGT = new HentGeografiskTilknytningQueryRequest();
-            queryGT.setIdent(aktørId.getId());
-            var projectionGT = new GeografiskTilknytningResponseProjection()
-                .gtType().gtBydel().gtKommune().gtLand();
-
-            var geografiskTilknytning = pdlKlient.hentGT(queryGT, projectionGT);
-
-            var diskresjonskodeFraPdl = hentDiskresjonskode(aktørId);
-            var tilknytningFraPdl = getTilknytning(geografiskTilknytning);
-
-            if (Objects.equals(geografiskTilknytningFraTps.getDiskresjonskode(), diskresjonskodeFraPdl)) {
-                LOG.info("K9SAK PDL diskresjonskode: like svar");
-            } else {
-                LOG.info("K9SAK PDL diskresjonskode: ulike svar TPS->PDL {} {}", geografiskTilknytningFraTps.getDiskresjonskode(), diskresjonskodeFraPdl);
-            }
-            if (Objects.equals(geografiskTilknytningFraTps.getTilknytning(), tilknytningFraPdl)) {
-                LOG.info("K9SAK PDL tilknytning: like svar");
-            } else {
-                LOG.info("K9SAK PDL tilknytning: ulike svar TPS->PDL {} {}", geografiskTilknytningFraTps.getTilknytning(), tilknytningFraPdl);
-            }
-        } catch (Exception e) {
-            LOG.info("K9SAK PDL geografiskTilknytning: error", e);
-        }
-    }
-
-    private Diskresjonskode hentDiskresjonskode(AktørId aktørId) {
-        var query = new HentPersonQueryRequest();
-        query.setIdent(aktørId.getId());
-        var projection = new PersonResponseProjection()
-            .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-
-        var person = pdlKlient.hentPerson(query, projection);
-
-        return diskresjonskodeFor(person.getAdressebeskyttelse().stream());
-    }
-
     private String getTilknytning(no.nav.pdl.GeografiskTilknytning gt) {
         if (gt == null || gt.getGtType() == null)
             return null;
@@ -115,4 +72,24 @@ public class TilknytningTjeneste {
         return null;
     }
 
+    public GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId) {
+        var queryGT = new HentGeografiskTilknytningQueryRequest();
+        queryGT.setIdent(aktørId.getId());
+        var projectionGT = new GeografiskTilknytningResponseProjection()
+            .gtType().gtBydel().gtKommune().gtLand();
+
+        var diskresjon = hentDiskresjonskode(aktørId);
+        var tilknytning = getTilknytning(pdlKlient.hentGT(queryGT, projectionGT));
+        return new GeografiskTilknytning(tilknytning, diskresjon);
+    }
+
+    private Diskresjonskode hentDiskresjonskode(AktørId aktørId) {
+        var query = new HentPersonQueryRequest();
+        query.setIdent(aktørId.getId());
+        var projection = new PersonResponseProjection()
+            .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
+        var person = pdlKlient.hentPerson(query, projection);
+
+        return diskresjonskodeFor(person.getAdressebeskyttelse().stream());
+    }
 }

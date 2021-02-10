@@ -23,6 +23,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
+import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.vedtak.konfig.Tid;
@@ -58,30 +59,49 @@ class SøknadOversetter {
         PleiepengerSyktBarn ytelse = søknad.getYtelse();
         var maksSøknadsperiode = ytelse.getSøknadsperiode();
 
-        // TODO:
+        // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
+        
+        // TODO etter18feb: Fjern denne fra entitet og DB:
         final boolean elektroniskSøknad = false;
+        
         LocalDate mottattDato = søknad.getMottattDato().toLocalDate();
+        
+        // TODO: Hvis vi skal beholde SøknadEntitet trenger vi å lagre SøknadID og sikre idempotens med denne.
+        
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()))
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(mottattDato)
-            .medErEndringssøknad(false)
-            .medSøknadsdato(mottattDato) // TODO: Hva er dette? Dette feltet er datoen det gjelder fra for FP-endringssøknader.
-            .medSpråkkode(getSpraakValg(Språk.NORSK_BOKMÅL)); // TODO
+            .medErEndringssøknad(false) // TODO: Håndtere endringssøknad. "false" betyr at vi krever IMer.
+            .medSøknadsdato(maksSøknadsperiode.getFraOgMed())
+            .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
         // Utgår for K9-ytelsene?
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
+        
+        // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
+        
+        // TODO etter18feb: Beredskap, nattevåk og tilsynsordning
 
+        // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
         lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
+        
         lagrePleietrengende(fagsakId, ytelse.getBarn());
 
         lagreUttakOgPerioder(søknad, behandlingId, fagsakId);
+        
+        // TODO etter18feb: Omsorg
     }
 
     private void lagreUttakOgPerioder(Søknad soknad, final Long behandlingId, Long fagsakId) {
+        // TODO etter18feb: LovbestemtFerie
+        
+        // TODO 18feb: Arbeidstid
+        // TODO etter18feb: UttakPeriodeInfo
+        
         var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 

@@ -1,9 +1,7 @@
 package no.nav.k9.sak.domene.person.tps;
 
-import java.util.List;
 import java.util.Optional;
 
-import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.typer.AktørId;
@@ -27,9 +25,6 @@ public interface TpsTjeneste {
 
     GeografiskTilknytning hentGeografiskTilknytning(PersonIdent fnr);
 
-    List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent fnr);
-
     Optional<PersonIdent> hentFnr(AktørId aktørId);
 
-    Adresseinfo hentAdresseinformasjon(PersonIdent personIdent);
 }

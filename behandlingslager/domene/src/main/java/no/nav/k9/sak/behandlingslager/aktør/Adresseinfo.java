@@ -13,7 +13,6 @@ public class Adresseinfo {
     private String adresselinje3;
     private String adresselinje4;
     private String postNr;
-    private String poststed;
     private String land;
 
     private Adresseinfo() {
@@ -43,10 +42,6 @@ public class Adresseinfo {
         return postNr;
     }
 
-    public String getPoststed() {
-        return poststed;
-    }
-
     public String getLand() {
         return land;
     }
@@ -67,13 +62,12 @@ public class Adresseinfo {
             Objects.equals(adresselinje3, that.adresselinje3) &&
             Objects.equals(adresselinje4, that.adresselinje4) &&
             Objects.equals(postNr, that.postNr) &&
-            Objects.equals(poststed, that.poststed) &&
             Objects.equals(land, that.land);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gjeldendePostadresseType, matrikkelId, adresselinje1, adresselinje2, adresselinje3, adresselinje4, postNr, poststed, land);
+        return Objects.hash(gjeldendePostadresseType, matrikkelId, adresselinje1, adresselinje2, adresselinje3, adresselinje4, postNr, land);
     }
 
     public static boolean likeAdresser(Adresseinfo a1, Adresseinfo a2) {
@@ -124,11 +118,6 @@ public class Adresseinfo {
 
         public Builder medPostNr(String postNr) {
             this.kladd.postNr = postNr;
-            return this;
-        }
-
-        public Builder medPoststed(String poststed) {
-            this.kladd.poststed = poststed;
             return this;
         }
 

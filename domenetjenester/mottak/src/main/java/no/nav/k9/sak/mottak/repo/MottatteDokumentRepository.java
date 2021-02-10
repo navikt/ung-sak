@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
@@ -30,7 +31,20 @@ public class MottatteDokumentRepository {
     }
 
     public MottattDokument lagre(MottattDokument mottattDokument, DokumentStatus status) {
-        mottattDokument.setStatus(status);
+        if (!mottattDokument.getStatus().erGyldigTransisjon(status)) {
+            throw new IllegalArgumentException("Ugyldig transisjon: " + mottattDokument.getStatus() + " -> " + status);
+        }
+        mottattDokument.setStatus(Objects.requireNonNull(status, "status"));
+        entityManager.persist(mottattDokument);
+        entityManager.flush();
+        return mottattDokument;
+    }
+
+    /** Lagrer kun, endrer ikke status . */
+    public MottattDokument oppdater(MottattDokument mottattDokument) {
+        if (mottattDokument.getId() == null) {
+            throw new IllegalStateException("Kan kun oppdatere eksisterende dokument her, ikke lagre nytt: journalpostId=" + mottattDokument.getJournalpostId());
+        }
         entityManager.persist(mottattDokument);
         entityManager.flush();
         return mottattDokument;
@@ -49,13 +63,14 @@ public class MottatteDokumentRepository {
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor
      * ikke å anbefale å bruke.
      */
-    public List<MottattDokument> hentMottatteDokumentForBehandling(long fagsakId, long behandlingId, boolean taSkriveLås, DokumentStatus... statuser) {
-        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :fagsakId AND m.behandlingId = :behandlingId AND (m.status IS NULL OR m.status IN (:status)) order by m.id";
+    public List<MottattDokument> hentMottatteDokumentForBehandling(long fagsakId, long behandlingId, Brevkode type, boolean taSkriveLås, DokumentStatus... statuser) {
+        String strQueryTemplate = "select m from MottattDokument m where m.fagsakId = :fagsakId AND m.behandlingId = :behandlingId AND m.type = :type AND(m.status IS NULL OR m.status IN (:status)) order by m.id";
         Set<DokumentStatus> statusParam = statuser == null || statuser.length == 0 ? EnumSet.complementOf(EnumSet.of(DokumentStatus.UGYLDIG)) : Set.of(statuser);
         var query = entityManager.createQuery(
             strQueryTemplate, MottattDokument.class)
             .setParameter("fagsakId", fagsakId)
             .setParameter("behandlingId", behandlingId)
+            .setParameter("type", type)
             .setParameter("status", statusParam);
         if (taSkriveLås) {
             query.setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT);
@@ -125,6 +140,5 @@ public class MottatteDokumentRepository {
         entityManager.flush();
 
     }
-
 
 }

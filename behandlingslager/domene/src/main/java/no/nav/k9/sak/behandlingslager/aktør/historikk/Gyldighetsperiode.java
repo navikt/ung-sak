@@ -1,14 +1,17 @@
 package no.nav.k9.sak.behandlingslager.aktør.historikk;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.Period;
 import java.util.Objects;
 
 import no.nav.vedtak.konfig.Tid;
 
 public class Gyldighetsperiode {
-
     private LocalDate fom;
     private LocalDate tom;
+
+    private static final LocalDate FREG_TIDENES_BEGYNNELSE = LocalDate.of(0, Month.DECEMBER, 30);
 
     private Gyldighetsperiode(LocalDate fom, LocalDate tom) {
         // Fom er null om perioden for en opplysning gjelder fra personen ble født
@@ -30,6 +33,14 @@ public class Gyldighetsperiode {
 
     public static Gyldighetsperiode fraTilTidenesEnde(LocalDate fom) {
         return new Gyldighetsperiode(fom, Tid.TIDENES_ENDE);
+    }
+
+    public static boolean fuzzyEquals(Gyldighetsperiode p1, Gyldighetsperiode p2) {
+        var fuzzyfom = Objects.equals(p1.fom, Tid.TIDENES_BEGYNNELSE) || Objects.equals(p2.fom, Tid.TIDENES_BEGYNNELSE) ||
+            Objects.equals(p1.fom, FREG_TIDENES_BEGYNNELSE) || Objects.equals(p2.fom, FREG_TIDENES_BEGYNNELSE) ||
+            Math.abs(Period.between(p1.fom, p2.fom).getDays()) < 21;
+        var fuzzytom = Objects.equals(p1.tom, p2.tom) || Math.abs(Period.between(p1.tom, p2.tom).getDays()) < 21;
+        return fuzzyfom && fuzzytom;
     }
 
     public LocalDate getFom() {

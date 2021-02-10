@@ -85,7 +85,6 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -159,14 +158,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (startBeregningInput.isEmpty()) {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
-        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var startBeregningRequest = initStartRequest(
             referanse,
             iayGrunnlag,
             sakInntektsmeldinger,
-            refusjonskravDatoer,
             startBeregningInput);
         List<TilstandResponse> tilstandResponse = restTjeneste.startBeregning(startBeregningRequest);
 
@@ -346,7 +343,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     protected StartBeregningListeRequest initStartRequest(BehandlingReferanse behandlingReferanse,
                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                           Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                          List<RefusjonskravDato> refusjonskravDatoer,
                                                           List<StartBeregningInput> startBeregningInput) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(behandlingReferanse.getFagsakId());
 
@@ -355,7 +351,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         Map<UUID, LocalDate> stpMap = startBeregningInput.stream().collect(Collectors.toMap(StartBeregningInput::getBgReferanse, StartBeregningInput::getSkjæringstidspunkt));
         Map<UUID, KalkulatorInputDto> input = getReferanseTilInputMap(behandlingReferanse,
             iayGrunnlag,
-            sakInntektsmeldinger, refusjonskravDatoer, stpMap);
+            sakInntektsmeldinger, stpMap);
 
         return new StartBeregningListeRequest(
             input,
@@ -365,18 +361,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private Map<UUID, KalkulatorInputDto> lagInputMap(Collection<BgRef> bgReferanser, BehandlingReferanse referanse) {
-        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(referanse.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
 
         Map<UUID, LocalDate> stpMap = bgReferanser.stream().collect(Collectors.toMap(BgRef::getRef, BgRef::getStp));
-        return getReferanseTilInputMap(referanse, iayGrunnlag, sakInntektsmeldinger, refusjonskravDatoer, stpMap);
+        return getReferanseTilInputMap(referanse, iayGrunnlag, sakInntektsmeldinger, stpMap);
     }
 
     private Map<UUID, KalkulatorInputDto> getReferanseTilInputMap(BehandlingReferanse behandlingReferanse,
                                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                                  List<RefusjonskravDato> refusjonskravDatoer,
                                                                   Map<UUID, LocalDate> referanseSkjæringstidspunktMap) {
         Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
@@ -393,7 +387,6 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                         bgReferanse,
                         iayGrunnlag,
                         sakInntektsmeldinger,
-                        refusjonskravDatoer,
                         ytelsesGrunnlag,
                         vilkårsPeriode));
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

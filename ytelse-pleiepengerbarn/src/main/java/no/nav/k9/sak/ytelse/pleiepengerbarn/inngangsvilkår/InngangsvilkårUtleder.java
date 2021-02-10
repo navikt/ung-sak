@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår;
 
 import static java.util.Arrays.asList;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
@@ -28,6 +29,7 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
         SØKERSOPPLYSNINGSPLIKT,
         OMSORGEN_FOR,
+        ALDERSVILKÅR,
         MEDISINSKEVILKÅR_UNDER_18_ÅR,
         MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,

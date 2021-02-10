@@ -1,9 +1,8 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
+package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class PåTversAvHelgErKantIKantVurderer implements KantIKantVurderer {

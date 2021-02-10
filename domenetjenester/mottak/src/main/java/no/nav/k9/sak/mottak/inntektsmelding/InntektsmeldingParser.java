@@ -57,9 +57,9 @@ public class InntektsmeldingParser {
         var instance = CDI.current().select(new TypeLiteralMottattDokumentOversetter(), annotationLiteral);
 
         if (instance.isAmbiguous()) {
-            throw MottattInntektsmeldingFeil.FACTORY.flereImplementasjonerAvSkjemaType(namespace).toException();
+            throw MottattInntektsmeldingException.FACTORY.flereImplementasjonerAvSkjemaType(namespace);
         } else if (instance.isUnsatisfied()) {
-            throw MottattInntektsmeldingFeil.FACTORY.ukjentSkjemaType(namespace).toException();
+            throw MottattInntektsmeldingException.FACTORY.ukjentSkjemaType(namespace);
         }
         var minInstans = instance.get();
         if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {

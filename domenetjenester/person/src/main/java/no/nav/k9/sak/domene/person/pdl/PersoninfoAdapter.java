@@ -1,26 +1,22 @@
 package no.nav.k9.sak.domene.person.pdl;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.xml.ws.soap.SOAPFaultException;
 
-import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
-import no.nav.k9.sak.domene.person.tps.TpsAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoAdapter {
-    private TpsAdapter tpsAdapter;
     private PersonBasisTjeneste personBasisTjeneste;
     private PersoninfoTjeneste personinfoTjeneste;
     private AktørTjeneste aktørTjeneste;
@@ -31,8 +27,7 @@ public class PersoninfoAdapter {
     }
 
     @Inject
-    public PersoninfoAdapter(TpsAdapter tpsAdapter, PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste) {
-        this.tpsAdapter = tpsAdapter;
+    public PersoninfoAdapter(PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste) {
         this.personBasisTjeneste = personBasisTjeneste;
         this.personinfoTjeneste = personinfoTjeneste;
         this.aktørTjeneste = aktørTjeneste;
@@ -55,7 +50,7 @@ public class PersoninfoAdapter {
     }
 
     public Personhistorikkinfo innhentPersonopplysningerHistorikk(AktørId aktørId, Periode periode) {
-        return tpsAdapter.hentPersonhistorikk(aktørId, periode);
+        return personinfoTjeneste.hentPersoninfoHistorikk(aktørId, periode);
     }
 
     /**
@@ -72,32 +67,14 @@ public class PersoninfoAdapter {
         return Optional.empty();
     }
 
-    public Adresseinfo innhentAdresseopplysningerForDokumentsending(AktørId aktørId) {
-        Optional<PersonIdent> optFnr = hentIdentForAktørId(aktørId);
-        return optFnr.map(personIdent -> tpsAdapter.hentAdresseinformasjon(personIdent)).orElse(null);
-    }
-
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
         Optional<PersonIdent> personIdent = hentFnr(aktørId);
-        Optional<PersoninfoArbeidsgiver> personinfoArbeidsgiver = personIdent.map(i -> tpsAdapter.hentKjerneinformasjonBasis(i, aktørId))
-            .map(p ->
-                new PersoninfoArbeidsgiver.Builder()
-                    .medAktørId(aktørId)
-                    .medPersonIdent(p.getPersonIdent())
-                    .medNavn(p.getNavn())
-                    .medFødselsdato(p.getFødselsdato())
-                    .bygg()
-            );
-
-        // Sammnligner det som hentes fra tps og pdl
-        personinfoArbeidsgiver.ifPresent(p -> personBasisTjeneste.hentOgSjekkPersoninfoArbeidsgiverFraPDL(aktørId, p.getPersonIdent(), p));
-
-        return personinfoArbeidsgiver;
+        return personIdent.map(pi -> personBasisTjeneste.hentPersoninfoArbeidsgiver(aktørId, pi));
     }
 
     public Optional<PersoninfoBasis> hentBrukerBasisForAktør(AktørId aktørId) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> tpsAdapter.hentKjerneinformasjonBasis(fnr, aktørId));
+        return funnetFnr.map(personIdent -> personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent));
     }
 
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
@@ -136,12 +113,7 @@ public class PersoninfoAdapter {
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
-
-        Personinfo personinfo = tpsAdapter.hentKjerneinformasjon(personIdent, aktørId);
-
-        // Kaller på personinfoTjeneste som sammenligner resultat
-        personinfoTjeneste.hentKjerneinformasjon(aktørId, personIdent, personinfo);
-        return personinfo;
+        return personinfoTjeneste.hentKjerneinformasjon(aktørId, personIdent);
     }
 
     private Optional<PersonIdent> hentFnr(AktørId aktørId) {
@@ -149,19 +121,8 @@ public class PersoninfoAdapter {
     }
 
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {
-        GeografiskTilknytning geografiskTilknytningFraTps = tpsAdapter.hentGeografiskTilknytning(personIdent);
-
-        hentAktørIdForPersonIdent(personIdent)
-        .ifPresent(aid -> tilknytningTjeneste.hentGeografiskTilknytning(aid, geografiskTilknytningFraTps));
-
-        return geografiskTilknytningFraTps;
+        var aktørId = hentAktørIdForPersonIdent(personIdent).orElseThrow(() -> new IllegalStateException("Kan ikke finne geografisk tilknytning for fnr med ukjent aktørId"));
+        return tilknytningTjeneste.hentGeografiskTilknytning(aktørId);
     }
 
-    public List<GeografiskTilknytning> hentDiskresjonskoderForFamilierelasjoner(PersonIdent personIdent) {
-        return tpsAdapter.hentDiskresjonskoderForFamilierelasjoner(personIdent);
-    }
-
-    public Adresseinfo hentAdresseinformasjon(PersonIdent personIdent) {
-        return tpsAdapter.hentAdresseinformasjon(personIdent);
-    }
 }

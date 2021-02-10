@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.vilkår;
+package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

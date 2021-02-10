@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.RefusjonskravDatoDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.BeløpDto;
@@ -73,7 +72,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
@@ -371,19 +369,6 @@ public class TilKalkulusMapper {
                 ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse())
                 : null))
             .collect(Collectors.toList()));
-    }
-
-    public static List<RefusjonskravDatoDto> mapTilDto(List<RefusjonskravDato> refusjonskravDatoes) {
-        // FIXME TSF-1102 (Espen Velsvik): førsteInnsendingAvRefusjonskrav dato blir feil for inntektsmeldinger mottatt april-august 2020.
-        // Kalkulus bruker dette til å avlede et aksjonspunkt hvorvidt refusjonskravet har kommet for sent. Men logikken her er uansett feil da
-        // refusjonskrav for omsorgspenger / pleiepenger må knyttes tli
-        // dato refusjonskravet for en gitt periode ble fremsatt, og ikke første dato blant alle refusjonskrav. Må fikses for 2021 og når frist
-        // reduseres fra 9mnd -> 3mnd.
-        return refusjonskravDatoes.stream().map(refusjonskravDato -> new RefusjonskravDatoDto(mapTilAktør(
-            refusjonskravDato.getArbeidsgiver()),
-            refusjonskravDato.getFørsteDagMedRefusjonskrav(),
-            refusjonskravDato.getFørsteInnsendingAvRefusjonskrav(),
-            refusjonskravDato.getHarRefusjonFraStart())).collect(Collectors.toList());
     }
 
     private static PermisjonDto mapTilPermisjonDto(Permisjon permisjon) {

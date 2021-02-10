@@ -81,14 +81,12 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         Collection<BgRef> bgReferanser = startBeregningInput.stream().map(input -> new BgRef(input.getBgReferanse(), input.getSkjæringstidspunkt()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        var refusjonskravDatoer = iayTjeneste.hentRefusjonskravDatoerForSak(ref.getSaksnummer());
         var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
         var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN);
 
         for (var input : sortertInput) {
             var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());
             var bgReferanse = input.getBgReferanse();
-            var skjæringstidspunkt = input.getSkjæringstidspunkt();
             FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
             // frisinn super-hacky håndtering av avslagsårsaker uten for kalkulkus. Slette denne klassen snarest Frisinn er ferdig.
             if (frisinnGrunnlag.getPerioderMedSøkerInfo().isEmpty()) {
@@ -96,7 +94,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             } else {
                 // tar en og en
                 var startBeregningRequest = initStartRequest(ref, iayGrunnlag, Set.of() /* frisinn har ikke inntektsmeldinger */
-                    , refusjonskravDatoer, List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode())));
+                    , List.of(new StartBeregningInput(bgReferanse, input.getVilkårsperiode())));
 
                 var inputPerRef = startBeregningRequest.getKalkulatorInputPerKoblingReferanse();
                 if (inputPerRef.size() != 1) {

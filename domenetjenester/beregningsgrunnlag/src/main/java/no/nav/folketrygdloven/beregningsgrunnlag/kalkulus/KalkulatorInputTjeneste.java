@@ -2,7 +2,6 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.iay.modell.RefusjonskravDato;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
@@ -43,7 +41,6 @@ public class KalkulatorInputTjeneste {
                                       UUID bgReferanse,
                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                       Collection<Inntektsmelding> sakInntektsmeldinger,
-                                      List<RefusjonskravDato> refusjonskravDatoer,
                                       YtelsespesifiktGrunnlagDto ytelseGrunnlag,
                                       DatoIntervallEntitet vilkårsperiode) {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
@@ -61,10 +58,6 @@ public class KalkulatorInputTjeneste {
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get());
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
-
-        if (!refusjonskravDatoer.isEmpty()) {
-            kalkulatorInputDto.medRefusjonskravDatoer(TilKalkulusMapper.mapTilDto(refusjonskravDatoer));
-        }
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
         return kalkulatorInputDto;
