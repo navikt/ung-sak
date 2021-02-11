@@ -278,7 +278,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
-            UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
+            VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
