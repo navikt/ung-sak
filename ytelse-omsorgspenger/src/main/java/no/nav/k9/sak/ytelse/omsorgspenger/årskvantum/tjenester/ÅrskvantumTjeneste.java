@@ -142,7 +142,6 @@ public class ÅrskvantumTjeneste {
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
 
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
-            null, // FIXME: Oppdater kontrakt
             ref.getBehandlingUuid().toString(),
             fraværPerioder,
             personMedRelasjoner.getPersonIdent().getIdent(),
