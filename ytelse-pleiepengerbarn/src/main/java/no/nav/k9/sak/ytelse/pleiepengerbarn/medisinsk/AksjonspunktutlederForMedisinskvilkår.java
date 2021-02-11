@@ -45,11 +45,10 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
 
             final var harSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengende, RelasjonsRolleType.BARN);
             if (harSammeBosted && RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
-                return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING));
+                return List.of();
             }
         }
 
-        return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING),
-            AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
+        return List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR));
     }
 }

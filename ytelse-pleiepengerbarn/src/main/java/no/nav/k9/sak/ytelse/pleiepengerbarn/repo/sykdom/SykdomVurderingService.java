@@ -1,5 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.kunPerioderSomIkkeFinnesI;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toLocalDateTimeline;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toPeriodeList;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,13 +22,13 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -52,6 +56,32 @@ public class SykdomVurderingService {
     }    
     
     
+    public boolean harAksjonspunkt(Behandling behandling) {
+        // XXX: Denne er kastet sammen og bør trolig skrives enklere
+        final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
+        final boolean legeerklæring = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
+        if (!legeerklæring) {
+            return true;
+        }
+        
+        final boolean diagnosekode = !sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
+        if (!diagnosekode) {
+            return true;
+        }
+        
+        final var ktp = hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+        if (!ktp.getResterendeVurderingsperioder().isEmpty()) {
+            return true;
+        }
+        
+        final var too = hentVurderingerForToOmsorgspersoner(behandling);
+        if (!too.getResterendeVurderingsperioder().isEmpty()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
         final var vurderingerOgPerioder = utledPerioder(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
         vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
@@ -67,7 +97,7 @@ public class SykdomVurderingService {
         return vurderingerOgPerioder;
     }
     
-    private List<Periode> hentInnleggelsesperioder( Behandling behandling) {
+    private List<Periode> hentInnleggelsesperioder(Behandling behandling) {
         final var innleggelser = hentInnleggelser(behandling);
         return innleggelser.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
     }
@@ -84,15 +114,18 @@ public class SykdomVurderingService {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         
         final LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
-        final NavigableSet<DatoIntervallEntitet> søknadsperioderFraNyBehandling = getAlleSøknadsperioderFraNyBehandling(behandling.getUuid());
+        //final NavigableSet<DatoIntervallEntitet> søknadsperioderFraNyBehandling = getAlleSøknadsperioderFraNyBehandling(behandling.getUuid());
         
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        final List<Periode> nyeSøknadsperioder = finnNyeSøknadsperioder(søknadsperioderFraNyBehandling, behandledeSøknadsperioder);
-        final LocalDateTimeline<Set<Saksnummer>> saksnummertidslinjeeMedNyePerioder = saksnummertidslinjeeMedNyePerioder(behandledeSøknadsperioder, søknadsperioderFraNyBehandling, behandling.getFagsak().getSaksnummer());
+        //final List<Periode> nyeSøknadsperioder = finnNyeSøknadsperioder(søknadsperioderFraNyBehandling, behandledeSøknadsperioder);
+        //final LocalDateTimeline<Set<Saksnummer>> saksnummertidslinjeeMedNyePerioder = saksnummertidslinjeeMedNyePerioder(behandledeSøknadsperioder, søknadsperioderFraNyBehandling, behandling.getFagsak().getSaksnummer());
         final List<Periode> resterendeVurderingsperioder = finnResterendeVurderingsperioder(perioderTilVurdering, vurderinger);
         
-        final List<Periode> alleSøknadsperioder = saksnummertidslinjeeMedNyePerioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
-        return new SykdomVurderingerOgPerioder(vurderinger, saksnummertidslinjeeMedNyePerioder, alleSøknadsperioder, resterendeVurderingsperioder, nyeSøknadsperioder);
+        //final List<Periode> alleSøknadsperioder = saksnummertidslinjeeMedNyePerioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+        //return new SykdomVurderingerOgPerioder(vurderinger, saksnummertidslinjeeMedNyePerioder, alleSøknadsperioder, resterendeVurderingsperioder, nyeSøknadsperioder);
+        final List<Periode> nyeSøknadsperioder = Collections.emptyList(); // TODO;nyeSøknadsperioder
+        final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+        return new SykdomVurderingerOgPerioder(vurderinger, behandledeSøknadsperioder, alleSøknadsperioder, resterendeVurderingsperioder, nyeSøknadsperioder);
     }
     
     
@@ -159,31 +192,6 @@ public class SykdomVurderingService {
         });
     }
 
-    private static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {
-        return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
-    }
-    
-    private static LocalDateTimeline<Boolean> toLocalDateTimeline(List<Periode> perioder) {
-        return new LocalDateTimeline<Boolean>(perioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFom(), p.getTom(), true)).collect(Collectors.toList()));
-    }
-    
-    private static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
-        return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList()));
-    }
-    
-    private static <T, U> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<U> perioderSomSkalTrekkesFra) {
-        return perioder.combine(perioderSomSkalTrekkesFra, new LocalDateSegmentCombinator<T, U, T>() {
-            @Override
-            public LocalDateSegment<T> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<T> datoSegment, LocalDateSegment<U> datoSegment2) {
-                if (datoSegment2 == null) {
-                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                }
-                return null;
-            }
-        }, JoinStyle.LEFT_JOIN).compress();
-    }
-    
     public static class SykdomVurderingerOgPerioder {
         private final LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje;
         private final LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder;
@@ -239,4 +247,5 @@ public class SykdomVurderingService {
             this.resterendeVurderingsperioder = toPeriodeList(nyTidslinje);
         }
     }
+    
 }

@@ -32,8 +32,7 @@ public class SykdomRevurderingPeriode {
         //Hibernate
     }
 
-    public SykdomRevurderingPeriode(SykdomGrunnlag sykdomGrunnlag, LocalDate fom, LocalDate tom) {
-        this.sykdomGrunnlag = sykdomGrunnlag;
+    public SykdomRevurderingPeriode(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
     }
@@ -44,6 +43,10 @@ public class SykdomRevurderingPeriode {
     
     public SykdomGrunnlag getSykdomGrunnlag() {
         return sykdomGrunnlag;
+    }
+    
+    void setSykdomGrunnlag(SykdomGrunnlag sykdomGrunnlag) {
+        this.sykdomGrunnlag = sykdomGrunnlag;
     }
 
     public LocalDate getFom() {

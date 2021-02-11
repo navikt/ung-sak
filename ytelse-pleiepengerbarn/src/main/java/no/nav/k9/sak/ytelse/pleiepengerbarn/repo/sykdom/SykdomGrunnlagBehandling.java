@@ -15,15 +15,20 @@ public class SykdomGrunnlagBehandling {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_GRUNNLAG_BEHANDLING")
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "SYKDOM_GRUNNLAG_ID", nullable = false)
     private SykdomGrunnlag grunnlag;
 
     @ManyToOne
     @JoinColumn(name = "SOEKER_PERSON_ID", nullable = false)
     private SykdomPerson søker;
+    
+    @ManyToOne
+    @JoinColumn(name = "PLEIETRENGENDE_PERSON_ID", nullable = false)
+    private SykdomPerson pleietrengende;
 
-    @Column(name = "SAKSNUMMER", nullable = false)
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "SAKSNUMMER", nullable = false)))
     private Saksnummer saksnummer;
 
     @Column(name = "BEHANDLING_UUID", nullable = false)
@@ -43,4 +48,39 @@ public class SykdomGrunnlagBehandling {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
+    
+    SykdomGrunnlagBehandling() {
+        
+    }
+    
+    public SykdomGrunnlagBehandling(SykdomGrunnlag grunnlag, SykdomPerson søker, SykdomPerson pleietrengende, Saksnummer saksnummer,
+            UUID behandlingUuid, Long behandlingsnummer, Long versjon, String opprettetAv,
+            LocalDateTime opprettetTidspunkt) {
+        this.grunnlag = grunnlag;
+        this.søker = søker;
+        this.pleietrengende = pleietrengende;
+        this.saksnummer = saksnummer;
+        this.behandlingUuid = behandlingUuid;
+        this.behandlingsnummer = behandlingsnummer;
+        this.versjon = versjon;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+    
+
+    public SykdomGrunnlag getGrunnlag() {
+        return grunnlag;
+    }
+    
+    public Long getBehandlingsnummer() {
+        return behandlingsnummer;
+    }
+    
+    public Long getVersjon() {
+        return versjon;
+    }
+    
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
 }

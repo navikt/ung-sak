@@ -81,6 +81,14 @@ public class SykdomDokumentRepository {
     }
 
     public SykdomInnleggelser hentInnleggelse(AktørId pleietrengende) {
+        var sykdomInnleggelser = hentInnleggelseOrNull(pleietrengende);
+        if (sykdomInnleggelser != null) {
+            return sykdomInnleggelser;
+        }
+        return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+    }
+    
+    SykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
                 "SELECT si "
                 + "FROM SykdomInnleggelser as si "
@@ -96,7 +104,7 @@ public class SykdomDokumentRepository {
 
         final List<SykdomInnleggelser> result = q.getResultList();
         if (result.isEmpty()) {
-            return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+            return null;
         }
         if (result.size() != 1) {
             throw new IllegalStateException("Forventer maksimalt én rad som svar.");
@@ -166,6 +174,14 @@ public class SykdomDokumentRepository {
     }
 
     public SykdomDiagnosekoder hentDiagnosekoder(AktørId pleietrengende) {
+        var diagnosekoder = hentDiagnosekoderOrNull(pleietrengende);
+        if (diagnosekoder != null) {
+            return diagnosekoder;
+        }
+        return new SykdomDiagnosekoder(null, null, new ArrayList<>(), null, null);
+    }
+    
+    SykdomDiagnosekoder hentDiagnosekoderOrNull(AktørId pleietrengende) {
         final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
             "SELECT sd " +
                 "FROM SykdomDiagnosekoder as sd " +
@@ -181,7 +197,7 @@ public class SykdomDokumentRepository {
 
         final List<SykdomDiagnosekoder> result = q.getResultList();
         if (result.isEmpty()) {
-            return new SykdomDiagnosekoder(null, null, new ArrayList<>(), null, null);
+            return null;
         }
         if (result.size() != 1) {
             throw new IllegalStateException("Forventer maksimalt én rad som svar.");

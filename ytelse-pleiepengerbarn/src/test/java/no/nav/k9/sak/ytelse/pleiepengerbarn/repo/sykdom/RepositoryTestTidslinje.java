@@ -41,14 +41,14 @@ class RepositoryTestTidslinje {
 
         when(repo.hentAlleSøktePerioder(s1))
             .thenReturn(Arrays.asList(
-                new SykdomSøktPeriode(null, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15)),
-                new SykdomSøktPeriode(null, LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
+                new SykdomSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15)),
+                new SykdomSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
             ));
 
         when(repo.hentAlleSøktePerioder(s2))
             .thenReturn(Arrays.asList(
-                new SykdomSøktPeriode(null, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10)),
-                new SykdomSøktPeriode(null, LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
+                new SykdomSøktPeriode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10)),
+                new SykdomSøktPeriode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))
             ));
 
         when(repo.hentSaksnummerForSøktePerioder(pleietrengendeAktør)).thenCallRealMethod();

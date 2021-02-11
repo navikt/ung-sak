@@ -24,8 +24,7 @@ public class SykdomSøktPeriode {
         // Hibernate
     }
 
-    public SykdomSøktPeriode(SykdomGrunnlag sykdomGrunnlag, LocalDate fom, LocalDate tom) {
-        this.sykdomGrunnlag = sykdomGrunnlag;
+    public SykdomSøktPeriode(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
     }
@@ -34,7 +33,7 @@ public class SykdomSøktPeriode {
         return sykdomGrunnlag;
     }
 
-    public void setSykdomGrunnlag(SykdomGrunnlag sykdomGrunnlag) {
+    void setSykdomGrunnlag(SykdomGrunnlag sykdomGrunnlag) {
         this.sykdomGrunnlag = sykdomGrunnlag;
     }
 

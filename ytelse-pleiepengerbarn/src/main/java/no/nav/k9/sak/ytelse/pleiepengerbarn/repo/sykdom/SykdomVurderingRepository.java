@@ -89,14 +89,10 @@ public class SykdomVurderingRepository {
 
     public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
         final TypedQuery<Saksnummer> q = entityManager.createQuery(
-            "SELECT distinct sgb.saksnummer " +
-                "FROM SykdomGrunnlagBehandling as sgb " +
-                "   inner join sgb.grunnlag as sg " +
-                "   inner join sg.vurderinger as svv " +
-                "   inner join svv.sykdomVurdering as sv " +
-                "   inner join sv.sykdomVurderinger as svs " +
-                "   inner join svs.person as sp " +
-                "where sp.aktørId = :aktørId"
+            "SELECT distinct sgb.saksnummer "
+                + "FROM SykdomGrunnlagBehandling as sgb "
+                +   "inner join sgb.pleietrengende as p "
+                + "where p.aktørId = :aktørId"
                 , Saksnummer.class);
 
         q.setParameter("aktørId", pleietrengende);
