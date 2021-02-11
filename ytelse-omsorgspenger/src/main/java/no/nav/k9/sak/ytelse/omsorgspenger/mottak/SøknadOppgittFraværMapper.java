@@ -1,9 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.AktørId;
@@ -27,7 +27,7 @@ class SøknadOppgittFraværMapper {
         this.journalpostId = journalpostId;
     }
 
-    List<OppgittFraværPeriode> map() {
+    Set<OppgittFraværPeriode> map() {
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
         if (søknadsinnhold.getAktivitet().getArbeidstaker() != null){
@@ -40,7 +40,8 @@ class SøknadOppgittFraværMapper {
         }
 
         var fraværsperioder = søknadsinnhold.getFraværsperioder();
-        List<OppgittFraværPeriode> oppgittFraværPerioder = new ArrayList<>();
+        Set<OppgittFraværPeriode> oppgittFraværPerioder;
+        oppgittFraværPerioder = new LinkedHashSet<>();
         for (FraværPeriode fp : fraværsperioder) {
             for (SelvstendigNæringsdrivende sn : snAktiviteter) {
                 InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.

@@ -96,11 +96,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     }
 
     public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
-        this.arbeidsgiver = arbeidsgiver;
-        this.arbeidsforholdRef = arbeidsforholdRef;
-        this.fraværPerDag = fraværPerDag;
-        this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag);
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {

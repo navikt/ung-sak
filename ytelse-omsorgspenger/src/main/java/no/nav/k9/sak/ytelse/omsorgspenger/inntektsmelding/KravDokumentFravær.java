@@ -107,18 +107,16 @@ public class KravDokumentFravær {
 
     public List<WrappedOppgittFraværPeriode> trekkUtAlleFraværOgValiderOverlapp(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraKravdokumenter) {
         var sorterteKravdokumenter = fraværFraKravdokumenter.keySet().stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-        var aktivitetTyper = fraværFraKravdokumenter.values().stream().flatMap(Collection::stream).map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
 
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
-        for (var aktivitetType : aktivitetTyper) {
-            for (var dok : sorterteKravdokumenter) {
-                var vurdertSøktPerioder = fraværFraKravdokumenter.get(dok);
-                if (vurdertSøktPerioder.isEmpty()) {
-                    break;
-                }
-                if (!vurdertSøktPerioder.stream().anyMatch(it -> it.getType().equals(aktivitetType))) {
-                    continue;
-                }
+        for (var dok : sorterteKravdokumenter) {
+            var vurdertSøktPerioder = fraværFraKravdokumenter.get(dok);
+            if (vurdertSøktPerioder.isEmpty()) {
+                break;
+            }
+            var aktivitetTyper = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
+            for (var aktivitetType : aktivitetTyper) {
+                // TODO: Må håndtere søknad for flere arbeidsgivere og perioder. Må kunne sameksistere med IMs arbeidsforhold. Vurder om Dokumenttype må inkluderes her
                 var arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
                 var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
                 var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));

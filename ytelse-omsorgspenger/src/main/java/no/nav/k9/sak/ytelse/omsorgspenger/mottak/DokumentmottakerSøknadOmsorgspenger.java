@@ -2,7 +2,9 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -32,6 +34,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
@@ -143,8 +146,16 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();
 
-        var fraværPerioderFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId).map();
-        var fraværFraSøknad = new OppgittFravær(fraværPerioderFraSøknad);
+        // TODO: vurder om aggregering av perioder kan gjøres smidigere
+        Set<OppgittFraværPeriode> søktFravær = new LinkedHashSet<>();
+        var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
+            .map(OppgittFravær::getPerioder)
+            .orElse(Set.of());
+        var søktFraværFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId).map();
+        søktFravær.addAll(søktFraværFraTidligere);
+        søktFravær.addAll(søktFraværFraSøknad);
+
+        var fraværFraSøknad = new OppgittFravær(søktFravær);
         omsorgspengerGrunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
         // Utvide fagsakperiode
