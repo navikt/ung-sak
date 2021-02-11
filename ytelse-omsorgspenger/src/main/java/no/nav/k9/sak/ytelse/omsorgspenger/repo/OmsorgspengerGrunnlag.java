@@ -29,6 +29,10 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     @JoinColumn(name = "fravaer_id")
     private OppgittFravær oppgittFravær;
 
+    @ManyToOne
+    @JoinColumn(name = "fravaer_id_fra_soeknad")
+    private OppgittFravær oppgittFraværFraSøknad;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -40,15 +44,20 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     }
 
     /** Opprett uten oppgittFravær - kommer fra saksbehandler senere. */
-    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær oppgittFravær) {
+    public OmsorgspengerGrunnlag(Long behandlingId, OppgittFravær oppgittFravær, OppgittFravær oppgittFraværFraSøknad) {
         this.behandlingId = behandlingId;
         this.oppgittFravær = oppgittFravær;
+        this.oppgittFraværFraSøknad = oppgittFraværFraSøknad;
     }
 
     public OppgittFravær getOppgittFravær() {
         return oppgittFravær;
     }
-    
+
+    public OppgittFravær getOppgittFraværFraSøknad() {
+        return oppgittFraværFraSøknad;
+    }
+
     void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
     }

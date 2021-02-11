@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -37,6 +36,8 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     private final Map<LocalDateInterval, SøknadsfristPeriodeVurderer<OppgittFraværPeriode>> avviksVurderere;
     private final SøknadsfristPeriodeVurderer<OppgittFraværPeriode> defaultVurderer = new DefaultSøknadsfristPeriodeVurderer();
     private InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste;
+    private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper;
+    private SøknadPerioderTjeneste søknadPerioderTjeneste;
     private boolean vurderSøknadsfrist;
     private LocalDate startDatoValidering = LocalDate.of(2021, 1, 1);
 
@@ -47,10 +48,14 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Inject
     public OMPVurderSøknadsfristTjeneste(InntektsmeldingerPerioderTjeneste inntektsmeldingerPerioderTjeneste,
+                                         InntektsmeldingSøktePerioderMapper inntektsmeldingMapper,
+                                         SøknadPerioderTjeneste søknadPerioderTjeneste,
                                          @KonfigVerdi(value = "VURDER_SOKNADSFRIST", required = false, defaultVerdi = "false") boolean vurderSøknadsfrist,
                                          @KonfigVerdi(value = "enable_søknadsfrist_fradato", defaultVerdi = "2021-01-01") LocalDate startDatoValidering) {
         this();
         this.inntektsmeldingerPerioderTjeneste = inntektsmeldingerPerioderTjeneste;
+        this.inntektsmeldingMapper = inntektsmeldingMapper;
+        this.søknadPerioderTjeneste = søknadPerioderTjeneste;
         this.vurderSøknadsfrist = vurderSøknadsfrist;
         this.startDatoValidering = startDatoValidering;
     }
@@ -64,19 +69,14 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Override
     public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
-        HashMap<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> result = new HashMap<>();
-        inntektsmeldinger.forEach(it -> mapTilMøknadsperiode(result, it));
-        return result;
-    }
+        Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder = new HashMap<>();
 
-    private void mapTilMøknadsperiode(HashMap<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> result, no.nav.k9.sak.domene.iay.modell.Inntektsmelding it) {
-        result.put(new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
-            it.getOppgittFravær()
-                .stream()
-                .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag()))
-                .map(op -> new SøktPeriode<>(op.getPeriode(), op.getAktivitetType(), op.getArbeidsgiver(), op.getArbeidsforholdRef(), op))
-                .collect(Collectors.toList()));
+        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
+        søktePerioder.putAll(inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger));
+        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokument(referanse);
+        søktePerioder.putAll(søktePerioderFraSøknad);
+
+        return søktePerioder;
     }
 
     @Override
