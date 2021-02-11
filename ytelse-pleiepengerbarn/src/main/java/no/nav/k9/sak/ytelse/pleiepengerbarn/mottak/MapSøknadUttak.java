@@ -30,9 +30,7 @@ import no.nav.k9.søknad.felles.aktivitet.Frilanser;
 import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
-import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
-import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning;
 

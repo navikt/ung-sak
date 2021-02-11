@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;

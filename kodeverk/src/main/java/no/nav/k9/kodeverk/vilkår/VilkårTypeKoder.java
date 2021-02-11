@@ -28,4 +28,6 @@ public final class VilkårTypeKoder {
     public static final String K9_VK_2b = "K9_VK_2_b";
     public static final String K9_VK_3 = "K9_VK_3";
 
+    public static final String K9_VK_9_6 = "K9_VK_9_6";
+
 }

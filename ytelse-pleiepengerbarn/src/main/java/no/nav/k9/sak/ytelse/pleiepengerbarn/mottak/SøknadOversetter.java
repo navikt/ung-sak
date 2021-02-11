@@ -23,7 +23,6 @@ import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
-import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.vedtak.konfig.Tid;

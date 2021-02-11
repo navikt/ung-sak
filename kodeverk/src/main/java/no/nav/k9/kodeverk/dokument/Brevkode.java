@@ -24,15 +24,22 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class Brevkode implements Kodeverdi {
 
+    public static final String SØKNAD_OMS_UTVIDETRETT_MA_KODE = "SØKNAD_OMS_UTVIDETRETT_MA";
+    public static final String SØKNAD_OMS_UTVIDETRETT_KS_KODE = "SØKNAD_OMS_UTVIDETRETT_KS";
     public static final String SØKNAD_UTBETALING_OMS_KODE = "SØKNAD_UTBETALING_OMS";
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
+
     private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
     public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
     public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023");
     public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02");
+
+    /** Omsorgspenger brevkoder. */
     public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01");
+    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05");
+    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07");
 
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null);
