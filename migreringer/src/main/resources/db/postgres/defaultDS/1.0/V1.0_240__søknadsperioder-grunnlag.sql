@@ -28,7 +28,7 @@ create index IDX_SP_SOEKNADSPERIODER_02
 create table if not exists SP_SOEKNADSPERIODE
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
-    PERIODER_ID   BIGINT REFERENCES SP_SOEKNADSPERIODER (id),
+    HOLDER_ID   BIGINT REFERENCES SP_SOEKNADSPERIODER (id),
     FOM           DATE                                   NOT NULL,
     TOM           DATE                                   NOT NULL,
     VERSJON       BIGINT       DEFAULT 0                 NOT NULL,
@@ -44,13 +44,13 @@ create sequence if not exists SEQ_SP_SOEKNADSPERIODE increment by 50 minvalue 10
 create sequence if not exists SEQ_GR_SOEKNADSPERIODE increment by 50 minvalue 1000000;
 
 create index IDX_SP_SOEKNADSPERIODE_01
-    on SP_SOEKNADSPERIODE (PERIODER_ID);
+    on SP_SOEKNADSPERIODE (HOLDER_ID);
 
 create table GR_SOEKNADSPERIODE
 (
     ID                        bigint                                            not null PRIMARY KEY,
     BEHANDLING_ID             bigint REFERENCES BEHANDLING (id)                 not null,
-    oppgitt_SOKNADSPERIODE_id bigint REFERENCES SP_SOEKNADSPERIODER_HOLDER (id) not null,
+    OPPGITT_SOKNADSPERIODE_ID bigint REFERENCES SP_SOEKNADSPERIODER_HOLDER (id) not null,
     VERSJON                   bigint       default 0                            not null,
     AKTIV                     boolean      default true                         not null,
     OPPRETTET_AV              VARCHAR(20)  default 'VL'                         not null,

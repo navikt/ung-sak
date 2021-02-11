@@ -2,12 +2,16 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +26,7 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "Søknadsperioder")
 @Table(name = "SP_SOEKNADSPERIODER")
@@ -31,6 +36,10 @@ public class Søknadsperioder extends BaseEntitet {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODER")
     private Long id;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
+    private JournalpostId journalpostId;
 
     @ChangeTracked
     @BatchSize(size = 20)
@@ -46,11 +55,12 @@ public class Søknadsperioder extends BaseEntitet {
         // hibernate
     }
 
-    public Søknadsperioder(Søknadsperiode... perioder) {
-        this(Arrays.asList(perioder));
+    public Søknadsperioder(JournalpostId journalpostId, Søknadsperiode... perioder) {
+        this(journalpostId, Arrays.asList(perioder));
     }
 
-    public Søknadsperioder(Collection<Søknadsperiode> perioder) {
+    public Søknadsperioder(JournalpostId journalpostId, Collection<Søknadsperiode> perioder) {
+        this.journalpostId = journalpostId;
         this.perioder = new LinkedHashSet<>(Objects.requireNonNull(perioder));
     }
 
@@ -58,8 +68,12 @@ public class Søknadsperioder extends BaseEntitet {
         return id;
     }
 
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
+
     public Set<Søknadsperiode> getPerioder() {
-        return perioder;
+        return Collections.unmodifiableSet(perioder);
     }
 
     @Override
@@ -78,7 +92,8 @@ public class Søknadsperioder extends BaseEntitet {
     @Override
     public String toString() {
         return "Søknadsperioder{" +
-            "perioder=" + perioder +
+            "journalpostId=" + journalpostId +
+            ", perioder=" + perioder +
             '}';
     }
 }

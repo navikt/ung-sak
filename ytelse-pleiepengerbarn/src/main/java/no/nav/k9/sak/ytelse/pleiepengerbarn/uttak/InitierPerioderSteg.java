@@ -55,7 +55,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 
-            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(mottatteDokumenter);
+            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(behandling.getId(), mottatteDokumenter);
             // Tar søknadsperioder fra søknader ankommet på fagsaken etter kronologisk rekkefølge og lagrer ned på søknadsperiodegrunnlag elns
         } else {
             var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
@@ -64,7 +64,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 
-            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(mottatteDokumenter);
+            var relevanteSøknadsPerioder = søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(behandling.getId(), mottatteDokumenter);
             // Tar søknadsperioder fra søknader ankommet på behandlingen og lagrer ned på søknadsperiodegrunnlag elns
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();

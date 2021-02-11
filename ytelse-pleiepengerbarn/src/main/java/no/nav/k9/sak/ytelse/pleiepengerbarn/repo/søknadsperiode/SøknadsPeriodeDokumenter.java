@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 import java.util.Objects;
 import java.util.Set;
 
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.typer.JournalpostId;
 
 public class SøknadsPeriodeDokumenter {

@@ -22,7 +22,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -32,6 +31,7 @@ import no.nav.k9.sak.perioder.TimelineMerger;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsPeriodeDokumenter;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 
 
@@ -39,7 +39,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 @FagsakYtelseTypeRef("PSB")
 public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<Søknadsperiode> {
 
-    private DefaultSøknadsfristPeriodeVurderer vurderer = new DefaultSøknadsfristPeriodeVurderer();
+    private final DefaultSøknadsfristPeriodeVurderer vurderer = new DefaultSøknadsfristPeriodeVurderer();
+
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
@@ -77,7 +78,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(mottatteJournalposter)
+        søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(referanse.getBehandlingId(), mottatteJournalposter)
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, dokument));
 
         return result;
