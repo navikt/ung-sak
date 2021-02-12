@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
@@ -62,7 +64,7 @@ public class UttakRestKlient {
             .setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
-    
+
     private ObjectReader uttaksplanReader = objectMapper.readerFor(Uttaksplan.class);
 
     private OidcRestClient restKlient;
@@ -87,6 +89,18 @@ public class UttakRestKlient {
             return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
+        }
+    }
+
+    public Uttaksplan hentUttaksplan(UUID behandlingId) {
+        Objects.requireNonNull(behandlingId);
+        URIBuilder builder = new URIBuilder(endpointUttaksplan);
+            builder.addParameter("behandlingId", behandlingId.toString());
+        try {
+            HttpGet kall = new HttpGet(builder.build());
+            return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingId, e).toException();
         }
     }
 
