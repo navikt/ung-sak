@@ -19,6 +19,8 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -51,6 +53,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @ManyToOne
     @JoinColumn(name = "fravaer_id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore //må ha denne for å unngå sirkulær traversering fra Jackson - ved serialisering av regelsporing
     private OppgittFravær oppgittFravær;
 
     @ChangeTracked
