@@ -69,7 +69,7 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
     }
 
     public SøknadsperioderHolder getRelevantSøknadsperioder() {
-        return oppgitteSøknadsperioder;
+        return relevanteSøknadsperioder;
     }
 
     public boolean isAktiv() {
