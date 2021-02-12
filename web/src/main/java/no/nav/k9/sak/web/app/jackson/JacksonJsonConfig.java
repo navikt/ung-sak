@@ -26,6 +26,8 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBereg
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.omsorgspenger.mottak.OmsorgspengerSøknadInnsending;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak.KroniskSyktBarnSøknadInnsending;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak.MidlertidigAleneSøknadInnsending;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;

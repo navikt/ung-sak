@@ -74,7 +74,7 @@ public enum Avslagsårsak implements Kodeverdi {
     // TODO, trengs denne?
     IKKE_UTVIDETRETT("1072", "Ikke grunnlag for utvidet rett", Map.of(
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd",
-        FagsakYtelseType.OMSORGSPENGER_MA, "9-6 2. ledd")),
+        FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
         Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
