@@ -367,6 +367,11 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
+                <groupId>no.nav.pleiepengerbarn.uttak</groupId>
+                <artifactId>kontrakter</artifactId>
+                <version>1.0_20210212132314_75dbc9a</version>
+            </dependency>
+            <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>soknad</artifactId>
                 <version>${k9format.version}</version>

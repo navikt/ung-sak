@@ -23,32 +23,28 @@ public class VurderUttakSteg implements BehandlingSteg {
     private UttakTjeneste uttakTjeneste;
     private BehandlingRepository behandlingRepository;
     private UttakInputTjeneste uttakInputTjeneste;
-    private SkjæringstidspunktTjeneste stpTjeneste;
-    
+
     VurderUttakSteg(){
         // for proxy
     }
 
     @Inject
-    public VurderUttakSteg(BehandlingRepository behandlingRepository, 
-                           SkjæringstidspunktTjeneste stpTjeneste,
-                           UttakTjeneste uttakTjeneste, 
+    public VurderUttakSteg(BehandlingRepository behandlingRepository,
+                           UttakTjeneste uttakTjeneste,
                            UttakInputTjeneste uttakInputTjeneste){
         this.behandlingRepository = behandlingRepository;
-        this.stpTjeneste = stpTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.uttakInputTjeneste = uttakInputTjeneste;
     }
-    
+
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, stp);
-        var uttakInput = uttakInputTjeneste.lagInput(ref);
-        uttakTjeneste.opprettUttaksplan(uttakInput);
-        
+        var ref = BehandlingReferanse.fra(behandling);
+
+
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
