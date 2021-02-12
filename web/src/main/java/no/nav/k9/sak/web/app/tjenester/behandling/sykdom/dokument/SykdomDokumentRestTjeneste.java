@@ -33,6 +33,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -161,6 +162,9 @@ public class SykdomDokumentRestTjeneste {
             SykdomInnleggelseDto sykdomInnleggelse) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomInnleggelse.getBehandlingUuid()).orElseThrow();
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
 
         final SykdomInnleggelser innleggelser = sykdomDokumentOversiktMapper.toSykdomInnleggelser(sykdomInnleggelse, SubjectHandler.getSubjectHandler().getUid());
 
@@ -211,6 +215,10 @@ public class SykdomDokumentRestTjeneste {
             SykdomDiagnosekoderDto sykdomDiagnosekoderDto) {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDiagnosekoderDto.getBehandlingUuid()).orElseThrow();
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+        
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
         sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
     }
@@ -256,7 +264,7 @@ public class SykdomDokumentRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentEndringDto sykdomDokumentEndringDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentEndringDto.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus()) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
 
@@ -289,7 +297,7 @@ public class SykdomDokumentRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomDokumentOpprettelseDto sykdomDokumentOpprettelseDto) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomDokumentOpprettelseDto.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus()) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
 
