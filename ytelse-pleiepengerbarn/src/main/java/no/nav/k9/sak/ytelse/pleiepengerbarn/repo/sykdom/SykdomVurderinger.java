@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomFelles.BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -15,11 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
 
 @Entity(name = "SykdomVurderinger")
 @Table(name = "SYKDOM_VURDERINGER")
@@ -56,17 +52,6 @@ public class SykdomVurderinger {
         this.vurderinger = new ArrayList<>();
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.opprettetAv = opprettetAv != null ? opprettetAv : finnBrukernavn();
-        this.opprettetTidspunkt = opprettetTidspunkt != null ? opprettetTidspunkt : LocalDateTime.now();
-    }
-
-    private static String finnBrukernavn() {
-        String brukerident = SubjectHandler.getSubjectHandler().getUid();
-        return brukerident != null ? brukerident : BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
     }
 
     public Long getId() {
