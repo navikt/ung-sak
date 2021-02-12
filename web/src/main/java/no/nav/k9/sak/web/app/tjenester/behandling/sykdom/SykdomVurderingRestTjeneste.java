@@ -41,6 +41,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
@@ -174,8 +175,16 @@ public class SykdomVurderingRestTjeneste {
                     .get()
                     .getSykdomVurderingVersjoner();
         }
+        
+        // TODO: Bedre løsning:
+        final SykdomVurderingerOgPerioder sykdomUtlededePerioder;
+        if (versjoner.get(0).getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE) {
+            sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
+        } else {
+            sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
+        }
 
-        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, dokumenterSomErRelevanteForSykdom);
+        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, dokumenterSomErRelevanteForSykdom, sykdomUtlededePerioder);
     }
 
     @POST

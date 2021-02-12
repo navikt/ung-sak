@@ -1,8 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -19,6 +17,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 
@@ -44,7 +43,7 @@ public class SykdomVurderingMapper {
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
-    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> relevanteDokumenterForSykdom) {
+    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> relevanteDokumenterForSykdom, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
         final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
         
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
@@ -68,8 +67,8 @@ public class SykdomVurderingMapper {
                 vurdering.getType(), 
                 versjonerDto,
                 new SykdomVurderingAnnenInformasjon(
-                    Arrays.asList(new Periode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(3))), // TODO: Implementer
-                    Arrays.asList(new Periode(LocalDate.now().minusDays(10), LocalDate.now())) // TODO: Implementer
+                    sykdomUtlededePerioder.getResterendeVurderingsperioder(),
+                    sykdomUtlededePerioder.getPerioderSomKanVurderes()
                 )
             );
     }
