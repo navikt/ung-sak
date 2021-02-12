@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.repo;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -21,13 +21,13 @@ import org.hibernate.annotations.Immutable;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@Entity(name = "UTSøknadsperiode")
-@Table(name = "UT_SOEKNADSPERIODE")
+@Entity(name = "Søknadsperiode")
+@Table(name = "SP_SOEKNADSPERIODE")
 @Immutable
 public class Søknadsperiode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UT_SOEKNADSPERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODE")
     private Long id;
 
     @Embedded
@@ -36,10 +36,6 @@ public class Søknadsperiode extends BaseEntitet {
         @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
-
-    @ManyToOne
-    @JoinColumn(name = "soeknadsperioder_id", nullable = false, updatable = false, unique = true)
-    private Søknadsperioder søknadsperioder;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -56,12 +52,12 @@ public class Søknadsperiode extends BaseEntitet {
         this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
-    public DatoIntervallEntitet getPeriode() {
-        return periode;
+    public Søknadsperiode(Søknadsperiode it) {
+        this.periode = it.getPeriode();
     }
 
-    void setFordeling(Søknadsperioder fordeling) {
-        this.søknadsperioder = fordeling;
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
     }
 
     @Override
@@ -85,5 +81,4 @@ public class Søknadsperiode extends BaseEntitet {
             ", versjon=" + versjon +
             '>';
     }
-
 }

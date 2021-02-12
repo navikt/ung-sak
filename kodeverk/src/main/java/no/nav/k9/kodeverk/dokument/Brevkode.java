@@ -41,6 +41,8 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05");
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07");
 
+    /** Pleiepenger brevkoder. */
+    public static final Brevkode PLEIEPENGER_SOKNAD = new Brevkode("PLEIEPENGER_SOKNAD", "NAV 09-11.05");
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null);
 

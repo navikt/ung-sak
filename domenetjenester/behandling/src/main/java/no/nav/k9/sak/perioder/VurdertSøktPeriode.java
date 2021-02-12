@@ -17,6 +17,17 @@ public class VurdertSøktPeriode<T> {
     private Utfall utfall;
     private T raw;
 
+    /**
+     * Ingen faktisk krav om utbetaling, men en periode for vurdering
+     *
+     * @param periode fom-tom
+     * @param raw entitet
+     */
+    public VurdertSøktPeriode(DatoIntervallEntitet periode, T raw) {
+        this.periode = periode;
+        this.raw = raw;
+    }
+
     public VurdertSøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Utfall utfall, T raw) {
         this.periode = periode;
         this.type = type;

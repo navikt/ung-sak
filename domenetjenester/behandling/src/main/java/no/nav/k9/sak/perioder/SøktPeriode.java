@@ -1,12 +1,12 @@
 package no.nav.k9.sak.perioder;
 
+import java.util.Objects;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-
-import java.util.Objects;
 
 public class SøktPeriode<T> {
 
@@ -15,6 +15,17 @@ public class SøktPeriode<T> {
     private Arbeidsgiver arbeidsgiver;
     private InternArbeidsforholdRef arbeidsforholdRef;
     private T raw;
+
+    /**
+     * Ingen faktisk krav om utbetaling, men en periode for vurdering
+     *
+     * @param periode fom-tom
+     * @param raw entitet
+     */
+    public SøktPeriode(DatoIntervallEntitet periode, T raw) {
+        this.periode = periode;
+        this.raw = raw;
+    }
 
     public SøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, T raw) {
         this.periode = periode;

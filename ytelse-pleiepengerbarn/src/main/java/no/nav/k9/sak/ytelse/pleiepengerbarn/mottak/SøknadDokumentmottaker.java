@@ -67,7 +67,7 @@ class SøknadDokumentmottaker {
         new PleiepengerSyktBarnValidator().forsikreValidert(søknad.getYtelse());
 
         Behandling behandling = tilknyttBehandling(saksnummer);
-        pleiepengerBarnSoknadOversetter.persister(søknad, behandling);
+        pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
 
