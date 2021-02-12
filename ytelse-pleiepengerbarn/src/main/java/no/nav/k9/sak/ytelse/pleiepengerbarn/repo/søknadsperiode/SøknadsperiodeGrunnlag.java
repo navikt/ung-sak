@@ -56,6 +56,10 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         this.relevanteSøknadsperioder = grunnlag.relevanteSøknadsperioder;
     }
 
+    public SøknadsperiodeGrunnlag(Long behandlingId) {
+        this.behandlingId = behandlingId;
+    }
+
     public Long getId() {
         return id;
     }

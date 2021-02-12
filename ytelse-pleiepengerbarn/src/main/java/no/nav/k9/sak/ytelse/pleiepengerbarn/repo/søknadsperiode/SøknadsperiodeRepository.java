@@ -43,7 +43,7 @@ public class SøknadsperiodeRepository {
     public void lagre(Long behandlingId, Søknadsperioder søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new SøknadsperiodeGrunnlag(behandlingId, it))
-            .orElse(new SøknadsperiodeGrunnlag());
+            .orElse(new SøknadsperiodeGrunnlag(behandlingId));
         nyttGrunnlag.leggTil(søknadsperioder);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
