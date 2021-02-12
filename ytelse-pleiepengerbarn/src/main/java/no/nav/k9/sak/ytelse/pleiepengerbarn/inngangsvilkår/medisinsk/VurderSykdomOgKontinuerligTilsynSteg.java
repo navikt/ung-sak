@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -38,9 +38,12 @@ import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @BehandlingStegRef(kode = "VURDER_MEDISINSK")
@@ -57,6 +60,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
+    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
     VurderSykdomOgKontinuerligTilsynSteg() {
         // CDI
@@ -67,7 +71,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                 MedisinskVilkårTjeneste medisinskVilkårTjeneste,
-                                                SykdomVurderingService sykdomVurderingService) {
+                                                SykdomVurderingService sykdomVurderingService,
+                                                SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
@@ -75,33 +80,46 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.medisinskVilkårTjeneste = medisinskVilkårTjeneste;
         this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET); // OK
         
-        final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(kontekst, perioder);
+        // TODO etter 18feb: Legge til støtte for at det legges inn vurderinger på utsiden av "perioder" som da trigger revurdering. Endre i PSBVilkårsPerioderTilVurderingTjeneste
+        
+        final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagRepository.opprettGrunnlag(
+            behandling.getFagsak().getSaksnummer(),
+            behandling.getUuid(),
+            behandling.getAktørId(),
+            behandling.getFagsak().getPleietrengendeAktørId(),
+            perioder.stream()
+                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
+                .collect(Collectors.toList())
+        );
         
         if (sykdomVurderingService.harAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()))) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
-
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final var oppdaterteVilkår = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
-
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
-
-        // Lagre resultatstruktur
-        oppdaterResultatStruktur(kontekst, perioder, vilkårData);
+       
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         
+        for (DatoIntervallEntitet periode : perioder) {
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(kontekst, periode, sykdomGrunnlagBehandling);
+            vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
+            oppdaterResultatStruktur(kontekst, periode, vilkårData);
+        }
+
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårene);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, Set<DatoIntervallEntitet> perioder, VilkårData vilkårData) {
+    private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(PleiebehovBuilder::builder).orElse(PleiebehovBuilder.builder());
-        final DatoIntervallEntitet periodeTilVurdering = utledPeriodeTilVurdering(perioder);
         builder.tilbakeStill(periodeTilVurdering);
         final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
@@ -111,13 +129,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     private Pleieperiode utledPeriode(PleiePeriode periode) {
         return new Pleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
-    }
-
-    private DatoIntervallEntitet utledPeriodeTilVurdering(Set<DatoIntervallEntitet> perioder) {
-        var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-
-        return DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
     }
 
     private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {

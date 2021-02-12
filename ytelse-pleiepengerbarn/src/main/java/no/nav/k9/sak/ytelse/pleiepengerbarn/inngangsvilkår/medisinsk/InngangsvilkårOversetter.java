@@ -38,7 +38,6 @@ public class InngangsvilkårOversetter {
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
     InngangsvilkårOversetter() {
         // for CDI proxy
@@ -47,29 +46,14 @@ public class InngangsvilkårOversetter {
     @Inject
     public InngangsvilkårOversetter(MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                     BehandlingRepository behandlingRepository,
-                                    BasisPersonopplysningTjeneste personopplysningTjeneste,
-                                    SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                    BasisPersonopplysningTjeneste personopplysningTjeneste) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
     }
 
-    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(Long behandlingId, DatoIntervallEntitet periode) {
+    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(Long behandlingId, DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         final Periode vilkårsperiode = new Periode(periode.getFomDato(), periode.getTomDato());
-        final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagRepository.opprettGrunnlag(
-            behandling.getFagsak().getSaksnummer(),
-            behandling.getUuid(),
-            behandling.getAktørId(),
-            behandling.getFagsak().getPleietrengendeAktørId(),
-            List.of(vilkårsperiode)
-            /*
-            perioder.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList())
-            */
-        );
 
         final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
         
