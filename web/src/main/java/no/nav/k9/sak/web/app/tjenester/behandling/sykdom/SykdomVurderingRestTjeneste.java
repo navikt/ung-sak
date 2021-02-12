@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -166,7 +167,7 @@ public class SykdomVurderingRestTjeneste {
         final List<SykdomDokument> dokumenterSomErRelevanteForSykdom = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(pleietrengende);
         
         final List<SykdomVurderingVersjon> versjoner;
-        if (behandling.getStatus().erFerdigbehandletStatus()) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
         } else {
             versjoner = sykdomVurderingRepository.hentVurdering(pleietrengende, Long.valueOf(vurderingId.getSykdomVurderingId()))
@@ -197,7 +198,7 @@ public class SykdomVurderingRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomVurderingEndringDto sykdomVurderingOppdatering) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOppdatering.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus()) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
 
@@ -243,7 +244,7 @@ public class SykdomVurderingRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SykdomVurderingOpprettelseDto sykdomVurderingOpprettelse) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOpprettelse.getBehandlingUuid()).orElseThrow();
-        if (behandling.getStatus().erFerdigbehandletStatus()) {
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
 
