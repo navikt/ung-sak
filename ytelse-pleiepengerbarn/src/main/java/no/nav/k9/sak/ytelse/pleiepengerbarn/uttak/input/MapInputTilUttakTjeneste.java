@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -111,7 +113,7 @@ public class MapInputTilUttakTjeneste {
 
     private Map<LukketPeriode, Pleiebehov> toTilsynsbehov(PleiebehovResultat pleiebehov) {
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.getPleieperioder().getPerioder().stream().forEach(p -> {
+        pleiebehov.getPleieperioder().getPerioder().forEach(p -> {
             tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
         });
         return tilsynsbehov;
@@ -132,14 +134,15 @@ public class MapInputTilUttakTjeneste {
 
     private List<Arbeid> toArbeid(UttakAktivitet oppgittUttak) {
         // TODO: Skal vi ha arbeidsforhold på topp?
-        final Map<InternArbeidsforholdRef, List<UttakAktivitetPeriode>> arbeidsforhold = new HashMap<>();
+        final Map<ArbeidsgiverArbeidsforhold, List<UttakAktivitetPeriode>> arbeidsforhold = new HashMap<>();
         oppgittUttak.getPerioder().forEach(p -> {
-            List<UttakAktivitetPeriode> perioder = arbeidsforhold.get(p.getArbeidsforholdRef());
+            final ArbeidsgiverArbeidsforhold key = new ArbeidsgiverArbeidsforhold(p.getArbeidsgiver(), p.getArbeidsforholdRef());
+            List<UttakAktivitetPeriode> perioder = arbeidsforhold.get(key);
             if (perioder == null) {
                 perioder = new ArrayList<>();
             }
             perioder.add(p);
-            arbeidsforhold.put(p.getArbeidsforholdRef(), perioder);
+            arbeidsforhold.put(key, perioder);
         });
         
         return arbeidsforhold.entrySet().stream().map(e -> {
@@ -173,5 +176,46 @@ public class MapInputTilUttakTjeneste {
             inngangsvilkår.put(v.getVilkårType().getKode(), vilkårsperioder);
         });
         return inngangsvilkår;
+    }
+    
+    static class ArbeidsgiverArbeidsforhold {
+
+        private Arbeidsgiver arbeidsgiver;
+        private InternArbeidsforholdRef arbeidsforhold;
+
+        public ArbeidsgiverArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
+            this.arbeidsgiver = Objects.requireNonNull(arbeidsgiver);
+            this.arbeidsforhold = Objects.requireNonNull(arbeidsforhold);
+        }
+
+        public Arbeidsgiver getArbeidsgiver() {
+            return arbeidsgiver;
+        }
+
+        public InternArbeidsforholdRef getArbeidsforhold() {
+            return arbeidsforhold;
+        }
+
+        public boolean identifisererSamme(ArbeidsgiverArbeidsforhold arbeidsforhold) {
+            if (!arbeidsgiver.equals(arbeidsforhold.getArbeidsgiver())) {
+                return false;
+            }
+
+            return this.arbeidsforhold.gjelderFor(arbeidsforhold.getArbeidsforhold());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ArbeidsgiverArbeidsforhold that = (ArbeidsgiverArbeidsforhold) o;
+            return Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
+                Objects.equals(arbeidsforhold, that.arbeidsforhold);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(arbeidsgiver, arbeidsforhold);
+        }
     }
 }

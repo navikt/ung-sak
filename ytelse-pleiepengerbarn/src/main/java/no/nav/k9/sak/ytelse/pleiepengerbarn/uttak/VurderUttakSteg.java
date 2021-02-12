@@ -11,8 +11,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
@@ -20,9 +20,9 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @FagsakYtelseTypeRef("PSB")
 public class VurderUttakSteg implements BehandlingSteg {
 
-    private UttakTjeneste uttakTjeneste;
     private BehandlingRepository behandlingRepository;
-    private UttakInputTjeneste uttakInputTjeneste;
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
+    private UttakRestKlient uttakRestKlient;
 
     VurderUttakSteg(){
         // for proxy
@@ -30,11 +30,11 @@ public class VurderUttakSteg implements BehandlingSteg {
 
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
-                           UttakTjeneste uttakTjeneste,
-                           UttakInputTjeneste uttakInputTjeneste){
+                           MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                           UttakRestKlient uttakRestKlient){
         this.behandlingRepository = behandlingRepository;
-        this.uttakTjeneste = uttakTjeneste;
-        this.uttakInputTjeneste = uttakInputTjeneste;
+        this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
+        this.uttakRestKlient = uttakRestKlient;
     }
 
     @Override
@@ -43,7 +43,8 @@ public class VurderUttakSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
 
-
+        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
+        uttakRestKlient.opprettUttaksplan(request);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
