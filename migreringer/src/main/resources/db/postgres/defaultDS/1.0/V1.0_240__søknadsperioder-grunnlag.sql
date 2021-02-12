@@ -50,6 +50,7 @@ create table GR_SOEKNADSPERIODE
 (
     ID                        bigint                                            not null PRIMARY KEY,
     BEHANDLING_ID             bigint REFERENCES BEHANDLING (id)                 not null,
+    RELEVANT_SOKNADSPERIODE_ID bigint REFERENCES SP_SOEKNADSPERIODER_HOLDER (id) not null,
     OPPGITT_SOKNADSPERIODE_ID bigint REFERENCES SP_SOEKNADSPERIODER_HOLDER (id) not null,
     VERSJON                   bigint       default 0                            not null,
     AKTIV                     boolean      default true                         not null,

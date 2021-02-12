@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -52,6 +53,15 @@ public class Søknadsperioder extends BaseEntitet {
     private long versjon;
 
     Søknadsperioder() {
+        // hibernate
+    }
+
+    public Søknadsperioder(Søknadsperioder periode) {
+        this.journalpostId = periode.getJournalpostId();
+        this.perioder = periode.getPerioder()
+            .stream()
+            .map(Søknadsperiode::new)
+            .collect(Collectors.toSet());
         // hibernate
     }
 

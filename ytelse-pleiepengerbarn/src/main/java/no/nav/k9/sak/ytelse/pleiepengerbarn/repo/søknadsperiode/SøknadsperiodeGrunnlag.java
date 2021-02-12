@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,8 +32,13 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
+    @JoinColumn(name = "relevant_soknadsperiode_id", nullable = false, updatable = false, unique = true)
+    private SøknadsperioderHolder relevanteSøknadsperioder;
+
+    @ManyToOne
+    @Immutable
     @JoinColumn(name = "oppgitt_soknadsperiode_id", nullable = false, updatable = false, unique = true)
-    private SøknadsperioderHolder søknadsperioder;
+    private SøknadsperioderHolder oppgitteSøknadsperioder;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -46,15 +52,20 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
 
     SøknadsperiodeGrunnlag(Long behandlingId, SøknadsperiodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
-        this.søknadsperioder = grunnlag.søknadsperioder;
+        this.oppgitteSøknadsperioder = grunnlag.oppgitteSøknadsperioder;
+        this.relevanteSøknadsperioder = grunnlag.relevanteSøknadsperioder;
     }
 
     public Long getId() {
         return id;
     }
 
-    public SøknadsperioderHolder getSøknadsperioder() {
-        return søknadsperioder;
+    public SøknadsperioderHolder getOppgitteSøknadsperioder() {
+        return oppgitteSøknadsperioder;
+    }
+
+    public SøknadsperioderHolder getRelevantSøknadsperioder() {
+        return oppgitteSøknadsperioder;
     }
 
     public boolean isAktiv() {
@@ -69,9 +80,14 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = new HashSet<>(this.søknadsperioder.getPerioder());
+        var perioder = new HashSet<>(this.oppgitteSøknadsperioder.getPerioder());
         perioder.add(søknadsperioder);
-        this.søknadsperioder = new SøknadsperioderHolder(perioder);
+        this.oppgitteSøknadsperioder = new SøknadsperioderHolder(perioder);
+    }
+
+    void setRelevanteSøknadsperioder(SøknadsperioderHolder relevanteSøknadsperioder) {
+        Objects.requireNonNull(relevanteSøknadsperioder);
+        this.relevanteSøknadsperioder = relevanteSøknadsperioder;
     }
 
     @Override
@@ -79,11 +95,11 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SøknadsperiodeGrunnlag that = (SøknadsperiodeGrunnlag) o;
-        return Objects.equals(søknadsperioder, that.søknadsperioder);
+        return Objects.equals(relevanteSøknadsperioder, that.relevanteSøknadsperioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(søknadsperioder);
+        return Objects.hash(relevanteSøknadsperioder);
     }
 }

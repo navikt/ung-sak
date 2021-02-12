@@ -52,6 +52,10 @@ public class Søknadsperiode extends BaseEntitet {
         this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
+    public Søknadsperiode(Søknadsperiode it) {
+        this.periode = it.getPeriode();
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }

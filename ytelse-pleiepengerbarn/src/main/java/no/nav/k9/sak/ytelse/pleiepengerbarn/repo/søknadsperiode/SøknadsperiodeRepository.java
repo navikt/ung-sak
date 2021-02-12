@@ -28,12 +28,16 @@ public class SøknadsperiodeRepository {
         if (eksisterendeGrunnlag.isEmpty()) {
             return Set.of();
         }
-        return eksisterendeGrunnlag.get().getSøknadsperioder()
+        return eksisterendeGrunnlag.get().getOppgitteSøknadsperioder()
             .getPerioder()
             .stream()
             .filter(it -> journalpostIder.contains(it.getJournalpostId()))
             .map(it -> new SøknadsPeriodeDokumenter(it.getJournalpostId(), it.getPerioder()))
             .collect(Collectors.toSet());
+    }
+
+    public Optional<SøknadsperiodeGrunnlag> hentGrunnlag(Long behandlingId) {
+        return hentEksisterendeGrunnlag(behandlingId);
     }
 
     public void lagre(Long behandlingId, Søknadsperioder søknadsperioder) {
@@ -45,10 +49,20 @@ public class SøknadsperiodeRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
+    public void lagreRelevanteSøknadsperioder(Long behandlingId, SøknadsperioderHolder søknadsperioder) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new SøknadsperiodeGrunnlag(behandlingId, it))
+            .orElse(new SøknadsperiodeGrunnlag());
+        nyttGrunnlag.setRelevanteSøknadsperioder(søknadsperioder);
+
+        persister(eksisterendeGrunnlag, nyttGrunnlag);
+    }
+
     private void persister(Optional<SøknadsperiodeGrunnlag> eksisterendeGrunnlag, SøknadsperiodeGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
-        entityManager.persist(nyttGrunnlag.getSøknadsperioder());
+        entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
+        entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
@@ -61,7 +75,8 @@ public class SøknadsperiodeRepository {
 
     private Optional<SøknadsperiodeGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
-            "FROM SøknadsperiodeGrunnlag s " +
+            "SELECT s " +
+                "FROM SøknadsperiodeGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
                 "AND s.aktiv = true", SøknadsperiodeGrunnlag.class);
 
