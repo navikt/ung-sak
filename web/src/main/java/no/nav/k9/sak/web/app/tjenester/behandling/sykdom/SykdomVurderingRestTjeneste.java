@@ -256,7 +256,8 @@ public class SykdomVurderingRestTjeneste {
             sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
             endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
                 // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
-                throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
+                // OK inntil videre med opprett ny fordi den har høyere rangering (men det bør likevel unngås).
+                //throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
             });
         }
 
