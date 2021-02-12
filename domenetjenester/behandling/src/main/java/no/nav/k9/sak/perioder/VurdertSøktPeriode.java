@@ -23,8 +23,9 @@ public class VurdertSøktPeriode<T> {
      * @param periode fom-tom
      * @param raw entitet
      */
-    public VurdertSøktPeriode(DatoIntervallEntitet periode, T raw) {
+    public VurdertSøktPeriode(DatoIntervallEntitet periode, Utfall utfall, T raw) {
         this.periode = periode;
+        this.utfall = utfall;
         this.raw = raw;
     }
 

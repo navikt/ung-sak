@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -150,15 +152,15 @@ public class MapInputTilUttakTjeneste {
                 final Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder = new HashMap<>();
                 e.getValue().forEach(p -> {
                     perioder.put(new LukketPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()),
-                            new ArbeidsforholdPeriodeInfo(p.getJobberNormaltPerUke(), Duration.ZERO)); // TODO: Sett riktig verdi.
+                            new ArbeidsforholdPeriodeInfo(Optional.ofNullable(p.getJobberNormaltPerUke()).orElse(Duration.ZERO), Duration.ZERO)); // TODO: Sett riktig verdi.
                 });
                 
                 return new Arbeid(
                         new Arbeidsforhold(
                                 uttakAktivitetPeriode.getAktivitetType().getKode(),
                                 uttakAktivitetPeriode.getArbeidsgiver().getArbeidsgiverOrgnr(),
-                                uttakAktivitetPeriode.getArbeidsgiver().getArbeidsgiverAktørId().getId(),
-                                uttakAktivitetPeriode.getArbeidsforholdRef().getReferanse()
+                                Optional.ofNullable(uttakAktivitetPeriode.getArbeidsgiver().getArbeidsgiverAktørId()).map(a -> a.getId()).orElse(null),
+                                Optional.ofNullable(uttakAktivitetPeriode.getArbeidsforholdRef()).map(a -> a.getReferanse()).orElse(null)
                         ),
                         perioder
                 );
@@ -169,6 +171,9 @@ public class MapInputTilUttakTjeneste {
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = new HashMap<>();
         vilkårene.getVilkårene().forEach(v -> {
+            if (v.getVilkårType() == VilkårType.BEREGNINGSGRUNNLAGVILKÅR) {
+                return;
+            }
             final List<Vilkårsperiode> vilkårsperioder = v.getPerioder()
                     .stream()
                     .map(vp -> new Vilkårsperiode(new LukketPeriode(vp.getFom(), vp.getTom()), Utfall.valueOf(vp.getUtfall().getKode())))
@@ -185,7 +190,7 @@ public class MapInputTilUttakTjeneste {
 
         public ArbeidsgiverArbeidsforhold(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
             this.arbeidsgiver = Objects.requireNonNull(arbeidsgiver);
-            this.arbeidsforhold = Objects.requireNonNull(arbeidsforhold);
+            this.arbeidsforhold = arbeidsforhold;
         }
 
         public Arbeidsgiver getArbeidsgiver() {
