@@ -61,8 +61,12 @@ public class SøknadsperiodeRepository {
     private void persister(Optional<SøknadsperiodeGrunnlag> eksisterendeGrunnlag, SøknadsperiodeGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
-        entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
-        entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
+        if (nyttGrunnlag.getOppgitteSøknadsperioder() != null) {
+            entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
+        }
+        if (nyttGrunnlag.getRelevantSøknadsperioder() != null) {
+            entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
+        }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
