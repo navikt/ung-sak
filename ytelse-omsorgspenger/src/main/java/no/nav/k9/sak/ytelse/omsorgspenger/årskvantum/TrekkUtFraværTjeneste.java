@@ -103,27 +103,22 @@ public class TrekkUtFraværTjeneste {
     }
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
-        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling));
+        var søkteFraværsperioderIm = fraværMedInnsendingstidspunktFraInntektsmeldingerPåBehandling(behandling);
+
+        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(søkteFraværsperioderIm);
 
         var antallIM = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.INNTEKTSMELDING.equals(type.getType())).count();
         var antallSøknader = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.SØKNAD.equals(type.getType())).count();
         log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", antallIM, antallSøknader);
 
-        return vurdertePerioder.values().stream()
-            .flatMap(Collection::stream)
-            .map(VurdertSøktPeriode::getRaw)
-            .collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var søkteFraværsperioderIm = fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(behandling);
         var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(søkteFraværsperioderIm);
 
-        return vurdertePerioder.values()
-            .stream()
-            .flatMap(Collection::stream)
-            .map(VurdertSøktPeriode::getRaw)
-            .collect(Collectors.toList());
+        return trekkUtFravær(vurdertePerioder).stream().map(WrappedOppgittFraværPeriode::getPeriode).collect(Collectors.toList());
     }
 
     public List<OppgittFraværPeriode> fraværPåFagsak(Behandling behandling) {
@@ -138,6 +133,20 @@ public class TrekkUtFraværTjeneste {
             .map(VurdertSøktPeriode::getRaw)
             .collect(Collectors.toList());
     }
+
+    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraInntektsmeldingerPåBehandling(Behandling behandling) {
+        var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
+            .stream()
+            .filter(it -> Brevkode.INNTEKTSMELDING.equals(it.getType()))
+            .filter(it -> it.getBehandlingId() != null && it.getBehandlingId().equals(behandling.getId()))
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+
+        log.info("Fant inntektsmeldinger knyttet til fagsaken: {}", inntektsmeldingerJournalposter);
+
+        return trekkUtOppgittFraværFraInntektsmeldinger(behandling, inntektsmeldingerJournalposter);
+    }
+
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraInntektsmeldingerPåFagsak(Behandling behandling) {
         var inntektsmeldingerJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
