@@ -2,7 +2,6 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 

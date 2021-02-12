@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
+package no.nav.k9.sak.perioder;
 
 import java.util.Objects;
 
@@ -6,7 +6,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 
 public final class TimelineMerger {
 

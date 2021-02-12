@@ -1,10 +1,12 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -121,6 +123,26 @@ public class SøknadRepository {
             .setParameter("ids", behandlingIder);
 
         return queryBeh.getResultList();
+
+    }
+
+    /** Returnerer alle søknader for fagsak, i rekkefølge mottatt dato. */
+    @SuppressWarnings("unchecked")
+    public List<SøknadEntitet> hentSøknaderForFagsak(Long fagsakId) {
+        Query query = entityManager.createNativeQuery(""
+            + "select distinct so.id from GR_SOEKNAD gr "
+            + " inner join SO_SOEKNAD so ON so.id = gr.soeknad_id "
+            + " inner join BEHANDLING b on b.id = gr.behandling_id "
+            + " where b.fagsak_id = :fagsakId"
+            + "   AND gr.aktiv=TRUE");
+        query.setParameter("fagsakId", fagsakId);
+
+        List<Long> søknadIder = (List<Long>) query.getResultStream().map(v -> Long.valueOf(((Number) v).longValue())).collect(Collectors.<Long> toList());
+
+        Query queryBeh = entityManager.createQuery("from Søknad where id in (:ids)")
+            .setParameter("ids", søknadIder);
+
+        return ((Stream<SøknadEntitet>) queryBeh.getResultStream()).sorted(Comparator.comparing(SøknadEntitet::getMottattDato)).collect(Collectors.toList());
 
     }
 }

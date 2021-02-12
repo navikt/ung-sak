@@ -27,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "OmsorgspengerFraværPeriode")
 @Table(name = "OMP_OPPGITT_FRAVAER_PERIODE")
@@ -36,6 +37,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMP_OPPGITT_FRAVAER_PERIODE")
     private Long id;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
+    private JournalpostId journalpostId;
 
     @Embedded
     @AttributeOverrides({
@@ -74,26 +79,28 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     OppgittFraværPeriode() {
     }
 
+    // Kun for test
     public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Duration fraværPerDag) {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
+        this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.fraværPerDag = fraværPerDag;
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-
     }
 
-    public OppgittFraværPeriode(DatoIntervallEntitet periode) {
-        this.periode = periode;
+    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
+        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag);
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
+        this.journalpostId = periode.journalpostId;
         this.arbeidsgiver = periode.arbeidsgiver;
         this.arbeidsforholdRef = periode.arbeidsforholdRef;
         this.fraværPerDag = periode.fraværPerDag;
@@ -104,7 +111,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+        return IndexKeyComposer.createKey(journalpostId, periode, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+    }
+
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -147,6 +158,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             return false;
         OppgittFraværPeriode that = (OppgittFraværPeriode) o;
         return Objects.equals(periode, that.periode)
+            && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(fraværPerDag, that.fraværPerDag)
             && Objects.equals(aktivitetType, that.aktivitetType)
             && Objects.equals(arbeidsgiver, that.arbeidsgiver)
@@ -155,7 +167,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, fraværPerDag, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(periode, journalpostId, fraværPerDag, aktivitetType, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override
@@ -163,6 +175,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         return getClass().getSimpleName() + "<" +
             "id=" + id +
             ", periode=" + periode +
+            ", journalpostId=" + journalpostId +
             ", aktivitetType=" + arbeidsgiver +
             (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
             (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +

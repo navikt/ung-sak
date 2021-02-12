@@ -18,7 +18,7 @@ import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-public class InntektsmeldingFraværTest {
+public class KravDokumentFraværTest {
 
     @Test
     public void skal_bygge_tidslinje_av_fravær_fra_inntektsmeldinger() {
@@ -69,7 +69,7 @@ public class InntektsmeldingFraværTest {
 
         var inntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
 
-        var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
+        var oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
 
         assertThat(oppgittFraværPeriode).hasSize(3);
         assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000"))).hasSize(2);
@@ -103,7 +103,7 @@ public class InntektsmeldingFraværTest {
             .build();
 
         var inntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
-        var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
+        var oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
 
         assertThat(oppgittFraværPeriode).hasSize(2);
         assertThat(oppgittFraværPeriode.stream().map(WrappedOppgittFraværPeriode::getPeriode).filter(it -> it.getArbeidsgiver().getOrgnr().equals("000000000") && it.getArbeidsforholdRef().equals(arbeidsforholdId))).hasSize(1);
@@ -150,7 +150,7 @@ public class InntektsmeldingFraværTest {
             .build();
 
         var inntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
-        var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
+        var oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
 
         assertThat(oppgittFraværPeriode).hasSize(1);
         assertThat(oppgittFraværPeriode.stream()
@@ -195,7 +195,7 @@ public class InntektsmeldingFraværTest {
 
         var inntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
-        var oppgittFraværPeriode = new InntektsmeldingFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
+        var oppgittFraværPeriode = new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(inntektsmeldinger);
 
         assertThat(oppgittFraværPeriode).hasSize(2);
         assertThat(oppgittFraværPeriode.stream()

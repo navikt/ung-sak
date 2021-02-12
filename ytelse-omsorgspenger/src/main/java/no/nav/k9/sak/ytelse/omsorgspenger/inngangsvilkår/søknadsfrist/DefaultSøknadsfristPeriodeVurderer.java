@@ -1,16 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
+import java.time.Period;
+import java.util.stream.Collectors;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.TimelineMerger;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-
-import java.time.Period;
-import java.util.stream.Collectors;
 
 public class DefaultSøknadsfristPeriodeVurderer implements SøknadsfristPeriodeVurderer<OppgittFraværPeriode> {
 

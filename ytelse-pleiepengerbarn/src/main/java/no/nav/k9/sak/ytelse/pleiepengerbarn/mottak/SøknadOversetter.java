@@ -19,11 +19,14 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
-import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.vedtak.konfig.Tid;
@@ -32,6 +35,7 @@ import no.nav.vedtak.konfig.Tid;
 class SøknadOversetter {
 
     private SøknadRepository søknadRepository;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
     private TpsTjeneste tpsTjeneste;
@@ -43,16 +47,18 @@ class SøknadOversetter {
 
     @Inject
     SøknadOversetter(BehandlingRepositoryProvider repositoryProvider,
+                     SøknadsperiodeRepository søknadsperiodeRepository,
                      UttakRepository uttakRepository,
                      TpsTjeneste tpsTjeneste) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.uttakRepository = uttakRepository;
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    void persister(Søknad søknad, Behandling behandling) {
+    void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
 
@@ -60,14 +66,14 @@ class SøknadOversetter {
         var maksSøknadsperiode = ytelse.getSøknadsperiode();
 
         // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
-        
+
         // TODO etter18feb: Fjern denne fra entitet og DB:
         final boolean elektroniskSøknad = false;
-        
+
         LocalDate mottattDato = søknad.getMottattDato().toLocalDate();
-        
+
         // TODO: Hvis vi skal beholde SøknadEntitet trenger vi å lagre SøknadID og sikre idempotens med denne.
-        
+
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()))
             .medElektroniskRegistrert(elektroniskSøknad)
@@ -78,30 +84,33 @@ class SøknadOversetter {
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
+        var søknadsperiode = new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()));
+        søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperiode));
+
         // Utgår for K9-ytelsene?
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
         // .medTilleggsopplysninger(wrapper.getTilleggsopplysninger())
-        
+
         // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
-        
+
         // TODO etter18feb: Beredskap, nattevåk og tilsynsordning
 
         // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
         lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
-        
+
         lagrePleietrengende(fagsakId, ytelse.getBarn());
 
         lagreUttakOgPerioder(søknad, behandlingId, fagsakId);
-        
+
         // TODO etter18feb: Omsorg
     }
 
     private void lagreUttakOgPerioder(Søknad soknad, final Long behandlingId, Long fagsakId) {
         // TODO etter18feb: LovbestemtFerie
-        
+
         // TODO 18feb: Arbeidstid
         // TODO etter18feb: UttakPeriodeInfo
-        
+
         var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
         uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
 
