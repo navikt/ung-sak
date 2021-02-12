@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "SøknadsperiodeGrunnlag")
 @Table(name = "GR_SOEKNADSPERIODE")
-@Immutable
 public class SøknadsperiodeGrunnlag extends BaseEntitet {
 
     @Id
