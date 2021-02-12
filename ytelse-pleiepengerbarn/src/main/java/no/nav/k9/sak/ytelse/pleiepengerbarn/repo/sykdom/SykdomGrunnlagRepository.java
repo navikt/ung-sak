@@ -89,8 +89,8 @@ public class SykdomGrunnlagRepository {
         final LocalDateTimeline<SykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende);
         final LocalDateTimeline<SykdomVurderingVersjon> tooVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.TO_OMSORGSPERSONER, pleietrengende);
         
-        final List<SykdomVurderingVersjon> vurderinger = new ArrayList<>(ktpVurderinger.stream().map(s -> s.getValue()).collect(Collectors.toList()));
-        vurderinger.addAll(tooVurderinger.stream().map(s -> s.getValue()).collect(Collectors.toList()));
+        final List<SykdomVurderingVersjon> vurderinger = new ArrayList<>(ktpVurderinger.stream().map(s -> s.getValue()).distinct().collect(Collectors.toList()));
+        vurderinger.addAll(tooVurderinger.stream().map(s -> s.getValue()).distinct().collect(Collectors.toList()));
         return vurderinger;
     }
 
