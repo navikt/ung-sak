@@ -80,7 +80,7 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = new HashSet<>(this.oppgitteSøknadsperioder.getPerioder());
+        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioder()) : new HashSet<>(Set.of(søknadsperioder));
         perioder.add(søknadsperioder);
         this.oppgitteSøknadsperioder = new SøknadsperioderHolder(perioder);
     }
