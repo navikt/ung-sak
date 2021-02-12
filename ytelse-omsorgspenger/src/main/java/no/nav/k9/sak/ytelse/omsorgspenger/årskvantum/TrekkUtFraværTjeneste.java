@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,9 +104,11 @@ public class TrekkUtFraværTjeneste {
     }
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
-        var søkteFraværsperioderIm = fraværMedInnsendingstidspunktFraInntektsmeldingerPåBehandling(behandling);
+        Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søkteFraværsperioder = new LinkedHashMap<>();
+        søkteFraværsperioder.putAll(fraværMedInnsendingstidspunktFraInntektsmeldingerPåBehandling(behandling));
+        søkteFraværsperioder.putAll(fraværMedInnsendingstidspunktFraSøknaderPåBehandling(behandling));
 
-        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(søkteFraværsperioderIm);
+        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(søkteFraværsperioder);
 
         var antallIM = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.INNTEKTSMELDING.equals(type.getType())).count();
         var antallSøknader = vurdertePerioder.keySet().stream().filter(type -> KravDokumentType.SØKNAD.equals(type.getType())).count();
@@ -163,6 +166,10 @@ public class TrekkUtFraværTjeneste {
 
     private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraSøknaderPåFagsak(Behandling behandling) {
         return søknadPerioderTjeneste.hentSøktePerioderMedKravdokument(behandling.getFagsak());
+    }
+
+    private Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> fraværMedInnsendingstidspunktFraSøknaderPåBehandling(Behandling behandling) {
+        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokument(BehandlingReferanse.fra(behandling));
     }
 
     public List<WrappedOppgittFraværPeriode> fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(Behandling behandling) {
