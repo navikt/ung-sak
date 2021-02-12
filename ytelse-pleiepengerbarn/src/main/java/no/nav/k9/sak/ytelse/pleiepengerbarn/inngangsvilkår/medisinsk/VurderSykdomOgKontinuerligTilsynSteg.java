@@ -137,12 +137,12 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
         final var periode = vilkårData.getPeriode();
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
-            .medUtfall(vilkårData.getUtfallType()) // OK: Oppfylt/ikke
-            .medMerknadParametere(vilkårData.getMerknadParametere()) // Ignorer.
-            .medRegelEvaluering(vilkårData.getRegelEvaluering()) // Eventuelle delresultater.
-            .medRegelInput(vilkårData.getRegelInput()) // Grunnlagsid+kodeversjon (eller bedre: grunnlagsdatamodellen)
+            .medUtfall(vilkårData.getUtfallType())
+            .medMerknadParametere(vilkårData.getMerknadParametere())
+            .medRegelEvaluering(vilkårData.getRegelEvaluering())
+            .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak()) 
-            .medMerknad(vilkårData.getVilkårUtfallMerknad())); // Ignorer
+            .medMerknad(vilkårData.getVilkårUtfallMerknad()));
 
         if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
             final var ekstraVilkårresultat = (MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat();
