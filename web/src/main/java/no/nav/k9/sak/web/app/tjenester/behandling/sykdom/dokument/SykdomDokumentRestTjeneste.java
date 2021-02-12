@@ -76,7 +76,7 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
     
     private BehandlingRepository behandlingRepository;
-    private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper;
+    private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
@@ -86,9 +86,8 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.sykdomDokumentOversiktMapper = sykdomDokumentOversiktMapper;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }

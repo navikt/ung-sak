@@ -65,8 +65,8 @@ public class SykdomVurderingRestTjeneste {
     public static final String VURDERING_OVERSIKT_TOO_PATH = BASE_PATH + VURDERING_OVERSIKT_TOO;
 
     private BehandlingRepository behandlingRepository;
-    private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper;
-    private SykdomVurderingMapper sykdomVurderingMapper;
+    private SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper = new SykdomVurderingOversiktMapper();
+    private SykdomVurderingMapper sykdomVurderingMapper = new SykdomVurderingMapper();
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingService sykdomVurderingService;
@@ -77,12 +77,9 @@ public class SykdomVurderingRestTjeneste {
 
 
     @Inject
-    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingOversiktMapper sykdomVurderingOversiktMapper,
-            SykdomVurderingMapper sykdomVurderingMapper, SykdomVurderingRepository sykdomVurderingRepository,
+    public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
             SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService) {
         this.behandlingRepository = behandlingRepository;
-        this.sykdomVurderingOversiktMapper = sykdomVurderingOversiktMapper;
-        this.sykdomVurderingMapper = sykdomVurderingMapper;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingService = sykdomVurderingService;
