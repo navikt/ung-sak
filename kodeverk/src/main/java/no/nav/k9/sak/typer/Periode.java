@@ -77,6 +77,12 @@ public class Periode implements Comparable<Periode> {
     public boolean starterFørEllerSamtidigSom(Periode periode) {
         return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
     }
+    
+    public boolean overlaps(Periode other) {
+        boolean fomBeforeOrEqual = getFom().isBefore(other.getTom()) || getFom().isEqual(other.getTom());
+        boolean tomAfterOrEqual = getTom().isAfter(other.getFom()) || getTom().isEqual(other.getFom());
+        return fomBeforeOrEqual && tomAfterOrEqual;
+    }
 
     @Override
     public boolean equals(Object o) {

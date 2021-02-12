@@ -21,6 +21,8 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -71,6 +73,8 @@ public class RestImplementationClasses {
         classes.add(TilbakekrevingRestTjeneste.class);
         classes.add(AktørRestTjeneste.class);
         classes.add(SykdomRestTjeneste.class);
+        classes.add(SykdomVurderingRestTjeneste.class);
+        classes.add(SykdomDokumentRestTjeneste.class);
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);

@@ -63,6 +63,10 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingEndringDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingOpprettelseDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -348,6 +352,15 @@ public class BehandlingDtoTjeneste {
             case PLEIEPENGER_SYKT_BARN:
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_KTP_PATH, "sykdom-vurdering-oversikt-ktp", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_TOO_PATH, "sykdom-vurdering-oversikt-too", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
+                dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandling.getUuid().toString())));
+                dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
                 break;

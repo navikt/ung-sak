@@ -268,8 +268,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe : 90xx
 
     KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
-        AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.INN,
-        VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
+            AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKVILKÅR, VurderingspunktType.UT,
+            VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
         AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.INN,
         VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, EnumSet.of(PSB)),
