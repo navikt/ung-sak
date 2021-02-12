@@ -13,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
@@ -81,6 +82,12 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
 
         return vilkårPeriodeSet;
+    }
+    
+    @Override
+    public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
+        // TODO: Returnere liste av alle perioder på utsiden av revurderingsperiode som har blitt endret.
+        return new TreeSet<>();
     }
 
     @Override
