@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -15,7 +14,6 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt.Builder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -29,7 +27,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     private final Period periodeFør = Period.parse("P36M");
 
     private UttakRepository uttakRepository;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
     private BehandlingRepository behandlingRepository;
 
     FrisinnSkjæringstidspunktTjenesteImpl() {
@@ -38,11 +35,9 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
 
     @Inject
     public FrisinnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
-                                                 UttakRepository uttakRepository,
-                                                 UttakTjeneste uttakTjeneste) {
+                                                 UttakRepository uttakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.uttakRepository = uttakRepository;
-        this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
     @Override
@@ -73,11 +68,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
             .orElseThrow(() -> new IllegalStateException("Mangler sønadsperiode for behandlingId=" + behandlingId));
 
         return søknadsperioder.getMaksPeriode().getFomDato();
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
 
     @Override

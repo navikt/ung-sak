@@ -92,7 +92,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream()
             .filter((Predicate<? super VilkårPeriode>) at -> Utfall.IKKE_VURDERT.equals(at.getGjeldendeUtfall()))
             .collect(Collectors.toList());
-        if (!vilkår.getPerioder().isEmpty()) {
+        if (!ikkeVurdertePerioder.isEmpty()) {
             throw new IllegalStateException(
                 "Vilkåret " + vilkår.getVilkårType() + " har en eller flere perioder som ikke er vurdert: " + ikkeVurdertePerioder);
         }

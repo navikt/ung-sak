@@ -2,7 +2,6 @@ package no.nav.k9.sak.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -63,12 +62,6 @@ public class SkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjene
         return getTjeneste(ytelseType).utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
     }
     
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
-        return getTjeneste(behandling.getFagsakYtelseType()).harAvslåttPeriode(behandlingUuid);
-    }
-
     @Override
     public Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato) {
         return getTjeneste(fagsakYtelseType).utledOpplysningsperiode(id, fagsakYtelseType, tomDagensDato);

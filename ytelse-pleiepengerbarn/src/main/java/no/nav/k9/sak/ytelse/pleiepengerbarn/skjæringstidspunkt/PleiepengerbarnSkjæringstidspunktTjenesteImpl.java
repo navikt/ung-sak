@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
@@ -36,7 +34,6 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     private OpptjeningRepository opptjeningRepository;
     private SøknadsperiodeRepository uttakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
 
     private Period periodeEtter = Period.parse("P4Y");
     private Period periodeFør = Period.parse("P17M");
@@ -49,13 +46,11 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
                                                          OpptjeningRepository opptjeningRepository,
                                                          SøknadsperiodeRepository uttakRepository,
-                                                         UttakTjeneste uttakTjeneste,
                                                          VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.uttakRepository = uttakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
     @Override
@@ -133,11 +128,6 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
 
     @Override
