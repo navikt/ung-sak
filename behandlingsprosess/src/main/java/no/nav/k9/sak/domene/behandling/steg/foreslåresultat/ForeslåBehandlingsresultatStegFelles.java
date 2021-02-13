@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.enterprise.inject.Any;
@@ -17,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåBehandlingsresultatSteg {
@@ -65,7 +68,8 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         var ugyldigResultat = BehandlingResultatType.kodeMap().values().stream().filter(r -> r.erHenleggelse()).collect(Collectors.toSet());
         var resultatType = behandling.getBehandlingResultatType();
         if (ugyldigResultat.contains(resultatType)) {
-            throw new IllegalStateException("Behandling "+ behandling.getId()+ " har ugyldig resultatType=" + resultatType + ", støtter ikke allerede henlagt behandling i Foreslå Behandlingsresultat");
+            throw new IllegalStateException(
+                "Behandling " + behandling.getId() + " har ugyldig resultatType=" + resultatType + ", støtter ikke allerede henlagt behandling i Foreslå Behandlingsresultat");
         }
     }
 
@@ -73,7 +77,8 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         var ugyldigResultat = Set.of(BehandlingResultatType.IKKE_FASTSATT);
         var resultatType = behandling.getBehandlingResultatType();
         if (ugyldigResultat.contains(resultatType)) {
-            throw new IllegalStateException("Behandling "+ behandling.getId()+ " har ugyldig resultatType=" + resultatType + " etter Foreslå Behandlingsresultat, må fastsette type endring/innvilgelse/avslag");
+            throw new IllegalStateException(
+                "Behandling " + behandling.getId() + " har ugyldig resultatType=" + resultatType + " etter Foreslå Behandlingsresultat, må fastsette type endring/innvilgelse/avslag");
         }
     }
 
@@ -84,8 +89,12 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
     }
 
     private void validerVilkår(Vilkår vilkår) {
-        if (vilkår.getPerioder().stream().anyMatch(at -> Utfall.IKKE_VURDERT.equals(at.getGjeldendeUtfall()))) {
-            throw new IllegalStateException("Vilkåret " + vilkår.getVilkårType() + " har en eller flere perioder som ikke er vurdert.");
+        List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream()
+            .filter((Predicate<? super VilkårPeriode>) at -> Utfall.IKKE_VURDERT.equals(at.getGjeldendeUtfall()))
+            .collect(Collectors.toList());
+        if (!vilkår.getPerioder().isEmpty()) {
+            throw new IllegalStateException(
+                "Vilkåret " + vilkår.getVilkårType() + " har en eller flere perioder som ikke er vurdert: " + ikkeVurdertePerioder);
         }
     }
 }

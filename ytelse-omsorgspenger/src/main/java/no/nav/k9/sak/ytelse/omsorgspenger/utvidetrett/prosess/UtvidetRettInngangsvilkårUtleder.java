@@ -17,11 +17,11 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 @FagsakYtelseTypeRef("OMP_MA")
 @BehandlingTypeRef
 @ApplicationScoped
-class InngangsvilkårUtleder implements VilkårUtleder {
+class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(VilkårType.UTVIDETRETT);
 
-    public InngangsvilkårUtleder() {
+    public UtvidetRettInngangsvilkårUtleder() {
     }
 
     @Override

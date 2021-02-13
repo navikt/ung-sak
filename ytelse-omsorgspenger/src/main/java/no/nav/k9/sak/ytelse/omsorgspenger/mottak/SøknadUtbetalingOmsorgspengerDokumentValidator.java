@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     private Boolean lansert;
 
     SøknadUtbetalingOmsorgspengerDokumentValidator() {
-        //for CDI proxy
+        // for CDI proxy
     }
 
     @Inject
@@ -39,8 +40,16 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     public void validerDokumenter(Long behandlingId, Collection<MottattDokument> meldinger) {
         validerLansert();
         validerHarInnhold(meldinger);
+        var mottattBrevkoder = meldinger.stream().map(MottattDokument::getType).collect(Collectors.toList());
         var søknader = søknadParser.parseSøknader(meldinger);
+
+        int i = 0;
         for (Søknad søknad : søknader) {
+            var brevkode = mottattBrevkoder.get(i++);
+            Brevkode forventetBrevkode = Brevkode.SØKNAD_UTBETALING_OMS;
+            if (!Objects.equals(brevkode, forventetBrevkode)) {
+                throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkode + ", fikk: " + brevkode);
+            }
             validerInnhold(søknad);
         }
     }
@@ -65,7 +74,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
     }
 
     private void sanityCheck(OmsorgspengerUtbetaling ytelse) {
-        //TODO sanity check kan vurderes flyttet inn i kontrakt
+        // TODO sanity check kan vurderes flyttet inn i kontrakt
         if (ytelse.getFraværsperioder().size() > 365) {
             throw valideringsfeil("Antallet fraværeperioder er " + ytelse.getFraværsperioder().size() + ", det gir ikke mening.");
         }

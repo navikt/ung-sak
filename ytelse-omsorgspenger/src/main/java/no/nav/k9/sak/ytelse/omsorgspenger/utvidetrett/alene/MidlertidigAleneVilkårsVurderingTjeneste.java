@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
 
 import java.util.Map;
 import java.util.NavigableSet;
@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -20,22 +19,21 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.mottak.SøknadParser;
 
-@FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
 @BehandlingTypeRef
 @RequestScoped
-public class UtvidetRettVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
-    UtvidetRettVilkårsVurderingTjeneste() {
+    MidlertidigAleneVilkårsVurderingTjeneste() {
         // for proxy
     }
 
     @Inject
-    public UtvidetRettVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
-                                               MottatteDokumentRepository mottatteDokumentRepository) {
+    public MidlertidigAleneVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
+                                                    MottatteDokumentRepository mottatteDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
@@ -56,7 +54,7 @@ public class UtvidetRettVilkårsVurderingTjeneste implements VilkårsPerioderTil
 
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
-        var søknadBrevkode = getBrevkode(behandling.getFagsakYtelseType());
+        var søknadBrevkode = Brevkode.SØKNAD_OMS_UTVIDETRETT_MA;
         var dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandling.getId(), søknadBrevkode, true);
 
         if (dokumenter.size() != 1) {
@@ -66,17 +64,6 @@ public class UtvidetRettVilkårsVurderingTjeneste implements VilkårsPerioderTil
         var ytelse = søknad.getYtelse();
         var periode = ytelse.getSøknadsperiode();
         return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed());
-    }
-
-    private Brevkode getBrevkode(FagsakYtelseType ytelseType) {
-        switch (ytelseType) {
-            case OMSORGSPENGER_KS:
-                return Brevkode.SØKNAD_OMS_UTVIDETRETT_KS;
-            case OMSORGSPENGER_MA:
-                return Brevkode.SØKNAD_OMS_UTVIDETRETT_MA;
-            default:
-                throw new UnsupportedOperationException("Støtter ikke ytelse=" + ytelseType);
-        }
     }
 
     @Override

@@ -124,10 +124,7 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private void foreslåBehandlingsresultat(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling,
             Skjæringstidspunkt.builder()
-                .medSkjæringstidspunktOpptjening(SKJÆRINGSTIDSPUNKT)
-                .medSkjæringstidspunktBeregning(SKJÆRINGSTIDSPUNKT)
                 .medUtledetSkjæringstidspunkt(SKJÆRINGSTIDSPUNKT)
-                .medFørsteUttaksdato(SKJÆRINGSTIDSPUNKT.plusDays(1))
                 .build());
         tjeneste.foreslåBehandlingsresultatType(ref, lagKontekst(behandling));
     }

@@ -2,6 +2,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,10 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerUtvide
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
 public class SøknadDokumentValidator implements DokumentValidator {
 
+    private static final Map<Ytelse.Type, Brevkode> GYLDIGE_SØKNAD_BREVKODER = Map.of(
+        Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN, Brevkode.SØKNAD_OMS_UTVIDETRETT_KS,
+        Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE, Brevkode.SØKNAD_OMS_UTVIDETRETT_MA);
+
     @Inject
     public SøknadDokumentValidator() {
     }
@@ -34,8 +40,16 @@ public class SøknadDokumentValidator implements DokumentValidator {
     @Override
     public void validerDokumenter(Long behandlingId, Collection<MottattDokument> meldinger) {
         validerHarInnhold(meldinger);
+        var mottattBrevkoder = meldinger.stream().map(MottattDokument::getType).collect(Collectors.toList());
         var søknader = new SøknadParser().parseSøknader(meldinger);
+
+        int i = 0;
         for (Søknad søknad : søknader) {
+            var brevkode = mottattBrevkoder.get(i++);
+            Brevkode forventetBrevkode = GYLDIGE_SØKNAD_BREVKODER.get(søknad.getYtelse().getType());
+            if (!Objects.equals(brevkode, forventetBrevkode)) {
+                throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkode + ", fikk: " + brevkode);
+            }
             validerInnhold(søknad);
         }
     }

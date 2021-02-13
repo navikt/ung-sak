@@ -1,5 +1,10 @@
 package no.nav.k9.sak.behandling;
 
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -8,11 +13,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Minimal metadata for en behandling.
@@ -210,13 +210,6 @@ public class BehandlingReferanse {
      */
     public BehandlingResultatType getBehandlingResultat() {
         return behandlingResultatType;
-    }
-
-    @Deprecated
-    public LocalDate getSkjæringstidspunktOpptjening() {
-        // precondition
-        sjekkSkjæringstidspunkt();
-        return skjæringstidspunkt.getSkjæringstidspunktOpptjening();
     }
 
     public BehandlingType getBehandlingType() {

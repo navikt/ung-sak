@@ -14,7 +14,7 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
 @BehandlingTypeRef()
-class InformasjonselementerUtlederRegisterinnhenting implements InformasjonselementerUtleder {
+class UtvidetRettInformasjonselementerUtleder implements InformasjonselementerUtleder {
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {
         return Set.of(); // ingen inntekter/arbeidsforhold her

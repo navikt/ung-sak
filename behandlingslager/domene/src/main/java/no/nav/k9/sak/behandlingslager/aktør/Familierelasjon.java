@@ -2,9 +2,6 @@ package no.nav.k9.sak.behandlingslager.aktør;
 
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -13,8 +10,6 @@ public class Familierelasjon {
     private final PersonIdent personIdent;
     private final RelasjonsRolleType relasjonsrolle;
     private final Boolean harSammeBostedTps;
-
-    private static final Logger LOG = LoggerFactory.getLogger(Familierelasjon.class);
 
     public Familierelasjon(PersonIdent personIdent, RelasjonsRolleType relasjonsrolle, Boolean harSammeBosted) {
         this.personIdent = personIdent;
@@ -47,7 +42,7 @@ public class Familierelasjon {
     public String toString() {
         // tar ikke med personIdent i toString så det ikke lekkeri logger etc.
         return getClass().getSimpleName()
-            + "<relasjon=" + relasjonsrolle  //$NON-NLS-1$
+            + "<relasjon=" + relasjonsrolle //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
     }
 }
