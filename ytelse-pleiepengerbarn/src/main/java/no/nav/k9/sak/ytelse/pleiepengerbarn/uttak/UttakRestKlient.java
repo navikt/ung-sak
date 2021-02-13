@@ -164,22 +164,22 @@ public class UttakRestKlient {
     interface RestTjenesteFeil extends DeklarerteFeil {
         static final RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000001", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.ERROR)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000011", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilUttak(String feilmelding);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000002", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000012", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(String feilmelding);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000003", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000013", feilmelding = "Feil ved kall til K9Uttak: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000004", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000014", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttak(UUID behandlingUuid, Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000005", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000015", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for behandlinger: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlaner(Collection<UUID> behandlingUuid, Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000006", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000016", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlanerForSaker(Collection<Saksnummer> saksnummere, Throwable t);
     }
 
