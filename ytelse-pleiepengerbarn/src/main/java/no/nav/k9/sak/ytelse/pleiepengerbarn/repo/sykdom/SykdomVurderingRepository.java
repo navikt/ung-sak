@@ -263,46 +263,11 @@ public class SykdomVurderingRepository {
 
 
     public LocalDateTimeline<SykdomVurderingVersjon> getVurderingstidslinjeFor(SykdomVurderingType type, UUID behandlingUuid) {
-        return tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
+        return SykdomUtils.tilTidslinje(hentBehandlingVurderingerFor(type, behandlingUuid));
     }
 
     public LocalDateTimeline<SykdomVurderingVersjon> getSisteVurderingstidslinjeFor(SykdomVurderingType type, AktørId pleietrengende) {
-        return tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
-    }
-
-
-    LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
-        final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
-        for (SykdomVurderingVersjon vurdering : vurderinger) {
-            for (SykdomVurderingPeriode periode : vurdering.getPerioder()) {
-                segments.add(new LocalDateSegment<SykdomVurderingVersjon>(periode.getFom(), periode.getTom(), vurdering));
-            }
-        }
-
-        final LocalDateTimeline<SykdomVurderingVersjon> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<SykdomVurderingVersjon, SykdomVurderingVersjon, SykdomVurderingVersjon>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingVersjon> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<SykdomVurderingVersjon> datoSegment,
-                    LocalDateSegment<SykdomVurderingVersjon> datoSegment2) {
-                final Long rangering1 = datoSegment.getValue().getSykdomVurdering().getRangering();
-                final Long rangering2 = datoSegment2.getValue().getSykdomVurdering().getRangering();
-                final Long versjon1 = datoSegment.getValue().getVersjon();
-                final Long versjon2 = datoSegment2.getValue().getVersjon();
-
-                final SykdomVurderingVersjon valgtVurdering;
-                if (rangering1.compareTo(rangering2) > 0) {
-                    valgtVurdering = datoSegment.getValue();
-                } else if (rangering1.compareTo(rangering2) < 0) {
-                    valgtVurdering = datoSegment2.getValue();
-                } else {
-                    valgtVurdering = (versjon1.compareTo(versjon2) > 0) ? datoSegment.getValue() : datoSegment2.getValue();
-                }
-
-                return new LocalDateSegment<>(datoInterval, valgtVurdering);
-            }
-        });
-
-        return tidslinje.compress();
+        return SykdomUtils.tilTidslinje(hentSisteVurderingerFor(type, pleietrengende));
     }
 
     public List<SykdomPeriodeMedEndring> finnEndringer(LocalDateTimeline<SykdomVurderingVersjon> tidslinje, SykdomVurderingVersjon nyEndring) {
