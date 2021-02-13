@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -56,6 +57,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.util.Tuple;
 
+@Disabled
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class PleiepengerBeregneYtelseStegTest {
