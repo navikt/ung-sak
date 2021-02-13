@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -27,9 +28,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.OmsorgenFor;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 @ApplicationScoped
 public class InngangsvilkårOversetter {
@@ -79,17 +82,15 @@ public class InngangsvilkårOversetter {
                 .collect(Collectors.toList());
         }
 
-        final var relevantKontinuerligTilsyn = SykdomUtils.tilTidslinje(grunnlag.getVurderinger())
+        final var relevantKontinuerligTilsyn = toTidslinjeFor(grunnlag, SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
                 .stream()
-                .filter(v -> v.getValue().getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
                 .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
                 .map(v -> new PeriodeMedKontinuerligTilsyn(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
                 .collect(Collectors.toList());
         
-        final var relevantUtvidetBehov = SykdomUtils.tilTidslinje(grunnlag.getVurderinger())
+        final var relevantUtvidetBehov = toTidslinjeFor(grunnlag, SykdomVurderingType.TO_OMSORGSPERSONER)
                 .stream()
-                .filter(v -> v.getValue().getSykdomVurdering().getType() == SykdomVurderingType.TO_OMSORGSPERSONER)
                 .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
                 .map(v -> new PeriodeMedUtvidetBehov(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
@@ -102,6 +103,10 @@ public class InngangsvilkårOversetter {
             .medUtvidetBehov(relevantUtvidetBehov);
 
         return vilkårsGrunnlag;
+    }
+
+    private LocalDateTimeline<SykdomVurderingVersjon> toTidslinjeFor(SykdomGrunnlag grunnlag, SykdomVurderingType type) {
+        return SykdomUtils.tilTidslinje(grunnlag.getVurderinger().stream().filter(v -> v.getSykdomVurdering().getType() == type).collect(Collectors.toList()));
     }
 
     public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
