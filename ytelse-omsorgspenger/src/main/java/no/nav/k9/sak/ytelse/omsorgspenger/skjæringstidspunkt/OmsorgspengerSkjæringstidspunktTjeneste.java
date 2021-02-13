@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -44,10 +43,10 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
 
     @Inject
     public OmsorgspengerSkjæringstidspunktTjeneste(ÅrskvantumTjeneste årskvantumTjeneste,
-                                                       BehandlingRepository behandlingRepository,
-                                                       OpptjeningRepository opptjeningRepository,
-                                                       OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
-                                                       VilkårResultatRepository vilkårResultatRepository) {
+                                                   BehandlingRepository behandlingRepository,
+                                                   OpptjeningRepository opptjeningRepository,
+                                                   OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.opphørTidspunktTjeneste = new OmsorgspengerOpphørtidspunktTjeneste(årskvantumTjeneste);
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
@@ -64,13 +63,6 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         // FIXME K9 skjæringstidspunkt
         return førsteUttaksdag(behandlingId);
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        var behandling = behandlingRepository.hentBehandling(behandlingUuid);
-        var ref = BehandlingReferanse.fra(behandling);
-        return opphørTidspunktTjeneste.harAvslåttPeriode(ref);
     }
 
     @Override

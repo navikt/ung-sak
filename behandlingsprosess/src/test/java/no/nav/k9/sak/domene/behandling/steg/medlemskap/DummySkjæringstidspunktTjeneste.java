@@ -34,11 +34,6 @@ public class DummySkjæringstidspunktTjeneste implements SkjæringstidspunktTjen
         return null;
     }
 
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return false;
-    }
-
     public LocalDate getUtledetSkjæringstidspunkt() {
         return utledetSkjæringstidspunkt;
     }
