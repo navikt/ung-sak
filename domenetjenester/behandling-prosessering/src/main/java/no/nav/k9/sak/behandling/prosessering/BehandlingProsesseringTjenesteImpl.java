@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -297,7 +298,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     private boolean skalInnhenteAbakus(Behandling behandling) {
         var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
-        return !(informasjonselementerUtleder.utled(behandling.getType()).isEmpty());
+        Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
+        return registerdata != null && !(registerdata.isEmpty());
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
