@@ -82,8 +82,12 @@ public class DokumentmottakerSøknadUtvidetRett implements Dokumentmottaker {
     private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtvidetRett søknadInnhold) {
         var søknadsperiode = søknadInnhold.getSøknadsperiode();
         boolean elektroniskSøknad = true;
+        DatoIntervallEntitet datoIntervall = søknadsperiode == null
+            ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
+            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed());
+
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed()))
+            .medSøknadsperiode(datoIntervall)
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)

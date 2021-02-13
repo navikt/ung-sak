@@ -447,6 +447,6 @@ public class RegisterdataInnhenter {
 
     private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
         return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, utledInformasjonselementer, fagsakYtelseType, behandlingType).map(utleder -> utleder.utled(behandlingType))
-            .orElse(FILTER.get(behandlingType));
+            .orElseThrow(() -> new IllegalStateException("Har ikke InformasjonsElementerUtleder for ytelseType=" + fagsakYtelseType + ", behandlingType=" + behandlingType));
     }
 }

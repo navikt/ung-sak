@@ -28,7 +28,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
-public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements SkjæringstidspunktTjeneste {
+public class OmsorgspengerSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
@@ -38,12 +38,12 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
 
     private Period periodeFør = Period.parse("P12M");
 
-    OmsorgspengerSkjæringstidspunktTjenesteImpl() {
+    OmsorgspengerSkjæringstidspunktTjeneste() {
         // CDI
     }
 
     @Inject
-    public OmsorgspengerSkjæringstidspunktTjenesteImpl(ÅrskvantumTjeneste årskvantumTjeneste,
+    public OmsorgspengerSkjæringstidspunktTjeneste(ÅrskvantumTjeneste årskvantumTjeneste,
                                                        BehandlingRepository behandlingRepository,
                                                        OpptjeningRepository opptjeningRepository,
                                                        OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
@@ -78,14 +78,12 @@ public class OmsorgspengerSkjæringstidspunktTjenesteImpl implements Skjæringst
         Builder builder = Skjæringstidspunkt.builder();
 
         LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
-        builder.medFørsteUttaksdato(førsteUttaksdato);
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
             .flatMap(it -> it.finnOpptjening(førsteUttaksdato))
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
-                builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
                 builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
             });
 

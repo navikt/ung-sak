@@ -20,6 +20,8 @@ public interface SkjæringstidspunktTjeneste {
      */
     LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType);
 
+    /** @deprecated er ikke i bruk? vil fjernes */
+    @Deprecated(forRemoval = true)
     boolean harAvslåttPeriode(UUID behandlingUuid);
 
     Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato);
