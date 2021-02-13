@@ -20,7 +20,8 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
-@BehandlingTypeRef
+@BehandlingTypeRef("BT-002")
+@BehandlingTypeRef("BT-004")
 class OMPInformasjonselementerUtleder implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
