@@ -1,12 +1,5 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.ARBEIDSFORHOLD;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -72,22 +65,6 @@ import no.nav.vedtak.konfig.Tid;
 public class RegisterdataInnhenter {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterdataInnhenter.class);
-    private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
-        BehandlingType.FØRSTEGANGSSØKNAD,
-        Set.of(
-            YTELSE,
-            ARBEIDSFORHOLD,
-            INNTEKT_PENSJONSGIVENDE,
-            LIGNET_NÆRING,
-            INNTEKT_BEREGNINGSGRUNNLAG,
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG),
-        BehandlingType.REVURDERING,
-        Set.of(
-            YTELSE,
-            ARBEIDSFORHOLD,
-            INNTEKT_PENSJONSGIVENDE,
-            INNTEKT_BEREGNINGSGRUNNLAG,
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG));
 
     private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFiltrering = Map.of(
         FagsakYtelseType.PSB, new PleiepengerRelasjonsFilter(),

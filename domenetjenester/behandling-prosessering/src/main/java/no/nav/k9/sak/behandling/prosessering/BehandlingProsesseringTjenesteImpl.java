@@ -16,14 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
@@ -295,12 +296,13 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteAbakus(Behandling behandling) {
-        var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType());
+        var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
         return !(informasjonselementerUtleder.utled(behandling.getType()).isEmpty());
     }
 
-    private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(informasjonselementer, ytelseType).orElseThrow(() -> new IllegalStateException("Har ikke utleder for ytelseType=" + ytelseType));
+    private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, informasjonselementer, ytelseType, behandlingType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke utleder for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
     }
 
     private String lagreMedCallId(Long fagsakId, Long behandlingId, ProsessTaskData prosessTaskData) {
