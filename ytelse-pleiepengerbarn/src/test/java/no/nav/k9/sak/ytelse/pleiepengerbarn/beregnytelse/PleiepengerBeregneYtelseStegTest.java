@@ -52,6 +52,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.util.Tuple;
 
@@ -72,6 +73,7 @@ public class PleiepengerBeregneYtelseStegTest {
     private UttakInMemoryTjeneste uttakTjeneste;
     @Inject
     private KalkulusInMemoryTjeneste kalkulusTjeneste;
+    
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
@@ -93,8 +95,8 @@ public class PleiepengerBeregneYtelseStegTest {
             .medRegelSporing("regelSporing")
             .build();
         steg = new PleiepengerBeregneYtelseSteg(repositoryProvider, beregningTjeneste,
-            uttakTjeneste,
             fastsettBeregningsresultatTjeneste,
+            new UttakRestKlient(null, null), // TODO: Rette denne.
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
     }
 

@@ -31,22 +31,23 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplanperiode;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 import no.nav.vedtak.util.Tuple;
 
 @FagsakYtelseTypeRef("PSB")
@@ -56,7 +57,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private UttakTjeneste uttakTjeneste;
+    private UttakRestKlient uttakKlient;
 
     PSBBeregningsresultatMapper() {
         // For inject
@@ -66,11 +67,11 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     public PSBBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                       UttakTjeneste uttakTjeneste) {
+                                       UttakRestKlient uttakKlient) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.uttakTjeneste = uttakTjeneste;
+        this.uttakKlient = uttakKlient;
     }
 
     private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
@@ -81,14 +82,14 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             a.getArbeidsforholdId());
     }
 
-    private static LocalDateSegment<Uttaksplanperiode> toSegment(Periode periode, Uttaksplanperiode value) {
+    private static LocalDateSegment<UttaksperiodeInfo> toSegment(LukketPeriode periode, UttaksperiodeInfo value) {
         return new LocalDateSegment<>(periode.getFom(), periode.getTom(), value);
     }
 
     @Override
     public BeregningsresultatDto map(Behandling behandling,
                                      BehandlingBeregningsresultatEntitet beregningsresultatAggregat) {
-        Optional<Uttaksplan> uttakResultat = uttakTjeneste.hentUttaksplan(behandling.getUuid());
+        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid());
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatDto.build()
@@ -100,7 +101,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
     @Override
     public BeregningsresultatMedUtbetaltePeriodeDto mapMedUtbetaltePerioder(Behandling behandling, BehandlingBeregningsresultatEntitet bresAggregat) {
-        Optional<Uttaksplan> uttakResultat = uttakTjeneste.hentUttaksplan(behandling.getUuid());
+        final Uttaksplan uttakResultat = uttakKlient.hentUttaksplan(behandling.getUuid());
         var ref = BehandlingReferanse.fra(behandling);
         LocalDate opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref).orElse(null);
         return BeregningsresultatMedUtbetaltePeriodeDto.build()
@@ -111,8 +112,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             .create();
     }
 
-    public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat,
-                                                          Optional<Uttaksplan> uttaksplan) {
+    public List<BeregningsresultatPeriodeDto> lagPerioder(long behandlingId, BeregningsresultatEntitet beregningsresultat, Uttaksplan uttaksplan) {
         if (beregningsresultat == null) {
             return List.of();
         }
@@ -131,38 +131,64 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             .collect(Collectors.toList());
         var resultatTimeline = toTimeline(dtoer);
 
-        if (uttaksplan.isPresent()) {
-            leggTilUttak(uttaksplan, resultatTimeline);
-        }
+        leggTilUttak(uttaksplan, resultatTimeline);
 
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    private void leggTilUttak(Optional<Uttaksplan> uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
+    private void leggTilUttak(Uttaksplan uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
         @SuppressWarnings("unchecked")
-        LocalDateTimeline<Uttaksplanperiode> uttTimeline = uttaksplan.map(this::getTimeline).orElse(LocalDateTimeline.EMPTY_TIMELINE);
+        LocalDateTimeline<UttaksperiodeInfo> uttTimeline = getTimeline(uttaksplan);
         resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }
 
     private LocalDateSegment<Void> kombinerMedUttak(LocalDateInterval interval,
                                                     LocalDateSegment<BeregningsresultatPeriodeDto> brpDto,
-                                                    LocalDateSegment<Uttaksplanperiode> uttPeriode) {
+                                                    LocalDateSegment<UttaksperiodeInfo> uttPeriode) {
         var ut = uttPeriode == null ? null : uttPeriode.getValue();
         brpDto.getValue().getAndeler().forEach(a -> {
             if (ut != null) {
                 // setter uttak rett på andel 'a' - Ok her
                 var periode = new no.nav.k9.sak.typer.Periode(interval.getFomDato(), interval.getTomDato());
-                a.setUttak(List.of(new UttakDto(periode, ut.getUtfall(), BigDecimal.ZERO))); // default uttak, overskrives under
-                if (UtfallType.INNVILGET.equals(ut.getUtfall())) {
-                    var key = toUttakArbeidsforhold(a);
-                    var innvilget = (InnvilgetUttaksplanperiode) ut;
-                    innvilget.getUtbetalingsgrad(key).ifPresent(utbet -> {
-                        a.setUttak(List.of(new UttakDto(periode, innvilget.getUtfall(), utbet.getUtbetalingsgrad())));
-                    });
-                }
+                final UtfallType utfallType = mapToUtfallType(ut.getUtfall());
+                a.setUttak(List.of(new UttakDto(periode, utfallType, BigDecimal.ZERO))); // default uttak, overskrives under
+                
+                ut.getUtbetalingsgrader()
+                        .stream()
+                        .filter(ug -> matchesAndel(a, ug.getArbeidsforhold()))
+                        .forEach(ug -> a.setUttak(List.of(new UttakDto(periode,  utfallType, ug.getUtbetalingsgrad()))));
             }
         });
         return null;
+    }
+
+    private boolean matchesAndel(BeregningsresultatPeriodeAndelDto andel, Arbeidsforhold arbeidsforhold) {
+        // TODO: Blir dette riktig????
+        final boolean sammeArbeidsforhold = (
+            andel.getArbeidsforholdId() == null
+            || arbeidsforhold.getArbeidsforholdId() == null
+            || andel.getArbeidsforholdId().equals(arbeidsforhold.getArbeidsforholdId())
+        );
+        
+        // TODO: Trenger vi å sjekke arbeidstype??
+        
+        if (!sammeArbeidsforhold) {
+            return false;
+        }
+        
+        if (andel.getArbeidsgiverOrgnr() != null) {
+            return andel.getArbeidsgiverOrgnr().getOrgNummer().equals(arbeidsforhold.getOrganisasjonsnummer());
+        } else {
+            return andel.getAktørId().getId().equals(arbeidsforhold.getAktørId());
+        }
+    }
+
+    private UtfallType mapToUtfallType(Utfall utfall) {
+        switch (utfall) {
+        case OPPFYLT: return UtfallType.INNVILGET;
+        case IKKE_OPPFYLT: return UtfallType.AVSLÅTT;
+        default: throw new IllegalArgumentException("Ukjent utfall: " + utfall);
+        }
     }
 
     private LocalDateTimeline<BeregningsresultatPeriodeDto> toTimeline(List<BeregningsresultatPeriodeDto> resultatDtoListe) {
@@ -289,7 +315,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         return ny;
     }
 
-    private LocalDateTimeline<Uttaksplanperiode> getTimeline(Uttaksplan uttaksplan) {
+    private LocalDateTimeline<UttaksperiodeInfo> getTimeline(Uttaksplan uttaksplan) {
         return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> toSegment(e.getKey(), e.getValue())).collect(Collectors.toList()));
     }
 

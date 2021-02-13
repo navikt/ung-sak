@@ -85,6 +85,17 @@ public class UttakRestKlient {
         try {
             HttpPost kall = new HttpPost(builder.build());
             var json = objectMapper.writer().writeValueAsString(request);
+            
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+             // FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN FJERN
+            log.info(json);
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
@@ -92,15 +103,15 @@ public class UttakRestKlient {
         }
     }
 
-    public Uttaksplan hentUttaksplan(UUID behandlingId) {
-        Objects.requireNonNull(behandlingId);
+    public Uttaksplan hentUttaksplan(UUID behandlingUuid) {
+        Objects.requireNonNull(behandlingUuid);
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
-            builder.addParameter("behandlingId", behandlingId.toString());
+        builder.addParameter("behandlingUUID", behandlingUuid.toString());
         try {
             HttpGet kall = new HttpGet(builder.build());
             return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingId, e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingUuid, e).toException();
         }
     }
 

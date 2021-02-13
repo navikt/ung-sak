@@ -152,7 +152,8 @@ public class MapInputTilUttakTjeneste {
                 final Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder = new HashMap<>();
                 e.getValue().forEach(p -> {
                     perioder.put(new LukketPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()),
-                            new ArbeidsforholdPeriodeInfo(Optional.ofNullable(p.getJobberNormaltPerUke()).orElse(Duration.ZERO), Duration.ZERO)); // TODO: Sett riktig verdi.
+                            //new ArbeidsforholdPeriodeInfo(Optional.ofNullable(p.getJobberNormaltPerUke()).orElse(Duration.ZERO), Duration.ZERO)); // TODO: Sett riktig verdi.
+                            new ArbeidsforholdPeriodeInfo(Duration.ofHours(7).plusMinutes(30), Duration.ZERO)); // TODO: Sett riktig verdi.
                 });
                 
                 return new Arbeid(
