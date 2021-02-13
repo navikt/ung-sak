@@ -7,7 +7,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -29,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepo
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.OmsorgenFor;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 
 @ApplicationScoped
@@ -80,35 +79,22 @@ public class InngangsvilkårOversetter {
                 .collect(Collectors.toList());
         }
 
-        final var relevantKontinuerligTilsyn = grunnlag.getVurderinger()
+        final var relevantKontinuerligTilsyn = SykdomUtils.tilTidslinje(grunnlag.getVurderinger())
                 .stream()
-                .filter(v -> v.getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
-                .filter(v -> v.getResultat() == Resultat.OPPFYLT)
-                .map(v -> 
-                    v.getPerioder()
-                        .stream()
-                        .map(p -> new PeriodeMedKontinuerligTilsyn(p.getFom(), p.getTom()))
-                        .collect(Collectors.toList())
-                )
-                .flatMap(List::stream)
+                .filter(v -> v.getValue().getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
+                .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
+                .map(v -> new PeriodeMedKontinuerligTilsyn(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
                 .collect(Collectors.toList());
         
-        final var relevantUtvidetBehov = grunnlag.getVurderinger()
+        final var relevantUtvidetBehov = SykdomUtils.tilTidslinje(grunnlag.getVurderinger())
                 .stream()
-                .filter(v -> v.getSykdomVurdering().getType() == SykdomVurderingType.TO_OMSORGSPERSONER)
-                .filter(v -> v.getResultat() == Resultat.OPPFYLT)
-                .map(v -> 
-                    v.getPerioder()
-                        .stream()
-                        .map(p -> new PeriodeMedUtvidetBehov(p.getFom(), p.getTom()))
-                        .collect(Collectors.toList())
-                )
-                .flatMap(List::stream)
+                .filter(v -> v.getValue().getSykdomVurdering().getType() == SykdomVurderingType.TO_OMSORGSPERSONER)
+                .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
+                .map(v -> new PeriodeMedUtvidetBehov(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
                 .collect(Collectors.toList());
-                                   
-
+        
         vilkårsGrunnlag.medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE) // TODO 18-feb
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)
