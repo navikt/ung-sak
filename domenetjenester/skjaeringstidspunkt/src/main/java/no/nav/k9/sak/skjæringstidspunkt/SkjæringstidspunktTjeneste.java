@@ -2,7 +2,6 @@ package no.nav.k9.sak.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -19,10 +18,6 @@ public interface SkjæringstidspunktTjeneste {
      * Skjæringstidspunkt som benyttes for registerinnhenting
      */
     LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType);
-
-    /** @deprecated er ikke i bruk? vil fjernes */
-    @Deprecated(forRemoval = true)
-    boolean harAvslåttPeriode(UUID behandlingUuid);
 
     Periode utledOpplysningsperiode(Long id, FagsakYtelseType fagsakYtelseType, boolean tomDagensDato);
 

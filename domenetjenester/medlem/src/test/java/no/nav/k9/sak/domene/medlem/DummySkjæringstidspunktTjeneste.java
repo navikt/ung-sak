@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.medlem;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.RequestScoped;
 
@@ -32,11 +31,6 @@ public class DummySkjæringstidspunktTjeneste implements SkjæringstidspunktTjen
     @Override
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         return null;
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return false;
     }
 
     public LocalDate getUtledetSkjæringstidspunkt() {

@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -53,11 +52,6 @@ public class KroniskSykSkjæringstidspunktTjeneste implements Skjæringstidspunk
     @Override
     public LocalDate utledSkjæringstidspunktForRegisterInnhenting(Long behandlingId, FagsakYtelseType ytelseType) {
         return getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        throw new UnsupportedOperationException("ikke implementert, skal ikke være i bruk");
     }
 
     @Override
