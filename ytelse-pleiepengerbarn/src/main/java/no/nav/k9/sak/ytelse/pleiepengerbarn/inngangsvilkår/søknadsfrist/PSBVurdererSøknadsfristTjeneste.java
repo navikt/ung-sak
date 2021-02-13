@@ -85,18 +85,18 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     }
 
     private void mapTilKravDokumentOgPeriode(Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> result, Set<MottattDokument> mottatteDokumenter, SøknadsPeriodeDokumenter dokument) {
-        var innsendingstidspunkt = utledInnsendingstidspunkt(dokument, mottatteDokumenter);
-        var kravDokument = new KravDokument(dokument.getJournalpostId(), innsendingstidspunkt, KravDokumentType.SØKNAD);
+        var mottattTidspunkt = utledMottattTidspunkt(dokument, mottatteDokumenter);
+        var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattTidspunkt, KravDokumentType.SØKNAD);
         var søktePerioder = dokument.getSøknadsperioder().stream().map(it -> new SøktPeriode<>(it.getPeriode(), it)).collect(Collectors.toList());
 
         result.put(kravDokument, søktePerioder);
     }
 
-    private LocalDateTime utledInnsendingstidspunkt(SøknadsPeriodeDokumenter dokument, Set<MottattDokument> mottatteDokumenter) {
+    private LocalDateTime utledMottattTidspunkt(SøknadsPeriodeDokumenter dokument, Set<MottattDokument> mottatteDokumenter) {
         return mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst()
-            .map(MottattDokument::getInnsendingstidspunkt)
+            .map(MottattDokument::getMottattTidspunkt)
             .orElseThrow();
     }
 
@@ -174,6 +174,6 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
         var fraværPeriode = new Søknadsperiode(segment.getFom(), segment.getTom());
 
-        return new VurdertSøktPeriode<>(periode, fraværPeriode);
+        return new VurdertSøktPeriode<>(periode, segment.getValue().getUtfall(), fraværPeriode);
     }
 }

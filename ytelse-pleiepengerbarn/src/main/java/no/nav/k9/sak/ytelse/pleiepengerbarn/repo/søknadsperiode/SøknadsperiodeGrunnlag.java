@@ -2,6 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "SøknadsperiodeGrunnlag")
 @Table(name = "GR_SOEKNADSPERIODE")
-@Immutable
 public class SøknadsperiodeGrunnlag extends BaseEntitet {
 
     @Id
@@ -54,6 +55,10 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         this.relevanteSøknadsperioder = grunnlag.relevanteSøknadsperioder;
     }
 
+    public SøknadsperiodeGrunnlag(Long behandlingId) {
+        this.behandlingId = behandlingId;
+    }
+
     public Long getId() {
         return id;
     }
@@ -63,7 +68,7 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
     }
 
     public SøknadsperioderHolder getRelevantSøknadsperioder() {
-        return oppgitteSøknadsperioder;
+        return relevanteSøknadsperioder;
     }
 
     public boolean isAktiv() {
@@ -78,7 +83,7 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = new HashSet<>(this.oppgitteSøknadsperioder.getPerioder());
+        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioder()) : new HashSet<>(Set.of(søknadsperioder));
         perioder.add(søknadsperioder);
         this.oppgitteSøknadsperioder = new SøknadsperioderHolder(perioder);
     }

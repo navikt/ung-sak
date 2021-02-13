@@ -43,7 +43,7 @@ public class SøknadsperiodeRepository {
     public void lagre(Long behandlingId, Søknadsperioder søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new SøknadsperiodeGrunnlag(behandlingId, it))
-            .orElse(new SøknadsperiodeGrunnlag());
+            .orElse(new SøknadsperiodeGrunnlag(behandlingId));
         nyttGrunnlag.leggTil(søknadsperioder);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
@@ -52,7 +52,7 @@ public class SøknadsperiodeRepository {
     public void lagreRelevanteSøknadsperioder(Long behandlingId, SøknadsperioderHolder søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new SøknadsperiodeGrunnlag(behandlingId, it))
-            .orElse(new SøknadsperiodeGrunnlag());
+            .orElse(new SøknadsperiodeGrunnlag(behandlingId));
         nyttGrunnlag.setRelevanteSøknadsperioder(søknadsperioder);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
@@ -61,8 +61,12 @@ public class SøknadsperiodeRepository {
     private void persister(Optional<SøknadsperiodeGrunnlag> eksisterendeGrunnlag, SøknadsperiodeGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
-        entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
-        entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
+        if (nyttGrunnlag.getOppgitteSøknadsperioder() != null) {
+            entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
+        }
+        if (nyttGrunnlag.getRelevantSøknadsperioder() != null) {
+            entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
+        }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }

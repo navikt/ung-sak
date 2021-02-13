@@ -11,8 +11,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "VURDER_UTTAK")
@@ -20,35 +20,32 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @FagsakYtelseTypeRef("PSB")
 public class VurderUttakSteg implements BehandlingSteg {
 
-    private UttakTjeneste uttakTjeneste;
     private BehandlingRepository behandlingRepository;
-    private UttakInputTjeneste uttakInputTjeneste;
-    private SkjæringstidspunktTjeneste stpTjeneste;
-    
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
+    private UttakRestKlient uttakRestKlient;
+
     VurderUttakSteg(){
         // for proxy
     }
 
     @Inject
-    public VurderUttakSteg(BehandlingRepository behandlingRepository, 
-                           SkjæringstidspunktTjeneste stpTjeneste,
-                           UttakTjeneste uttakTjeneste, 
-                           UttakInputTjeneste uttakInputTjeneste){
+    public VurderUttakSteg(BehandlingRepository behandlingRepository,
+                           MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                           UttakRestKlient uttakRestKlient){
         this.behandlingRepository = behandlingRepository;
-        this.stpTjeneste = stpTjeneste;
-        this.uttakTjeneste = uttakTjeneste;
-        this.uttakInputTjeneste = uttakInputTjeneste;
+        this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
+        this.uttakRestKlient = uttakRestKlient;
     }
-    
+
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var stp = stpTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, stp);
-        var uttakInput = uttakInputTjeneste.lagInput(ref);
-        uttakTjeneste.opprettUttaksplan(uttakInput);
-        
+        var ref = BehandlingReferanse.fra(behandling);
+
+        final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
+        uttakRestKlient.opprettUttaksplan(request);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
