@@ -130,6 +130,7 @@ public class MapInputTilUttakTjeneste {
         case INGEN: return Pleiebehov.PROSENT_0;
         case KONTINUERLIG_TILSYN: return Pleiebehov.PROSENT_100;
         case UTVIDET_KONTINUERLIG_TILSYN: return Pleiebehov.PROSENT_200;
+        case INNLEGGELSE:  return Pleiebehov.PROSENT_200;
         default: throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
         }
     }
