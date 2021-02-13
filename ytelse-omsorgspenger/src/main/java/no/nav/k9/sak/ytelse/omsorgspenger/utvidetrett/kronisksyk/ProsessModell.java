@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -12,10 +12,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
 
 @ApplicationScoped
-public class MidlertidigAleneProsessModell {
+public class ProsessModell {
 
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER_MA;
-    private static final String YTELSE = "OMP_MA";
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER_KS;
+    private static final String YTELSE = "OMP_KS";
 
     @FagsakYtelseTypeRef(YTELSE)
     @BehandlingTypeRef("BT-002")
@@ -28,6 +28,7 @@ public class MidlertidigAleneProsessModell {
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

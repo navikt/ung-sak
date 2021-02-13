@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode;
 
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

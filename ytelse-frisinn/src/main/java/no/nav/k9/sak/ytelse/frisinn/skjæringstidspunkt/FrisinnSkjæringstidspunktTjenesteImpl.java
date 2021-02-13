@@ -54,9 +54,6 @@ public class FrisinnSkjæringstidspunktTjenesteImpl implements Skjæringstidspun
     @Override
     public Skjæringstidspunkt getSkjæringstidspunkter(Long behandlingId) {
         Builder builder = Skjæringstidspunkt.builder();
-
-        LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
-        builder.medFørsteUttaksdato(førsteUttaksdato);
         builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
         return builder.build();
     }

@@ -67,14 +67,12 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         Builder builder = Skjæringstidspunkt.builder();
 
         LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
-        builder.medFørsteUttaksdato(førsteUttaksdato);
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
             .flatMap(it -> it.finnOpptjening(førsteUttaksdato)) // TODO: Dette er neppe optimalt ...
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
-                builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
                 builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
             });
 
