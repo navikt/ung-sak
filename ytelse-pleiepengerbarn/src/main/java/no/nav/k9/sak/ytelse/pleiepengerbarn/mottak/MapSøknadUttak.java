@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,23 +89,6 @@ class MapSøknadUttak {
         return new UttakAktivitet(mappedPerioder);
     }
 
-    private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(SelvstendigNæringsdrivende input) {
-        if (input == null || input.perioder == null || input.perioder.isEmpty()) {
-            return Collections.emptyList();
-        }
-        var mappedPerioder = input.perioder.entrySet().stream()
-            .map(entry -> {
-                Periode k = entry.getKey();
-                // TODO prosent, normal uke:
-                var skalJobbeProsent = BigDecimal.valueOf(100L);
-                var jobberNormaltPerUke = Duration.parse("PT37H30M");
-                return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, jobberNormaltPerUke, skalJobbeProsent);
-            })
-            .collect(Collectors.toList());
-        return mappedPerioder;
-
-    }
-
     private UttakAktivitetPeriode lagUttakAktivitetPeriode(Frilanser input) {
         if (input == null || input.startdato == null) {
             return null;
@@ -128,8 +112,11 @@ class MapSøknadUttak {
         var mappedPerioder = input.getArbeidstidInfo().getPerioder().entrySet().stream()
             .map(entry -> {
                 Periode k = entry.getKey();
-                var v = entry.getValue(); // TODO: skrive omt til entry.getValue().getFaktiskArbeidTimerPerDag()?
-                return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null, null);
+                return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef,
+                        input.getArbeidstidInfo().getJobberNormaltTimerPerDag(),
+                        new BigDecimal(entry.getValue().getFaktiskArbeidTimerPerDag().toMillis()).divide(
+                            new BigDecimal(input.getArbeidstidInfo().getJobberNormaltTimerPerDag().toMillis()
+                        ), 6, RoundingMode.HALF_UP) );
             })
             .collect(Collectors.toList());
         return mappedPerioder;

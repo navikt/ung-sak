@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -152,9 +153,11 @@ public class MapInputTilUttakTjeneste {
                 var uttakAktivitetPeriode = e.getValue().get(0);
                 final Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder = new HashMap<>();
                 e.getValue().forEach(p -> {
+                    final Duration jobberNormaltPerUke = Optional.ofNullable(p.getJobberNormaltPerUke()).orElse(Duration.ZERO);
+                    final BigDecimal jobberAndel = Optional.ofNullable(p.getSkalJobbeProsent()).orElse(new BigDecimal(0L));
+                    final Duration jobber = Duration.ofMillis(new BigDecimal(jobberNormaltPerUke.toMillis()).multiply(jobberAndel).longValue());
                     perioder.put(new LukketPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()),
-                            //new ArbeidsforholdPeriodeInfo(Optional.ofNullable(p.getJobberNormaltPerUke()).orElse(Duration.ZERO), Duration.ZERO)); // TODO: Sett riktig verdi.
-                            new ArbeidsforholdPeriodeInfo(Duration.ofHours(7).plusMinutes(30), Duration.ZERO)); // TODO: Sett riktig verdi.
+                            new ArbeidsforholdPeriodeInfo(jobberNormaltPerUke, jobber));
                 });
                 
                 return new Arbeid(
