@@ -36,7 +36,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
     private void lagHistorikkinnslag(AksjonspunktOppdaterParameter param) {
         historikkTjenesteAdapter.tekstBuilder()
-            .medSkjermlenke(SkjermlenkeType.FAKTA_OM_MEDLEMSKAP)
+            .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_MEDISINSK)
             .medBegrunnelse("Sykdom manuelt behandlet.");
         historikkTjenesteAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
     }
