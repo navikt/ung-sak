@@ -19,7 +19,10 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 @ApplicationScoped
 class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {
 
-    private static final List<VilkårType> YTELSE_VILKÅR = asList(VilkårType.UTVIDETRETT);
+    private static final List<VilkårType> YTELSE_VILKÅR = asList(
+        VilkårType.OMSORGEN_FOR,
+        VilkårType.ALDERSVILKÅR,
+        VilkårType.UTVIDETRETT);
 
     public UtvidetRettInngangsvilkårUtleder() {
     }

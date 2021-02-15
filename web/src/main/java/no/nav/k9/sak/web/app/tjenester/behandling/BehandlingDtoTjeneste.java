@@ -347,6 +347,10 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FORBRUKTEDAGER, "forbrukte-dager", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 break;
+            case OMSORGSPENGER_KS:
+            case OMSORGSPENGER_MA:
+                dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
+                break;
             case PLEIEPENGER_NÆRSTÅENDE:
             case OPPLÆRINGSPENGER:
             case PLEIEPENGER_SYKT_BARN:
