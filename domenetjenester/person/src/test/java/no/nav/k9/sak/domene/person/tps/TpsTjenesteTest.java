@@ -29,8 +29,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet;
 import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
@@ -102,13 +100,4 @@ public class TpsTjenesteTest {
         assertThat(geografiskTilknytning).isNotNull();
     }
 
-    @Test
-    public void test_hentGeografiskTilknytning_finnes_ikke() {
-        doThrow(TpsFeilmeldinger.FACTORY.geografiskTilknytningIkkeFunnet(
-            new HentGeografiskTilknytningPersonIkkeFunnet("finner ikke person", new PersonIkkeFunnet())).toException()
-        )
-            .when(personinfoAdapter).hentGeografiskTilknytning(new PersonIdent("666"));
-
-        Assertions.assertThrows(TekniskException.class, () -> testSubject.hentGeografiskTilknytning(new PersonIdent("666")));
-    }
 }

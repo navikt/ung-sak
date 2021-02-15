@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -34,7 +33,7 @@ public class PersoninfoAdapter {
         this.tilknytningTjeneste = tilknytningTjeneste;
     }
 
-    //TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
+    // TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
     public Personinfo hentPersoninfo(AktørId aktørId) {
         return hentKjerneinformasjon(aktørId);
     }
@@ -54,7 +53,8 @@ public class PersoninfoAdapter {
     }
 
     /**
-     * Henter PersonInfo for barn, gitt at det ikke er FDAT nummer (sjekkes på format av PersonIdent, evt. ved feilhåndtering fra TPS). Hvis FDAT nummer returneres {@link Optional#empty()}
+     * Henter PersonInfo for barn, gitt at det ikke er FDAT nummer (sjekkes på format av PersonIdent, evt. ved feilhåndtering fra TPS). Hvis
+     * FDAT nummer returneres {@link Optional#empty()}
      */
     public Optional<Personinfo> innhentSaksopplysningerForBarn(PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
@@ -88,23 +88,11 @@ public class PersoninfoAdapter {
         return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
     }
 
-
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
-        try {
-            return Optional.of(
-                hentKjerneinformasjon(aktørId, personIdent)
-            );
-            //Her sorterer vi ut dødfødte barn
-        } catch (SOAPFaultException e) {
-            //TODO PDL vil aldri kaste denne feilen. Fjern derfor try/catch når TPS er fjernet
-            if (e.getCause().getMessage().contains("status: S610006F")) {
-                return Optional.empty();
-            }
-            throw e;
-        }
+        return Optional.of(hentKjerneinformasjon(aktørId, personIdent));
     }
 
     public Personinfo hentKjerneinformasjon(AktørId aktørId) {

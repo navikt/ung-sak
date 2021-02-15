@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
@@ -36,17 +35,8 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (aktørId.isEmpty()) {
             return Optional.empty();
         }
-        try {
-            Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get());
-            return Optional.ofNullable(personinfo);
-        } catch (SOAPFaultException e) {
-            if (e.getMessage().contains("status: S100008F")) {
-                // Her sorterer vi ut dødfødte barn
-                return Optional.empty();
-            } else {
-                throw e;
-            }
-        }
+        Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get());
+        return Optional.ofNullable(personinfo);
     }
 
     @Override
