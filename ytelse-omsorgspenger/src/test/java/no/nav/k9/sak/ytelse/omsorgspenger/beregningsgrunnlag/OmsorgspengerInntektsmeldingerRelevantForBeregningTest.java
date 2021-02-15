@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
+package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +18,9 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-public class TilKalkulusMapperTest {
+class OmsorgspengerInntektsmeldingerRelevantForBeregningTest {
+
+    private OmsorgspengerInntektsmeldingerRelevantForBeregning tjeneste = new OmsorgspengerInntektsmeldingerRelevantForBeregning();
 
     private DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(25));
     private DatoIntervallEntitet periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10));
@@ -62,7 +64,7 @@ public class TilKalkulusMapperTest {
             .build();
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 
@@ -99,7 +101,7 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3);
         var vilkårsperiode2 = DatoIntervallEntitet.fraOgMedTilOgMed(dato("04-14"), dato("04-14"));
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsperiode2);
         assertThat(relevanteInntektsmeldinger).containsOnly(inntektsmelding2);
     }
 
@@ -154,11 +156,11 @@ public class TilKalkulusMapperTest {
 
         // assertThat(sortedInntektsmeldinger).has(sortedInntektsmeldinger);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
 
         assertThat(relevanteInntektsmeldinger).containsSequence(inntektsmelding2, inntektsmelding3);
 
-        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
+        relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
         assertThat(relevanteInntektsmeldinger).containsSequence(inntektsmelding4);
     }
 
@@ -211,11 +213,11 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2, inntektsmelding3, inntektsmelding4);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode1);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1, inntektsmelding2, inntektsmelding3);
 
-        relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
+        relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode2);
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding4);
     }
 
@@ -248,7 +250,7 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode3);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode3);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1);
     }
@@ -282,7 +284,7 @@ public class TilKalkulusMapperTest {
 
         var sakInntektsmeldinger = Set.of(inntektsmelding1, inntektsmelding2);
 
-        var relevanteInntektsmeldinger = TilKalkulusMapper.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode4);
+        var relevanteInntektsmeldinger = tjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode4);
 
         assertThat(relevanteInntektsmeldinger).containsExactlyInAnyOrder(inntektsmelding1);
     }

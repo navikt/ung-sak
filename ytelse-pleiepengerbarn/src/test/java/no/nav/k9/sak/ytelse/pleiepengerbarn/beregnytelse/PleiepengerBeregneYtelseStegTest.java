@@ -75,7 +75,6 @@ public class PleiepengerBeregneYtelseStegTest {
     private UttakInMemoryTjeneste uttakTjeneste;
     @Inject
     private KalkulusInMemoryTjeneste kalkulusTjeneste;
-    
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
