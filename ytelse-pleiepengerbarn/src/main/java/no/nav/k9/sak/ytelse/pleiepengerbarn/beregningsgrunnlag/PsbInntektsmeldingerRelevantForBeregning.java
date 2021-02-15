@@ -16,7 +16,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("PSB")
 public class PsbInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     @Override
