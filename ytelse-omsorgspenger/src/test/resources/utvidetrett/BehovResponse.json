@@ -1,0 +1,9 @@
+{
+  "status" : "FORESLÅTT",
+  "potensielleStatuser" : {
+    "INNVILGET" : { "hello" : "Hello" }
+  },
+  "uløsteBehov" : {
+    "LEGEERKLÆRING" : { "world" : "World" }
+  }
+}
