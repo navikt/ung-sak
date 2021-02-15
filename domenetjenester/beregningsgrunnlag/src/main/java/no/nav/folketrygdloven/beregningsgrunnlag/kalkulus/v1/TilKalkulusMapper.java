@@ -1,20 +1,15 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -70,7 +65,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
@@ -103,11 +97,7 @@ public class TilKalkulusMapper {
         };
     }
 
-    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjonOpt) {
-        if (arbeidsforholdInformasjonOpt.isEmpty()) {
-            return null;
-        }
-        ArbeidsforholdInformasjon arbeidsforholdInformasjon = arbeidsforholdInformasjonOpt.get();
+    public static ArbeidsforholdInformasjonDto mapTilArbeidsforholdInformasjonDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
         List<ArbeidsforholdOverstyringDto> resultat = arbeidsforholdInformasjon.getOverstyringer().stream()
             .map(arbeidsforholdOverstyring -> new ArbeidsforholdOverstyringDto(mapTilAktør(arbeidsforholdOverstyring.getArbeidsgiver()),
                 arbeidsforholdOverstyring.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold() ? new InternArbeidsforholdRefDto(arbeidsforholdOverstyring.getArbeidsforholdRef().getReferanse())
@@ -141,14 +131,14 @@ public class TilKalkulusMapper {
         return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
-    private static InntektsmeldingerDto mapTilDto(Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
+    private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste, Optional<InntektsmeldingAggregat> inntektsmeldingerOpt, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         if (inntektsmeldingerOpt.isEmpty()) {
             return null;
         }
 
         // TODO: Skal vi ta hensyn til endringer i refusjonskrav så må dette konstrueres fra alle inntektsmeldingene som overlapper med perioden
         // Da denne informasjonen ikke er periodisert for IM for OMP så må det mappes fra inntektsmeldingene i kronologisk rekkefølge
-        List<Inntektsmelding> inntektsmeldingerForPerioden = utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
+        List<Inntektsmelding> inntektsmeldingerForPerioden = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, vilkårsPeriode);
 
         List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
             Aktør aktør = mapTilAktør(inntektsmelding.getArbeidsgiver());
@@ -182,84 +172,6 @@ public class TilKalkulusMapper {
         }).collect(Collectors.toList());
 
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
-    }
-
-    static List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        var inntektsmeldingene = new ArrayList<Inntektsmelding>();
-
-        var alleInntektsmeldinger = hentInntektsmeldingerSomGjelderForVilkårsperiode(sakInntektsmeldinger, vilkårsPeriode);
-        for (Inntektsmelding inntektsmelding : alleInntektsmeldinger) {
-            if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)) {
-                inntektsmeldingene.add(inntektsmelding);
-            } else if (harInntektsmeldingSomMatcherArbeidsforhold(inntektsmeldingene, inntektsmelding)
-                && skalErstatteEksisterendeInntektsmelding(inntektsmelding, inntektsmeldingene, vilkårsPeriode)) {
-                inntektsmeldingene.removeIf(arbeidsforholdMatcher(inntektsmelding));
-                inntektsmeldingene.add(inntektsmelding);
-            }
-        }
-
-        return inntektsmeldingene;
-    }
-
-    private static boolean skalErstatteEksisterendeInntektsmelding(Inntektsmelding inntektsmelding, List<Inntektsmelding> inntektsmeldingene, DatoIntervallEntitet vilkårsPeriode) {
-        var datoNærmestSkjæringstidspunktet = finnDatoNærmestSkjæringstidspunktet(inntektsmelding, vilkårsPeriode.getFomDato());
-        if (datoNærmestSkjæringstidspunktet.isEmpty()) {
-            return false;
-        }
-        var inntektsmeldingerSomErNærmereEllerNyere = inntektsmeldingene.stream()
-            .filter(arbeidsforholdMatcher(inntektsmelding))
-            .filter(it -> erNærmereEllerLikeNæreSkjæringtidspunktet(it, datoNærmestSkjæringstidspunktet.get(), vilkårsPeriode.getFomDato())
-                && inntektsmelding.erNyereEnn(it))
-            .collect(Collectors.toList());
-
-        return !inntektsmeldingerSomErNærmereEllerNyere.isEmpty();
-    }
-
-    private static Optional<LocalDate> finnDatoNærmestSkjæringstidspunktet(Inntektsmelding inntektsmelding, LocalDate skjæringstidspunkt) {
-        var inkludert = inntektsmelding.getOppgittFravær()
-            .stream()
-            .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
-            .filter(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()).inkluderer(skjæringstidspunkt))
-            .findFirst();
-        if (inkludert.isPresent()) {
-            return Optional.of(skjæringstidspunkt);
-        }
-        return inntektsmelding.getOppgittFravær()
-            .stream()
-            .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
-            .map(PeriodeAndel::getFom)
-            .min(Comparator.comparingLong(x -> Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, x))));
-    }
-
-    private static boolean erNærmereEllerLikeNæreSkjæringtidspunktet(Inntektsmelding gammel, LocalDate nyInntektsmeldingDatoNærmestStp, LocalDate skjæringstidspunkt) {
-        var næresteDatoFraEksisterende = finnDatoNærmestSkjæringstidspunktet(gammel, skjæringstidspunkt).orElseThrow();
-        long distGammel = Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, næresteDatoFraEksisterende));
-        long distNy = Math.abs(ChronoUnit.DAYS.between(skjæringstidspunkt, nyInntektsmeldingDatoNærmestStp));
-        return distNy <= distGammel;
-    }
-
-    private static boolean harInntektsmeldingSomMatcherArbeidsforhold(List<Inntektsmelding> inntektsmeldingene, Inntektsmelding inntektsmelding) {
-        return inntektsmeldingene.stream().anyMatch(arbeidsforholdMatcher(inntektsmelding));
-    }
-
-    private static boolean harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(List<Inntektsmelding> inntektsmeldingene, Inntektsmelding inntektsmelding) {
-        return inntektsmeldingene.stream().noneMatch(arbeidsforholdMatcher(inntektsmelding));
-    }
-
-    private static Set<Inntektsmelding> hentInntektsmeldingerSomGjelderForVilkårsperiode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-
-        return sakInntektsmeldinger
-            .stream()
-            .filter(it -> it.getOppgittFravær()
-                .stream()
-                .filter(at -> !Duration.ZERO.equals(at.getVarighetPerDag()))
-                .anyMatch(at -> vilkårsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(at.getFom(), at.getTom()))))
-            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private static Predicate<Inntektsmelding> arbeidsforholdMatcher(Inntektsmelding inntektsmelding) {
-        return it -> it.gjelderSammeArbeidsforhold(inntektsmelding);
     }
 
     private static Periode mapPeriode(DatoIntervallEntitet periode) {
@@ -391,7 +303,8 @@ public class TilKalkulusMapper {
                                                     Collection<Inntektsmelding> sakInntektsmeldinger,
                                                     AktørId aktørId,
                                                     DatoIntervallEntitet vilkårsPeriode,
-                                                    OppgittOpptjening oppgittOpptjening) {
+                                                    OppgittOpptjening oppgittOpptjening,
+                                                    InntektsmeldingerRelevantForBeregning imTjeneste) {
 
         var skjæringstidspunktBeregning = vilkårsPeriode.getFomDato();
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId)).før(skjæringstidspunktBeregning);
@@ -407,10 +320,9 @@ public class TilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(mapArbeidDto(yrkesaktiviteterForBeregning));
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(mapYtelseDto(ytelseFilter.getAlleYtelser()));
-        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
+        inntektArbeidYtelseGrunnlagDto.medInntektsmeldingerDto(mapTilDto(imTjeneste, inntektsmeldinger, sakInntektsmeldinger, vilkårsPeriode));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(TilKalkulusMapper::mapTilArbeidsforholdInformasjonDto).orElse(null));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
     }

@@ -53,9 +53,8 @@ public class FrisinnTilKalkulusMapper {
         inntektArbeidYtelseGrunnlagDto.medArbeidDto(TilKalkulusMapper.mapArbeidDto(yrkesaktiviteterForBeregning));
         inntektArbeidYtelseGrunnlagDto.medInntekterDto(TilKalkulusMapper.mapInntektDto(alleRelevanteInntekter));
         inntektArbeidYtelseGrunnlagDto.medYtelserDto(TilKalkulusMapper.mapYtelseDto(ytelseFilter.getAlleYtelser()));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(TilKalkulusMapper.mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
+        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon().map(TilKalkulusMapper::mapTilArbeidsforholdInformasjonDto).orElse(null));
         inntektArbeidYtelseGrunnlagDto.medOppgittOpptjeningDto(mapTilOppgittOpptjeningDto(oppgittOpptjening, vilkårsPeriode));
-        inntektArbeidYtelseGrunnlagDto.medArbeidsforholdInformasjonDto(TilKalkulusMapper.mapTilArbeidsforholdInformasjonDto(grunnlag.getArbeidsforholdInformasjon()));
 
         return inntektArbeidYtelseGrunnlagDto;
     }
