@@ -53,7 +53,7 @@ public class UtvidetRettModellTest {
 
     @Test
     void skal_verfisere_mot_eksisterende_KroniskSyktBarnSøknadRequest_json() throws Exception {
-        String json = getJson("KroniskSyktBarnSøknadRequest.json");
+        String json = getJson("/utvidetrett/KroniskSyktBarnSøknadRequest.json");
         var parsed = om.readValue(json, KroniskSyktBarnSøknadRequest.class);
         assertThat(parsed).isNotNull();
     }
@@ -71,7 +71,7 @@ public class UtvidetRettModellTest {
 
     @Test
     void skal_verifisere_eksisterende_BehovRequest_json() throws Exception {
-        String json = getJson("BehovRequest.json");
+        String json = getJson("/utvidetrett/BehovRequest.json");
         var parsed = om.readValue(json, BehovRequest.class);
         assertThat(parsed).isNotNull();
         assertThat(parsed.getBehov()).isNotEmpty();
@@ -98,7 +98,7 @@ public class UtvidetRettModellTest {
 
     @Test
     void skal_verifisere_eksisterende_BehovResponse_json() throws Exception {
-        String json = getJson("BehovResponse.json");
+        String json = getJson("/utvidetrett/BehovResponse.json");
         var parsed = om.readValue(json, BehovResponse.class);
         assertThat(parsed).isNotNull();
         assertThat(parsed.getStatus()).isNotNull();
