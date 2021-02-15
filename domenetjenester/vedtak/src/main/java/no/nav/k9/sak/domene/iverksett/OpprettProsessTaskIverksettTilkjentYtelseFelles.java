@@ -22,17 +22,17 @@ import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
 
-public abstract class OpprettProsessTaskIverksettFelles implements OpprettProsessTaskIverksett {
+public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
 
-    protected OpprettProsessTaskIverksettFelles() {
+    protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
         // for CDI proxy
     }
 
-    public OpprettProsessTaskIverksettFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
+    public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                              OppgaveTjeneste oppgaveTjeneste,
                                              InfotrygdFeedService infotrygdFeedService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;

@@ -21,7 +21,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 
@@ -40,9 +39,9 @@ public class AvklarUtvidetRettOppdaterer implements AksjonspunktOppdaterer<Avkla
 
     @Inject
     AvklarUtvidetRettOppdaterer(BehandlingRepository behandlingRepository,
-                      VilkårResultatRepository vilkårResultatRepository,
-                      BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                      HistorikkTjenesteAdapter historikkAdapter) {
+                                VilkårResultatRepository vilkårResultatRepository,
+                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                HistorikkTjenesteAdapter historikkAdapter) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -52,29 +51,24 @@ public class AvklarUtvidetRettOppdaterer implements AksjonspunktOppdaterer<Avkla
     @Override
     public OppdateringResultat oppdater(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        Vilkårene vilkårene = vilkårResultatRepository.hent(param.getBehandlingId());
+        var vilkårBuilder = param.getVilkårResultatBuilder();
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
         var periode = dto.getPeriode();
-        oppdaterUtfallOgLagre(behandling, vilkårene, nyttUtfall, kontekst.getSkriveLås(), periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom());
+        oppdaterUtfallOgLagre(behandling, vilkårBuilder, nyttUtfall, kontekst.getSkriveLås(), periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom());
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Behandling behandling, Vilkårene vilkårene, Utfall utfallType, BehandlingLås skriveLås, LocalDate fom, LocalDate tom) {
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+    private void oppdaterUtfallOgLagre(Behandling behandling, VilkårResultatBuilder builder, Utfall utfallType, BehandlingLås skriveLås, LocalDate fom, LocalDate tom) {
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.UTVIDETRETT);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
-            .medUtfall(utfallType)
+            .medUtfallManuell(utfallType)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_UTVIDETRETT : null));
         builder.leggTil(vilkårBuilder);
-        Vilkårene resultat = builder.build();
-
-        vilkårResultatRepository.lagre(behandling.getId(), resultat);
-        behandlingRepository.lagre(behandling, skriveLås);
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {

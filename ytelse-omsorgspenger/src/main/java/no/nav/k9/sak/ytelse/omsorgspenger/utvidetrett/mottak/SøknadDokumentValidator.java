@@ -62,13 +62,6 @@ public class SøknadDokumentValidator implements DokumentValidator {
     private void validerInnhold(Søknad søknad) {
         OmsorgspengerUtvidetRett ytelse = søknad.getYtelse();
         defaultValidering(ytelse);
-        validerIkkeImplementertFunksjonalitet(ytelse);
-    }
-
-    private void validerIkkeImplementertFunksjonalitet(OmsorgspengerUtvidetRett ytelse) {
-        if (ytelse.getType() != Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN) {
-            throw new UnsupportedOperationException("Støtter kun kronisk sykt barn p.t., fikk:" + ytelse.getType());
-        }
     }
 
     private void defaultValidering(OmsorgspengerUtvidetRett ytelse) {
