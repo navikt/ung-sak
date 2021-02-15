@@ -17,7 +17,7 @@ import no.nav.k9.sak.typer.Periode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE)
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT)
 public class AvklarUtvidetRettDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "erVilkarOk", required = true)
