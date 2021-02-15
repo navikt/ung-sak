@@ -9,12 +9,10 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class Familierelasjon {
     private final PersonIdent personIdent;
     private final RelasjonsRolleType relasjonsrolle;
-    private final Boolean harSammeBostedTps;
 
-    public Familierelasjon(PersonIdent personIdent, RelasjonsRolleType relasjonsrolle, Boolean harSammeBosted) {
+    public Familierelasjon(PersonIdent personIdent, RelasjonsRolleType relasjonsrolle) {
         this.personIdent = personIdent;
         this.relasjonsrolle = relasjonsrolle;
-        this.harSammeBostedTps = harSammeBosted;
     }
 
     public PersonIdent getPersonIdent() {

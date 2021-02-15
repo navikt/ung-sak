@@ -21,7 +21,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.BehovRequest
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.BehovResponse;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.BehovType;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Json;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarnSøknadRequest;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.RawJson;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.StatusType;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Søker;
@@ -36,7 +36,7 @@ public class UtvidetRettModellTest {
         var barn = new Barn(NorskIdentitetsnummer.of("1234"), LocalDate.now(), true);
         var søker = new Søker(NorskIdentitetsnummer.of("4321"));
 
-        var req = new KroniskSyktBarnSøknadRequest()
+        var req = new KroniskSyktBarn()
             .setBehandlingUuid(UUID.randomUUID())
             .setSaksnummer(new Saksnummer("ABC"))
             .setTidspunkt(ZonedDateTime.now())
@@ -46,7 +46,7 @@ public class UtvidetRettModellTest {
 
         var json = om.writerWithDefaultPrettyPrinter().writeValueAsString(req);
 
-        var parsed = om.readValue(json, KroniskSyktBarnSøknadRequest.class);
+        var parsed = om.readValue(json, KroniskSyktBarn.class);
 
         assertThat(parsed).isNotNull();
     }
@@ -54,7 +54,7 @@ public class UtvidetRettModellTest {
     @Test
     void skal_verfisere_mot_eksisterende_KroniskSyktBarnSøknadRequest_json() throws Exception {
         String json = getJson("/utvidetrett/KroniskSyktBarnSøknadRequest.json");
-        var parsed = om.readValue(json, KroniskSyktBarnSøknadRequest.class);
+        var parsed = om.readValue(json, KroniskSyktBarn.class);
         assertThat(parsed).isNotNull();
     }
 

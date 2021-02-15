@@ -183,15 +183,14 @@ public class PersoninfoTjeneste {
         familierelasjoner.stream()
             .map(r -> new Familierelasjon(
                     new PersonIdent(r.getRelatertPersonsIdent()),
-                    mapRelasjonsrolle(r.getRelatertPersonsRolle()),
-                    false
+                    mapRelasjonsrolle(r.getRelatertPersonsRolle())
                 )
             )
             .forEach(relasjoner::add);
         sivilstandliste.stream()
             .filter(rel -> JURIDISK_GIFT.contains(rel.getType()))
             .filter(rel -> rel.getRelatertVedSivilstand() != null)
-            .map(r -> new Familierelasjon(new PersonIdent(r.getRelatertVedSivilstand()), mapRelasjonsrolle(r.getType()), false))
+            .map(r -> new Familierelasjon(new PersonIdent(r.getRelatertVedSivilstand()), mapRelasjonsrolle(r.getType())))
             .forEach(relasjoner::add);
         return relasjoner;
     }

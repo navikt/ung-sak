@@ -11,7 +11,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
 import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
 import no.nav.vedtak.konfig.KonfigVerdi;
 
@@ -35,63 +35,13 @@ public class UtvidetRettRestKlient implements UtvidetRettKlient {
     }
 
     @Override
-    public void forkast(FagsakYtelseType ytelseType, UUID behandlingUUID) {
+    public void innvilget(FagsakYtelseType ytelseType, UUID behandlingUUID, UtvidetRett utvidetRett) {
         var subpath = getSubpath(ytelseType);
-        var endpoint = URI.create(String.format("%s/%s/%s/forkastet", basisEndpoint, subpath, behandlingUUID));
+        var endpoint = URI.create(String.format("%s/%s", basisEndpoint, subpath));
         try {
-            restKlient.patch(endpoint, Object.class);
+            restKlient.post(endpoint, utvidetRett);
         } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901302", "Kunne ikke markere forkastet for : %s", e, endpoint);
-        }
-    }
-
-    @Override
-    public void avslått(FagsakYtelseType ytelseType, UUID behandlingUUID) {
-        var subpath = getSubpath(ytelseType);
-        var endpoint = URI.create(String.format("%s/%s/%s/avslått", basisEndpoint, subpath, behandlingUUID));
-        try {
-            restKlient.patch(endpoint, Object.class);
-        } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901301", "Kunne ikke markere avslått for : %s", e, endpoint);
-        }
-    }
-
-    @Override
-    public void oppgaveLøst(FagsakYtelseType ytelseType, UUID behandlingUUID, Oppgaver oppgaver) {
-        var subpath = getSubpath(ytelseType);
-        var endpoint = URI.create(String.format("%s/%s/%s/avslått", basisEndpoint, subpath, behandlingUUID));
-        try {
-            restKlient.patch(endpoint, oppgaver);
-        } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901301", "Kunne ikke markere avslått for : %s", e, endpoint);
-        }
-    }
-
-    @Override
-    public void innvilget(FagsakYtelseType ytelseType, UUID behandlingUUID) {
-        var subpath = getSubpath(ytelseType);
-        var endpoint = URI.create(String.format("%s/%s/%s/innvilget", basisEndpoint, subpath, behandlingUUID));
-        try {
-            restKlient.patch(endpoint, Object.class);
-        } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901300", "Kunne ikke markere innvilget for : %s", e, endpoint);
-        }
-    }
-
-    @Override
-    public UtvidetRettResultat hentResultat(FagsakYtelseType ytelseType, Saksnummer saksnummer, UUID behandlingUUID) {
-        var subpath = getSubpath(ytelseType);
-        var endpoint = URI.create(String.format("%s/%s/?saksnummer=%s&behandlingId=%s", basisEndpoint, subpath, saksnummer.getVerdi(), behandlingUUID));
-
-        try {
-            var result = restKlient.get(endpoint, UtvidetRettResultat.class);
-            var constraints = VALIDATOR.validate(result);
-            if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingUUID=" + behandlingUUID + ": " + constraints);
-            }
-            return result;
-        } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901305", "Kunne ikke hente resultat for : %s", e, endpoint);
+            throw new UtvidetRettRestException("K9-901300", "Kunne ikke angi innvilget for : %s", e, endpoint);
         }
     }
 

@@ -16,7 +16,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class KroniskSyktBarnSøknadRequest {
+public class KroniskSyktBarn implements UtvidetRett {
 
     @JsonProperty(value = "saksnummer", required = true)
     @Valid
@@ -50,11 +50,11 @@ public class KroniskSyktBarnSøknadRequest {
     @JsonProperty(value = "barn", required = true)
     private Barn barn;
 
-    public KroniskSyktBarnSøknadRequest() {
+    public KroniskSyktBarn() {
     }
 
     @JsonCreator
-    public KroniskSyktBarnSøknadRequest(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
+    public KroniskSyktBarn(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
                                         @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
                                         @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
                                         @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
@@ -72,7 +72,7 @@ public class KroniskSyktBarnSøknadRequest {
         return saksnummer;
     }
 
-    public KroniskSyktBarnSøknadRequest setSaksnummer(Saksnummer saksnummer) {
+    public KroniskSyktBarn setSaksnummer(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
         return this;
     }
@@ -81,7 +81,7 @@ public class KroniskSyktBarnSøknadRequest {
         return behandlingUuid;
     }
 
-    public KroniskSyktBarnSøknadRequest setBehandlingUuid(UUID behandlingUuid) {
+    public KroniskSyktBarn setBehandlingUuid(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
         return this;
     }
@@ -90,7 +90,7 @@ public class KroniskSyktBarnSøknadRequest {
         return søknadMottatt;
     }
 
-    public KroniskSyktBarnSøknadRequest setSøknadMottatt(ZonedDateTime søknadMottatt) {
+    public KroniskSyktBarn setSøknadMottatt(ZonedDateTime søknadMottatt) {
         this.søknadMottatt = søknadMottatt;
         return this;
     }
@@ -99,7 +99,7 @@ public class KroniskSyktBarnSøknadRequest {
         return tidspunkt;
     }
 
-    public KroniskSyktBarnSøknadRequest setTidspunkt(ZonedDateTime tidspunkt) {
+    public KroniskSyktBarn setTidspunkt(ZonedDateTime tidspunkt) {
         this.tidspunkt = tidspunkt;
         return this;
     }
@@ -108,13 +108,17 @@ public class KroniskSyktBarnSøknadRequest {
         return søker;
     }
 
-    public KroniskSyktBarnSøknadRequest setSøker(Søker søker) {
+    public KroniskSyktBarn setSøker(Søker søker) {
         this.søker = søker;
         return this;
     }
 
-    public KroniskSyktBarnSøknadRequest setBarn(Barn barn) {
+    public KroniskSyktBarn setBarn(Barn barn) {
         this.barn = barn;
         return this;
+    }
+
+    public Barn getBarn() {
+        return barn;
     }
 }
