@@ -149,7 +149,7 @@ public class FagsakRestTjeneste {
 
         var fagsak = fagsakTjeneste.finnFagsakerForAktør(bruker)
             .stream()
-            .filter(f -> f.getPleietrengendeAktørId() == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
+            .filter(f -> pleietrengendeAktørId == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
             .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
             .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
             .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
