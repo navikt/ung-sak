@@ -78,7 +78,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                 var behandling = behandlingOptional.get();
                 BehandlingProsessTask.logContext(behandling);
 
-                if (!harYtelse(behandling)) {
+                if (!erFagsakYtelseBasert(behandling)) {
                     // ingenting å publisere her
                     return;
                 }
@@ -89,7 +89,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         }
     }
 
-    private boolean harYtelse(Behandling behandling) {
+    private boolean erFagsakYtelseBasert(Behandling behandling) {
         var infoelementer = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
         return !(infoelementer.utled(behandling.getType()).isEmpty());
     }
