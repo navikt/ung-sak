@@ -14,7 +14,7 @@ public class UtvidetRettInMemoryKlient implements UtvidetRettKlient {
 
     @Override
     public void innvilget(FagsakYtelseType ytelseType, UUID behandlingUUID, UtvidetRett utvidetRett) {
-        // TODO Auto-generated method stub
+        // no-op
     }
 
 }

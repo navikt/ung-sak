@@ -7,9 +7,8 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.Specification;
 import no.nav.k9.sak.inngangsvilkår.IkkeOppfylt;
 import no.nav.k9.sak.inngangsvilkår.Oppfylt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Medisinskvilkår;
 
-@RuleDocumentation(value = Medisinskvilkår.ID, specificationReference = "")
+@RuleDocumentation(value = OmsorgenForVilkår.ID, specificationReference = "")
 public class OmsorgenForVilkår implements RuleService<OmsorgenForGrunnlag> {
 
     public static final String ID = "PSB_VK 9.10";

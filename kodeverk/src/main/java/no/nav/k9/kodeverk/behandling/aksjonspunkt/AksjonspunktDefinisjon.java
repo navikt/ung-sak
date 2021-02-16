@@ -192,7 +192,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av OMPorgen for",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT, VilkårType.OMSORGEN_FOR,
-        SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, EnumSet.of(OMP, PSB)),
+            SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, EnumSet.of(OMP, PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
     OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
         AksjonspunktType.OVERSTYRING, "Overstyring av beregning", BehandlingStatus.UTREDES, BehandlingStegType.BEREGN_YTELSE, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),

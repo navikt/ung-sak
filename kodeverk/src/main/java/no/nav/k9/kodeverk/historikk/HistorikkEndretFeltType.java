@@ -67,6 +67,9 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     FASTSETT_VIDERE_BEHANDLING("FASTSETT_VIDERE_BEHANDLING", "Fastsett videre behandling"),
     TILBAKETREKK("TILBAKETREKK", "Tilbaketrekk"),
 
+    /** Vilkår */
+    OMSORG_FOR("OMSORG_FOR", "Har omsorgen for"),
+
     /** Faresignaler. */
     FARESIGNALER("FARESIGNALER", "Faresignaler"),
 
