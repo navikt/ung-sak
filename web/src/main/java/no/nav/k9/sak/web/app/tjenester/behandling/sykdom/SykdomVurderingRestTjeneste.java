@@ -4,7 +4,12 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,18 +31,23 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingMapper.Sporingsinformasjon;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
@@ -105,7 +115,7 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        
+
         return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder);
     }
 
@@ -129,7 +139,7 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
-        
+
         return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder);
     }
 
@@ -161,9 +171,9 @@ public class SykdomVurderingRestTjeneste {
             SykdomVurderingIdDto vurderingId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-        
+
         final List<SykdomDokument> dokumenterSomErRelevanteForSykdom = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(pleietrengende);
-        
+
         final List<SykdomVurderingVersjon> versjoner;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             versjoner = sykdomVurderingRepository.hentVurderingMedVersjonerForBehandling(behandling.getUuid(), Long.valueOf(vurderingId.getSykdomVurderingId()));
@@ -172,7 +182,7 @@ public class SykdomVurderingRestTjeneste {
                     .get()
                     .getSykdomVurderingVersjoner();
         }
-        
+
         // TODO: Bedre løsning:
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder;
         if (versjoner.get(0).getSykdomVurdering().getType() == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE) {
@@ -216,10 +226,7 @@ public class SykdomVurderingRestTjeneste {
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVersjon);
         if (!sykdomVurderingOppdatering.isDryRun()) {
             sykdomVurderingRepository.lagre(nyVersjon);
-            endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-                // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
-                throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
-            });
+            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer);
         }
 
         return toSykdomVurderingEndringResultatDto(endringer);
@@ -257,18 +264,70 @@ public class SykdomVurderingRestTjeneste {
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
         final SykdomVurdering nyVurdering = sykdomVurderingMapper.map(sykdomVurderingOpprettelse, sporingsinformasjon, alleDokumenter);
-       
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVurdering.getSisteVersjon());
         if (!sykdomVurderingOpprettelse.isDryRun()) {
             sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
-            endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-                // TODO: Fjern v.getPeriode() fra v.getGammelVersjon()
-                // OK inntil videre med opprett ny fordi den har høyere rangering (men det bør likevel unngås).
-                //throw new IllegalStateException("Det støttes ikke å erstatte vurderingsperioder som har blitt lagt inn i samme behandling. Fjern manuelt perioden fra den gamle vurderingen.");
-            });
+            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer);
         }
 
         return toSykdomVurderingEndringResultatDto(endringer);
+    }
+
+    void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer) {
+        HashMap<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
+        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+
+            if(perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon()) == null) {
+                ArrayList<Periode> periode = new ArrayList<>();
+                periode.add(v.getPeriode());
+                perioderSomSkalFjernesFraVurdering.put(v.getGammelVersjon(), periode);
+            } else {
+                perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon()).add(v.getPeriode());
+            }
+        });
+
+        for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
+            SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
+
+            Collection<LocalDateSegment<Boolean>> segments = new ArrayList<>();
+            for (Periode periode : vurderingPerioder.getValue()) {
+                segments.add(new LocalDateSegment<>(periode.getFom(), periode.getTom(), true));
+            }
+            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = new LocalDateTimeline<>(segments).compress();
+
+            segments.clear();
+            for (SykdomVurderingPeriode sykdomVurderingPeriode : vurdering.getPerioder()) {
+                segments.add(new LocalDateSegment<>(sykdomVurderingPeriode.getFom(), sykdomVurderingPeriode.getTom(), true));
+            }
+            LocalDateTimeline<Boolean> gammelTidslinje = new LocalDateTimeline<>(segments).compress();
+
+            LocalDateTimeline<Boolean> nyePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(gammelTidslinje, tidslinjeSomSkalTrekkesFra);
+
+            List<Periode> vurderingPerioderTilLagring = new ArrayList<>();
+            for (LocalDateSegment<Boolean> segment : nyePerioder) {
+                vurderingPerioderTilLagring.add(new Periode(
+                    segment.getFom(),
+                    segment.getTom()));
+
+            }
+            SykdomVurderingVersjon tilLagring = new SykdomVurderingVersjon(
+                vurdering.getSykdomVurdering(),
+                vurdering.getTekst(),
+                vurdering.getResultat(),
+                vurdering.getVersjon()+1,
+                "endretAv", //TODO!!! hva skal inn her?
+                LocalDateTime.now(), //TODO!!! hva skal inn her?
+                vurdering.getEndretBehandlingUuid(),
+                vurdering.getEndretSaksnummer(),
+                vurdering.getEndretForPerson(),
+                vurdering.getBesluttet(),
+                vurdering.getDokumenter(),
+                vurderingPerioderTilLagring);
+
+            sykdomVurderingRepository.lagre(tilLagring);
+
+        }
+
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
@@ -281,12 +340,12 @@ public class SykdomVurderingRestTjeneste {
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
     }
-    
+
     private List<SykdomPeriodeMedEndring> finnEndringer(Behandling behandling, SykdomVurderingVersjon nyEndring) {
         var vurderinger = sykdomVurderingService.hentVurderinger(nyEndring.getSykdomVurdering().getType(), behandling);
         return sykdomVurderingRepository.finnEndringer(vurderinger, nyEndring);
     }
-    
+
     private static SykdomVurderingEndringResultatDto toSykdomVurderingEndringResultatDto(List<SykdomPeriodeMedEndring> perioderMedEndringer) {
         return new SykdomVurderingEndringResultatDto(perioderMedEndringer.stream().map(p -> new SykdomPeriodeMedEndringDto(p)).collect(Collectors.toList()));
     }

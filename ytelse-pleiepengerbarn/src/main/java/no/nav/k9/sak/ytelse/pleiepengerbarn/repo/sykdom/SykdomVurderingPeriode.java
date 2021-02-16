@@ -32,20 +32,24 @@ public class SykdomVurderingPeriode {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    
+
     SykdomVurderingPeriode() {
-        
+
     }
-    
-    public SykdomVurderingPeriode(SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
-        this.vurderingVersjon = vurderingVersjon;
+
+    public SykdomVurderingPeriode(LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.fom = fom;
         this.tom = tom;
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
-    
+    public SykdomVurderingPeriode(SykdomVurderingVersjon vurderingVersjon, LocalDate fom, LocalDate tom, String opprettetAv, LocalDateTime opprettetTidspunkt) {
+        this(fom, tom, opprettetAv, opprettetTidspunkt);
+        this.vurderingVersjon = vurderingVersjon;
+    }
+
+
     public Long getId() {
         return id;
     }
@@ -53,7 +57,7 @@ public class SykdomVurderingPeriode {
     public SykdomVurderingVersjon getVurderingVersjon() {
         return vurderingVersjon;
     }
-    
+
     void setVurderingVersjon(SykdomVurderingVersjon vurderingVersjon) {
         this.vurderingVersjon = vurderingVersjon;
     }
