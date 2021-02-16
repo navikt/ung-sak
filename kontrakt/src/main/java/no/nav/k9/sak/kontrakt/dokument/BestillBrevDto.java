@@ -58,20 +58,15 @@ public class BestillBrevDto {
         this(behandlingId, dokumentMalType, fritekst, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, String arsakskode) { // NOSONAR
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto) {
+        this(behandlingId, dokumentMalType, null, mottakerDto);
+    }
+
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker) { // NOSONAR
         this.behandlingId = behandlingId;
         this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
         this.fritekst = fritekst;
-        this.overstyrtMottaker = null;
-        this.arsakskode = arsakskode;
-    }
-
-    public String getArsakskode() {
-        return arsakskode;
-    }
-
-    public String getÅrsakskode() {
-        return arsakskode;
+        this.overstyrtMottaker = overstyrtMottaker;
     }
 
     @AbacAttributt("behandlingId")
