@@ -3,13 +3,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,7 +18,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType.SykdomVurderingTypeConverter;
 
 @Entity(name = "SykdomInnleggelser")
 @Table(name = "SYKDOM_INNLEGGELSER")

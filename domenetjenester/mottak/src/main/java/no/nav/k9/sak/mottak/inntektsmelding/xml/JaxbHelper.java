@@ -1,25 +1,16 @@
 package no.nav.k9.sak.mottak.inntektsmelding.xml;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -30,23 +21,7 @@ import org.xml.sax.SAXException;
 public final class JaxbHelper {
     private static final Map<Class<?>, JAXBContext> CONTEXTS = new ConcurrentHashMap<>(); // NOSONAR
     private static final Map<String, Schema> SCHEMAS = new ConcurrentHashMap<>(); // NOSONAR
-    private static final NamespaceContext NO_NAMESPACE_CONTEXT = new NamespaceContext() {
-        @Override
-        public String getNamespaceURI(String prefix) {
-            return null;
-        }
 
-        @Override
-        public String getPrefix(String namespaceURI) {
-            return "";
-        }
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        @Override
-        public Iterator getPrefixes(String namespaceURI) {
-            return null;
-        }
-    };
 
     private JaxbHelper() {
     }
@@ -62,23 +37,6 @@ public final class JaxbHelper {
         }
 
         return unmarshalAndValidateXMLWithStAXProvidingSchema(clazz, new StreamSource(new StringReader(xml)), schema);
-    }
-
-    private static Schema getSchema(String mainXsdLocation, String[] xsdLocations) throws SAXException {
-        if (!SCHEMAS.containsKey(mainXsdLocation)) {
-            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            StreamSource[] xsdArray = new StreamSource[xsdLocations.length + 1];
-            for (int i = 0; i < xsdLocations.length; i++) {
-                final String systemId = JaxbHelper.class.getClassLoader().getResource(xsdLocations[i]).toExternalForm();
-                final StreamSource source = new StreamSource(systemId);
-                xsdArray[i] = source;
-            }
-            final String systemId = JaxbHelper.class.getClassLoader().getResource(mainXsdLocation).toExternalForm();
-            final StreamSource source = new StreamSource(systemId);
-            xsdArray[xsdLocations.length] = source;
-            SCHEMAS.putIfAbsent(mainXsdLocation, schemaFactory.newSchema(xsdArray));
-        }
-        return SCHEMAS.get(mainXsdLocation);
     }
 
     public static <T> T unmarshalAndValidateXMLWithStAXProvidingSchema(Class<T> clazz, Source source, Schema schema)
@@ -115,12 +73,6 @@ public final class JaxbHelper {
     public static void clear() {
         CONTEXTS.clear();
         SCHEMAS.clear();
-    }
-
-    private static Class<?>[] addIdentifierToBoundClasses(Class<?> clazz, Class<?>... classes) {
-        Set<Class<?>> classSet = new HashSet<>(Arrays.asList(classes));
-        classSet.add(clazz);
-        return classSet.toArray(new Class<?>[classSet.size()]);
     }
 
     public static String retrieveNameSpaceOfXML(Source xmlSource) throws XMLStreamException {
