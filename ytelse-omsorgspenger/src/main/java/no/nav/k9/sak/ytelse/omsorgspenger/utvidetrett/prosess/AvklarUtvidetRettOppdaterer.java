@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
 

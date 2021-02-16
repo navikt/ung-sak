@@ -18,7 +18,6 @@ import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettRestKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AnnenForelder;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;

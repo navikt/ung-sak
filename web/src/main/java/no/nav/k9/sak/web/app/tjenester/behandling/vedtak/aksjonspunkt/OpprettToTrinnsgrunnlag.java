@@ -14,7 +14,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
@@ -79,8 +78,7 @@ public class OpprettToTrinnsgrunnlag {
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, informasjonselementer, ytelseType, behandlingType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke utleder for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
+        return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType);
     }
 
 }

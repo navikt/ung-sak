@@ -4,7 +4,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +27,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)

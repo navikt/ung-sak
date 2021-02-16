@@ -31,7 +31,6 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.k9.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -78,7 +77,7 @@ public class RegisterdataInnhenter {
     private AbakusTjeneste abakusTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
-    private Instance<InformasjonselementerUtleder> utledInformasjonselementer;
+    private Instance<InformasjonselementerUtleder> informasjonselementer;
 
     RegisterdataInnhenter() {
         // for CDI proxy
@@ -100,7 +99,7 @@ public class RegisterdataInnhenter {
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
-        this.utledInformasjonselementer = utledInformasjonselementer;
+        this.informasjonselementer = utledInformasjonselementer;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -422,8 +421,7 @@ public class RegisterdataInnhenter {
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 
-    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
-        return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, utledInformasjonselementer, fagsakYtelseType, behandlingType).map(utleder -> utleder.utled(behandlingType))
-            .orElseThrow(() -> new IllegalStateException("Har ikke InformasjonsElementerUtleder for ytelseType=" + fagsakYtelseType + ", behandlingType=" + behandlingType));
+    private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType ytelseType) {
+        return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType).utled(behandlingType);
     }
 }
