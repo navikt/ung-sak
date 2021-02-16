@@ -7,9 +7,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
@@ -17,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -35,6 +41,8 @@ public class EndringsresultatSjekker {
 
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private Instance<InformasjonselementerUtleder> informasjonselementer;
+    private BehandlingRepository behandlingRepository;
 
     EndringsresultatSjekker() {
         // For CDI
@@ -43,13 +51,16 @@ public class EndringsresultatSjekker {
     @Inject
     public EndringsresultatSjekker(PersonopplysningTjeneste personopplysningTjeneste,
                                    MedlemTjeneste medlemTjeneste,
+                                   @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
+        this.informasjonselementer = informasjonselementer;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.opptjeningRepository = provider    .getOpptjeningRepository();
+        this.opptjeningRepository = provider.getOpptjeningRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
+        this.behandlingRepository = provider.getBehandlingRepository();
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
@@ -57,13 +68,19 @@ public class EndringsresultatSjekker {
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
 
-        EndringsresultatSnapshot iaySnapshot =  inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
+        if (inkludererBeregning(behandlingId)) {
+            EndringsresultatSnapshot iaySnapshot = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
                 .map(iayg -> EndringsresultatSnapshot.medSnapshot(InntektArbeidYtelseGrunnlag.class, iayg.getEksternReferanse()))
                 .orElse(EndringsresultatSnapshot.utenSnapshot(InntektArbeidYtelseGrunnlag.class));
-
-        snapshot.leggTil(iaySnapshot);
+            snapshot.leggTil(iaySnapshot);
+        }
 
         return snapshot;
+    }
+
+    private boolean inkludererBeregning(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return !(finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType()).utled(behandling.getType()).isEmpty());
     }
 
     public EndringsresultatDiff finnSporedeEndringerPåBehandlingsgrunnlag(Long behandlingId, EndringsresultatSnapshot idSnapshotFør) {
@@ -74,16 +91,18 @@ public class EndringsresultatSjekker {
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)
         EndringsresultatDiff sporedeEndringerDiff = EndringsresultatDiff.opprettForSporingsendringer();
-        idDiff.hentDelresultat(PersonInformasjonEntitet.class).ifPresent(idEndring ->
-            sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
-        idDiff.hentDelresultat(MedlemskapAggregat.class).ifPresent(idEndring ->
-            sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
-        idDiff.hentDelresultat(InntektArbeidYtelseGrunnlag.class).ifPresent(idEndring ->
-            sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> {
-                InntektArbeidYtelseGrunnlag grunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID)idEndring.getGrunnlagId1());
-                InntektArbeidYtelseGrunnlag grunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID)idEndring.getGrunnlagId2());
+        idDiff.hentDelresultat(PersonInformasjonEntitet.class)
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
+        idDiff.hentDelresultat(MedlemskapAggregat.class)
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
+
+        if (inkludererBeregning(behandlingId)) {
+            idDiff.hentDelresultat(InntektArbeidYtelseGrunnlag.class).ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> {
+                InntektArbeidYtelseGrunnlag grunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId1());
+                InntektArbeidYtelseGrunnlag grunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId2());
                 return new IAYGrunnlagDiff(grunnlag1, grunnlag2).diffResultat(kunSporedeEndringer);
             }));
+        }
         return sporedeEndringerDiff;
     }
 
@@ -91,8 +110,10 @@ public class EndringsresultatSjekker {
         Long behandlingId = behandling.getId();
         EndringsresultatSnapshot snapshot = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
 
-        snapshot.leggTil(opptjeningRepository.finnAktivGrunnlagId(behandling));
-        snapshot.leggTil(finnAktivBeregningsgrunnlagGrunnlagAggregatId(behandlingId));
+        if (inkludererBeregning(behandlingId)) {
+            snapshot.leggTil(opptjeningRepository.finnAktivGrunnlagId(behandling));
+            snapshot.leggTil(finnAktivBeregningsgrunnlagGrunnlagAggregatId(behandlingId));
+        }
 
         // Resultatstrukturene nedenfor støtter ikke paradigme med "aktivt" grunnlag som kan identifisere med id
         // Aksepterer her at endringssjekk heller utledes av deres tidsstempel forutsatt at metoden ikke brukes i
@@ -108,15 +129,14 @@ public class EndringsresultatSjekker {
     }
 
     private EndringsresultatSnapshot lagVilkårResultatIdSnapshotAvTidsstempel(Behandling behandling) {
-       return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-                 .map(vilkårResultat ->
-                     EndringsresultatSnapshot.medSnapshot(Vilkårene.class, hentLongVerdiAvEndretTid(vilkårResultat)))
-                 .orElse(EndringsresultatSnapshot.utenSnapshot(Vilkårene.class));
+        return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
+            .map(vilkårResultat -> EndringsresultatSnapshot.medSnapshot(Vilkårene.class, hentLongVerdiAvEndretTid(vilkårResultat)))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(Vilkårene.class));
     }
 
-    //Denne metoden bør legges i Tjeneste
-    public EndringsresultatSnapshot finnAktivBeregningsgrunnlagGrunnlagAggregatId(Long behandlingId) {
-        //FIXME K9 (OJR) koble på kalkulus her
+    // Denne metoden bør legges i Tjeneste
+    private EndringsresultatSnapshot finnAktivBeregningsgrunnlagGrunnlagAggregatId(Long behandlingId) {
+        // FIXME K9 (OJR) koble på kalkulus her
         Optional<Long> aktivBeregningsgrunnlagGrunnlagId = Optional.empty();
         return aktivBeregningsgrunnlagGrunnlagId
             .map(id -> EndringsresultatSnapshot.medSnapshot(Beregningsgrunnlag.class, id))
@@ -124,14 +144,19 @@ public class EndringsresultatSjekker {
     }
 
     private Long hentLongVerdiAvEndretTid(BaseEntitet entitet) {
-       LocalDateTime endretTidspunkt = entitet.getOpprettetTidspunkt();
-       if(entitet.getEndretTidspunkt()!=null){
-           endretTidspunkt = entitet.getEndretTidspunkt();
-       }
-       return mapFraLocalDateTimeTilLong(endretTidspunkt);
+        LocalDateTime endretTidspunkt = entitet.getOpprettetTidspunkt();
+        if (entitet.getEndretTidspunkt() != null) {
+            endretTidspunkt = entitet.getEndretTidspunkt();
+        }
+        return mapFraLocalDateTimeTilLong(endretTidspunkt);
     }
 
-    static Long mapFraLocalDateTimeTilLong(LocalDateTime ldt){
+    private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, informasjonselementer, ytelseType, behandlingType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke utleder for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
+    }
+
+    static Long mapFraLocalDateTimeTilLong(LocalDateTime ldt) {
         ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
         return zdt.toInstant().toEpochMilli();
     }

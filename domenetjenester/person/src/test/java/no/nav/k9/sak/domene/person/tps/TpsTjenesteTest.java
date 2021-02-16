@@ -46,7 +46,7 @@ public class TpsTjenesteTest {
     // Familierelasjon
     private static final AktørId AKTØR_ID_RELASJON = AktørId.dummy();
     private static final PersonIdent FNR_RELASJON = new PersonIdent("01345678901");
-    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, true);
+    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN);
     private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
     private PersoninfoAdapter personinfoAdapter;
 

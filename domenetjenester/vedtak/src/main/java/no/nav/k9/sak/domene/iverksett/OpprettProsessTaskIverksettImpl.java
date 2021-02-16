@@ -11,7 +11,7 @@ import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksettFelles {
+public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksettTilkjentYtelseFelles {
 
     OpprettProsessTaskIverksettImpl() {
         // for CDI proxy

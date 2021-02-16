@@ -20,8 +20,8 @@ class MapperForYtelseType {
         Set<FagsakYtelseType> ignored = Set.of(
             FagsakYtelseType.UDEFINERT,
             FagsakYtelseType.OBSOLETE,
-            FagsakYtelseType.OMSORGSPENGER_KS, //rammevedtak - medfører ikke utbetaling
-            FagsakYtelseType.OMSORGSPENGER_MA //rammevedtak - medfører ikke utbetaling
+            FagsakYtelseType.OMSORGSPENGER_KS, // rammevedtak - medfører ikke utbetaling
+            FagsakYtelseType.OMSORGSPENGER_MA // rammevedtak - medfører ikke utbetaling
         );
         for (FagsakYtelseType egenKode : FagsakYtelseType.values()) {
             if (ignored.contains(egenKode)) {

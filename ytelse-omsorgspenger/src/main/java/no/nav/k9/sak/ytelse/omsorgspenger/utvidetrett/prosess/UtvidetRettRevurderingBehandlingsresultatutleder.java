@@ -23,6 +23,9 @@ class UtvidetRettRevurderingBehandlingsresultatutleder implements no.nav.k9.sak.
     @SuppressWarnings("unused")
     private VilkårResultatRepository vilkårResultatRepository;
 
+    protected UtvidetRettRevurderingBehandlingsresultatutleder() {
+    }
+
     @Inject
     public UtvidetRettRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider) {
 
