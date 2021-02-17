@@ -40,13 +40,15 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 @ExtendWith(MockitoExtension.class)
-class fjernOverlappendeVurderingerRestTjenesteTest {
-    SykdomVurderingRestTjeneste tjeneste;
+class FjernOverlappendeVurderingerRestTjenesteTest {
+    private SykdomVurderingRestTjeneste tjeneste;
 
     @Mock
     private SykdomVurderingRepository repo;
     @Captor
-    ArgumentCaptor<SykdomVurderingVersjon> captor;
+    private ArgumentCaptor<SykdomVurderingVersjon> captor;
+
+    private SykdomVurderingMapper.Sporingsinformasjon mockSporingsinformasjon = new SykdomVurderingMapper.Sporingsinformasjon(null, null, null, null);
 
     @BeforeEach
     void setUp() {
@@ -69,8 +71,7 @@ class fjernOverlappendeVurderingerRestTjenesteTest {
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
             new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 20)));
 
-        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer);
-        //ArgumentCaptor<SykdomVurderingVersjon> captor = ArgumentCaptor.forClass(SykdomVurderingVersjon.class);
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
         SykdomVurderingVersjon faktisk = captor.getValue();
         List<SykdomVurderingPeriode> faktiskePerioder = faktisk.getPerioder();
@@ -94,7 +95,7 @@ class fjernOverlappendeVurderingerRestTjenesteTest {
                 true, false,
                 createSykdomVurderingOgVersjonMock(0, 1,
                     new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))))
-            );
+        );
 
         SykdomVurderingVersjon fasit1 = createSykdomVurderingOgVersjonMock(1, 1,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
@@ -104,7 +105,7 @@ class fjernOverlappendeVurderingerRestTjenesteTest {
             new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 4)),
             new Periode(LocalDate.of(2021, 2, 11), LocalDate.of(2021, 2, 20)));
 
-        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer);
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo, times(2)).lagre(captor.capture());
         List<SykdomVurderingVersjon> faktisk = captor.getAllValues();
         List<SykdomVurderingPeriode> faktiskePerioder1 = faktisk.get(0).getPerioder();
@@ -121,6 +122,42 @@ class fjernOverlappendeVurderingerRestTjenesteTest {
         assertThat(faktiskePerioder2.get(0).getTom()).isEqualTo(fasit2.getPerioder().get(0).getTom());
         assertThat(faktiskePerioder2.get(1).getFom()).isEqualTo(fasit2.getPerioder().get(1).getFom());
         assertThat(faktiskePerioder2.get(1).getTom()).isEqualTo(fasit2.getPerioder().get(1).getTom());
+    }
+
+    @Test
+    void toOverlappendePerioder() {
+
+        SykdomVurderingVersjon vurderingVersjon = createSykdomVurderingOgVersjonMock(0, 1,
+            new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 20)));
+
+        List<SykdomPeriodeMedEndring> sykdomPeriodeMedEndringer = Arrays.asList(
+            new SykdomPeriodeMedEndring(
+                new Periode(LocalDate.of(2021, 1, 5), LocalDate.of(2021, 1, 10)),
+                true, false,
+                vurderingVersjon),
+            new SykdomPeriodeMedEndring(
+                new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 19)),
+                true, false,
+                vurderingVersjon)
+            );
+
+        SykdomVurderingVersjon fasit = createSykdomVurderingOgVersjonMock(1, 1,
+            new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 4)),
+            new Periode(LocalDate.of(2021, 1, 11), LocalDate.of(2021, 1, 14)),
+            new Periode(LocalDate.of(2021, 1, 20), LocalDate.of(2021, 1, 20)));
+
+        tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
+        verify(repo).lagre(captor.capture());
+        SykdomVurderingVersjon faktisk = captor.getValue();
+        List<SykdomVurderingPeriode> faktiskePerioder = faktisk.getPerioder();
+        assertThat(faktiskePerioder.size()).isEqualTo(3);
+        assertThat(faktiskePerioder.get(0).getFom()).isEqualTo(fasit.getPerioder().get(0).getFom());
+        assertThat(faktiskePerioder.get(0).getTom()).isEqualTo(fasit.getPerioder().get(0).getTom());
+        assertThat(faktiskePerioder.get(1).getFom()).isEqualTo(fasit.getPerioder().get(1).getFom());
+        assertThat(faktiskePerioder.get(1).getTom()).isEqualTo(fasit.getPerioder().get(1).getTom());
+        assertThat(faktiskePerioder.get(2).getFom()).isEqualTo(fasit.getPerioder().get(2).getFom());
+        assertThat(faktiskePerioder.get(2).getTom()).isEqualTo(fasit.getPerioder().get(2).getTom());
+
     }
 
     private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long versjon, long rangering, Periode... perioder) {

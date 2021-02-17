@@ -20,26 +20,26 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 public class SykdomVurderingMapper {
 
     private SykdomDokumentOversiktMapper dokumentMapper = new SykdomDokumentOversiktMapper();
-    
+
 
     public SykdomVurderingMapper() {
 
     }
-    
-    
+
+
     /**
      * Mapper angitte versjoner til SykdomVurderingDto.
-     * 
+     *
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
     public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> relevanteDokumenterForSykdom, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
         final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
-        
+
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
             throw new IllegalArgumentException("Utviklerfeil: Alle SykdomVurderingVersjon i parameteren 'versjoner' må tilhøre samme SykdomVurdering.");
         }
-        
+
         var versjonerDto = versjoner.stream()
             .sorted(Collections.reverseOrder())
             .map(v -> new SykdomVurderingVersjonDto("" + v.getVersjon(),
@@ -54,7 +54,7 @@ public class SykdomVurderingMapper {
 
         return new SykdomVurderingDto(
                 "" + vurdering.getId(),
-                vurdering.getType(), 
+                vurdering.getType(),
                 versjonerDto,
                 new SykdomVurderingAnnenInformasjon(
                     sykdomUtlededePerioder.getResterendeVurderingsperioder(),
@@ -63,7 +63,7 @@ public class SykdomVurderingMapper {
             );
     }
 
-    
+
     private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> relevanteDokumenterForSykdom) {
         final Set<Long> ids = tilknyttedeDokumenter.stream().map(d -> d.getId()).collect(Collectors.toUnmodifiableSet());
         return dokumentMapper.mapDokumenter(behandlingUuid, relevanteDokumenterForSykdom, ids);
@@ -73,14 +73,14 @@ public class SykdomVurderingMapper {
     private List<Periode> mapPerioder(List<SykdomVurderingPeriode> perioder) {
         return perioder.stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
     }
-    
+
     public SykdomVurderingVersjon map(SykdomVurdering sykdomVurdering, SykdomVurderingEndringDto oppdatering, Sporingsinformasjon sporingsinformasjon, List<SykdomDokument> alleDokumenter) {
         if (sykdomVurdering.getSisteVersjon().getVersjon() != Long.parseLong(oppdatering.getVersjon())) {
             throw new ConcurrentModificationException("Forsøk på å oppdatere SykdomVurdering på grunnlag av utdatert versjon.");
         }
-        
+
         final LocalDateTime endretTidspunkt = LocalDateTime.now();
-        
+
         final SykdomVurderingVersjon versjon = new SykdomVurderingVersjon(
                 sykdomVurdering,
                 oppdatering.getTekst(),
@@ -98,10 +98,10 @@ public class SykdomVurderingMapper {
 
         return versjon;
     }
-    
+
     public SykdomVurdering map(SykdomVurderingOpprettelseDto opprettelse, Sporingsinformasjon sporingsinformasjon, List<SykdomDokument> alleDokumenter) {
         final LocalDateTime endretTidspunkt = LocalDateTime.now();
-        
+
         final SykdomVurdering sykdomVurdering = new SykdomVurdering(opprettelse.getType(), Collections.emptyList(), sporingsinformasjon.endretAv, LocalDateTime.now());
         final SykdomVurderingVersjon versjon = new SykdomVurderingVersjon(
                 sykdomVurdering,
@@ -121,19 +121,34 @@ public class SykdomVurderingMapper {
 
         return sykdomVurdering;
     }
-    
+
     public final static class Sporingsinformasjon {
         private String endretAv;
         private UUID endretBehandlingUuid;
         private String endretSaksnummer;
         private SykdomPerson endretForPerson;
-        
+
         public Sporingsinformasjon(String endretAv, UUID endretBehandlingUuid, String endretSaksnummer, SykdomPerson endretForPerson) {
             this.endretAv = endretAv;
             this.endretBehandlingUuid = endretBehandlingUuid;
             this.endretSaksnummer = endretSaksnummer;
             this.endretForPerson = endretForPerson;
         }
-        
+
+        public String getEndretAv() {
+            return endretAv;
+        }
+
+        public UUID getEndretBehandlingUuid() {
+            return endretBehandlingUuid;
+        }
+
+        public String getEndretSaksnummer() {
+            return endretSaksnummer;
+        }
+
+        public SykdomPerson getEndretForPerson() {
+            return endretForPerson;
+        }
     }
 }

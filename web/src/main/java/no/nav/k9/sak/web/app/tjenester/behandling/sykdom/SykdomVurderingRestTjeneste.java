@@ -226,7 +226,7 @@ public class SykdomVurderingRestTjeneste {
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVersjon);
         if (!sykdomVurderingOppdatering.isDryRun()) {
             sykdomVurderingRepository.lagre(nyVersjon);
-            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer);
+            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer, sporingsinformasjon, nyVersjon.getEndretTidspunkt());
         }
 
         return toSykdomVurderingEndringResultatDto(endringer);
@@ -267,16 +267,15 @@ public class SykdomVurderingRestTjeneste {
         final List<SykdomPeriodeMedEndring> endringer = finnEndringer(behandling, nyVurdering.getSisteVersjon());
         if (!sykdomVurderingOpprettelse.isDryRun()) {
             sykdomVurderingRepository.lagre(nyVurdering, behandling.getFagsak().getPleietrengendeAktørId());
-            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer);
+            fjernOverlappendePerioderFraOverskyggendeVurderinger(endringer, sporingsinformasjon, nyVurdering.getOpprettetTidspunkt());
         }
 
         return toSykdomVurderingEndringResultatDto(endringer);
     }
 
-    void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer) {
+    void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer, Sporingsinformasjon sporing, LocalDateTime opprettetTidspunkt) {
         Map<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
         endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-
             var liste = perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon());
             if (liste == null) {
                 liste = new ArrayList<>();
@@ -288,33 +287,27 @@ public class SykdomVurderingRestTjeneste {
         for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
             SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
 
-            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = SykdomUtils.toLocalDateTimeline(vurderingPerioder.getValue()).compress();
+            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = SykdomUtils.toLocalDateTimeline(vurderingPerioder.getValue());
 
             LocalDateTimeline<Boolean> gammelTidslinje = SykdomUtils.toLocalDateTimeline(
                 vurdering.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList())
-            ).compress();
+            );
 
             LocalDateTimeline<Boolean> nyePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(gammelTidslinje, tidslinjeSomSkalTrekkesFra);
 
-            List<Periode> vurderingPerioderTilLagring = new ArrayList<>();
-            for (LocalDateSegment<Boolean> segment : nyePerioder) {
-                vurderingPerioderTilLagring.add(new Periode(
-                    segment.getFom(),
-                    segment.getTom()));
+            List<Periode> vurderingPerioderTilLagring = SykdomUtils.toPeriodeList(nyePerioder);
 
-            }
-            
             SykdomVurderingVersjon tilLagring = new SykdomVurderingVersjon(
                 vurdering.getSykdomVurdering(),
                 vurdering.getTekst(),
                 vurdering.getResultat(),
                 vurdering.getVersjon()+1,
-                "endretAv", //TODO!!! hva skal inn her?
-                LocalDateTime.now(), //TODO!!! hva skal inn her?
-                vurdering.getEndretBehandlingUuid(),
-                vurdering.getEndretSaksnummer(),
-                vurdering.getEndretForPerson(),
-                vurdering.getBesluttet(),
+                sporing.getEndretAv(),
+                opprettetTidspunkt,
+                sporing.getEndretBehandlingUuid(),
+                sporing.getEndretSaksnummer(),
+                sporing.getEndretForPerson(),
+                null,
                 vurdering.getDokumenter(),
                 vurderingPerioderTilLagring);
 
