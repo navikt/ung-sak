@@ -17,4 +17,9 @@ public interface InformasjonselementerUtleder {
         return BehandlingTypeRef.Lookup.find(InformasjonselementerUtleder.class, instances, ytelseType, behandlingType)
             .orElseThrow(() -> new IllegalStateException("Har ikke utleder for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
     }
+
+    /** hvorvidt har beregnig/inntekt/arbeid. default basert på om registerdatatype er registrert. */
+    default boolean harBeregnetYtelse(BehandlingType type) {
+        return !(utled(type).isEmpty());
+    }
 }
