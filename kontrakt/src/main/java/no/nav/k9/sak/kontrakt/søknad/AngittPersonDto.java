@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
@@ -51,6 +52,10 @@ public class AngittPersonDto {
     @Valid
     private AktørId aktørId;
 
+    @JsonProperty(value = "personIdent")
+    @Valid
+    private PersonIdent personIdent;
+
     public AngittPersonDto setNavn(String navn) {
         this.navn = navn;
         return this;
@@ -78,6 +83,11 @@ public class AngittPersonDto {
 
     public AngittPersonDto setAktørId(AktørId aktørId) {
         this.aktørId = aktørId;
+        return this;
+    }
+
+    public AngittPersonDto setPersonIdent(PersonIdent personIdent) {
+        this.personIdent = personIdent;
         return this;
     }
 

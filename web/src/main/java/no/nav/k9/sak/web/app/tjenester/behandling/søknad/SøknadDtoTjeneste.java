@@ -1,7 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -44,6 +47,7 @@ public class SøknadDtoTjeneste {
     private KompletthetsjekkerProvider kompletthetsjekkerProvider;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private MedlemTjeneste medlemTjeneste;
+    private PersoninfoAdapter personinfoAdapter;
 
     protected SøknadDtoTjeneste() {
         // for CDI proxy
@@ -53,11 +57,13 @@ public class SøknadDtoTjeneste {
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              KompletthetsjekkerProvider kompletthetsjekkerProvider,
+                             PersoninfoAdapter personinfoAdapter,
                              ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                              MedlemTjeneste medlemTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
+        this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
@@ -101,9 +107,15 @@ public class SøknadDtoTjeneste {
         if (angittePersoner == null || angittePersoner.isEmpty()) {
             return null;
         }
+
+        var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
+            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentIdentForAktørId(p.getAktørId()).orElse(null)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         return angittePersoner.stream()
             .map(p -> new AngittPersonDto()
                 .setAktørId(p.getAktørId())
+                .setPersonIdent(identMap.get(p.getAktørId()))
                 .setNavn(p.getNavn())
                 .setFødselsdato(p.getFødselsdato())
                 .setRolle(p.getRolle())
