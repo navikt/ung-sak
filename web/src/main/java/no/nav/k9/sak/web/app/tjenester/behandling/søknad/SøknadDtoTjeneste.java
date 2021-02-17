@@ -107,7 +107,7 @@ public class SøknadDtoTjeneste {
 
     private List<AngittPersonDto> mapAngittePersoner(Set<SøknadAngittPersonEntitet> angittePersoner) {
         if (angittePersoner == null || angittePersoner.isEmpty()) {
-            return null;
+            return List.of();
         }
 
         var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
