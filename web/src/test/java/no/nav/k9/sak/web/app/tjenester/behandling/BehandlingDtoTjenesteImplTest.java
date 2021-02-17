@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -58,6 +61,10 @@ public class BehandlingDtoTjenesteImplTest {
     @Inject
     private TotrinnTjeneste totrinnTjeneste;
 
+    @Inject
+    @Any
+    private Instance<InformasjonselementerUtleder> informasjonselementer;
+
     private BehandlingDtoTjeneste tjeneste;
 
     private Collection<ResourceLink> existingRoutes;
@@ -65,7 +72,8 @@ public class BehandlingDtoTjenesteImplTest {
     @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository, totrinnTjeneste, "/k9/oppdrag/api");
+        tjeneste = new BehandlingDtoTjeneste(fagsakRepository, behandlingRepository, behandlingVedtakRepository, søknadRepository, uttakRepository, tilbakekrevingRepository, vilkårResultatRepository,
+            totrinnTjeneste, informasjonselementer, "/k9/oppdrag/api");
     }
 
     @Test
