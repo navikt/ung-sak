@@ -20,8 +20,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
-import com.google.common.collect.ImmutableList;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "BeregningsgrunnlagPerioder")
@@ -59,7 +57,7 @@ class BeregningsgrunnlagPerioder extends BaseEntitet {
         if (grunnlagPerioder == null) {
             return List.of();
         }
-        return ImmutableList.copyOf(grunnlagPerioder);
+        return List.copyOf(grunnlagPerioder);
     }
 
     void deaktiver(LocalDate skjæringstidspunkt) {

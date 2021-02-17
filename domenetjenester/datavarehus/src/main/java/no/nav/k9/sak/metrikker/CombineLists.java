@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 
-import com.google.common.collect.Lists;
-
 /** Generer alle kombinasjoner av angitte input data. */
 class CombineLists<T> {
 
@@ -50,7 +48,7 @@ class CombineLists<T> {
         if (vectors == null || vectors.isEmpty()) {
             return Collections.emptyList();
         } else {
-            List<List<T>> res = Lists.newLinkedList();
+            List<List<T>> res = new LinkedList<>();
             permutationsImpl(vectors, res, 0, new LinkedList<T>());
             return res;
         }
@@ -67,7 +65,7 @@ class CombineLists<T> {
         // iterate from current collection and copy 'current' element N times, one for each element
         Collection<T> currentCollection = vectors.get(d);
         for (T element : currentCollection) {
-            List<T> copy = Lists.newLinkedList(currentVector);
+            List<T> copy = new LinkedList<>(currentVector);
             copy.add(element);
             permutationsImpl(vectors, resultMatrix, d + 1, copy);
         }
