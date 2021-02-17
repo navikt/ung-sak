@@ -5,11 +5,13 @@
 
 	<sequence-generator name="SEQ_GR_SOEKNAD" allocation-size="50" sequence-name="SEQ_GR_SOEKNAD" />
 	<sequence-generator name="SEQ_SOEKNAD" allocation-size="50" sequence-name="SEQ_SOEKNAD" />
+    <sequence-generator name="SEQ_SOEKNAD_ANGITT_PERSON" allocation-size="50" sequence-name="SEQ_SOEKNAD" />
 
 	<sequence-generator name="SEQ_SOEKNAD_VEDLEGG" allocation-size="50" sequence-name="SEQ_SOEKNAD_VEDLEGG" />
 
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadGrunnlagEntitet" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet" />
 	<entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet" />
+    <entity class="no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet" />
 
 </entity-mappings>
