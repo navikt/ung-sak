@@ -10,7 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -107,7 +109,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
 
         tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo, times(2)).lagre(captor.capture());
-        List<SykdomVurderingVersjon> faktisk = captor.getAllValues();
+        List<SykdomVurderingVersjon> faktisk = captor.getAllValues().stream().sorted(Comparator.comparing(p -> p.getPerioder().get(0).getFom())).collect(Collectors.toList());
+
         List<SykdomVurderingPeriode> faktiskePerioder1 = faktisk.get(0).getPerioder();
         List<SykdomVurderingPeriode> faktiskePerioder2 = faktisk.get(1).getPerioder();
 
