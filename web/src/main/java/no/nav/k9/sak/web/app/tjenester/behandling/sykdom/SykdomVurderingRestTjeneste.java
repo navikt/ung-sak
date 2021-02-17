@@ -274,32 +274,25 @@ public class SykdomVurderingRestTjeneste {
     }
 
     void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer) {
-        HashMap<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
+        Map<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
         endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
 
-            if(perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon()) == null) {
-                ArrayList<Periode> periode = new ArrayList<>();
-                periode.add(v.getPeriode());
-                perioderSomSkalFjernesFraVurdering.put(v.getGammelVersjon(), periode);
-            } else {
-                perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon()).add(v.getPeriode());
+            var liste = perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon());
+            if (liste == null) {
+                liste = new ArrayList<>();
+                perioderSomSkalFjernesFraVurdering.put(v.getGammelVersjon(), liste);
             }
+            liste.add(v.getPeriode());
         });
 
         for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
             SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
 
-            Collection<LocalDateSegment<Boolean>> segments = new ArrayList<>();
-            for (Periode periode : vurderingPerioder.getValue()) {
-                segments.add(new LocalDateSegment<>(periode.getFom(), periode.getTom(), true));
-            }
-            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = new LocalDateTimeline<>(segments).compress();
+            LocalDateTimeline<Boolean> tidslinjeSomSkalTrekkesFra = SykdomUtils.toLocalDateTimeline(vurderingPerioder.getValue()).compress();
 
-            segments.clear();
-            for (SykdomVurderingPeriode sykdomVurderingPeriode : vurdering.getPerioder()) {
-                segments.add(new LocalDateSegment<>(sykdomVurderingPeriode.getFom(), sykdomVurderingPeriode.getTom(), true));
-            }
-            LocalDateTimeline<Boolean> gammelTidslinje = new LocalDateTimeline<>(segments).compress();
+            LocalDateTimeline<Boolean> gammelTidslinje = SykdomUtils.toLocalDateTimeline(
+                vurdering.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList())
+            ).compress();
 
             LocalDateTimeline<Boolean> nyePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(gammelTidslinje, tidslinjeSomSkalTrekkesFra);
 
@@ -310,6 +303,7 @@ public class SykdomVurderingRestTjeneste {
                     segment.getTom()));
 
             }
+            
             SykdomVurderingVersjon tilLagring = new SykdomVurderingVersjon(
                 vurdering.getSykdomVurdering(),
                 vurdering.getTekst(),

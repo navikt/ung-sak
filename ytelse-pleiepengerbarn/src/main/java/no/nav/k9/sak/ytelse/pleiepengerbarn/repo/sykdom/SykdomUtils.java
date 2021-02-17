@@ -19,15 +19,15 @@ public final class SykdomUtils {
     private SykdomUtils() {}
 
 
-    static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {
+    public static List<Periode> toPeriodeList(LocalDateTimeline<?> t) {
         return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
     }
 
-    static LocalDateTimeline<Boolean> toLocalDateTimeline(List<Periode> perioder) {
+    public static LocalDateTimeline<Boolean> toLocalDateTimeline(List<Periode> perioder) {
         return new LocalDateTimeline<Boolean>(perioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFom(), p.getTom(), true)).collect(Collectors.toList()));
     }
 
-    static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
+    public static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
         return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList()));
     }
 
@@ -43,8 +43,8 @@ public final class SykdomUtils {
             }
         }, JoinStyle.LEFT_JOIN).compress();
     }
-    
-    
+
+
     public static LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
         final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
         for (SykdomVurderingVersjon vurdering : vurderinger) {
