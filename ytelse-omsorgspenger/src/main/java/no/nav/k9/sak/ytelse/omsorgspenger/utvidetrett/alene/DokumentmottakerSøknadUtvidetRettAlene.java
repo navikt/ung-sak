@@ -92,12 +92,14 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) // TODO: hente riktig språk
         ;
 
-        for (var barn : innsendt.getBarn()) {
-            if (barn.getPersonIdent() != null) {
-                var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi())).orElseThrow();
-                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
-            } else if (barn.getFødselsdato() != null) {
-                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(null, barn.getFødselsdato(), RelasjonsRolleType.BARN));
+        if (innsendt.getBarn() != null) {
+            for (var barn : innsendt.getBarn()) {
+                if (barn.getPersonIdent() != null) {
+                    var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi())).orElseThrow();
+                    søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
+                } else if (barn.getFødselsdato() != null) {
+                    søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(null, barn.getFødselsdato(), RelasjonsRolleType.BARN));
+                }
             }
         }
 
