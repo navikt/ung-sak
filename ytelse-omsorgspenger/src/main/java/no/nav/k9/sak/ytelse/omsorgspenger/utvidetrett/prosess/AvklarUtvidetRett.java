@@ -14,37 +14,22 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
-public class AvklarUtvidetRettOppdaterer implements AksjonspunktOppdaterer<AvklarUtvidetRettDto> {
+public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRettDto> {
 
-    private VilkårResultatRepository vilkårResultatRepository;
-    private BehandlingRepository behandlingRepository;
     private HistorikkTjenesteAdapter historikkAdapter;
-    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    AvklarUtvidetRettOppdaterer() {
+    AvklarUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarUtvidetRettOppdaterer(BehandlingRepository behandlingRepository,
-                                VilkårResultatRepository vilkårResultatRepository,
-                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                HistorikkTjenesteAdapter historikkAdapter) {
-        this.behandlingRepository = behandlingRepository;
-        this.vilkårResultatRepository = vilkårResultatRepository;
-        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter) {
         this.historikkAdapter = historikkAdapter;
     }
 
@@ -53,17 +38,15 @@ public class AvklarUtvidetRettOppdaterer implements AksjonspunktOppdaterer<Avkla
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var vilkårBuilder = param.getVilkårResultatBuilder();
 
-        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
         var periode = dto.getPeriode();
-        oppdaterUtfallOgLagre(behandling, vilkårBuilder, nyttUtfall, kontekst.getSkriveLås(), periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom());
+        oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom());
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Behandling behandling, VilkårResultatBuilder builder, Utfall utfallType, BehandlingLås skriveLås, LocalDate fom, LocalDate tom) {
+    private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom) {
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.UTVIDETRETT);
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)

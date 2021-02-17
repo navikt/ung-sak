@@ -4,8 +4,13 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
+import javax.enterprise.inject.Instance;
+
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -38,5 +43,10 @@ public interface VilkårsPerioderTilVurderingTjeneste {
 
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
+    }
+
+    public static VilkårsPerioderTilVurderingTjeneste finnTjeneste(Instance<VilkårsPerioderTilVurderingTjeneste> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, instances, ytelseType, behandlingType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke tjeneste for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
     }
 }

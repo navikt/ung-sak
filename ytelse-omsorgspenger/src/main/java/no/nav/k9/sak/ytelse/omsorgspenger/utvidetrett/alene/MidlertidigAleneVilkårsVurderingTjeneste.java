@@ -49,7 +49,10 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var periode = utledPeriode(behandling);
-        return Map.of(VilkårType.UTVIDETRETT, new TreeSet<>(Set.of(periode)));
+        var perioder = new TreeSet<>(Set.of(periode));
+        return Map.of(
+            VilkårType.UTVIDETRETT, perioder,
+            VilkårType.OMSORGEN_FOR, perioder);
     }
 
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {

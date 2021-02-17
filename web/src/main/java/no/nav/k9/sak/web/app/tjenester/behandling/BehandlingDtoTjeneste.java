@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -31,6 +33,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -98,6 +101,7 @@ public class BehandlingDtoTjeneste {
      * denne kan overstyres for testing lokalt
      */
     private String k9OppdragProxyUrl;
+    private Instance<InformasjonselementerUtleder> informasjonselementer;
 
     BehandlingDtoTjeneste() {
         // for CDI proxy
@@ -112,6 +116,7 @@ public class BehandlingDtoTjeneste {
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  TotrinnTjeneste totrinnTjeneste,
+                                 @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                  @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
 
         this.fagsakRepository = fagsakRepository;
@@ -122,6 +127,7 @@ public class BehandlingDtoTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.totrinnTjeneste = totrinnTjeneste;
+        this.informasjonselementer = informasjonselementer;
         this.k9OppdragProxyUrl = k9OppdragProxyUrl;
     }
 
@@ -292,6 +298,7 @@ public class BehandlingDtoTjeneste {
 
     private void leggTilGrunnlagResourceLinks(Behandling behandling, BehandlingDto dto) {
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
 
         leggTilYtelsespesifikkResourceLinks(behandling, dto);
 
@@ -305,26 +312,31 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
-        dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidQueryParams));
-        dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold-v1", uuidQueryParams));
-        dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
-
-        dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
-        dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
+        leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
-
-        dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
-        dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
-
         lagVarselOmRevurderingLink(behandling).ifPresent(dto::leggTil);
-        lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
-        lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
-        lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
-        lagOriginalBehandlingLink(behandling).ifPresent(dto::leggTil);
-
         lagFormidlingLink(behandling).forEach(dto::leggTil);
-        lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
+    }
+
+    private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
+        boolean ytelseMedBeregning = InformasjonselementerUtleder.finnTjeneste(informasjonselementer, behandling.getFagsakYtelseType(), behandling.getType()).harBeregnetYtelse(behandling.getType());
+
+        if (ytelseMedBeregning) {
+            dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_PATH, "inntekt-arbeid-ytelse", uuidQueryParams));
+            dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold-v1", uuidQueryParams));
+            dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
+
+            dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
+            dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
+
+            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
+            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
+            lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
+            lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
+            lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
+            lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
+        }
     }
 
     private void leggTilYtelsespesifikkResourceLinks(Behandling behandling, BehandlingDto dto) {
@@ -447,8 +459,7 @@ public class BehandlingDtoTjeneste {
         final var behandlingUuid = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         final var behandlingUuidOgYtelse = Map.of(
             BehandlingUuidDto.NAME, behandling.getUuid().toString(),
-            "sakstype", behandling.getFagsakYtelseType().getKode()
-        );
+            "sakstype", behandling.getFagsakYtelseType().getKode());
 
         List<ResourceLink> links = new ArrayList<>();
         links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
