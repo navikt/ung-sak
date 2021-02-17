@@ -24,9 +24,7 @@ public class AvklarOmsorgenForDto extends BekreftetAksjonspunktDto {
     @NotNull
     private Boolean harOmsorgenFor;
 
-    @JsonProperty(value = "periode", required = true)
     @Valid
-    @NotNull
     private Periode periode;
 
     public AvklarOmsorgenForDto(String begrunnelse, Boolean harOmsorgenFor, Periode periode) {
