@@ -45,6 +45,10 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
     private OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
+    OpptjeningFaktaSteg() {
+        // CDI
+    }
+
     @Inject
     public OpptjeningFaktaSteg(BehandlingRepositoryProvider repositoryProvider,
                                  AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,

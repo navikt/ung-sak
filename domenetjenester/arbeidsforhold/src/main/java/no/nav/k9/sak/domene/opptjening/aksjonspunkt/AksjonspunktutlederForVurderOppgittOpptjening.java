@@ -78,7 +78,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
-            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), finnRelevanteKoder()) == JA) {
+            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), annenOpptjening()) == JA) {
                 logger.info("Utleder AP 5051 fra oppgitt opptjening");
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
             }
@@ -104,7 +104,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         return INGEN_AKSJONSPUNKTER;
     }
 
-    private List<ArbeidType> finnRelevanteKoder() {
+    private List<ArbeidType> annenOpptjening() {
         return List.of(ArbeidType.values())
             .stream()
             .filter(ArbeidType::erAnnenOpptjening)
