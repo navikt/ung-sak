@@ -29,7 +29,7 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 @Produces(MediaType.APPLICATION_JSON)
 public class PleiepengerUttakRestTjeneste {
 
-    static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
+    public static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
 
     private UttakRestKlient uttakRestKlient;
 
