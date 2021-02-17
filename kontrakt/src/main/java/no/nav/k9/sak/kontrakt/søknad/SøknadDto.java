@@ -144,7 +144,7 @@ public class SøknadDto {
     }
 
     public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {
-        this.angittePersoner = List.copyOf(angittePersoner);
+        this.angittePersoner = angittePersoner == null ? Collections.emptyList() : List.copyOf(angittePersoner);
     }
 
     public void setSøknadsperiode(Periode periode) {
