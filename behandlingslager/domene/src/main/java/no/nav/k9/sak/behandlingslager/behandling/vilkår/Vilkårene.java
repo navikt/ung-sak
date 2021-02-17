@@ -160,7 +160,7 @@ public class Vilkårene extends BaseEntitet {
     }
 
     @SuppressWarnings("unchecked")
-    private LocalDateTimeline<VilkårPeriode> getVilkårTimeline(VilkårType vilkårType) {
+    public LocalDateTimeline<VilkårPeriode> getVilkårTimeline(VilkårType vilkårType) {
         var vilkår = getVilkår(vilkårType);
 
         if (vilkår.isEmpty()) {
