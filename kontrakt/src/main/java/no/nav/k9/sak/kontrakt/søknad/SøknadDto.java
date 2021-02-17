@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
@@ -66,6 +67,10 @@ public class SøknadDto {
     @Size(max = 5000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String tilleggsopplysninger;
+
+    @JsonProperty(value = "søknadsperiode")
+    @Valid
+    private Periode søknadsperiode;
 
     public SøknadDto() {
     }
@@ -140,5 +145,9 @@ public class SøknadDto {
 
     public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {
         this.angittePersoner = List.copyOf(angittePersoner);
+    }
+
+    public void setSøknadsperiode(Periode periode) {
+        this.søknadsperiode = periode;
     }
 }

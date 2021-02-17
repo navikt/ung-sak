@@ -38,6 +38,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
+import no.nav.k9.sak.typer.Periode;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -91,6 +92,7 @@ public class SøknadDtoTjeneste {
         dto.setTilleggsopplysninger(søknad.getTilleggsopplysninger());
         dto.setSpraakkode(søknad.getSpråkkode());
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
+        Optional.ofNullable(søknad.getSøknadsperiode()).ifPresent(sp -> dto.setSøknadsperiode(new Periode(sp.getFomDato(), sp.getTomDato())));
 
         medlemTjeneste.hentMedlemskap(behandlingId).ifPresent(ma -> {
             dto.setOppgittTilknytning(mapFra(ma.getOppgittTilknytning().orElse(null)));
