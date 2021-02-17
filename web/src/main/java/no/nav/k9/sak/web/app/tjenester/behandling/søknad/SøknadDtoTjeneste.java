@@ -38,6 +38,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
+import no.nav.k9.sak.typer.Periode;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -91,6 +92,7 @@ public class SøknadDtoTjeneste {
         dto.setTilleggsopplysninger(søknad.getTilleggsopplysninger());
         dto.setSpraakkode(søknad.getSpråkkode());
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
+        Optional.ofNullable(søknad.getSøknadsperiode()).ifPresent(sp -> dto.setSøknadsperiode(new Periode(sp.getFomDato(), sp.getTomDato())));
 
         medlemTjeneste.hentMedlemskap(behandlingId).ifPresent(ma -> {
             dto.setOppgittTilknytning(mapFra(ma.getOppgittTilknytning().orElse(null)));
@@ -109,18 +111,28 @@ public class SøknadDtoTjeneste {
         }
 
         var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
-            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentIdentForAktørId(p.getAktørId()).orElse(null)))
+            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentBrukerBasisForAktør(p.getAktørId()).orElse(null)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return angittePersoner.stream()
-            .map(p -> new AngittPersonDto()
-                .setAktørId(p.getAktørId())
-                .setPersonIdent(identMap.get(p.getAktørId()))
-                .setNavn(p.getNavn())
-                .setFødselsdato(p.getFødselsdato())
-                .setRolle(p.getRolle())
-                .setSituasjonKode(p.getSituasjonKode())
-                .setTilleggsopplysninger(p.getTilleggsopplysninger()))
+            .map(p -> {
+
+                var dto = new AngittPersonDto()
+                    .setAktørId(p.getAktørId())
+                    .setNavn(p.getNavn())
+                    .setFødselsdato(p.getFødselsdato())
+                    .setRolle(p.getRolle())
+                    .setSituasjonKode(p.getSituasjonKode())
+                    .setTilleggsopplysninger(p.getTilleggsopplysninger());
+
+                var personBasis = identMap.get(p.getAktørId());
+                if (personBasis != null) {
+                    dto.setPersonIdent(personBasis.getPersonIdent());
+                    dto.setNavn(personBasis.getNavn());
+                    dto.setFødselsdato(personBasis.getFødselsdato());
+                }
+                return dto;
+            })
             .collect(Collectors.toList());
     }
 
