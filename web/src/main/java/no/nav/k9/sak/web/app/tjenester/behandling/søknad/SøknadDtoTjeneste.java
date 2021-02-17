@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.kontrakt.søknad.AngittPersonDto;
 import no.nav.k9.sak.kontrakt.søknad.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.søknad.ManglendeVedleggDto;
 import no.nav.k9.sak.kontrakt.søknad.OppgittTilknytningDto;
@@ -90,7 +92,24 @@ public class SøknadDtoTjeneste {
 
         dto.setManglendeVedlegg(genererManglendeVedlegg(ref));
 
+        dto.setAngittePersoner(mapAngittePersoner(søknad.getAngittePersoner()));
+
         return Optional.of(dto);
+    }
+
+    private List<AngittPersonDto> mapAngittePersoner(Set<SøknadAngittPersonEntitet> angittePersoner) {
+        if (angittePersoner == null || angittePersoner.isEmpty()) {
+            return null;
+        }
+        return angittePersoner.stream()
+            .map(p -> new AngittPersonDto()
+                .setAktørId(p.getAktørId())
+                .setNavn(p.getNavn())
+                .setFødselsdato(p.getFødselsdato())
+                .setRolle(p.getRolle())
+                .setSituasjonKode(p.getSituasjonKode())
+                .setTilleggsopplysninger(p.getTilleggsopplysninger()))
+            .collect(Collectors.toList());
     }
 
     private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {

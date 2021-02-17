@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.søknad;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +33,11 @@ public class SøknadDto {
     @Valid
     @Size(max = 20)
     private List<ManglendeVedleggDto> manglendeVedlegg = new ArrayList<>();
+
+    @JsonProperty(value = "angittePersoner")
+    @Valid
+    @Size(max = 30)
+    private List<AngittPersonDto> angittePersoner = new ArrayList<>();
 
     /** Dato søknad mottatt av Nav. */
     @JsonProperty(value = "mottattDato", required = true)
@@ -96,6 +102,10 @@ public class SøknadDto {
         return tilleggsopplysninger;
     }
 
+    public List<AngittPersonDto> getAngittePersoner() {
+        return angittePersoner;
+    }
+
     public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
     }
@@ -126,5 +136,9 @@ public class SøknadDto {
 
     public void setTilleggsopplysninger(String tilleggsopplysninger) {
         this.tilleggsopplysninger = tilleggsopplysninger;
+    }
+
+    public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {
+        this.angittePersoner = List.copyOf(angittePersoner);
     }
 }
