@@ -4,8 +4,8 @@ import no.nav.vedtak.exception.IntegrasjonException;
 
 public class UtvidetRettRestException extends IntegrasjonException {
 
-    public UtvidetRettRestException(String kode, String msg, Throwable t, Object... args) {
-        super(kode, msg, t, args);
+    public UtvidetRettRestException(String kode, String msg, Throwable t) {
+        super(kode, msg, t);
     }
 
 }

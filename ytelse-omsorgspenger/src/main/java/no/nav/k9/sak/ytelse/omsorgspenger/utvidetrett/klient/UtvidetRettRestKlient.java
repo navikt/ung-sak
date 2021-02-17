@@ -41,7 +41,7 @@ public class UtvidetRettRestKlient implements UtvidetRettKlient {
         try {
             restKlient.post(endpoint, utvidetRett);
         } catch (Exception e) {
-            throw new UtvidetRettRestException("K9-901300", "Kunne ikke angi innvilget for : %s", e, endpoint);
+            throw new UtvidetRettRestException("K9-901300", String.format("Kunne ikke angi innvilget for : %s", endpoint), e);
         }
     }
 
