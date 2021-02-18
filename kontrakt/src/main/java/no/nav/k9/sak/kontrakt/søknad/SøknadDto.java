@@ -40,12 +40,16 @@ public class SøknadDto {
     @Size(max = 30)
     private List<AngittPersonDto> angittePersoner = new ArrayList<>();
 
-    /** Dato søknad mottatt av Nav. */
+    /**
+     * Dato søknad mottatt av Nav.
+     */
     @JsonProperty(value = "mottattDato", required = true)
     @NotNull
     private LocalDate mottattDato;
 
-    /** Oppgitt startdato for ytelsen fra søknad. */
+    /**
+     * Oppgitt startdato for ytelsen fra søknad.
+     */
     @JsonProperty(value = "oppgittStartdato", required = true)
     @NotNull
     private LocalDate oppgittStartdato;
@@ -54,7 +58,9 @@ public class SøknadDto {
     @Valid
     private OppgittTilknytningDto oppgittTilknytning;
 
-    /** Dato søknad sendt fra bruker. (er forskjellig fra mottatdato dersom ikke digital søknad). */
+    /**
+     * Dato søknad sendt fra bruker. (er forskjellig fra mottatdato dersom ikke digital søknad).
+     */
     @JsonProperty(value = "soknadsdato", required = true)
     @NotNull
     private LocalDate soknadsdato;
@@ -79,68 +85,68 @@ public class SøknadDto {
         return begrunnelseForSenInnsending;
     }
 
-    public List<ManglendeVedleggDto> getManglendeVedlegg() {
-        return Collections.unmodifiableList(manglendeVedlegg);
-    }
-
-    public LocalDate getMottattDato() {
-        return mottattDato;
-    }
-
-    public LocalDate getOppgittStartdato() {
-        return oppgittStartdato;
-    }
-
-    public OppgittTilknytningDto getOppgittTilknytning() {
-        return oppgittTilknytning;
-    }
-
-    public LocalDate getSoknadsdato() {
-        return soknadsdato;
-    }
-
-    public Språkkode getSpraakkode() {
-        return spraakkode;
-    }
-
-    public String getTilleggsopplysninger() {
-        return tilleggsopplysninger;
-    }
-
-    public List<AngittPersonDto> getAngittePersoner() {
-        return angittePersoner;
-    }
-
     public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
+    }
+
+    public List<ManglendeVedleggDto> getManglendeVedlegg() {
+        return Collections.unmodifiableList(manglendeVedlegg);
     }
 
     public void setManglendeVedlegg(List<ManglendeVedleggDto> manglendeVedlegg) {
         this.manglendeVedlegg = List.copyOf(manglendeVedlegg);
     }
 
+    public LocalDate getMottattDato() {
+        return mottattDato;
+    }
+
     public void setMottattDato(LocalDate mottattDato) {
         this.mottattDato = mottattDato;
+    }
+
+    public LocalDate getOppgittStartdato() {
+        return oppgittStartdato;
     }
 
     public void setOppgittStartdato(LocalDate oppgittStartdato) {
         this.oppgittStartdato = oppgittStartdato;
     }
 
+    public OppgittTilknytningDto getOppgittTilknytning() {
+        return oppgittTilknytning;
+    }
+
     public void setOppgittTilknytning(OppgittTilknytningDto oppgittTilknytning) {
         this.oppgittTilknytning = oppgittTilknytning;
+    }
+
+    public LocalDate getSoknadsdato() {
+        return soknadsdato;
     }
 
     public void setSoknadsdato(LocalDate soknadsdato) {
         this.soknadsdato = soknadsdato;
     }
 
+    public Språkkode getSpraakkode() {
+        return spraakkode;
+    }
+
     public void setSpraakkode(Språkkode spraakkode) {
         this.spraakkode = spraakkode;
     }
 
+    public String getTilleggsopplysninger() {
+        return tilleggsopplysninger;
+    }
+
     public void setTilleggsopplysninger(String tilleggsopplysninger) {
         this.tilleggsopplysninger = tilleggsopplysninger;
+    }
+
+    public List<AngittPersonDto> getAngittePersoner() {
+        return angittePersoner;
     }
 
     public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {

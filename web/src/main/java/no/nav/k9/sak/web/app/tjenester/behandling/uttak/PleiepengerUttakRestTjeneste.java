@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
@@ -31,14 +32,14 @@ public class PleiepengerUttakRestTjeneste {
 
     public static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
 
-    private UttakRestKlient uttakRestKlient;
+    private UttakTjeneste uttakRestKlient;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
     }
 
     @Inject
-    public PleiepengerUttakRestTjeneste(UttakRestKlient uttakRestKlient) {
+    public PleiepengerUttakRestTjeneste(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
 

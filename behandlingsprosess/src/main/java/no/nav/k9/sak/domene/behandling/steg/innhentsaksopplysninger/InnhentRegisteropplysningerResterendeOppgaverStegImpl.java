@@ -90,7 +90,7 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
     private List<AksjonspunktDefinisjon> sjekkPersonstatus(BehandlingReferanse ref) {
         List<PersonstatusType> liste = asList(PersonstatusType.BOSA, PersonstatusType.DØD, PersonstatusType.DØDD, PersonstatusType.UTVA, PersonstatusType.ADNR);
 
-        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
 
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         for (PersonstatusEntitet personstatus : personopplysninger.getPersonstatuserFor(ref.getAktørId())) {
@@ -107,7 +107,7 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
     }
 
     private boolean erSøkerUnder18ar(BehandlingReferanse ref) {
-        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
         PersonopplysningEntitet søker = personopplysninger.getSøker();
         return søker.getFødselsdato().isAfter(LocalDate.now().minusYears(18));
     }

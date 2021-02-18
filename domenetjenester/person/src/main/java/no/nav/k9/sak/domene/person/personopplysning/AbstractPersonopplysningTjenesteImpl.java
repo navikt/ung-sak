@@ -31,21 +31,15 @@ public abstract class AbstractPersonopplysningTjenesteImpl implements StandardPe
         this.personopplysningRepository = personopplysningRepository;
     }
 
-    @Override
-    public PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref) {
-        final LocalDate localDate = ref.getUtledetSkjæringstidspunkt();
-        return hentGjeldendePersoninformasjonPåTidspunkt(ref.getBehandlingId(), ref.getAktørId(), localDate);
+    public PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref, LocalDate vurderingspunkt) {
+        return hentGjeldendePersoninformasjonPåTidspunkt(ref.getBehandlingId(), ref.getAktørId(), vurderingspunkt);
     }
 
     @Override
-    public Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref) {
+    public Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref, LocalDate vurderingspunkt) {
         final Optional<PersonopplysningGrunnlagEntitet> grunnlagOpt = getPersonopplysningRepository()
             .hentPersonopplysningerHvisEksisterer(ref.getBehandlingId());
-        if (grunnlagOpt.isPresent()) {
-            final LocalDate localDate = ref.getUtledetSkjæringstidspunkt();
-            return Optional.of(mapTilAggregat(ref.getAktørId(), localDate, grunnlagOpt.get()));
-        }
-        return Optional.empty();
+        return grunnlagOpt.map(personopplysningGrunnlagEntitet -> mapTilAggregat(ref.getAktørId(), vurderingspunkt, personopplysningGrunnlagEntitet));
     }
 
     @Override

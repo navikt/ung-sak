@@ -10,12 +10,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -42,10 +42,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.uttak.UttakInMemoryTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -53,11 +49,14 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.util.Tuple;
 
-@Disabled
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class PleiepengerBeregneYtelseStegTest {
@@ -97,7 +96,7 @@ public class PleiepengerBeregneYtelseStegTest {
             .build();
         steg = new PleiepengerBeregneYtelseSteg(repositoryProvider, beregningTjeneste,
             fastsettBeregningsresultatTjeneste,
-            new UttakRestKlient(null, null), // TODO: Rette denne.
+            uttakTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
     }
 
@@ -182,8 +181,9 @@ public class PleiepengerBeregneYtelseStegTest {
     }
 
     private void byggUttakPlanResultat(Behandling behandling, LocalDate stp) {
-        var periode = new Periode(stp, stp.plusDays(2));
-        var uttaksplan = new Uttaksplan(Map.of(periode, new InnvilgetUttaksplanperiode(100, List.of())));
+        var periode = new LukketPeriode(stp, stp.plusDays(2));
+        var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
+            BigDecimal.valueOf(100), List.of(), Set.of(), Map.of(), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE)));
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }

@@ -26,6 +26,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingStegRef(kode = "BERYT")
@@ -38,7 +39,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
-    private UttakRestKlient uttakTjeneste;
+    private UttakTjeneste uttakTjeneste;
 
     protected PleiepengerBeregneYtelseSteg() {
         // for proxy
@@ -48,7 +49,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     public PleiepengerBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                         BeregningTjeneste kalkulusTjeneste,
                                         FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                        UttakRestKlient uttakTjeneste,
+                                        UttakTjeneste uttakTjeneste,
                                         @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();

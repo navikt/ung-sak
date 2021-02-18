@@ -14,13 +14,13 @@ public interface StandardPersonopplysningTjeneste {
      * Gir personopplysningene på utledet skjæringstidspunktet
      * @return personopplysninger
      */
-    PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref);
-    
+    PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref, LocalDate vurderingspunkt);
+
     /**
      * Gir personopplysningene på utledet skjæringstidspunktet
      * @return personopplysninger hvis finnes
      */
-    Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref);
+    Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref, LocalDate vurderingspunkt);
 
     /**
      * Filtrerer, og gir personopplysning-historikk som er gyldig for på gitt tidspunkt.
