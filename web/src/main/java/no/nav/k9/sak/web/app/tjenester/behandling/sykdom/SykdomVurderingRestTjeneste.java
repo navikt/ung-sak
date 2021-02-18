@@ -6,7 +6,6 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDAT
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -47,7 +45,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
@@ -274,15 +271,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer, Sporingsinformasjon sporing, LocalDateTime opprettetTidspunkt) {
-        Map<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
-        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
-            var liste = perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon());
-            if (liste == null) {
-                liste = new ArrayList<>();
-                perioderSomSkalFjernesFraVurdering.put(v.getGammelVersjon(), liste);
-            }
-            liste.add(v.getPeriode());
-        });
+        Map<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = finnPerioderSomSkalFjernesPerVurdering(endringer);
 
         for (Map.Entry<SykdomVurderingVersjon, List<Periode>> vurderingPerioder : perioderSomSkalFjernesFraVurdering.entrySet()) {
             SykdomVurderingVersjon vurdering = vurderingPerioder.getKey();
@@ -312,9 +301,20 @@ public class SykdomVurderingRestTjeneste {
                 vurderingPerioderTilLagring);
 
             sykdomVurderingRepository.lagre(tilLagring);
-
         }
+    }
 
+    private HashMap<SykdomVurderingVersjon, List<Periode>> finnPerioderSomSkalFjernesPerVurdering(List<SykdomPeriodeMedEndring> endringer) {
+        HashMap<SykdomVurderingVersjon, List<Periode>> perioderSomSkalFjernesFraVurdering = new HashMap<>();
+        endringer.stream().filter(s -> s.isEndrerVurderingSammeBehandling()).forEach(v -> {
+            var liste = perioderSomSkalFjernesFraVurdering.get(v.getGammelVersjon());
+            if (liste == null) {
+                liste = new ArrayList<>();
+                perioderSomSkalFjernesFraVurdering.put(v.getGammelVersjon(), liste);
+            }
+            liste.add(v.getPeriode());
+        });
+        return perioderSomSkalFjernesFraVurdering;
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {

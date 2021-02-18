@@ -1,33 +1,26 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import net.bytebuddy.asm.Advice;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
@@ -76,12 +69,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
         SykdomVurderingVersjon faktisk = captor.getValue();
-        List<SykdomVurderingPeriode> faktiskePerioder = faktisk.getPerioder();
-        assertThat(faktiskePerioder.size()).isEqualTo(2);
-        assertThat(faktiskePerioder.get(0).getFom()).isEqualTo(fasit.getPerioder().get(0).getFom());
-        assertThat(faktiskePerioder.get(0).getTom()).isEqualTo(fasit.getPerioder().get(0).getTom());
-        assertThat(faktiskePerioder.get(1).getFom()).isEqualTo(fasit.getPerioder().get(1).getFom());
-        assertThat(faktiskePerioder.get(1).getTom()).isEqualTo(fasit.getPerioder().get(1).getTom());
+
+        sjekkPerioder(fasit, faktisk);
     }
 
     @Test
@@ -111,20 +100,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
         verify(repo, times(2)).lagre(captor.capture());
         List<SykdomVurderingVersjon> faktisk = captor.getAllValues().stream().sorted(Comparator.comparing(p -> p.getPerioder().get(0).getFom())).collect(Collectors.toList());
 
-        List<SykdomVurderingPeriode> faktiskePerioder1 = faktisk.get(0).getPerioder();
-        List<SykdomVurderingPeriode> faktiskePerioder2 = faktisk.get(1).getPerioder();
-
-        assertThat(faktiskePerioder1.size()).isEqualTo(2);
-        assertThat(faktiskePerioder1.get(0).getFom()).isEqualTo(fasit1.getPerioder().get(0).getFom());
-        assertThat(faktiskePerioder1.get(0).getTom()).isEqualTo(fasit1.getPerioder().get(0).getTom());
-        assertThat(faktiskePerioder1.get(1).getFom()).isEqualTo(fasit1.getPerioder().get(1).getFom());
-        assertThat(faktiskePerioder1.get(1).getTom()).isEqualTo(fasit1.getPerioder().get(1).getTom());
-
-        assertThat(faktiskePerioder2.size()).isEqualTo(2);
-        assertThat(faktiskePerioder2.get(0).getFom()).isEqualTo(fasit2.getPerioder().get(0).getFom());
-        assertThat(faktiskePerioder2.get(0).getTom()).isEqualTo(fasit2.getPerioder().get(0).getTom());
-        assertThat(faktiskePerioder2.get(1).getFom()).isEqualTo(fasit2.getPerioder().get(1).getFom());
-        assertThat(faktiskePerioder2.get(1).getTom()).isEqualTo(fasit2.getPerioder().get(1).getTom());
+        sjekkPerioder(fasit1, faktisk.get(0));
+        sjekkPerioder(fasit2, faktisk.get(1));
     }
 
     @Test
@@ -151,16 +128,19 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
 
         tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
-        SykdomVurderingVersjon faktisk = captor.getValue();
-        List<SykdomVurderingPeriode> faktiskePerioder = faktisk.getPerioder();
-        assertThat(faktiskePerioder.size()).isEqualTo(3);
-        assertThat(faktiskePerioder.get(0).getFom()).isEqualTo(fasit.getPerioder().get(0).getFom());
-        assertThat(faktiskePerioder.get(0).getTom()).isEqualTo(fasit.getPerioder().get(0).getTom());
-        assertThat(faktiskePerioder.get(1).getFom()).isEqualTo(fasit.getPerioder().get(1).getFom());
-        assertThat(faktiskePerioder.get(1).getTom()).isEqualTo(fasit.getPerioder().get(1).getTom());
-        assertThat(faktiskePerioder.get(2).getFom()).isEqualTo(fasit.getPerioder().get(2).getFom());
-        assertThat(faktiskePerioder.get(2).getTom()).isEqualTo(fasit.getPerioder().get(2).getTom());
 
+        sjekkPerioder(fasit, captor.getValue());
+    }
+
+    private void sjekkPerioder(SykdomVurderingVersjon fasit, SykdomVurderingVersjon faktisk) {
+        List<Periode> fasitPerioder = fasit.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
+        List<Periode> faktiskePerioder = faktisk.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
+        assertThat(faktiskePerioder.size()).isEqualTo(fasit.getPerioder().size());
+        Iterator<Periode> fasiter = fasitPerioder.iterator();
+        Iterator<Periode> faktiskiter = faktiskePerioder.iterator();
+        while(fasiter.hasNext() && faktiskiter.hasNext()) {
+            assertThat(fasiter.next()).isEqualTo(faktiskiter.next());
+        }
     }
 
     private SykdomVurderingVersjon createSykdomVurderingOgVersjonMock(long versjon, long rangering, Periode... perioder) {
