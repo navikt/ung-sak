@@ -68,9 +68,8 @@ class FjernOverlappendeVurderingerRestTjenesteTest {
 
         tjeneste.fjernOverlappendePerioderFraOverskyggendeVurderinger(sykdomPeriodeMedEndringer, mockSporingsinformasjon, LocalDateTime.now());
         verify(repo).lagre(captor.capture());
-        SykdomVurderingVersjon faktisk = captor.getValue();
 
-        sjekkPerioder(fasit, faktisk);
+        sjekkPerioder(fasit, captor.getValue());
     }
 
     @Test
