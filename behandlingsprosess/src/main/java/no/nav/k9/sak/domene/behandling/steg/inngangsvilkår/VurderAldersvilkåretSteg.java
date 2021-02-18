@@ -65,23 +65,27 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
-        vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
+        var dødsdato = personopplysningerAggregat.getSøker().getDødsdato();
+        vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato, dødsdato);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato) {
+    void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato, LocalDate dødsdato) {
         var maksdato = fødselsdato.plusYears(70);
-        var regelInput = "{ 'fødselsdato': '" + fødselsdato + "', 'maksdato': '" + maksdato + "' }";
+        if (dødsdato != null && maksdato.isAfter(dødsdato)) {
+            maksdato = dødsdato;
+        }
+        var regelInput = "{ 'fødselsdato': '" + fødselsdato + ", 'dødsdato': '" + dødsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            vurderPeriode(vilkårBuilder, maksdato, regelInput, periode);
+            vurderPeriode(vilkårBuilder, maksdato, dødsdato, regelInput, periode);
         }
     }
 
-    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, String regelInput, DatoIntervallEntitet periode) {
+    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, LocalDate dødsdato, String regelInput, DatoIntervallEntitet periode) {
         if (periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)) && !periode.getFomDato().equals(maksdato)) {
             var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato.minusDays(1)));
             builder.medUtfall(Utfall.OPPFYLT)
@@ -91,7 +95,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
             builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, periode.getTomDato()));
             builder.medUtfall(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
+                .medAvslagsårsak(utledAvslagsårsak(maksdato, dødsdato))
                 .medRegelInput(regelInput);
 
             vilkårBuilder.leggTil(builder);
@@ -100,7 +104,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
             var builder = vilkårBuilder.hentBuilderFor(periode);
             if (periode.getFomDato().isAfter(maksdato) || periode.getFomDato().isEqual(maksdato)) {
                 builder.medUtfall(Utfall.IKKE_OPPFYLT)
-                    .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
+                    .medAvslagsårsak(utledAvslagsårsak(maksdato, dødsdato))
                     .medRegelInput(regelInput);
             } else {
                 builder.medUtfall(Utfall.OPPFYLT)
@@ -108,6 +112,16 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
             }
             vilkårBuilder.leggTil(builder);
         }
+    }
+
+    private Avslagsårsak utledAvslagsårsak(LocalDate maksdato, LocalDate dødsdato) {
+        if (dødsdato == null) {
+            return Avslagsårsak.SØKER_OVER_HØYESTE_ALDER;
+        }
+        if (maksdato.isBefore(dødsdato)) {
+            return Avslagsårsak.SØKER_OVER_HØYESTE_ALDER;
+        }
+        return Avslagsårsak.SØKER_HAR_AVGÅTT_MED_DØDEN;
     }
 
 
