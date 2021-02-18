@@ -1,7 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,13 +18,16 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.kontrakt.søknad.AngittPersonDto;
 import no.nav.k9.sak.kontrakt.søknad.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.søknad.ManglendeVedleggDto;
 import no.nav.k9.sak.kontrakt.søknad.OppgittTilknytningDto;
@@ -33,6 +38,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
+import no.nav.k9.sak.typer.Periode;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -42,6 +48,7 @@ public class SøknadDtoTjeneste {
     private KompletthetsjekkerProvider kompletthetsjekkerProvider;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private MedlemTjeneste medlemTjeneste;
+    private PersoninfoAdapter personinfoAdapter;
 
     protected SøknadDtoTjeneste() {
         // for CDI proxy
@@ -51,11 +58,13 @@ public class SøknadDtoTjeneste {
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              KompletthetsjekkerProvider kompletthetsjekkerProvider,
+                             PersoninfoAdapter personinfoAdapter,
                              ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                              MedlemTjeneste medlemTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
+        this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
@@ -83,6 +92,7 @@ public class SøknadDtoTjeneste {
         dto.setTilleggsopplysninger(søknad.getTilleggsopplysninger());
         dto.setSpraakkode(søknad.getSpråkkode());
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
+        Optional.ofNullable(søknad.getSøknadsperiode()).ifPresent(sp -> dto.setSøknadsperiode(new Periode(sp.getFomDato(), sp.getTomDato())));
 
         medlemTjeneste.hentMedlemskap(behandlingId).ifPresent(ma -> {
             dto.setOppgittTilknytning(mapFra(ma.getOppgittTilknytning().orElse(null)));
@@ -90,7 +100,40 @@ public class SøknadDtoTjeneste {
 
         dto.setManglendeVedlegg(genererManglendeVedlegg(ref));
 
+        dto.setAngittePersoner(mapAngittePersoner(søknad.getAngittePersoner()));
+
         return Optional.of(dto);
+    }
+
+    private List<AngittPersonDto> mapAngittePersoner(Set<SøknadAngittPersonEntitet> angittePersoner) {
+        if (angittePersoner == null || angittePersoner.isEmpty()) {
+            return List.of();
+        }
+
+        var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
+            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentBrukerBasisForAktør(p.getAktørId()).orElse(null)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return angittePersoner.stream()
+            .map(p -> {
+
+                var dto = new AngittPersonDto()
+                    .setAktørId(p.getAktørId())
+                    .setNavn(p.getNavn())
+                    .setFødselsdato(p.getFødselsdato())
+                    .setRolle(p.getRolle())
+                    .setSituasjonKode(p.getSituasjonKode())
+                    .setTilleggsopplysninger(p.getTilleggsopplysninger());
+
+                var personBasis = identMap.get(p.getAktørId());
+                if (personBasis != null) {
+                    dto.setPersonIdent(personBasis.getPersonIdent());
+                    dto.setNavn(personBasis.getNavn());
+                    dto.setFødselsdato(personBasis.getFødselsdato());
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
     private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {

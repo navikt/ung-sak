@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.søknad;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
@@ -32,6 +34,11 @@ public class SøknadDto {
     @Valid
     @Size(max = 20)
     private List<ManglendeVedleggDto> manglendeVedlegg = new ArrayList<>();
+
+    @JsonProperty(value = "angittePersoner")
+    @Valid
+    @Size(max = 30)
+    private List<AngittPersonDto> angittePersoner = new ArrayList<>();
 
     /** Dato søknad mottatt av Nav. */
     @JsonProperty(value = "mottattDato", required = true)
@@ -60,6 +67,10 @@ public class SøknadDto {
     @Size(max = 5000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String tilleggsopplysninger;
+
+    @JsonProperty(value = "søknadsperiode")
+    @Valid
+    private Periode søknadsperiode;
 
     public SøknadDto() {
     }
@@ -96,6 +107,10 @@ public class SøknadDto {
         return tilleggsopplysninger;
     }
 
+    public List<AngittPersonDto> getAngittePersoner() {
+        return angittePersoner;
+    }
+
     public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
     }
@@ -126,5 +141,13 @@ public class SøknadDto {
 
     public void setTilleggsopplysninger(String tilleggsopplysninger) {
         this.tilleggsopplysninger = tilleggsopplysninger;
+    }
+
+    public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {
+        this.angittePersoner = angittePersoner == null ? Collections.emptyList() : List.copyOf(angittePersoner);
+    }
+
+    public void setSøknadsperiode(Periode periode) {
+        this.søknadsperiode = periode;
     }
 }

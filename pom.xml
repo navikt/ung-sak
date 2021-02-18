@@ -38,7 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <junit.version>5.7.1</junit.version>
-        <felles.version>3.0.84</felles.version>
+        <felles.version>3.0.97</felles.version>
 
         <fp-kontrakter.version>5.1-20201223140505-5ac989f</fp-kontrakter.version>
         <k9format.version>5.1.16</k9format.version>
@@ -521,6 +521,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

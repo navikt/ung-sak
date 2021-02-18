@@ -73,6 +73,9 @@ public class SøknadEntitet extends BaseEntitet {
     @Column(name = "bruker_rolle", nullable = false)
     private RelasjonsRolleType brukerRolle = RelasjonsRolleType.UDEFINERT;
 
+    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "søknad")
+    private Set<SøknadAngittPersonEntitet> angittePersoner = new HashSet<>(2);
+
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "fomDato", column = @Column(name = "fom", updatable = false)),
@@ -142,11 +145,15 @@ public class SøknadEntitet extends BaseEntitet {
         this.tilleggsopplysninger = tilleggsopplysninger;
     }
 
+    public Set<SøknadAngittPersonEntitet> getAngittePersoner() {
+        return angittePersoner;
+    }
+
     public Språkkode getSpråkkode() {
         return språkkode;
     }
 
-    public void setSpråkkode(Språkkode språkkode) {
+    void setSpråkkode(Språkkode språkkode) {
         this.språkkode = språkkode;
     }
 
@@ -275,6 +282,13 @@ public class SøknadEntitet extends BaseEntitet {
         public Builder leggTilVedlegg(SøknadVedleggEntitet søknadVedlegg) {
             SøknadVedleggEntitet sve = new SøknadVedleggEntitet(søknadVedlegg);
             søknadMal.søknadVedlegg.add(sve);
+            sve.setSøknad(søknadMal);
+            return this;
+        }
+
+        public Builder leggTilAngittPerson(SøknadAngittPersonEntitet angitt) {
+            var sve = new SøknadAngittPersonEntitet(angitt);
+            søknadMal.angittePersoner.add(sve);
             sve.setSøknad(søknadMal);
             return this;
         }
