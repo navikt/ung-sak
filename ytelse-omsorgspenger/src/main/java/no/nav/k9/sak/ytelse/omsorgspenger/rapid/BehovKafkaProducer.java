@@ -12,7 +12,10 @@ import org.slf4j.MDC;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @ApplicationScoped
@@ -20,6 +23,7 @@ public class BehovKafkaProducer extends BehovKlient {
     private static final String BEHOVESSEKVENS_ID = "behovessekvens_id";
     private static final Logger LOG = LoggerFactory.getLogger(BehovKafkaProducer.class);
 
+    private String clientId;
     private String topic;
     private Producer<String, String> producer;
 
@@ -31,9 +35,10 @@ public class BehovKafkaProducer extends BehovKlient {
         @KonfigVerdi("bootstrap.servers") String bootstrapServers,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password) {
+        this.clientId = clientId();
         Properties properties = new Properties();
         properties.put("bootstrap.servers", bootstrapServers);
-        properties.put("client.id", "TODO"); // TODO
+        properties.put("client.id", this.clientId);
         setSecurity(username, properties);
         setUsernameAndPassword(username, password, properties);
         this.topic = topic;
@@ -45,7 +50,7 @@ public class BehovKafkaProducer extends BehovKlient {
         try {
             MDC.put(BEHOVESSEKVENS_ID, behovssekvensId);
             var metadata = producer.send(new ProducerRecord<>(topic, behovssekvensId, behovssekvens)).get();
-            LOG.info("Sendt OK topic={}, offset={}, partition={}", metadata.topic(), metadata.offset(), metadata.partition());
+            LOG.info("Sendt OK clientId={}, topic={}, offset={}, partition={}", clientId, metadata.topic(), metadata.offset(), metadata.partition());
         } catch (InterruptedException e) { // TODO
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -55,6 +60,17 @@ public class BehovKafkaProducer extends BehovKlient {
         }
     }
 
+    private static String clientId() {
+        if (System.getenv().containsKey("NAIS_APP_NAME")) {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                return UUID.randomUUID().toString();
+            }
+        } else {
+            return UUID.randomUUID().toString();
+        }
+    }
 
     private void setUsernameAndPassword(String username, String password, Properties properties) {
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
