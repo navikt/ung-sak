@@ -51,6 +51,10 @@ public class LagreOppgittOpptjening {
                 .collect(Collectors.toList());
             builderOgStatus.builder.leggTilEgneNæringer(egenNæringBuilders);
         }
+        if (søknad.getAktivitet().getFrilanser() != null){
+            builderOgStatus.builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
+                .build());
+        }
 
         if (builderOgStatus.builder.build().harOpptjening() || !builderOgStatus.erNyopprettet) {
             iayTjeneste.lagreOppgittOpptjening(behandlingId, builderOgStatus.builder);
