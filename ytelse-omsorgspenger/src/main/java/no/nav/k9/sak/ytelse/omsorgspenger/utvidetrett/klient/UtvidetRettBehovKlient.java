@@ -27,7 +27,7 @@ public class UtvidetRettBehovKlient implements UtvidetRettKlient {
 
     private BehovKlient behovKlient;
 
-    private UtvidetRettBehovKlient() {}
+    UtvidetRettBehovKlient() {}
 
     @Inject
     public UtvidetRettBehovKlient(
