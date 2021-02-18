@@ -147,9 +147,6 @@ public enum BehandlingResultatType implements Kodeverdi {
     public boolean erHenlagt() {
         return ALLE_HENLEGGELSESKODER.contains(this);
     }
-    public boolean erInnvilget() {
-        return INNVILGET_KODER.contains(this);
-    }
 
     public boolean isBehandlingHenlagt() {
         return BehandlingResultatType.getAlleHenleggelseskoder().contains(this);
