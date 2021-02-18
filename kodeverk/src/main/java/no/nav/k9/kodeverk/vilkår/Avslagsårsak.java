@@ -78,6 +78,8 @@ public enum Avslagsårsak implements Kodeverdi {
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
         Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
+    SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
+        Map.of(FagsakYtelseType.PSB, "9-5")),
 
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen",
         Map.of()),
