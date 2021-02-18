@@ -31,7 +31,7 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
 
         // Vurder om det skal tas stilling til omsorgen for
-        final var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(param.getRef());
+        final var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(param.getRef(), param.getRef().getFagsakPeriode().getFomDato());
         if (param.getRef().getPleietrengendeAktørId() != null && personopplysningerAggregat.isPresent()) {
             final var aggregat = personopplysningerAggregat.get();
             final var pleietrengende = param.getRef().getPleietrengendeAktørId();

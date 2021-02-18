@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @ApplicationScoped
@@ -22,7 +23,7 @@ public class VurderUttakSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
-    private UttakRestKlient uttakRestKlient;
+    private UttakTjeneste uttakRestKlient;
 
     VurderUttakSteg(){
         // for proxy
@@ -31,7 +32,7 @@ public class VurderUttakSteg implements BehandlingSteg {
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
                            MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                           UttakRestKlient uttakRestKlient){
+                           UttakTjeneste uttakRestKlient){
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakRestKlient = uttakRestKlient;

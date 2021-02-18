@@ -69,7 +69,7 @@ public class UttakInputTjeneste {
         Long behandlingId = ref.getBehandlingId();
         SøknadEntitet søknad = søknadRepository.hentSøknadHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Har ikke søknad for behandling " + ref));
-        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref);
+        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
 
         var fastsattUttak = lagFastsattUttakAktivitetPerioder(ref);
         var søknadsperioder = lagSøknadsperioder(ref);

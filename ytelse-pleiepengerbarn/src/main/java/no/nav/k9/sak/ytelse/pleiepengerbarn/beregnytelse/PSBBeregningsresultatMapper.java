@@ -43,6 +43,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
@@ -57,7 +58,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private UttakRestKlient uttakKlient;
+    private UttakTjeneste uttakKlient;
 
     PSBBeregningsresultatMapper() {
         // For inject
@@ -67,7 +68,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     public PSBBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                       UttakRestKlient uttakKlient) {
+                                       UttakTjeneste uttakKlient) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
@@ -152,7 +153,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                 var periode = new no.nav.k9.sak.typer.Periode(interval.getFomDato(), interval.getTomDato());
                 final UtfallType utfallType = mapToUtfallType(ut.getUtfall());
                 a.setUttak(List.of(new UttakDto(periode, utfallType, BigDecimal.ZERO))); // default uttak, overskrives under
-                
+
                 ut.getUtbetalingsgrader()
                         .stream()
                         .filter(ug -> matchesAndel(a, ug.getArbeidsforhold()))
@@ -169,13 +170,13 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
             || arbeidsforhold.getArbeidsforholdId() == null
             || andel.getArbeidsforholdId().equals(arbeidsforhold.getArbeidsforholdId())
         );
-        
+
         // TODO: Trenger vi å sjekke arbeidstype??
-        
+
         if (!sammeArbeidsforhold) {
             return false;
         }
-        
+
         if (andel.getArbeidsgiverOrgnr() != null) {
             return andel.getArbeidsgiverOrgnr().getOrgNummer().equals(arbeidsforhold.getOrganisasjonsnummer());
         } else {

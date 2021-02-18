@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
@@ -33,14 +34,14 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 @ApplicationScoped
 public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<PleiepengerSyktBarnGrunnlag> {
 
-    private UttakRestKlient uttakRestKlient;
+    private UttakTjeneste uttakRestKlient;
 
     public PsbYtelsesspesifiktGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PsbYtelsesspesifiktGrunnlagMapper(UttakRestKlient uttakRestKlient) {
+    public PsbYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
 

@@ -674,6 +674,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
+        fagsak.setPeriode(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }

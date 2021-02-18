@@ -18,9 +18,12 @@ import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
@@ -47,6 +50,7 @@ public class MapInputTilUttakTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private UttakRepository uttakRepository;
+    private PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
 
 
@@ -54,52 +58,56 @@ public class MapInputTilUttakTjeneste {
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
                                     PleiebehovResultatRepository pleiebehovResultatRepository,
                                     UttakRepository uttakRepository,
+                                    PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakRepository = uttakRepository;
+        this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
 
-    public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {       
+    public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var uttakGrunnlag = uttakRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var oppgittUttak = uttakGrunnlag.getOppgittUttak();
         var pleiebehov = pleiebehovResultatRepository.hent(referanse.getBehandlingId());
-        
-        return toRequestData(behandling, vilkårene, oppgittUttak, pleiebehov);
+
+        return toRequestData(behandling, personopplysningerAggregat, vilkårene, oppgittUttak, pleiebehov);
     }
 
-    private Uttaksgrunnlag toRequestData(Behandling behandling, Vilkårene vilkårene, UttakAktivitet oppgittUttak, PleiebehovResultat pleiebehov) {
-        // TODO: Dødsdato:
-        final Barn barn = new Barn(behandling.getFagsak().getPleietrengendeAktørId().getId(), null);
-        
-        // TODO: Fødsels- og dødsdato:
-        final Søker søker = new Søker(behandling.getAktørId().getId(), LocalDate.now().minusYears(20), null); 
-        
+    private Uttaksgrunnlag toRequestData(Behandling behandling, PersonopplysningerAggregat personopplysningerAggregat, Vilkårene vilkårene, UttakAktivitet oppgittUttak, PleiebehovResultat pleiebehov) {
+
+        var søkerPersonopplysninger = personopplysningerAggregat.getSøker();
+        var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
+        final Barn barn = new Barn(pleietrengendePersonopplysninger.getAktørId().getId(), pleietrengendePersonopplysninger.getDødsdato());
+
+        final Søker søker = new Søker(søkerPersonopplysninger.getAktørId().getId(), søkerPersonopplysninger.getFødselsdato(), søkerPersonopplysninger.getDødsdato());
+
         // TODO: Map:
         final List<String> andrePartersSaksnummer = List.of();
-        
+
         // TODO: Sett faktisk søkt uttak:
         final List<SøktUttak> søktUttak = oppgittUttak.getPerioder()
                 .stream()
                 .map(uap -> new SøktUttak(toLukketPeriode(uap.getPeriode()), null))
                 .collect(Collectors.toList());
-        
+
         // TODO: Se kommentarer/TODOs under denne:
         final List<Arbeid> arbeid = toArbeid(oppgittUttak);
-        
+
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = toTilsynsbehov(pleiebehov);
-        
+
         // TODO: Map:
         final List<LukketPeriode> lovbestemtFerie = List.of();
-        
+
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(vilkårene);
-        
+
         // TODO: Map:
         final Map<LukketPeriode, Duration> tilsynsperioder = Map.of();
-        
+
         return new Uttaksgrunnlag(
                 barn,
                 søker,
@@ -121,11 +129,11 @@ public class MapInputTilUttakTjeneste {
         });
         return tilsynsbehov;
     }
-    
+
     private LukketPeriode toLukketPeriode(DatoIntervallEntitet periode) {
         return new LukketPeriode(periode.getFomDato(), periode.getTomDato());
     }
-    
+
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
         switch (grad) {
         case INGEN: return Pleiebehov.PROSENT_0;
@@ -148,7 +156,7 @@ public class MapInputTilUttakTjeneste {
             perioder.add(p);
             arbeidsforhold.put(key, perioder);
         });
-        
+
         return arbeidsforhold.entrySet().stream().map(e -> {
                 var uttakAktivitetPeriode = e.getValue().get(0);
                 final Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder = new HashMap<>();
@@ -159,7 +167,7 @@ public class MapInputTilUttakTjeneste {
                     perioder.put(new LukketPeriode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()),
                             new ArbeidsforholdPeriodeInfo(jobberNormaltPerUke, jobber));
                 });
-                
+
                 return new Arbeid(
                         new Arbeidsforhold(
                                 uttakAktivitetPeriode.getAktivitetType().getKode(),
@@ -187,7 +195,7 @@ public class MapInputTilUttakTjeneste {
         });
         return inngangsvilkår;
     }
-    
+
     static class ArbeidsgiverArbeidsforhold {
 
         private Arbeidsgiver arbeidsgiver;
