@@ -38,7 +38,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: ${{ env.CLUSTER }}
-          RESOURCE: nais/${{ env.CLUSTER }}-${{ env.NAMESPACE }}.yml
+          RESOURCE: deploy/${{ env.CLUSTER }}-${{ env.NAMESPACE }}.yml
           
       - name: Oppdater kommentar med deployment status ved feil
         if: failure()
