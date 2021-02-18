@@ -138,7 +138,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(ZonedDateTime.now())
-            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato(), relasjon.getHarSammeBosted()))
+            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato()))
             .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
 
     }

@@ -77,9 +77,9 @@ public class UtvidetRettBehovKlientTest {
             ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
             new Søker(NorskIdentitetsnummer.of("29099011111")),
-            new Barn(NorskIdentitetsnummer.of("01011811111"), LocalDate.parse("2018-01-01"), true)
+            new Barn(NorskIdentitetsnummer.of("01011811111"), LocalDate.parse("2018-01-01"))
         ),
-        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"identitetsnummer\":\"29099011111\"},\"barn\":{\"identitetsnummer\":\"01011811111\",\"fødselsdato\":\"2018-01-01\",\"harSammeBosted\":true}}"
+        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"identitetsnummer\":\"29099011111\"},\"barn\":{\"identitetsnummer\":\"01011811111\",\"fødselsdato\":\"2018-01-01\"}}"
     );
 
     private static UtvidetRettSerialisering midlertidigAlene = new UtvidetRettSerialisering<>(

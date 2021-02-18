@@ -30,16 +30,10 @@ public class Barn implements Person {
     @Valid
     private LocalDate fødselsdato;
 
-    /** Hvorvidt barnet har samme bosted som søker. */
-    @JsonProperty(value = "harSammeBosted")
-    private Boolean harSammeBosted;
-
     @JsonCreator
     public Barn(@JsonProperty(value = "identitetsnummer", required = true) NorskIdentitetsnummer identitetsnummer,
-                @JsonProperty(value = "fødselsdato") LocalDate fødselsdato,
-                @JsonProperty(value = "harSammeBosted") Boolean harSammeBosted) {
+                @JsonProperty(value = "fødselsdato") LocalDate fødselsdato) {
         this.fødselsdato = fødselsdato;
-        this.harSammeBosted = harSammeBosted;
         this.identitetsnummer = Objects.requireNonNull(identitetsnummer, "identitetsnummer");
     }
 
@@ -62,10 +56,6 @@ public class Barn implements Person {
     @Override
     public PersonIdent getPersonIdent() {
         return identitetsnummer;
-    }
-
-    public Boolean getHarSammeBosted() {
-        return harSammeBosted;
     }
 
     @Override
