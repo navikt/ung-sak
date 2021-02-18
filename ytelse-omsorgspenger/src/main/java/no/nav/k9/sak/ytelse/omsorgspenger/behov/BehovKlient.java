@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.rapid;
+package no.nav.k9.sak.ytelse.omsorgspenger.behov;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

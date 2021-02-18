@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient;
 
-import no.nav.k9.sak.ytelse.omsorgspenger.rapid.BehovKlient;
+import no.nav.k9.sak.ytelse.omsorgspenger.behov.BehovKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;

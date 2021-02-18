@@ -1,10 +1,11 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.rapid;
+package no.nav.k9.sak.ytelse.omsorgspenger.behov;
 
 import no.nav.vedtak.konfig.KonfigVerdi;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @ApplicationScoped
 public class BehovKafkaProducer extends BehovKlient {
@@ -51,10 +51,8 @@ public class BehovKafkaProducer extends BehovKlient {
             MDC.put(BEHOVESSEKVENS_ID, behovssekvensId);
             var metadata = producer.send(new ProducerRecord<>(topic, behovssekvensId, behovssekvens)).get();
             LOG.info("Sendt OK clientId={}, topic={}, offset={}, partition={}", clientId, metadata.topic(), metadata.offset(), metadata.partition());
-        } catch (InterruptedException e) { // TODO
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new BehovKafkaException(String.format("Oppsto feil når clientId=%s skulle sende behov på topic=%s", clientId, topic), e);
         } finally {
             MDC.remove(BEHOVESSEKVENS_ID);
         }
@@ -76,7 +74,7 @@ public class BehovKafkaProducer extends BehovKlient {
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
             String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
             String jaasCfg = String.format(jaasTemplate, username, password);
-            properties.put("sasl.jaas.config", jaasCfg);
+            properties.put(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
         }
     }
 
