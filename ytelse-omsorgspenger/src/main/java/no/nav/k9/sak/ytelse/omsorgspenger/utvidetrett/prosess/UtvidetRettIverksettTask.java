@@ -78,9 +78,9 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var iverksett = mapIverksett(behandling, søknad, vilkårene);
         var utfall = behandling.getBehandlingResultatType();
 
-        if (utfall == BehandlingResultatType.INNVILGET) {
+        if (utfall.erInnvilget()) {
             utvidetRettKlient.innvilget(iverksett);
-        } else if (utfall == BehandlingResultatType.AVSLÅTT) {
+        } else if (utfall.isBehandlingsresultatAvslåttOrOpphørt()) {
             utvidetRettKlient.avslått(iverksett);
         } else {
             LOG.info("Behandling av utvidet rett med utfall={} sendes ikke.", utfall);
