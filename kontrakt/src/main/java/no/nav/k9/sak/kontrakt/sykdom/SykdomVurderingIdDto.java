@@ -1,7 +1,6 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.Objects;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -13,28 +12,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class SykdomDokumentIdDto {
+public class SykdomVurderingIdDto {
 
-    public static final String DESC = "sykdomDokumentId";
-    public static final String NAME = "sykdomDokumentId";
+    public static final String DESC = "sykdomVurderingId";
+    public static final String NAME = "sykdomVurderingId";
 
     @JsonProperty(value = NAME, required = true)
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String sykdomdokumentId;
+    private String sykdomVurderingId;
 
-    public SykdomDokumentIdDto(String sykdomDokumentId) {
-        this.sykdomdokumentId = Objects.requireNonNull(sykdomDokumentId, NAME);
+    public SykdomVurderingIdDto(String sykdomVurderingId) {
+        this.sykdomVurderingId = Objects.requireNonNull(sykdomVurderingId, NAME);
     }
     
-    protected SykdomDokumentIdDto() {
+    protected SykdomVurderingIdDto() {
         //
     }
     
     
-    public String getSykdomDokumentId() {
-        return sykdomdokumentId;
+    public String getSykdomVurderingId() {
+        return sykdomVurderingId;
     }
 
     @Override
@@ -44,17 +43,17 @@ public class SykdomDokumentIdDto {
         if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var other = (SykdomDokumentIdDto) obj;
-        return Objects.equals(this.sykdomdokumentId, other.sykdomdokumentId);
+        var other = (SykdomVurderingIdDto) obj;
+        return Objects.equals(this.sykdomVurderingId, other.sykdomVurderingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sykdomdokumentId);
+        return Objects.hash(sykdomVurderingId);
     }
 
     @Override
     public String toString() {
-        return String.valueOf(sykdomdokumentId);
+        return String.valueOf(sykdomVurderingId);
     }
 }

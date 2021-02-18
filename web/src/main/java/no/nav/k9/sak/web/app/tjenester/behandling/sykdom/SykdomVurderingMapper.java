@@ -8,9 +8,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingAnnenInformasjon;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringDto;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOpprettelseDto;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingVersjonDto;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentOversiktMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPerson;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode;
@@ -150,5 +158,9 @@ public class SykdomVurderingMapper {
         public SykdomPerson getEndretForPerson() {
             return endretForPerson;
         }
+    }
+    
+    public SykdomPeriodeMedEndringDto toSykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
+        return new SykdomPeriodeMedEndringDto(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
     }
 }

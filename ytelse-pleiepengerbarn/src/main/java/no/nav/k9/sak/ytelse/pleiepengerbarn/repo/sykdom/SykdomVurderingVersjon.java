@@ -19,6 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.Periode;
 
 @Entity(name = "SykdomVurderingVersjon")

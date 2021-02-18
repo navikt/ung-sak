@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.Objects;
 
@@ -10,8 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomPeriodeMedEndring;
-
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,10 +38,6 @@ public class SykdomPeriodeMedEndringDto {
         this.periode = Objects.requireNonNull(periode, "periode");
         this.endrerVurderingSammeBehandling = endrerVurderingSammeBehandling;
         this.endrerAnnenVurdering = endrerAnnenVurdering;
-    }
-    
-    public SykdomPeriodeMedEndringDto(SykdomPeriodeMedEndring p) {
-        this(p.getPeriode(), p.isEndrerVurderingSammeBehandling(), p.isEndrerAnnenVurdering());
     }
 
     

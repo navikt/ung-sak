@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 
 
 // Sammensetning av SykdomVurdering og SykdomVurderingVersjon. For øverste nivå (dvs ikke de under "tidligereVersjoner") brukes SykdomVurderingVersjon med høyest versjon.
