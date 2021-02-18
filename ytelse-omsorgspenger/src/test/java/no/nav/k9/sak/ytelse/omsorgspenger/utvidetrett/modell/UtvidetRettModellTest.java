@@ -33,7 +33,7 @@ public class UtvidetRettModellTest {
 
     @Test
     void skal_genrere_KroniskSyktBarnSøknadRequest_json() throws Exception {
-        var barn = new Barn(NorskIdentitetsnummer.of("1234"), LocalDate.now(), true);
+        var barn = new Barn(NorskIdentitetsnummer.of("1234"), LocalDate.now());
         var søker = new Søker(NorskIdentitetsnummer.of("4321"));
 
         var req = new KroniskSyktBarn()

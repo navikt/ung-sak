@@ -58,6 +58,12 @@
             <artifactId>kontrakter</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.rapid</groupId>
+            <artifactId>behov</artifactId>
+            <version>1.a7233f8</version>
+        </dependency>
+
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

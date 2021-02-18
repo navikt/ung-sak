@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -17,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettRestKlient;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
@@ -26,19 +27,22 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 @ProsessTask(UtvidetRettIverksettTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
+    private static final Logger LOG = LoggerFactory.getLogger(UtvidetRettIverksettTask.class);
     public static final String TASKTYPE = "iverksetteVedtak.sendUtvidetRett";
 
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
 
-    private UtvidetRettRestKlient restKlient;
+    private UtvidetRettKlient utvidetRettKlient;
 
     private PersoninfoAdapter personinfoAdapter;
 
@@ -53,13 +57,13 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
                                     BehandlingRepository behandlingRepository,
                                     PersoninfoAdapter personinfoAdapter,
                                     PersonopplysningTjeneste personopplysningTjeneste,
-                                    UtvidetRettRestKlient restKlient) {
+                                    UtvidetRettKlient utvidetRettKlient) {
         this.søknadRepository = søknadRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.restKlient = restKlient;
+        this.utvidetRettKlient = utvidetRettKlient;
     }
 
     @Override
@@ -72,8 +76,15 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
         var iverksett = mapIverksett(behandling, søknad, vilkårene);
+        var utfall = behandling.getBehandlingResultatType();
 
-        restKlient.innvilget(behandling.getFagsakYtelseType(), behandling.getUuid(), iverksett);
+        if (utfall == BehandlingResultatType.INNVILGET || utfall == BehandlingResultatType.INNVILGET_ENDRING) {
+            utvidetRettKlient.innvilget(iverksett);
+        } else if (utfall == BehandlingResultatType.AVSLÅTT) {
+            utvidetRettKlient.avslått(iverksett);
+        } else {
+            throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=" + utfall);
+        }
     }
 
     private UtvidetRett mapIverksett(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
@@ -127,7 +138,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(ZonedDateTime.now())
-            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato(), relasjon.getHarSammeBosted()))
+            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato()))
             .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
 
     }
