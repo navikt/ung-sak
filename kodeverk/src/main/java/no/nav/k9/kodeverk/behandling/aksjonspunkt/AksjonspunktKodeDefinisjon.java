@@ -99,6 +99,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // OMS
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
+    public static final String VURDER_ÅRSKVANTUM_DOK = "9004";
     public static final String VURDER_OMS_UTVIDET_RETT = "9013";
 
     // FRISINN
