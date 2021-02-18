@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

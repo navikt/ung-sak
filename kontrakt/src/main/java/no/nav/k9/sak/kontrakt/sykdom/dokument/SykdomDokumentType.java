@@ -1,6 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
-
-import javax.persistence.AttributeConverter;
+package no.nav.k9.sak.kontrakt.sykdom.dokument;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
@@ -35,6 +33,10 @@ public enum SykdomDokumentType {
         return relevantForSykdom;
     }
     
+    public String getDatabasekode() {
+        return databasekode;
+    }
+    
     @JsonCreator(mode = Mode.DELEGATING)
     public static SykdomDokumentType fraApikode(String s) {
         for (var type : values()) {
@@ -43,23 +45,5 @@ public enum SykdomDokumentType {
             }
         }
         throw new IllegalArgumentException("Ukjent type: " + s);
-    }
-    
-    
-    public static class SykdomDokumentTypeConverter implements AttributeConverter<SykdomDokumentType, String> {
-        @Override
-        public String convertToDatabaseColumn(SykdomDokumentType type) {
-            return type.databasekode;
-        }
-        
-        @Override
-        public SykdomDokumentType convertToEntityAttribute(String databasekode) {
-            for (SykdomDokumentType type : values()) {
-                if (type.databasekode.equals(databasekode)) {
-                    return type;
-                }
-            }
-            return null;
-        }
     }
 }

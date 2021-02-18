@@ -1,12 +1,10 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
+package no.nav.k9.sak.kontrakt.sykdom.dokument;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertFalse;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -17,15 +15,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.ResourceLink;
-import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SykdomInnleggelseDto {
+public class SykdomDiagnosekoderDto {
 
     @JsonProperty(value = "behandlingUuid", required = true)
-    @NotNull
     @Valid
     private UUID behandlingUuid;
 
@@ -38,33 +34,32 @@ public class SykdomInnleggelseDto {
     @Valid
     private String versjon;
 
-    @JsonProperty(value = "perioder")
+    @JsonProperty(value = "diagnosekoder")
     @Size(max = 1000)
     @Valid
-    private List<Periode> perioder = new ArrayList<>();
-    
+    private List<SykdomDiagnosekodeDto> diagnosekoder = new ArrayList<>();
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
 
-
-    public SykdomInnleggelseDto() {
+    public SykdomDiagnosekoderDto() {
 
     }
 
-    public SykdomInnleggelseDto(String behandlingUuid) {
+    public SykdomDiagnosekoderDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
 
-    public SykdomInnleggelseDto(UUID behandlingUuid) {
+    public SykdomDiagnosekoderDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
 
-    public SykdomInnleggelseDto(UUID behandlingUuid, String versjon, List<Periode> perioder, List<ResourceLink> links) {
+    public SykdomDiagnosekoderDto(UUID behandlingUuid, String versjon, List<SykdomDiagnosekodeDto> diagnosekoder, List<ResourceLink> links) {
         this.behandlingUuid = behandlingUuid;
         this.versjon = versjon;
-        this.perioder = perioder;
+        this.diagnosekoder = diagnosekoder;
         this.links = links;
     }
 
@@ -78,18 +73,7 @@ public class SykdomInnleggelseDto {
         return versjon;
     }
 
-    public List<Periode> getPerioder() {
-        return perioder;
-    }
-    
-    @AssertFalse(message = "Det er ikke tillatt med overlappende perioder.")
-    private boolean isOverlappendePerioder() {
-        for (Periode p : perioder) {
-            var result = perioder.stream().anyMatch(p2 -> p != p2 && p.overlaps(p2));
-            if (result) {
-                return true;
-            }
-        }
-        return false;
+    public List<SykdomDiagnosekodeDto> getDiagnosekoder() {
+        return diagnosekoder;
     }
 }

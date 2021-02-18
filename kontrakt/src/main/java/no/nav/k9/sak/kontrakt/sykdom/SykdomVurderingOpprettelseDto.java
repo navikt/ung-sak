@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,36 +17,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SykdomVurderingEndringDto {
+public class SykdomVurderingOpprettelseDto {
 
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
     
-    /**
-     * IDen til SykdomVurdering (og ikke en gitt SykdomVurderingVersjon).
-     */
-    @JsonProperty(value = "id")
-    @Size(max = 50)
+    @JsonProperty(value = "type", required = true)
     @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    private String id;
-    
-    /**
-     * Versjonen man tok utgangspunkt i før endring.
-     */
-    @JsonProperty(value = "versjon")
-    @Size(max = 50)
-    @NotNull
-    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @Valid
-    private String versjon;
+    private SykdomVurderingType type;
 
     @JsonProperty(value = "tekst")
     @Size(max = 4000)
@@ -72,31 +56,25 @@ public class SykdomVurderingEndringDto {
     @Valid
     private boolean dryRun;
 
-    
-    public SykdomVurderingEndringDto() {
-        
+    public SykdomVurderingOpprettelseDto() {
+     
     }
     
-    public SykdomVurderingEndringDto(String behandlingUuid) {
+    public SykdomVurderingOpprettelseDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
     
-    public SykdomVurderingEndringDto(UUID behandlingUuid) {
+    public SykdomVurderingOpprettelseDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
-    
     
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
-    public String getId() {
-        return id;
-    }
 
-    public String getVersjon() {
-        return versjon;
+    public SykdomVurderingType getType() {
+        return type;
     }
 
     public String getTekst() {
@@ -114,37 +92,27 @@ public class SykdomVurderingEndringDto {
     public Set<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
     }
-
+    
     public boolean isDryRun() {
         return dryRun;
     }
     
-    public SykdomVurderingEndringDto medId(String id) {
-        this.id = id;
-        return this;
-    }
-    
-    public SykdomVurderingEndringDto medVersjon(String versjon) {
-        this.versjon = versjon;
-        return this;
-    }
-
-    public SykdomVurderingEndringDto medTekst(String tekst) {
+    public SykdomVurderingOpprettelseDto medTekst(String tekst) {
         this.tekst = tekst;
         return this;
     }
     
-    public SykdomVurderingEndringDto medResultat(Resultat resultat) {
+    public SykdomVurderingOpprettelseDto medResultat(Resultat resultat) {
         this.resultat = resultat;
         return this;
     }
     
-    public SykdomVurderingEndringDto medPerioder(List<Periode> perioder) {
+    public SykdomVurderingOpprettelseDto medPerioder(List<Periode> perioder) {
         this.perioder = perioder;
         return this;
     }
 
-    public SykdomVurderingEndringDto medTilknyttedeDokumenter(Set<String> tilknyttedeDokumenter) {
+    public SykdomVurderingOpprettelseDto medTilknyttedeDokumenter(Set<String> tilknyttedeDokumenter) {
         this.tilknyttedeDokumenter = tilknyttedeDokumenter;
         return this;
     }

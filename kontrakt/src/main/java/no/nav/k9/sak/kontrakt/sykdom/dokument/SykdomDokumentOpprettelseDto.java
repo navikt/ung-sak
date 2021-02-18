@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
+package no.nav.k9.sak.kontrakt.sykdom.dokument;
 
 import java.util.Objects;
 import java.util.UUID;

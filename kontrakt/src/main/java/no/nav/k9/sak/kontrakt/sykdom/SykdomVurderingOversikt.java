@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,7 +19,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType.SykdomVurderingTypeConverter;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 
 @Entity(name = "SykdomVurdering")
 @Table(name = "SYKDOM_VURDERING")

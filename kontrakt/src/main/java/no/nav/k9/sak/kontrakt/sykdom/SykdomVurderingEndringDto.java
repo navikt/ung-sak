@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
+package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,22 +17,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Resultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class SykdomVurderingOpprettelseDto {
+public class SykdomVurderingEndringDto {
 
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
     
-    @JsonProperty(value = "type", required = true)
+    /**
+     * IDen til SykdomVurdering (og ikke en gitt SykdomVurderingVersjon).
+     */
+    @JsonProperty(value = "id")
+    @Size(max = 50)
     @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    private SykdomVurderingType type;
+    private String id;
+    
+    /**
+     * Versjonen man tok utgangspunkt i før endring.
+     */
+    @JsonProperty(value = "versjon")
+    @Size(max = 50)
+    @NotNull
+    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String versjon;
 
     @JsonProperty(value = "tekst")
     @Size(max = 4000)
@@ -58,25 +71,31 @@ public class SykdomVurderingOpprettelseDto {
     @Valid
     private boolean dryRun;
 
-    public SykdomVurderingOpprettelseDto() {
-     
+    
+    public SykdomVurderingEndringDto() {
+        
     }
     
-    public SykdomVurderingOpprettelseDto(String behandlingUuid) {
+    public SykdomVurderingEndringDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
     
-    public SykdomVurderingOpprettelseDto(UUID behandlingUuid) {
+    public SykdomVurderingEndringDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
+    
     
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
+    
+    public String getId() {
+        return id;
+    }
 
-    public SykdomVurderingType getType() {
-        return type;
+    public String getVersjon() {
+        return versjon;
     }
 
     public String getTekst() {
@@ -94,27 +113,37 @@ public class SykdomVurderingOpprettelseDto {
     public Set<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
     }
-    
+
     public boolean isDryRun() {
         return dryRun;
     }
     
-    public SykdomVurderingOpprettelseDto medTekst(String tekst) {
+    public SykdomVurderingEndringDto medId(String id) {
+        this.id = id;
+        return this;
+    }
+    
+    public SykdomVurderingEndringDto medVersjon(String versjon) {
+        this.versjon = versjon;
+        return this;
+    }
+
+    public SykdomVurderingEndringDto medTekst(String tekst) {
         this.tekst = tekst;
         return this;
     }
     
-    public SykdomVurderingOpprettelseDto medResultat(Resultat resultat) {
+    public SykdomVurderingEndringDto medResultat(Resultat resultat) {
         this.resultat = resultat;
         return this;
     }
     
-    public SykdomVurderingOpprettelseDto medPerioder(List<Periode> perioder) {
+    public SykdomVurderingEndringDto medPerioder(List<Periode> perioder) {
         this.perioder = perioder;
         return this;
     }
 
-    public SykdomVurderingOpprettelseDto medTilknyttedeDokumenter(Set<String> tilknyttedeDokumenter) {
+    public SykdomVurderingEndringDto medTilknyttedeDokumenter(Set<String> tilknyttedeDokumenter) {
         this.tilknyttedeDokumenter = tilknyttedeDokumenter;
         return this;
     }
