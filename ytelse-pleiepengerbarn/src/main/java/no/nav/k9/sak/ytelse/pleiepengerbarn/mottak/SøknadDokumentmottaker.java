@@ -75,7 +75,7 @@ class SøknadDokumentmottaker {
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, journalpostId, null, "VL", søknad.getMottattDato().toLocalDateTime(), null, null);
+        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, journalpostId, null, "VL", søknad.getMottattDato().toLocalDateTime(), "VL", søknad.getMottattDato().toLocalDateTime());
 
         sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
