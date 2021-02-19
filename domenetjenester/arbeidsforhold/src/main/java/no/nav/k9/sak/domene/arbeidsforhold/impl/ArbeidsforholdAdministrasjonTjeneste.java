@@ -101,7 +101,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     /**
      * Avsjekk arbeidsforhold mot inntektsmeldinger.
      *
-     *
      * @deprecated erstattes
      */
     @Deprecated
@@ -186,19 +185,19 @@ public class ArbeidsforholdAdministrasjonTjeneste {
     private void utledArbeidsforholdFraArbeidsforholdInformasjon(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
                                                                  Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer,
                                                                  Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        arbeidsforholdOverstyringer.stream()
-            .filter(it -> Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(it.getHandling()))
-            .forEach(overstyring -> mapOverstyring(result, overstyring, arbeidsforholdInformasjon));
+        arbeidsforholdOverstyringer.forEach(overstyring -> mapOverstyring(result, overstyring, arbeidsforholdInformasjon));
     }
 
     private void mapOverstyring(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
                                 ArbeidsforholdOverstyring overstyring,
                                 Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
         var dto = finnEllerOpprett(result, overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef(), arbeidsforholdInformasjon);
-        dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
+        if (Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(overstyring.getHandling())) {
+            dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
+            dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
+            dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
+        }
         dto.setHandlingType(overstyring.getHandling());
-        dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
-        dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
         dto.setBegrunnelse(overstyring.getBegrunnelse());
     }
 
