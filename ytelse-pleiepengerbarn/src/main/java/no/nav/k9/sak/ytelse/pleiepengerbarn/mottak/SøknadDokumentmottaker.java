@@ -31,6 +31,7 @@ class SøknadDokumentmottaker {
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingRepository behandlingRepository;
+    private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
 
     SøknadDokumentmottaker() {
         // for CDI proxy
@@ -42,11 +43,13 @@ class SøknadDokumentmottaker {
                            SaksnummerRepository saksnummerRepository,
                            Behandlingsoppretter behandlingsoppretter,
                            SøknadOversetter pleiepengerBarnSoknadOversetter,
+                           SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                            FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.behandlingRepository = behandlingRepository;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
+        this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.fagsakTjeneste = fagsakTjeneste;
     }
@@ -68,6 +71,10 @@ class SøknadDokumentmottaker {
 
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
+
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(journalpostId,
+            behandling.getFagsak().getPleietrengendeAktørId(),
+            søknad.getMottattDato().toLocalDateTime());
 
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
 
