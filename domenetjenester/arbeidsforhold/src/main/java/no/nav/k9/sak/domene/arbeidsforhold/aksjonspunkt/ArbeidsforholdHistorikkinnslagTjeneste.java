@@ -52,6 +52,9 @@ class ArbeidsforholdHistorikkinnslagTjeneste {
         if (EnumSet.of(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER, ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING).contains(handlingType)) {
             list.add(VurderArbeidsforholdHistorikkinnslag.LAGT_TIL_AV_SAKSBEHANDLER);
         }
+        if (handlingType == ArbeidsforholdHandlingType.BRUK) {
+            list.add(VurderArbeidsforholdHistorikkinnslag.BRUK);
+        }
         return list;
     }
 

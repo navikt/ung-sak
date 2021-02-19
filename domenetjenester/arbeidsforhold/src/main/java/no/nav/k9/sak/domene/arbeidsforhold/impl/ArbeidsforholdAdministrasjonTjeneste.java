@@ -187,7 +187,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                  Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer,
                                                                  Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
         arbeidsforholdOverstyringer.stream()
-            .filter(it -> Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(it.getHandling()))
+            .filter(it -> Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER, ArbeidsforholdHandlingType.BRUK).contains(it.getHandling()))
             .forEach(overstyring -> mapOverstyring(result, overstyring, arbeidsforholdInformasjon));
     }
 
@@ -195,7 +195,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                 ArbeidsforholdOverstyring overstyring,
                                 Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
         var dto = finnEllerOpprett(result, overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef(), arbeidsforholdInformasjon);
-        dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
+
+        //i de tilfellende det er ArbeidsforholdHandlingType.BRUK forventes det å finne kilde på dtoen som er oppretter tidligere enten fra (utledArbeidsforholdFraInntektsmeldinger eller utledArbeidsforholdFraYrkesaktivteter)
+        if (overstyring.getHandling() != ArbeidsforholdHandlingType.BRUK) {
+            dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
+        }
         dto.setHandlingType(overstyring.getHandling());
         dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
         dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
