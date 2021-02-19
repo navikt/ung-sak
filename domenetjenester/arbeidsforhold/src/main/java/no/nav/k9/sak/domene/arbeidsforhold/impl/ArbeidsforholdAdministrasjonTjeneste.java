@@ -196,13 +196,13 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                 Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
         var dto = finnEllerOpprett(result, overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef(), arbeidsforholdInformasjon);
 
-        //i de tilfellende det er ArbeidsforholdHandlingType.BRUK forventes det å finne kilde på dtoen som er oppretter tidligere enten fra (utledArbeidsforholdFraInntektsmeldinger eller utledArbeidsforholdFraYrkesaktivteter)
+        //i de tilfellende det er ArbeidsforholdHandlingType.BRUK forventes det å finne kilde på dtoen som er opprettet tidligere enten fra (utledArbeidsforholdFraInntektsmeldinger eller utledArbeidsforholdFraYrkesaktivteter)
         if (overstyring.getHandling() != ArbeidsforholdHandlingType.BRUK) {
             dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
+            dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
+            dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
+            dto.setHandlingType(overstyring.getHandling());
         }
-        dto.setHandlingType(overstyring.getHandling());
-        dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
-        dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
         dto.setBegrunnelse(overstyring.getBegrunnelse());
     }
 

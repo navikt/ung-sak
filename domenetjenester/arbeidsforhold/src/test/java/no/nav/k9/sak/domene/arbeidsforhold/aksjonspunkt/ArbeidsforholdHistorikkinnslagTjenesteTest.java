@@ -5,10 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -34,18 +32,17 @@ import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositor
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioBuilder;
 import no.nav.k9.sak.historikk.HistorikkInnslagKonverter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.vedtak.konfig.Tid;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class ArbeidsforholdHistorikkinnslagTjenesteTest {
+
+    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
 
     @Inject
     private EntityManager entityManager;
@@ -91,34 +88,22 @@ public class ArbeidsforholdHistorikkinnslagTjenesteTest {
     }
 
     @Test
-    public void skal_opprette_historikkinnslag_når_arbeidsforholdet_har_arbeidsforholdHandlingType_bruk() {
-        // Arrange
-        var arbeidsforholdId = InternArbeidsforholdRef.nyRef();
-        var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
-        LocalDate stp = LocalDate.of(2019, 1, 1);
+    public void skal_ikke_opprette_noen_historikkinnslag_når_arbeidsforholdet_kun_har_null_verdier() {
 
+        // Arrange
         AvklarArbeidsforholdDto arbeidsforholdDto = new AvklarArbeidsforholdDto();
-        String navn = "Utlandet";
-        LocalDate fomDato = stp.minusYears(3);
-        BigDecimal stillingsprosent = BigDecimal.valueOf(100);
-        arbeidsforholdDto.setStillingsprosent(stillingsprosent);
-        arbeidsforholdDto.setNavn(navn);
-        arbeidsforholdDto.setArbeidsforhold(new ArbeidsforholdIdDto(arbeidsforholdId.getUUIDReferanse(), "1234"));
-        arbeidsforholdDto.setId(arbeidsgiver.getIdentifikator() + "-" + arbeidsforholdId.getUUIDReferanse()); // identifikator + "-" + arbeidsforholdsIdIntern
-        arbeidsforholdDto.setStillingsprosent(stillingsprosent);
-        arbeidsforholdDto.setAnsettelsesPerioder(Set.of(new PeriodeDto(fomDato, Tid.TIDENES_ENDE)));
-        arbeidsforholdDto.setStillingsprosent(stillingsprosent);
-        arbeidsforholdDto.setArbeidsgiver(arbeidsgiver);
-        arbeidsforholdDto.setNavn(navn);
         arbeidsforholdDto.setHandlingType(ArbeidsforholdHandlingType.BRUK);
 
         when(arbeidsgiverHistorikkinnslagTjeneste.lagArbeidsgiverHistorikkinnslagTekst(any(), any(), any())).thenReturn("navn");
 
         // Act
+        arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()), arbeidsforholdDto, virksomhet, ref, List.of());
         arbeidsforholdHistorikkinnslagTjeneste.opprettHistorikkinnslag(new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, skjæringstidspunkt, arbeidsforholdDto.getBegrunnelse()),
             arbeidsforholdDto, virksomhet, ref, List.of());
 
         // Assert
-        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(1);
+        assertThat(historikkAdapter.tekstBuilder().getHistorikkinnslagDeler()).hasSize(0);
+
     }
 }
+

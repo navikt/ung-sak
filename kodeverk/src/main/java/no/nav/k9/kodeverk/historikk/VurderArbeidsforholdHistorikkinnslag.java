@@ -29,7 +29,6 @@ public enum VurderArbeidsforholdHistorikkinnslag implements Kodeverdi {
     UDEFINERT("-", "UDEFINERT"),
     MANGLENDE_OPPLYSNINGER("MANGLENDE_OPPLYSNINGER", "Benytt i behandlingen, men har manglende opplysninger"),
     LAGT_TIL_AV_SAKSBEHANDLER("LAGT_TIL_AV_SAKSBEHANDLER", "Arbeidsforholdet er lagt til av saksbehandler beregningsgrunnlaget"),
-    BRUK("BRUK", "Benytt uten endringen")
     ;
 
     private static final Map<String, VurderArbeidsforholdHistorikkinnslag> KODER = new LinkedHashMap<>();
