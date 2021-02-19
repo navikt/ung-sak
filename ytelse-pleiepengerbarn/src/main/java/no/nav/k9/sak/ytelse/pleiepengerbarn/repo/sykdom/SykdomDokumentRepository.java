@@ -126,7 +126,14 @@ public class SykdomDokumentRepository {
             , SykdomInnleggelser.class);
         q.setParameter("behandlingUuid", behandlingUUID);
 
-        return q.getSingleResult();
+        final List<SykdomInnleggelser> result = q.getResultList();
+        if (result.isEmpty()) {
+            return null;
+        }
+        if (result.size() != 1) {
+            throw new IllegalStateException("Forventer maksimalt én rad som svar.");
+        }
+        return result.get(0);
     }
 
     public void opprettEllerOppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
