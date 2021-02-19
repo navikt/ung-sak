@@ -14,14 +14,11 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
-import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
@@ -34,7 +31,7 @@ class SøknadDokumentmottaker {
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingRepository behandlingRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
 
     SøknadDokumentmottaker() {
         // for CDI proxy
@@ -46,13 +43,13 @@ class SøknadDokumentmottaker {
                            SaksnummerRepository saksnummerRepository,
                            Behandlingsoppretter behandlingsoppretter,
                            SøknadOversetter pleiepengerBarnSoknadOversetter,
-                           SykdomDokumentRepository sykdomDokumentRepository,
+                           SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                            FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.behandlingRepository = behandlingRepository;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.fagsakTjeneste = fagsakTjeneste;
     }
@@ -75,9 +72,10 @@ class SøknadDokumentmottaker {
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, journalpostId, null, "VL", søknad.getMottattDato().toLocalDateTime(), "VL", søknad.getMottattDato().toLocalDateTime());
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(journalpostId,
+            behandling.getFagsak().getPleietrengendeAktørId(),
+            søknad.getMottattDato().toLocalDateTime());
 
-        sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
 
         return behandling;
