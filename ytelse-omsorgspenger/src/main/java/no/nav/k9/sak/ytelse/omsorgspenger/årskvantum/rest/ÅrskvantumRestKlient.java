@@ -15,6 +15,7 @@ import javax.validation.Validator;
 import javax.ws.rs.core.HttpHeaders;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
+import no.nav.k9.sak.typer.PersonIdent;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
@@ -162,6 +163,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
+        try {
+            var request = new RammevedtakRequest(personIdent.getIdent(), periode);
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
+            return restKlient.post(endpoint, request, RammevedtakResponse.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallHentUtbetalingGrunnlag(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public ÅrskvantumUttrekk hentUttrekk() {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentUttrekk");
@@ -206,6 +218,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000096", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil klarteIkkeHenteUttaksplanForBehandlinger(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000097", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hentRammevedtak: %s", logLevel = LogLevel.WARN)
+        Feil feilHentRammevedtak(String feilmelding, Throwable t);
     }
 
 }

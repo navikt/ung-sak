@@ -65,6 +65,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.Beregningsr
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.UtvidetRettRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
@@ -76,7 +77,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjen
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.årskvantum.ÅrskvantumRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -361,6 +362,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 break;
             case OMSORGSPENGER_KS:
+                dto.leggTil(getFraMap(UtvidetRettRestTjeneste.RAMMEVEDTAK_PATH, "rammevedtak", uuidQueryParams));
             case OMSORGSPENGER_MA:
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 break;
