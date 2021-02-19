@@ -39,11 +39,11 @@ public class KroniskSykRammevedtakTjeneste {
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         PersonIdent personIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId())
-            .orElseGet(() -> { throw new IllegalArgumentException("todo: finn på en feilmelding"); });
+            .orElseGet(() -> { throw new IllegalArgumentException("todo: finn på en feilmelding"); }); // todo
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
         if(søknad == null) {
-            throw new IllegalArgumentException("todo: finn på en feilmelding");
+            throw new IllegalArgumentException("todo: finn på en feilmelding"); // todo
         }
         DatoIntervallEntitet søknadsperiode = søknad.getSøknadsperiode();
 

@@ -362,7 +362,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 break;
             case OMSORGSPENGER_KS:
-                dto.leggTil(getFraMap(UtvidetRettRestTjeneste.RAMMEVEDTAK_PATH, "rammevedtak", uuidQueryParams));
+                dto.leggTil(getFraMap(UtvidetRettRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
             case OMSORGSPENGER_MA:
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 break;

@@ -29,7 +29,9 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 @ApplicationScoped
 public class UtvidetRettRestTjeneste {
     static final String BASE_PATH = "/behandling/utvidetRett";
-    public static final String RAMMEVEDTAK_PATH = BASE_PATH + "/rammevedtak";
+    private static final String RAMMEVEDTAK_PATH = "/rammevedtak";
+
+    public static final String RAMMEVEDTAK = BASE_PATH + RAMMEVEDTAK_PATH;
 
     private KroniskSykRammevedtakTjeneste kroniskSykRammevedtakTjeneste;
 
