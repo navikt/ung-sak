@@ -9,9 +9,19 @@ class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
     private UttakArbeidType aktivitetType;
     private ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold;
 
+    public AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType) {
+        this(aktivitetType, null);
+    }
+
     public AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(UttakArbeidType aktivitetType, ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold) {
         this.aktivitetType = Objects.requireNonNull(aktivitetType);
-        this.arbeidsgiverArbeidsforhold = Objects.requireNonNull(arbeidsgiverArbeidsforhold);
+        this.arbeidsgiverArbeidsforhold = arbeidsgiverArbeidsforhold;
+        if (aktivitetType == UttakArbeidType.ARBEIDSTAKER) {
+            Objects.requireNonNull(arbeidsgiverArbeidsforhold);
+        }
+        if (aktivitetType == UttakArbeidType.FRILANSER && arbeidsgiverArbeidsforhold != null) {
+            throw new IllegalArgumentException("Skal ikke sette arbeidsforhold for FRILANSER her");
+        }
     }
 
     public UttakArbeidType getAktivitetType() {
@@ -27,7 +37,7 @@ class AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold {
             return false;
         }
 
-        return arbeidsgiverArbeidsforhold.identifisererSamme(aktivitet.getArbeidsgiverArbeidsforhold());
+        return arbeidsgiverArbeidsforhold == aktivitet.getArbeidsgiverArbeidsforhold() || arbeidsgiverArbeidsforhold.identifisererSamme(aktivitet.getArbeidsgiverArbeidsforhold());
     }
 
     @Override

@@ -7,7 +7,6 @@ import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettList
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -85,11 +84,6 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
 
             if (harBrukerOppgittArbeidsforholdMed(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD, opptjening.getOpptjeningPeriode(), oppgittOpptjening) == JA) {
                 logger.info("Utleder AP 5051 fra utlandsk arbeidsforhold");
-                return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-            }
-
-            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), Collections.singletonList(ArbeidType.FRILANSER)) == JA) {
-                logger.info("Utleder AP 5051 fra oppgitt eller bekreftet frilans: behandlingId={}", behandlingId);
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
             }
 

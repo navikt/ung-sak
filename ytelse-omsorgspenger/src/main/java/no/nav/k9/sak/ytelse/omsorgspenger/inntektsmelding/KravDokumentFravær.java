@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class KravDokumentFravær {
@@ -117,9 +120,7 @@ public class KravDokumentFravær {
             var aktivitetTyper = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
             for (var aktivitetType : aktivitetTyper) {
                 // TODO: Må håndtere søknad for flere arbeidsgivere og perioder. Må kunne sameksistere med IMs arbeidsforhold. Vurder om Dokumenttype må inkluderes her
-                var arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).findFirst().orElseThrow();
-                var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
-                var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
+                var gruppe = utledGruppe(vurdertSøktPerioder, aktivitetType);
                 var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
                 var liste = vurdertSøktPerioder.stream()
                     .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(pa)))
@@ -153,6 +154,17 @@ public class KravDokumentFravær {
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+    }
+
+    @NotNull
+    private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold utledGruppe(List<VurdertSøktPeriode<OppgittFraværPeriode>> vurdertSøktPerioder, UttakArbeidType aktivitetType) {
+        Optional<Arbeidsgiver> arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).filter(Objects::nonNull).findFirst();
+        if (arbeidsgiver.isPresent()) {
+            var arbeidsforholdRef = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsforholdRef).findFirst().orElseThrow();
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver.get(), arbeidsforholdRef));
+        } else {
+            return new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType);
+        }
     }
 
     private Utfall utledUtfall(VurdertSøktPeriode<OppgittFraværPeriode> pa) {

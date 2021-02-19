@@ -14,7 +14,7 @@ import no.nav.k9.sak.inngangsvilkår.Oppfylt;
  * Regeltjeneste for vurdering av OpptjeningsVilkåret tilpasset Svangerskapspenger
  * <p>
  * Dette vurderes som følger:
- *
+ * <p>
  * Perioden i arbeidsm må være på eller mer 28 dager, får antatt godkjent i perioden siden innteket ikke har tilkommet på tidspunktet.
  *
  * <p>
@@ -34,7 +34,9 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
 
     public static final String ID = "FP_VK_23";
 
-    /** Konstant for Aareg arbeid. */
+    /**
+     * Konstant for Aareg arbeid.
+     */
     public static final String ARBEID = "ARBEID";
     public static final String MELLOM_ARBEID = "MELLOM_ARBEID";
 
@@ -46,10 +48,14 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
      */
     public static final String EVAL_RESULT_ANTATT_AKTIVITET_TIDSLINJE = "antattOpptjeningAktivitetTidslinje";
 
-    /** Evaluation Property: Antatt godkjente perioder med arbeid. */
+    /**
+     * Evaluation Property: Antatt godkjente perioder med arbeid.
+     */
     public static final String EVAL_RESULT_ANTATT_GODKJENT = "antattGodkjentArbeid";
 
-    /** Evaluation property: Frist for innsending av opptjeningopplysninger (eks. Inntekt). */
+    /**
+     * Evaluation property: Frist for innsending av opptjeningopplysninger (eks. Inntekt).
+     */
     public static final String EVAL_RESULT_FRIST_FOR_OPPTJENING_OPPLYSNINGER = "fristInnsendingOpptjeningopplysninger";
 
     /**
@@ -58,10 +64,14 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
      */
     public static final String EVAL_RESULT_UNDERKJENTE_PERIODER = "underkjentePerioder";
 
-    /** Evaluation Property: Bekreftet opptjening aktivitet tidslinje bestemmes av {@link BeregnOpptjening}. */
+    /**
+     * Evaluation Property: Bekreftet opptjening aktivitet tidslinje bestemmes av {@link BeregnOpptjening}.
+     */
     public static final String EVAL_RESULT_BEKREFTET_AKTIVITET_TIDSLINJE = "bekreftetOpptjeningAktivitetTidslinje";
 
-    /** Evaluation Property: Bekreftet opptjening uttrykt som en Period (ISO 8601). eks. P4M22D = 4 måneder + 22 dager. */
+    /**
+     * Evaluation Property: Bekreftet opptjening uttrykt som en Period (ISO 8601). eks. P4M22D = 4 måneder + 22 dager.
+     */
     public static final String EVAL_RESULT_BEKREFTET_OPPTJENING = "bekreftetOpptjening";
     public static final String EVAL_RESULT_AKSEPTERT_MELLOMLIGGENDE_PERIODE = "mellomLiggendePerioder";
 
@@ -85,8 +95,12 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
             .hvis(new SjekkTilstrekkeligOpptjening(), new Oppfylt())
             .ellers(new SjekkTilstrekkeligOpptjeningInklAntatt());
 
-        return new SequenceSpecification<>("FP_VK 23.1",
-            "Sammenstill Arbeid aktivitet med Inntekt",
+        SequenceSpecification<MellomregningOpptjeningsvilkårData> sammenstillArbeidMedInntekt = new SequenceSpecification<>("FP_VK 23.1", "Sammenstill Arbeid aktivitet med Inntekt",
             List.of(new SjekkInntektSamsvarerMedArbeidAktivitet(), new SjekkMellomliggendePerioderMellomArbeidsforhold(), new BeregnOpptjening(), sjekkOpptjeningsvilkåret));
+
+        return rs.hvisRegel("FP_VK 23.6", "Hvis søker har oppgitt aktivt frilansarbeidsforhold")
+            .hvis(new SjekkOppgittFrilansArbeidsforhold(), new Oppfylt())
+            .ellers(sammenstillArbeidMedInntekt);
+
     }
 }
