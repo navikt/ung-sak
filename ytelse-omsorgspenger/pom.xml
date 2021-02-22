@@ -38,10 +38,6 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>domenetjenester-bom</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.k9</groupId>
-            <artifactId>soknad</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>mottak</artifactId>
