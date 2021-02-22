@@ -47,7 +47,7 @@ create table if not exists UP_ARBEID_PERIODE
     HOLDER_ID                BIGINT REFERENCES UP_SOEKNAD_PERIODER (id),
     FOM                      DATE                                   NOT NULL,
     TOM                      DATE                                   NOT NULL,
-    UTTAK_AKTIVITET_TYPE     VARCHAR(100)                           NOT NULL,
+    AKTIVITET_TYPE           VARCHAR(100)                           NOT NULL,
     ARBEIDSGIVER_AKTOR_ID    VARCHAR(100),
     ARBEIDSGIVER_ORGNR       VARCHAR(100),
     ARBEIDSFORHOLD_INTERN_ID UUID,
@@ -105,11 +105,12 @@ create table if not exists UP_FERIE_PERIODE
 );
 create index IDX_UP_FERIE_PERIODE_01 on UP_FERIE_PERIODE (HOLDER_ID);
 
+create sequence if not exists SEQ_UP_ARBEID_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UP_FERIE_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UP_TILSYNSORDNING_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UP_TILSYNSORDNING increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UP_UTTAKSPERIODER_HOLDER increment by 50 minvalue 1000000;
-create sequence if not exists SEQ_UP_UTTAKSPERIODER increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_UP_SOEKNAD_PERIODER increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UP_UTTAKSPERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_GR_UTTAKSPERIODER increment by 50 minvalue 1000000;
 
@@ -126,6 +127,7 @@ create table GR_UTTAKSPERIODER
     ENDRET_AV                  VARCHAR(20),
     ENDRET_TID                 TIMESTAMP(3)
 );
+
 
 create index IDX_GR_UTTAKSPERIODER_01
     on GR_UTTAKSPERIODER (BEHANDLING_ID);

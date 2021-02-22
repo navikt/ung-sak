@@ -30,13 +30,13 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.typer.JournalpostId;
 
-@Entity(name = "PsbUttakPeriode")
-@Table(name = "UP_UTTAKSPERIODER")
+@Entity(name = "PerioderFraSøknad")
+@Table(name = "UP_SOEKNAD_PERIODER")
 @Immutable
 public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_UTTAKSPERIODER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_SOEKNAD_PERIODER")
     private Long id;
 
     @Embedded

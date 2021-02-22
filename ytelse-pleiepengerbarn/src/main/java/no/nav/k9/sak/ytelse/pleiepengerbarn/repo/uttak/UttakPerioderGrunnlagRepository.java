@@ -86,7 +86,7 @@ public class UttakPerioderGrunnlagRepository {
     private Optional<UttaksPerioderGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM SøknadsperiodeGrunnlag s " +
+                "FROM UttakPerioderGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
                 "AND s.aktiv = true", UttaksPerioderGrunnlag.class);
 

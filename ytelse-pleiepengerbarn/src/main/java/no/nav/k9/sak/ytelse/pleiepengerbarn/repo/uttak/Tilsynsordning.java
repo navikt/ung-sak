@@ -15,10 +15,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -33,7 +35,9 @@ public class Tilsynsordning extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_TILSYNSORDNING")
     private Long id;
 
-    @OneToMany(mappedBy = "tilsynsordning", cascade = { CascadeType.PERSIST, CascadeType.REFRESH })
+    @BatchSize(size = 20)
+    @JoinColumn(name = "TILSYNSORDNING_ID", nullable = false)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     private Set<TilsynsordningPeriode> perioder;
 
     @Enumerated(EnumType.STRING)

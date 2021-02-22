@@ -23,12 +23,12 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "PsbUttakPeriode")
-@Table(name = "UP_UTTAKPERIODE")
+@Table(name = "UP_UTTAKSPERIODE")
 @Immutable
 public class UttakPeriode extends BaseEntitet implements IndexKey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_UTTAKPERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_UTTAKSPERIODE")
     private Long id;
 
     @Embedded

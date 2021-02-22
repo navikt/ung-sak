@@ -11,8 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -22,9 +20,8 @@ import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.Ferie;
 
-@Entity(name = "FeriePeriode")
+@Entity(name = "PsbFeriePeriode")
 @Table(name = "UP_FERIE_PERIODE")
 @Immutable
 public class FeriePeriode extends BaseEntitet implements IndexKey {
