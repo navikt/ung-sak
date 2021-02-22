@@ -18,17 +18,13 @@ class WrappedOppgittFraværPeriode {
         this(null, null, null, arbeidStatus, null);
     }
 
-    public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt) {
-        this(periode, innsendingstidspunkt, null, null, null);
-    }
-
     public WrappedOppgittFraværPeriode(OppgittFraværPeriode periode, LocalDateTime innsendingstidspunkt, Boolean iPermisjon, ArbeidStatus arbeidStatus, Boolean avslåttInngangsvilkår) {
         this.periode = periode;
         this.innsendingstidspunkt = innsendingstidspunkt;
         this.iPermisjon = iPermisjon;
         this.arbeidStatus = arbeidStatus;
         if (periode != null && periode.getAktivitetType() != null) {
-            this.aktivitet = new Aktivitet(periode.getArbeidsgiver(), periode.getArbeidsforholdRef() != null ? periode.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef());
+            this.aktivitet = new Aktivitet(periode.getAktivitetType(), periode.getArbeidsgiver(), periode.getArbeidsforholdRef() != null ? periode.getArbeidsforholdRef() : InternArbeidsforholdRef.nullRef());
         } else {
             this.aktivitet = null;
         }
@@ -91,7 +87,7 @@ class WrappedOppgittFraværPeriode {
             "periode=" + periode +
             ", avslåttInngangsvilkår=" + avslåttInngangsvilkår +
             ", iPermisjon=" + iPermisjon +
-            ", ikkeIArbeid=" + arbeidStatus +
+            ", arbeidStatus=" + arbeidStatus +
             '}';
     }
 
