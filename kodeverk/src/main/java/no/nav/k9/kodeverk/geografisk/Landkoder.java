@@ -35,9 +35,6 @@ public class Landkoder implements Kodeverdi {
     public static final Landkoder CAN = fraKode("CAN");
     public static final Landkoder ESP = fraKode("ESP");
 
-    /** Kodeverkklient spesifikk konstant. Statsløs bruker */
-    public static final Landkoder STATSLØS = fraKode("XXX");
-
     /** Kodeverkklient spesifikk konstant. Bruker oppgir ikke land */
     public static final Landkoder UOPPGITT_UKJENT = fraKode("???");
 
@@ -125,7 +122,10 @@ public class Landkoder implements Kodeverdi {
 
         // ISO user defined codes (NAV spesifikke)
         // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#User-assigned_code_elements
-        List.of("XXX", "XXK")
+        List.of(
+            "XXX", // STATSLØS
+            "XUK", // UKJENT
+            "XXK") // KOSOVO
             .forEach(c -> map.put(c, new Landkoder(c)));
 
         // ISO transitional codes.
