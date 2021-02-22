@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+
+	<sequence-generator name="SEQ_GR_UTTAKSPERIODER" allocation-size="50" sequence-name="SEQ_GR_UTTAKSPERIODER" />
+	<sequence-generator name="SEQ_UP_UTTAKSPERIODE" allocation-size="50" sequence-name="SEQ_UP_UTTAKSPERIODE" />
+	<sequence-generator name="SEQ_UP_SOEKNAD_PERIODER" allocation-size="50" sequence-name="SEQ_UP_SOEKNAD_PERIODER" />
+	<sequence-generator name="SEQ_UP_UTTAKSPERIODER_HOLDER" allocation-size="50" sequence-name="SEQ_UP_UTTAKSPERIODER_HOLDER" />
+	<sequence-generator name="SEQ_UP_TILSYNSORDNING" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING" />
+	<sequence-generator name="SEQ_UP_TILSYNSORDNING_PERIODE" allocation-size="50" sequence-name="SEQ_UP_TILSYNSORDNING_PERIODE" />
+	<sequence-generator name="SEQ_UP_FERIE_PERIODE" allocation-size="50" sequence-name="SEQ_UP_FERIE_PERIODE" />
+	<sequence-generator name="SEQ_UP_ARBEID_PERIODE" allocation-size="50" sequence-name="SEQ_UP_ARBEID_PERIODE" />
+
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode" />
+
+</entity-mappings>

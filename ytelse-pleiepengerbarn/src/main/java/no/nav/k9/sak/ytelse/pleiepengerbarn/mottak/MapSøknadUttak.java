@@ -24,6 +24,7 @@ import no.nav.k9.sak.domene.uttak.repo.UttakGrunnlag;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.LovbestemtFerie;
 import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
@@ -34,6 +35,10 @@ import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.Tilsynsordning;
 
+/**
+ * Skal dø og erstattes av MapSøknadUttakPerioder
+ */
+@Deprecated(forRemoval = true)
 class MapSøknadUttak {
     @SuppressWarnings("unused")
     private Søknad søknad;
