@@ -70,8 +70,8 @@ class MapSøknadUttakPerioder {
         var mappedUttak = nullableList(arbeidstid.getArbeidstakerList()).stream()
             .flatMap(a -> lagUttakAktivitetPeriode(a, UttakArbeidType.ARBEIDSTAKER).stream())
             .collect(Collectors.toList());
-        var mappedFrilanser = mapAreidstidInfo(arbeidstid.getFrilanserArbeidstidInfo(), UttakArbeidType.FRILANSER);
-        var mappedSelvstendigNæringsdrivende = mapAreidstidInfo(arbeidstid.getSelvstendigNæringsdrivendeArbeidstidInfo(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+        var mappedFrilanser = mapArbeidstidInfo(arbeidstid.getFrilanserArbeidstidInfo(), UttakArbeidType.FRILANSER);
+        var mappedSelvstendigNæringsdrivende = mapArbeidstidInfo(arbeidstid.getSelvstendigNæringsdrivendeArbeidstidInfo(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
         var mappedPerioder = new ArrayList<ArbeidPeriode>();
         mappedPerioder.addAll(mappedUttak);
@@ -81,7 +81,10 @@ class MapSøknadUttakPerioder {
     }
 
     @NotNull
-    private List<ArbeidPeriode> mapAreidstidInfo(ArbeidstidInfo frilanserArbeidstidInfo, UttakArbeidType frilanser) {
+    private List<ArbeidPeriode> mapArbeidstidInfo(ArbeidstidInfo frilanserArbeidstidInfo, UttakArbeidType arbeidType) {
+        if (frilanserArbeidstidInfo == null || frilanserArbeidstidInfo.getPerioder() == null) {
+            return List.of();
+        }
         return frilanserArbeidstidInfo
             .getPerioder()
             .entrySet()
@@ -89,7 +92,7 @@ class MapSøknadUttakPerioder {
             .map(entry -> {
                 Periode k = entry.getKey();
                 return new ArbeidPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(k.getFraOgMed(), k.getTilOgMed()),
-                    frilanser,
+                    arbeidType,
                     null,
                     null,
                     entry.getValue().getFaktiskArbeidTimerPerDag(),
