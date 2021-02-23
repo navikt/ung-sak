@@ -3,6 +3,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -21,18 +24,20 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 @FagsakYtelseTypeRef("PSB")
 public class VurderUttakSteg implements BehandlingSteg {
 
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UttakTjeneste uttakTjeneste;
 
-    VurderUttakSteg(){
+    VurderUttakSteg() {
         // for proxy
     }
 
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
                            MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                           UttakTjeneste uttakTjeneste){
+                           UttakTjeneste uttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
@@ -45,7 +50,7 @@ public class VurderUttakSteg implements BehandlingSteg {
         var ref = BehandlingReferanse.fra(behandling);
 
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-        uttakTjeneste.opprettUttaksplan(request);
+        log.info("Opprettet uttaksplan: '" + uttakTjeneste.opprettUttaksplan(request) + "'");
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
