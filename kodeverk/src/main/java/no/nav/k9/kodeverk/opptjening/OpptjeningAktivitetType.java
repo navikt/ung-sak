@@ -126,7 +126,7 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
     }
 
     public static final Set<OpptjeningAktivitetType> ANNEN_OPPTJENING = Set.of(VENTELØNN_VARTPENGER, MILITÆR_ELLER_SIVILTJENESTE, ETTERLØNN_SLUTTPAKKE,
-        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD);
+        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD, FRILANS);
 
     private String kode;
 

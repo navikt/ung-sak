@@ -37,8 +37,6 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
             return vurderAnnenOpptjening(overstyrtAktivitet, harVærtSaksbehandlet);
         } else if (OpptjeningAktivitetType.NÆRING.equals(type)) {
             return vurderNæring(behandlingReferanse.getAktørId(), overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
-        } else if (OpptjeningAktivitetType.FRILANS.equals(type)){
-            return vurderFrilans();
         } else if (OpptjeningAktivitetType.ARBEID.equals(type)) {
             return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, harVærtSaksbehandlet, opptjeningPeriode, inntektsmeldinger);
         }
@@ -49,8 +47,8 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
      * @param registerAktivitet    aktiviteten
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode opptjeningsperioder
-     * @param inntektsmeldinger inntektsmeldinger
+     * @param opptjeningPeriode    opptjeningsperioder
+     * @param inntektsmeldinger    inntektsmeldinger
      * @return vurderingsstatus
      */
     private VurderingsStatus vurderArbeid(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet,
@@ -85,11 +83,10 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
     }
 
     /**
-     *
-     * @param aktørId aktør
+     * @param aktørId              aktør
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode opptjeningsperiode
+     * @param opptjeningPeriode    opptjeningsperiode
      * @return vurderingsstatus
      */
     private VurderingsStatus vurderNæring(AktørId aktørId, Yrkesaktivitet overstyrtAktivitet, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
@@ -102,10 +99,6 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
             }
             return VurderingsStatus.TIL_VURDERING;
         }
-        return VurderingsStatus.GODKJENT;
-    }
-
-    private VurderingsStatus vurderFrilans() {
         return VurderingsStatus.GODKJENT;
     }
 

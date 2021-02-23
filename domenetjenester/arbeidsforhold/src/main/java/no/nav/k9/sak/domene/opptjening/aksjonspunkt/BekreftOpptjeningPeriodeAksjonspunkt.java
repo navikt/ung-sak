@@ -126,8 +126,6 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
             }
             var iayg = iaygOpt.get();
             return harGittAksjonspunktForNæring(aktørId, iayg, opptjeningPeriode);
-        } else if (OpptjeningAktivitetType.FRILANS.equals(opptjeningAktivitetType)){
-            return false;
         }
         return OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(opptjeningAktivitetType);
     }
