@@ -1,14 +1,6 @@
 package no.nav.k9.kodeverk.opptjening;
 
 import java.util.AbstractMap;
-/**
- * <h3>Internt kodeverk</h3>
- * Definerer aktiviteter benyttet til å vurdere Opptjening.
- * <p>
- * Kodeverket sammenstiller data fra {@link ArbeidType} og {@link RelatertYtelseType}.<br>
- * Senere benyttes dette i mapping til bla. Beregningsgrunnlag.
- *
- */
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -133,7 +126,7 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
     }
 
     public static final Set<OpptjeningAktivitetType> ANNEN_OPPTJENING = Set.of(VENTELØNN_VARTPENGER, MILITÆR_ELLER_SIVILTJENESTE, ETTERLØNN_SLUTTPAKKE,
-        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD, FRILANS);
+        VIDERE_ETTERUTDANNING, UTENLANDSK_ARBEIDSFORHOLD);
 
     private String kode;
 

@@ -111,7 +111,8 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
 
     private boolean kanSaksbehandles(AktørId aktørId, Optional<InntektArbeidYtelseGrunnlag> iaygOpt, Set<ArbeidType> arbeidTypes,
                                      BekreftOpptjeningPeriodeDto periode, DatoIntervallEntitet opptjeningPeriode) {
-        if (OpptjeningAktivitetType.ARBEID.equals(periode.getAktivitetType())) {
+        OpptjeningAktivitetType opptjeningAktivitetType = periode.getAktivitetType();
+        if (OpptjeningAktivitetType.ARBEID.equals(opptjeningAktivitetType)) {
             if (iaygOpt.isEmpty()) {
                 return false;
             }
@@ -119,14 +120,16 @@ class BekreftOpptjeningPeriodeAksjonspunkt {
             var filter = new YrkesaktivitetFilter(iayg.getArbeidsforholdInformasjon(), iayg.getAktørArbeidFraRegister(aktørId))
                 .før(opptjeningPeriode.getTomDato());
             return harGittAksjonspunktForArbeidsforhold(filter, arbeidTypes, periode);
-        } else if (OpptjeningAktivitetType.NÆRING.equals(periode.getAktivitetType())) {
+        } else if (OpptjeningAktivitetType.NÆRING.equals(opptjeningAktivitetType)) {
             if (iaygOpt.isEmpty()) {
                 return false;
             }
             var iayg = iaygOpt.get();
             return harGittAksjonspunktForNæring(aktørId, iayg, opptjeningPeriode);
+        } else if (OpptjeningAktivitetType.FRILANS.equals(opptjeningAktivitetType)){
+            return false;
         }
-        return OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(periode.getAktivitetType());
+        return OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(opptjeningAktivitetType);
     }
 
     private boolean harGittAksjonspunktForArbeidsforhold(YrkesaktivitetFilter filter, Set<ArbeidType> arbeidTypes, BekreftOpptjeningPeriodeDto periode) {

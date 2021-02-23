@@ -34,6 +34,8 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
             return vurderAnnenOpptjening(overstyrtAktivitet);
         } else if (OpptjeningAktivitetType.NÆRING.equals(type)) {
             return vurderNæring(iayGrunnlag, overstyrtAktivitet, opptjeningPeriode, behandlingReferanse.getAktørId());
+        } else if (OpptjeningAktivitetType.FRILANS.equals(type)) {
+            return vurderFrilans();
         } else if (OpptjeningAktivitetType.ARBEID.equals(type)) {
             var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
             return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, opptjeningPeriode, inntektsmeldinger);
@@ -57,6 +59,10 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
             return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
         }
         return VurderingsStatus.FERDIG_VURDERT_UNDERKJENT;
+    }
+
+    private VurderingsStatus vurderFrilans() {
+        return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
     }
 
     private VurderingsStatus vurderNæring(InntektArbeidYtelseGrunnlag iayg, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, AktørId aktørId) {

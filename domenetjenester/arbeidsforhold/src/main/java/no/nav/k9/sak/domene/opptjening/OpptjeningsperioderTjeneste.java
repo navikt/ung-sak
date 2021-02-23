@@ -33,7 +33,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
-import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
@@ -158,7 +157,7 @@ public class OpptjeningsperioderTjeneste {
 
             oppgittOpptjening.getFrilans().ifPresent(
                 frilans -> {
-                    perioder.add(mapFrilans(frilans, grunnlag, behandlingReferanse, opptjening.getOpptjeningPeriode()));
+                    perioder.add(mapFrilans(grunnlag, behandlingReferanse, vurderOpptjening, opptjening.getOpptjeningPeriode()));
                 }
             );
         }
@@ -412,8 +411,8 @@ public class OpptjeningsperioderTjeneste {
         return builder.build();
     }
 
-    private OpptjeningsperiodeForSaksbehandling mapFrilans(OppgittFrilans frilans, InntektArbeidYtelseGrunnlag grunnlag,
-                                                           BehandlingReferanse behandlingReferanse, DatoIntervallEntitet opptjeningPeriode) {
+    private OpptjeningsperiodeForSaksbehandling mapFrilans(InntektArbeidYtelseGrunnlag grunnlag,
+                                                           BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet opptjeningPeriode) {
         var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny().medOpptjeningAktivitetType(FRILANS);
 
         //TODO begrens til  fra-dato fra søknad
@@ -422,9 +421,7 @@ public class OpptjeningsperioderTjeneste {
         input.setGrunnlag(grunnlag);
         input.setHarVærtSaksbehandlet(grunnlag.harBlittSaksbehandlet());
         input.setOpptjeningPeriode(opptjeningPeriode);
-
-        //TODO gjør om til følgende kall? (må endre impl i så fall) builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
-        builder.medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT);
+        builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
         if (grunnlag.harBlittSaksbehandlet()) {
             builder.medErManueltBehandlet();
         }
