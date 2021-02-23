@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
@@ -31,7 +32,6 @@ import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.vedtak.konfig.KonfigVerdi;
@@ -84,8 +84,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             return new OmsorgspengerGrunnlag(Collections.emptyList());
         }
 
-        var arbeidsforholdPerioder = aktiviteter;
-        var utbetalingsgradPrAktivitet = arbeidsforholdPerioder.stream()
+        var utbetalingsgradPrAktivitet = aktiviteter.stream()
             .filter(e -> !e.getUttaksperioder().isEmpty())
             .map(e -> mapTilUtbetalingsgrad(e.getArbeidsforhold(), e.getUttaksperioder().stream()
                 .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom())))

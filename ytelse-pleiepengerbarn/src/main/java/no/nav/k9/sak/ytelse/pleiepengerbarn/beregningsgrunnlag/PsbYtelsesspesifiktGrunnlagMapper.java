@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,12 +21,10 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @FagsakYtelseTypeRef("PSB")
@@ -52,8 +49,9 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
         var utbetalingsgrader = uttaksplan.getPerioder()
             .entrySet()
             .stream()
-            .filter(e -> Objects.equals(Utfall.OPPFYLT, e.getValue().getUtfall()))
-            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).stream()).collect(Collectors.toList());
+            .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
+            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).stream())
+            .collect(Collectors.toList());
 
         return new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
     }
