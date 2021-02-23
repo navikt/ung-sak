@@ -92,6 +92,11 @@ public class MapInputTilUttakTjeneste {
             .stream()
             .filter(it -> perioderFraSøknader.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .collect(Collectors.toCollection(TreeSet::new));
+
+        if (perioderFraSøknader.size() != kravDokumenter.size()) {
+            throw new IllegalStateException("Fant ikke alle dokumentene siden '" + kravDokumenter + "' != '" + perioderFraSøknader + "'");
+        }
+
         var søkerPersonopplysninger = personopplysningerAggregat.getSøker();
         var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
 
