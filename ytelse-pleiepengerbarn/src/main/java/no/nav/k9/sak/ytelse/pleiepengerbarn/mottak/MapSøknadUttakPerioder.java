@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -80,7 +78,6 @@ class MapSøknadUttakPerioder {
         return mappedPerioder;
     }
 
-    @NotNull
     private List<ArbeidPeriode> mapArbeidstidInfo(ArbeidstidInfo frilanserArbeidstidInfo, UttakArbeidType arbeidType) {
         if (frilanserArbeidstidInfo == null || frilanserArbeidstidInfo.getPerioder() == null) {
             return List.of();
