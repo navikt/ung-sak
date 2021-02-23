@@ -23,7 +23,7 @@ public class VurderUttakSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
-    private UttakTjeneste uttakRestKlient;
+    private UttakTjeneste uttakTjeneste;
 
     VurderUttakSteg(){
         // for proxy
@@ -32,10 +32,10 @@ public class VurderUttakSteg implements BehandlingSteg {
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
                            MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                           UttakTjeneste uttakRestKlient){
+                           UttakTjeneste uttakTjeneste){
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
-        this.uttakRestKlient = uttakRestKlient;
+        this.uttakTjeneste = uttakTjeneste;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class VurderUttakSteg implements BehandlingSteg {
         var ref = BehandlingReferanse.fra(behandling);
 
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-        uttakRestKlient.opprettUttaksplan(request);
+        uttakTjeneste.opprettUttaksplan(request);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
