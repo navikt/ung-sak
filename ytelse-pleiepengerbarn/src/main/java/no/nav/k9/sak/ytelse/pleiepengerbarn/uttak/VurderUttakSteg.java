@@ -50,7 +50,7 @@ public class VurderUttakSteg implements BehandlingSteg {
         var ref = BehandlingReferanse.fra(behandling);
 
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-        log.info("Opprettet uttaksplan: '" + uttakTjeneste.opprettUttaksplan(request) + "'");
+        uttakTjeneste.opprettUttaksplan(request);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
