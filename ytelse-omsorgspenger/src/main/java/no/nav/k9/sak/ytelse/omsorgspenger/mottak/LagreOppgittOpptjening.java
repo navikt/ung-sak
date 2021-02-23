@@ -18,6 +18,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 @Dependent
@@ -105,6 +106,7 @@ public class LagreOppgittOpptjening {
     private EgenNæringBuilder mapEgenNæring(no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende sn) {
         var builder = EgenNæringBuilder.ny();
         sn.perioder.forEach((per, info) -> {
+            builder.medVirksomhet(sn.getOrganisasjonsnummer() != null ? new OrgNummer(sn.getOrganisasjonsnummer().verdi) : null);
             builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(per.getFraOgMed(), per.getTilOgMed()));
             builder.medBruttoInntekt(info.bruttoInntekt);
             builder.medVirksomhetType(VirksomhetType.ANNEN);
