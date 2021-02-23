@@ -57,7 +57,7 @@ public class UttakPerioderHolder extends BaseEntitet {
         return id;
     }
 
-    public Set<PerioderFraSøknad> getUttakPerioder() {
+    public Set<PerioderFraSøknad> getPerioderFraSøknadene() {
         return perioder;
     }
 
