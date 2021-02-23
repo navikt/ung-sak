@@ -71,8 +71,14 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
             : VurderingsStatus.FERDIG_VURDERT_UNDERKJENT;
     }
 
-    private VurderingsStatus vurderNæring(InntektArbeidYtelseGrunnlag iayg, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, AktørId aktørId) {
-        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(aktørId, iayg, opptjeningPeriode)) {
+    private VurderingsStatus vurderNæring(InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, AktørId aktørId) {
+        boolean harSøkt = iayGrunnlag.getOppgittOpptjening().map(o -> !o.getEgenNæring().isEmpty()).orElse(false);
+        if (harSøkt) {
+            //avklart med funksjonell at når egen næring er oppgitt i søknad, så er det automatisk godkjent som opptjeningsaktivitet
+            return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
+        }
+
+        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(aktørId, iayGrunnlag, opptjeningPeriode)) {
             if (overstyrtAktivitet != null) {
                 return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
             }
