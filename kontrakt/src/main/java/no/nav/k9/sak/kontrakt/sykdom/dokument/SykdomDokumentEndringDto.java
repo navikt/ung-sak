@@ -25,52 +25,52 @@ public class SykdomDokumentEndringDto {
     @Valid
     @NotNull
     private UUID behandlingUuid;
-    
+
     @JsonProperty(value = "id", required = true)
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
-    
+
     @JsonProperty(value = "versjon")
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String versjon;
-    
+
     @JsonProperty(value = "type", required = true)
     @Valid
     @NotNull
     private SykdomDokumentType type;
-    
+
     @JsonProperty(value = "datert", required = true)
     @Valid
     @NotNull
     private LocalDate datert;
 
-    
+
     public SykdomDokumentEndringDto() {
-        
+
     }
-    
+
     public SykdomDokumentEndringDto(String behandlingUuid, String id, String versjon) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
         this.id = id;
         this.versjon = versjon;
     }
-    
+
     public SykdomDokumentEndringDto(UUID behandlingUuid) {
         this.behandlingUuid = Objects.requireNonNull(behandlingUuid);
     }
-    
-    
+
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
+
     public String getId() {
         return id;
     }
@@ -82,8 +82,18 @@ public class SykdomDokumentEndringDto {
     public SykdomDokumentType getType() {
         return type;
     }
-    
+
     public LocalDate getDatert() {
         return datert;
+    }
+
+    public SykdomDokumentEndringDto medType(SykdomDokumentType type) {
+        this.type = type;
+        return this;
+    }
+
+    public SykdomDokumentEndringDto medDatert(LocalDate datert) {
+        this.datert = datert;
+        return this;
     }
 }
