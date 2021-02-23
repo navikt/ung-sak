@@ -22,14 +22,14 @@ import no.nav.k9.sak.kontrakt.ResourceLink;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class SykdomDokumentOversiktElement {
 
-    
+
     @JsonProperty(value = "id")
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
-    
+
     @JsonProperty(value = "versjon")
     @Size(max = 50)
     @NotNull
@@ -43,8 +43,8 @@ public class SykdomDokumentOversiktElement {
 
     @JsonProperty(value = "annenPartErKilde")
     @Valid
-    private boolean annenPartErKilde;   
-    
+    private boolean annenPartErKilde;
+
     @JsonProperty(value = "datert")
     @Valid
     private LocalDate datert;
@@ -52,21 +52,24 @@ public class SykdomDokumentOversiktElement {
     @JsonProperty(value = "mottattDato")
     @Valid
     private LocalDate mottattDato;
-    
+
     @JsonProperty(value = "mottattTidspunkt")
     @Valid
     private LocalDateTime mottattTidspunkt;
-    
+
     @JsonProperty(value = "behandlet")
     @Valid
     private boolean behandlet;
-    
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
 
-    
+    SykdomDokumentOversiktElement(){
+
+    }
+
     public SykdomDokumentOversiktElement(
             String id, String versjon, SykdomDokumentType type, boolean annenPartErKilde, LocalDate datert,
             LocalDate mottattDato, LocalDateTime mottattTidspunkt, boolean behandlet,
@@ -86,7 +89,7 @@ public class SykdomDokumentOversiktElement {
     public String getId() {
         return id;
     }
-    
+
     public String getVersjon() {
         return versjon;
     }

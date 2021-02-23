@@ -22,24 +22,27 @@ public class SykdomDokumentOversikt {
     @Size(max = 1000)
     @Valid
     private List<SykdomDokumentOversiktElement> dokumenter = new ArrayList<>();
-    
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
-    
-    
+
+    SykdomDokumentOversikt() {
+
+    }
+
     public SykdomDokumentOversikt(List<SykdomDokumentOversiktElement> dokumenter,
             List<ResourceLink> links) {
         this.dokumenter = dokumenter;
         this.links = links;
     }
-    
-    
+
+
     public List<SykdomDokumentOversiktElement> getDokumenter() {
         return dokumenter;
     }
-    
+
     public List<ResourceLink> getLinks() {
         return links;
     }
