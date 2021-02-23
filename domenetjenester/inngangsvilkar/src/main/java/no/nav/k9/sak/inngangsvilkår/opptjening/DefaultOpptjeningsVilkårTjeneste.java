@@ -61,7 +61,7 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         var relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, sortertFomDatoer);
         boolean brukerHarOppgittAktivtFrilansArbeidsforhold = iayTjeneste.finnGrunnlag(behandlingId)
             .flatMap(InntektArbeidYtelseGrunnlag::getOppgittOpptjening)
-            .map(OppgittOpptjening::getFrilans)
+            .flatMap(OppgittOpptjening::getFrilans)
             .isPresent();
 
         //TODO håndter selvstendig næringsdrivende
