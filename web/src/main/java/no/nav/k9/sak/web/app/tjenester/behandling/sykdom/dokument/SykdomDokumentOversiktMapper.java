@@ -42,9 +42,9 @@ public class SykdomDokumentOversiktMapper {
                         "1", // TODO: Sett riktig verdi.
                         d.getType(),
                         false,  // TODO: Sette riktig verdi.
-                        LocalDate.now(), // TODO: Sette riktig verdi.
-                        LocalDate.now(), // TODO: Sette riktig verdi.
-                        LocalDateTime.now(), // TODO: Sette riktig verdi.
+                        d.getDatert(),
+                        d.getMottattDato(),
+                        d.getMottattTidspunkt(),
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
@@ -126,7 +126,7 @@ public class SykdomDokumentOversiktMapper {
                 "sykdom-innleggelse-endring",
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
-    
+
     public List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
         return dokumenter.stream().map(d -> new SykdomDokumentDto(
                     "" + d.getId(),

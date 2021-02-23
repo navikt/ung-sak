@@ -80,7 +80,7 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
     private static final String DOKUMENT_LISTE = "/liste";
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
-    
+
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
@@ -122,7 +122,7 @@ public class SykdomDokumentRestTjeneste {
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
         return sykdomDokumentOversiktMapper.mapDokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
     }
-    
+
     @GET
     @Path(SYKDOM_INNLEGGELSE)
     @Operation(description = "Henter alle perioder den pleietrengende er innlagt på sykehus og liknende.",
@@ -223,7 +223,7 @@ public class SykdomDokumentRestTjeneste {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
         sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
     }
@@ -274,9 +274,12 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
+        if(dokument.getType() != SykdomDokumentType.UKLASSIFISERT) {
+            throw new UnsupportedOperationException("Oppdatering av dokumenter mer enn en gang er ikke støttet ennå");
+        } // TODO: Håndtering av versjoner/historikk.
+
         dokument.setDatert(sykdomDokumentEndringDto.getDatert());
         dokument.setType(sykdomDokumentEndringDto.getType());
-        // TODO: Håndtering av versjoner/historikk.
 
         sykdomDokumentRepository.oppdater(dokument);
     }
@@ -307,7 +310,15 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final LocalDateTime nå = LocalDateTime.now();
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, sykdomDokumentOpprettelseDto.getJournalpostId(), null, getCurrentUserId(), nå, getCurrentUserId(), nå);
+        final SykdomDokument dokument = new SykdomDokument(
+            SykdomDokumentType.UKLASSIFISERT,
+            nå,
+            sykdomDokumentOpprettelseDto.getJournalpostId(),
+            null,
+            getCurrentUserId(),
+            nå,
+            getCurrentUserId(),
+            nå);
 
         sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
     }

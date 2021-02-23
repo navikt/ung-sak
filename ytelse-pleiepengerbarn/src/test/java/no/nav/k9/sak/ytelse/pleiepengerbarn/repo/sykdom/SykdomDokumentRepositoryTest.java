@@ -36,7 +36,7 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId journalpostId = new JournalpostId("journalpostId");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, journalpostId, null, endretAv, nå, endretAv, nå);
+        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, nå, journalpostId, null, endretAv, nå, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
@@ -45,7 +45,7 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
-        final SykdomDokument dokument2 = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, journalpostId, null, endretAv, nå, endretAv, nå);
+        final SykdomDokument dokument2 = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, nå, journalpostId, null, endretAv, nå, endretAv, nå);
         repo.lagre(dokument2, annenPleietrengendeAktørId);
 
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
