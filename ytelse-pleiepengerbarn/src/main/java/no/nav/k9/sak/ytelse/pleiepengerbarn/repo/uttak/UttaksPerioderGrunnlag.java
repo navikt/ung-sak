@@ -82,7 +82,7 @@ public class UttaksPerioderGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getUttakPerioder()) : new HashSet<PerioderFraSøknad>();
+        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioderFraSøknadene()) : new HashSet<PerioderFraSøknad>();
         perioder.add(perioderFraSøknad);
         this.oppgitteSøknadsperioder = new UttakPerioderHolder(perioder);
     }

@@ -100,7 +100,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     private UttakPerioderHolder mapUttaksPerioderRelevantForBehandlingen(UttaksPerioderGrunnlag grunnlag, Set<JournalpostId> mottatteDokumenter) {
         var perioderFraSøknader = grunnlag.getOppgitteSøknadsperioder()
-            .getUttakPerioder()
+            .getPerioderFraSøknadene()
             .stream()
             .filter(it -> mottatteDokumenter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());

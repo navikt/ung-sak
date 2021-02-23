@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -28,6 +29,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "PerioderFraSøknad")
@@ -131,17 +133,31 @@ public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
         return Collections.unmodifiableSet(ferie);
     }
 
+    public DatoIntervallEntitet utledSøktPeriode() {
+        var min = uttakPerioder.stream()
+            .map(UttakPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(LocalDate::compareTo)
+            .orElseThrow();
+        var max = uttakPerioder.stream()
+            .map(UttakPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(LocalDate::compareTo)
+            .orElseThrow();
+        return DatoIntervallEntitet.fraOgMedTilOgMed(min, max);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PerioderFraSøknad that = (PerioderFraSøknad) o;
-        return Objects.equals(arbeidPerioder, that.arbeidPerioder);
+        return Objects.equals(journalpostId, that.journalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(arbeidPerioder);
+        return Objects.hash(journalpostId);
     }
 
     @Override

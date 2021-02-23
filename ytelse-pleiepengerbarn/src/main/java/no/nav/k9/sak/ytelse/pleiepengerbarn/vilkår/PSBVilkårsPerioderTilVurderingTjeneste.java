@@ -38,9 +38,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private VilkårUtleder vilkårUtleder;
-    private SøknadsperiodeRepository søknadsperiodeRepository;
     private SøktePerioder søktePerioder;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
@@ -53,10 +51,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårUtleder = vilkårUtleder;
-        this.søknadsperiodeRepository = søknadsperiodeRepository;
         var maksSøktePeriode = new MaksSøktePeriode(søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.søknadsfristTjeneste = søknadsfristTjeneste;
 
         søktePerioder = new SøktePerioder(søknadsperiodeRepository);
 
@@ -90,7 +86,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         return vilkårPeriodeSet;
     }
-    
+
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         // TODO: Returnere liste av alle perioder på utsiden av revurderingsperiode som har blitt endret.

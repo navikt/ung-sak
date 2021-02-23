@@ -79,8 +79,8 @@ public class ArbeidPeriode extends BaseEntitet implements IndexKey {
                          UttakArbeidType aktivitetType,
                          Arbeidsgiver arbeidsgiver,
                          InternArbeidsforholdRef arbeidsforholdRef,
-                         Duration faktiskArbeidTimerPerDag,
-                         Duration jobberNormaltTimerPerDag) {
+                         Duration jobberNormaltTimerPerDag,
+                         Duration faktiskArbeidTimerPerDag) {
         this.periode = periode;
         this.aktivitetType = aktivitetType;
         this.arbeidsgiver = arbeidsgiver;

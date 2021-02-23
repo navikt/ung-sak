@@ -92,8 +92,8 @@ class MapSøknadUttakPerioder {
                     arbeidType,
                     null,
                     null,
-                    entry.getValue().getFaktiskArbeidTimerPerDag(),
-                    frilanserArbeidstidInfo.getJobberNormaltTimerPerDag());
+                    frilanserArbeidstidInfo.getJobberNormaltTimerPerDag(), entry.getValue().getFaktiskArbeidTimerPerDag()
+                );
             })
             .collect(Collectors.toList());
     }
@@ -116,8 +116,8 @@ class MapSøknadUttakPerioder {
                     aktivitetType,
                     arbeidsgiver,
                     arbeidsforholdRef,
-                    entry.getValue().getFaktiskArbeidTimerPerDag(),
-                    input.getArbeidstidInfo().getJobberNormaltTimerPerDag());
+                    input.getArbeidstidInfo().getJobberNormaltTimerPerDag(), entry.getValue().getFaktiskArbeidTimerPerDag()
+                );
             })
             .collect(Collectors.toList());
     }
