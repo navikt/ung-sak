@@ -63,6 +63,12 @@ public class SykdomVurderingService {
     public boolean harAksjonspunkt(Behandling behandling) {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
+        
+        final boolean uklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
+        if (uklassifiserteDokumenter) {
+            return true;
+        }
+        
         final boolean legeerklæring = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
         if (!legeerklæring) {
             return true;
