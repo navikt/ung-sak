@@ -41,9 +41,6 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
     @JsonProperty("inntektPerioder")
     private final List<InntektPeriode> inntektPerioder = new ArrayList<>();
 
-    @JsonProperty("brukerHarOppgittAktivtFrilansArbeidsforhold")
-    private boolean brukerHarOppgittAktivtFrilansArbeidsforhold;
-
     /**
      * Maks periode i en mellomliggende periode for et arbeidsforhold for at den skal kunne regnes med.
      */
@@ -216,11 +213,4 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
         this.skalValidereMotInntekt = skalValidereMotInntekt;
     }
 
-    public boolean brukerHarOppgittAktivtFrilansArbeidsforhold() {
-        return brukerHarOppgittAktivtFrilansArbeidsforhold;
-    }
-
-    public void setBrukerHarOppgittAktivtFrilansArbeidsforhold(boolean brukerHarOppgittAktivtFrilansArbeidsforhold) {
-        this.brukerHarOppgittAktivtFrilansArbeidsforhold = brukerHarOppgittAktivtFrilansArbeidsforhold;
-    }
 }

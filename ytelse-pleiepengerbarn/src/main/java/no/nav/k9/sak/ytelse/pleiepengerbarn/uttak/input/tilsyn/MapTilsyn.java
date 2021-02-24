@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -18,8 +19,10 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 public class MapTilsyn {
 
-    public Map<LukketPeriode, Duration> map(Set<KravDokument> kravDokumenter,
-                                            Set<PerioderFraSøknad> perioderFraSøknader) {
+    public Map<LukketPeriode, Duration> map(TreeSet<KravDokument> kravDokumenter,
+                                            Set<PerioderFraSøknad> perioderFraSøknader,
+                                            LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+
         var resultatTimeline = new LocalDateTimeline<Duration>(List.of());
         for (KravDokument kravDokument : kravDokumenter) {
             var dokumenter = perioderFraSøknader.stream()
@@ -37,7 +40,10 @@ public class MapTilsyn {
         }
 
         var result = new HashMap<LukketPeriode, Duration>();
-        for (LocalDateSegment<Duration> segment : resultatTimeline.compress().toSegments()) {
+        var segmenter = resultatTimeline.compress()
+            .intersection(tidslinjeTilVurdering)
+            .toSegments();
+        for (LocalDateSegment<Duration> segment : segmenter) {
             result.put(new LukketPeriode(segment.getFom(), segment.getTom()), segment.getValue());
         }
 

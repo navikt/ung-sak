@@ -95,12 +95,8 @@ public class Opptjeningsvilkår implements RuleService<Opptjeningsgrunnlag> {
             .hvis(new SjekkTilstrekkeligOpptjening(), new Oppfylt())
             .ellers(new SjekkTilstrekkeligOpptjeningInklAntatt());
 
-        SequenceSpecification<MellomregningOpptjeningsvilkårData> sammenstillArbeidMedInntekt = new SequenceSpecification<>("FP_VK 23.1", "Sammenstill Arbeid aktivitet med Inntekt",
+        return new SequenceSpecification<>("FP_VK 23.1", "Sammenstill Arbeid aktivitet med Inntekt",
             List.of(new SjekkInntektSamsvarerMedArbeidAktivitet(), new SjekkMellomliggendePerioderMellomArbeidsforhold(), new BeregnOpptjening(), sjekkOpptjeningsvilkåret));
-
-        return rs.hvisRegel("FP_VK 23.6", "Hvis søker har oppgitt aktivt frilansarbeidsforhold")
-            .hvis(new SjekkOppgittFrilansArbeidsforhold(), new Oppfylt())
-            .ellers(sammenstillArbeidMedInntekt);
 
     }
 }

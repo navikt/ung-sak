@@ -94,7 +94,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     }
 
     @Test
-    public void skal_utlede_en_periode_for_egen_næring() {
+    public void skal_vurdere_oppgitt_periode_for_egen_næring_som_ferdig_vurdert_godkjent() {
 
 
 
@@ -132,7 +132,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
         assertThat(perioder).hasSize(1);
         OpptjeningAktivitetPeriode aktivitetPeriode = perioder.get(0);
         assertThat(aktivitetPeriode.getPeriode()).isEqualTo(periode);
-        assertThat(aktivitetPeriode.getVurderingsStatus()).isEqualTo(VurderingsStatus.TIL_VURDERING);
+        assertThat(aktivitetPeriode.getVurderingsStatus()).isEqualTo(VurderingsStatus.FERDIG_VURDERT_GODKJENT);
     }
 
     @Test

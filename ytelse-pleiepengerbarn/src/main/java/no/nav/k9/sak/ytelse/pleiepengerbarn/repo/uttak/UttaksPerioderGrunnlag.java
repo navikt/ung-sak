@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -83,7 +82,7 @@ public class UttaksPerioderGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getUttakPerioder()) : new HashSet<>(Set.of(perioderFraSøknad));
+        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioderFraSøknadene()) : new HashSet<PerioderFraSøknad>();
         perioder.add(perioderFraSøknad);
         this.oppgitteSøknadsperioder = new UttakPerioderHolder(perioder);
     }

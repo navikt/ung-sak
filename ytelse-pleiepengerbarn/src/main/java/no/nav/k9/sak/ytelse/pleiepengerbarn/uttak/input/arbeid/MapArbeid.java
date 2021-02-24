@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -26,8 +27,10 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 public class MapArbeid {
 
-    public List<Arbeid> map(Set<KravDokument> kravDokumenter,
-                            Set<PerioderFraSøknad> perioderFraSøknader) {
+    public List<Arbeid> map(TreeSet<KravDokument> kravDokumenter,
+                            Set<PerioderFraSøknad> perioderFraSøknader,
+                            LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+
         final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
         kravDokumenter.stream()
@@ -58,13 +61,15 @@ public class MapArbeid {
                 var perioder = new HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo>();
                 arbeidPeriodes.getValue()
                     .compress()
-                    .toSegments().forEach(p -> {
-                    var periode = p.getValue().getPeriode();
-                    var jobberNormalt = Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(Duration.ZERO);
-                    var jobberFaktisk = Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(Duration.ZERO);
-                    perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
-                        new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
-                });
+                    .intersection(tidslinjeTilVurdering)
+                    .toSegments()
+                    .forEach(p -> {
+                        var periode = p.getValue().getPeriode();
+                        var jobberNormalt = Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(Duration.ZERO);
+                        var jobberFaktisk = Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(Duration.ZERO);
+                        perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
+                            new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
+                    });
 
                 return new Arbeid(mapArbeidsforhold(arbeidPeriodes.getKey()), perioder);
             })
@@ -85,7 +90,7 @@ public class MapArbeid {
     private LocalDateSegment<WrappedArbeid> lagSegment(LocalDateInterval di, WrappedArbeid segmentValue) {
         var oppgittPeriode = segmentValue.getPeriode();
         var arbeidPeriode = oppgittPeriode != null ? new ArbeidPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()), oppgittPeriode.getAktivitetType(),
-            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getFaktiskArbeidTimerPerDag(), oppgittPeriode.getJobberNormaltTimerPerDag()) : null;
+            oppgittPeriode.getArbeidsgiver(), oppgittPeriode.getArbeidsforholdRef(), oppgittPeriode.getJobberNormaltTimerPerDag(), oppgittPeriode.getFaktiskArbeidTimerPerDag()) : null;
         var wrapper = new WrappedArbeid(arbeidPeriode);
         return new LocalDateSegment<>(di, wrapper);
     }

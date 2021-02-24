@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -23,7 +24,11 @@ public class PsbInntektsmeldingerRelevantForBeregning implements Inntektsmelding
     public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
         var inntektsmeldingene = new ArrayList<Inntektsmelding>();
 
-        for (Inntektsmelding inntektsmelding : sakInntektsmeldinger) {
+        var sortedIms = sakInntektsmeldinger.stream()
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        for (Inntektsmelding inntektsmelding : sortedIms) {
             if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)) {
                 inntektsmeldingene.add(inntektsmelding);
             } else if (harInntektsmeldingSomMatcherArbeidsforhold(inntektsmeldingene, inntektsmelding)

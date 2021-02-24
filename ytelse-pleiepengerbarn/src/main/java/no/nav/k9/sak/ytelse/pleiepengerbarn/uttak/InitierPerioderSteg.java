@@ -2,13 +2,16 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -28,7 +31,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
@@ -38,6 +40,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
 public class InitierPerioderSteg implements BehandlingSteg {
+
+    private final Logger log = LoggerFactory.getLogger(InitierPerioderSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -79,8 +83,11 @@ public class InitierPerioderSteg implements BehandlingSteg {
             var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId())
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
+                .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
+
+            log.info("Fant {} dokumenter knyttet til behandlingen", mottatteDokumenter);
 
             var søknadsperioderHolder = mapSøknadsperioderRelevantForBehandlingen(kravDokumenterMedPerioder, mottatteDokumenter, søknadsperiodeGrunnlag);
             søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandlingId, søknadsperioderHolder);
@@ -93,10 +100,12 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     private UttakPerioderHolder mapUttaksPerioderRelevantForBehandlingen(UttaksPerioderGrunnlag grunnlag, Set<JournalpostId> mottatteDokumenter) {
         var perioderFraSøknader = grunnlag.getOppgitteSøknadsperioder()
-            .getUttakPerioder()
+            .getPerioderFraSøknadene()
             .stream()
             .filter(it -> mottatteDokumenter.contains(it.getJournalpostId()))
             .collect(Collectors.toSet());
+
+        log.info("Fant {} dokumenter med perioder knyttet til behandlingen", perioderFraSøknader);
 
         return new UttakPerioderHolder(perioderFraSøknader);
     }

@@ -29,7 +29,7 @@ public class UttakPerioderGrunnlagRepository {
             return Set.of();
         }
         return eksisterendeGrunnlag.get().getOppgitteSøknadsperioder()
-            .getUttakPerioder()
+            .getPerioderFraSøknadene()
             .stream()
             .filter(it -> journalpostIder.contains(it.getJournalpostId()))
             .map(it -> new UttakPerioderDokumenter(it.getJournalpostId(), it.getArbeidPerioder()))

@@ -22,6 +22,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum AktivitetStatus implements Kodeverdi {
+    MIDLERTIDIG_INAKTIV("MIDL_INAKTIV", "Midlertidig inaktiv", Inntektskategori.UDEFINERT),
     ARBEIDSAVKLARINGSPENGER("AAP", "Arbeidsavklaringspenger", Inntektskategori.ARBEIDSAVKLARINGSPENGER),
     ARBEIDSTAKER("AT", "Arbeidstaker", Inntektskategori.ARBEIDSTAKER),
     DAGPENGER("DP", "Dagpenger", Inntektskategori.DAGPENGER),
@@ -34,10 +35,10 @@ public enum AktivitetStatus implements Kodeverdi {
     KOMBINERT_AT_FL_SN("AT_FL_SN", "Kombinert arbeidstaker, frilanser og selvstendig næringsdrivende", Inntektskategori.UDEFINERT),
     BRUKERS_ANDEL("BA", "Brukers andel", Inntektskategori.UDEFINERT),
     KUN_YTELSE("KUN_YTELSE", "Kun ytelse", Inntektskategori.UDEFINERT),
-    
+
     TTLSTØTENDE_YTELSE("TY", "Tilstøtende ytelse", Inntektskategori.UDEFINERT),
     VENTELØNN_VARTPENGER("VENTELØNN_VARTPENGER", "Ventelønn/Vartpenger", Inntektskategori.UDEFINERT),
-    
+
     UDEFINERT("-", "Ikke definert", Inntektskategori.UDEFINERT);
 
     public static final String KODEVERK = "AKTIVITET_STATUS";
@@ -80,7 +81,7 @@ public enum AktivitetStatus implements Kodeverdi {
         }
         return ad;
     }
-    
+
     public static Map<String, AktivitetStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -122,7 +123,7 @@ public enum AktivitetStatus implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();

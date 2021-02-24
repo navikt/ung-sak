@@ -66,6 +66,9 @@ public class SykdomDokumentOversiktElement {
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
 
+    SykdomDokumentOversiktElement(){
+
+    }
 
     public SykdomDokumentOversiktElement(
             String id,

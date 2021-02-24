@@ -4,15 +4,19 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -24,6 +28,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
@@ -52,6 +57,7 @@ public class MapInputTilUttakTjeneste {
     private PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     @Inject
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -59,12 +65,14 @@ public class MapInputTilUttakTjeneste {
                                     UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                     PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository,
-                                    @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
+                                    @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+        @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
@@ -74,24 +82,30 @@ public class MapInputTilUttakTjeneste {
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hent(referanse.getBehandlingId());
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
 
-        return toRequestData(behandling, personopplysningerAggregat, vurderteSøknadsperioder, vilkårene, uttakGrunnlag, pleiebehov);
+        return toRequestData(behandling, personopplysningerAggregat, vurderteSøknadsperioder, perioderTilVurdering, vilkårene, uttakGrunnlag, pleiebehov);
     }
 
     private Uttaksgrunnlag toRequestData(Behandling behandling,
                                          PersonopplysningerAggregat personopplysningerAggregat,
                                          Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderteSøknadsperioder,
+                                         NavigableSet<DatoIntervallEntitet> vurdertePerioder,
                                          Vilkårene vilkårene,
                                          UttaksPerioderGrunnlag uttaksPerioderGrunnlag,
                                          PleiebehovResultat pleiebehovResultat) {
 
-        var perioderFraSøknader = uttaksPerioderGrunnlag.getRelevantSøknadsperioder()
-            .getUttakPerioder();
-        var kravDokumenter = vurderteSøknadsperioder.keySet()
-            .stream()
-            .filter(it -> perioderFraSøknader.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
-            .collect(Collectors.toCollection(TreeSet::new));
+        // Henter ut alt og lager tidlinje av denne for så å ta ut den delen som er relevant
+        // NB! Kan gi issues ved lange fagsaker mtp ytelse
+        var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
+            .getPerioderFraSøknadene();
+        var kravDokumenter = new TreeSet<>(vurderteSøknadsperioder.keySet());
+
+        if (perioderFraSøknader.size() != kravDokumenter.size()) {
+            throw new IllegalStateException("Fant ikke alle dokumentene siden '" + kravDokumenter + "' != '" + perioderFraSøknader + "'");
+        }
+
         var søkerPersonopplysninger = personopplysningerAggregat.getSøker();
         var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
 
@@ -101,18 +115,22 @@ public class MapInputTilUttakTjeneste {
         // TODO: Map:
         final List<String> andrePartersSaksnummer = List.of();
 
-        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader);
+        var tidslinjeTilVurdering = new LocalDateTimeline<>(vurdertePerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toList()));
+
+        final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader);
+        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(pleiebehovResultat);
 
-        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader);
+        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(vilkårene);
 
-        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(kravDokumenter, perioderFraSøknader);
+        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         return new Uttaksgrunnlag(
             barn,
