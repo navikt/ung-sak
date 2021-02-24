@@ -48,7 +48,7 @@ public class AvklarSaksopplysningerOppdaterer implements AksjonspunktOppdaterer<
         AktørId aktørId = param.getAktørId();
         Behandling behandling = param.getBehandling();
         var ref = BehandlingReferanse.fra(behandling, param.getSkjæringstidspunkt());
-        final PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(ref);
+        final PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
         boolean totrinn = håndterEndringHistorikk(dto, param, personopplysningerAggregat);
 
         if (dto.isFortsettBehandling()) {

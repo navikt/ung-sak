@@ -212,4 +212,5 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
     public void setSkalValidereMotInntekt(boolean skalValidereMotInntekt) {
         this.skalValidereMotInntekt = skalValidereMotInntekt;
     }
+
 }

@@ -9,9 +9,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
-import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
-import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.vedtak.felles.jpa.HibernateVerktøy;
 
 @Dependent
@@ -55,33 +52,29 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær);
     }
 
-    public void lagreOgFlushNyttGrunnlag(Long behandlingId, OmsorgspengerGrunnlag grunnlag) {
-        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
-
-        if (eksisterendeGrunnlag.isPresent()) {
-            boolean erForskjellige = differ(false).areDifferent(grunnlag, eksisterendeGrunnlag.orElse(null));
-            if (erForskjellige) {
-                deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
-            } else {
-                // skip
-                return;
-            }
+    public Optional<OppgittFravær> hentOppgittFraværFraSøknadHvisEksisterer(Long behandlingId) {
+        if (behandlingId == null) {
+            return Optional.empty();
         }
-        Optional.ofNullable(grunnlag.getOppgittFravær()).ifPresent(entityManager::persist);
-        entityManager.persist(grunnlag);
-        entityManager.flush();
-    }
+        final var grunnlag = hentGrunnlag(behandlingId);
 
-    private DiffEntity differ(boolean medOnlyCheckTrackedFields) {
-        TraverseGraph traverser = TraverseEntityGraphFactory.build(medOnlyCheckTrackedFields);
-        return new DiffEntity(traverser);
+        return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad);
     }
 
     public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
+        var eksisterendeFraværFraSøknad = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad).orElse(null);
         entityManager.persist(input);
         deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
-        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, input));
+        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, input, eksisterendeFraværFraSøknad));
+    }
+
+    public void lagreOgFlushOppgittFraværFraSøknad(Long behandlingId, OppgittFravær input) {
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
+        var eksisterendeFravær = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær).orElse(null);
+        entityManager.persist(input);
+        deaktiverEksisterendeGrunnlag(eksisterendeGrunnlag.orElse(null));
+        lagreOgFlushNyttGrunnlag(new OmsorgspengerGrunnlag(behandlingId, eksisterendeFravær, input));
     }
 
     /**

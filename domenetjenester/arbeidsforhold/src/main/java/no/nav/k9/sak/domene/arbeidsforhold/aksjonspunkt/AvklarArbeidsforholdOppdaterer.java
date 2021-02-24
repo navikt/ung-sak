@@ -75,8 +75,8 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
 
         // krever totrinn hvis saksbehandler har tatt stilling til dette aksjonspunktet
         arbeidsforholdTjeneste.lagre(param.getBehandlingId(), param.getAktørId(), informasjonBuilder);
-        return OppdateringResultat.utenTransisjon().medTotrinn().build();
 
+        return OppdateringResultat.utenTransisjon().build();
     }
 
     private boolean harVærtHåndtertVedAksjonspunktFør(no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto it) {

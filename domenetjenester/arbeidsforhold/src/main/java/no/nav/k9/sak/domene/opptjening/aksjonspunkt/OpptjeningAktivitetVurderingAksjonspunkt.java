@@ -47,8 +47,8 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
      * @param registerAktivitet    aktiviteten
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode opptjeningsperioder
-     * @param inntektsmeldinger inntektsmeldinger
+     * @param opptjeningPeriode    opptjeningsperioder
+     * @param inntektsmeldinger    inntektsmeldinger
      * @return vurderingsstatus
      */
     private VurderingsStatus vurderArbeid(YrkesaktivitetFilter filter, Yrkesaktivitet registerAktivitet, Yrkesaktivitet overstyrtAktivitet,
@@ -83,11 +83,10 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
     }
 
     /**
-     *
-     * @param aktørId aktør
+     * @param aktørId              aktør
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
-     * @param opptjeningPeriode opptjeningsperiode
+     * @param opptjeningPeriode    opptjeningsperiode
      * @return vurderingsstatus
      */
     private VurderingsStatus vurderNæring(AktørId aktørId, Yrkesaktivitet overstyrtAktivitet, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {

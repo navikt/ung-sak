@@ -55,8 +55,8 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         var relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, sortertPerioder);
         var relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, sortertFomDatoer);
 
+        //TODO håndter selvstendig næringsdrivende
         for (var vilkårPeriode : sortertPerioder) {
-
             var stp = vilkårPeriode.getFomDato();
             Opptjening opptjening = opptjeningResultat.finnOpptjening(stp).orElseThrow();
             LocalDate behandlingstidspunkt = LocalDate.now();

@@ -24,7 +24,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-        Map.of()),
+        Map.of(FagsakYtelseType.OMSORGSPENGER, "22-13, 2. ledd")),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.FP, "21-3,21-7",
             FagsakYtelseType.OMP, "21-3")),
@@ -71,8 +71,15 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.",
         Map.of(FagsakYtelseType.PSB, "9-10")),
 
+    // TODO, trengs denne?
+    IKKE_UTVIDETRETT("1072", "Ikke grunnlag for utvidet rett", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd",
+        FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
+
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
         Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
+    SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
+        Map.of(FagsakYtelseType.PSB, "9-5")),
 
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen",
         Map.of()),

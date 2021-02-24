@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -41,7 +40,6 @@ import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(JpaExtension.class)
 public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
 
-
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
     public static final LocalDate FØRSTE_UTTAKSDAG = SKJÆRINGSTIDSPUNKT.minusDays(9);
     public static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.virksomhet("123456789");
@@ -49,22 +47,21 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
-    private OpptjeningRepository opptjeningRepository ;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private OpptjeningRepository opptjeningRepository;
     private OmsorgspengerOpptjeningForBeregningTjeneste tjeneste;
     private BehandlingReferanse ref;
     private AktørId aktørId;
 
     @BeforeEach
-    public void setUp()  {
+    public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
 
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);
         Behandling behandling = scenario.lagre(entityManager);
-        ref = BehandlingReferanse.fra(behandling).medSkjæringstidspunkt(Skjæringstidspunkt.builder()
-            .medSkjæringstidspunktOpptjening(FØRSTE_UTTAKSDAG).build());
+        ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
         tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)));

@@ -50,7 +50,7 @@ public class AksjonspunktutlederForAlder implements AksjonspunktUtleder {
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
         var oppgittFravær = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId());
         if (oppgittFravær.isPresent()) {
-            var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(param.getRef());
+            var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(param.getRef(), param.getRef().getFagsakPeriode().getFomDato());
             var søker = personopplysningerAggregat.getSøker();
             var perioder = oppgittFravær.get().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow().getPerioder().stream().map(VilkårPeriode::getFom).collect(Collectors.toSet());
             if (perioder.stream().anyMatch(dato -> erBruker70ÅrVed(dato, søker))) {

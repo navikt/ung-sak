@@ -26,6 +26,7 @@ public final class AktivitetStatusMapper {
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.MS, AktivitetStatus.MILITÆR_ELLER_SIVIL);
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.SN, AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE);
         map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.KUN_YTELSE, AktivitetStatus.KUN_YTELSE);
+        map.put(no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.MIDL_INAKTIV, AktivitetStatus.MIDLERTIDIG_INAKTIV);
         REGEL_TIL_VL_MAP = Collections.unmodifiableMap(map);
     }
 
@@ -38,6 +39,7 @@ public final class AktivitetStatusMapper {
         map.put(AktivitetStatus.KOMBINERT_AT_FL_SN, no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.ATFL_SN);
         map.put(AktivitetStatus.KOMBINERT_AT_SN, no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.ATFL_SN);
         map.put(AktivitetStatus.KOMBINERT_FL_SN, no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.ATFL_SN);
+        map.put(AktivitetStatus.MIDLERTIDIG_INAKTIV, no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus.MIDL_INAKTIV);
         VL_TIL_REGEL_MAP = Collections.unmodifiableMap(map);
     }
 

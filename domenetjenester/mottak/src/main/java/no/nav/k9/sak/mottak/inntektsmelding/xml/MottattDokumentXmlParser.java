@@ -1,14 +1,11 @@
 package no.nav.k9.sak.mottak.inntektsmelding.xml;
 
-import static no.nav.vedtak.felles.xml.XmlUtils.retrieveNameSpaceOfXML;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.felles.integrasjon.felles.ws.JaxbHelper;
 
 public final class MottattDokumentXmlParser {
 
@@ -46,7 +43,7 @@ public final class MottattDokumentXmlParser {
     private static String hentNamespace(String xml) {
         final String namespace;
         try {
-            namespace = retrieveNameSpaceOfXML(xml);
+            namespace = JaxbHelper.retrieveNameSpaceOfXML(xml);
         } catch (Exception e) {
             throw MottattInntektsmeldingException.FACTORY.uventetFeilVedParsingAvXml("ukjent", e); //$NON-NLS-1$
         }

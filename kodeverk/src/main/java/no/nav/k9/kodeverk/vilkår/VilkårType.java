@@ -50,13 +50,18 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.SØKER_ER_IKKE_BOSATT),
     OMSORGEN_FOR(VilkårTypeKoder.K9_VK_1,
         "Omsorgen for",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10"),
+            Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10",
+                FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-10",
+                FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-10"),
         Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
         Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
         Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     ALDERSVILKÅR(VilkårTypeKoder.K9_VK_3,
         "Aldersvilkåret",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-3 første ledd"),
+            Map.of(
+                FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-3 første ledd",
+                FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
+                FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
     MEDISINSKEVILKÅR_UNDER_18_ÅR(VilkårTypeKoder.K9_VK_2a,
         "Medisinskevilkår under 18 år",
@@ -107,6 +112,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT,
         Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT),
 
+    UTVIDETRETT(VilkårTypeKoder.K9_VK_9_6, "Utvidet rett",
+            Map.of(FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
+                FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
+            Avslagsårsak.IKKE_UTVIDETRETT),
     /**
      * Brukes i stedet for null der det er optional.
      */

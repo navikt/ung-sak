@@ -7,7 +7,6 @@ import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettList
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -78,18 +77,13 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
-            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), finnRelevanteKoder()) == JA) {
+            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), annenOpptjening()) == JA) {
                 logger.info("Utleder AP 5051 fra oppgitt opptjening");
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
             }
 
             if (harBrukerOppgittArbeidsforholdMed(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD, opptjening.getOpptjeningPeriode(), oppgittOpptjening) == JA) {
                 logger.info("Utleder AP 5051 fra utlandsk arbeidsforhold");
-                return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-            }
-
-            if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), Collections.singletonList(ArbeidType.FRILANSER)) == JA) {
-                logger.info("Utleder AP 5051 fra oppgitt eller bekreftet frilans: behandlingId={}", behandlingId);
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
             }
 
@@ -104,7 +98,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         return INGEN_AKSJONSPUNKTER;
     }
 
-    private List<ArbeidType> finnRelevanteKoder() {
+    private List<ArbeidType> annenOpptjening() {
         return List.of(ArbeidType.values())
             .stream()
             .filter(ArbeidType::erAnnenOpptjening)

@@ -142,7 +142,6 @@ public class ÅrskvantumTjeneste {
         var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
 
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
-            null, // FIXME: Oppdater kontrakt
             ref.getBehandlingUuid().toString(),
             fraværPerioder,
             personMedRelasjoner.getPersonIdent().getIdent(),
@@ -153,7 +152,7 @@ public class ÅrskvantumTjeneste {
 
     private Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioderRelevantForBehandling(Behandling behandling, OppgittFravær grunnlag) {
         var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
-        var fagsakFravær = trekkUtFraværTjeneste.fraværFraInntektsmeldingerPåFagsakMedSøknadsfristVurdering(behandling);
+        var fagsakFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
 
         var behandlingFravær = grunnlag.getPerioder();
         return utledPerioder(vilkårsperioder, fagsakFravær, behandlingFravær);

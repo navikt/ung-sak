@@ -67,12 +67,18 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     FASTSETT_VIDERE_BEHANDLING("FASTSETT_VIDERE_BEHANDLING", "Fastsett videre behandling"),
     TILBAKETREKK("TILBAKETREKK", "Tilbaketrekk"),
 
+    /** Vilkår */
+    OMSORG_FOR("OMSORG_FOR", "Har omsorgen for"),
+
     /** Faresignaler. */
     FARESIGNALER("FARESIGNALER", "Faresignaler"),
 
     /** Refusjonskrav. */
     NYTT_REFUSJONSKRAV("NYTT_REFUSJONSKRAV", "Nytt refusjonskrav"),
     NY_REFUSJONSFRIST("NY_REFUSJONSFRIST", "Ny refusjonsfrist"),
+
+    /** Rammevedtak */
+    UTVIDETRETT("UTVIDETRETT", "Utvidet rett"),
 
     VALG("VALG", "Valg"),
     UDEFINERT("-", "Ikke definert"),

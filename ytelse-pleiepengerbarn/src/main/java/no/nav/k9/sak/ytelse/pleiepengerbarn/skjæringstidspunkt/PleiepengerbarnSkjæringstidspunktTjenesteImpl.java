@@ -2,8 +2,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.skjæringstidspunkt;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,11 +20,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -32,9 +32,8 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
 
     private BehandlingRepository behandlingRepository;
     private OpptjeningRepository opptjeningRepository;
-    private UttakRepository uttakRepository;
+    private SøknadsperiodeRepository uttakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private OpphørUttakTjeneste opphørUttakTjeneste;
 
     private Period periodeEtter = Period.parse("P4Y");
     private Period periodeFør = Period.parse("P17M");
@@ -46,14 +45,12 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     @Inject
     public PleiepengerbarnSkjæringstidspunktTjenesteImpl(BehandlingRepository behandlingRepository,
                                                          OpptjeningRepository opptjeningRepository,
-                                                         UttakRepository uttakRepository,
-                                                         UttakTjeneste uttakTjeneste,
+                                                         SøknadsperiodeRepository uttakRepository,
                                                          VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.uttakRepository = uttakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.opphørUttakTjeneste = new OpphørUttakTjeneste(uttakTjeneste);
     }
 
     @Override
@@ -67,14 +64,12 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         Builder builder = Skjæringstidspunkt.builder();
 
         LocalDate førsteUttaksdato = førsteUttaksdag(behandlingId);
-        builder.medFørsteUttaksdato(førsteUttaksdato);
         builder.medUtledetSkjæringstidspunkt(førsteUttaksdato);
 
         opptjeningRepository.finnOpptjening(behandlingId)
             .flatMap(it -> it.finnOpptjening(førsteUttaksdato)) // TODO: Dette er neppe optimalt ...
             .map(opptjening -> opptjening.getTom().plusDays(1))
             .ifPresent(skjæringstidspunkt -> {
-                builder.medSkjæringstidspunktOpptjening(skjæringstidspunkt);
                 builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
             });
 
@@ -87,17 +82,23 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
-        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
+        var søknadsperioder = uttakRepository.hentGrunnlag(behandlingId);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
 
         if (søknadsperioder.isPresent()) {
             final var oppgittFordeling = søknadsperioder.get();
-            final var førstePeriode = oppgittFordeling.getPerioder()
+            final var førstePeriode = oppgittFordeling.getOppgitteSøknadsperioder()
+                .getPerioder()
                 .stream()
+                .map(Søknadsperioder::getPerioder)
+                .flatMap(Collection::stream)
                 .map(Søknadsperiode::getPeriode)
                 .min(DatoIntervallEntitet::compareTo);
-            final var førsteDagIUttaket = oppgittFordeling.getPerioder()
+            final var førsteDagIUttaket = oppgittFordeling.getOppgitteSøknadsperioder()
+                .getPerioder()
                 .stream()
+                .map(Søknadsperioder::getPerioder)
+                .flatMap(Collection::stream)
                 .map(Søknadsperiode::getPeriode)
                 .map(DatoIntervallEntitet::getFomDato)
                 .min(LocalDate::compareTo)
@@ -108,8 +109,8 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
                 if (spesifiktVilkår.isPresent() && førstePeriode.isPresent()) {
                     final var vilkårPeriode = spesifiktVilkår.get().getPerioder()
                         .stream()
-                        .filter(it -> it.getPeriode().hengerSammen(førstePeriode.get()))
                         .map(VilkårPeriode::getPeriode)
+                        .filter(periode -> periode.hengerSammen(førstePeriode.get()))
                         .min(DatoIntervallEntitet::compareTo);
 
                     if (vilkårPeriode.isEmpty()) {
@@ -127,11 +128,6 @@ public class PleiepengerbarnSkjæringstidspunktTjenesteImpl implements Skjæring
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return behandling.getOpprettetDato().toLocalDate();
-    }
-
-    @Override
-    public boolean harAvslåttPeriode(UUID behandlingUuid) {
-        return opphørUttakTjeneste.harAvslåttUttakPeriode(behandlingUuid);
     }
 
     @Override

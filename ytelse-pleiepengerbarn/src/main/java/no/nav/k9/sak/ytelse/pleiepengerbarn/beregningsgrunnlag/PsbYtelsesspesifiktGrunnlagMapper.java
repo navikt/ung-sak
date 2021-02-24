@@ -3,12 +3,12 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
@@ -18,45 +18,49 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
-import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.domene.uttak.uttaksplan.InnvilgetUttaksplanperiode;
-import no.nav.k9.sak.kontrakt.uttak.UttakUtbetalingsgrad;
-import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
 public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<PleiepengerSyktBarnGrunnlag> {
 
-    private UttakTjeneste uttakTjeneste;
+    private UttakTjeneste uttakRestKlient;
 
     public PsbYtelsesspesifiktGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PsbYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakTjeneste) {
-        this.uttakTjeneste = uttakTjeneste;
+    public PsbYtelsesspesifiktGrunnlagMapper(UttakTjeneste uttakRestKlient) {
+        this.uttakRestKlient = uttakRestKlient;
     }
 
     @Override
     public PleiepengerSyktBarnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
-        var uttaksplan = uttakTjeneste.hentUttaksplan(ref.getBehandlingUuid()).orElseThrow();
+        var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid());
 
-        var utbetalingsgrader = uttaksplan.getPerioder().entrySet().stream()
-            .filter(e -> Objects.equals(UtfallType.INNVILGET, e.getValue().getUtfall()))
-            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), (InnvilgetUttaksplanperiode) e.getValue()).stream()).collect(Collectors.toList());
+        var utbetalingsgrader = uttaksplan.getPerioder()
+            .entrySet()
+            .stream()
+            .filter(it -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
+            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).stream())
+            .collect(Collectors.toList());
 
         return new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
     }
 
-    private List<UtbetalingsgradPrAktivitetDto> lagUtbetalingsgrad(Periode periode, InnvilgetUttaksplanperiode plan) {
-        var perArbeidsforhold = plan.getUtbetalingsgrader().stream().collect(Collectors.groupingBy(UttakUtbetalingsgrad::getArbeidsforhold));
+    private List<UtbetalingsgradPrAktivitetDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
+        var perArbeidsforhold = plan.getUtbetalingsgrader()
+            .stream()
+            .collect(Collectors.groupingBy(Utbetalingsgrader::getArbeidsforhold));
+
         List<UtbetalingsgradPrAktivitetDto> res = new ArrayList<>();
         for (var entry : perArbeidsforhold.entrySet()) {
             var arbeidsforhold = lagArbeidsforhold(entry.getKey());
@@ -66,7 +70,7 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
         return res;
     }
 
-    private List<PeriodeMedUtbetalingsgradDto> lagPerioder(Periode periode, List<UttakUtbetalingsgrad> ut) {
+    private List<PeriodeMedUtbetalingsgradDto> lagPerioder(LukketPeriode periode, List<Utbetalingsgrader> ut) {
         if (ut == null) {
             return Collections.emptyList();
         } else {
@@ -77,15 +81,15 @@ public class PsbYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtel
         }
     }
 
-    private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(UttakArbeidsforhold arb) {
+    private UtbetalingsgradArbeidsforholdDto lagArbeidsforhold(Arbeidsforhold arb) {
         return new UtbetalingsgradArbeidsforholdDto(lagAktør(arb),
             arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
-            new UttakArbeidType(arb.getType().getKode()));
+            new UttakArbeidType(arb.getType()));
     }
 
-    private Aktør lagAktør(UttakArbeidsforhold arb) {
+    private Aktør lagAktør(Arbeidsforhold arb) {
         if (arb.getAktørId() != null) {
-            return new AktørIdPersonident(arb.getAktørId().getId());
+            return new AktørIdPersonident(arb.getAktørId());
         } else if (arb.getOrganisasjonsnummer() != null) {
             return new Organisasjon(arb.getOrganisasjonsnummer());
         } else {

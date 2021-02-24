@@ -23,22 +23,22 @@ public class DummyKompletthetSjekker implements Kompletthetsjekker {
 
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
-        return null;
+        return KompletthetResultat.oppfylt();
     }
 
     @Override
     public KompletthetResultat vurderForsendelseKomplett(BehandlingReferanse ref) {
-        return null;
+        return KompletthetResultat.oppfylt();
     }
 
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
-        return null;
+        return List.of();
     }
 
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
-        return null;
+        return List.of();
     }
 
     @Override

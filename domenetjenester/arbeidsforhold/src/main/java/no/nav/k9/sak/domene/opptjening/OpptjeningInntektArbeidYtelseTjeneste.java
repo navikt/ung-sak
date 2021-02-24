@@ -22,7 +22,9 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
-/** Henter inntekter, arbeid, og ytelser relevant for opptjening. */
+/**
+ * Henter inntekter, arbeid, og ytelser relevant for opptjening.
+ */
 @Dependent
 public class OpptjeningInntektArbeidYtelseTjeneste {
 
@@ -49,7 +51,9 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
             .orElseThrow(() -> new IllegalStateException("Utvikler-feil: Mangler Opptjening for Behandling: " + behandlingId));
     }
 
-    /** Hent alle inntekter for søker der det finnes arbeidsgiver */
+    /**
+     * Hent alle inntekter for søker der det finnes arbeidsgiver
+     */
     public NavigableMap<LocalDate, List<OpptjeningInntektPeriode>> hentRelevanteOpptjeningInntekterForVilkårVurdering(Long behandlingId, AktørId aktørId, Collection<LocalDate> skjæringstidspunkter) {
         var grunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
         if (grunnlagOpt.isEmpty()) {
@@ -65,7 +69,6 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
             alle.put(stp, List.copyOf(result));
         }
         return Collections.unmodifiableNavigableMap(alle);
-
     }
 
     public NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse behandlingReferanse,
@@ -79,6 +82,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         var iayGrunnlag = grunnlagOpt.get();
         NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> alle = new TreeMap<>();
 
+
         for (var periode : new TreeSet<>(vilkårsPerioder)) {
             LocalDate stp = periode.getFomDato();
             var opptjening = opptjeningsresultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
@@ -86,6 +90,8 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
             var opptjeningAktivitetPerioder = perioderForSaksbehandling.stream().map(this::mapTilPerioder).collect(Collectors.toList());
             alle.put(periode, opptjeningAktivitetPerioder);
         }
+
+
         return Collections.unmodifiableNavigableMap(alle);
     }
 

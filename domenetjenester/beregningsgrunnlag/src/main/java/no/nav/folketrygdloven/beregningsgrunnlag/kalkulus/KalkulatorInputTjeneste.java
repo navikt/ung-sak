@@ -27,10 +27,13 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class KalkulatorInputTjeneste {
 
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
+    private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
 
     @Inject
-    public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste) {
+    public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
+                                   @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
+        this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -46,8 +49,9 @@ public class KalkulatorInputTjeneste {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
+        var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
 
-        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, tjeneste.finnOppgittOpptjening(iayGrunnlag).orElse(null));
+        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, tjeneste.finnOppgittOpptjening(iayGrunnlag).orElse(null), imTjeneste);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty()) {
@@ -67,8 +71,9 @@ public class KalkulatorInputTjeneste {
                                                                DatoIntervallEntitet vilkårsperiode,
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
                                                                Collection<Inntektsmelding> inntektsmeldinger,
-                                                               OppgittOpptjening oppgittOpptjening) {
-        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
+                                                               OppgittOpptjening oppgittOpptjening,
+                                                               InntektsmeldingerRelevantForBeregning imTjeneste) {
+        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste);
     }
 
     protected LocalDate finnSkjæringstidspunkt(DatoIntervallEntitet vilkårsperiode) {
@@ -77,8 +82,13 @@ public class KalkulatorInputTjeneste {
 
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse referanse) {
         FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
-        var tjeneste = FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
+        return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
-        return tjeneste;
+    }
+
+    private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse referanse) {
+        FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
+        return FagsakYtelseTypeRef.Lookup.find(inntektsmeldingerRelevantForBeregning, ytelseType)
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + InntektsmeldingerRelevantForBeregning.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 }

@@ -25,6 +25,7 @@ import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -180,7 +181,7 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private void mapUttakForAndel(DatoIntervallEntitet periode, BeregningsresultatAndel brukersAndel, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder, List<Aktivitet> aktiviteter) {
         var uttaksPeriodeForAndel = aktiviteter.stream()
-            .filter(it -> matcherArbeidsforhold(it.getArbeidsforhold(), brukersAndel))
+            .filter(it -> matcherAndel(it, brukersAndel))
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getPeriode().getFom(), it.getPeriode().getTom()).overlapper(periode))
@@ -207,19 +208,33 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
         return new Periode(fom, tom);
     }
 
-    private boolean matcherArbeidsforhold(Arbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {
+    private boolean matcherAndel(Aktivitet aktivitet, BeregningsresultatAndel brukersAndel) {
         if (brukersAndel.getArbeidsgiver().isPresent()) {
-            var arbeidsgiver = brukersAndel.getArbeidsgiver().get();
-            if (arbeidsgiver.erAktørId()) {
-                return arbeidsforhold.getAktørId() != null
-                    && arbeidsgiver.getAktørId().getId().equals(arbeidsforhold.getAktørId())
-                    && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(brukersAndel.getArbeidsforholdRef());
-            } else if (arbeidsgiver.getErVirksomhet()) {
-                return Objects.equals(arbeidsgiver.getOrgnr(), arbeidsforhold.getOrganisasjonsnummer())
-                    && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(brukersAndel.getArbeidsforholdRef());
-            }
+            return matcherArbeidsforhold(aktivitet.getArbeidsforhold(), brukersAndel)
+                && matcherAktitivetStatus(aktivitet, brukersAndel);
+        } else {
+            return matcherAktitivetStatus(aktivitet, brukersAndel);
+        }
+    }
+
+    private boolean matcherArbeidsforhold(Arbeidsforhold arbeidsforhold, BeregningsresultatAndel brukersAndel) {
+        var arbeidsgiver = brukersAndel.getArbeidsgiver().orElseThrow();
+        var arbeidsforholdRef = brukersAndel.getArbeidsforholdRef();
+        if (arbeidsgiver.erAktørId()) {
+            return arbeidsforhold.getAktørId() != null
+                && arbeidsgiver.getAktørId().getId().equals(arbeidsforhold.getAktørId())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef);
+        } else if (arbeidsgiver.getErVirksomhet()) {
+            return Objects.equals(arbeidsgiver.getOrgnr(), arbeidsforhold.getOrganisasjonsnummer())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef)
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef);
         }
         return false;
+    }
+
+    private boolean matcherAktitivetStatus(Aktivitet it, BeregningsresultatAndel brukersAndel) {
+        UttakArbeidType uttakArbeidType = UttakArbeidType.fraKode(it.getArbeidsforhold().getType());
+        return uttakArbeidType.matcher(brukersAndel.getAktivitetStatus());
     }
 
     private void settArbeidsgiverfelter(Arbeidsgiver arb, BeregningsresultatPeriodeAndelDto.Builder dtoBuilder) {

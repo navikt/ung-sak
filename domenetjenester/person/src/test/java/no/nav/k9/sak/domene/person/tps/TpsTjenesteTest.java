@@ -4,7 +4,6 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +27,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.tjeneste.virksomhet.person.v3.binding.HentGeografiskTilknytningPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.person.v3.feil.PersonIkkeFunnet;
-import no.nav.vedtak.exception.TekniskException;
 import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -48,7 +43,7 @@ public class TpsTjenesteTest {
     // Familierelasjon
     private static final AktørId AKTØR_ID_RELASJON = AktørId.dummy();
     private static final PersonIdent FNR_RELASJON = new PersonIdent("01345678901");
-    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, true);
+    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN);
     private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
     private PersoninfoAdapter personinfoAdapter;
 
@@ -102,13 +97,4 @@ public class TpsTjenesteTest {
         assertThat(geografiskTilknytning).isNotNull();
     }
 
-    @Test
-    public void test_hentGeografiskTilknytning_finnes_ikke() {
-        doThrow(TpsFeilmeldinger.FACTORY.geografiskTilknytningIkkeFunnet(
-            new HentGeografiskTilknytningPersonIkkeFunnet("finner ikke person", new PersonIkkeFunnet())).toException()
-        )
-            .when(personinfoAdapter).hentGeografiskTilknytning(new PersonIdent("666"));
-
-        Assertions.assertThrows(TekniskException.class, () -> testSubject.hentGeografiskTilknytning(new PersonIdent("666")));
-    }
 }

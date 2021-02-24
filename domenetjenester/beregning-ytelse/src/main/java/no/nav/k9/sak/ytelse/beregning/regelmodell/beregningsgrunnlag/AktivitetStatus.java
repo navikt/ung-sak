@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum AktivitetStatus {
+    MIDL_INAKTIV("Midlertidig inaktiv"),
     ATFL("Arbeidstaker/Frilanser"),
     KUN_YTELSE("Mottaker av tilstøtende ytelse"),
     SN("Selvstendig næringsdrivende"),

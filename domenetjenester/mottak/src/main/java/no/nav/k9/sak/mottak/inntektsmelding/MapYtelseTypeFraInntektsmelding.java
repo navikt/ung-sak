@@ -19,9 +19,13 @@ public class MapYtelseTypeFraInntektsmelding {
         lc(YtelseKodeliste.SYKEPENGER), FagsakYtelseType.SYKEPENGER);
 
     public static FagsakYtelseType mapYtelseType(String ytelseTypeFraInntektsmelding) {
+        if("Pleiepenger".equalsIgnoreCase(ytelseTypeFraInntektsmelding)) {
+            // Unnskyld, men Stian sa det var greit.
+            return FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+        }
         var ytelse = MAP.get(ytelseTypeFraInntektsmelding == null ? null : lc(ytelseTypeFraInntektsmelding));
-        if(ytelse==null) {
-            throw new IllegalArgumentException("Ukjent ytelsetype fra inntektsmelding : " + ytelseTypeFraInntektsmelding +"; Sjekk verdier og mapping fra: " + EnumSet.allOf(YtelseKodeliste.class));
+        if (ytelse == null) {
+            throw new IllegalArgumentException("Ukjent ytelsetype fra inntektsmelding : " + ytelseTypeFraInntektsmelding + "; Sjekk verdier og mapping fra: " + EnumSet.allOf(YtelseKodeliste.class));
         }
         return ytelse;
     }

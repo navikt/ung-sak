@@ -2,7 +2,6 @@ package no.nav.k9.sak.perioder;
 
 import java.util.Objects;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -17,6 +16,18 @@ public class VurdertSøktPeriode<T> {
     private InternArbeidsforholdRef arbeidsforholdRef;
     private Utfall utfall;
     private T raw;
+
+    /**
+     * Ingen faktisk krav om utbetaling, men en periode for vurdering
+     *
+     * @param periode fom-tom
+     * @param raw entitet
+     */
+    public VurdertSøktPeriode(DatoIntervallEntitet periode, Utfall utfall, T raw) {
+        this.periode = periode;
+        this.utfall = utfall;
+        this.raw = raw;
+    }
 
     public VurdertSøktPeriode(DatoIntervallEntitet periode, UttakArbeidType type, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Utfall utfall, T raw) {
         this.periode = periode;

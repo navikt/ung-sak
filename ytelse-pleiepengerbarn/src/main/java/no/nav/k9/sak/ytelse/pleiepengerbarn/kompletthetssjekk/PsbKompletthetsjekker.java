@@ -12,6 +12,10 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
+import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
+import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,6 +142,7 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
+
         if (finnVentefristForEtterlysning(ref).isEmpty()) {
             return KompletthetResultat.oppfylt();
         }
@@ -146,22 +151,24 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
         List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref);
         if (!manglendeInntektsmeldinger.isEmpty()) {
             loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
-            Optional<LocalDateTime> ventefristManglendeIM = vurderSkalInntektsmeldingEtterlyses(ref);
-            return ventefristManglendeIM
+            sendEtterlysningForManglendeInntektsmeldinger(ref, manglendeInntektsmeldinger);
+            return finnVentefristForEtterlysning(ref)
                 .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
                 .orElse(KompletthetResultat.oppfylt()); // Konvensjon for å sikre framdrift i prosessen
         }
         return KompletthetResultat.oppfylt();
     }
 
-    private Optional<LocalDateTime> vurderSkalInntektsmeldingEtterlyses(BehandlingReferanse ref) {
-        Optional<LocalDateTime> ventefristEtterlysning = finnVentefristForEtterlysning(ref);
-        // Gjeldende logikk: Etterlys hvis ingen mottatte
-        if (ventefristEtterlysning.isPresent() && inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt()).isEmpty()) {
-            fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, null);
-            return ventefristEtterlysning;
-        }
-        return Optional.empty();
+    private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
+        var arbeidsgiverIdenterSomSkalMottaEtterlysning = manglendeInntektsmeldinger.stream()
+            .filter(a -> !a.getBrukerHarSagtAtIkkeKommer())
+            .map(ManglendeVedlegg::getArbeidsgiver);
+
+        arbeidsgiverIdenterSomSkalMottaEtterlysning.forEach(a -> {
+                var idType = (OrganisasjonsNummerValidator.erGyldig(a) || OrgNummer.erKunstig(a)) ? IdType.ORGNR : IdType.AKTØRID;
+                fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, new Mottaker(a, idType));
+            }
+        );
     }
 
     private Optional<LocalDateTime> finnVentefristTilManglendeInntektsmelding(BehandlingReferanse ref) {

@@ -72,7 +72,7 @@ public class AvklarOmSøkerOppholderSegINorge {
     }
 
     private Utfall erGiftMed(BehandlingReferanse ref, Region region) {
-        Optional<PersonopplysningEntitet> ektefelle = personopplysningTjeneste.hentPersonopplysninger(ref).getEktefelle();
+        Optional<PersonopplysningEntitet> ektefelle = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato()).getEktefelle();
         if (ektefelle.isPresent()) {
             if (ektefelle.get().getRegion().equals(region)) {
                 return JA;

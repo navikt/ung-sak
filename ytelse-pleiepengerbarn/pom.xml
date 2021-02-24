@@ -29,10 +29,6 @@
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>behandlingsprosess-steg</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-db</artifactId>
         </dependency>
@@ -45,6 +41,10 @@
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>mottak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.pleiepengerbarn.uttak</groupId>
+            <artifactId>kontrakter</artifactId>
         </dependency>
 
         <!-- eksterne avhengigheter -->

@@ -11,6 +11,8 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -19,6 +21,8 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     private PersonopplysningRepository personopplysningRepository;
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
+    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public GrunnlagKopiererPleiepenger() {
@@ -27,9 +31,14 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
 
     @Inject
     public GrunnlagKopiererPleiepenger(BehandlingRepositoryProvider repositoryProvider,
-                                       UttakRepository uttakRepository, InntektArbeidYtelseTjeneste iayTjeneste) {
+                                       UttakRepository uttakRepository,
+                                       SøknadsperiodeRepository søknadsperiodeRepository,
+                                       UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                       InntektArbeidYtelseTjeneste iayTjeneste) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
+        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
     }
@@ -43,6 +52,8 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        søknadsperiodeRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        uttakPerioderGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

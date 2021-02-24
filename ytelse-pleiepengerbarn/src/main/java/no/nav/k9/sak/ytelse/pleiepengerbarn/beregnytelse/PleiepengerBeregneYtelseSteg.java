@@ -21,11 +21,12 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingStegRef(kode = "BERYT")
@@ -47,8 +48,8 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     @Inject
     public PleiepengerBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                         BeregningTjeneste kalkulusTjeneste,
-                                        UttakTjeneste uttakTjeneste,
                                         FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
+                                        UttakTjeneste uttakTjeneste,
                                         @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -65,7 +66,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var ref = BehandlingReferanse.fra(behandling);
         UUID behandlingUuid = ref.getBehandlingUuid();
 
-        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid).orElseThrow(() -> new IllegalStateException("Finner ikke uttaksplan for behandling: " + behandlingUuid));
+        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid);
 
         var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioder(ref);
 

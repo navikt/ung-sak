@@ -2,17 +2,23 @@ package no.nav.k9.sak.behandling.prosessering;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
@@ -25,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
+import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.DiffOgReposisjonerTask;
@@ -55,13 +62,17 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     private EndringsresultatSjekker endringsresultatSjekker;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
+    private Instance<InformasjonselementerUtleder> informasjonselementer;
+
     @Inject
     public BehandlingProsesseringTjenesteImpl(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                               RegisterdataEndringshåndterer registerdataEndringshåndterer,
+                                              @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                               EndringsresultatSjekker endringsresultatSjekker,
                                               FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.registerdataEndringshåndterer = registerdataEndringshåndterer;
+        this.informasjonselementer = informasjonselementer;
         this.endringsresultatSjekker = endringsresultatSjekker;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
@@ -262,19 +273,36 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private void leggTilInnhentRegisterdataTasks(Behandling behandling, ProsessTaskGruppe gruppe) {
-        ProsessTaskData innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
+
+        var innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
         innhentPersonopplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        ProsessTaskData innhentMedlemskapOpplysniger = new ProsessTaskData(InnhentMedlemskapOpplysningerTask.TASKTYPE);
+        var innhentMedlemskapOpplysniger = new ProsessTaskData(InnhentMedlemskapOpplysningerTask.TASKTYPE);
         innhentMedlemskapOpplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
-        ProsessTaskData abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
-        abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        var tasks = new ArrayList<ProsessTaskData>();
+        tasks.add(innhentPersonopplysniger);
+        tasks.add(innhentMedlemskapOpplysniger);
 
-        gruppe.addNesteParallell(innhentPersonopplysniger, innhentMedlemskapOpplysniger, abakusRegisterInnheting);
+        if (skalInnhenteAbakus(behandling)) {
+            var abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
+            abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            tasks.add(abakusRegisterInnheting);
+        }
+        gruppe.addNesteParallell(tasks);
 
         ProsessTaskData oppdaterInnhentTidspunkt = new ProsessTaskData(SettRegisterdataInnhentetTidspunktTask.TASKTYPE);
         oppdaterInnhentTidspunkt.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(oppdaterInnhentTidspunkt);
+    }
+
+    private boolean skalInnhenteAbakus(Behandling behandling) {
+        var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
+        Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
+        return registerdata != null && !(registerdata.isEmpty());
+    }
+
+    private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType);
     }
 
     private String lagreMedCallId(Long fagsakId, Long behandlingId, ProsessTaskData prosessTaskData) {
@@ -294,4 +322,5 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(firstMatch.get()).toException();
         }
     }
+
 }
