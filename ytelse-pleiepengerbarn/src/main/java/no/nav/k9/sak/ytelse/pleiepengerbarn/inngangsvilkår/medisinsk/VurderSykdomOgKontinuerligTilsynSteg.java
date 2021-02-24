@@ -100,7 +100,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .collect(Collectors.toList())
         );
         
-        if (sykdomVurderingService.harAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()))) {
+        final boolean trengerInput = sykdomVurderingService.harAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        if (trengerInput || sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling()) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
        
