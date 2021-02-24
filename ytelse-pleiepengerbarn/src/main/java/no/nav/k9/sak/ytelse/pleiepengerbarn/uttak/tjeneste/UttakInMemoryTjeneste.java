@@ -77,7 +77,9 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     private UttaksperiodeInfo mapTilUttaksperiodeInfo(SøktUttak periode, Uttaksgrunnlag input) {
         return new UttaksperiodeInfo(Utfall.OPPFYLT,
             _100,
-            mapUtbetalingsgrader(periode, input), Set.of(),
+            mapUtbetalingsgrader(periode, input),
+            _100,
+            Set.of(),
             mapInngangsvilkår(input.getInngangsvilkår()),
             null,
             Set.of(),
