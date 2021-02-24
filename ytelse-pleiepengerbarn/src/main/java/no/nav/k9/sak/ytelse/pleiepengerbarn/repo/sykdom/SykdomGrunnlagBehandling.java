@@ -83,4 +83,8 @@ public class SykdomGrunnlagBehandling {
     public Saksnummer getSaksnummer() {
         return saksnummer;
     }
+    
+    public boolean isFørsteGrunnlagPåBehandling() {
+        return versjon != 0;
+    }
 }
