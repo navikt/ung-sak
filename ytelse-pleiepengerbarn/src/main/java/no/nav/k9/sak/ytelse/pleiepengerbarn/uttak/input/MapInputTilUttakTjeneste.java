@@ -110,7 +110,7 @@ public class MapInputTilUttakTjeneste {
         var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
 
         var barn = new Barn(pleietrengendePersonopplysninger.getAktørId().getId(), pleietrengendePersonopplysninger.getDødsdato());
-        var søker = new Søker(søkerPersonopplysninger.getAktørId().getId(), søkerPersonopplysninger.getFødselsdato(), søkerPersonopplysninger.getDødsdato());
+        var søker = new Søker(søkerPersonopplysninger.getAktørId().getId());
 
         // TODO: Map:
         final List<String> andrePartersSaksnummer = List.of();
