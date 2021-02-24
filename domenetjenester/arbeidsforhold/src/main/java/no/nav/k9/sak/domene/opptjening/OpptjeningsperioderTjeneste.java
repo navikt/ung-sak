@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.opptjening;
 
+import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.FRILANS;
 import static no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType.NÆRING;
 
 import java.math.BigDecimal;
@@ -152,6 +153,13 @@ public class OpptjeningsperioderTjeneste {
                 OpptjeningsperiodeForSaksbehandling periode = mapEgenNæring(egenNæring, grunnlag, behandlingReferanse, vurderOpptjening, opptjening.getOpptjeningPeriode());
                 perioder.add(periode);
             });
+
+
+            oppgittOpptjening.getFrilans().ifPresent(
+                frilans -> {
+                    perioder.add(mapFrilans(grunnlag, behandlingReferanse, vurderOpptjening, opptjening.getOpptjeningPeriode()));
+                }
+            );
         }
         perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(behandlingReferanse, grunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode()));
 
@@ -392,6 +400,24 @@ public class OpptjeningsperioderTjeneste {
         }
         var input = new VurderStatusInput(NÆRING, behandlingReferanse);
         input.setOverstyrtAktivitet(overstyrt);
+        input.setGrunnlag(grunnlag);
+        input.setHarVærtSaksbehandlet(grunnlag.harBlittSaksbehandlet());
+        input.setOpptjeningPeriode(opptjeningPeriode);
+        builder.medVurderingsStatus(vurderForSaksbehandling.vurderStatus(input));
+        if (grunnlag.harBlittSaksbehandlet()) {
+            builder.medErManueltBehandlet();
+        }
+        builder.medStillingsandel(new Stillingsprosent(BigDecimal.valueOf(100)));
+        return builder.build();
+    }
+
+    private OpptjeningsperiodeForSaksbehandling mapFrilans(InntektArbeidYtelseGrunnlag grunnlag,
+                                                           BehandlingReferanse behandlingReferanse, OpptjeningAktivitetVurdering vurderForSaksbehandling, DatoIntervallEntitet opptjeningPeriode) {
+        var builder = OpptjeningsperiodeForSaksbehandling.Builder.ny().medOpptjeningAktivitetType(FRILANS);
+
+        //TODO begrens til  fra-dato fra søknad
+        builder.medPeriode(opptjeningPeriode);
+        var input = new VurderStatusInput(FRILANS, behandlingReferanse);
         input.setGrunnlag(grunnlag);
         input.setHarVærtSaksbehandlet(grunnlag.harBlittSaksbehandlet());
         input.setOpptjeningPeriode(opptjeningPeriode);

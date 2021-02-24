@@ -82,6 +82,7 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
         var iayGrunnlag = grunnlagOpt.get();
         NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> alle = new TreeMap<>();
 
+
         for (var periode : new TreeSet<>(vilkårsPerioder)) {
             LocalDate stp = periode.getFomDato();
             var opptjening = opptjeningsresultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
@@ -89,6 +90,8 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
             var opptjeningAktivitetPerioder = perioderForSaksbehandling.stream().map(this::mapTilPerioder).collect(Collectors.toList());
             alle.put(periode, opptjeningAktivitetPerioder);
         }
+
+
         return Collections.unmodifiableNavigableMap(alle);
     }
 
