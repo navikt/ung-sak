@@ -74,7 +74,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
         søktePerioder.putAll(inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger));
-        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokument(referanse);
+        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
         søktePerioder.putAll(søktePerioderFraSøknad);
 
         return søktePerioder;
