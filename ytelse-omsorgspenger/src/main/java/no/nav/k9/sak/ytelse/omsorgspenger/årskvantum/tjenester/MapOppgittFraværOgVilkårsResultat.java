@@ -119,8 +119,8 @@ public class MapOppgittFraværOgVilkårsResultat {
         if (oppgittFrilans.isPresent()) {
             //det er avklart med funksjonell at frilans-arbeidsforhold som er oppgitt i søknad brukes direkte ifht opptjening
             var aktivitet = new Aktivitet(UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef());
-            var tidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT))));
-            return Map.of(aktivitet, tidslinje);
+            var tidslinjeAlltidAktivt = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT))));
+            return Map.of(aktivitet, tidslinjeAlltidAktivt);
         } else {
             return Collections.emptyMap();
         }
@@ -132,13 +132,13 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private void mapEgenNæringTilTidlinje(HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result, OppgittEgenNæring egenNæring) {
-        var tidlinje = opprettEgenNæringTidslinje(egenNæring);
+        var tidslinjeAlltidAktivt = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT))));
         var arbeidsgiver = egenNæring.getOrgnr() != null ? Arbeidsgiver.virksomhet(egenNæring.getOrgnr()) : null;
         var aktivitet = new Aktivitet(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef());
         if (result.containsKey(aktivitet)) {
             throw new IllegalArgumentException("Utviklerfeil: Kun ett orgnummer per selvstendig næringsdrivende, fikk flere for" + aktivitet.getArbeidsgiver());
         }
-        result.put(aktivitet, tidlinje.compress());
+        result.put(aktivitet, tidslinjeAlltidAktivt.compress());
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettArbeidsforholdTidslinje(Yrkesaktivitet yrkesaktivitet, YrkesaktivitetFilter filter) {
@@ -160,19 +160,6 @@ public class MapOppgittFraværOgVilkårsResultat {
             arbeidsforholdTidslinje = arbeidsforholdTidslinje.combine(new LocalDateTimeline<>(List.of(segment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return arbeidsforholdTidslinje;
-    }
-
-    private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettEgenNæringTidslinje(OppgittEgenNæring egenNæring) {
-        LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AVSLUTTET))));
-
-        var fom = Optional.ofNullable(egenNæring.getPeriode().getFomDato()).orElse(Tid.TIDENES_BEGYNNELSE);
-        var tom = Optional.ofNullable(egenNæring.getPeriode().getTomDato()).orElse(Tid.TIDENES_ENDE);
-        var wrappedOppgittFraværPeriodeLocalDateSegment = new LocalDateSegment<>(fom, tom, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT));
-
-        LocalDateTimeline<WrappedOppgittFraværPeriode> egenNæringTidslinje = allVerdenAvTid;
-        egenNæringTidslinje = egenNæringTidslinje.combine(new LocalDateTimeline<>(List.of(wrappedOppgittFraværPeriodeLocalDateSegment)), this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
-        return egenNæringTidslinje;
     }
 
     private boolean erStørreEllerLik100Prosent(Stillingsprosent prosentsats) {
