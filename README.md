@@ -17,5 +17,5 @@ Start postgres først for å kjøre alle enhetstester. Bruker schema k9sak_unit 
 
 2. Start webserver fra f.eks. IDE
    Start `JettyDevServer --vtp` 
-   
-   
+
+Swagger: http://localhost:8080/k9/sak/swagger

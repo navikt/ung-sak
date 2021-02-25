@@ -33,7 +33,7 @@ class MapFraÅrskvantumResultat {
 
     }
 
-    private static Arbeidsforhold mapArbeidsforhold(no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold arb) {
+    static Arbeidsforhold mapArbeidsforhold(no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold arb) {
         final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
         if (arb.getOrganisasjonsnummer() != null) {
             arbeidsforholdBuilder.medOrgnr(arb.getOrganisasjonsnummer());
@@ -41,9 +41,8 @@ class MapFraÅrskvantumResultat {
             arbeidsforholdBuilder.medAktørId(arb.getAktørId());
         }
         arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId());
-
-        var arbeidsforhold = arbeidsforholdBuilder.build();
-        return arbeidsforhold;
+        arbeidsforholdBuilder.medFrilanser("FL".equals(arb.getType()));
+        return arbeidsforholdBuilder.build();
     }
 
     private static List<UttakResultatPeriode> getInnvilgetTimeline(List<Aktivitet> aktiviteter) {

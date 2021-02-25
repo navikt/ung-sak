@@ -32,7 +32,6 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingStegRef(kode = "BERYT")
@@ -45,7 +44,6 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private UttakRepository uttakRepository;
-    private Boolean toggletVilkårsperioder;
 
     protected FrisinnBeregneYtelseSteg() {
         // for proxy
@@ -55,14 +53,12 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
     public FrisinnBeregneYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                     BeregningTjeneste kalkulusTjeneste,
                                     FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
-                                    UttakRepository uttakRepository,
-                                    @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                    UttakRepository uttakRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.uttakRepository = uttakRepository;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
@@ -70,42 +66,25 @@ public class FrisinnBeregneYtelseSteg implements BeregneYtelseSteg {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        if (toggletVilkårsperioder) {
-            var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
+        var originalBehandlingId = behandling.getOriginalBehandlingId();
 
-            BeregningsresultatEntitet beregningsresultat = beregningsgrunnlag.isEmpty()
-                ? BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build() // tomt beregningresultat
-                : fastsettBeregningsresultat(behandlingId, behandling, beregningsgrunnlag);
+        var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
 
-            // Verifiser beregningsresultat
-            BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
+        BeregningsresultatEntitet beregningsresultat = beregningsgrunnlag.isEmpty()
+            ? BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build() // tomt beregningresultat
+            : fastsettBeregningsresultat(behandlingId, behandling, beregningsgrunnlag);
 
-            // Beregner ikke feriepenger for frisinn
-
-            // Lagre beregningsresultat
-            beregningsresultatRepository.lagre(behandling, beregningsresultat);
-        } else {
-            var originalBehandlingId = behandling.getOriginalBehandlingId();
-
-            var beregningsgrunnlag = kalkulusTjeneste.hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse.fra(behandling));
-
-            BeregningsresultatEntitet beregningsresultat = beregningsgrunnlag.isEmpty()
-                ? BeregningsresultatEntitet.builder().medRegelInput("{}").medRegelSporing("{}").build() // tomt beregningresultat
-                : fastsettBeregningsresultat(behandlingId, behandling, beregningsgrunnlag);
-
-            Boolean erNySøknadsperiode = originalBehandlingId.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
-            if (erNySøknadsperiode) {
-                beregningsresultat = mergeMedOrigBeregningsresultat(beregningsresultat, behandlingId, originalBehandlingId);
-            }
-
-            // Verifiser beregningsresultat
-            BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-            // Beregner ikke feriepenger for frisinn
-
-            // Lagre beregningsresultat
-            beregningsresultatRepository.lagre(behandling, beregningsresultat);
+        Boolean erNySøknadsperiode = originalBehandlingId.map(b -> erNySøknadperiode(behandling, b)).orElse(false);
+        if (erNySøknadsperiode) {
+            beregningsresultat = mergeMedOrigBeregningsresultat(beregningsresultat, behandlingId, originalBehandlingId);
         }
 
+        // Verifiser beregningsresultat
+        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
+        // Beregner ikke feriepenger for frisinn
+
+        // Lagre beregningsresultat
+        beregningsresultatRepository.lagre(behandling, beregningsresultat);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

@@ -26,10 +26,9 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @ApplicationScoped
 public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
+    private final Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new HashMap<>();
     private MaksSøktePeriode maksSøktePeriode;
     private VilkårUtleder vilkårUtleder;
-    private Boolean toggletVilkårsperioder;
 
     FrisinnVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -37,29 +36,16 @@ public class FrisinnVilkårsPerioderTilVurderingTjeneste implements VilkårsPeri
 
     @Inject
     public FrisinnVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("FRISINN") VilkårUtleder vilkårUtleder,
-                                                      UttakRepository uttakRepository,
-                                                      BehandlingRepository behandlingRepository,
-                                                      UtledPerioderMedEndringTjeneste utledPerioderMedEndringTjeneste,
-                                                      @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                                      UttakRepository uttakRepository) {
         this.maksSøktePeriode = new MaksSøktePeriode(uttakRepository);
         this.vilkårUtleder = vilkårUtleder;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
-        if (toggletVilkårsperioder) {
-            final var søknadsperioder = new Søknadsperioder(behandlingRepository, uttakRepository, utledPerioderMedEndringTjeneste);
-            vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, søknadsperioder);
-        } else {
-            final var beregningPeriode = new BeregningPeriode(uttakRepository);
-            vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
-        }
+        final var beregningPeriode = new BeregningPeriode(uttakRepository);
+        vilkårsPeriodisering.put(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, beregningPeriode);
     }
 
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
-        if (toggletVilkårsperioder) {
-            return new IkkeKantIKantVurderer();
-        } else {
-            return new DefaultKantIKantVurderer();
-        }
+        return new DefaultKantIKantVurderer();
     }
 
     @Override

@@ -3,9 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -23,8 +20,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("PSB")
 public class VurderUttakSteg implements BehandlingSteg {
-
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;

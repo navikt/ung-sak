@@ -15,6 +15,7 @@ import javax.validation.Validator;
 import javax.ws.rs.core.HttpHeaders;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
+import no.nav.k9.sak.typer.PersonIdent;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
 
@@ -158,6 +159,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
             return restKlient.post(endpoint, årskvantumGrunnlag, ÅrskvantumUtbetalingGrunnlag.class);
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallHentUtbetalingGrunnlag(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
+        try {
+            var request = new RammevedtakRequest(personIdent.getIdent(), periode);
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
+            return restKlient.post(endpoint, request, RammevedtakResponse.class);
+        } catch (Exception e) {
+            throw new IllegalStateException("Feil ved kall til rammevedtakstjeneste på årskvantum", e);
         }
     }
 

@@ -278,7 +278,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     private boolean gjelderSammeArbeidsforhold(InntektArbeidYtelseArbeidsforholdV2Dto it, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
         return it.getArbeidsgiver().getIdentifikator().equals(arbeidsgiver.getIdentifikator()) &&
-            arbeidsforholdRef.equals(InternArbeidsforholdRef.ref(it.getArbeidsforhold().getInternArbeidsforholdId()));
+            arbeidsforholdRef.gjelderFor(InternArbeidsforholdRef.ref(it.getArbeidsforhold().getInternArbeidsforholdId()));
     }
 
     private void sjekkHarAksjonspunktForVurderArbeidsforhold(BehandlingReferanse ref, Set<ArbeidsforholdWrapper> arbeidsforhold,

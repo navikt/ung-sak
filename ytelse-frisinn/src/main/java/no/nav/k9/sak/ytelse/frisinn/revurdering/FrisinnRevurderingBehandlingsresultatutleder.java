@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.frisinn.revurdering;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.GUNST;
 import static no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN.BeregningsresultatEndring.UGUNST;
 
-import java.util.Comparator;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,30 +25,26 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.ytelse.frisinn.beregningsresultat.ErEndringIBeregningsresultatFRISINN;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
 @BehandlingTypeRef("BT-004")
 public class FrisinnRevurderingBehandlingsresultatutleder implements RevurderingBehandlingsresultatutleder {
 
-    private BeregningsresultatRepository beregningsresultatRepository;
-    private BehandlingRepository behandlingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private UttakRepository uttakRepository;
-    private Boolean toggletVilkårsperioder;
+    private final BeregningsresultatRepository beregningsresultatRepository;
+    private final BehandlingRepository behandlingRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final UttakRepository uttakRepository;
 
     @Inject
     public FrisinnRevurderingBehandlingsresultatutleder(BehandlingRepositoryProvider repositoryProvider, // NOSONAR
                                                         BeregningsresultatRepository beregningsresultatRepository,
-                                                        UttakRepository uttakRepository,
-                                                        @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                                        UttakRepository uttakRepository) {
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.beregningsresultatRepository = beregningsresultatRepository;
         this.uttakRepository = uttakRepository;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
 
@@ -79,12 +74,6 @@ public class FrisinnRevurderingBehandlingsresultatutleder implements Revurdering
     }
 
     private boolean erHeltEllerDelvisInnvilget(Vilkår beregningsvilkår) {
-        if (toggletVilkårsperioder) {
-            return beregningsvilkår.getPerioder().stream()
-                .max(Comparator.comparing(p -> p.getPeriode().getFomDato()))
-                .filter(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT))
-                .isPresent();
-        }
         return beregningsvilkår.getPerioder().stream()
             .anyMatch(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT));
     }

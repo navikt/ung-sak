@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -38,12 +37,12 @@ public class SøknadPerioderTjeneste {
         this.grunnlagRepository = grunnlagRepository;
     }
 
-    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokument(Fagsak fagsak) {
-        var mottatteDokumenter = hentMottatteDokument(fagsak.getId());
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse ref) {
+        var mottatteDokumenter = hentMottatteDokument(ref.getFagsakId());
         return tilSøktePerioderMedKravdokument(mottatteDokumenter);
     }
 
-    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokument(BehandlingReferanse ref) {
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåBehandling(BehandlingReferanse ref) {
         var mottatteDokumenter = hentMottatteDokument(ref.getFagsakId())
             .stream()
             .filter(dok -> ref.getBehandlingId().equals(dok.getBehandlingId()))
