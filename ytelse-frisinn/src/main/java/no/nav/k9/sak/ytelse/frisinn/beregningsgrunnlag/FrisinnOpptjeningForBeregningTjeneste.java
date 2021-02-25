@@ -30,7 +30,6 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOvers
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.frisinn.filter.OppgittOpptjeningFilter;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
@@ -39,7 +38,6 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
      * alle må starte et sted.
      */
     private static final LocalDate THE_FOM = LocalDate.of(2017, 3, 1);
-    private static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2020, 3, 1);
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -48,28 +46,20 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD));
     private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
-    private Boolean toggletVilkårsperioder;
 
     protected FrisinnOpptjeningForBeregningTjeneste() {
         // For proxy
     }
 
     @Inject
-    public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser,
-                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+    public FrisinnOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
                                                                             InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        LocalDate stp;
-        if (toggletVilkårsperioder) {
-            stp = SKJÆRINGSTIDSPUNKT;
-        } else {
-            stp = vilkårsperiode.getFomDato();
-        }
+        LocalDate stp = vilkårsperiode.getFomDato();
         LocalDate fom = THE_FOM;
         OpptjeningAktiviteter opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, stp, fom);
 

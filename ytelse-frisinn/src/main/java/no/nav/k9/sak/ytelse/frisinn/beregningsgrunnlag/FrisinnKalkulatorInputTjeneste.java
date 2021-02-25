@@ -24,41 +24,15 @@ import no.nav.vedtak.konfig.KonfigVerdi;
 @FagsakYtelseTypeRef("FRISINN")
 public class FrisinnKalkulatorInputTjeneste extends KalkulatorInputTjeneste {
 
-    private Boolean toggletVilkårsperioder;
 
     @Inject
     public FrisinnKalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                          @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregnings,
-                                          @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                          @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregnings) {
         super(opptjeningForBeregningTjeneste, inntektsmeldingerRelevantForBeregnings);
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     protected FrisinnKalkulatorInputTjeneste() {
         // for CDI proxy
-    }
-
-    /**
-     * Mapper IAY til kalkuluskontrakt for frisinn. Mapper informasjon for oppgitt vilkårsperiode i tillegg til informasjon før
-     * skjæringstidspunktet.
-     *
-     * @param referanse Behandlingreferanse
-     * @param vilkårsperiode Vilkårsperiode
-     * @param inntektArbeidYtelseGrunnlag IAY-grunnlag
-     * @param oppgittOpptjening OppgittOpptjening
-     * @param imTjeneste
-     * @return IAY-grunnlag mappet til kalkuluskontrakt
-     */
-    @Override
-    protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse, DatoIntervallEntitet vilkårsperiode,
-                                                               InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
-                                                               Collection<Inntektsmelding> sakInntektsmeldinger,
-                                                               OppgittOpptjening oppgittOpptjening, InntektsmeldingerRelevantForBeregning imTjeneste) {
-        if (toggletVilkårsperioder) {
-            return new FrisinnTilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening);
-        } else {
-            return super.mapIAYTilKalkulus(referanse, vilkårsperiode, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, oppgittOpptjening, imTjeneste);
-        }
     }
 
     /**

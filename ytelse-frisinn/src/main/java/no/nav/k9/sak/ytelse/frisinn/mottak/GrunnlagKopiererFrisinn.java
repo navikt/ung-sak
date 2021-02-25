@@ -16,8 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("FRISINN")
@@ -27,8 +25,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     private MedlemskapRepository medlemskapRepository;
     private UttakRepository uttakRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
-    private Boolean toggletVilkårsperioder;
 
     public GrunnlagKopiererFrisinn() {
         // for CDI proxy
@@ -37,15 +33,11 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererFrisinn(BehandlingRepositoryProvider repositoryProvider,
                                    UttakRepository uttakRepository,
-                                   InntektArbeidYtelseTjeneste iayTjeneste,
-                                   BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                   @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                   InntektArbeidYtelseTjeneste iayTjeneste) {
         this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
 
@@ -56,9 +48,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        if (toggletVilkårsperioder) {
-            beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
-        }
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
@@ -72,9 +61,6 @@ public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        if (toggletVilkårsperioder) {
-            beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
-        }
 
         // gjør til slutt, innebærer kall til abakus
         // Delvis kopiering hvor alt unntatt oppgitte opptjening fra søknad kopieres over

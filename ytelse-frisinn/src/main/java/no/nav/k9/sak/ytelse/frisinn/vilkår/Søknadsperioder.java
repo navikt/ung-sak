@@ -77,7 +77,7 @@ class Søknadsperioder implements VilkårsPeriodiseringsFunksjon {
     /**
      *
      * Perioder for april og mai må vurderes samlet fordi disse har felles vilkårsperiode fra originalbehandling i alle søknader som inkluderer både april og mai.
-     * På grunn av dette slås april og mai sammen til en periode (vilkårsperiode). Se også {@link IkkeKantIKantVurderer#erKantIKant}
+     * På grunn av dette slås april og mai sammen til en periode (vilkårsperiode).
      *
      * @param fulleMåneder Søknadsperioder konvertert til fulle søknadsmåneder
      * @return Perioder der april og mai er slått sammen

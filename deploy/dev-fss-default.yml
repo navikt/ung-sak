@@ -190,8 +190,6 @@ spec:
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "true"
-    - name: FRISINN_VILKARSPERIODER
-      value: "false"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
     - name: "AKSJONSPUNKT_7035_ENABLED"
