@@ -72,7 +72,7 @@ public class MapArbeid {
                     .toSegments()
                     .forEach(p -> {
                         var periode = p.getValue().getPeriode();
-                        var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> it.getArbeidsgiver().equals(periode.getArbeidsgiver())).count();
+                        var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> periode.getArbeidsgiver() != null && it.getArbeidsgiver().equals(periode.getArbeidsgiver())).count();
                         var jobberNormalt = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
                         var jobberFaktisk = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
                         perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
