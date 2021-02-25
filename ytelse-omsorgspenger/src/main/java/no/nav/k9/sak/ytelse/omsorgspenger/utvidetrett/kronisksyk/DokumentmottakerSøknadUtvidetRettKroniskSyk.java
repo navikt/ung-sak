@@ -45,8 +45,8 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
 
     @Inject
     DokumentmottakerSøknadUtvidetRettKroniskSyk(BehandlingRepositoryProvider repositoryProvider,
-                                      PersoninfoAdapter personinfoAdapter,
-                                      MottatteDokumentRepository mottatteDokumentRepository) {
+                                                PersoninfoAdapter personinfoAdapter,
+                                                MottatteDokumentRepository mottatteDokumentRepository) {
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -67,7 +67,6 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
     }
 
     void persister(Søknad søknad, Behandling behandling) {
-        var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerKroniskSyktBarn) søknad.getYtelse();
 
@@ -87,16 +86,13 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
-            .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) // TODO: hente riktig språk
+            .medSpråkkode(getSpråkValg(søknad.getSpråk())) // TODO: hente riktig språk
         ;
 
         var barn = innsendt.getBarn();
-        if (barn.getPersonIdent() != null) {
-            var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi())).orElseThrow();
-            søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
-        } else if (barn.getFødselsdato() != null) {
-            søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(null, barn.getFødselsdato(), RelasjonsRolleType.BARN));
-        }
+        var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
+            .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
+        søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
 
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);

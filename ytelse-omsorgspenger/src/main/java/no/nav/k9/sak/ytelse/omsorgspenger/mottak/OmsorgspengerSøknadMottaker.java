@@ -84,8 +84,12 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, sluttDato);
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
+        if (relatertPersonAktørId != null) {
+            throw new IllegalArgumentException("Har ikke relatertPersonAktørId på omsorgspenger utbetaling sak");
+        }
+
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
@@ -110,7 +114,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
-        var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, fom, tom);
+        var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, fom, tom);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
@@ -39,7 +40,7 @@ public class PersonopplysningDtoTjenesteTest {
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, repositoryProvider);
+        tjeneste = new PersonopplysningDtoTjeneste(this.personopplysningTjeneste, new BehandlingRepository(entityManager));
     }
 
     @Test

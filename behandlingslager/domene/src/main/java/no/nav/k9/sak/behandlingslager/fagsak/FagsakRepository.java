@@ -127,70 +127,33 @@ public class FagsakRepository {
         var eksisterendeTom = fagsak.getPeriode().getTomDato();
         var oppdatertFom = eksisterendeFom.isBefore(fom) && !Tid.TIDENES_BEGYNNELSE.equals(eksisterendeFom) ? eksisterendeFom : fom;
         var oppdatertTom = eksisterendeTom.isAfter(tom) && !Tid.TIDENES_ENDE.equals(eksisterendeTom) ? eksisterendeTom : tom;
-        
+
         oppdaterPeriode(fagsakId, oppdatertFom, oppdatertTom);
     }
 
     /**
-     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
+     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende og/eller relatert person (1 fagsak per søker).
      * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
      *
      * @param tom
      */
     @SuppressWarnings("unchecked")
-    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, LocalDate fom, LocalDate tom) {
+    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         Query query;
 
-        if (pleietrengendeAktørId != null) {
-            query = entityManager.createNativeQuery(
-                "select f.* from Fagsak f"
-                    + " where f.pleietrengende_aktoer_id = :pleietrengendeAktørId"
-                    + "   and f.bruker_aktoer_id = :brukerAktørId"
-                    + "   and f.ytelse_type = :ytelseType"
-                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
-                Fagsak.class); // NOSONAR
-            query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
-        } else {
-            query = entityManager.createNativeQuery(
-                "select f.* from Fagsak f"
-                    + " where f.ytelse_type = :ytelseType"
-                    + "   and f.bruker_aktoer_id = :brukerAktørId"
-                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
-                Fagsak.class); // NOSONAR
-        }
+        query = entityManager.createNativeQuery(
+            "select f.* from Fagsak f"
+                + " where "
+                + "       coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')"
+                + "   and coalesce(f.relatert_person_aktor_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
+                + "   and f.bruker_aktoer_id = :brukerAktørId"
+                + "   and f.ytelse_type = :ytelseType"
+                + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+            Fagsak.class); // NOSONAR
+
+        query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId());
+        query.setParameter("relatertPersonAktørId", relatertPersonAktørId == null ? null : relatertPersonAktørId.getId());
         query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
-        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
-        query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
-        query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
-
-        return query.getResultList();
-    }
-
-    /**
-     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende (1 fagsak per søker).
-     * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
-     *
-     * @param tom
-     */
-    @SuppressWarnings("unchecked")
-    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, LocalDate fom, LocalDate tom) {
-        Query query;
-
-        if (pleietrengendeAktørId != null) {
-            query = entityManager.createNativeQuery(
-                "select f.* from Fagsak f"
-                    + " where f.pleietrengende_aktoer_id = :pleietrengendeAktørId"
-                    + "   and f.ytelse_type = :ytelseType"
-                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
-                Fagsak.class); // NOSONAR
-            query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
-        } else {
-            query = entityManager.createNativeQuery(
-                "select f.* from Fagsak f"
-                    + " where f.ytelse_type = :ytelseType"
-                    + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
-                Fagsak.class); // NOSONAR
-        }
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);

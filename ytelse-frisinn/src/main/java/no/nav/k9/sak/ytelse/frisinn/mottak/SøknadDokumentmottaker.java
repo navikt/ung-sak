@@ -62,15 +62,15 @@ public class SøknadDokumentmottaker {
         this.behandlingRepository = provider.getBehandlingRepository();
     }
 
-    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, @SuppressWarnings("unused") LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato, startDato);
+    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, LocalDate startDato, @SuppressWarnings("unused") LocalDate sluttDato) {
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, null, null, startDato, startDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
         LocalDate yearFom = startDato.withDayOfYear(1);
         LocalDate yearTom = startDato.withMonth(12).withDayOfMonth(31);
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, yearFom, yearTom);
+        return opprettSakFor(saksnummer, brukerIdent, fagsakYtelseType, yearFom, yearTom);
     }
 
     Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, FrisinnSøknad søknad) {
@@ -156,8 +156,8 @@ public class SøknadDokumentmottaker {
         return behandling;
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, fom, tom);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
+        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, null, null, saksnummer, fom, tom);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

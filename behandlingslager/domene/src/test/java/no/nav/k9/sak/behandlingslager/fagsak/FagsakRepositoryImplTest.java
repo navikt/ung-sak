@@ -87,28 +87,43 @@ public class FagsakRepositoryImplTest {
         AktørId aktørIdSøker1 = AktørId.dummy();
         AktørId aktørIdSøker2 = AktørId.dummy();
         AktørId aktørIdPleietrengende = AktørId.dummy();
+        AktørId relatertPersonAktørId = AktørId.dummy();
         FagsakYtelseType ytelseType = FagsakYtelseType.DAGPENGER;
         LocalDate fom = LocalDate.now();
         LocalDate tom = fom.plusDays(10);
 
         // Opprett fagsaker
         Fagsak[] fagsaker = {
-                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, new Saksnummer("200"), fom, tom),
-                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, new Saksnummer("201"), null, fom.minusDays(1)),
-                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, new Saksnummer("202"), fom, tom),
-                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, new Saksnummer("203"), tom.plusDays(1), null)
+                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("200"), fom, tom),
+                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("201"), null, fom.minusDays(1)),
+                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("202"), fom, tom),
+                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("203"), tom.plusDays(1), null),
+                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, relatertPersonAktørId, new Saksnummer("205"), tom.plusDays(1), null)
+
         };
 
         lagre(fagsaker);
 
-        List<Fagsak> list0 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, fom.minusDays(10), fom.plusDays(5));
-        assertThat(list0).containsOnly(fagsaker[0], fagsaker[1], fagsaker[2]);
+        List<Fagsak> list0 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, fom.minusDays(10), fom.plusDays(5));
+        assertThat(list0).containsOnly(fagsaker[0], fagsaker[1]);
 
-        List<Fagsak> list1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, tom, tom);
-        assertThat(list1).containsOnly(fagsaker[0], fagsaker[2]);
+        List<Fagsak> list0_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, fom.minusDays(10), fom.plusDays(5));
+        assertThat(list0_2).containsOnly(fagsaker[2]);
 
-        List<Fagsak> list2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdPleietrengende, tom, null);
-        assertThat(list2).containsOnly(fagsaker[0], fagsaker[2], fagsaker[3]);
+        List<Fagsak> list1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, tom, tom);
+        assertThat(list1).containsOnly(fagsaker[0]);
+
+        List<Fagsak> list1_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, tom, tom);
+        assertThat(list1_2).containsOnly(fagsaker[2]);
+
+        List<Fagsak> list2_1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, tom, null);
+        assertThat(list2_1).containsOnly(fagsaker[0]);
+
+        List<Fagsak> list2_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, tom, null);
+        assertThat(list2_2).containsOnly(fagsaker[2], fagsaker[3]);
+
+        List<Fagsak> list3 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, relatertPersonAktørId, tom, null);
+        assertThat(list3).containsOnly(fagsaker[4]);
     }
 
     private void lagre(Fagsak... fagsaker) {

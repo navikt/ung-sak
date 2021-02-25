@@ -5,8 +5,8 @@ import java.util.Optional;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
-public class PleiepengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
-    public PleiepengerRelasjonsFilter() {
+public class PleietrengendeRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
+    public PleietrengendeRelasjonsFilter() {
     }
 
     @Override

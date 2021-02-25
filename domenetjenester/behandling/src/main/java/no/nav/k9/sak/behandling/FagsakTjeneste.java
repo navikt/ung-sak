@@ -74,8 +74,8 @@ public class FagsakTjeneste {
         return fagsakRepository.hentJournalpost(journalpostId);
     }
 
-    public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, LocalDate fom, LocalDate tom) {
-        var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, pleietrengende, fom, tom);
+    public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+        var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, pleietrengende, relatertPersonAktørId, fom, tom);
         if (potensielleFagsaker.isEmpty()) {
             return Optional.empty();
         }

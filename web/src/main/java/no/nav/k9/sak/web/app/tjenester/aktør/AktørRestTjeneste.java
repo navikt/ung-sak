@@ -94,6 +94,7 @@ public class AktørRestTjeneste {
                         periode,
                         personDto,
                         f.getPleietrengendeAktørId(),
+                        f.getRelatertPersonAktørId(),
                         null,
                         f.getSkalTilInfotrygd(),
                         f.getOpprettetTidspunkt(),

@@ -36,6 +36,10 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
+    @JsonProperty(value = "relatertPersonAktørId")
+    @Digits(integer = 19, fraction = 0)
+    private String relatertPersonAktørId;
+
     @JsonProperty(value = "periode", required = true)
     @NotNull
     @Valid
@@ -45,7 +49,9 @@ public class FinnEllerOpprettSak {
     public FinnEllerOpprettSak(@JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
                                @JsonProperty(value = "aktørId", required = true) @NotNull @Digits(integer = 19, fraction = 0) String aktørId,
                                @JsonProperty(value = "pleietrengendeAktørId") @Digits(integer = 19, fraction = 0) String pleietrengendeAktørId,
+                               @JsonProperty(value = "relatertPersonAktørId") @Digits(integer = 19, fraction = 0) String relatertPersonAktørId,
                                @JsonProperty(value = "periode", required = true) @NotNull @Valid Periode periode) {
+        this.relatertPersonAktørId = relatertPersonAktørId;
         this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
@@ -67,6 +73,10 @@ public class FinnEllerOpprettSak {
 
     public String getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public String getRelatertPersonAktørId() {
+        return relatertPersonAktørId;
     }
 
     @Override
