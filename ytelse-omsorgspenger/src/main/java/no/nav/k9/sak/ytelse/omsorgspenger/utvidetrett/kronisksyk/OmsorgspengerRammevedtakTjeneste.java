@@ -18,28 +18,28 @@ import javax.inject.Inject;
 
 @ApplicationScoped
 @Default
-public class KroniskSykRammevedtakTjeneste {
+public class OmsorgspengerRammevedtakTjeneste {
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private SøknadRepository søknadRepository;
 
     @Inject
-    public KroniskSykRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste, PersoninfoAdapter personinfoAdapter, SøknadRepository søknadRepository) {
+    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste, PersoninfoAdapter personinfoAdapter, SøknadRepository søknadRepository) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
     }
 
-    public KroniskSykRammevedtakTjeneste() {
+    public OmsorgspengerRammevedtakTjeneste() {
         // for CDI
     }
 
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         PersonIdent personIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId())
-            .orElseGet(() -> { throw new IllegalStateException("Kunne ikke finne person for aktørId."); });
+            .orElseGet(() -> { throw new IllegalStateException("Kunne ikke finne person for aktørId."); }); // todo: send aktørId når Årskvantum får PDL-integrasjon
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
         if(søknad == null) {

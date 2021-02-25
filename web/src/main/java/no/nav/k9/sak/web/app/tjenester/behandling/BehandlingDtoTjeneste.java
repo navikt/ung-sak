@@ -65,7 +65,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.Beregningsr
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.UtvidetRettRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
@@ -362,9 +362,9 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 break;
             case OMSORGSPENGER_KS:
-                dto.leggTil(getFraMap(UtvidetRettRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
             case OMSORGSPENGER_MA:
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
+                dto.leggTil(getFraMap(RammevedtakRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
                 break;
             case PLEIEPENGER_NÆRSTÅENDE:
             case OPPLÆRINGSPENGER:

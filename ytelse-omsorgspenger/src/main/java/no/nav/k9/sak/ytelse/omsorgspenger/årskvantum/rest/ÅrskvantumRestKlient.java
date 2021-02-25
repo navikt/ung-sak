@@ -169,7 +169,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
             return restKlient.post(endpoint, request, RammevedtakResponse.class);
         } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilKallHentUtbetalingGrunnlag(e.getMessage(), e).toException();
+            throw new IllegalStateException("Feil ved kall til rammevedtakstjeneste på årskvantum", e);
         }
     }
 
@@ -218,9 +218,6 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000096", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil klarteIkkeHenteUttaksplanForBehandlinger(String feilmelding, Throwable t);
-
-        @TekniskFeil(feilkode = "K9SAK-AK-1000097", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke hentRammevedtak: %s", logLevel = LogLevel.WARN)
-        Feil feilHentRammevedtak(String feilmelding, Throwable t);
     }
 
 }

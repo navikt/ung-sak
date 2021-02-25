@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk.KroniskSykRammevedtakTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk.OmsorgspengerRammevedtakTjeneste;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
@@ -23,25 +23,25 @@ import javax.ws.rs.core.MediaType;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-@Path(UtvidetRettRestTjeneste.BASE_PATH)
+@Path(RammevedtakRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Transactional
 @ApplicationScoped
-public class UtvidetRettRestTjeneste {
+public class RammevedtakRestTjeneste {
     static final String BASE_PATH = "/behandling/utvidetRett";
     private static final String RAMMEVEDTAK_PATH = "/rammevedtak";
 
     public static final String RAMMEVEDTAK = BASE_PATH + RAMMEVEDTAK_PATH;
 
-    private KroniskSykRammevedtakTjeneste kroniskSykRammevedtakTjeneste;
+    private OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste;
 
-    public UtvidetRettRestTjeneste() {
+    public RammevedtakRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public UtvidetRettRestTjeneste(KroniskSykRammevedtakTjeneste kroniskSykRammevedtakTjeneste) {
-        this.kroniskSykRammevedtakTjeneste = kroniskSykRammevedtakTjeneste;
+    public RammevedtakRestTjeneste(OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste) {
+        this.omsorgspengerRammevedtakTjeneste = omsorgspengerRammevedtakTjeneste;
     }
 
     @GET
@@ -59,6 +59,6 @@ public class UtvidetRettRestTjeneste {
                 @NotNull
                 @Valid
                 BehandlingUuidDto behandlingUuid) {
-        return kroniskSykRammevedtakTjeneste.hentRammevedtak(behandlingUuid);
+        return omsorgspengerRammevedtakTjeneste.hentRammevedtak(behandlingUuid);
     }
 }
