@@ -111,9 +111,7 @@ public class SykdomVurderingService {
 
     private List<Periode> hentInnleggelsesperioder(Behandling behandling) {
         final var innleggelser = hentInnleggelser(behandling);
-        if(innleggelser == null) {
-            return Collections.emptyList();
-        }
+
         return innleggelser.getPerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList());
     }
 
