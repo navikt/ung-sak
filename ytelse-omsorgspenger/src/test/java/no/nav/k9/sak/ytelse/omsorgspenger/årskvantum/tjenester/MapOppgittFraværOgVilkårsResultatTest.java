@@ -429,6 +429,37 @@ public class MapOppgittFraværOgVilkårsResultatTest {
     }
 
     @Test
+    public void skal_ta_hensyn_til_frilans() {
+        var vilkårResultatBuilder = new VilkårResultatBuilder();
+        var dummy = AktørId.dummy();
+
+        var vilkårene = vilkårResultatBuilder.build();
+
+        var oppgittFravær = new OppgittFravær(
+            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null));
+
+        var frilans = OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny();
+        var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
+            .leggTilFrilansOpplysninger(frilans.build());
+        var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medOppgittOpptjening(oppgittOpptjeningBuilder)
+            .build();
+
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlag, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+
+        assertThat(perioder).hasSize(1);
+        for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
+            assertThat(entries.getValue()).hasSize(1);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AKTIVT.equals(it.getArbeidStatus()))).hasSize(1);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
+        }
+    }
+
+    @Test
     public void skal_filtrere_bort_perioder_utenfor_fagsaksinterval() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
