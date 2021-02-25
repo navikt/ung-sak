@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.årskvantum;
+package no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
