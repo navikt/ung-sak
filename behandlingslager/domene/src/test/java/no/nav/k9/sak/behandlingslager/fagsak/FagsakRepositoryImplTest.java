@@ -98,7 +98,7 @@ public class FagsakRepositoryImplTest {
                 new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("201"), null, fom.minusDays(1)),
                 new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("202"), fom, tom),
                 new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("203"), tom.plusDays(1), null),
-                new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, relatertPersonAktørId, new Saksnummer("205"), tom.plusDays(1), null)
+                new Fagsak(ytelseType, aktørIdSøker2, null, relatertPersonAktørId, new Saksnummer("205"), tom.plusDays(1), null)
 
         };
 
@@ -122,7 +122,7 @@ public class FagsakRepositoryImplTest {
         List<Fagsak> list2_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, tom, null);
         assertThat(list2_2).containsOnly(fagsaker[2], fagsaker[3]);
 
-        List<Fagsak> list3 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, aktørIdPleietrengende, relatertPersonAktørId, tom, null);
+        List<Fagsak> list3 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, null, relatertPersonAktørId, tom, null);
         assertThat(list3).containsOnly(fagsaker[4]);
     }
 

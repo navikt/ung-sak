@@ -12,6 +12,9 @@ import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import org.hibernate.jpa.TypedParameterValue;
+import org.hibernate.type.StringType;
+
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -145,14 +148,14 @@ public class FagsakRepository {
             "select f.* from Fagsak f"
                 + " where "
                 + "       coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')"
-                + "   and coalesce(f.relatert_person_aktor_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
+                + "   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
                 + "   and f.bruker_aktoer_id = :brukerAktørId"
                 + "   and f.ytelse_type = :ytelseType"
                 + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
             Fagsak.class); // NOSONAR
 
-        query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId());
-        query.setParameter("relatertPersonAktørId", relatertPersonAktørId == null ? null : relatertPersonAktørId.getId());
+        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
+        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
         query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
