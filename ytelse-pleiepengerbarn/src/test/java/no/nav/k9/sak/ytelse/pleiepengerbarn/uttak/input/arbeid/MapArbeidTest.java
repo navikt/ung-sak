@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,11 +15,15 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
@@ -48,7 +53,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering, Set.of());
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
@@ -76,7 +81,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering, Set.of());
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
@@ -109,12 +114,73 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering, Set.of());
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
             Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
                 new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
+    }
+
+    @Test
+    void skal_mappe_arbeid_innenfor_periode_til_vurdering_prioriter_med_arbeidsforholdsId_fra_im() {
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now());
+        var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));
+
+        var journalpostId = new JournalpostId(1L);
+        var journalpostId1 = new JournalpostId(2L);
+        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD), new KravDokument(journalpostId1, LocalDateTime.now(), KravDokumentType.SØKNAD));
+        var varighet = Duration.ofHours(3);
+        var arbeidsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(3));
+        var arbeidsperiode1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(29), LocalDate.now().minusDays(29));
+        var arbeidsgiverOrgnr = "000000000";
+        var periodeDel1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now().minusDays(20));
+        var periodeDel2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
+        var virksomhet = Arbeidsgiver.virksomhet(arbeidsgiverOrgnr);
+        var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
+                List.of(new UttakPeriode(periodeDel1, varighet)),
+                List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
+                List.of(),
+                List.of()),
+            new PerioderFraSøknad(journalpostId1,
+                List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
+                List.of(new ArbeidPeriode(arbeidsperiode1, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(7))),
+                List.of(),
+                List.of()));
+
+        var ref1 = InternArbeidsforholdRef.nyRef();
+        var ref2 = InternArbeidsforholdRef.nyRef();
+        Set<Inntektsmelding> inntektsmeldinger = Set.of(InntektsmeldingBuilder.builder()
+                .medYtelse(FagsakYtelseType.PSB)
+                .medArbeidsgiver(virksomhet)
+                .medArbeidsforholdId(ref2)
+                .medArbeidsforholdId(EksternArbeidsforholdRef.ref("ref"))
+                .medJournalpostId("1")
+                .medStartDatoPermisjon(periodeTilVurdering.getFomDato())
+                .medBeløp(BigDecimal.TEN)
+                .medKanalreferanse("AR123")
+                .medRefusjon(BigDecimal.TEN)
+                .build(),
+            InntektsmeldingBuilder.builder()
+                .medYtelse(FagsakYtelseType.PSB)
+                .medArbeidsgiver(virksomhet)
+                .medArbeidsforholdId(ref1)
+                .medArbeidsforholdId(EksternArbeidsforholdRef.ref("ref"))
+                .medJournalpostId("2")
+                .medStartDatoPermisjon(periodeTilVurdering.getFomDato())
+                .medBeløp(BigDecimal.TEN)
+                .medKanalreferanse("AR124")
+                .medRefusjon(BigDecimal.TEN)
+                .build());
+        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering, inntektsmeldinger);
+
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, ref1.getUUIDReferanse().toString()),
+            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8).dividedBy(inntektsmeldinger.size()), Duration.ofHours(1).dividedBy(inntektsmeldinger.size())),
+                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8).dividedBy(inntektsmeldinger.size()), Duration.ofHours(7).dividedBy(inntektsmeldinger.size())))),
+            new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, ref2.getUUIDReferanse().toString()),
+                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8).dividedBy(inntektsmeldinger.size()), Duration.ofHours(1).dividedBy(inntektsmeldinger.size())),
+                    new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8).dividedBy(inntektsmeldinger.size()), Duration.ofHours(7).dividedBy(inntektsmeldinger.size())))));
     }
 
 }
