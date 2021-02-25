@@ -52,7 +52,7 @@ public class LagreOppgittOpptjening {
                 .collect(Collectors.toList());
             builderOgStatus.builder.leggTilEgneNæringer(egenNæringBuilders);
         }
-        if (søknad.getAktivitet().getFrilanser() != null){
+        if (søknad.getAktivitet().getFrilanser() != null) {
             builderOgStatus.builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
@@ -107,8 +107,10 @@ public class LagreOppgittOpptjening {
         var builder = EgenNæringBuilder.ny();
         sn.perioder.forEach((per, info) -> {
             builder.medVirksomhet(sn.getOrganisasjonsnummer() != null ? new OrgNummer(sn.getOrganisasjonsnummer().verdi) : null);
-            builder.medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(per.getFraOgMed(), per.getTilOgMed()));
-            builder.medBruttoInntekt(info.bruttoInntekt);
+            builder.medPeriode(per.getTilOgMed() != null
+                ? DatoIntervallEntitet.fraOgMedTilOgMed(per.getFraOgMed(), per.getTilOgMed())
+                : DatoIntervallEntitet.fraOgMed(per.getFraOgMed()));
+            //builder.medBruttoInntekt(info.bruttoInntekt);
             builder.medVirksomhetType(VirksomhetType.ANNEN);
             builder.medRegnskapsførerNavn(info.regnskapsførerNavn);
             builder.medRegnskapsførerTlf(info.regnskapsførerTlf);

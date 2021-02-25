@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
@@ -48,9 +50,11 @@ public class MapOppgittFraværOgVilkårsResultat {
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje = opprettFraværsTidslinje(fagsakPeriode, fraværsPerioder);
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdOgPermitertTidslinje = opprettPermitertTidslinje(filter);
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> egenNæringTidslinje = opprettEgenNæringTidslinje(iayGrunnlag);
+        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> oppgittFrilansTidslinje = opprettOppgittFrilansTidslinje(iayGrunnlag);
 
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, arbeidsforholdOgPermitertTidslinje);
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, egenNæringTidslinje);
+        fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, oppgittFrilansTidslinje);
         LocalDateTimeline<WrappedOppgittFraværPeriode> avslåtteVilkårTidslinje = opprettVilkårTidslinje(vilkårene);
 
         return kombinerTidslinjene(fraværsTidslinje, avslåtteVilkårTidslinje);
@@ -106,8 +110,20 @@ public class MapOppgittFraværOgVilkårsResultat {
         var oppgittEgenNæringer = iayGrunnlag.getOppgittOpptjening().map(OppgittOpptjening::getEgenNæring).orElse(List.of());
 
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
-        oppgittEgenNæringer.forEach(egenNæring ->  mapEgenNæringTilTidlinje(result, egenNæring));
+        oppgittEgenNæringer.forEach(egenNæring -> mapEgenNæringTilTidlinje(result, egenNæring));
         return result;
+    }
+
+    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettOppgittFrilansTidslinje(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        Optional<OppgittFrilans> oppgittFrilans = iayGrunnlag.getOppgittOpptjening().flatMap(OppgittOpptjening::getFrilans);
+        if (oppgittFrilans.isPresent()) {
+            //det er avklart med funksjonell at frilans-arbeidsforhold som er oppgitt i søknad brukes direkte ifht opptjening
+            var aktivitet = new Aktivitet(UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef());
+            var tidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT))));
+            return Map.of(aktivitet, tidslinje);
+        } else {
+            return Collections.emptyMap();
+        }
     }
 
     private void mapYaTilTidlinje(Yrkesaktivitet yrkesaktivitet, HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result, YrkesaktivitetFilter filter) {
