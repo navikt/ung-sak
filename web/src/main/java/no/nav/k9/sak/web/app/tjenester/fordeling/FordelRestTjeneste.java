@@ -123,6 +123,8 @@ public class FordelRestTjeneste {
             relatertPersonAktørId = new AktørId(opprettSakDto.getRelatertPersonAktørId());
         }
 
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
         Periode periode = opprettSakDto.getPeriode();
         if (periode == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);

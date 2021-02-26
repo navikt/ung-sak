@@ -37,12 +37,7 @@ public class FrisinnSøknadMottaker implements SøknadMottakTjeneste<FrisinnSøk
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
-        if (pleietrengendeAktørId != null) {
-            throw new IllegalArgumentException("Har ikke pleietrengendeAktørId på frisinn sak");
-        }
-        if (relatertPersonAktørId != null) {
-            throw new IllegalArgumentException("Har ikke relatertPersonAktørId på frisinn sak");
-        }
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         return dokumentMottaker.finnEllerOpprett(ytelseType, søkerAktørId, startDato, sluttDato);
     }
 

@@ -35,9 +35,7 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
-        if (relatertPersonAktørId != null) {
-            throw new IllegalArgumentException("Har ikke relatertPersonAktørId på pleiepenger sak");
-        }
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         return dokumentMottaker.finnEllerOpprett(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, sluttDato);
     }
 
