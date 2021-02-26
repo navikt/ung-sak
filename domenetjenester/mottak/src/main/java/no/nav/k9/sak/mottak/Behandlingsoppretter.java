@@ -11,7 +11,6 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -57,8 +56,8 @@ public class Behandlingsoppretter {
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
     }
 
-    public boolean erKompletthetssjekkPassert(Behandling behandling) {
-        return behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.VURDER_KOMPLETTHET);
+    public Optional<Behandling> hentForrigeBehandling(Fagsak fagsak) {
+        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
     }
 
     /**
@@ -106,7 +105,7 @@ public class Behandlingsoppretter {
             new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
                 .map(BehandlingÅrsak::getBehandlingÅrsakType)
                 .collect(toList()))
-                    .buildFor(revurdering);
+                .buildFor(revurdering);
 
             BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
             behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
@@ -123,14 +122,6 @@ public class Behandlingsoppretter {
 
     public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(Behandling forrigeBehandling, Behandling nyBehandling) {
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
-    }
-
-    public boolean harBehandlingsresultatOpphørt(Behandling behandling) {
-        return behandling.getBehandlingResultatType().isBehandlingsresultatOpphørt();
-    }
-
-    public boolean erAvslåttBehandling(Behandling behandling) {
-        return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
     }
 
     public Behandling opprettNyFørstegangsbehandling(Fagsak fagsak, Behandling avsluttetBehandling) {
