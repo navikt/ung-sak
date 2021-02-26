@@ -31,7 +31,7 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     @Inject
     public UtvidetRettSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                                  FagsakTjeneste fagsakTjeneste) {
+                                     FagsakTjeneste fagsakTjeneste) {
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
     }
@@ -42,21 +42,45 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, startDato, sluttDato);
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
+        validerAktørIder(ytelseType, pleietrengendeAktørId, relatertPersonAktørId);
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
 
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType);
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType);
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType) {
-        var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType) {
+        var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, relatertPersonAktørId, saksnummer);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
+    }
+
+    private static void validerAktørIder(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId) {
+        switch (ytelseType) {
+            case OMSORGSPENGER_KS:
+                if (pleietrengendeAktørId == null) {
+                    throw new IllegalArgumentException("Må angi pleietrengede aktørId på omsorgspenger rammevedtak - kronisk syk sak");
+                }
+                if (relatertPersonAktørId != null) {
+                    throw new IllegalArgumentException("Har ikke relatertPersonAktørId på omsorgspenger rammevedtak - kronisk syk sak");
+                }
+                break;
+            case OMSORGSPENGER_MA:
+                if (pleietrengendeAktørId != null) {
+                    throw new IllegalArgumentException("Har ikke pleietrengendeAktørId på omsorgspenger rammevedtak - midlertidig alene sak");
+                }
+                if (relatertPersonAktørId == null) {
+                    throw new IllegalArgumentException("Må angi relatertPersonAktørId på omsorgspenger rammevedtak - midlertidig alene sak");
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Støtter ikke ytelseType:" + ytelseType);
+        }
     }
 
 }

@@ -53,6 +53,10 @@ public class Fagsak extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id", unique = true, nullable = true, updatable = true)))
     private AktørId pleietrengendeAktørId;
 
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "relatert_person_aktoer_id", unique = true, nullable = true, updatable = true)))
+    private AktørId relatertPersonAktørId;
+
     @Convert(converter = FagsakStatusKodeverdiConverter.class)
     @Column(name = "fagsak_status", nullable = false)
     private FagsakStatus fagsakStatus = FagsakStatus.DEFAULT;
@@ -83,23 +87,25 @@ public class Fagsak extends BaseEntitet {
     }
 
     public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer) {
-        this(ytelseType, søker, null, saksnummer, null, null);
+        this(ytelseType, søker, null, null, saksnummer, null, null);
     }
 
-    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, AktørId pleietrengende, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(ytelseType, "ytelseType");
         this.ytelseType = ytelseType;
         this.brukerAktørId = søker;
         this.pleietrengendeAktørId = pleietrengende;
+        this.relatertPersonAktørId = relatertPerson;
         if (saksnummer != null) {
             setSaksnummer(saksnummer);
         }
         setPeriode(fom, tom);
     }
 
-    public Fagsak(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer) {
+    public Fagsak(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer) {
         this(ytelseType, bruker, saksnummer);
         this.pleietrengendeAktørId = pleietrengende;
+        this.relatertPersonAktørId = relatertPerson;
     }
 
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker) {
@@ -110,12 +116,12 @@ public class Fagsak extends BaseEntitet {
         return new Fagsak(ytelseType, bruker, saksnummer);
     }
 
-    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer) {
-        return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer);
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer) {
+        return new Fagsak(ytelseType, bruker, pleietrengende, relatertPerson, saksnummer);
     }
 
-    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
-        return new Fagsak(ytelseType, bruker, pleietrengende, saksnummer, fom, tom);
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+        return new Fagsak(ytelseType, bruker, pleietrengende, relatertPerson, saksnummer, fom, tom);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -142,14 +148,24 @@ public class Fagsak extends BaseEntitet {
         this.saksnummer = saksnummer;
     }
 
-    public void setPleietrengende(AktørId pleietrengendeAktørId) {
-        if (pleietrengendeAktørId != null && this.pleietrengendeAktørId != null && !this.pleietrengendeAktørId.equals(pleietrengendeAktørId)) {
-            throw new IllegalArgumentException("Kan ikke oppdatere pleietrengende til en annen person. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + pleietrengendeAktørId);
+    public void setPleietrengende(AktørId aktørId) {
+        if (aktørId != null && this.pleietrengendeAktørId != null && !this.pleietrengendeAktørId.equals(aktørId)) {
+            throw new IllegalArgumentException("Kan ikke oppdatere pleietrengende til en annen person. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + aktørId);
         }
-        if (pleietrengendeAktørId == null && this.pleietrengendeAktørId != null) {
-            throw new IllegalArgumentException("Kan ikke nullstille pleietrengende. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + pleietrengendeAktørId);
+        if (aktørId == null && this.pleietrengendeAktørId != null) {
+            throw new IllegalArgumentException("Kan ikke nullstille pleietrengende. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + aktørId);
         }
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.pleietrengendeAktørId = aktørId;
+    }
+
+    public void setRelatertPerson(AktørId aktørId) {
+        if (aktørId != null && this.relatertPersonAktørId != null && !this.relatertPersonAktørId.equals(aktørId)) {
+            throw new IllegalArgumentException("Kan ikke oppdatere relatertPerson til en annen person. Prøver å endre fra " + this.relatertPersonAktørId + " til " + aktørId);
+        }
+        if (aktørId == null && this.relatertPersonAktørId != null) {
+            throw new IllegalArgumentException("Kan ikke nullstille relatertPerson. Prøver å endre fra " + this.relatertPersonAktørId + " til " + aktørId);
+        }
+        this.relatertPersonAktørId = aktørId;
     }
 
     public AktørId getBrukerAktørId() {
@@ -158,6 +174,10 @@ public class Fagsak extends BaseEntitet {
 
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public AktørId getRelatertPersonAktørId() {
+        return relatertPersonAktørId;
     }
 
     public boolean erÅpen() {

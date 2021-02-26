@@ -100,6 +100,9 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     }
 
     void setPersonopplysningInformasjon(PersonInformasjonEntitet personopplysningInformasjon) {
+        if (this.personopplysningInformasjon != null && !Objects.equals(this.personopplysningInformasjon, personopplysningInformasjon)) {
+            throw new IllegalStateException("Kan ikke endre personopplysningInformasjon for aktørId=" + this.getAktørId());
+        }
         this.personopplysningInformasjon = personopplysningInformasjon;
     }
 
@@ -187,7 +190,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
 
     @Override
     public String toString() {
-        return getClass().getSimpleName()+"<" + "id=" + id +
+        return getClass().getSimpleName() + "<" + "id=" + id +
             ", brukerKjønn=" + brukerKjønn +
             ", sivilstand=" + sivilstand +
             ", navn='" + navn + '\'' +

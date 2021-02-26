@@ -51,9 +51,10 @@ import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.AlleRelasjonFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.IngenRelasjonFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.OmsorgspengerRelasjonsFilter;
-import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleiepengerRelasjonsFilter;
+import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.PleietrengendeRelasjonsFilter;
 import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -65,8 +66,10 @@ public class RegisterdataInnhenter {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterdataInnhenter.class);
 
-    private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> relasjonsFiltrering = Map.of(
-        FagsakYtelseType.PSB, new PleiepengerRelasjonsFilter(),
+    private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> barnRelasjonsFilter = Map.of(
+        FagsakYtelseType.OMSORGSPENGER_KS, new AlleRelasjonFilter(),
+        FagsakYtelseType.OMSORGSPENGER_MA, new AlleRelasjonFilter(),
+        FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
         FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
 
     private PersoninfoAdapter personinfoAdapter;
@@ -157,6 +160,9 @@ public class RegisterdataInnhenter {
             leggTilPleietrengende(informasjonBuilder, behandling);
             // Ektefelle
             leggTilEktefelle(søkerPersonInfo, informasjonBuilder, behandling);
+            // Relatert person
+            leggTilRelatertPerson(informasjonBuilder, behandling);
+
         }
 
         return informasjonBuilder;
@@ -166,6 +172,17 @@ public class RegisterdataInnhenter {
         final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
             final var aktørId = pleietrengende.get();
+            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            if (personinfo != null) {
+                mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            }
+        }
+    }
+
+    private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
+        final var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
+        if (relatertPerson.isPresent()) {
+            final var aktørId = relatertPerson.get();
             final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
@@ -273,6 +290,10 @@ public class RegisterdataInnhenter {
     }
 
     private void mapInfoTilEntitet(Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, boolean lagreIHistoriskeTabeller) {
+        if (informasjonBuilder.harAktørId(personinfo.getAktørId())) {
+            return;
+        }
+
         final DatoIntervallEntitet periode = getPeriode(personinfo.getFødselsdato(), Tid.TIDENES_ENDE);
         final PersonInformasjonBuilder.PersonopplysningBuilder builder = informasjonBuilder.getPersonopplysningBuilder(personinfo.getAktørId());
         builder.medFødselsdato(personinfo.getFødselsdato())
@@ -336,7 +357,7 @@ public class RegisterdataInnhenter {
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
-        var relasjonsFilter = relasjonsFiltrering.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter());
+        var relasjonsFilter = barnRelasjonsFilter.getOrDefault(behandling.getFagsakYtelseType(), new IngenRelasjonFilter());
 
         return relaterteBarn.stream()
             .filter(it -> relasjonsFilter.relasjonsFiltrering(behandling, it))

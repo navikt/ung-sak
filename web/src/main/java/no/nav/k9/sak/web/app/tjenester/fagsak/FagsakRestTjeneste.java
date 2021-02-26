@@ -145,11 +145,13 @@ public class FagsakRestTjeneste {
 
         AktørId bruker = finnSakDto.getAktørId();
         AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
+        AktørId relatertPersonAktørId = finnSakDto.getRelatertPersonAktørId();
         var periode = finnSakDto.getPeriode();
 
         var fagsak = fagsakTjeneste.finnFagsakerForAktør(bruker)
             .stream()
             .filter(f -> pleietrengendeAktørId == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
+            .filter(f -> relatertPersonAktørId == null || Objects.equals(f.getRelatertPersonAktørId(), relatertPersonAktørId))
             .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
             .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
             .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
@@ -245,6 +247,7 @@ public class FagsakRestTjeneste {
             periode,
             personDto,
             fagsak.getPleietrengendeAktørId(),
+            fagsak.getRelatertPersonAktørId(),
             kanRevurderingOpprettes,
             fagsak.getSkalTilInfotrygd(),
             fagsak.getOpprettetTidspunkt(),

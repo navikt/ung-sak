@@ -403,7 +403,7 @@ public class BehandlingDtoTjeneste {
         var fom = søknadsperioder.map(DatoIntervallEntitet::getFomDato).orElse(fagsak.getPeriode().getFomDato());
         var tom = søknadsperioder.map(DatoIntervallEntitet::getTomDato).orElse(fagsak.getPeriode().getTomDato());
 
-        var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId(), fom, tom)
+        var andreSaker = fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getBrukerAktørId(), fagsak.getPleietrengendeAktørId(), fagsak.getRelatertPersonAktørId(), fom, tom)
             .stream().map(Fagsak::getSaksnummer)
             .collect(Collectors.toList());
 

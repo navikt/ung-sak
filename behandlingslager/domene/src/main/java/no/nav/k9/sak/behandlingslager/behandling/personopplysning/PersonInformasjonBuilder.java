@@ -30,6 +30,10 @@ public class PersonInformasjonBuilder {
         this.gjelderOppdatering = gjelderOppdatering;
     }
 
+    public boolean harAktørId(AktørId aktørId) {
+        return kladd.harAktørId(aktørId);
+    }
+
     private static PersonInformasjonBuilder nytt(PersonopplysningVersjonType type) {
         return new PersonInformasjonBuilder(new PersonInformasjonEntitet(), type, false);
     }
@@ -88,9 +92,9 @@ public class PersonInformasjonBuilder {
             aktørerIRelasjoner.addAll(kladd.getRelasjoner().stream().map(e -> e.getTilAktørId()).collect(Collectors.toSet()));
 
             Set<AktørId> personer = kladd.getPersonopplysninger()
-                    .stream()
-                    .filter(e -> !søkerAktørId.equals(e.getAktørId()))
-                    .map(HarAktørId::getAktørId).collect(Collectors.toSet());
+                .stream()
+                .filter(e -> !søkerAktørId.equals(e.getAktørId()))
+                .map(HarAktørId::getAktørId).collect(Collectors.toSet());
             personer.forEach(e -> {
                 if (!aktørerIRelasjoner.contains(e)) {
                     kladd.fjernPersonopplysning(e);
@@ -147,7 +151,7 @@ public class PersonInformasjonBuilder {
     }
 
     public StatsborgerskapBuilder getStatsborgerskapBuilder(AktørId aktørId, DatoIntervallEntitet periode, Landkoder landkode, Region region) {
-        return kladd.getStatsborgerskapBuilderForAktørId(aktørId, landkode, periode,region);
+        return kladd.getStatsborgerskapBuilderForAktørId(aktørId, landkode, periode, region);
     }
 
     public static final class PersonopplysningBuilder {
@@ -157,6 +161,10 @@ public class PersonInformasjonBuilder {
         private PersonopplysningBuilder(PersonopplysningEntitet kladd, boolean oppdatering) {
             this.kladd = kladd;
             this.oppdatering = oppdatering;
+        }
+
+        public AktørId getAktørId() {
+            return kladd.getAktørId();
         }
 
         private static PersonopplysningBuilder oppdatere(PersonopplysningEntitet kladd) {
@@ -424,7 +432,7 @@ public class PersonInformasjonBuilder {
             return this;
         }
 
-        public StatsborgerskapBuilder medRegion(Region region){
+        public StatsborgerskapBuilder medRegion(Region region) {
             kladd.setRegion(region);
             return this;
         }
@@ -437,4 +445,5 @@ public class PersonInformasjonBuilder {
             return oppdatering;
         }
     }
+
 }

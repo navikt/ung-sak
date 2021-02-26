@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
-import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -31,14 +30,6 @@ public class SøknadAngittPersonEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    /** Angitt navn ( kun hvis ikke bruker er identifisert. */
-    @Column(name = "navn")
-    private String navn;
-
-    /** Angitt fødselsdato (kun hvis ikke person er identifisert. */
-    @Column(name = "foedselsdato")
-    private LocalDate fødselsdato;
-
     /** Angitt aktørid hvis bruker er identifisert. */
     @Column(name = "aktoer_id")
     private AktørId aktørId;
@@ -63,23 +54,9 @@ public class SøknadAngittPersonEntitet {
         // for jpa
     }
 
-    public SøknadAngittPersonEntitet(String navn, LocalDate fødselsdato, RelasjonsRolleType rolle) {
-        this.navn = navn;
-        this.fødselsdato = fødselsdato;
-        this.rolle = rolle;
-    }
-
     public SøknadAngittPersonEntitet(AktørId aktørId, RelasjonsRolleType rolle) {
         this.aktørId = aktørId;
         this.rolle = rolle;
-    }
-
-    public SøknadAngittPersonEntitet(String navn, LocalDate fødselsdato, RelasjonsRolleType rolle, String situasjonKode, String tilleggsopplysninger) {
-        this.navn = navn;
-        this.fødselsdato = fødselsdato;
-        this.rolle = rolle;
-        this.situasjonKode = situasjonKode;
-        this.tilleggsopplysninger = tilleggsopplysninger;
     }
 
     public SøknadAngittPersonEntitet(AktørId aktørId, RelasjonsRolleType rolle, String situasjonKode, String tilleggsopplysninger) {
@@ -92,9 +69,9 @@ public class SøknadAngittPersonEntitet {
     // copy ctor
     SøknadAngittPersonEntitet(SøknadAngittPersonEntitet angitt) {
         this.aktørId = angitt.aktørId;
-        this.navn = angitt.navn;
-        this.fødselsdato = angitt.fødselsdato;
         this.rolle = angitt.rolle;
+        this.situasjonKode = angitt.situasjonKode;
+        this.tilleggsopplysninger = angitt.tilleggsopplysninger;
     }
 
     void setSøknad(SøknadEntitet søknad) {
@@ -108,14 +85,6 @@ public class SøknadAngittPersonEntitet {
 
     public Long getId() {
         return id;
-    }
-
-    public String getNavn() {
-        return navn;
-    }
-
-    public LocalDate getFødselsdato() {
-        return fødselsdato;
     }
 
     public AktørId getAktørId() {
@@ -142,15 +111,14 @@ public class SøknadAngittPersonEntitet {
             return false;
         }
         var other = (SøknadAngittPersonEntitet) obj;
-        return Objects.equals(this.fødselsdato, other.fødselsdato)
-            && Objects.equals(this.rolle, other.rolle)
+        return Objects.equals(this.rolle, other.rolle)
             && Objects.equals(this.aktørId, other.aktørId)
-            && Objects.equals(this.navn, other.navn);
+        ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(aktørId, rolle, fødselsdato, navn);
+        return Objects.hash(aktørId, rolle);
     }
 
 }

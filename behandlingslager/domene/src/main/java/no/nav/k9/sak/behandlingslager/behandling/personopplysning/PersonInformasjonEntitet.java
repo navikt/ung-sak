@@ -135,9 +135,13 @@ public class PersonInformasjonEntitet extends BaseEntitet {
     }
 
     void leggTilPersonopplysning(PersonopplysningEntitet personopplysning) {
-        final PersonopplysningEntitet personopplysning1 = personopplysning;
-        personopplysning1.setPersonopplysningInformasjon(this);
-        this.personopplysninger.add(personopplysning1);
+        var aktørId = personopplysning.getAktørId();
+        if (harAktørId(aktørId)) {
+            throw new IllegalStateException("Kan ikke overskrive aktørId:" + aktørId);
+        }
+
+        personopplysning.setPersonopplysningInformasjon(this);
+        this.personopplysninger.add(personopplysning);
     }
 
     void fjernPersonopplysning(AktørId aktørId) {
@@ -162,6 +166,11 @@ public class PersonInformasjonEntitet extends BaseEntitet {
         Objects.requireNonNull(aktørId, "aktørId");
         final Optional<PersonopplysningEntitet> eksisterendeAktør = personopplysninger.stream().filter(it -> it.getAktørId().equals(aktørId)).findFirst();
         return PersonInformasjonBuilder.PersonopplysningBuilder.oppdater(eksisterendeAktør).medAktørId(aktørId);
+    }
+
+    boolean harAktørId(AktørId aktørId) {
+        Objects.requireNonNull(aktørId, "aktørId");
+        return personopplysninger.stream().anyMatch(it -> it.getAktørId().equals(aktørId));
     }
 
     /**

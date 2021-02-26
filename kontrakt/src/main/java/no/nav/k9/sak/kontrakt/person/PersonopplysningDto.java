@@ -40,11 +40,6 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Size(max = 30)
     private List<PersonopplysningDto> barn = new ArrayList<>();
 
-    @JsonProperty(value = "barnFraTpsRelatertTilSoknad")
-    @Valid
-    @Size(max = 10)
-    private List<PersonopplysningDto> barnFraTpsRelatertTilSoknad = new ArrayList<>();
-
     @JsonProperty(value = "barnSoktFor")
     @Valid
     @Size(max = 10)
@@ -119,10 +114,6 @@ public class PersonopplysningDto extends PersonIdentDto {
         return barn;
     }
 
-    public List<PersonopplysningDto> getBarnFraTpsRelatertTilSoknad() {
-        return barnFraTpsRelatertTilSoknad;
-    }
-
     public List<PersonopplysningDto> getBarnSoktFor() {
         return barnSoktFor;
     }
@@ -185,10 +176,6 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public void setBarn(List<PersonopplysningDto> barn) {
         this.barn = barn;
-    }
-
-    public void setBarnFraTpsRelatertTilSoknad(List<PersonopplysningDto> barnFraTpsRelatertTilSoknad) {
-        this.barnFraTpsRelatertTilSoknad = barnFraTpsRelatertTilSoknad;
     }
 
     public void setBarnSoktFor(List<PersonopplysningDto> barnSoktFor) {
