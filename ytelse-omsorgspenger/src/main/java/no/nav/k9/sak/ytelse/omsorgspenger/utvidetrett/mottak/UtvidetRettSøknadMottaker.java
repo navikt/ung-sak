@@ -43,7 +43,7 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
-        validerAktørIder(ytelseType, pleietrengendeAktørId, relatertPersonAktørId);
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
@@ -58,29 +58,6 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
         var fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, relatertPersonAktørId, saksnummer);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
-    }
-
-    private static void validerAktørIder(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId) {
-        switch (ytelseType) {
-            case OMSORGSPENGER_KS:
-                if (pleietrengendeAktørId == null) {
-                    throw new IllegalArgumentException("Må angi pleietrengede aktørId på omsorgspenger rammevedtak - kronisk syk sak");
-                }
-                if (relatertPersonAktørId != null) {
-                    throw new IllegalArgumentException("Har ikke relatertPersonAktørId på omsorgspenger rammevedtak - kronisk syk sak");
-                }
-                break;
-            case OMSORGSPENGER_MA:
-                if (pleietrengendeAktørId != null) {
-                    throw new IllegalArgumentException("Har ikke pleietrengendeAktørId på omsorgspenger rammevedtak - midlertidig alene sak");
-                }
-                if (relatertPersonAktørId == null) {
-                    throw new IllegalArgumentException("Må angi relatertPersonAktørId på omsorgspenger rammevedtak - midlertidig alene sak");
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException("Støtter ikke ytelseType:" + ytelseType);
-        }
     }
 
 }
