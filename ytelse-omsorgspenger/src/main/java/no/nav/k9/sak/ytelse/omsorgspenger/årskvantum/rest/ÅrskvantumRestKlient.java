@@ -49,13 +49,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlag årskvantumRequest) {
+    public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlag grunnlag) {
+        if (grunnlag.getUttakperioder().isEmpty()) {
+            throw new IllegalArgumentException("Har ikke fraværsperioder for " + grunnlag.getBehandlingUUID());
+        }
+
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum");
-            var result = restKlient.post(endpoint, årskvantumRequest, ÅrskvantumResultat.class);
+            var result = restKlient.post(endpoint, grunnlag, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
-                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + årskvantumRequest.getBehandlingUUID() + ": " + constraints);
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + grunnlag.getBehandlingUUID() + ": " + constraints);
             }
             return result;
         } catch (Exception e) {

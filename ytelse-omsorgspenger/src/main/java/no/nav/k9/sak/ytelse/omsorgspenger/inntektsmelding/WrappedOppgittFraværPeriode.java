@@ -53,9 +53,10 @@ public class WrappedOppgittFraværPeriode {
 
     @Override
     public String toString() {
-        return "WrappedOppgittFraværPeriode{" +
+        return getClass().getSimpleName() + "<" +
             "periode=" + periode +
             ", innsendingstidspunkt=" + innsendingstidspunkt +
-            '}';
+            ", søknadsfristUtfall=" + søknadsfristUtfall +
+            '>';
     }
 }
