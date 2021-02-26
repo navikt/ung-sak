@@ -170,8 +170,7 @@ public class PersonInformasjonEntitet extends BaseEntitet {
 
     boolean harAktørId(AktørId aktørId) {
         Objects.requireNonNull(aktørId, "aktørId");
-        var eksisterendeAktør = personopplysninger.stream().filter(it -> it.getAktørId().equals(aktørId)).findFirst();
-        return eksisterendeAktør.isPresent();
+        return personopplysninger.stream().anyMatch(it -> it.getAktørId().equals(aktørId));
     }
 
     /**

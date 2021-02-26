@@ -88,8 +88,11 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         if (relatertPersonAktørId != null) {
             throw new IllegalArgumentException("Har ikke relatertPersonAktørId på omsorgspenger utbetaling sak");
         }
+        if (pleietrengendeAktørId != null) {
+            throw new IllegalArgumentException("Har ikke pleietrengendeAktørId på omsorgspenger utbetaling sak");
+        }
 
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, startDato, sluttDato);
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
