@@ -93,8 +93,13 @@ class SøknadDokumentmottaker {
 
         validerIngenÅpneBehandlinger(fagsak);
 
+        var forrigeBehandling = behandlingsoppretter.hentForrigeBehandling(fagsak);
+        if (forrigeBehandling.isEmpty()) {
+            return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        }
+
         // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
-        return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        return behandlingsoppretter.opprettRevurdering(forrigeBehandling.get(), BehandlingÅrsakType.UDEFINERT);
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {

@@ -32,7 +32,9 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsPeriodeDokumenter;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 
 
 @ApplicationScoped
@@ -74,11 +76,12 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             return result;
         }
 
-        var mottatteJournalposter = mottatteDokumenter.stream()
-            .map(MottattDokument::getJournalpostId)
-            .collect(Collectors.toSet());
-
-        søknadsperiodeRepository.hentPerioderKnyttetTilJournalpost(referanse.getBehandlingId(), mottatteJournalposter)
+        søknadsperiodeRepository.hentGrunnlag(referanse.getBehandlingId())
+            .stream()
+            .map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder)
+            .map(SøknadsperioderHolder::getPerioder)
+            .flatMap(Collection::stream)
+            .map(it -> new SøknadsPeriodeDokumenter(it.getJournalpostId(), it.getPerioder()))
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, dokument));
 
         return result;

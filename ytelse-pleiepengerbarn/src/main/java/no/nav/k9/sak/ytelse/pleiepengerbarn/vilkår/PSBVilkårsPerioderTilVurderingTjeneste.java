@@ -25,9 +25,9 @@ import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
@@ -40,6 +40,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -47,11 +48,11 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Inject
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
-                                                  @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårUtleder = vilkårUtleder;
-        var maksSøktePeriode = new MaksSøktePeriode(søknadsperiodeRepository);
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
+        var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
         søktePerioder = new SøktePerioder(søknadsperiodeRepository);
@@ -91,6 +92,17 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         // TODO: Returnere liste av alle perioder på utsiden av revurderingsperiode som har blitt endret.
         return new TreeSet<>();
+    }
+
+    @Override
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+        // TODO: Ignorerer rekkefølge for nå, blir først en utfordring når brukeren kan "trekke" perioder ved søknad
+        var alleSøknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
+            .map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder)
+            .map(SøknadsperioderHolder::getPerioder)
+            .orElse(Set.of());
+
+        return søktePerioder.utledVurderingsperioderFraSøknadsperioder(alleSøknadsperioder);
     }
 
     @Override
