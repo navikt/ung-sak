@@ -88,6 +88,7 @@ public class PipRepository {
         }
     }
 
+
     public Set<AktørId> hentAktørIdKnyttetTilFagsaker(Collection<Long> fagsakIder) {
         Objects.requireNonNull(fagsakIder, SAKSNUMMER);
         if (fagsakIder.isEmpty()) {
@@ -105,6 +106,7 @@ public class PipRepository {
             " UNION ALL " + // NOSONAR
             "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
             "WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL " +
+            " UNION ALL " + // NOSONAR
             "SELECT fag.relatert_person_aktoer_id FROM Fagsak fag " +
             "WHERE fag.id in (:fagsakIder) AND fag.relatert_person_aktoer_id IS NOT NULL " +
             " UNION ALL " + // NOSONAR
@@ -128,10 +130,10 @@ public class PipRepository {
         Objects.requireNonNull(saksnummer, SAKSNUMMER);
 
         String sql = "SELECT por.AKTOER_ID From Fagsak fag " +
-            "JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID " +
-            "JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID " +
-            "JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID " +
-            "JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
+            " INNER JOIN BEHANDLING beh ON fag.ID = beh.FAGSAK_ID " +
+            " INNER JOIN GR_PERSONOPPLYSNING grp ON grp.behandling_id = beh.ID " +
+            " INNER JOIN PO_INFORMASJON poi ON grp.registrert_informasjon_id = poi.ID " +
+            " INNER JOIN PO_PERSONOPPLYSNING por ON poi.ID = por.po_informasjon_id " +
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND grp.aktiv = TRUE " +
             " UNION ALL " + // NOSONAR
             "SELECT fag.bruker_aktoer_id FROM Fagsak fag " +
@@ -139,6 +141,7 @@ public class PipRepository {
             " UNION ALL " + // NOSONAR
             "SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag " +
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.pleietrengende_aktoer_id IS NOT NULL " +
+            " UNION ALL " + // NOSONAR
             "SELECT fag.relatert_person_aktoer_id FROM Fagsak fag " +
             "WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.relatert_person_aktoer_id IS NOT NULL " +
             " UNION ALL " + // NOSONAR
@@ -156,6 +159,7 @@ public class PipRepository {
         List<String> aktørIdList = query.getResultList();
         return aktørIdList.stream().map(AktørId::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
 
     @SuppressWarnings({ "unchecked", "cast" })
     public Set<Long> fagsakIdForJournalpostId(Collection<JournalpostId> journalpostId) {
