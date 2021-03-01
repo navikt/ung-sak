@@ -60,10 +60,7 @@ public class KravDokumentFravær {
         }
 
         // sjekker mot overlappende data - foreløpig krasj and burn hvis overlappende segmenter
-        for (var entry : mapByAktivitet.entrySet()) {
-            var segments = entry.getValue().stream().map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFom(), ofp.getPeriode().getTom(), ofp)).collect(Collectors.toList());
-            new LocalDateTimeline<>(segments);
-        }
+        validerOverlapp(mapByAktivitet);
         return mapByAktivitet.values()
             .stream()
             .flatMap(Collection::stream)
@@ -94,7 +91,6 @@ public class KravDokumentFravær {
         }
     }
 
-    @NotNull
     private LocalDateTimeline<WrappedOppgittFraværPeriode> mapTilTimeline(List<WrappedOppgittFraværPeriode> aktiviteter) {
         return new LocalDateTimeline<>(aktiviteter.stream()
             .map(it -> new LocalDateSegment<>(it.getPeriode().getFom(), it.getPeriode().getTom(), it))
@@ -146,17 +142,20 @@ public class KravDokumentFravær {
         }
 
         // sjekker mot overlappende data - foreløpig krasj and burn hvis overlappende segmenter
-        for (var entry : mapByAktivitet.entrySet()) {
-            var segments = entry.getValue().stream().map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFom(), ofp.getPeriode().getTom(), ofp)).collect(Collectors.toList());
-            new LocalDateTimeline<>(segments);
-        }
+        validerOverlapp(mapByAktivitet);
         return mapByAktivitet.values()
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
     }
 
-    @NotNull
+    private void validerOverlapp(Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet) {
+        mapByAktivitet.forEach((key, value) -> {
+            var segments = value.stream().map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFom(), ofp.getPeriode().getTom(), ofp)).collect(Collectors.toList());
+            new LocalDateTimeline<>(segments);
+        });
+    }
+
     private AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold utledGruppe(List<VurdertSøktPeriode<OppgittFraværPeriode>> vurdertSøktPerioder, UttakArbeidType aktivitetType) {
         Optional<Arbeidsgiver> arbeidsgiver = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getArbeidsgiver).filter(Objects::nonNull).findFirst();
         if (arbeidsgiver.isPresent()) {
