@@ -45,13 +45,9 @@ public class Periode implements Comparable<Periode> {
     }
 
     public Periode(LocalDate fom, LocalDate tom) {
-        Objects.requireNonNull(fom, "fom");
-        Objects.requireNonNull(tom, "tom");
-        if (fom.isAfter(tom)) {
-            throw new IllegalArgumentException("fom (fra-og-med dato) kan ikke være etter tom (til-og-med dato: " + fom + ">" + tom);
-        }
         this.fom = fom;
         this.tom = tom;
+        validerOk();
     }
 
     public Periode(String iso8601) {
@@ -59,11 +55,20 @@ public class Periode implements Comparable<Periode> {
         String[] split = iso8601.split("/");
         this.fom = parseLocalDate(split[0]);
         this.tom = parseLocalDate(split[1]);
+        validerOk();
     }
 
-    @AssertTrue(message = "fom dato må være <= tom dato")
+    private void validerOk() {
+        if (!ok()) {
+            throw new IllegalArgumentException("fom (fra-og-med dato) kan ikke være etter tom (til-og-med dato: " + fom + ">" + tom);
+        }
+    }
+
+    @AssertTrue(message = "fom dato må være <= tom dato hvis satt")
     private boolean ok() {
-        return getFom().isEqual(getTom()) || getFom().isBefore(getTom());
+        LocalDate fom = getFom();
+        LocalDate tom = getTom();
+        return (fom == null || tom == null) || fom.isEqual(tom) || fom.isBefore(tom);
     }
 
     public LocalDate getFom() {
@@ -75,13 +80,21 @@ public class Periode implements Comparable<Periode> {
     }
 
     public boolean starterFørEllerSamtidigSom(Periode periode) {
-        return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
+        return (fom == null && periode.getFom() == null)
+            || (fom == null && periode.getFom() != null)
+            || ((fom != null && periode.getFom() != null)
+                && (fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom())));
     }
-    
+
+    public boolean slutterEtterEllerSamtidigSom(Periode periode) {
+        return (tom == null && periode.getTom() == null)
+            || (tom == null && periode.getTom() != null)
+            || ((tom != null && periode.getTom() != null)
+                && (tom.isEqual(periode.getTom()) || tom.isAfter(periode.getTom())));
+    }
+
     public boolean overlaps(Periode other) {
-        boolean fomBeforeOrEqual = getFom().isBefore(other.getTom()) || getFom().isEqual(other.getTom());
-        boolean tomAfterOrEqual = getTom().isAfter(other.getFom()) || getTom().isEqual(other.getFom());
-        return fomBeforeOrEqual && tomAfterOrEqual;
+        return starterFørEllerSamtidigSom(other) && slutterEtterEllerSamtidigSom(other);
     }
 
     @Override
@@ -92,7 +105,7 @@ public class Periode implements Comparable<Periode> {
             return false;
         }
         var annen = (Periode) o;
-        return fom.equals(annen.getFom()) && tom.equals(annen.getTom());
+        return Objects.equals(fom, annen.getFom()) && Objects.equals(tom, annen.getTom());
     }
 
     @Override
@@ -125,5 +138,5 @@ public class Periode implements Comparable<Periode> {
 
     private static final Comparator<Periode> COMP = Comparator
         .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
-        .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        .thenComparing(dto -> dto.getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 }
