@@ -118,32 +118,32 @@ public class PersonAdresseEntitet extends BaseEntitet implements HarAktørId, In
         return adresselinje1;
     }
 
-    void setAdresselinje1(String adresselinje1) {
-        this.adresselinje1 = adresselinje1;
+    void setAdresselinje1(String adresselinje) {
+        this.adresselinje1 = adresselinje == null ? null : adresselinje.trim();
     }
 
     public String getAdresselinje2() {
         return adresselinje2;
     }
 
-    void setAdresselinje2(String adresselinje2) {
-        this.adresselinje2 = adresselinje2;
+    void setAdresselinje2(String adresselinje) {
+        this.adresselinje2 = adresselinje == null ? null : adresselinje.trim();
     }
 
     public String getAdresselinje3() {
         return adresselinje3;
     }
 
-    void setAdresselinje3(String adresselinje3) {
-        this.adresselinje3 = adresselinje3;
+    void setAdresselinje3(String adresselinje) {
+        this.adresselinje3 = adresselinje == null ? null : adresselinje.trim();
     }
 
     public String getAdresselinje4() {
         return adresselinje4;
     }
 
-    void setAdresselinje4(String adresselinje4) {
-        this.adresselinje4 = adresselinje4;
+    void setAdresselinje4(String adresselinje) {
+        this.adresselinje4 = adresselinje == null ? null : adresselinje.trim();
     }
 
     public String getPostnummer() {
