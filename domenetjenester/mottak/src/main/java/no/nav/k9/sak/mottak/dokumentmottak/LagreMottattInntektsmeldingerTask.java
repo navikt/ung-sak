@@ -69,15 +69,11 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
 
         var mottatteDokumenter = new ArrayList<MottattDokument>();
 
-        String dokumenter = input.getPropertyValue(MOTTATT_DOKUMENT);
-
-        // TODO fjern denne - skal alltid lese fra mottatt_dokument status BEHANDLER
-        Collection<JournalpostId> journalpostIder = dokumenter == null || dokumenter.isEmpty() ? Collections.emptyList()
-            : Arrays.asList(dokumenter.split(",")).stream().map(s -> new JournalpostId(s)).collect(Collectors.toCollection(LinkedHashSet::new));
-        mottatteDokumenter.addAll(mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG));
+        gammelPlukkingAvInntektsmeldingTilLagring(input, fagsakId, mottatteDokumenter);
 
         // ny - henter alle som er til BEHANDLER
-        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.INNTEKTSMELDING,true, DokumentStatus.BEHANDLER);
+        List<MottattDokument> mottatteDokumentBehandler = mottatteDokumentRepository
+            .hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.INNTEKTSMELDING, true, DokumentStatus.BEHANDLER);
         mottatteDokumenter.addAll(mottatteDokumentBehandler);
 
         if (mottatteDokumenter.isEmpty()) {
@@ -92,6 +88,17 @@ public class LagreMottattInntektsmeldingerTask extends UnderBehandlingProsessTas
         // må gjøres til slutt siden vi har å gjøre med et ikke-tx grensesnitt til abakus
         inntektsmeldingTjeneste.lagreInntektsmeldinger(saksnummer, behandlingId, inntektsmeldinger);
 
+    }
+
+    /** @deprecated fjern denne, les alle fra status BEHANDLER i stedet. */
+    @Deprecated(forRemoval = true)
+    private void gammelPlukkingAvInntektsmeldingTilLagring(ProsessTaskData input, Long fagsakId, ArrayList<MottattDokument> mottatteDokumenter) {
+        String dokumenter = input.getPropertyValue(MOTTATT_DOKUMENT);
+
+        // TODO fjern denne - skal alltid lese fra mottatt_dokument status BEHANDLER
+        Collection<JournalpostId> journalpostIder = dokumenter == null || dokumenter.isEmpty() ? Collections.emptyList()
+            : Arrays.asList(dokumenter.split(",")).stream().map(s -> new JournalpostId(s)).collect(Collectors.toCollection(LinkedHashSet::new));
+        mottatteDokumenter.addAll(mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.MOTTATT, DokumentStatus.GYLDIG));
     }
 
 }
