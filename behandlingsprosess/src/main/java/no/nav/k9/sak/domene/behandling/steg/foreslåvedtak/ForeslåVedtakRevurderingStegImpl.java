@@ -67,7 +67,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
             .orElse(List.of())
             .stream()
             .map(VilkårPeriode::getSkjæringstidspunkt)
-            .collect(Collectors.toCollection(() -> new TreeSet<>()));
+            .collect(Collectors.toCollection(TreeSet::new));
 
         var vurderUgunst = erRevurderingensBeregningsgrunnlagMindreEnnOrginal(originalRef, revurderingRef, skjæringstidspunkter);
         for (LocalDate stp : skjæringstidspunkter) {
