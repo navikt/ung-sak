@@ -43,8 +43,7 @@ public class AksjonspunktutlederForMedisinskvilkår implements AksjonspunktUtled
                 .map(PersonRelasjonEntitet::getRelasjonsrolle)
                 .orElse(RelasjonsRolleType.UDEFINERT);
 
-            final var harSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengende, RelasjonsRolleType.BARN);
-            if (harSammeBosted && RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
+            if (RelasjonsRolleType.BARN.equals(pleietrengendeRelasjon)) {
                 return List.of();
             }
         }
