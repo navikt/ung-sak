@@ -110,7 +110,7 @@ public class LagreOppgittOpptjening {
             builder.medPeriode(per.getTilOgMed() != null
                 ? DatoIntervallEntitet.fraOgMedTilOgMed(per.getFraOgMed(), per.getTilOgMed())
                 : DatoIntervallEntitet.fraOgMed(per.getFraOgMed()));
-            //builder.medBruttoInntekt(info.bruttoInntekt);
+            builder.medVarigEndring(info.erVarigEndring);
             builder.medVirksomhetType(VirksomhetType.ANNEN);
             builder.medRegnskapsførerNavn(info.regnskapsførerNavn);
             builder.medRegnskapsførerTlf(info.regnskapsførerTlf);
