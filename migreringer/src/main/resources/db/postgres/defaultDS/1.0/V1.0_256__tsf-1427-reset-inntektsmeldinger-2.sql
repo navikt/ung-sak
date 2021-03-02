@@ -6,17 +6,22 @@ update mottatt_dokument set status='MOTTATT' where journalpost_id in ('490674017
 
 insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
 SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
-       nextval('SEQ_PROSESS_TASK_GRUPPE'), 1, '08', 'mottattDokumentId=1890270';
+       1142138, 1, '08', 'mottattDokumentId=1890270
+fagsakId=1142138
+saksnummer=9SXWi';
        
 insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
 SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
-       nextval('SEQ_PROSESS_TASK_GRUPPE'), 1, '08', 'mottattDokumentId=1890271';
+       1142138, 2, '08', 'mottattDokumentId=1890271
+fagsakId=1142138
+saksnummer=9SXWi'
+       ;
        
 -- opprett manuell revurdering
-INSERT INTO prosess_task (id, task_type, task_gruppe, neste_kjoering_etter, task_parametere)
+INSERT INTO prosess_task (id, task_type, task_gruppe, task_sekvens, partition_key, neste_kjoering_etter, task_parametere)
 SELECT nextval('seq_prosess_task'),
   'forvaltning.opprettManuellRevurdering',
-  nextval('seq_prosess_task_gruppe'),
+  1142138, 3, '08',
   (current_timestamp at time zone 'UTC') + (row_number() OVER()) * INTERVAL '1 seconds',
   'fagsakId=' || t.id || '
   saksnummer=' || t.saksnummer
