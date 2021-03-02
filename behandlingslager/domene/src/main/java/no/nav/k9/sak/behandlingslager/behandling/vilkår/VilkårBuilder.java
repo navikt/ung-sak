@@ -33,7 +33,9 @@ public class VilkårBuilder {
     private boolean bygget = false;
     private int mellomliggendePeriodeAvstand = 0;
 
-    /** @deprecated bygger ugyldig vilkår. */
+    /**
+     * @deprecated bygger ugyldig vilkår.
+     */
     @Deprecated(forRemoval = true)
     public VilkårBuilder() {
         this.vilkåret = new Vilkår();
@@ -87,7 +89,9 @@ public class VilkårBuilder {
         return this;
     }
 
-    /** @deprecated bruk ctor {@link #VilkårBuilder(VilkårType)}. */
+    /**
+     * @deprecated bruk ctor {@link #VilkårBuilder(VilkårType)}.
+     */
     @Deprecated(forRemoval = true)
     public VilkårBuilder medType(VilkårType type) {
         validerBuilder();
@@ -308,9 +312,24 @@ public class VilkårBuilder {
             if (periode != null) {
                 vilkårPerioder.add(periode);
             }
-            return vilkårPerioder;
+            return adjustAndCompress(vilkårPerioder);
         }
         return vilkårsPerioderRaw;
+    }
+
+    private List<VilkårPeriode> adjustAndCompress(List<VilkårPeriode> vilkårPerioder) {
+        var timeline = new LocalDateTimeline<>(vilkårPerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
+            .collect(Collectors.toList()));
+        if (kantIKantVurderer.erKomprimerbar()) {
+            timeline = timeline.compress();
+        }
+        return timeline.toSegments()
+            .stream()
+            .filter(it -> it.getValue() != null)
+            .map(this::opprettHoldKonsistens)
+            .map(WrappedVilkårPeriode::getVilkårPeriode)
+            .collect(Collectors.toList());
     }
 
     private boolean harPerioderSomIkkeErVurdertOgGrenserTilAnnenPeriode(List<VilkårPeriode> vilkårsPerioderRaw) {
