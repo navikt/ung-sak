@@ -24,7 +24,8 @@ public class AktivitetsAvtale implements IndexKey {
     private LocalDate sisteLønnsendringsdato;
 
     /**
-     * Setter en periode brukt til overstyring av angitt periode (avledet fra saksbehandlers vurderinger). Benyttes kun transient (ved filtrering av modellen)
+     * Setter en periode brukt til overstyring av angitt periode (avledet fra saksbehandlers vurderinger). Benyttes kun transient (ved
+     * filtrering av modellen)
      */
     private DatoIntervallEntitet overstyrtPeriode;
 
@@ -79,6 +80,7 @@ public class AktivitetsAvtale implements IndexKey {
     /**
      * Henter kun den originale perioden, ikke den overstyrte perioden.
      * Bruk heller {@link #getPeriode} i de fleste tilfeller
+     * 
      * @return Hele den originale perioden, uten overstyringer.
      */
 
@@ -98,11 +100,9 @@ public class AktivitetsAvtale implements IndexKey {
         return overstyrtPeriode != null;
     }
 
-
     public LocalDate getSisteLønnsendringsdato() {
         return sisteLønnsendringsdato;
     }
-
 
     public boolean matcherPeriode(DatoIntervallEntitet aktivitetsAvtale) {
         return getPeriode().equals(aktivitetsAvtale);
@@ -116,7 +116,6 @@ public class AktivitetsAvtale implements IndexKey {
     public boolean getErLøpende() {
         return Tid.TIDENES_ENDE.equals(getPeriode().getTomDato());
     }
-
 
     public String getBeskrivelse() {
         return beskrivelse;
@@ -132,11 +131,12 @@ public class AktivitetsAvtale implements IndexKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof AktivitetsAvtale)) return false;
+        if (this == o)
+            return true;
+        if (o == null || !(o instanceof AktivitetsAvtale))
+            return false;
         AktivitetsAvtale that = (AktivitetsAvtale) o;
-        return 
-            Objects.equals(beskrivelse, that.beskrivelse) &&
+        return Objects.equals(beskrivelse, that.beskrivelse) &&
             Objects.equals(prosentsats, that.prosentsats) &&
             Objects.equals(periode, that.periode) &&
             Objects.equals(sisteLønnsendringsdato, that.sisteLønnsendringsdato);
@@ -151,17 +151,17 @@ public class AktivitetsAvtale implements IndexKey {
     public String toString() {
         return getClass().getSimpleName() + "<" + //$NON-NLS-1$
             "periode=" + periode + //$NON-NLS-1$
-            ", overstyrtPeriode=" + overstyrtPeriode + //$NON-NLS-1$
-            ", prosentsats=" + prosentsats + //$NON-NLS-1$
-            ", beskrivelse=" + beskrivelse + //$NON-NLS-1$
-            ", sisteLønnsendringsdato="+sisteLønnsendringsdato + //$NON-NLS-1$
+            (overstyrtPeriode == null ? "" : ", overstyrtPeriode=" + overstyrtPeriode) + //$NON-NLS-1$
+            (prosentsats == null ? "" : ", prosentsats=" + prosentsats) + //$NON-NLS-1$
+            (beskrivelse == null ? "" : ", beskrivelse=" + beskrivelse) + //$NON-NLS-1$
+            (sisteLønnsendringsdato == null ? "" : ", sisteLønnsendringsdato=" + sisteLønnsendringsdato) + //$NON-NLS-1$
+            ", erAnsettelsesPeriode=" + erAnsettelsesPeriode() +
             '>';
     }
 
     boolean hasValues() {
         return prosentsats != null || periode != null;
     }
-
 
     public boolean erAnsettelsesPeriode() {
         return (prosentsats == null || prosentsats.erNulltall())
