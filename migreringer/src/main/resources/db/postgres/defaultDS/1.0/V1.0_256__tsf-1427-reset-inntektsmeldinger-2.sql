@@ -6,27 +6,21 @@ update mottatt_dokument set status='MOTTATT' where journalpost_id in ('490674017
 
 insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
 SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
-       1142138, 1, '08', 'mottattDokumentId=1890270
-fagsakId=1142138
-saksnummer=9SXWi';
-       
-insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
-SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
-       1142138, 2, '08', 'mottattDokumentId=1890271
+       m.fagsak_id as gruppe, row_number() over () as sekvens, '08', 'mottattDokumentId=' || m.id || '
 fagsakId=1142138
 saksnummer=9SXWi'
-       ;
+FROM mottatt_dokument m where id IN (1890270, 1890271);
        
 -- opprett manuell revurdering
 INSERT INTO prosess_task (id, task_type, task_gruppe, task_sekvens, partition_key, neste_kjoering_etter, task_parametere)
 SELECT nextval('seq_prosess_task'),
   'forvaltning.opprettManuellRevurdering',
-  1142138, 3, '08',
+  t.fagsak_id, 3, '08',
   (current_timestamp at time zone 'UTC') + (row_number() OVER()) * INTERVAL '1 seconds',
-  'fagsakId=' || t.id || '
+  'fagsakId=' || t.fagsak_id || '
   saksnummer=' || t.saksnummer
 FROM (
-  select distinct f.saksnummer, f.id from fagsak f
+  select distinct f.saksnummer, f.id as fagsak_id from fagsak f
   where f.saksnummer IN ('9SXWi')
   AND f.ytelse_type = 'OMP'
 ) t
