@@ -4,7 +4,14 @@
 -- 25.11.2020 kl 20.35.18 AR398964019 for 12.06.2020
 update mottatt_dokument set status='MOTTATT' where journalpost_id in ('490674017','490674020');
 
-
+insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
+SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
+       nextval('SEQ_PROSESS_TASK_GRUPPE'), 1, '08', 'mottattDokumentId=1890270';
+       
+insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key, task_parametere)
+SELECT nextval('SEQ_PROSESS_TASK'), 'forvaltning.håndterFortaptDokument', 1, 'KLAR',
+       nextval('SEQ_PROSESS_TASK_GRUPPE'), 1, '08', 'mottattDokumentId=1890271';
+       
 -- opprett manuell revurdering
 INSERT INTO prosess_task (id, task_type, task_gruppe, neste_kjoering_etter, task_parametere)
 SELECT nextval('seq_prosess_task'),
