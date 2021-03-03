@@ -24,7 +24,7 @@ public class MedisinskvilkårTest {
 
     @Test
     public void skal_avslå_hvis_det_ikke_er_diagnose() {
-        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now());
+        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now(), null);
         final var resultat = new MedisinskVilkårResultat();
 
         final var evaluation = new Medisinskvilkår().evaluer(grunnlag, resultat);
@@ -38,7 +38,7 @@ public class MedisinskvilkårTest {
 
     @Test
     public void skal_avslå_hvis_det_ikke_er_dokumentert_av_rett_organ() {
-        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
+        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now(), null)
             .medDiagnoseKode("SYK");
         final var resultat = new MedisinskVilkårResultat();
 
@@ -50,7 +50,7 @@ public class MedisinskvilkårTest {
         assertThat(utfall).isNotNull();
         assertThat(utfall).isEqualTo(Resultat.NEI);
 
-        final var grunnlag1 = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
+        final var grunnlag1 = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now(), null)
             .medDiagnoseKode("SYK")
             .medDiagnoseKilde(DiagnoseKilde.FASTLEGE);
         final var resultat1 = new MedisinskVilkårResultat();
@@ -66,7 +66,7 @@ public class MedisinskvilkårTest {
 
     @Test
     public void skal_avslå_hvis_det_ikke_er_noen_gyldige_perioder() {
-        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now())
+        final var grunnlag = new MedisinskvilkårGrunnlag(LocalDate.now().minusWeeks(8), LocalDate.now(), null)
             .medDiagnoseKode("SYK")
             .medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE);
         final var resultat = new MedisinskVilkårResultat();
@@ -87,7 +87,7 @@ public class MedisinskvilkårTest {
     public void skal_godkjenne_perioden_med_innleggelse() {
         final var tom = LocalDate.now();
         final var fom = tom.minusWeeks(8);
-        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom)
+        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom, null)
             .medDiagnoseKode("SYK")
             .medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE)
             .medInnleggelsesPerioder(List.of(new InnleggelsesPeriode(fom, tom)));
@@ -111,7 +111,7 @@ public class MedisinskvilkårTest {
     public void skal_prioritere_perioden_med_innleggelse_over_tilsyn() {
         final var tom = LocalDate.now();
         final var fom = tom.minusWeeks(8);
-        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom)
+        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom, null)
             .medDiagnoseKode("SYK")
             .medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE)
             .medInnleggelsesPerioder(List.of(new InnleggelsesPeriode(fom, fom.plusWeeks(2))))
@@ -139,7 +139,7 @@ public class MedisinskvilkårTest {
     public void skal_prioritere_innleggelse_og_utvidetrett_over_tilsyn() {
         final var tom = LocalDate.now();
         final var fom = tom.minusWeeks(8);
-        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom)
+        final var grunnlag = new MedisinskvilkårGrunnlag(fom, tom, null)
             .medDiagnoseKode("syk")
             .medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE)
             .medInnleggelsesPerioder(List.of(new InnleggelsesPeriode(fom, fom.plusWeeks(2))))
