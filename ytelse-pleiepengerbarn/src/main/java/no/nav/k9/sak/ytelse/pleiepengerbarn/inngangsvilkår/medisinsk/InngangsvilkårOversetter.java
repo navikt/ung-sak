@@ -29,6 +29,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmod
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.OmsorgenFor;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -57,20 +58,20 @@ public class InngangsvilkårOversetter {
     public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(Long behandlingId, DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         final Periode vilkårsperiode = new Periode(periode.getFomDato(), periode.getTomDato());
 
-        final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
-        
+
         var grunnlag = sykdomGrunnlagBehandling.getGrunnlag();
-        
+        final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato(), grunnlag);
+
         String diagnosekode = null;
         if (grunnlag.getDiagnosekoder() != null) {
             diagnosekode = grunnlag.getDiagnosekoder()
                 .getDiagnosekoder()
                 .stream()
                 .findAny()
-                .map(d -> d.getDiagnosekode())
+                .map(SykdomDiagnosekode::getDiagnosekode)
                 .orElse(null);
         }
-        
+
         List<InnleggelsesPeriode> relevanteInnleggelsesperioder = List.of();
         if (grunnlag.getInnleggelser() != null) {
             relevanteInnleggelsesperioder = grunnlag.getInnleggelser()
@@ -88,14 +89,14 @@ public class InngangsvilkårOversetter {
                 .map(v -> new PeriodeMedKontinuerligTilsyn(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
                 .collect(Collectors.toList());
-        
+
         final var relevantUtvidetBehov = toTidslinjeFor(grunnlag, SykdomVurderingType.TO_OMSORGSPERSONER)
                 .stream()
                 .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
                 .map(v -> new PeriodeMedUtvidetBehov(v.getFom(), v.getTom()))
                 .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
                 .collect(Collectors.toList());
-        
+
         vilkårsGrunnlag.medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE) // TODO 18-feb
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)
