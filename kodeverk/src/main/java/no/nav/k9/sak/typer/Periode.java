@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -25,12 +24,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Periode implements Comparable<Periode> {
 
     @JsonProperty(value = "fom", required = true)
-    @NotNull
     @Valid
     private LocalDate fom;
 
     @JsonProperty(value = "tom", required = true)
-    @NotNull
     @Valid
     private LocalDate tom;
 
