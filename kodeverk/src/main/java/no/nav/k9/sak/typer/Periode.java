@@ -79,14 +79,14 @@ public class Periode implements Comparable<Periode> {
         return tom;
     }
 
-    public boolean starterFørEllerSamtidigSom(Periode periode) {
+    private boolean starterFørEllerSamtidigSom(Periode periode) {
         return (fom == null && periode.getFom() == null)
             || (fom == null && periode.getFom() != null)
             || ((fom != null && periode.getFom() != null)
                 && (fom.isEqual(periode.getTom()) || fom.isBefore(periode.getTom())));
     }
 
-    public boolean slutterEtterEllerSamtidigSom(Periode periode) {
+    private boolean slutterEtterEllerSamtidigSom(Periode periode) {
         return (tom == null && periode.getTom() == null)
             || (tom == null && periode.getTom() != null)
             || ((tom != null && periode.getTom() != null)
