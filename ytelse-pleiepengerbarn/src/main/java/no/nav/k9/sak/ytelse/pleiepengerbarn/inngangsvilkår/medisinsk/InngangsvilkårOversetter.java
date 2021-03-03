@@ -60,7 +60,7 @@ public class InngangsvilkårOversetter {
 
 
         var grunnlag = sykdomGrunnlagBehandling.getGrunnlag();
-        final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato(), grunnlag);
+        final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
 
         String diagnosekode = null;
         if (grunnlag.getDiagnosekoder() != null) {

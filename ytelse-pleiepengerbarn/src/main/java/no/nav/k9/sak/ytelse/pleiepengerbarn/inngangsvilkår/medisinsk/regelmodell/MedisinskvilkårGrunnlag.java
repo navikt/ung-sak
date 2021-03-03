@@ -6,14 +6,12 @@ import java.util.List;
 import no.nav.fpsak.nare.doc.RuleDocumentationGrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 
 @RuleDocumentationGrunnlag
 public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
 
     private final LocalDate fom;
     private final LocalDate tom;
-    private SykdomGrunnlag grunnlag; // Legger her for sporing
 
     private List<InnleggelsesPeriode> innleggelsesPerioder = List.of();
     private List<PeriodeMedKontinuerligTilsyn> kontinuerligTilsyn = List.of();
@@ -21,10 +19,9 @@ public class MedisinskvilkårGrunnlag implements VilkårGrunnlag {
     private String diagnoseKode;
     private DiagnoseKilde diagnoseKilde;
 
-    public MedisinskvilkårGrunnlag(LocalDate fom, LocalDate tom, SykdomGrunnlag grunnlag) {
+    public MedisinskvilkårGrunnlag(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
-        this.grunnlag = grunnlag;
     }
 
     public LocalDate getFom() {
