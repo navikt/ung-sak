@@ -34,6 +34,7 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyrtePerioder;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
@@ -142,7 +143,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                           UtledArbeidsforholdParametere param) {
 
-        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSakMedReferanser(ref.getSaksnummer(), finnInternreferanserForBehandling(iayGrunnlag));
 
         var arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
         var filter = new YrkesaktivitetFilter(arbeidsforholdInformasjon, iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
@@ -159,6 +160,10 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         }
 
         return arbeidsforhold;
+    }
+
+    private List<InternArbeidsforholdRef> finnInternreferanserForBehandling(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+        return iayGrunnlag.getArbeidsforholdInformasjon().stream().flatMap(i -> i.getArbeidsforholdReferanser().stream()).map(ArbeidsforholdReferanse::getInternReferanse).collect(Collectors.toList());
     }
 
     private void markerArbeidsforholdMedAksjonspunktÅrsaker(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> arbeidsforhold, BehandlingReferanse ref, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon, InntektArbeidYtelseGrunnlag grunnlag) {

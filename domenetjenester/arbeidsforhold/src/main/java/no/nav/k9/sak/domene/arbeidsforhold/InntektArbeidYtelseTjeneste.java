@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.arbeidsforhold;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public interface InntektArbeidYtelseTjeneste {
@@ -142,6 +144,8 @@ public interface InntektArbeidYtelseTjeneste {
      * @param builders - Collection med {@link InntektsmeldingBuilder}
      */
     void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders);
+
+    Set<Inntektsmelding> hentUnikeInntektsmeldingerForSakMedReferanser(Saksnummer saksnummer, List<InternArbeidsforholdRef> arbeidsforholdReferanser);
 
     Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse);
 

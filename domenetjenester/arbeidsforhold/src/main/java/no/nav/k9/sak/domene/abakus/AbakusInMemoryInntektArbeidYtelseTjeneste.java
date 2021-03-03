@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
+import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
@@ -151,6 +152,22 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType) {
         return hentUnikeInntektsmeldingerForSak(saksnummer);
     }
+
+    @Override
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSakMedReferanser(Saksnummer saksnummer, List<InternArbeidsforholdRef> arbeidsforholdReferanser) {
+        Set<Inntektsmelding> inntektsmeldinger = new LinkedHashSet<>();
+        for (var iayg : grunnlag) {
+            var ims = iayg.getInntektsmeldinger();
+            if (ims.isPresent()) {
+                inntektsmeldinger.stream()
+                    .filter(im -> arbeidsforholdReferanser.stream().anyMatch(r -> r.gjelderFor(im.getArbeidsforholdRef())))
+                    .collect(Collectors.toList())
+                    .addAll(ims.get().getAlleInntektsmeldinger());
+            }
+        }
+        return inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
 
     @Override
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {

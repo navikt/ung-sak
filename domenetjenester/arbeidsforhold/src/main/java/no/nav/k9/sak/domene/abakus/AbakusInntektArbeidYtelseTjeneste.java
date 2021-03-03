@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
@@ -56,6 +55,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -203,6 +203,20 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return Set.of();
     }
 
+    @Override
+    public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSakMedReferanser(Saksnummer saksnummer, List<InternArbeidsforholdRef> arbeidsforholdReferanser) {
+        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
+
+        if (fagsakOpt.isPresent()) {
+            Fagsak fagsak = fagsakOpt.get();
+            // Hent grunnlag fra abakus
+            return hentOgMapInntektsmeldingerMedRef(fagsak.getAktørId(), fagsak.getSaksnummer(), fagsak.getYtelseType(), arbeidsforholdReferanser);
+
+        }
+        return Set.of();
+    }
+
+
     private SakInntektsmeldinger hentInntektsmeldinger(Saksnummer saksnummer) {
         SakInntektsmeldinger sakInntektsmeldinger = new SakInntektsmeldinger();
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
@@ -343,14 +357,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         }
     }
 
-    private RefusjonskravDatoerDto hentRefusjonskravDatoer(InntektsmeldingerRequest request) {
-        try {
-            return abakusTjeneste.hentRefusjonskravDatoer(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-        }
-    }
-
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
         try {
             return abakusTjeneste.hentGrunnlag(request);
@@ -410,6 +416,17 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
 
         return inntektsmeldinger.stream()
+            .sorted(Inntektsmelding.COMP_REKKEFØLGE)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private Set<Inntektsmelding> hentOgMapInntektsmeldingerMedRef(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType, List<InternArbeidsforholdRef> referanser) {
+        var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
+        var dto = hentUnikeInntektsmeldinger(request);
+        var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+
+        return inntektsmeldinger.stream()
+            .filter(im -> referanser.stream().anyMatch(r -> r.gjelderFor(im.getArbeidsforholdRef())))
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
