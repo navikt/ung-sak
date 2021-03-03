@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -25,12 +24,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Periode implements Comparable<Periode> {
 
     @JsonProperty(value = "fom", required = true)
-    @NotNull
     @Valid
     private LocalDate fom;
 
     @JsonProperty(value = "tom", required = true)
-    @NotNull
     @Valid
     private LocalDate tom;
 
@@ -79,22 +76,21 @@ public class Periode implements Comparable<Periode> {
         return tom;
     }
 
-    public boolean starterFørEllerSamtidigSom(Periode periode) {
-        return (fom == null && periode.getFom() == null)
-            || (fom == null && periode.getFom() != null)
-            || ((fom != null && periode.getFom() != null)
-                && (fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom())));
-    }
-
-    public boolean slutterEtterEllerSamtidigSom(Periode periode) {
-        return (tom == null && periode.getTom() == null)
-            || (tom == null && periode.getTom() != null)
-            || ((tom != null && periode.getTom() != null)
-                && (tom.isEqual(periode.getTom()) || tom.isAfter(periode.getTom())));
-    }
-
     public boolean overlaps(Periode other) {
-        return starterFørEllerSamtidigSom(other) && slutterEtterEllerSamtidigSom(other);
+        boolean starterFørEllerSamtidigSomAnnenPeriodeSlutter = (fom == null)
+            || (fom != null && other.getTom() == null)
+            || ((fom != null && other.getTom() != null)
+                && (fom.isEqual(other.getTom()) || fom.isBefore(other.getTom())));
+
+        if (starterFørEllerSamtidigSomAnnenPeriodeSlutter) {
+            boolean slutterEtterEllerSamtidigSomPeriodeStarter = (tom == null)
+                || (tom != null && other.getFom() == null)
+                || ((tom != null && other.getFom() != null)
+                    && (tom.isEqual(other.getFom()) || tom.isAfter(other.getFom())));
+            return slutterEtterEllerSamtidigSomPeriodeStarter;
+        } else {
+            return false;
+        }
     }
 
     @Override
