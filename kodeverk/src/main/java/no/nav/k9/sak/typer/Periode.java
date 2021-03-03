@@ -83,14 +83,14 @@ public class Periode implements Comparable<Periode> {
         return (fom == null && periode.getFom() == null)
             || (fom == null && periode.getFom() != null)
             || ((fom != null && periode.getFom() != null)
-                && (fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom())));
+                && (fom.isEqual(periode.getTom()) || fom.isBefore(periode.getTom())));
     }
 
     public boolean slutterEtterEllerSamtidigSom(Periode periode) {
         return (tom == null && periode.getTom() == null)
             || (tom == null && periode.getTom() != null)
             || ((tom != null && periode.getTom() != null)
-                && (tom.isEqual(periode.getTom()) || tom.isAfter(periode.getTom())));
+                && (tom.isEqual(periode.getFom()) || tom.isAfter(periode.getFom())));
     }
 
     public boolean overlaps(Periode other) {
