@@ -79,22 +79,21 @@ public class Periode implements Comparable<Periode> {
         return tom;
     }
 
-    private boolean starterFørEllerSamtidigSom(Periode periode) {
-        return (fom == null && periode.getFom() == null)
-            || (fom == null && periode.getFom() != null)
-            || ((fom != null && periode.getFom() != null)
-                && (fom.isEqual(periode.getTom()) || fom.isBefore(periode.getTom())));
-    }
-
-    private boolean slutterEtterEllerSamtidigSom(Periode periode) {
-        return (tom == null && periode.getTom() == null)
-            || (tom == null && periode.getTom() != null)
-            || ((tom != null && periode.getTom() != null)
-                && (tom.isEqual(periode.getFom()) || tom.isAfter(periode.getFom())));
-    }
-
     public boolean overlaps(Periode other) {
-        return starterFørEllerSamtidigSom(other) && slutterEtterEllerSamtidigSom(other);
+        boolean starterFørEllerSamtidigSomAnnenPeriodeSlutter = (fom == null)
+            || (fom != null && other.getTom() == null)
+            || ((fom != null && other.getTom() != null)
+                && (fom.isEqual(other.getTom()) || fom.isBefore(other.getTom())));
+
+        if (starterFørEllerSamtidigSomAnnenPeriodeSlutter) {
+            boolean slutterEtterEllerSamtidigSomPeriodeStarter = (tom == null)
+                || (tom != null && other.getFom() == null)
+                || ((tom != null && other.getFom() != null)
+                    && (tom.isEqual(other.getFom()) || tom.isAfter(other.getFom())));
+            return slutterEtterEllerSamtidigSomPeriodeStarter;
+        } else {
+            return false;
+        }
     }
 
     @Override
