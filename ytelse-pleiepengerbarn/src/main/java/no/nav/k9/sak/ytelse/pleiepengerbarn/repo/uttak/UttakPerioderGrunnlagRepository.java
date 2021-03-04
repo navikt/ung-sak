@@ -36,6 +36,10 @@ public class UttakPerioderGrunnlagRepository {
             .collect(Collectors.toSet());
     }
 
+    public Optional<UttaksPerioderGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
+        return hentEksisterendeGrunnlagBasertPåGrunnlagId(grunnlagId);
+    }
+
     public Optional<UttaksPerioderGrunnlag> hentGrunnlag(Long behandlingId) {
         return hentEksisterendeGrunnlag(behandlingId);
     }
@@ -81,6 +85,17 @@ public class UttakPerioderGrunnlagRepository {
         gr.setAktiv(false);
         entityManager.persist(gr);
         entityManager.flush();
+    }
+
+    private Optional<UttaksPerioderGrunnlag> hentEksisterendeGrunnlagBasertPåGrunnlagId(Long id) {
+        var query = entityManager.createQuery(
+            "SELECT s " +
+                "FROM UttakPerioderGrunnlag s " +
+                "WHERE s.id = :grunnlagId ", UttaksPerioderGrunnlag.class);
+
+        query.setParameter("grunnlagId", id);
+
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     private Optional<UttaksPerioderGrunnlag> hentEksisterendeGrunnlag(Long id) {

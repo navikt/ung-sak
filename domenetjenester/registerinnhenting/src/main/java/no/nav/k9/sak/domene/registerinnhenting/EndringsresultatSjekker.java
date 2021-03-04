@@ -11,6 +11,9 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -34,8 +37,11 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 @Dependent
 public class EndringsresultatSjekker {
 
+    private static final Logger log = LoggerFactory.getLogger(EndringsresultatSjekker.class);
+
     private PersonopplysningTjeneste personopplysningTjeneste;
     private MedlemTjeneste medlemTjeneste;
+    private Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     private OpptjeningRepository opptjeningRepository;
@@ -51,15 +57,22 @@ public class EndringsresultatSjekker {
     public EndringsresultatSjekker(PersonopplysningTjeneste personopplysningTjeneste,
                                    MedlemTjeneste medlemTjeneste,
                                    @Any Instance<InformasjonselementerUtleder> informasjonselementer,
+                                   @Any Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
         this.informasjonselementer = informasjonselementer;
+        this.søknadsDokumentTjenester = søknadsDokumentTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = provider.getOpptjeningRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
+    }
+
+    static Long mapFraLocalDateTimeTilLong(LocalDateTime ldt) {
+        ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
+        return zdt.toInstant().toEpochMilli();
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
@@ -67,18 +80,25 @@ public class EndringsresultatSjekker {
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
 
-        if (inkludererBeregning(behandlingId)) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        if (inkludererBeregning(behandling)) {
             EndringsresultatSnapshot iaySnapshot = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId)
                 .map(iayg -> EndringsresultatSnapshot.medSnapshot(InntektArbeidYtelseGrunnlag.class, iayg.getEksternReferanse()))
                 .orElse(EndringsresultatSnapshot.utenSnapshot(InntektArbeidYtelseGrunnlag.class));
             snapshot.leggTil(iaySnapshot);
         }
 
+        var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
+        if (søknadDokumentTjeneste.isPresent()) {
+            snapshot.leggTil(søknadDokumentTjeneste.get().finnAktivGrunnlagId(behandlingId));
+        } else {
+            log.info("Fant ingen søknadsdokument endringssjekker for ytelse {}", behandling.getFagsakYtelseType());
+        }
+
         return snapshot;
     }
 
-    private boolean inkludererBeregning(Long behandlingId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
+    private boolean inkludererBeregning(Behandling behandling) {
         return !(finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType()).utled(behandling.getType()).isEmpty());
     }
 
@@ -95,13 +115,19 @@ public class EndringsresultatSjekker {
         idDiff.hentDelresultat(MedlemskapAggregat.class)
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
 
-        if (inkludererBeregning(behandlingId)) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        if (inkludererBeregning(behandling)) {
             idDiff.hentDelresultat(InntektArbeidYtelseGrunnlag.class).ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> {
                 InntektArbeidYtelseGrunnlag grunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId1());
                 InntektArbeidYtelseGrunnlag grunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId2());
                 return new IAYGrunnlagDiff(grunnlag1, grunnlag2).diffResultat(kunSporedeEndringer);
             }));
         }
+        var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
+        søknadDokumentTjeneste.ifPresent(dokumentTjeneste -> idDiff.hentDelresultat(dokumentTjeneste.getGrunnlagsKlasse())
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> dokumentTjeneste.diffResultat(idEndring, kunSporedeEndringer))));
+
+
         return sporedeEndringerDiff;
     }
 
@@ -109,7 +135,7 @@ public class EndringsresultatSjekker {
         Long behandlingId = behandling.getId();
         EndringsresultatSnapshot snapshot = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
 
-        if (inkludererBeregning(behandlingId)) {
+        if (inkludererBeregning(behandlingRepository.hentBehandling(behandlingId))) {
             snapshot.leggTil(opptjeningRepository.finnAktivGrunnlagId(behandling));
             snapshot.leggTil(finnAktivBeregningsgrunnlagGrunnlagAggregatId(behandlingId));
         }
@@ -152,10 +178,5 @@ public class EndringsresultatSjekker {
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
         return InformasjonselementerUtleder.finnTjeneste(informasjonselementer, ytelseType, behandlingType);
-    }
-
-    static Long mapFraLocalDateTimeTilLong(LocalDateTime ldt) {
-        ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
-        return zdt.toInstant().toEpochMilli();
     }
 }

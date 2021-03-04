@@ -36,6 +36,7 @@ public class ArbeidPeriode extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_ARBEID_PERIODE")
     private Long id;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
