@@ -43,23 +43,23 @@ public class KroniskSyktBarn implements UtvidetRett {
     @Valid
     @NotNull
     @JsonProperty(value = "søker", required = true)
-    private Søker søker;
+    private Person søker;
 
     @Valid
     @NotNull
     @JsonProperty(value = "barn", required = true)
-    private Barn barn;
+    private Person barn;
 
     public KroniskSyktBarn() {
     }
 
     @JsonCreator
     public KroniskSyktBarn(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
-                                        @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
-                                        @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
-                                        @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Søker søker,
-                                        @JsonProperty(value = "barn", required = true) @Valid @NotNull Barn barn) {
+                                    @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
+                                    @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
+                                    @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
+                                    @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                                    @JsonProperty(value = "barn", required = true) @Valid @NotNull Person barn) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
         this.søknadMottatt = søknadMottatt;
@@ -104,21 +104,21 @@ public class KroniskSyktBarn implements UtvidetRett {
         return this;
     }
 
-    public Søker getSøker() {
+    public Person getSøker() {
         return søker;
     }
 
-    public KroniskSyktBarn setSøker(Søker søker) {
+    public KroniskSyktBarn setSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public KroniskSyktBarn setBarn(Barn barn) {
+    public KroniskSyktBarn setBarn(Person barn) {
         this.barn = barn;
         return this;
     }
 
-    public Barn getBarn() {
+    public Person getBarn() {
         return barn;
     }
 }

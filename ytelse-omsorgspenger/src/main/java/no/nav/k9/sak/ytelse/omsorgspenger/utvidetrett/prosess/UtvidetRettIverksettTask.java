@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,17 +20,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AnnenForelder;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Søker;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
@@ -44,12 +38,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-
     private UtvidetRettKlient utvidetRettKlient;
-
-    private PersoninfoAdapter personinfoAdapter;
-
-    private PersonopplysningTjeneste personopplysningTjeneste;
 
     protected UtvidetRettIverksettTask() {
     }
@@ -58,14 +47,10 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     public UtvidetRettIverksettTask(SøknadRepository søknadRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     BehandlingRepository behandlingRepository,
-                                    PersoninfoAdapter personinfoAdapter,
-                                    PersonopplysningTjeneste personopplysningTjeneste,
                                     UtvidetRettKlient utvidetRettKlient) {
         this.søknadRepository = søknadRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
-        this.personinfoAdapter = personinfoAdapter;
-        this.personopplysningTjeneste = personopplysningTjeneste;
         this.utvidetRettKlient = utvidetRettKlient;
     }
 
@@ -104,44 +89,34 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     }
 
     private UtvidetRett mapMidlertidigAlene(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
+        var aktørIdSøker = behandling.getAktørId();
+        var aktørIdAnnenForelder = behandling.getFagsak().getRelatertPersonAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
-        var søkerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId());
-        var annenPartIdent = personinfoAdapter.hentIdentForAktørId(behandling.getFagsak().getRelatertPersonAktørId());
 
         return new MidlertidigAlene()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(tidspunkt(behandling))
-            .setAnnenForelder(new AnnenForelder(NorskIdentitetsnummer.of(annenPartIdent.get().getIdent())))
-            .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
+            .setAnnenForelder(new Person(aktørIdAnnenForelder))
+            .setSøker(new Person(aktørIdSøker));
     }
 
     private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
-        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
+        var aktørIdSøker = behandling.getAktørId();
+        var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
-        var søkerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId());
-
-        var barnIdent = personinfoAdapter.hentIdentForAktørId(pleietrengendeAktørId);
-        var barnInfo = personinfoAdapter.hentKjerneinformasjon(pleietrengendeAktørId);
-
-        var personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), søknad.getMottattDato());
-
-        var relasjon = personopplysninger.getSøkersRelasjoner().stream().filter(r -> r.getAktørId().equals(pleietrengendeAktørId)).findFirst()
-            .orElseThrow(() -> new IllegalStateException("Har ikke relasjon fra søker til barn: " + pleietrengendeAktørId));
 
         return new KroniskSyktBarn()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(tidspunkt(behandling))
-            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato()))
-            .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
-
+            .setBarn(new Person(aktørIdBarn))
+            .setSøker(new Person(aktørIdSøker));
     }
 
     private ZonedDateTime tidspunkt(Behandling behandling) {
         return ZonedDateTime.of(behandling.getAvsluttetDato(), ZoneOffset.UTC);
     }
-
 }

@@ -43,12 +43,12 @@ public class MidlertidigAlene implements UtvidetRett {
     @Valid
     @NotNull
     @JsonProperty(value = "søker", required = true)
-    private Søker søker;
+    private Person søker;
 
     @Valid
     @NotNull
     @JsonProperty(value = "annenForelder", required = true)
-    private AnnenForelder annenForelder;
+    private Person annenForelder;
 
     public MidlertidigAlene() {
     }
@@ -58,8 +58,8 @@ public class MidlertidigAlene implements UtvidetRett {
                                         @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
                                         @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
                                         @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Søker søker,
-                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull AnnenForelder annenForelder) {
+                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                                        @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
         this.søknadMottatt = søknadMottatt;
@@ -104,21 +104,21 @@ public class MidlertidigAlene implements UtvidetRett {
         return this;
     }
 
-    public Søker getSøker() {
+    public Person getSøker() {
         return søker;
     }
 
-    public MidlertidigAlene setSøker(Søker søker) {
+    public MidlertidigAlene setSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public MidlertidigAlene setAnnenForelder(AnnenForelder annenForelder) {
+    public MidlertidigAlene setAnnenForelder(Person annenForelder) {
         this.annenForelder = annenForelder;
         return this;
     }
 
-    public AnnenForelder getAnnenForelder() {
+    public Person getAnnenForelder() {
         return annenForelder;
     }
 
