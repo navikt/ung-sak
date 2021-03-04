@@ -50,6 +50,11 @@ public class KroniskSyktBarn implements UtvidetRett {
     @JsonProperty(value = "periode", required = true)
     private Periode periode;
 
+    @Valid
+    @NotNull
+    @JsonProperty(value = "versjon", required = true)
+    public final String versjon = "1.0.0";
+
     public KroniskSyktBarn() {
     }
 

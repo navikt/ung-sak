@@ -79,7 +79,7 @@ public class UtvidetRettBehovKlientTest {
             new Person(new AktørId("01011811111")),
             new Periode("2021-01-01/2021-12-31")
         ),
-        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2021-01-01\",\"tom\":\"2021-12-31\"}}"
+        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2021-01-01\",\"tom\":\"2021-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
     private static UtvidetRettSerialisering midlertidigAlene = new UtvidetRettSerialisering<>(
@@ -91,7 +91,7 @@ public class UtvidetRettBehovKlientTest {
             new Person(new AktørId("01011811111")),
             new Periode("2022-01-01/2022-12-31")
         ),
-        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2022-01-01\",\"tom\":\"2022-12-31\"}}"
+        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2022-01-01\",\"tom\":\"2022-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
     private static class TestBehovKlient extends BehovKlient {
