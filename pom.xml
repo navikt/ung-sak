@@ -773,8 +773,7 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
-    
+    </build>    
     <scm>
         <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
