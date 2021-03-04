@@ -123,6 +123,7 @@ public class InntektsmeldingBuilder {
     public InntektsmeldingBuilder medArbeidsforholdId(EksternArbeidsforholdRef arbeidsforholdId) {
         precondition();
         this.eksternArbeidsforholdId = arbeidsforholdId;
+        kladd.setEksternArbeidsforholdRef(arbeidsforholdId);
         return this;
     }
 
