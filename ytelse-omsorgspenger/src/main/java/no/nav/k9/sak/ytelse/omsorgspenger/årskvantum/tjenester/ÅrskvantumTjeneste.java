@@ -144,7 +144,8 @@ public class ÅrskvantumTjeneste {
             throw new IllegalStateException("Har ikke fraværs perioder for fagsak.periode[" + ref.getFagsakPeriode() + "]"
                 + ",\trelevant perioder=" + relevantePerioder
                 + ",\toppgitt fravær=" + oppgittFravær
-                + ",\tvilkårsperioder[" + vilkårType + "]=" + vilkårsperioder);
+                + ",\tvilkårsperioder[" + vilkårType + "]=" + vilkårsperioder
+                + ",\tfagsakFravær=" + fagsakFravær);
         }
 
         var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();
