@@ -11,6 +11,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -24,6 +26,7 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
+    private PersoninfoAdapter personInfoAdapter;
 
     UtvidetRettSøknadMottaker() {
         // proxy
@@ -31,9 +34,11 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
     @Inject
     public UtvidetRettSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                     FagsakTjeneste fagsakTjeneste) {
+                                     FagsakTjeneste fagsakTjeneste,
+                                     PersoninfoAdapter personInfoAdapter) {
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
+        this.personInfoAdapter = personInfoAdapter;
     }
 
     @Override
@@ -44,6 +49,15 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
+        if (pleietrengendeAktørId != null) {
+            var personinfo = personInfoAdapter.hentBrukerBasisForAktør(pleietrengendeAktørId).orElseThrow(() -> new IllegalStateException("Fant ikke personinfo for angitt pleietrengende aktørId"));
+            LocalDate maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // slutt av kalenderår 18 år
+            if (sluttDato.isAfter(maksdato)) {
+                sluttDato = maksdato;
+            }
+        }
+
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, startDato, sluttDato);
         if (fagsak.isPresent()) {
             return fagsak.get();

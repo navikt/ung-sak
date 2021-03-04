@@ -77,9 +77,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         var innhentetBarn = personTjeneste.innhentSaksopplysningerForBarn(PersonIdent.fra(barn.getPersonIdent().getVerdi()))
             .orElseThrow(() -> new IllegalStateException("Fant ikke barn for søknad i journalpost=" + dok.getJournalpostId()));
         var fom = innhentetBarn.getFødselsdato();
-        var tom = fom.plusYears(18).withMonth(12).withDayOfMonth(31); // fram tom kalenderår v/18 år
-
-        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        var søknadFom = søknad.getMottattDato().toLocalDate();
+        var maksDato = fom.plusYears(18).withMonth(12).withDayOfMonth(31); // fram tom kalenderår v/18 år
+        return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksDato);
     }
 
     @Override
