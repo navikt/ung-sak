@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -111,7 +112,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
-            .setTidspunkt(ZonedDateTime.now())
+            .setTidspunkt(tidspunkt(behandling))
             .setAnnenForelder(new AnnenForelder(NorskIdentitetsnummer.of(annenPartIdent.get().getIdent())))
             .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
     }
@@ -133,10 +134,14 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
             .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
-            .setTidspunkt(ZonedDateTime.now())
+            .setTidspunkt(tidspunkt(behandling))
             .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato()))
             .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
 
+    }
+
+    private ZonedDateTime tidspunkt(Behandling behandling) {
+        return ZonedDateTime.of(behandling.getAvsluttetDato(), ZoneOffset.UTC);
     }
 
 }
