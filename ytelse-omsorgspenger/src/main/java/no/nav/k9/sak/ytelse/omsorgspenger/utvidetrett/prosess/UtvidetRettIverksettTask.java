@@ -2,10 +2,13 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
 import org.slf4j.Logger;
@@ -99,7 +102,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setTidspunkt(tidspunkt(behandling))
             .setAnnenForelder(new Person(aktørIdAnnenForelder))
             .setSøker(new Person(aktørIdSøker))
-            .setPeriode(periode());
+            .setPeriode(periode(vilkårene));
     }
 
     private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
@@ -113,15 +116,18 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setTidspunkt(tidspunkt(behandling))
             .setBarn(new Person(aktørIdBarn))
             .setSøker(new Person(aktørIdSøker))
-            .setPeriode(periode());
+            .setPeriode(periode(vilkårene));
     }
 
     private ZonedDateTime tidspunkt(Behandling behandling) {
         return ZonedDateTime.of(behandling.getAvsluttetDato(), ZoneOffset.UTC);
     }
 
-    private Periode periode() {
-        // TODO: Hvor kan vi hente opp perioden?
-        return new Periode("2021-01-01/2021-12-31");
+    private Periode periode(Vilkårene vilkårene) {
+        var vilkår = vilkårene.getVilkår(VilkårType.UTVIDETRETT);
+        var perioder = vilkår.orElseThrow().getPerioder();
+        var fom = perioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
+        var tom = perioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
+        return new Periode(fom, tom);
     }
 }
