@@ -53,7 +53,6 @@ public class UtvidetRettBehovKlientTest {
         var utvidetRett = new MidlertidigAlene(
             new Saksnummer("ENSAK125"),
             UUID.fromString("5dc41c02-7148-11eb-9439-0242ac130002"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
             new Person(new AktørId("29099011111")),
             null
@@ -73,24 +72,22 @@ public class UtvidetRettBehovKlientTest {
         new KroniskSyktBarn(
             new Saksnummer("ENSAK123"),
             UUID.fromString("0a98ac74-6970-47a5-8b0b-a14ead63082a"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
             new Person(new AktørId("29099011111")),
             new Person(new AktørId("01011811111"))
         ),
-        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"}}"
+        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"}}"
     );
 
     private static UtvidetRettSerialisering midlertidigAlene = new UtvidetRettSerialisering<>(
         new MidlertidigAlene(
             new Saksnummer("ENSAK124"),
             UUID.fromString("b684c176-7147-11eb-9439-0242ac130002"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
             new Person(new AktørId("29099011111")),
             new Person(new AktørId("01011811111"))
         ),
-        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"}}"
+        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"}}"
     );
 
     private static class TestBehovKlient extends BehovKlient {

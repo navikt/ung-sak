@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
@@ -96,7 +95,6 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         return new MidlertidigAlene()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(tidspunkt(behandling))
             .setAnnenForelder(new Person(aktørIdAnnenForelder))
             .setSøker(new Person(aktørIdSøker));
@@ -110,7 +108,6 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         return new KroniskSyktBarn()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
             .setTidspunkt(tidspunkt(behandling))
             .setBarn(new Person(aktørIdBarn))
             .setSøker(new Person(aktørIdSøker));

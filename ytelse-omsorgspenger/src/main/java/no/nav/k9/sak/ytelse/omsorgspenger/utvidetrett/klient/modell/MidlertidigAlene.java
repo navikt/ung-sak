@@ -31,12 +31,6 @@ public class MidlertidigAlene implements UtvidetRett {
     @Valid
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
-    @JsonProperty(value = "søknadMottatt", required = true)
-    private ZonedDateTime søknadMottatt;
-
-    @Valid
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     @JsonProperty(value = "tidspunkt", required = true)
     private ZonedDateTime tidspunkt;
 
@@ -55,14 +49,12 @@ public class MidlertidigAlene implements UtvidetRett {
 
     @JsonCreator
     public MidlertidigAlene(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
-                                        @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
-                                        @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
-                                        @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
-                                        @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder) {
+                            @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
+                            @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
+                            @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
-        this.søknadMottatt = søknadMottatt;
         this.tidspunkt = tidspunkt;
         this.søker = søker;
         this.annenForelder = annenForelder;
@@ -83,15 +75,6 @@ public class MidlertidigAlene implements UtvidetRett {
 
     public MidlertidigAlene setBehandlingUuid(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
-        return this;
-    }
-
-    public ZonedDateTime getSøknadMottatt() {
-        return søknadMottatt;
-    }
-
-    public MidlertidigAlene setSøknadMottatt(ZonedDateTime søknadMottatt) {
-        this.søknadMottatt = søknadMottatt;
         return this;
     }
 
