@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,8 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setBehandlingUuid(behandling.getUuid())
             .setTidspunkt(tidspunkt(behandling))
             .setAnnenForelder(new Person(aktørIdAnnenForelder))
-            .setSøker(new Person(aktørIdSøker));
+            .setSøker(new Person(aktørIdSøker))
+            .setPeriode(periode());
     }
 
     private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
@@ -110,10 +112,16 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setBehandlingUuid(behandling.getUuid())
             .setTidspunkt(tidspunkt(behandling))
             .setBarn(new Person(aktørIdBarn))
-            .setSøker(new Person(aktørIdSøker));
+            .setSøker(new Person(aktørIdSøker))
+            .setPeriode(periode());
     }
 
     private ZonedDateTime tidspunkt(Behandling behandling) {
         return ZonedDateTime.of(behandling.getAvsluttetDato(), ZoneOffset.UTC);
+    }
+
+    private Periode periode() {
+        // TODO: Hvor kan vi hente opp perioden?
+        return new Periode("2021-01-01/2021-12-31");
     }
 }

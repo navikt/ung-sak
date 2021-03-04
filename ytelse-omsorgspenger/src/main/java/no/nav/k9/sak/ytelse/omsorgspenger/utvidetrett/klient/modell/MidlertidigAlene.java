@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -44,6 +45,11 @@ public class MidlertidigAlene implements UtvidetRett {
     @JsonProperty(value = "annenForelder", required = true)
     private Person annenForelder;
 
+    @Valid
+    @NotNull
+    @JsonProperty(value = "periode", required = true)
+    private Periode periode;
+
     public MidlertidigAlene() {
     }
 
@@ -52,12 +58,14 @@ public class MidlertidigAlene implements UtvidetRett {
                             @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
                             @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
                             @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
-                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder) {
+                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder,
+                            @JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
         this.tidspunkt = tidspunkt;
         this.søker = søker;
         this.annenForelder = annenForelder;
+        this.periode = periode;
     }
 
     public Saksnummer getSaksnummer() {
@@ -105,4 +113,12 @@ public class MidlertidigAlene implements UtvidetRett {
         return annenForelder;
     }
 
+    public MidlertidigAlene setPeriode(Periode periode) {
+        this.periode = periode;
+        return this;
+    }
+
+    public Periode getPeriode() {
+        return periode;
+    }
 }

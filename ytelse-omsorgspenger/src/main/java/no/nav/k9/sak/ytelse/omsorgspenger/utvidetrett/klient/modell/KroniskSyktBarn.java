@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -44,20 +45,27 @@ public class KroniskSyktBarn implements UtvidetRett {
     @JsonProperty(value = "barn", required = true)
     private Person barn;
 
+    @Valid
+    @NotNull
+    @JsonProperty(value = "periode", required = true)
+    private Periode periode;
+
     public KroniskSyktBarn() {
     }
 
     @JsonCreator
     public KroniskSyktBarn(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
-                            @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
-                            @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                            @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
-                            @JsonProperty(value = "barn", required = true) @Valid @NotNull Person barn) {
+                           @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
+                           @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
+                           @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                           @JsonProperty(value = "barn", required = true) @Valid @NotNull Person barn,
+                           @JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
         this.tidspunkt = tidspunkt;
         this.søker = søker;
         this.barn = barn;
+        this.periode = periode;
     }
 
     public Saksnummer getSaksnummer() {
@@ -103,5 +111,14 @@ public class KroniskSyktBarn implements UtvidetRett {
 
     public Person getBarn() {
         return barn;
+    }
+
+    public KroniskSyktBarn setPeriode(Periode periode) {
+        this.periode = periode;
+        return this;
+    }
+
+    public Periode getPeriode() {
+        return periode;
     }
 }
