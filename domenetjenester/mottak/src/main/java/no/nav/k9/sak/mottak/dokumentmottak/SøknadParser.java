@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
+package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;

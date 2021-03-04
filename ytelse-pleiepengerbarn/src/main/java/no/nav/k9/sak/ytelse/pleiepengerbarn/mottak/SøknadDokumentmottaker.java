@@ -22,6 +22,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
+/**
+ * Erstattes av PSBSøknadDokumentmottaker
+ */
+@Deprecated(forRemoval = true)
 @Dependent
 class SøknadDokumentmottaker {
 

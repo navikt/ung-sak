@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
+import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
