@@ -12,8 +12,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -110,34 +108,33 @@ public class KravDokumentFravær {
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var dok : sorterteKravdokumenter) {
             var vurdertSøktPerioder = fraværFraKravdokumenter.get(dok);
-            if (vurdertSøktPerioder.isEmpty()) {
-                break;
-            }
-            var aktivitetTyper = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
-            for (var aktivitetType : aktivitetTyper) {
-                // TODO: Må håndtere søknad for flere arbeidsgivere og perioder. Må kunne sameksistere med IMs arbeidsforhold. Vurder om Dokumenttype må inkluderes her
-                var gruppe = utledGruppe(vurdertSøktPerioder, aktivitetType);
-                var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
-                var liste = vurdertSøktPerioder.stream()
-                    .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(pa)))
-                    .collect(Collectors.toList());
+            if (!vurdertSøktPerioder.isEmpty()) {
+                var aktivitetTyper = vurdertSøktPerioder.stream().map(VurdertSøktPeriode::getType).collect(Collectors.toSet());
+                for (var aktivitetType : aktivitetTyper) {
+                    // TODO: Må håndtere søknad for flere arbeidsgivere og perioder. Må kunne sameksistere med IMs arbeidsforhold. Vurder om Dokumenttype må inkluderes her
+                    var gruppe = utledGruppe(vurdertSøktPerioder, aktivitetType);
+                    var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
+                    var liste = vurdertSøktPerioder.stream()
+                        .map(pa -> new WrappedOppgittFraværPeriode(pa.getRaw(), dok.getInnsendingsTidspunkt(), utledUtfall(pa)))
+                        .collect(Collectors.toList());
 
-                var timeline = mapTilTimeline(aktiviteter);
-                var imTidslinje = mapTilTimeline(liste);
+                    var timeline = mapTilTimeline(aktiviteter);
+                    var imTidslinje = mapTilTimeline(liste);
 
-                ryddOppIBerørteTidslinjer(mapByAktivitet, gruppe, imTidslinje);
+                    ryddOppIBerørteTidslinjer(mapByAktivitet, gruppe, imTidslinje);
 
-                timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                    timeline = timeline.combine(imTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-                var oppdatertListe = timeline.compress()
-                    .toSegments()
-                    .stream()
-                    .filter(it -> it.getValue() != null)
-                    .filter(it -> it.getValue().getPeriode() != null)
-                    .map(this::opprettHoldKonsistens)
-                    .collect(Collectors.toList());
+                    var oppdatertListe = timeline.compress()
+                        .toSegments()
+                        .stream()
+                        .filter(it -> it.getValue() != null)
+                        .filter(it -> it.getValue().getPeriode() != null)
+                        .map(this::opprettHoldKonsistens)
+                        .collect(Collectors.toList());
 
-                mapByAktivitet.put(gruppe, oppdatertListe);
+                    mapByAktivitet.put(gruppe, oppdatertListe);
+                }
             }
         }
 
