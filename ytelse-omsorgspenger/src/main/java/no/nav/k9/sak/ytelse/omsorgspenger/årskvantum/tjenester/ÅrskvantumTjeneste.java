@@ -170,11 +170,11 @@ public class ÅrskvantumTjeneste {
     Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
                                                                                                       List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær,
                                                                                                       Set<OppgittFraværPeriode> behandlingFravær) {
-        return new LinkedHashSet<>(fagsakFravær.stream()
+        return fagsakFravær.stream()
             .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) ||
                 erNullTimerTilBehandling(behandlingFravær, it) ||
                 erAvslagPåSøknadsfristIBehandling(behandlingFravær, it))
-            .collect(Collectors.toList()));
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean erAvslagPåSøknadsfristIBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {

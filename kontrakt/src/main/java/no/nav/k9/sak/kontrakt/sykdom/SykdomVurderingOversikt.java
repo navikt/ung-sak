@@ -44,7 +44,7 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
-    
+
     @JsonProperty(value = "harGyldigSignatur")
     @Valid
     private boolean harGyldigSignatur = true;
@@ -77,6 +77,10 @@ public class SykdomVurderingOversikt {
         this.søknadsperioderTilBehandling = søknadsperioderTilBehandling;
         this.perioderSomKanVurderes = perioderSomKanVurderes;
         this.links = links;
+    }
+
+    public SykdomVurderingOversikt() {
+
     }
 
 
