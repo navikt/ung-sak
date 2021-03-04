@@ -81,25 +81,22 @@ class SøknadDokumentmottaker {
         return behandling;
     }
 
-    private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
-        if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw new UnsupportedOperationException("PSB støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
-        }
-    }
-
     private Behandling tilknyttBehandling(Saksnummer saksnummer) {
         // FIXME K9 Legg til logikk for valg av fagsak
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
 
-        validerIngenÅpneBehandlinger(fagsak);
+        var sisteBehandling = behandlingsoppretter.hentForrigeBehandling(fagsak);
 
-        var forrigeBehandling = behandlingsoppretter.hentForrigeBehandling(fagsak);
-        if (forrigeBehandling.isEmpty()) {
+        if (sisteBehandling.isEmpty()) {
             return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        }
+        } else {
+            if (!sisteBehandling.get().erSaksbehandlingAvsluttet()) {
+                return sisteBehandling.get();
+            }
 
-        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
-        return behandlingsoppretter.opprettRevurdering(forrigeBehandling.get(), BehandlingÅrsakType.UDEFINERT);
+            // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
+            return behandlingsoppretter.opprettRevurdering(sisteBehandling.get(), BehandlingÅrsakType.UDEFINERT);
+        }
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {
