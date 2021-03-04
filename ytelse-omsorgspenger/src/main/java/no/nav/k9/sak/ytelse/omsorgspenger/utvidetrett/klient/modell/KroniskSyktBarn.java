@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,41 +32,45 @@ public class KroniskSyktBarn implements UtvidetRett {
     @Valid
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
-    @JsonProperty(value = "søknadMottatt", required = true)
-    private ZonedDateTime søknadMottatt;
-
-    @Valid
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     @JsonProperty(value = "tidspunkt", required = true)
     private ZonedDateTime tidspunkt;
 
     @Valid
     @NotNull
     @JsonProperty(value = "søker", required = true)
-    private Søker søker;
+    private Person søker;
 
     @Valid
     @NotNull
     @JsonProperty(value = "barn", required = true)
-    private Barn barn;
+    private Person barn;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "periode", required = true)
+    private Periode periode;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "versjon", required = true)
+    public final String versjon = "1.0.0";
 
     public KroniskSyktBarn() {
     }
 
     @JsonCreator
     public KroniskSyktBarn(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
-                                        @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
-                                        @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
-                                        @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Søker søker,
-                                        @JsonProperty(value = "barn", required = true) @Valid @NotNull Barn barn) {
+                           @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
+                           @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
+                           @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                           @JsonProperty(value = "barn", required = true) @Valid @NotNull Person barn,
+                           @JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
-        this.søknadMottatt = søknadMottatt;
         this.tidspunkt = tidspunkt;
         this.søker = søker;
         this.barn = barn;
+        this.periode = periode;
     }
 
     public Saksnummer getSaksnummer() {
@@ -86,15 +91,6 @@ public class KroniskSyktBarn implements UtvidetRett {
         return this;
     }
 
-    public ZonedDateTime getSøknadMottatt() {
-        return søknadMottatt;
-    }
-
-    public KroniskSyktBarn setSøknadMottatt(ZonedDateTime søknadMottatt) {
-        this.søknadMottatt = søknadMottatt;
-        return this;
-    }
-
     public ZonedDateTime getTidspunkt() {
         return tidspunkt;
     }
@@ -104,21 +100,30 @@ public class KroniskSyktBarn implements UtvidetRett {
         return this;
     }
 
-    public Søker getSøker() {
+    public Person getSøker() {
         return søker;
     }
 
-    public KroniskSyktBarn setSøker(Søker søker) {
+    public KroniskSyktBarn setSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public KroniskSyktBarn setBarn(Barn barn) {
+    public KroniskSyktBarn setBarn(Person barn) {
         this.barn = barn;
         return this;
     }
 
-    public Barn getBarn() {
+    public Person getBarn() {
         return barn;
+    }
+
+    public KroniskSyktBarn setPeriode(Periode periode) {
+        this.periode = periode;
+        return this;
+    }
+
+    public Periode getPeriode() {
+        return periode;
     }
 }
