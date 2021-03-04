@@ -76,6 +76,6 @@ public final class SykdomUtils {
             }
         });
 
-        return tidslinje.compress();
+        return tidslinje;
     }
 }
