@@ -164,6 +164,34 @@ public class FagsakRepository {
         return query.getResultList();
     }
 
+    /**
+     * Henter siste fagsak (nyeste) per søker knyttet til angitt pleietrengende og/eller relatert person (1 fagsak per søker).
+     * Pleietrengende her er typisk barn/nærstående avh. av ytelse.
+     *
+     * @param tom
+     */
+    @SuppressWarnings("unchecked")
+    public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+        Query query;
+
+        query = entityManager.createNativeQuery(
+            "select f.* from Fagsak f"
+                + " where "
+                + "       coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')"
+                + "   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
+                + "   and f.ytelse_type = :ytelseType"
+                + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+            Fagsak.class); // NOSONAR
+
+        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
+        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
+        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
+        query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
+        query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
+
+        return query.getResultList();
+    }
+
     public Optional<Fagsak> hentSakGittSaksnummer(Saksnummer saksnummer, boolean taSkriveLås) {
         TypedQuery<Fagsak> query = entityManager.createQuery("from Fagsak where saksnummer=:saksnummer", Fagsak.class);
         query.setParameter("saksnummer", saksnummer); // NOSONAR
