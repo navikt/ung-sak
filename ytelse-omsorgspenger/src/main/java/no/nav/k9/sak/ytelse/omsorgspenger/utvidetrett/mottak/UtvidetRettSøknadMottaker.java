@@ -52,9 +52,13 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
 
         if (pleietrengendeAktørId != null) {
             var personinfo = personInfoAdapter.hentBrukerBasisForAktør(pleietrengendeAktørId).orElseThrow(() -> new IllegalStateException("Fant ikke personinfo for angitt pleietrengende aktørId"));
-            LocalDate maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // slutt av kalenderår 18 år
-            if (sluttDato.isAfter(maksdato)) {
+            var fødselsdato = personinfo.getFødselsdato();
+            LocalDate maksdato = fødselsdato.plusYears(18).withMonth(12).withDayOfMonth(31); // slutt av kalenderår 18 år
+            if (sluttDato == null || sluttDato.isAfter(maksdato)) {
                 sluttDato = maksdato;
+            }
+            if (startDato == null || startDato.isBefore(fødselsdato)) {
+                startDato = fødselsdato;
             }
         }
 
