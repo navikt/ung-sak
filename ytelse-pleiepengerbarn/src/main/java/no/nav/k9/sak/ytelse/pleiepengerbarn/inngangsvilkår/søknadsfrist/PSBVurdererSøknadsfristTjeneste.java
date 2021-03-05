@@ -69,7 +69,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
         var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
             .stream()
-            .filter(it -> Brevkode.PLEIEPENGER_SOKNAD.equals(it.getType()))
+            .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
             .collect(Collectors.toSet());
 
         if (mottatteDokumenter.isEmpty()) {
