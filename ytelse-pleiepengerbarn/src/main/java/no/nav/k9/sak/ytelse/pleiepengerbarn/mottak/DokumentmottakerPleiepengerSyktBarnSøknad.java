@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -56,15 +57,15 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             persister(søknad, behandling, dokument.getJournalpostId());
         }
         // Søknadsinnhold som persisteres eksternt (abakus)
-        lagreOppgittOpptjeningFraSøknader(behandlingId);
+        lagreOppgittOpptjeningFraSøknader(behandlingId, dokumenter);
     }
-
 
     /**
      * Lagrer inntektsmeldinger til abakus fra mottatt dokument.
      */
-    private void lagreOppgittOpptjeningFraSøknader(Long behandlingId) {
-        // TODO: Dette må utføres prodsetting
+    private void lagreOppgittOpptjeningFraSøknader(Long behandlingId, Collection<MottattDokument> dokumenter) {
+        // TODO: Dette må faktisk opprette en task som sender til abakus hvor det også flippes status til gyldig før prodsetting
+        mottatteDokumentRepository.oppdaterStatus(new ArrayList<>(dokumenter), DokumentStatus.GYLDIG);
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
