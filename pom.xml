@@ -369,7 +369,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.0_20210302090648_ab2087a</version>
+                <version>1.0_20210304141235_3c2fbc5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
@@ -773,7 +773,7 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>    
+    </build>
     <scm>
         <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
