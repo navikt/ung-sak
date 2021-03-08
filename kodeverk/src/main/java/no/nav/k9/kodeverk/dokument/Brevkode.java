@@ -26,6 +26,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public class Brevkode implements Kodeverdi {
 
     public static final Comparator<? super Brevkode> COMP_REKKEFØLGE = Comparator.comparing(Brevkode::getRangering, Comparator.nullsLast(Comparator.naturalOrder()));
+    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
     public static final int VEDLEGG_RANGERING = 99;
     public static final int INNTEKTSMELDING_RANGERING = 10;
@@ -53,13 +54,12 @@ public class Brevkode implements Kodeverdi {
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
-    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
     private String offisiellKode;
 
     @JsonValue
     private String kode;
 
-    private int rangering = 99;
+    private int rangering;
 
     /**
      * intern ctor for registrerte koder.
@@ -67,6 +67,7 @@ public class Brevkode implements Kodeverdi {
     private Brevkode(String kode, String offisiellKode, int rangering) {
         this(kode);
         this.offisiellKode = offisiellKode;
+        this.rangering = rangering;
 
         if (KODER.putIfAbsent(kode, this) != null) {
             throw new IllegalArgumentException("Duplikat : " + kode);
