@@ -31,8 +31,7 @@ public class OppgaveRedirectTjenesteTest {
     private OppgaveBehandlingKoblingRepository oppgaveRepo = Mockito.mock(OppgaveBehandlingKoblingRepository.class);
     private FagsakRepository fagsakRepo = Mockito.mock(FagsakRepository.class);
 
-    RedirectFactory redirectFactory = new RedirectFactory();
-    private OppgaveRedirectTjeneste tjeneste = new OppgaveRedirectTjeneste(oppgaveRepo, fagsakRepo, redirectFactory);
+    private OppgaveRedirectTjeneste tjeneste = new OppgaveRedirectTjeneste(oppgaveRepo, fagsakRepo);
 
     private final Saksnummer saksnummer = new Saksnummer("22");
 
@@ -41,18 +40,13 @@ public class OppgaveRedirectTjenesteTest {
         ContextPathHolder.instance("/k9/sak");
     }
 
-    @BeforeEach
-    public void setLoadBalancerUrl() {
-        redirectFactory.setLoadBalancerUrl("https://erstatter.nav.no");
-    }
-
     @Test
     public void skal_lage_url_med_feilmelding_når_hverken_oppgaveId_eller_sakId_finnes() throws ServletException, IOException {
         Response response = tjeneste.doRedirect(null, null);
 
         String feilmelding = "Sak+kan+ikke+%C3%A5pnes%2C+da+referanse+mangler.";
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).contains("/k9/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -60,7 +54,7 @@ public class OppgaveRedirectTjenesteTest {
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto("2"));
         String feilmelding = "Det+finnes+ingen+sak+med+dette+saksnummeret%3A+2";
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).contains("/k9/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -75,7 +69,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), null);
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/fagsak/22/");
+        assertThat(response.getLocation().toString()).contains("/k9/sak/fagsak/22/");
     }
 
     @Test
@@ -87,7 +81,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/fagsak/22/");
+        assertThat(response.getLocation().toString()).contains("/k9/sak/fagsak/22/");
     }
 
     @Test
@@ -105,7 +99,7 @@ public class OppgaveRedirectTjenesteTest {
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
         String feilmelding = "Oppgaven+med+1+er+ikke+registrert+p%C3%A5+sak+22";
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/#?errormessage=" + feilmelding);
+        assertThat(response.getLocation().toString()).contains("/k9/sak/#?errormessage=" + feilmelding);
     }
 
     @Test
@@ -122,7 +116,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response response = tjeneste.doRedirect(new OppgaveIdDto("1"), new SaksnummerDto(saksnummer));
         assertThat(response.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(response.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/fagsak/22/");
+        assertThat(response.getLocation().toString()).contains("/k9/sak/fagsak/22/");
     }
 
     @Test
@@ -133,7 +127,7 @@ public class OppgaveRedirectTjenesteTest {
 
         Response responseSnr = tjeneste.doRedirect(null, new SaksnummerDto(saksnummer));
         assertThat(responseSnr.getStatus()).isEqualTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertThat(responseSnr.getLocation().toString()).isEqualTo("https://erstatter.nav.no/k9/sak/fagsak/22/");
+        assertThat(responseSnr.getLocation().toString()).contains("/k9/sak/fagsak/22/");
 
     }
 }

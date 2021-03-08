@@ -1,20 +1,18 @@
 package no.nav.k9.sak.web.app.oppgave;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.vedtak.konfig.KonfigVerdi;
 import no.nav.vedtak.sikkerhet.ContextPathHolder;
 
-@Dependent
-public class RedirectFactory {
+class RedirectFactory {
 
     private String loadBalancerUrl;
 
     //TODO (TOR) Denne bør ikkje ligga på server, men heller automatisk redirecte i klient. (Men dette er tryggast løysing tett opptil release)
     private String defaultPartUrl = "?punkt=default&fakta=default";
 
-    public String lagRedirect(OppgaveRedirectData data) {
+    String lagRedirect(OppgaveRedirectData data) {
         if (data.harFeilmelding()) {
             return String.format("%s/#?errormessage=%s", getBaseUrl(), data.getFeilmelding()); //$NON-NLS-1$
         }
