@@ -216,18 +216,13 @@ public class FordelRestTjeneste {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
         }
 
-        Set<Brevkode> typer = mottattJournalposter.stream().map(m -> m.getType()).collect(Collectors.toSet());
-        if (typer.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike typer: " + typer);
-        }
-
         Set<FagsakYtelseType> ytelseTyper = mottattJournalposter.stream().map(m -> m.getYtelseType()).collect(Collectors.toSet());
         if (ytelseTyper.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
         }
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
-            .map(m -> mapJournalpost(m))
+            .map(this::mapJournalpost)
             .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
             .collect(Collectors.toList());
 

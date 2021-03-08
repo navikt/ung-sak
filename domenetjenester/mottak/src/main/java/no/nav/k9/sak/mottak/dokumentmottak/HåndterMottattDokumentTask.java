@@ -2,6 +2,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -86,9 +87,16 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     }
 
     private void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter) {
-        Brevkode brevkode = DokumentBrevkodeUtil.unikBrevkode(mottatteDokumenter);
-        DokumentValidator validator = dokumentValidatorProvider.finnValidator(brevkode);
-        validator.validerDokumenter(behandlingId, mottatteDokumenter);
+        var mottatteDokumenterMap = mottatteDokumenter.stream()
+            .collect(Collectors.groupingBy(MottattDokument::getType));
+
+        mottatteDokumenterMap.keySet()
+            .stream()
+            .sorted(Brevkode.COMP_REKKEFØLGE)
+            .forEach(key -> {
+                DokumentValidator validator = dokumentValidatorProvider.finnValidator(key);
+                validator.validerDokumenter(behandlingId, mottatteDokumenterMap.get(key));
+            });
     }
 
 }
