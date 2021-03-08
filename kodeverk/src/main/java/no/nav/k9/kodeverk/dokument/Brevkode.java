@@ -1,6 +1,7 @@
 package no.nav.k9.kodeverk.dokument;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,42 +25,49 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class Brevkode implements Kodeverdi {
 
+    public static final Comparator<? super Brevkode> COMP_REKKEFØLGE = Comparator.comparing(Brevkode::getRangering, Comparator.nullsLast(Comparator.naturalOrder()));
+    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
+
+    public static final int VEDLEGG_RANGERING = 99;
+    public static final int INNTEKTSMELDING_RANGERING = 10;
+    public static final int SØKNAD_RANGERING = 1;
+
     public static final String SØKNAD_OMS_UTVIDETRETT_MA_KODE = "SØKNAD_OMS_UTVIDETRETT_MA";
     public static final String SØKNAD_OMS_UTVIDETRETT_KS_KODE = "SØKNAD_OMS_UTVIDETRETT_KS";
     public static final String SØKNAD_UTBETALING_OMS_KODE = "SØKNAD_UTBETALING_OMS";
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
-
-    private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
-
     // Match mot Deprecated {@link no.nav.k9.kodeverk.dokument.DokumentTypeId}
-    public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936");
-    public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023");
-    public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02");
-
-    /** Omsorgspenger brevkoder. */
-    public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01");
-    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05");
-    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07");
-
+    public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936", INNTEKTSMELDING_RANGERING);
+    public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023", VEDLEGG_RANGERING);
+    public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02", SØKNAD_RANGERING);
+    /**
+     * Omsorgspenger brevkoder.
+     */
+    public static final Brevkode SØKNAD_UTBETALING_OMS = new Brevkode(SØKNAD_UTBETALING_OMS_KODE, "NAV 09-35.01", SØKNAD_RANGERING);
+    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05", SØKNAD_RANGERING);
+    public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07", SØKNAD_RANGERING);
     public static final String PLEIEPENGER_BARN_SOKNAD_KODE = "PLEIEPENGER_SOKNAD";
-    /** Pleiepenger brevkoder. */
-    public static final Brevkode PLEIEPENGER_BARN_SOKNAD = new Brevkode(PLEIEPENGER_BARN_SOKNAD_KODE, "NAV 09-11.05");
+    /**
+     * Pleiepenger brevkoder.
+     */
+    public static final Brevkode PLEIEPENGER_BARN_SOKNAD = new Brevkode(PLEIEPENGER_BARN_SOKNAD_KODE, "NAV 09-11.05", SØKNAD_RANGERING);
     // Default
-    public static final Brevkode UDEFINERT = new Brevkode("-", null);
-
+    public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
-
     private String offisiellKode;
 
     @JsonValue
     private String kode;
 
+    private int rangering;
+
     /**
      * intern ctor for registrerte koder.
      */
-    private Brevkode(String kode, String offisiellKode) {
+    private Brevkode(String kode, String offisiellKode, int rangering) {
         this(kode);
         this.offisiellKode = offisiellKode;
+        this.rangering = rangering;
 
         if (KODER.putIfAbsent(kode, this) != null) {
             throw new IllegalArgumentException("Duplikat : " + kode);
@@ -96,6 +104,22 @@ public class Brevkode implements Kodeverdi {
         return ad;
     }
 
+    private static Brevkode finnForKodeverkEiersKode(String offisiellDokumentType) {
+        if (offisiellDokumentType == null || offisiellDokumentType.isBlank())
+            return Brevkode.UDEFINERT;
+
+        Optional<Brevkode> dokId = KODER.values().stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst();
+        if (dokId.isPresent()) {
+            return dokId.get();
+        } else {
+            return new Brevkode(offisiellDokumentType);
+        }
+    }
+
+    public static Map<String, Brevkode> registrerteKoder() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
@@ -114,22 +138,6 @@ public class Brevkode implements Kodeverdi {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<kode=" + kode + ">";
-    }
-
-    private static Brevkode finnForKodeverkEiersKode(String offisiellDokumentType) {
-        if (offisiellDokumentType == null || offisiellDokumentType.isBlank())
-            return Brevkode.UDEFINERT;
-
-        Optional<Brevkode> dokId = KODER.values().stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst();
-        if (dokId.isPresent()) {
-            return dokId.get();
-        } else {
-            return new Brevkode(offisiellDokumentType);
-        }
-    }
-
-    public static Map<String, Brevkode> registrerteKoder() {
-        return Collections.unmodifiableMap(KODER);
     }
 
     @Override
@@ -152,4 +160,7 @@ public class Brevkode implements Kodeverdi {
         return offisiellKode;
     }
 
+    public int getRangering() {
+        return rangering;
+    }
 }
