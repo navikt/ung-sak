@@ -97,28 +97,28 @@ public class DokumentRestTjeneste {
     public Collection<DokumentDto> hentAlleDokumenterForSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         try {
             Saksnummer saksnummer = saksnummerDto.getVerdi();
-            final Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-            final Long fagsakId = fagsak.map(Fagsak::getId).orElse(null);
+            final Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
+            final Long fagsakId = fagsakOpt.map(Fagsak::getId).orElse(null);
             if (fagsakId == null) {
                 return new ArrayList<>();
             }
 
+            Fagsak fagsak = fagsakOpt.get();
+
             Set<Long> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId).stream().map(Behandling::getId)
                 .collect(Collectors.toSet());
 
-            Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger = inntektsmeldingTjeneste
-                .hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
-                .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
-
             // Burde brukt map på dokumentid, men den lagres ikke i praksis.
-            Map<JournalpostId, List<MottattDokument>> mottatteIMDokument = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId).stream()
+            Map<JournalpostId, List<MottattDokument>> mottattedokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsakId).stream()
                 .collect(Collectors.groupingBy(MottattDokument::getJournalpostId));
 
-            List<ArkivJournalPost> journalPostList;
-            journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
+            List<ArkivJournalPost> journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
             List<DokumentDto> dokumentResultat = new ArrayList<>();
+
+            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger = finnInntektsmeldinger(fagsak, åpneBehandlinger);
+
             journalPostList.forEach(arkivJournalPost -> {
-                dokumentResultat.addAll(mapFraArkivJournalPost(arkivJournalPost, mottatteIMDokument, inntektsMeldinger));
+                dokumentResultat.addAll(mapFraArkivJournalPost(arkivJournalPost, mottattedokumenter, inntektsmeldinger));
             });
             dokumentResultat.sort(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
 
@@ -126,6 +126,15 @@ public class DokumentRestTjeneste {
         } catch (ManglerTilgangException e) {
             throw DokumentRestTjenesteFeil.FACTORY.applikasjonHarIkkeTilgangTilHentJournalpostListeTjeneste(e).toException();
         }
+    }
+
+    private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak, Set<Long> åpneBehandlinger) {
+        var ytelseType = fagsak.getYtelseType();
+        boolean harInntektsmeldinger = !ytelseType.erRammevedtak();
+        return !harInntektsmeldinger
+            ? Collections.emptyMap()
+            : inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
+                .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
     }
 
     @GET
@@ -149,23 +158,23 @@ public class DokumentRestTjeneste {
         }
     }
 
-    private List<DokumentDto> mapFraArkivJournalPost(ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteIMDokument,
+    private List<DokumentDto> mapFraArkivJournalPost(ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteDokument,
                                                      Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger) {
         List<DokumentDto> dokumentForJP = new ArrayList<>();
         if (arkivJournalPost.getHovedDokument() != null) {
-            dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteIMDokument, inntektsMeldinger));
+            dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteDokument, inntektsMeldinger));
         }
         if (arkivJournalPost.getAndreDokument() != null) {
             arkivJournalPost.getAndreDokument().forEach(dok -> {
-                dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, dok, mottatteIMDokument, inntektsMeldinger));
+                dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, dok, mottatteDokument, inntektsMeldinger));
             });
         }
         return dokumentForJP;
     }
 
     private DokumentDto mapFraArkivDokument(ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
-                                            Map<JournalpostId, List<MottattDokument>> mottatteIMDokument,
-                                            Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger) {
+                                            Map<JournalpostId, List<MottattDokument>> mottatteDokument,
+                                            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger) {
         var dto = new DokumentDto();
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
@@ -173,14 +182,14 @@ public class DokumentRestTjeneste {
         dto.setKommunikasjonsretning(arkivJournalPost.getKommunikasjonsretning());
         dto.setTidspunkt(arkivJournalPost.getTidspunkt());
 
-        if (mottatteIMDokument.containsKey(arkivJournalPost.getJournalpostId())) {
-            List<Long> behandlinger = mottatteIMDokument.get(dto.getJournalpostId()).stream()
-                .filter(imdok -> inntektsMeldinger.containsKey(dto.getJournalpostId()))
+        if (mottatteDokument.containsKey(arkivJournalPost.getJournalpostId())) {
+            List<Long> behandlinger = mottatteDokument.get(dto.getJournalpostId()).stream()
+                .filter(imdok -> inntektsmeldinger.containsKey(dto.getJournalpostId()))
                 .map(MottattDokument::getBehandlingId)
                 .collect(Collectors.toList());
             dto.setBehandlinger(behandlinger);
 
-            Optional<String> navn = inntektsMeldinger.getOrDefault(dto.getJournalpostId(), Collections.emptyList())
+            Optional<String> navn = inntektsmeldinger.getOrDefault(dto.getJournalpostId(), Collections.emptyList())
                 .stream()
                 .map((Inntektsmelding inn) -> {
                     var t = inn.getArbeidsgiver();
