@@ -125,8 +125,10 @@ public class Landkoder implements Kodeverdi {
         List.of(
             "XXX", // STATSLØS
             "XUK", // UKJENT
-            "XXK") // KOSOVO
-            .forEach(c -> map.put(c, new Landkoder(c)));
+            "XXK",  // KOSOVO
+            // Historiske land
+            "DDR" // Tyskland (Øst)
+        ).forEach(c -> map.put(c, new Landkoder(c)));
 
         // ISO transitional codes.
         // @see https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Transitional_reservations
