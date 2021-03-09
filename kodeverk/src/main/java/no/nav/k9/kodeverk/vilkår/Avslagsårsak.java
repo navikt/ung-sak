@@ -71,10 +71,13 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.",
         Map.of(FagsakYtelseType.PSB, "9-10")),
 
-    // TODO, trengs denne?
     IKKE_UTVIDETRETT("1072", "Ikke grunnlag for utvidet rett", Map.of(
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd",
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
+    IKKE_UTVIDETRETT_IKKE_KRONISK_SYK("1073", "Ikke kronisk syk eller funksjonshemmet", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd")),
+    IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR("1074", "Ikke økt risiko for fravær", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd")),
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
         Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),

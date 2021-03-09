@@ -41,16 +41,17 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
         var periode = dto.getPeriode();
-        oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom());
+        oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, periode == null ? null : periode.getFom(), periode == null ? null : periode.getTom(), dto.getAvslagsårsak());
 
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom) {
+    private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.UTVIDETRETT);
+        Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? Avslagsårsak.IKKE_UTVIDETRETT : avslagsårsak) : null;
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
-            .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_UTVIDETRETT : null));
+            .medAvslagsårsak(settAvslagsårsak));
         builder.leggTil(vilkårBuilder);
     }
 
