@@ -21,8 +21,8 @@ import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
@@ -53,7 +53,7 @@ public class VurderOppgaveTilbakekrevingTask extends BehandlingProsessTask {
         var behandlingId = prosessTaskData.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
-        
+
         var ref = BehandlingReferanse.fra(behandling);
         if (skalOppretteOppgaveTilbakekreving(behandling)) {
             FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();

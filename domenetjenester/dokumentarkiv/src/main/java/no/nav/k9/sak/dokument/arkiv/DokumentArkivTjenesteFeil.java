@@ -1,12 +1,12 @@
 package no.nav.k9.sak.dokument.arkiv;
 
 
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;
-import no.nav.vedtak.felles.integrasjon.saf.HentDokumentQuery;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
+import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
 
 public interface DokumentArkivTjenesteFeil extends DeklarerteFeil {
 

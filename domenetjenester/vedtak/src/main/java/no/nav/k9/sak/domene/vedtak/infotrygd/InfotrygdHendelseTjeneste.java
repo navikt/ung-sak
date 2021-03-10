@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedDto;
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class InfotrygdHendelseTjeneste {

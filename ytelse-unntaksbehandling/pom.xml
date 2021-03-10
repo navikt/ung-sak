@@ -30,8 +30,8 @@
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-db</artifactId>
+			<groupId>no.nav.k9.felles</groupId>
+			<artifactId>k9-felles-db</artifactId>
 		</dependency>
 
 		<dependency>

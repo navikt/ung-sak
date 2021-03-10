@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
+import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 
 public class NavAnsattRestTjenesteTest {
     private static final String gruppenavnSaksbehandler = "Saksbehandler";

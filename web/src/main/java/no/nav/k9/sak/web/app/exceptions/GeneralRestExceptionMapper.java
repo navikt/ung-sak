@@ -13,13 +13,13 @@ import org.slf4j.MDC;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
-import no.nav.vedtak.exception.ManglerTilgangException;
-import no.nav.vedtak.exception.VLException;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FunksjonellFeil;
-import no.nav.vedtak.felles.jpa.TomtResultatException;
-import no.nav.vedtak.log.mdc.MDCOperations;
-import no.nav.vedtak.log.util.LoggerUtils;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FunksjonellFeil;
+import no.nav.k9.felles.jpa.TomtResultatException;
+import no.nav.k9.felles.log.mdc.MDCOperations;
+import no.nav.k9.felles.log.util.LoggerUtils;
 
 @Provider
 public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationException> {

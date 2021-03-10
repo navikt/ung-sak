@@ -48,7 +48,7 @@ public class ApplicationConfig extends Application {
             .openAPI(oas)
             .prettyPrint(true)
             .scannerClass("io.swagger.v3.jaxrs2.integration.JaxrsAnnotationScanner")
-            .resourcePackages(Stream.of("no.nav.vedtak", "no.nav.k9.sak", "no.nav.k9")
+            .resourcePackages(Stream.of("no.nav.k9.", "no.nav.k9.sak", "no.nav.k9")
                 .collect(Collectors.toSet()));
 
         try {
@@ -64,7 +64,7 @@ public class ApplicationConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>(new RestImplementationClasses().getImplementationClasses());
-        
+
         classes.add(OpenApiResource.class);
 
         classes.add(ConstraintViolationMapper.class);

@@ -30,7 +30,7 @@ import no.nav.k9.sak.inngangsvilkår.RegelOrkestrerer;
 import no.nav.k9.sak.inngangsvilkår.RegelResultat;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.exception.TekniskException;
+import no.nav.k9.felles.exception.TekniskException;
 
 public class RegelOrkestrererImplTest {
 

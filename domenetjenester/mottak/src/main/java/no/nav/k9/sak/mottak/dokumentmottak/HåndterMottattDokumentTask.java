@@ -2,7 +2,6 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -19,20 +18,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
-    private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
-
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";
     public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
     public static final String BEHANDLING_ÅRSAK_TYPE_KEY = "arsakType";
-
+    private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private FagsakRepository fagsakRepository;

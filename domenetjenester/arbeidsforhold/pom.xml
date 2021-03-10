@@ -56,8 +56,8 @@
 		</dependency>
 
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>ereg-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-ereg-klient</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

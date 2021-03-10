@@ -16,7 +16,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
-import no.nav.vedtak.exception.FunksjonellException;
+import no.nav.k9.felles.exception.FunksjonellException;
 
 class TilkjentYtelsePerioderValidatorTest {
 

@@ -14,12 +14,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-feil</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-feil</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-db</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-db</artifactId>
         </dependency>
 
         <!-- Domenetjenester avhengigheter -->
@@ -70,8 +70,8 @@
 
         <!-- Test avhengigheter -->
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-testutilities</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

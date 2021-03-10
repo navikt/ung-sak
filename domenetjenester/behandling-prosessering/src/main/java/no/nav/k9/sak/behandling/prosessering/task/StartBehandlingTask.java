@@ -15,8 +15,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * Kjører behandlingskontroll automatisk fra start.
@@ -50,7 +50,7 @@ public class StartBehandlingTask extends UnderBehandlingProsessTask {
         if (!gyldigStatus.contains(behandling.getStatus())) {
             throw new IllegalStateException("Utvikler-feil: " + getClass().getSimpleName() + " kan kun benyttes på nyopprettet Behandling (med status " + gyldigStatus + ". Fikk: " + behandling);
         }
-        
+
         // TODO sjekk på steg? denne vil vel ikke gå forbi kompletthet eller inreg?
     }
 }

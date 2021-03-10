@@ -19,13 +19,13 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.vedtak.prosesstask</groupId>
+            <groupId>no.nav.k9.prosesstask</groupId>
             <artifactId>prosesstask</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet</artifactId>
         </dependency>
 
         <dependency>
@@ -42,12 +42,8 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-db</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-db</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>javax.xml.stream</groupId>

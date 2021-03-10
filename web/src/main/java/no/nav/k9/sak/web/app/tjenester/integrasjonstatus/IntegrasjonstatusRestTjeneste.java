@@ -17,9 +17,9 @@ import org.apache.commons.lang3.BooleanUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import no.nav.k9.sak.kontrakt.SystemNedeDto;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 
 @Path("/integrasjon")
 @ApplicationScoped

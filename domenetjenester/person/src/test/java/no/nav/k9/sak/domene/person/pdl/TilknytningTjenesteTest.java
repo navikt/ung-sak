@@ -3,10 +3,10 @@ package no.nav.k9.sak.domene.person.pdl;
 import static java.util.stream.Stream.of;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE6;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE7;
-import static no.nav.pdl.AdressebeskyttelseGradering.FORTROLIG;
-import static no.nav.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG;
-import static no.nav.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND;
-import static no.nav.pdl.AdressebeskyttelseGradering.UGRADERT;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.FORTROLIG;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRADERT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.person.Diskresjonskode;
-import no.nav.pdl.Adressebeskyttelse;
-import no.nav.pdl.AdressebeskyttelseGradering;
+import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
+import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
 
 class TilknytningTjenesteTest {
     @Test

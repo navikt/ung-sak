@@ -47,7 +47,7 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
-		
+
 		<!-- Kontrakter -->
         <dependency>
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
@@ -59,14 +59,14 @@
         </dependency>
 
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-bom</artifactId>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet</artifactId>
 		</dependency>
 
        <!-- Test avhengigheter -->
        <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-testutilities</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-testutilities</artifactId>
 			<scope>test</scope>
         </dependency>
         <dependency>
@@ -80,6 +80,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        
+
     </dependencies>
 </project>

@@ -11,8 +11,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(OpprettOppgaveSendTilInfotrygdTask.TASKTYPE)
@@ -40,7 +40,7 @@ public class OpprettOppgaveSendTilInfotrygdTask extends BehandlingProsessTask {
         var behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
-        
+
         String oppgaveId = oppgaveTjeneste.opprettOppgaveSakSkalTilInfotrygd(Long.valueOf(prosessTaskData.getBehandlingId()));
         log.info("Oppgave opprettet i GSAK slik at Infotrygd kan behandle saken videre. Oppgavenummer: {}", oppgaveId);
     }

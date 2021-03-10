@@ -9,11 +9,11 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Alternative;
 import javax.interceptor.Interceptor;
 
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
-import no.nav.vedtak.sikkerhet.pdp.XacmlRequestBuilderTjeneste;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlAttributeSet;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlRequestBuilder;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.sikkerhet.pdp.XacmlRequestBuilderTjeneste;
+import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlAttributeSet;
+import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlRequestBuilder;
+import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 @Alternative

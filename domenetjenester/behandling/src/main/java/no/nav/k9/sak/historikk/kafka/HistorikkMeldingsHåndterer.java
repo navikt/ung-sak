@@ -5,8 +5,8 @@ import javax.enterprise.context.control.ActivateRequestContext;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 @ActivateRequestContext
@@ -21,7 +21,7 @@ public class HistorikkMeldingsHåndterer {
     public HistorikkMeldingsHåndterer(ProsessTaskRepository prosessTaskRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
     }
-    
+
     void lagreMelding(@SuppressWarnings("unused") String header, String payload) { // NOSONAR
         ProsessTaskData data = new ProsessTaskData(LagreHistorikkTask.TASKTYPE);
         data.setCallIdFraEksisterende();

@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -25,8 +25,8 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomAksjonspunktDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -37,7 +37,7 @@ public class SykdomRestTjeneste {
     static final String BASE_PATH = "/behandling/sykdom";
     private static final String SYKDOM_AKSJONSPUNKT = "/aksjonspunkt";
     public static final String SYKDOM_AKSJONSPUNKT_PATH = BASE_PATH + SYKDOM_AKSJONSPUNKT;
-    
+
     //private SykdomDtoMapper dtoMapper;
     private SykdomVurderingService sykdomVurderingService;
     private BehandlingRepository behandlingRepository;
@@ -74,7 +74,7 @@ public class SykdomRestTjeneste {
         return behandling.map(behandlingId -> dtoMapper.map(behandlingId)).orElse(null);
     }
     */
-    
+
     @GET
     @Path(SYKDOM_AKSJONSPUNKT)
     @Operation(description = "Hent informasjon om sykdomsaksjonspunkt",
@@ -95,7 +95,7 @@ public class SykdomRestTjeneste {
                 BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
         final var aksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
-        
+
         return toSykdomAksjonspunktDto(aksjonspunkt);
     }
 

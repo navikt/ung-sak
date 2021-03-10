@@ -1,8 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
@@ -51,12 +51,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.vedtak.exception.ManglerTilgangException;
-import no.nav.vedtak.exception.TekniskException;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -80,7 +80,7 @@ public class SykdomDokumentRestTjeneste {
     public static final String DOKUMENT_OVERSIKT_PATH = BASE_PATH + DOKUMENT_OVERSIKT;
     private static final String DOKUMENT_LISTE = "/liste";
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
-    
+
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
@@ -122,7 +122,7 @@ public class SykdomDokumentRestTjeneste {
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
         return sykdomDokumentOversiktMapper.mapDokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
     }
-    
+
     @GET
     @Path(SYKDOM_INNLEGGELSE)
     @Operation(description = "Henter alle perioder den pleietrengende er innlagt på sykehus og liknende.",
@@ -223,7 +223,7 @@ public class SykdomDokumentRestTjeneste {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
-        
+
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentOversiktMapper.toSykdomDiagnosekoder(sykdomDiagnosekoderDto, SubjectHandler.getSubjectHandler().getUid());
         sykdomDokumentRepository.opprettEllerOppdaterDiagnosekoder(diagnosekoder, behandling.getFagsak().getPleietrengendeAktørId());
     }

@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.historikk;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collections;
 
@@ -29,8 +29,8 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path(HistorikkRestTjeneste.PATH)
 @ApplicationScoped
@@ -63,7 +63,7 @@ public class HistorikkRestTjeneste {
         cc.setMaxAge(0);
         cc.setMustRevalidate(true);
         cc.setProxyRevalidate(true);
-        
+
         // FIXME XSS valider requestURL eller bruk relativ URL
         String requestURL = getRequestPath(request);
         String url = requestURL + "/dokument/hent-dokument";

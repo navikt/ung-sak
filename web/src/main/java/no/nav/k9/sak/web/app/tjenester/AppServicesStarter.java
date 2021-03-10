@@ -5,9 +5,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import no.nav.vedtak.felles.integrasjon.sensu.SensuKlient;
-import no.nav.vedtak.felles.prosesstask.impl.BatchTaskScheduler;
-import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
+import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
+import no.nav.k9.prosesstask.impl.BatchTaskScheduler;
+import no.nav.k9.prosesstask.impl.TaskManager;
 
 /**
  * Initialiserer bakgrunns tasks.
@@ -17,13 +17,13 @@ public class AppServicesStarter implements ServletContextListener {
 
     @Inject
     private TaskManager taskManager;  // NOSONAR
-    
+
     @Inject
     private BatchTaskScheduler batchTaskScheduler;
-    
+
     @Inject
     private SensuKlient sensuKlient;
-    
+
     public AppServicesStarter() { // NOSONAR
     }
 

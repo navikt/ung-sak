@@ -18,8 +18,8 @@ import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.integrasjon.medl2.Medlemskapsunntak;
-import no.nav.vedtak.felles.integrasjon.medl2.MedlemsunntakRestKlient;
+import no.nav.k9.felles.integrasjon.medl2.Medlemskapsunntak;
+import no.nav.k9.felles.integrasjon.medl2.MedlemsunntakRestKlient;
 
 public class HentMedlemskapFraRegisterTest {
 

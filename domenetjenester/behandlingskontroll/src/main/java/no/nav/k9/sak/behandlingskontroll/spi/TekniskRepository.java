@@ -2,8 +2,8 @@ package no.nav.k9.sak.behandlingskontroll.spi;
 
 import javax.persistence.EntityManager;
 
-import no.nav.vedtak.felles.jpa.savepoint.RunWithSavepoint;
-import no.nav.vedtak.felles.jpa.savepoint.Work;
+import no.nav.k9.felles.jpa.savepoint.RunWithSavepoint;
+import no.nav.k9.felles.jpa.savepoint.Work;
 
 public class TekniskRepository {
 
@@ -12,7 +12,7 @@ public class TekniskRepository {
     public TekniskRepository(EntityManager em) {
         this.entityManager = em;
     }
-    
+
     public <V> V doWorkInSavepoint(Work<V> work) {
         RunWithSavepoint setJdbcSavepoint = new RunWithSavepoint(entityManager);
         return setJdbcSavepoint.doWork(work);

@@ -4,7 +4,7 @@ package no.nav.k9.sak.domene.person.pdl;
 import static java.util.function.Predicate.not;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE6;
 import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE7;
-import static no.nav.pdl.AdressebeskyttelseGradering.UGRADERT;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRADERT;
 
 import java.util.stream.Stream;
 
@@ -14,15 +14,15 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.pdl.Adressebeskyttelse;
-import no.nav.pdl.AdressebeskyttelseGradering;
-import no.nav.pdl.AdressebeskyttelseResponseProjection;
-import no.nav.pdl.GeografiskTilknytningResponseProjection;
-import no.nav.pdl.GtType;
-import no.nav.pdl.HentGeografiskTilknytningQueryRequest;
-import no.nav.pdl.HentPersonQueryRequest;
-import no.nav.pdl.PersonResponseProjection;
-import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
+import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
+import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
+import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytningResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.GtType;
+import no.nav.k9.felles.integrasjon.pdl.HentGeografiskTilknytningQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 
 @ApplicationScoped
 public class TilknytningTjeneste {
@@ -59,7 +59,7 @@ public class TilknytningTjeneste {
         }
     }
 
-    private String getTilknytning(no.nav.pdl.GeografiskTilknytning gt) {
+    private String getTilknytning(no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytning gt) {
         if (gt == null || gt.getGtType() == null)
             return null;
         var gtType = gt.getGtType();

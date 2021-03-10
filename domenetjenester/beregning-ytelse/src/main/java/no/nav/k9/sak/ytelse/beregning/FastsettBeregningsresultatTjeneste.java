@@ -16,11 +16,11 @@ import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraVLTilRegel
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatRegelmodell;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regler.RegelFastsettBeregningsresultat;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 
 @ApplicationScoped
 public class FastsettBeregningsresultatTjeneste {

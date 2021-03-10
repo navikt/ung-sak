@@ -31,8 +31,8 @@
             <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>saf-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-saf-klient</artifactId>
         </dependency>
 
 
@@ -45,8 +45,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-testutilities</artifactId>
+			<groupId>no.nav.k9.felles</groupId>
+			<artifactId>k9-felles-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -2,9 +2,9 @@ package no.nav.k9.sak.behandlingslager.task;
 
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 
 /**
  * Task som utfører noe på en behandling, før prosessen kjøres videre.

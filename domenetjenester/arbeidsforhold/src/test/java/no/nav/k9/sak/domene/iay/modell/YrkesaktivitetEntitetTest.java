@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class YrkesaktivitetEntitetTest {
 

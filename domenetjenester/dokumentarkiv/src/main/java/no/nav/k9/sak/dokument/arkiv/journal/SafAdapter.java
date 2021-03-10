@@ -5,9 +5,9 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.saf.JournalpostQueryRequest;
-import no.nav.saf.JournalpostResponseProjection;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 @ApplicationScoped
 public class SafAdapter {

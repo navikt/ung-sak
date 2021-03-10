@@ -38,6 +38,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.MetaData;
+import org.eclipse.jetty.webapp.WebAppConfiguration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.webapp.WebInfConfiguration;
 import org.eclipse.jetty.webapp.WebXmlConfiguration;
@@ -45,27 +46,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import no.nav.k9.felles.oidc.OidcApplication;
 import no.nav.k9.sak.web.app.ApplicationConfig;
 import no.nav.k9.sak.web.server.jetty.db.DatabaseScript;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
-import no.nav.vedtak.isso.IssoApplication;
 
 public class JettyServer {
-
-    static final Logger log = LoggerFactory.getLogger(JettyServer.class);
-
-    /**
-     * Legges først slik at alltid resetter context før prosesserer nye requests. Kjøres først så ikke risikerer andre har satt
-     * Request#setHandled(true).
-     */
-    static final class ResetLogContextHandler extends AbstractHandler {
-        @Override
-        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-            MDC.clear();
-        }
-    }
 
     /**
      * @see AbstractNetworkConnector#getHost()
@@ -75,15 +63,16 @@ public class JettyServer {
     /**
      * nedstrippet sett med Jetty configurations for raskere startup.
      */
-    protected static final Configuration[] CONFIGURATIONS = new Configuration[] {
-            new WebInfConfiguration(),
-            new WebXmlConfiguration(),
-            new AnnotationConfiguration(),
-            new EnvConfiguration(),
-            new PlusConfiguration(),
+    protected static final Configuration[] CONFIGURATIONS = new Configuration[]{
+        new WebAppConfiguration(),
+        new WebInfConfiguration(),
+        new WebXmlConfiguration(),
+        new AnnotationConfiguration(),
+        new EnvConfiguration(),
+        new PlusConfiguration(),
     };
+    static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
-
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
     }
@@ -110,8 +99,8 @@ public class JettyServer {
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
         Server server = new Server(appKonfigurasjon.getServerPort());
-        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[] {}));
-    
+        server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
+
         var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
         server.setHandler(handlers);
         server.start();
@@ -275,11 +264,11 @@ public class JettyServer {
             .distinct()
             .collect(Collectors.toList());
 
-        metaData.setWebInfClassesDirs(resources);
+        metaData.setWebInfClassesResources(resources);
     }
 
     protected List<Class<?>> getWebInfClasses() {
-        return Arrays.asList(ApplicationConfig.class, IssoApplication.class);
+        return Arrays.asList(ApplicationConfig.class, OidcApplication.class);
     }
 
     @SuppressWarnings("resource")
@@ -287,6 +276,17 @@ public class JettyServer {
         return new ResourceCollection(
             Resource.newClassPathResource("META-INF/resources/webjars/"),
             Resource.newClassPathResource("/web"));
+    }
+
+    /**
+     * Legges først slik at alltid resetter context før prosesserer nye requests. Kjøres først så ikke risikerer andre har satt
+     * Request#setHandled(true).
+     */
+    static final class ResetLogContextHandler extends AbstractHandler {
+        @Override
+        public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+            MDC.clear();
+        }
     }
 
 }

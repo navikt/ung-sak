@@ -24,7 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknad.BekreftSokersOpplysningspliktManuDto;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftSokersOpplysningspliktManuDto.class, adapter = AksjonspunktOppdaterer.class)

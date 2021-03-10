@@ -13,7 +13,7 @@ import javax.persistence.TypedQuery;
 
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class OppgaveBehandlingKoblingRepository {
@@ -41,7 +41,7 @@ public class OppgaveBehandlingKoblingRepository {
         return oppgaveBehandlingKobling.getId();
     }
 
-    
+
     public Optional<OppgaveBehandlingKobling> hentOppgaveBehandlingKobling(String oppgaveId) {
         TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where oppgave_id=:oppgaveId", //$NON-NLS-1$
             OppgaveBehandlingKobling.class);
@@ -49,7 +49,7 @@ public class OppgaveBehandlingKoblingRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    
+
     public List<OppgaveBehandlingKobling> hentOppgaverRelatertTilBehandling(Long behandlingId) {
         TypedQuery<OppgaveBehandlingKobling> query = entityManager.createQuery("from OppgaveBehandlingKobling where behandling_id=:behandlingId", //$NON-NLS-1$
             OppgaveBehandlingKobling.class);
@@ -57,7 +57,7 @@ public class OppgaveBehandlingKoblingRepository {
         return query.getResultList();
     }
 
-    
+
     public List<OppgaveBehandlingKobling> hentUferdigeOppgaverOpprettetTidsrom(LocalDate fom, LocalDate tom, Set<OppgaveÅrsak> oppgaveTyper) {
         TypedQuery<OppgaveBehandlingKobling> query = entityManager.
             createQuery("from OppgaveBehandlingKobling where ferdigstilt=:ferdig and opprettet_tid >= :fom and opprettet_tid <= :tom and oppgaveÅrsak in :aarsaker", //$NON-NLS-1$

@@ -25,12 +25,12 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
-import no.nav.vedtak.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.vedtak.sikkerhet.abac.PdpKlient;
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
-import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
+import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
 
 @Dependent
 @Alternative

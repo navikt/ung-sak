@@ -60,7 +60,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
 public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjeneste {

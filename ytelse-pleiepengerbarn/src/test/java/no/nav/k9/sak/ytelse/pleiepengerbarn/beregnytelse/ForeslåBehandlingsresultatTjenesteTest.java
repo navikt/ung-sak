@@ -57,8 +57,8 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
-import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.util.Tuple;
 
 @CdiDbAwareTest
 public class ForeslåBehandlingsresultatTjenesteTest {

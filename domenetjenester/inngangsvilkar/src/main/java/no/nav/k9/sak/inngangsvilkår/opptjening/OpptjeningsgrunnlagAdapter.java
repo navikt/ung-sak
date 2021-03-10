@@ -21,7 +21,7 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.AktivitetPeriode;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsgrunnlag;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsvilkår;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet.ReferanseType;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 class OpptjeningsgrunnlagAdapter {
     private LocalDate behandlingstidspunkt;

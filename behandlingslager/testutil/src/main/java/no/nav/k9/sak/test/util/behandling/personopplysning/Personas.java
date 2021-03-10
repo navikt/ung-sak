@@ -11,7 +11,7 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon.Builder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class Personas {
     private Builder builder;

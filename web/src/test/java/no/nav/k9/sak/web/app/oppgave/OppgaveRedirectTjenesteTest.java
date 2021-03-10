@@ -23,7 +23,7 @@ import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobli
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.sikkerhet.ContextPathHolder;
+import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 @SuppressWarnings({ "deprecation", "resource" })
 public class OppgaveRedirectTjenesteTest {
