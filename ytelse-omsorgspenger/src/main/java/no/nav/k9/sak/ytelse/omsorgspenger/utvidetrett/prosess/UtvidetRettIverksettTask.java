@@ -99,7 +99,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         return new MidlertidigAlene()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setTidspunkt(tidspunkt(behandling))
+            .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
             .setAnnenForelder(new Person(aktørIdAnnenForelder))
             .setSøker(new Person(aktørIdSøker))
             .setPeriode(periode(vilkårene));
@@ -113,14 +113,10 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         return new KroniskSyktBarn()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setTidspunkt(tidspunkt(behandling))
+            .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
             .setBarn(new Person(aktørIdBarn))
             .setSøker(new Person(aktørIdSøker))
             .setPeriode(periode(vilkårene));
-    }
-
-    private ZonedDateTime tidspunkt(Behandling behandling) {
-        return ZonedDateTime.of(behandling.getAvsluttetDato(), ZoneOffset.UTC);
     }
 
     private Periode periode(Vilkårene vilkårene) {
