@@ -1,12 +1,15 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.typer.Periode;
@@ -36,7 +39,12 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(UtvidetRettIverksettTask.class);
+    private static final Set<LocalDate> UGYLDIGE_DATOER_FOR_PERIODE = Set.of(
+        Tid.TIDENES_BEGYNNELSE,
+        Tid.TIDENES_ENDE
+    );
     public static final String TASKTYPE = "iverksetteVedtak.sendUtvidetRett";
+
 
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -124,6 +132,11 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var perioder = vilkår.orElseThrow().getPerioder();
         var fom = perioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
         var tom = perioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
-        return new Periode(fom, tom);
+        var periode = new Periode(fom, tom);
+        if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
+            throw new IllegalStateException("Ugylidig periode for vedtak om utvidet rett " + periode.toString());
+        }
+        return periode;
+
     }
 }
