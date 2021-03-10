@@ -56,6 +56,7 @@ public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTas
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(new ProsessTaskData(SendVedtaksbrevTask.TASKTYPE));
+        parallelle.add(new ProsessTaskData(UtvidetRettIverksettTask.TASKTYPE));
         avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);
