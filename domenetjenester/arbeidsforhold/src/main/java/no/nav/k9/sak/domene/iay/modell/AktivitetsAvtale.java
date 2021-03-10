@@ -8,7 +8,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class AktivitetsAvtale implements IndexKey {
 
@@ -80,7 +80,7 @@ public class AktivitetsAvtale implements IndexKey {
     /**
      * Henter kun den originale perioden, ikke den overstyrte perioden.
      * Bruk heller {@link #getPeriode} i de fleste tilfeller
-     * 
+     *
      * @return Hele den originale perioden, uten overstyringer.
      */
 

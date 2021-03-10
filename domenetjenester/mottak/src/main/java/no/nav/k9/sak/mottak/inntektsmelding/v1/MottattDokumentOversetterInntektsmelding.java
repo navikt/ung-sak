@@ -35,7 +35,7 @@ import no.nav.k9.sak.mottak.inntektsmelding.ValiderInntektsmelding;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.seres.xsd.nav.inntektsmelding_m._201809.InntektsmeldingConstants;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.Arbeidsforhold;
 import no.seres.xsd.nav.inntektsmelding_m._20180924.EndringIRefusjonsListe;

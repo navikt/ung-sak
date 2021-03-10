@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.task.AutomatiskEtterkontrollTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.prosesstask.api.TaskStatus;
-import no.nav.vedtak.log.mdc.MDCOperations;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.TaskStatus;
+import no.nav.k9.felles.log.mdc.MDCOperations;
 
 @ApplicationScoped
 public class AutomatiskEtterkontrollTjeneste {

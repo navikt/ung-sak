@@ -10,7 +10,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
  * En basis {@link Entity} klasse som håndtere felles standarder for utformign av tabeller (eks. sporing av hvem som har
@@ -61,7 +61,7 @@ public abstract class BaseEntitet implements Serializable {
         return endretAv;
     }
 
-    public LocalDateTime getEndretTidspunkt() { 
+    public LocalDateTime getEndretTidspunkt() {
         return endretTidspunkt;
     }
 
@@ -70,7 +70,7 @@ public abstract class BaseEntitet implements Serializable {
         String brukerident = SubjectHandler.getSubjectHandler().getUid();
         return brukerident != null ? brukerident : BRUKERNAVN_NÅR_SIKKERHETSKONTEKST_IKKE_FINNES;
     }
-    
+
     /**
      * Kan brukes til å eksplisitt sette opprettet tidspunkt, f.eks. ved migrering av data fra et annet system. Ivaretar da opprinnelig
      * tidspunkt istdf å sette likt now().

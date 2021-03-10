@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.risikoklassifisering.Kontrollresultat;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
-import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.vedtak.kontroll.kodeverk.KontrollResultatkode;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
 

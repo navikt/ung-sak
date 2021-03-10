@@ -2,8 +2,8 @@ package no.nav.k9.sak.web.app.oppgave;
 
 import javax.inject.Inject;
 
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.ContextPathHolder;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 class RedirectFactory {
 

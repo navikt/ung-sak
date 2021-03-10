@@ -19,7 +19,7 @@ import java.util.Objects;
 
 import org.threeten.extra.Interval;
 
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 /**
  * Basis klasse for modellere et dato interval.

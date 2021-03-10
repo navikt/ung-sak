@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.risikoklassifisering.json;
 
-import static no.nav.vedtak.feil.LogLevel.WARN;
+import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.util.Optional;
 
@@ -13,10 +13,10 @@ import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.FaresignalWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.Faresignalgruppe;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
 
 @ApplicationScoped

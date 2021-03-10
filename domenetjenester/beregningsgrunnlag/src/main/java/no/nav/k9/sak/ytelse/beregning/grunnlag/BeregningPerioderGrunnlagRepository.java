@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class BeregningPerioderGrunnlagRepository {

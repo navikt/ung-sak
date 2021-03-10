@@ -14,9 +14,9 @@ import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class ProsesseringAsynkTjeneste {
@@ -97,7 +97,7 @@ public class ProsesseringAsynkTjeneste {
 
     /**
      * Kjør prosess asynkront (i egen prosess task) videre.
-     * 
+     *
      * @return gruppe assignet til prosess task
      */
     public String asynkStartBehandlingProsess(Behandling behandling) {
@@ -111,7 +111,7 @@ public class ProsesseringAsynkTjeneste {
 
     /**
      * Kjør prosess asynkront (i egen prosess task) videre.
-     * 
+     *
      * @return gruppe assignet til prosess task
      */
     public String asynkProsesserBehandlingMergeGruppe(Behandling behandling) {

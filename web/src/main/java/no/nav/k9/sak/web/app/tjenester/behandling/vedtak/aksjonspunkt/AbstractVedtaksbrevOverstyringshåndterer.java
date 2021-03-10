@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
-import no.finn.unleash.Unleash;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -24,7 +23,6 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
     VedtakVarselRepository vedtakVarselRepository;
     protected OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
     private VedtakTjeneste vedtakTjeneste;
-    protected Unleash unleash;
 
     AbstractVedtaksbrevOverstyringshåndterer() {
         // for CDI proxy
@@ -38,19 +36,6 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
         this.vedtakTjeneste = vedtakTjeneste;
-        this.unleash = null;
-    }
-
-    AbstractVedtaksbrevOverstyringshåndterer(VedtakVarselRepository vedtakVarselRepository,
-                                             HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
-                                             OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
-                                             VedtakTjeneste vedtakTjeneste,
-                                             Unleash unleash) {
-        this.vedtakVarselRepository = vedtakVarselRepository;
-        this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
-        this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
-        this.vedtakTjeneste = vedtakTjeneste;
-        this.unleash = unleash;
     }
 
     void oppdaterVedtaksbrevForFritekst(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {

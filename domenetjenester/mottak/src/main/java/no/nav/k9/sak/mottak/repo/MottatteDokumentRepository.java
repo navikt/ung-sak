@@ -17,7 +17,7 @@ import javax.persistence.TypedQuery;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class MottatteDokumentRepository {

@@ -10,7 +10,7 @@ import org.jboss.resteasy.spi.ApplicationException;
 import org.owasp.encoder.Encode;
 
 import no.nav.k9.sak.kontrakt.FeilDto;
-import no.nav.vedtak.sikkerhet.ContextPathHolder;
+import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 
 @Provider

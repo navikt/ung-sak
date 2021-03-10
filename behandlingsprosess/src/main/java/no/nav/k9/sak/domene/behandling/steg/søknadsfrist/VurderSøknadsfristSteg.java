@@ -24,7 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @BehandlingStegRef(kode = "VURDER_SØKNADSFRIST")
 @BehandlingTypeRef

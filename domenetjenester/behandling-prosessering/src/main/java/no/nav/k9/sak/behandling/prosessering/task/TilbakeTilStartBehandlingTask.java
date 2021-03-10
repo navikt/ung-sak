@@ -25,8 +25,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -81,7 +81,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var startSteg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(PROPERTY_START_STEG));
         var targetSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
         var forventetPassertSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
-        
+
         if (targetSteg != BehandlingStegType.START_STEG && (
                         erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
                         || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
@@ -90,17 +90,17 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         }
 
         if (!behandling.erAvsluttet() && behandlingskontrollTjeneste.erIStegEllerSenereSteg(behandling.getId(), forventetPassertSteg)) {
-            log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);            
+            log.warn("Resetter behandling, flytter behandling tilbake fra {}, til {}.", behandling.getAktivtBehandlingSteg(), targetSteg);
             Long fagsakId = prosessTaskData.getFagsakId();
             BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-            
+
             if (Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_MANUELT_OPPRETTET))) {
                 BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ANNET).medManueltOpprettet(true).buildFor(behandling);
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
-            
+
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
-            
+
             if (startSteg == BehandlingStegType.START_STEG) {
                 resetGrunnlag(behandling);
             }

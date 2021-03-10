@@ -25,8 +25,8 @@
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-db</artifactId>
+			<groupId>no.nav.k9.felles</groupId>
+			<artifactId>k9-felles-db</artifactId>
 		</dependency>
 
 		<dependency>
@@ -39,8 +39,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-			<artifactId>sensu-klient</artifactId>
+			<groupId>no.nav.k9.felles.integrasjon</groupId>
+			<artifactId>k9-sensu-klient</artifactId>
 		</dependency>
 
 		<!-- Test avhengigheter -->

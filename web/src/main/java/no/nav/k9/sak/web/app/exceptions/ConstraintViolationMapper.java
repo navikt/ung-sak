@@ -22,7 +22,7 @@ import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
 import no.nav.k9.sak.kontrakt.FeltFeilDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
-import no.nav.vedtak.feil.Feil;
+import no.nav.k9.felles.feil.Feil;
 
 public class ConstraintViolationMapper implements ExceptionMapper<ConstraintViolationException> {
 

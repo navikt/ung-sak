@@ -28,7 +28,7 @@ import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.vedtak.exception.IntegrasjonException;
+import no.nav.k9.felles.exception.IntegrasjonException;
 
 @BehandlingStegRef(kode = "SIMOPP")
 @BehandlingTypeRef

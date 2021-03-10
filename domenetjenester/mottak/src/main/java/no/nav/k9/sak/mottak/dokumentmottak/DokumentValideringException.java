@@ -1,6 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import no.nav.vedtak.log.util.LoggerUtils;
+import no.nav.k9.felles.log.util.LoggerUtils;
 
 public class DokumentValideringException extends RuntimeException {
     public DokumentValideringException(String feilmelding) {

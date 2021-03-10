@@ -13,7 +13,7 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.vedtak.exception.FunksjonellException;
+import no.nav.k9.felles.exception.FunksjonellException;
 
 public class ArbeidsgiverValidatorTest {
 

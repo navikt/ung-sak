@@ -1,7 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.repository;
 
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentEksaktResultat;
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
+import static no.nav.k9.felles.jpa.HibernateVerktøy.hentEksaktResultat;
+import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

@@ -34,8 +34,8 @@
         </dependency>
 		<!-- Prosjektinterne avhengigheter -->
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-bom</artifactId>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

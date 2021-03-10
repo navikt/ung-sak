@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class SøknadsperiodeRepository {

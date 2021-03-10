@@ -43,7 +43,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
-import no.nav.vedtak.feil.Feil;
+import no.nav.k9.felles.feil.Feil;
 
 public class HistorikkInnslagTekstBuilder {
 

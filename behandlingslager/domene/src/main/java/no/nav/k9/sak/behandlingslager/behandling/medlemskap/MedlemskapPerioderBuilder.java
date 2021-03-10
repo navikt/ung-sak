@@ -6,7 +6,7 @@ import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.k9.kodeverk.medlem.MedlemskapKildeType;
 import no.nav.k9.kodeverk.medlem.MedlemskapType;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class MedlemskapPerioderBuilder {
     private MedlemskapPerioderEntitet medlemskapPerioderMal;

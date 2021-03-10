@@ -10,14 +10,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.saf.DokumentInfo;
-import no.nav.saf.DokumentInfoResponseProjection;
-import no.nav.saf.DokumentvariantResponseProjection;
-import no.nav.saf.JournalpostQueryRequest;
-import no.nav.saf.JournalpostResponseProjection;
-import no.nav.saf.LogiskVedleggResponseProjection;
-import no.nav.saf.RelevantDatoResponseProjection;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 @Dependent
 public class SykdomsDokumentVedleggHåndterer {

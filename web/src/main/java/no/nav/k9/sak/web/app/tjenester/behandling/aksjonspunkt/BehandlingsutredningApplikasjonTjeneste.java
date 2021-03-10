@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static no.nav.vedtak.feil.LogLevel.ERROR;
-import static no.nav.vedtak.feil.LogLevel.WARN;
+import static no.nav.k9.felles.feil.LogLevel.ERROR;
+import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,12 +29,12 @@ import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
 public class BehandlingsutredningApplikasjonTjeneste {
@@ -79,10 +79,10 @@ public class BehandlingsutredningApplikasjonTjeneste {
         doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak, venteårsakVariant);
     }
 
-    private void doSetBehandlingPåVent(Long behandlingsId, 
-                                       AksjonspunktDefinisjon apDef, 
+    private void doSetBehandlingPåVent(Long behandlingsId,
+                                       AksjonspunktDefinisjon apDef,
                                        LocalDate frist,
-                                       Venteårsak venteårsak, 
+                                       Venteårsak venteårsak,
                                        String venteårsakVariant) {
 
         LocalDateTime fristTid = bestemFristForBehandlingVent(frist);
@@ -124,7 +124,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
         }
         validerIngenPågåendeProsess(beh);
     }
-    
+
     private void validerIngenPågåendeProsess(Behandling behandling) {
         var res = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);
         if(res.isPresent()) {

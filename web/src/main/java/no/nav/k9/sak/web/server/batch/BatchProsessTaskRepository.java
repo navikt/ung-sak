@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 /**
  * Implementasjon av repository som er tilgjengelig for å lagre og opprette nye tasks.

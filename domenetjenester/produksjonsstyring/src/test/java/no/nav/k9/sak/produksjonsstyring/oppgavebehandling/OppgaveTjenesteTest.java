@@ -28,13 +28,13 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.Oppgave;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.Oppgavestatus;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.OpprettOppgave;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.Prioritet;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.integrasjon.oppgave.v1.Oppgave;
+import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
+import no.nav.k9.felles.integrasjon.oppgave.v1.Oppgavestatus;
+import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
+import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

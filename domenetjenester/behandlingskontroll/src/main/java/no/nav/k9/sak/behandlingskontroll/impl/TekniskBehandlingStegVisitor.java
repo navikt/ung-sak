@@ -7,8 +7,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.StegProsesseringResultat;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.vedtak.felles.jpa.savepoint.Work;
-import no.nav.vedtak.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.felles.jpa.savepoint.Work;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 
 /**
  * Tekniske oppsett ved kjøring av et steg:<br>

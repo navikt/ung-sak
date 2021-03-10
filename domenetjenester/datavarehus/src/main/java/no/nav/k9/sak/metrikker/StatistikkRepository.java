@@ -39,9 +39,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.vedtak.felles.integrasjon.sensu.SensuEvent;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskFeil;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
+import no.nav.k9.prosesstask.api.ProsessTaskFeil;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class StatistikkRepository {
@@ -495,7 +495,7 @@ public class StatistikkRepository {
 
         String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
         LocalDateTime nå = LocalDateTime.now();
-        
+
         @SuppressWarnings("unchecked")
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("ts", nå.truncatedTo(ChronoUnit.DAYS))

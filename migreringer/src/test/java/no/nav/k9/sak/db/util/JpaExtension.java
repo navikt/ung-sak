@@ -3,8 +3,9 @@ package no.nav.k9.sak.db.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.vedtak.felles.testutilities.db.EntityManagerAwareExtension;
-import no.nav.vedtak.util.env.Environment;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.testutilities.db.EntityManagerAwareExtension;
+
 
 public class JpaExtension extends EntityManagerAwareExtension {
 

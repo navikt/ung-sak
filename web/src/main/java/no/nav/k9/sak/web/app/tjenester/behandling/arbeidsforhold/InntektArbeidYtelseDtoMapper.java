@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
+import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @Dependent
 public class InntektArbeidYtelseDtoMapper {

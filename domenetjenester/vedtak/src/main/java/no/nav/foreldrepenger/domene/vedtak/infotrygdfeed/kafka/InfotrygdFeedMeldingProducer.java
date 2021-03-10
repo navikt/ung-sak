@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 public class InfotrygdFeedMeldingProducer extends GenerellMeldingProducer {

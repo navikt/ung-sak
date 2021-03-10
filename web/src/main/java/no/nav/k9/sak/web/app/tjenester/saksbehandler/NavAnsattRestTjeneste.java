@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.saksbehandler;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collection;
 
@@ -18,11 +18,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import no.nav.k9.sak.kontrakt.abac.InnloggetAnsattDto;
 import no.nav.k9.sak.web.app.util.LdapUtil;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
+import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Path("/nav-ansatt")
 @ApplicationScoped

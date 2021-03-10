@@ -38,8 +38,8 @@
 
 		<!-- Klient avhengigheter -->
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-			<artifactId>medl-klient</artifactId>
+			<groupId>no.nav.k9.felles.integrasjon</groupId>
+			<artifactId>k9-medl-klient</artifactId>
 		</dependency>
 
 		<!-- Prosjekt interne avhengigheter -->

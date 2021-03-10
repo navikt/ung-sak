@@ -6,16 +6,16 @@ import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.interceptor.Interceptor;
 
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.abac.AbacSporingslogg;
-import no.nav.vedtak.sikkerhet.abac.PdpKlient;
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
-import no.nav.vedtak.sikkerhet.abac.PdpRequestBuilder;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.sikkerhet.abac.AbacSporingslogg;
+import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
 
 @Default
 @Alternative
 @Priority(Interceptor.Priority.APPLICATION + 1)
-public class AppPepImpl extends no.nav.vedtak.sikkerhet.abac.PepImpl {
+public class AppPepImpl extends no.nav.k9.felles.sikkerhet.abac.PepImpl {
 
     AppPepImpl() {
     }

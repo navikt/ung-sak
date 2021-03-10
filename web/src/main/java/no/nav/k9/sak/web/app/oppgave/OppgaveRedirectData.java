@@ -16,7 +16,7 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.OppgaveIdDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.feil.Feil;
+import no.nav.k9.felles.feil.Feil;
 
 public class OppgaveRedirectData {
 

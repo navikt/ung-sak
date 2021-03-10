@@ -22,18 +22,18 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.saf.AvsenderMottakerResponseProjection;
-import no.nav.saf.BrukerResponseProjection;
-import no.nav.saf.DokumentInfo;
-import no.nav.saf.DokumentInfoResponseProjection;
-import no.nav.saf.DokumentvariantResponseProjection;
-import no.nav.saf.Journalpost;
-import no.nav.saf.JournalpostQueryRequest;
-import no.nav.saf.JournalpostResponseProjection;
-import no.nav.saf.RelevantDatoResponseProjection;
-import no.nav.saf.SakResponseProjection;
-import no.nav.saf.Variantformat;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.BrukerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Variantformat;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 @Dependent
 public class HistorikkinnslagTjeneste {

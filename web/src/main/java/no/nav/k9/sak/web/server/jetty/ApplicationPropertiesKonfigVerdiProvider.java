@@ -5,8 +5,8 @@ import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import no.nav.vedtak.konfig.PropertiesKonfigVerdiProvider;
-import no.nav.vedtak.konfig.StandardPropertySource;
+import no.nav.k9.felles.konfigurasjon.konfig.PropertiesKonfigVerdiProvider;
+import no.nav.k9.felles.konfigurasjon.konfig.StandardPropertySource;
 
 @ApplicationScoped
 public class ApplicationPropertiesKonfigVerdiProvider extends PropertiesKonfigVerdiProvider {

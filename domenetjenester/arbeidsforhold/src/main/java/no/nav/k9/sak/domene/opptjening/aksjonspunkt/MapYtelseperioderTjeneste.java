@@ -30,8 +30,8 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.util.Tuple;
 
 public class MapYtelseperioderTjeneste {
 

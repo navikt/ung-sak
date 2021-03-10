@@ -59,7 +59,7 @@ import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.Ytelsesspesifi
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {

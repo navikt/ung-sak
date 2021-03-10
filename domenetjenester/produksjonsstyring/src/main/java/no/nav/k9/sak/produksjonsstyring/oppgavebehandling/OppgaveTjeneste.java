@@ -24,12 +24,12 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.OpprettOppgave;
-import no.nav.vedtak.felles.integrasjon.oppgave.v1.Prioritet;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
+import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
+import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 public class OppgaveTjeneste {

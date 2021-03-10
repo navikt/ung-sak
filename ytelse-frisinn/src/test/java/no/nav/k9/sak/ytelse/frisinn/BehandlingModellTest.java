@@ -22,7 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 /** Sjekk at alle konfigurasjoner fungerer og har definerte steg implementasjoner. */
 @ExtendWith(CdiAwareExtension.class)
