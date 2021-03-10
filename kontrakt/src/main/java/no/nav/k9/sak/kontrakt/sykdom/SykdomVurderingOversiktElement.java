@@ -55,12 +55,12 @@ public class SykdomVurderingOversiktElement {
     @JsonProperty(value = "gjelderForAnnenPart")
     @Valid
     private boolean gjelderForAnnenPart;
-    
+
     @JsonProperty(value = "endretIDenneBehandlingen")
     @Valid
     private boolean endretIDenneBehandlingen;
-    
-    
+
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -78,6 +78,9 @@ public class SykdomVurderingOversiktElement {
         this.links = links;
     }
 
+    public SykdomVurderingOversiktElement(){
+
+    }
 
     public String getId() {
         return id;
