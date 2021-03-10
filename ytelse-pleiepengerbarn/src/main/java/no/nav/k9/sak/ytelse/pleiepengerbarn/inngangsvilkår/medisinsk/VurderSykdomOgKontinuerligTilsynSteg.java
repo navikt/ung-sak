@@ -45,6 +45,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
@@ -105,7 +106,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .collect(Collectors.toList())
         );
 
-        final boolean trengerInput = sykdomVurderingService.harAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
         if (trengerInput || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));

@@ -1,17 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,8 +14,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomAksjonspunktDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -33,21 +34,24 @@ import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 @Transactional
 public class SykdomRestTjeneste {
 
-    public static final String BASE_PATH = "/behandling/sykdom";
-    public static final String SYKDOMS_DTO = "";
-    public static final String SYKDOMS_OPPLYSNINGER_PATH = BASE_PATH + SYKDOMS_DTO;
-    private SykdomDtoMapper dtoMapper;
+    static final String BASE_PATH = "/behandling/sykdom";
+    private static final String SYKDOM_AKSJONSPUNKT = "/aksjonspunkt";
+    public static final String SYKDOM_AKSJONSPUNKT_PATH = BASE_PATH + SYKDOM_AKSJONSPUNKT;
+    
+    //private SykdomDtoMapper dtoMapper;
+    private SykdomVurderingService sykdomVurderingService;
     private BehandlingRepository behandlingRepository;
 
     public SykdomRestTjeneste() {
     }
 
     @Inject
-    public SykdomRestTjeneste(SykdomDtoMapper dtoMapper, BehandlingRepository behandlingRepository) {
-        this.dtoMapper = dtoMapper;
+    public SykdomRestTjeneste(SykdomVurderingService sykdomVurderingService, BehandlingRepository behandlingRepository) {
+        this.sykdomVurderingService = sykdomVurderingService;
         this.behandlingRepository = behandlingRepository;
     }
 
+    /*
     @GET
     @Path(SYKDOMS_DTO)
     @Operation(description = "Hent sykdoms opplysninger",
@@ -68,5 +72,39 @@ public class SykdomRestTjeneste {
                                                     BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).map(Behandling::getId);
         return behandling.map(behandlingId -> dtoMapper.map(behandlingId)).orElse(null);
+    }
+    */
+    
+    @GET
+    @Path(SYKDOM_AKSJONSPUNKT)
+    @Operation(description = "Hent informasjon om sykdomsaksjonspunkt",
+        summary = ("Henter informasjon om sykdomsaksjonspunkt"),
+        tags = "sykdom",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "Informasjon om sykdomsaksjonspunkt",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = SykdomAksjonspunktDto.class)))
+        })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public SykdomAksjonspunktDto hentSykdomAksjonspunkt(@NotNull @QueryParam(BehandlingUuidDto.NAME)
+                @Parameter(description = BehandlingUuidDto.DESC)
+                @Valid
+                @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+                BehandlingUuidDto behandlingUuid) {
+        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
+        final var aksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
+        
+        return toSykdomAksjonspunktDto(aksjonspunkt);
+    }
+
+    private SykdomAksjonspunktDto toSykdomAksjonspunktDto(final SykdomAksjonspunkt aksjonspunkt) {
+        return new SykdomAksjonspunktDto(aksjonspunkt.isKanLøseAksjonspunkt(),
+                aksjonspunkt.isHarUklassifiserteDokumenter(),
+                aksjonspunkt.isManglerDiagnosekode(),
+                aksjonspunkt.isManglerGodkjentLegeerklæring(),
+                aksjonspunkt.isManglerVurderingAvKontinuerligTilsynOgPleie(),
+                aksjonspunkt.isManglerVurderingAvToOmsorgspersoner());
     }
 }

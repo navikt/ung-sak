@@ -60,36 +60,21 @@ public class SykdomVurderingService {
     }    
     
     
-    public boolean harAksjonspunkt(Behandling behandling) {
+    public SykdomAksjonspunkt vurderAksjonspunkt(Behandling behandling) {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
         
-        final boolean uklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
-        if (uklassifiserteDokumenter) {
-            return true;
-        }
-        
-        final boolean legeerklæring = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
-        if (!legeerklæring) {
-            return true;
-        }
-        
-        final boolean diagnosekode = !sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
-        if (!diagnosekode) {
-            return true;
-        }
+        final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);       
+        final boolean manglerGodkjentLegeerklæring = !sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
+        final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
         
         final var ktp = hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        if (!ktp.getResterendeVurderingsperioder().isEmpty()) {
-            return true;
-        }
+        final boolean manglerVurderingAvKontinuerligTilsynOgPleie = !ktp.getResterendeVurderingsperioder().isEmpty();
         
         final var too = hentVurderingerForToOmsorgspersoner(behandling);
-        if (!too.getResterendeVurderingsperioder().isEmpty()) {
-            return true;
-        }
+        final boolean manglerVurderingAvToOmsorgspersoner = !too.getResterendeVurderingsperioder().isEmpty();
         
-        return false;
+        return new SykdomAksjonspunkt(harUklassifiserteDokumenter, manglerDiagnosekode, manglerGodkjentLegeerklæring, manglerVurderingAvKontinuerligTilsynOgPleie, manglerVurderingAvToOmsorgspersoner);
     }
     
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
