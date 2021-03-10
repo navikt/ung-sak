@@ -78,7 +78,7 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
         boolean elektroniskSøknad = true;
         DatoIntervallEntitet datoIntervall = søknadsperiode == null
             ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
-            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed());
+            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
 
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(datoIntervall)

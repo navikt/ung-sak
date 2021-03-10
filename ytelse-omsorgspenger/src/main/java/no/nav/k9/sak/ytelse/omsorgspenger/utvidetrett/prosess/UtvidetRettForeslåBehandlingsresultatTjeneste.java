@@ -45,6 +45,7 @@ public class UtvidetRettForeslåBehandlingsresultatTjeneste extends ForeslåBeha
 
         var fom = perioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
         var tom = perioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
+
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
