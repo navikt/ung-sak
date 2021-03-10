@@ -371,7 +371,7 @@ public class BehandlingDtoTjeneste {
             case OPPLÆRINGSPENGER:
             case PLEIEPENGER_SYKT_BARN:
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOMS_OPPLYSNINGER_PATH, "sykdom", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_KTP_PATH, "sykdom-vurdering-oversikt-ktp", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_TOO_PATH, "sykdom-vurdering-oversikt-too", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
