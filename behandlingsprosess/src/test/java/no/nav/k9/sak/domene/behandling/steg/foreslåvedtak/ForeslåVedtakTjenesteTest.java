@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -53,7 +55,7 @@ public class ForeslåVedtakTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -63,6 +65,9 @@ public class ForeslåVedtakTjenesteTest {
 
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+
+    @Inject
+    private @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
 
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
@@ -94,7 +99,7 @@ public class ForeslåVedtakTjenesteTest {
         when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
 
         SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste = new SjekkMotEksisterendeOppgaverTjeneste(historikkRepository, oppgaveTjeneste);
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotEksisterendeOppgaverTjeneste);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotEksisterendeOppgaverTjeneste, foreslåVedtakManueltUtledere);
     }
 
     @Test

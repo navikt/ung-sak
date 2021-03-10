@@ -8,16 +8,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -34,6 +37,7 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     private Boolean deaktiverTotrinnSelektivt;
+    private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -43,11 +47,13 @@ class ForeslåVedtakTjeneste {
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           @KonfigVerdi(value = "TOTRINN_TEMP_DEAKTIVERT", defaultVerdi = "false") Boolean deaktiverTotrinnSelektivt,
-                          SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste) {
+                          SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste,
+                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
         this.deaktiverTotrinnSelektivt = Objects.requireNonNull(deaktiverTotrinnSelektivt, "deaktiverTotrinnSelektivt");
         this.sjekkMotEksisterendeOppgaverTjeneste = sjekkMotEksisterendeOppgaverTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -66,31 +72,42 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
         }
 
-        håndterToTrinn(behandling, kontekst, aksjonspunktDefinisjoner);
+        if (skalUtføreTotrinnsbehandling(behandling)) {
+            håndterTotrinn(behandling, aksjonspunktDefinisjoner);
+        } else {
+            håndterUtenTotrinn(behandling, kontekst, aksjonspunktDefinisjoner);
+        }
 
-        return aksjonspunktDefinisjoner.isEmpty() ? BehandleStegResultat.utførtUtenAksjonspunkter()
+        return aksjonspunktDefinisjoner.isEmpty()
+            ? BehandleStegResultat.utførtUtenAksjonspunkter()
             : BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
     }
 
-    private void håndterToTrinn(Behandling behandling, BehandlingskontrollKontekst kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        if (skalUtføreTotrinnsbehandling(behandling)) {
-            if (!behandling.isToTrinnsBehandling()) {
-                behandling.setToTrinnsBehandling();
-                logger.info("To-trinn satt på behandling={}", behandling.getId());
-            }
-            aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
-        } else {
-            behandling.nullstillToTrinnsBehandling();
-            logger.info("To-trinn fjernet på behandling={}", behandling.getId());
-            settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
-            if (skalOppretteForeslåVedtakManuelt(behandling)) {
-                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
-            }
+    private void håndterTotrinn(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+        if (!behandling.isToTrinnsBehandling()) {
+            behandling.setToTrinnsBehandling();
+            logger.info("To-trinn satt på behandling={}", behandling.getId());
+        }
+        aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
+    }
+
+    private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+        behandling.nullstillToTrinnsBehandling();
+        logger.info("To-trinn fjernet på behandling={}", behandling.getId());
+        settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
+        if (skalOppretteForeslåVedtakManuelt(behandling)) {
+            aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
         }
     }
 
     private boolean skalOppretteForeslåVedtakManuelt(Behandling behandling) {
-        return BehandlingType.REVURDERING.equals(behandling.getType()) && behandling.erManueltOpprettet();
+        return finnForeslåVedtakManueltUtleder(behandling).skalOppretteForeslåVedtakManuelt(behandling);
+    }
+
+    private ForeslåVedtakManueltUtleder finnForeslåVedtakManueltUtleder(Behandling behandling) {
+        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+        return FagsakYtelseTypeRef.Lookup.find(foreslåVedtakManueltUtledere, ytelseType)
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + ForeslåVedtakManueltUtleder.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
