@@ -6,7 +6,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -18,7 +17,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 
@@ -26,21 +25,29 @@ import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRettDto> {
 
+    private final VilkårType vilkårType = VilkårType.UTVIDETRETT;
+    private final Avslagsårsak defaultAvslagsårsak = Avslagsårsak.IKKE_UTVIDETRETT;
+    private final SkjermlenkeType skjermlenkeType = SkjermlenkeType.PUNKT_FOR_UTVIDETRETT;
+    private final HistorikkEndretFeltType historikkEndretFeltType = HistorikkEndretFeltType.UTVIDETRETT;
+
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     AvklarUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter, BehandlingRepository behandlingRepository) {
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter, VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
+        var behandlingId = param.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var fagsak = behandling.getFagsak();
 
@@ -49,11 +56,14 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
-        var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
         var periode = dto.getPeriode();
         if (periode == null) {
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), dto.getAvslagsårsak());
+            // overskriver hele
+            var vilkårene = vilkårResultatRepository.hent(behandlingId);
+            var timeline = vilkårene.getVilkårTimeline(vilkårType);
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
         } else {
+            var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
             var angittPeriode = new LocalDateInterval(periode.getFom(), periode.getTom());
             if (!fagsakPeriode.contains(angittPeriode)) {
                 throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
@@ -64,8 +74,8 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     }
 
     private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.UTVIDETRETT);
-        Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? Avslagsårsak.IKKE_UTVIDETRETT : avslagsårsak) : null;
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? defaultAvslagsårsak : avslagsårsak) : null;
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
             .medAvslagsårsak(settAvslagsårsak));
@@ -74,11 +84,11 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
         historikkAdapter.tekstBuilder()
-            .medEndretFelt(HistorikkEndretFeltType.UTVIDETRETT, null, nyVerdi);
+            .medEndretFelt(historikkEndretFeltType, null, nyVerdi);
 
         boolean erBegrunnelseForAksjonspunktEndret = param.erBegrunnelseEndret();
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
-            .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_UTVIDETRETT);
+            .medSkjermlenke(skjermlenkeType);
     }
 }
