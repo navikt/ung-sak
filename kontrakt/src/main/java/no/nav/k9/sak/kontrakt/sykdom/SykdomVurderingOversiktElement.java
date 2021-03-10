@@ -82,7 +82,6 @@ public class SykdomVurderingOversiktElement {
 
     }
 
-
     public String getId() {
         return id;
     }
