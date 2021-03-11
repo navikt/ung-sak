@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -37,17 +36,12 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
     }
 
     public List<AksjonspunktDefinisjon> sjekkMotEksisterendeGsakOppgaver(AktørId aktørid, Behandling behandling) {
-        if (sjekkMotEksisterendeGsakOppgaverUtført(behandling)) {
+        if (ikkeSkalSjekkeGsakOppgaver(behandling)) {
             return new ArrayList<>();
         }
 
         List<Historikkinnslag> historikkInnslagFraRepo = historikkRepository.hentHistorikk(behandling.getId());
         List<AksjonspunktDefinisjon> aksjonspunktliste = new ArrayList<>();
-
-        // FIXME FagsakYtelseType: Ikke branch på ytelsetype i generelle moduler
-        if (FagsakYtelseType.FRISINN.equals(behandling.getFagsakYtelseType())) {
-            return List.of();
-        }
 
         if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, behandling.getFagsakYtelseType())) {
             aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
@@ -60,11 +54,15 @@ public class SjekkMotEksisterendeOppgaverTjeneste {
         return aksjonspunktliste;
     }
 
-    private boolean sjekkMotEksisterendeGsakOppgaverUtført(Behandling behandling) {
-        return behandling.getAksjonspunkter().stream()
+    private boolean ikkeSkalSjekkeGsakOppgaver(Behandling behandling) {
+        if (!behandling.getFagsakYtelseType().vurderÅpneOppgaverFørVedtak()) {
+            return false;
+        }
+        boolean sjekkMotÅpneGsakOppgaver = behandling.getAksjonspunkter().stream()
             .anyMatch(ap ->
                 (ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK) && ap.erUtført())
                     || (ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK) && ap.erUtført()));
+        return sjekkMotÅpneGsakOppgaver;
     }
 
     private void opprettHistorikkinnslagOmVurderingFørVedtak(Behandling behandling, OppgaveÅrsak begrunnelse, List<Historikkinnslag> historikkInnslagFraRepo) {
