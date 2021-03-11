@@ -7,7 +7,7 @@ import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_KS")
@@ -15,14 +15,17 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class GrunnlagKopiererUtvidetRett implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;
+    private SøknadRepository søknadRepository;
 
     public GrunnlagKopiererUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    public GrunnlagKopiererUtvidetRett(BehandlingRepositoryProvider repositoryProvider) {
-        this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
+    public GrunnlagKopiererUtvidetRett(PersonopplysningRepository personopplysningRepository,
+                                       SøknadRepository søknadRepository) {
+        this.personopplysningRepository = personopplysningRepository;
+        this.søknadRepository = søknadRepository;
     }
 
     @Override
@@ -30,6 +33,7 @@ public class GrunnlagKopiererUtvidetRett implements GrunnlagKopierer {
         Long originalBehandlingId = original.getId();
         Long nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        søknadRepository.kopierGrunnlagFraEksisterendeBehandling(original, ny); // kopierer også med søknad - kan være manuell revurdering er opprettet.
     }
 
     @Override

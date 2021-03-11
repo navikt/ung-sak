@@ -8,15 +8,13 @@ import java.util.TreeSet;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef("OMP_MA")
@@ -25,7 +23,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
+    private SøknadRepository søknadRepository;
 
     MidlertidigAleneVilkårsVurderingTjeneste() {
         // for proxy
@@ -33,9 +31,9 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
 
     @Inject
     public MidlertidigAleneVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
-                                                    MottatteDokumentRepository mottatteDokumentRepository) {
+                                                    SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.søknadRepository = søknadRepository;
     }
 
     @Override
@@ -56,17 +54,9 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
     }
 
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {
-        var fagsakId = behandling.getFagsakId();
-        var søknadBrevkode = Brevkode.SØKNAD_OMS_UTVIDETRETT_MA;
-        var dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandling.getId(), søknadBrevkode, true);
-
-        if (dokumenter.size() != 1) {
-            throw new UnsupportedOperationException("Støtter p.t. kun ett dokument per behandling, fikk " + dokumenter.size() + " knyttet til behandling");
-        }
-        var søknad = new SøknadParser().parseSøknad(dokumenter.get(0));
-        var ytelse = søknad.getYtelse();
-        var periode = ytelse.getSøknadsperiode();
-        return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed());
+        var søknad = søknadRepository.hentSøknad(behandling);
+        var søknadsperiode = søknad.getSøknadsperiode();
+        return DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFomDato(), søknadsperiode.getTomDato());
     }
 
     @Override

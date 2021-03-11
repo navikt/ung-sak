@@ -44,6 +44,7 @@ public class UtvidetRettManuellVilkårsvurderingSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkår = vilkårene.getVilkår(VilkårType.UTVIDETRETT);
+
         if (vilkår.get().getPerioder().stream().anyMatch(v -> v.getUtfall() == Utfall.IKKE_VURDERT)) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OMS_UTVIDET_RETT));
         } else {
