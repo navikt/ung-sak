@@ -44,6 +44,10 @@ public enum FagsakYtelseType implements Kodeverdi {
             requireNull(relatertPersonAktørId, "relatertPerson");
         }
 
+        @Override
+        public boolean vurderÅpneOppgaverFørVedtak() {
+            return false;
+        }
     },
 
     /** Folketrygdloven K8 ytelser. */
@@ -70,6 +74,7 @@ public enum FagsakYtelseType implements Kodeverdi {
             requireNull(pleietrengendeAktørId, "pleietrengende");
             requireNull(relatertPersonAktørId, "relatertPerson");
         }
+
     },
     OMSORGSPENGER_KS("OMP_KS", "Omsorgspenger - Utvidet rett Kronisk sykdom", "OM", "OMS") {
         @Override
@@ -77,12 +82,22 @@ public enum FagsakYtelseType implements Kodeverdi {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
             requireNull(relatertPersonAktørId, "relatertPerson");
         }
+
+        @Override
+        public boolean vurderÅpneOppgaverFørVedtak() {
+            return false;
+        }
     },
     OMSORGSPENGER_MA("OMP_MA", "Omsorgspenger - Utvidet rett Midlertidig Alene", "OM", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNull(pleietrengendeAktørId, "pleietrengende");
             requireNonNull(relatertPersonAktørId, "relatertPerson");
+        }
+
+        @Override
+        public boolean vurderÅpneOppgaverFørVedtak() {
+            return false;
         }
     },
 
@@ -296,6 +311,10 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     public void validerNøkkelParametere(AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId) {
         validerNøkkelParametere(pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getAktørId(), relatertPersonAktørId == null ? null : relatertPersonAktørId.getAktørId());
+    }
+
+    public boolean vurderÅpneOppgaverFørVedtak() {
+        return true;
     }
 
     void requireNull(String value, String type) {
