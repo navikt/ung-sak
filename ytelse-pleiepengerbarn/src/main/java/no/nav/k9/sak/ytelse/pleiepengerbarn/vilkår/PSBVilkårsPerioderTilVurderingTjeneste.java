@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -25,6 +27,11 @@ import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
@@ -41,6 +48,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
+    private BehandlingRepository behandlingRepository;
+    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -49,9 +58,12 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Inject
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
                                                   SøknadsperiodeRepository søknadsperiodeRepository,
-                                                  VilkårResultatRepository vilkårResultatRepository) {
+                                                  VilkårResultatRepository vilkårResultatRepository,
+                                                  BehandlingRepository behandlingRepository, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
@@ -90,8 +102,25 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        // TODO: Returnere liste av alle perioder på utsiden av revurderingsperiode som har blitt endret.
-        return new TreeSet<>();
+        AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();
+
+        final SykdomGrunnlag forrigeGrunnlag = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid()).get().getGrunnlag();
+        LocalDateTimeline<RevurderingTuppel> forrigeTidslinje = RevurderingTuppel.grunnlagTilTidslinje(forrigeGrunnlag);
+
+        var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
+        SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, perioder);
+        LocalDateTimeline<RevurderingTuppel> nyTidslinje = RevurderingTuppel.grunnlagTilTidslinje(utledetGrunnlag);
+
+        LocalDateTimeline<Object> kombinertTidslinje = RevurderingTuppel.getKombinertTidslinje(forrigeTidslinje, nyTidslinje);
+
+        var vurderingsperioder = SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+
+        LocalDateTimeline<Object> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioder);
+
+        return new TreeSet<>(utvidedePerioder.stream()
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
+            .collect(Collectors.toList()));
+
     }
 
     @Override
