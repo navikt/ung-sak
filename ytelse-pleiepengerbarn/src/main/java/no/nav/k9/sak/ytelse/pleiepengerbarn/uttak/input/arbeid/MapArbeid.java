@@ -95,6 +95,10 @@ public class MapArbeid {
                                                            LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                                                            Set<Inntektsmelding> sakInntektsmeldinger) {
         var segment = tidslinjeTilVurdering.getSegment(new LocalDateInterval(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()));
+        if (segment == null) {
+            // Arbeid perioden gjelder ikke for perioden til vurdering så "forkaster" denne
+            return Set.of();
+        }
         var arbeidsforholdRefs = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
             .stream()
             .filter(it -> it.getArbeidsgiver().equals(p.getArbeidsgiver()))
