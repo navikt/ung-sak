@@ -26,7 +26,6 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 @ApplicationScoped
 public class FatteVedtakTjeneste {
 
-    public static final String UTVIKLER_FEIL_VEDTAK = "Utvikler-feil: Vedtak kan ikke fattes, behandlingsresultat er ";
     private static final Set<BehandlingResultatType> VEDTAKSTILSTANDER_REVURDERING = new HashSet<>(
         Arrays.asList(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.INNVILGET,
             BehandlingResultatType.OPPHØR, BehandlingResultatType.INNVILGET_ENDRING,
@@ -90,12 +89,12 @@ public class FatteVedtakTjeneste {
         if (behandling.erRevurdering()) {
             if (!VEDTAKSTILSTANDER_REVURDERING.contains(behandlingResultatType)) {
                 throw new IllegalStateException(
-                    UTVIKLER_FEIL_VEDTAK // $NON-NLS-1$
+                    "Utvikler-feil: Vedtak kan ikke fattes for [" + behandling.getType() + "], behandlingsresultat er " // $NON-NLS-1$
                         + (behandlingResultatType.getNavn()));
             }
         } else if (!VEDTAKSTILSTANDER.contains(behandlingResultatType)) {
             throw new IllegalStateException(
-                UTVIKLER_FEIL_VEDTAK + behandlingResultatType.getNavn());
+                "Utvikler-feil: Vedtak kan ikke fattes for behandling [" + behandling.getType() + "], behandlingsresultat er " + behandlingResultatType.getNavn());
         }
     }
 

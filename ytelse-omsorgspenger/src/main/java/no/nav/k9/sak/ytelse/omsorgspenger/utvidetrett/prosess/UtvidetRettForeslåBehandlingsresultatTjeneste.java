@@ -3,10 +3,10 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 import java.util.Comparator;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
@@ -31,7 +31,7 @@ public class UtvidetRettForeslåBehandlingsresultatTjeneste extends ForeslåBeha
     public UtvidetRettForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                          VedtakVarselRepository vedtakVarselRepository,
                                                          VilkårResultatRepository vilkårResultatRepository,
-                                                         @Any UtvidetRettRevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
+                                                         @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
