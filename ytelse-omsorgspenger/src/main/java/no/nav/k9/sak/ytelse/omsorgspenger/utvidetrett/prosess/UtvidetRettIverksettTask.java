@@ -14,8 +14,6 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -38,13 +36,10 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UtvidetRettIverksettTask.class);
     private static final Set<LocalDate> UGYLDIGE_DATOER_FOR_PERIODE = Set.of(
         Tid.TIDENES_BEGYNNELSE,
-        Tid.TIDENES_ENDE
-    );
+        Tid.TIDENES_ENDE);
     public static final String TASKTYPE = "iverksetteVedtak.sendUtvidetRett";
-
 
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
