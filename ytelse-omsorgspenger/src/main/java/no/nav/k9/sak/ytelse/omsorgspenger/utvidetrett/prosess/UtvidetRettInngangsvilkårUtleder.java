@@ -21,7 +21,6 @@ class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
         VilkårType.OMSORGEN_FOR,
-        VilkårType.ALDERSVILKÅR,
         VilkårType.UTVIDETRETT);
 
     public UtvidetRettInngangsvilkårUtleder() {
