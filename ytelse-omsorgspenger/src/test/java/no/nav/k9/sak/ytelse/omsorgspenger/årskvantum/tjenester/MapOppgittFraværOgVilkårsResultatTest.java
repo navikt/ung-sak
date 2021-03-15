@@ -75,7 +75,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
     @NotNull
     private BehandlingReferanse opprettRef(AktørId dummy) {
-        return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
+        return BehandlingReferanse.fra(FagsakYtelseType.OMP, null, null, dummy, null, null, null, null, null, null, java.util.Optional.empty(), null, null, null);
     }
 
     @Test

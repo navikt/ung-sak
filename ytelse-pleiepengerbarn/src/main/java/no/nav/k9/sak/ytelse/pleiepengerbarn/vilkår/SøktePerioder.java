@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -32,22 +33,26 @@ class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
             return Collections.emptyNavigableSet();
         } else {
             var søknadsperioders = søknadsperioder.get().getPerioder();
-            var timeline = new LocalDateTimeline<Boolean>(List.of());
-
-            for (Søknadsperioder perioder : søknadsperioders) {
-                var relevantePerioder = perioder.getPerioder()
-                    .stream()
-                    .map(Søknadsperiode::getPeriode)
-                    .collect(Collectors.toSet());
-
-                var relevantTimeline = new LocalDateTimeline<>(relevantePerioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
-
-                timeline = timeline.combine(relevantTimeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
-            return Collections.unmodifiableNavigableSet(timeline.toSegments()
-                .stream()
-                .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                .collect(Collectors.toCollection(TreeSet::new)));
+            return utledVurderingsperioderFraSøknadsperioder(søknadsperioders);
         }
+    }
+
+    NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(Set<Søknadsperioder> søknadsperioders) {
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+
+        for (Søknadsperioder perioder : søknadsperioders) {
+            var relevantePerioder = perioder.getPerioder()
+                .stream()
+                .map(Søknadsperiode::getPeriode)
+                .collect(Collectors.toSet());
+
+            var relevantTimeline = new LocalDateTimeline<>(relevantePerioder.stream().map(a -> new LocalDateSegment<>(a.getFomDato(), a.getTomDato(), true)).collect(Collectors.toList())).compress();
+
+            timeline = timeline.combine(relevantTimeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return Collections.unmodifiableNavigableSet(timeline.toSegments()
+            .stream()
+            .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new)));
     }
 }

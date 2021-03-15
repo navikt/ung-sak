@@ -13,7 +13,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.RelaterteYtelserDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.TilgrensendeYtelserDto;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class BehandlingRelaterteYtelserMapper {
 

@@ -24,7 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.domene.registerinnhenting.impl.RegisterinnhentingHistorikkinnslagTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 /**
  * Oppdaterer registeropplysninger for engangsstønader og skrur behandlingsprosessen tilbake

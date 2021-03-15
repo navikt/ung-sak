@@ -11,14 +11,14 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(OppfriskTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class OppfriskTask extends BehandlingProsessTask {
-    
+
     private static final Logger log = LoggerFactory.getLogger(OppfriskTask.class);
 
     public static final String TASKTYPE = "behandling.oppfrisk";
@@ -46,8 +46,8 @@ public class OppfriskTask extends BehandlingProsessTask {
             log.info("Uventet feil ved oppfrisking av behandling.", e);
         }
     }
-    
-    
+
+
     public static final ProsessTaskData create(Behandling behandling) {
         final ProsessTaskData taskData = new ProsessTaskData(OppfriskTask.TASKTYPE);
         taskData.setCallIdFraEksisterende();

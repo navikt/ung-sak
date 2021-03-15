@@ -8,7 +8,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 public class OppdateringResultat {
 

@@ -67,7 +67,7 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = {arbeidsgiver, arbeidsforholdRef, arbeidType};
+        Object[] keyParts = { arbeidsgiver, arbeidsforholdRef, arbeidType };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -99,7 +99,8 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     }
 
     /**
-     * Unik identifikator for arbeidsforholdet til aktøren i bedriften. Selve nøkkelen er ikke unik, men er unik for arbeidstaker hos arbeidsgiver.
+     * Unik identifikator for arbeidsforholdet til aktøren i bedriften. Selve nøkkelen er ikke unik, men er unik for arbeidstaker hos
+     * arbeidsgiver.
      * <p>
      * NB! Vil kun forekomme i aktiviteter som er hentet inn fra aa-reg
      *
@@ -116,7 +117,7 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     /**
      * Identifiser om yrkesaktiviteten gjelder for arbeidsgiver og arbeidsforholdRef.
      *
-     * @param arbeidsgiver      en {@link Arbeidsgiver}
+     * @param arbeidsgiver en {@link Arbeidsgiver}
      * @param arbeidsforholdRef et {@link InternArbeidsforholdRef}
      * @return true hvis arbeidsgiver og arbeidsforholdRef macther
      */
@@ -172,7 +173,7 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
             return Optional.empty();
         }
         if (avtaler.size() > 1) {
-            throw new IllegalStateException("Fant overlappende aktivitestavataler for " + this.toString());
+            throw new IllegalStateException("Fant [" + avtaler.size() + "] overlappende aktivitetsavtaler for dato [" + dato + "], " + this.toString() + ", aktivitetsavtaler=" + avtaler);
         }
         return Optional.ofNullable(avtaler.get(0).getProsentsats());
     }

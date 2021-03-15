@@ -6,9 +6,9 @@ import javax.enterprise.inject.Alternative;
 import javax.interceptor.Interceptor;
 
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.vedtak.log.sporingslogg.Sporingsdata;
-import no.nav.vedtak.sikkerhet.abac.DefaultAbacSporingslogg;
-import no.nav.vedtak.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.log.sporingslogg.Sporingsdata;
+import no.nav.k9.felles.sikkerhet.abac.DefaultAbacSporingslogg;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 
 /**
  * Egen sporingslogg implementasjon for å utvide med egne felter.

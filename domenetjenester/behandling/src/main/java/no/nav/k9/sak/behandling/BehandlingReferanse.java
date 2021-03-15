@@ -32,9 +32,12 @@ public class BehandlingReferanse {
      */
     private AktørId aktørId;
     /**
-     * Søkers aktørid.
+     * Evt. pleietrengendes aktørid.
      */
     private AktørId pleietrengendeAktørId;
+
+    /** Evt. annen parts aktør id. Eks. kan være samboer, ektefelle, annen forelder. */
+    private AktørId relatertPersonAktørId;
 
     private BehandlingType behandlingType;
 
@@ -65,6 +68,7 @@ public class BehandlingReferanse {
                                 BehandlingResultatType behandlingResultatType,
                                 AktørId aktørId,
                                 AktørId pleietrengendeAktørId,
+                                AktørId relatertPersonAktørId,
                                 Saksnummer saksnummer,
                                 Long fagsakId,
                                 Long behandlingId,
@@ -78,6 +82,7 @@ public class BehandlingReferanse {
         this.behandlingResultatType = behandlingResultatType;
         this.aktørId = aktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.relatertPersonAktørId = relatertPersonAktørId;
         this.saksnummer = saksnummer;
         this.fagsakId = fagsakId;
         this.behandlingId = behandlingId;
@@ -101,6 +106,7 @@ public class BehandlingReferanse {
             behandling.getBehandlingResultatType(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
+            behandling.getFagsak().getRelatertPersonAktørId(),
             behandling.getFagsak().getSaksnummer(),
             behandling.getFagsakId(),
             behandling.getId(),
@@ -119,6 +125,7 @@ public class BehandlingReferanse {
             behandling.getBehandlingResultatType(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
+            behandling.getFagsak().getRelatertPersonAktørId(),
             behandling.getFagsak().getSaksnummer(),
             behandling.getFagsakId(),
             behandling.getId(),
@@ -134,6 +141,7 @@ public class BehandlingReferanse {
                                           BehandlingResultatType behandlingResultatType,
                                           AktørId aktørId,
                                           AktørId pleietrengendeAktørId,
+                                          AktørId relatertPersonAktørId,
                                           Saksnummer saksnummer,
                                           Long fagsakId,
                                           Long behandlingId,
@@ -146,6 +154,7 @@ public class BehandlingReferanse {
             behandlingResultatType,
             aktørId,
             pleietrengendeAktørId,
+            relatertPersonAktørId,
             saksnummer,
             fagsakId,
             behandlingId,
@@ -173,6 +182,10 @@ public class BehandlingReferanse {
 
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public AktørId getRelatertPersonAktørId() {
+        return relatertPersonAktørId;
     }
 
     public Long getId() {
@@ -272,6 +285,7 @@ public class BehandlingReferanse {
             getBehandlingResultat(),
             getAktørId(),
             getPleietrengendeAktørId(),
+            getRelatertPersonAktørId(),
             getSaksnummer(),
             getFagsakId(),
             getId(),
@@ -293,6 +307,7 @@ public class BehandlingReferanse {
             getBehandlingResultat(),
             getAktørId(),
             getPleietrengendeAktørId(),
+            getRelatertPersonAktørId(),
             getSaksnummer(),
             getFagsakId(),
             getId(),

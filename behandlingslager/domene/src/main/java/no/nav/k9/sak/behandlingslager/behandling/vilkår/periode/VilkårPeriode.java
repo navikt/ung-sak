@@ -39,7 +39,7 @@ import no.nav.k9.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.vedtak.felles.jpa.converters.PropertiesToStringConverter;
+import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")

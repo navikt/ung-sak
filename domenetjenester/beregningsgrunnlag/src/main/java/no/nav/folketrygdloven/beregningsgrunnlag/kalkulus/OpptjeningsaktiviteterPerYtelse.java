@@ -3,9 +3,9 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 import java.util.Objects;
 import java.util.Set;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 
 public class OpptjeningsaktiviteterPerYtelse {
 
@@ -27,8 +27,6 @@ public class OpptjeningsaktiviteterPerYtelse {
     }
 
     private boolean harOppgittFrilansISøknad(InntektArbeidYtelseGrunnlag grunnlag) {
-        return grunnlag.getOppgittOpptjening().stream()
-                .flatMap(oppgittOpptjening -> oppgittOpptjening.getAnnenAktivitet().stream())
-                .anyMatch(annenAktivitet -> annenAktivitet.getArbeidType().equals(ArbeidType.FRILANSER));
+        return grunnlag.getOppgittOpptjening().flatMap(OppgittOpptjening::getFrilans).isPresent();
     }
 }

@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,7 +17,6 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped

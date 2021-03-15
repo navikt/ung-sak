@@ -18,7 +18,7 @@ import no.nav.k9.sak.domene.vedtak.VedtakAksjonspunktData;
 import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 public class FatterVedtakAksjonspunkt {

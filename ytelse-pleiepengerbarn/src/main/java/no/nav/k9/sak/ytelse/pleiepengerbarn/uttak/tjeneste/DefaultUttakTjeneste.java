@@ -10,15 +10,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
-@Dependent
 @Default
+@Dependent
 public class DefaultUttakTjeneste implements UttakTjeneste {
 
     private UttakRestKlient restKlient;
-
-    DefaultUttakTjeneste() {
-        // CDI
-    }
 
     @Inject
     public DefaultUttakTjeneste(UttakRestKlient uttakRestTjeneste) {

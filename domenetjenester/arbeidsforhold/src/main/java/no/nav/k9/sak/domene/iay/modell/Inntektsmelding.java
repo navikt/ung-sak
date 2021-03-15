@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -38,6 +39,8 @@ public class Inntektsmelding implements IndexKey {
 
     @ChangeTracked
     private InternArbeidsforholdRef arbeidsforholdRef;
+
+    private EksternArbeidsforholdRef eksternArbeidsforholdRef;
 
     @ChangeTracked
     private LocalDate startDatoPermisjon;
@@ -88,6 +91,7 @@ public class Inntektsmelding implements IndexKey {
         this.ytelseType = inntektsmelding.getFagsakYtelseType();
         this.arbeidsgiver = inntektsmelding.getArbeidsgiver();
         this.arbeidsforholdRef = inntektsmelding.arbeidsforholdRef;
+        this.eksternArbeidsforholdRef = inntektsmelding.eksternArbeidsforholdRef;
         this.startDatoPermisjon = inntektsmelding.startDatoPermisjon;
         this.nærRelasjon = inntektsmelding.getErNærRelasjon();
         this.journalpostId = inntektsmelding.getJournalpostId();
@@ -237,6 +241,16 @@ public class Inntektsmelding implements IndexKey {
     }
 
     /**
+     * Arbeidsgivers eksterne arbeidsforhold referanse
+     *
+     * @return {@link EksternArbeidsforholdRef}
+     */
+    public Optional<EksternArbeidsforholdRef> getEksternArbeidsforholdRef() {
+        return Optional.ofNullable(eksternArbeidsforholdRef);
+    }
+
+
+    /**
      * Gjelder for et spesifikt arbeidsforhold
      *
      * @return {@link Boolean}
@@ -258,6 +272,15 @@ public class Inntektsmelding implements IndexKey {
      */
     void setArbeidsforholdId(InternArbeidsforholdRef arbeidsforholdRef) {
         this.arbeidsforholdRef = arbeidsforholdRef != null && !InternArbeidsforholdRef.nullRef().equals(arbeidsforholdRef) ? arbeidsforholdRef : null;
+    }
+
+    /**
+     * Setter ekstern arbeidsdforhold Id for inntektsmelding
+     *
+     * @param arbeidsforholdRef Ekstern arbeidsforhold id
+     */
+    void setEksternArbeidsforholdRef(EksternArbeidsforholdRef arbeidsforholdRef) {
+        this.eksternArbeidsforholdRef = arbeidsforholdRef;
     }
 
     /**

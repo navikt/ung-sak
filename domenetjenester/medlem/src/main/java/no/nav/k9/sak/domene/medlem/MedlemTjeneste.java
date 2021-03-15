@@ -46,7 +46,7 @@ import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlem
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 public class MedlemTjeneste {

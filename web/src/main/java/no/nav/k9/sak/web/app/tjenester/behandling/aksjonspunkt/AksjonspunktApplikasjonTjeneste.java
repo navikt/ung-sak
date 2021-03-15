@@ -54,7 +54,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class AksjonspunktApplikasjonTjeneste {

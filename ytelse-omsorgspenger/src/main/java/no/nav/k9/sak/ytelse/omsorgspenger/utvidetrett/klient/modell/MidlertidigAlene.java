@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,41 +32,45 @@ public class MidlertidigAlene implements UtvidetRett {
     @Valid
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
-    @JsonProperty(value = "søknadMottatt", required = true)
-    private ZonedDateTime søknadMottatt;
-
-    @Valid
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     @JsonProperty(value = "tidspunkt", required = true)
     private ZonedDateTime tidspunkt;
 
     @Valid
     @NotNull
     @JsonProperty(value = "søker", required = true)
-    private Søker søker;
+    private Person søker;
 
     @Valid
     @NotNull
     @JsonProperty(value = "annenForelder", required = true)
-    private AnnenForelder annenForelder;
+    private Person annenForelder;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "periode", required = true)
+    private Periode periode;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "versjon", required = true)
+    public final String versjon = "1.0.0";
 
     public MidlertidigAlene() {
     }
 
     @JsonCreator
     public MidlertidigAlene(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
-                                        @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
-                                        @JsonProperty(value = "søknadMottatt", required = true) @Valid @NotNull ZonedDateTime søknadMottatt,
-                                        @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
-                                        @JsonProperty(value = "søker", required = true) @Valid @NotNull Søker søker,
-                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull AnnenForelder annenForelder) {
+                            @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
+                            @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
+                            @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
+                            @JsonProperty(value = "annenForelder", required = true) @Valid @NotNull Person annenForelder,
+                            @JsonProperty(value = "periode", required = true) @Valid @NotNull Periode periode) {
         this.saksnummer = saksnummer;
         this.behandlingUuid = behandlingUuid;
-        this.søknadMottatt = søknadMottatt;
         this.tidspunkt = tidspunkt;
         this.søker = søker;
         this.annenForelder = annenForelder;
+        this.periode = periode;
     }
 
     public Saksnummer getSaksnummer() {
@@ -86,15 +91,6 @@ public class MidlertidigAlene implements UtvidetRett {
         return this;
     }
 
-    public ZonedDateTime getSøknadMottatt() {
-        return søknadMottatt;
-    }
-
-    public MidlertidigAlene setSøknadMottatt(ZonedDateTime søknadMottatt) {
-        this.søknadMottatt = søknadMottatt;
-        return this;
-    }
-
     public ZonedDateTime getTidspunkt() {
         return tidspunkt;
     }
@@ -104,22 +100,30 @@ public class MidlertidigAlene implements UtvidetRett {
         return this;
     }
 
-    public Søker getSøker() {
+    public Person getSøker() {
         return søker;
     }
 
-    public MidlertidigAlene setSøker(Søker søker) {
+    public MidlertidigAlene setSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public MidlertidigAlene setAnnenForelder(AnnenForelder annenForelder) {
+    public MidlertidigAlene setAnnenForelder(Person annenForelder) {
         this.annenForelder = annenForelder;
         return this;
     }
 
-    public AnnenForelder getAnnenForelder() {
+    public Person getAnnenForelder() {
         return annenForelder;
     }
 
+    public MidlertidigAlene setPeriode(Periode periode) {
+        this.periode = periode;
+        return this;
+    }
+
+    public Periode getPeriode() {
+        return periode;
+    }
 }

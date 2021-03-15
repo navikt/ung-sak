@@ -16,7 +16,7 @@ import org.mockito.quality.Strictness;
 
 import no.nav.k9.sak.domene.risikoklassifisering.RisikoklassifiseringUtførTask;
 import no.nav.k9.sak.domene.risikoklassifisering.kafka.config.RisikoklassifiseringKafkaProducer;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

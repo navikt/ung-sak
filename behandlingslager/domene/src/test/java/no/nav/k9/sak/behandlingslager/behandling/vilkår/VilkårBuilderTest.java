@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -362,5 +363,39 @@ public class VilkårBuilderTest {
         assertThat(oppdatertVilkår).isNotNull();
         assertThat(oppdatertVilkår.getPerioder()).hasSize(3);
         assertThat(oppdatertVilkår.getPerioder().stream().filter(it -> it.getUtfall().equals(Utfall.IKKE_VURDERT)).collect(Collectors.toList())).hasSize(2);
+    }
+
+    @Test
+    void håndter_oppdatering_av_utfall() throws Exception {
+        var v1 = LocalDate.now();
+        var v2 = v1.plusYears(18);
+
+        var vilkårene1 = opprettVilkår(VilkårType.UTVIDETRETT, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_UTVIDETRETT, null, v1, v2);
+
+        var timeline1 = vilkårene1.getVilkårTimeline(VilkårType.UTVIDETRETT);
+        assertThat(timeline1.getMinLocalDate()).isEqualTo(v1);
+        assertThat(timeline1.getMaxLocalDate()).isEqualTo(v2);
+        
+        var vilkårene2 = opprettVilkår(VilkårType.UTVIDETRETT, Utfall.OPPFYLT, null, vilkårene1, v1, v2);
+
+        var timeline2 = vilkårene2.getVilkårTimeline(VilkårType.UTVIDETRETT);
+        assertThat(timeline2.getMinLocalDate()).isEqualTo(v1);
+        assertThat(timeline2.getMaxLocalDate()).isEqualTo(v2);
+
+    }
+
+    private Vilkårene opprettVilkår(VilkårType utvidetrett, Utfall ikkeOppfylt, Avslagsårsak avslagsårsak, Vilkårene eksisterndeVilkårene, LocalDate v1, LocalDate v2) {
+        var builder = new VilkårBuilder(utvidetrett);
+        var vilkårPeriodeBuilder = builder
+            .hentBuilderFor(v1, v2)
+            .medUtfall(ikkeOppfylt)
+            .medAvslagsårsak(avslagsårsak);
+
+        builder.leggTil(vilkårPeriodeBuilder);
+
+        var vr1 = eksisterndeVilkårene == null ? Vilkårene.builder() : Vilkårene.builderFraEksisterende(eksisterndeVilkårene);
+        vr1.leggTil(builder);
+        var vilkårene1 = vr1.build();
+        return vilkårene1;
     }
 }

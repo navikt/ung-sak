@@ -41,6 +41,7 @@ public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UP_SOEKNAD_PERIODER")
     private Long id;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;

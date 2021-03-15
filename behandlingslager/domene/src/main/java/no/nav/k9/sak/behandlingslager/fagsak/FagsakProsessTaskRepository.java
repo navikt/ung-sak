@@ -27,28 +27,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskEvent;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe.Entry;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
-import no.nav.vedtak.felles.prosesstask.impl.ProsessTaskEntitet;
-import no.nav.vedtak.felles.prosesstask.impl.TaskManager;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskEvent;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe.Entry;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.impl.ProsessTaskEntitet;
+import no.nav.k9.prosesstask.impl.TaskManager;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
-/** Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks. */
+/**
+ * Repository for å håndtere kobling mellom Fagsak (og Behandling) mot Prosess Tasks.
+ */
 @ApplicationScoped
 public class FagsakProsessTaskRepository {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
-
+    private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     private EntityManager em;
     private ProsessTaskRepository prosessTaskRepository;
-
-    private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
-
     private TaskManager taskManager;
 
     FagsakProsessTaskRepository() {
@@ -239,8 +238,8 @@ public class FagsakProsessTaskRepository {
             // Dersom den ikke er NULL er den kun tillatt dersom den matcher laveste gruppe_sekvensnr for Fagsak i
             // FAGSAK_PROSESS_TASK tabell.
             TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt " +
-                "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
-                "order by gruppeSekvensNr ",
+                    "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
+                    "order by gruppeSekvensNr ",
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
             query.setMaxResults(1);
@@ -260,7 +259,9 @@ public class FagsakProsessTaskRepository {
 
     }
 
-    /** Observerer og vedlikeholder relasjon mellom fagsak og prosess task for enklere søk (dvs. fjerner relasjon når FERDIG). */
+    /**
+     * Observerer og vedlikeholder relasjon mellom fagsak og prosess task for enklere søk (dvs. fjerner relasjon når FERDIG).
+     */
     public void observeProsessTask(@Observes ProsessTaskEvent ptEvent) {
 
         Long fagsakId = ptEvent.getFagsakId();
@@ -290,7 +291,9 @@ public class FagsakProsessTaskRepository {
         return resultList.stream().map(ProsessTaskEntitet::tilProsessTask).collect(Collectors.toList());
     }
 
-    /** Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert. */
+    /**
+     * Sett feilet prosesstasks som er koblet til fagsak+behandling til suspendert.
+     */
     public void settFeiletTilSuspendert(Long fagsakId, Long behandlingId) {
 
         Set<ProsessTaskStatus> feiletStatus = EnumSet.of(ProsessTaskStatus.FEILET);
@@ -313,7 +316,9 @@ public class FagsakProsessTaskRepository {
 
     }
 
-    /** Sletter prosesstasks som er koblet til fagsak+behandling og er ikke kjørt. */
+    /**
+     * Sletter prosesstasks som er koblet til fagsak+behandling og er ikke kjørt.
+     */
     public void ryddProsessTasks(Long fagsakId, Long behandlingId) {
 
         Set<ProsessTaskStatus> uferdigStatuser = EnumSet.complementOf(EnumSet.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT));

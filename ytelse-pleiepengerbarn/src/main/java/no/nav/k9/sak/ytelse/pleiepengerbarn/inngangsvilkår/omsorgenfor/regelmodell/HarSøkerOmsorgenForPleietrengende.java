@@ -19,15 +19,7 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
     public Evaluation evaluate(OmsorgenForGrunnlag grunnlag) {
 
         final var relasjon = grunnlag.getRelasjonMellomSøkerOgPleietrengende();
-        if (relasjon != null) {
-            if (erMorEllerFarTilPleietrengende(relasjon) && relasjon.getHarSammeBosted()) {
-                return ja();
-            } else if (erMorEllerFarTilPleietrengende(relasjon) && saksbehandlerBekreftetOmsorgen(grunnlag)) {
-                return ja();
-            }
-        }
-
-        if (harSammeBosted(grunnlag) && saksbehandlerBekreftetOmsorgen(grunnlag)) {
+        if (relasjon != null && erMorEllerFarTilPleietrengende(relasjon)) {
             return ja();
         }
 

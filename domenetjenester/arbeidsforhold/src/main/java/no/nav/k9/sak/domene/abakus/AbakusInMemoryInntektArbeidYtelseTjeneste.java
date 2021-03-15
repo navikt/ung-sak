@@ -43,7 +43,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). Brukes under forflytting til Abakus til å erstatte tester som går mot

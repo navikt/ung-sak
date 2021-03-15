@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.server.jetty;
 
-import no.nav.vedtak.sikkerhet.ContextPathHolder;
+import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 public class JettyWebKonfigurasjon implements AppKonfigurasjon {
     public static final String CONTEXT_PATH = "/k9/sak";

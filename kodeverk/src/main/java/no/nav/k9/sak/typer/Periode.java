@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -25,12 +24,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Periode implements Comparable<Periode> {
 
     @JsonProperty(value = "fom", required = true)
-    @NotNull
     @Valid
     private LocalDate fom;
 
     @JsonProperty(value = "tom", required = true)
-    @NotNull
     @Valid
     private LocalDate tom;
 
@@ -45,13 +42,9 @@ public class Periode implements Comparable<Periode> {
     }
 
     public Periode(LocalDate fom, LocalDate tom) {
-        Objects.requireNonNull(fom, "fom");
-        Objects.requireNonNull(tom, "tom");
-        if (fom.isAfter(tom)) {
-            throw new IllegalArgumentException("fom (fra-og-med dato) kan ikke være etter tom (til-og-med dato: " + fom + ">" + tom);
-        }
         this.fom = fom;
         this.tom = tom;
+        validerOk();
     }
 
     public Periode(String iso8601) {
@@ -59,11 +52,20 @@ public class Periode implements Comparable<Periode> {
         String[] split = iso8601.split("/");
         this.fom = parseLocalDate(split[0]);
         this.tom = parseLocalDate(split[1]);
+        validerOk();
     }
 
-    @AssertTrue(message = "fom dato må være <= tom dato")
+    private void validerOk() {
+        if (!ok()) {
+            throw new IllegalArgumentException("fom (fra-og-med dato) kan ikke være etter tom (til-og-med dato: " + fom + ">" + tom);
+        }
+    }
+
+    @AssertTrue(message = "fom dato må være <= tom dato hvis satt")
     private boolean ok() {
-        return getFom().isEqual(getTom()) || getFom().isBefore(getTom());
+        LocalDate fom = getFom();
+        LocalDate tom = getTom();
+        return (fom == null || tom == null) || fom.isEqual(tom) || fom.isBefore(tom);
     }
 
     public LocalDate getFom() {
@@ -74,14 +76,21 @@ public class Periode implements Comparable<Periode> {
         return tom;
     }
 
-    public boolean starterFørEllerSamtidigSom(Periode periode) {
-        return fom.isEqual(periode.getFom()) || fom.isBefore(periode.getFom());
-    }
-    
     public boolean overlaps(Periode other) {
-        boolean fomBeforeOrEqual = getFom().isBefore(other.getTom()) || getFom().isEqual(other.getTom());
-        boolean tomAfterOrEqual = getTom().isAfter(other.getFom()) || getTom().isEqual(other.getFom());
-        return fomBeforeOrEqual && tomAfterOrEqual;
+        boolean starterFørEllerSamtidigSomAnnenPeriodeSlutter = (fom == null)
+            || (fom != null && other.getTom() == null)
+            || ((fom != null && other.getTom() != null)
+                && (fom.isEqual(other.getTom()) || fom.isBefore(other.getTom())));
+
+        if (starterFørEllerSamtidigSomAnnenPeriodeSlutter) {
+            boolean slutterEtterEllerSamtidigSomPeriodeStarter = (tom == null)
+                || (tom != null && other.getFom() == null)
+                || ((tom != null && other.getFom() != null)
+                    && (tom.isEqual(other.getFom()) || tom.isAfter(other.getFom())));
+            return slutterEtterEllerSamtidigSomPeriodeStarter;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -92,7 +101,7 @@ public class Periode implements Comparable<Periode> {
             return false;
         }
         var annen = (Periode) o;
-        return fom.equals(annen.getFom()) && tom.equals(annen.getTom());
+        return Objects.equals(fom, annen.getFom()) && Objects.equals(tom, annen.getTom());
     }
 
     @Override
@@ -125,5 +134,5 @@ public class Periode implements Comparable<Periode> {
 
     private static final Comparator<Periode> COMP = Comparator
         .comparing((Periode dto) -> dto.getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
-        .thenComparing(dto -> dto.getTom(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        .thenComparing(dto -> dto.getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 }

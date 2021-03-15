@@ -41,7 +41,7 @@ import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforholdPeriodeInfo;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 @Default

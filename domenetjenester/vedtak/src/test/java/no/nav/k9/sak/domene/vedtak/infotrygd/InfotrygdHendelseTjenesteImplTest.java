@@ -25,7 +25,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

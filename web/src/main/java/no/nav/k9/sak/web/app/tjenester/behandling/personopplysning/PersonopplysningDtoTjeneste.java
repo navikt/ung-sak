@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -18,7 +19,6 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.person.AvklartPersonstatus;
 import no.nav.k9.sak.kontrakt.person.PersonadresseDto;
@@ -36,9 +36,9 @@ public class PersonopplysningDtoTjeneste {
 
     @Inject
     public PersonopplysningDtoTjeneste(PersonopplysningTjeneste personopplysningTjeneste,
-                                       BehandlingRepositoryProvider repositoryProvider) {
+                                       BehandlingRepository behandlingRepository) {
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingRepository = behandlingRepository;
     }
 
     private static List<PersonadresseDto> lagAddresseDto(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {
@@ -90,25 +90,25 @@ public class PersonopplysningDtoTjeneste {
     }
 
     private PersonopplysningDto mapPersonopplysningDto(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat, Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         PersonopplysningDto dto = enkelMapping(søker, aggregat);
 
+        leggTilRegistrerteBarn(aggregat, dto);
+        leggTilBarnSøktFor(aggregat, dto, behandling);
+        leggTilEktefelle(søker, aggregat, dto);
+
+        return dto;
+    }
+
+    private void leggTilRegistrerteBarn(PersonopplysningerAggregat aggregat, PersonopplysningDto dto) {
         dto.setBarn(aggregat.getBarna()
             .stream()
             .map(e -> enkelMapping(e, aggregat))
             .collect(Collectors.toList()));
+    }
 
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
-        if (pleietrengende.isPresent()) {
-            var aktørId = pleietrengende.get();
-            dto.setBarnSoktFor(aggregat.getBarna()
-                .stream()
-                .filter(it -> it.getAktørId().equals(aktørId))
-                .map(e -> enkelMapping(e, aggregat))
-                .collect(Collectors.toList()));
-        }
-
+    private void leggTilEktefelle(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat, PersonopplysningDto dto) {
         Optional<PersonopplysningEntitet> ektefelleOpt = aggregat.getEktefelle();
         if (ektefelleOpt.isPresent() && ektefelleOpt.get().equals(søker)) {
             throw SøknadDtoFeil.FACTORY.kanIkkeVæreSammePersonSomSøker().toException();
@@ -118,8 +118,20 @@ public class PersonopplysningDtoTjeneste {
             PersonopplysningDto ektefelle = enkelMapping(ektefelleOpt.get(), aggregat);
             dto.setEktefelle(ektefelle);
         }
+    }
 
-        return dto;
+    private void leggTilBarnSøktFor(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, Behandling behandling) {
+        List<PersonopplysningDto> barnSøktFor = new ArrayList<>();
+
+        Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId()).ifPresent(aktørId -> {
+            barnSøktFor.addAll(aggregat.getBarna()
+                .stream()
+                .filter(it -> it.getAktørId().equals(aktørId))
+                .map(e -> enkelMapping(e, aggregat))
+                .collect(Collectors.toList()));
+        });
+
+        dto.setBarnSoktFor(barnSøktFor);
     }
 
     private PersonopplysningDto enkelMapping(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {

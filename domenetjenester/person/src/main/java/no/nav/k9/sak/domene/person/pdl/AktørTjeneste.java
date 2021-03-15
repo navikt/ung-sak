@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static no.nav.pdl.IdentGruppe.AKTORID;
+import static no.nav.k9.felles.integrasjon.pdl.IdentGruppe.AKTORID;
 import static org.jboss.weld.util.collections.ImmutableList.of;
 
 import java.util.List;
@@ -24,17 +24,17 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.pdl.HentIdenterBolkQueryRequest;
-import no.nav.pdl.HentIdenterBolkResultResponseProjection;
-import no.nav.pdl.HentIdenterQueryRequest;
-import no.nav.pdl.IdentGruppe;
-import no.nav.pdl.IdentInformasjon;
-import no.nav.pdl.IdentInformasjonResponseProjection;
-import no.nav.pdl.IdentlisteResponseProjection;
-import no.nav.vedtak.exception.VLException;
-import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
-import no.nav.vedtak.util.LRUCache;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResultResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.HentIdenterQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.IdentGruppe;
+import no.nav.k9.felles.integrasjon.pdl.IdentInformasjon;
+import no.nav.k9.felles.integrasjon.pdl.IdentInformasjonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.IdentlisteResponseProjection;
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
+import no.nav.k9.felles.util.LRUCache;
+import no.nav.k9.felles.util.Tuple;
 
 @ApplicationScoped
 public class AktørTjeneste {

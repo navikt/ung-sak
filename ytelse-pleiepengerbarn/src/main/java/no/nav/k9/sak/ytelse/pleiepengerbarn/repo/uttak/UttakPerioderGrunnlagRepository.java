@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class UttakPerioderGrunnlagRepository {
@@ -34,6 +34,10 @@ public class UttakPerioderGrunnlagRepository {
             .filter(it -> journalpostIder.contains(it.getJournalpostId()))
             .map(it -> new UttakPerioderDokumenter(it.getJournalpostId(), it.getArbeidPerioder()))
             .collect(Collectors.toSet());
+    }
+
+    public Optional<UttaksPerioderGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
+        return hentEksisterendeGrunnlagBasertPåGrunnlagId(grunnlagId);
     }
 
     public Optional<UttaksPerioderGrunnlag> hentGrunnlag(Long behandlingId) {
@@ -81,6 +85,17 @@ public class UttakPerioderGrunnlagRepository {
         gr.setAktiv(false);
         entityManager.persist(gr);
         entityManager.flush();
+    }
+
+    private Optional<UttaksPerioderGrunnlag> hentEksisterendeGrunnlagBasertPåGrunnlagId(Long id) {
+        var query = entityManager.createQuery(
+            "SELECT s " +
+                "FROM UttakPerioderGrunnlag s " +
+                "WHERE s.id = :grunnlagId ", UttaksPerioderGrunnlag.class);
+
+        query.setParameter("grunnlagId", id);
+
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     private Optional<UttaksPerioderGrunnlag> hentEksisterendeGrunnlag(Long id) {

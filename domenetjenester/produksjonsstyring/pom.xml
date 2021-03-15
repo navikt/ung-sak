@@ -28,12 +28,12 @@
 
         <!-- Integrasjon klient avhengigheter -->
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>arbeidsfordeling-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-arbeidsfordeling-klient</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>oppgave-rest-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-oppgave-rest-klient</artifactId>
         </dependency>
 
         <!-- Prosjektinterne avhengigheter -->
@@ -44,7 +44,7 @@
 
         <!-- Felles avhengigheter -->
         <dependency>
-		    <groupId>no.nav.vedtak.prosesstask</groupId>
+		    <groupId>no.nav.k9.prosesstask</groupId>
 		    <artifactId>prosesstask</artifactId>
 		</dependency>
 

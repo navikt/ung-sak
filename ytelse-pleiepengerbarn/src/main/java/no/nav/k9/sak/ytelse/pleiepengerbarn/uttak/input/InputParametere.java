@@ -14,6 +14,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
@@ -27,6 +28,7 @@ public class InputParametere {
     private UttaksPerioderGrunnlag uttaksGrunnlag;
     private PleiebehovResultat pleiebehovResultat;
     private Set<Inntektsmelding> sakInntektsmeldinger;
+    private Set<Saksnummer> relaterteSaker;
 
     public InputParametere() {
     }
@@ -101,5 +103,14 @@ public class InputParametere {
 
     public Set<Inntektsmelding> getSakInntektsmeldinger() {
         return sakInntektsmeldinger;
+    }
+
+    public InputParametere medRelaterteSaker(Set<Saksnummer> relaterteSaker) {
+        this.relaterteSaker = Objects.requireNonNull(relaterteSaker);
+        return this;
+    }
+
+    public Set<Saksnummer> getRelaterteSaker() {
+        return relaterteSaker;
     }
 }

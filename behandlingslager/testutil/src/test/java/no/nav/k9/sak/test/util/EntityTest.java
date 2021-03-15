@@ -38,7 +38,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.vedtak.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 /** Sjekker alle entiteter er mappet korrekt. Ligger i web slik at den fanger alle orm filer lagt i ulike moduler. */
 @ExtendWith(CdiAwareExtension.class)

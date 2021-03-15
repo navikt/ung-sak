@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.10.0</simple.client.version>
-        <swagger-ui.version>3.43.0</swagger-ui.version>
+        <swagger-ui.version>3.44.0</swagger-ui.version>
         <resteasy.version>4.6.0.Final</resteasy.version>
     </properties>
 
@@ -47,11 +47,11 @@
 
         <!-- Prosjekt avhengigheter -->
         <dependency>
-            <groupId>no.nav.vedtak.prosesstask</groupId>
+            <groupId>no.nav.k9.prosesstask</groupId>
             <artifactId>prosesstask-rest-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.vedtak.prosesstask</groupId>
+            <groupId>no.nav.k9.prosesstask</groupId>
             <artifactId>prosesstask-legacy</artifactId>
         </dependency>
 
@@ -110,8 +110,8 @@
         <!-- Server Provided Libraries. Transitive avhengigheter som ikke burde
             vært her da de trekkes inn av server. -->
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.woodstox</groupId>
@@ -120,8 +120,12 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
+            <groupId>no.nav.k9.felles.oidc-token</groupId>
+            <artifactId>k9-sikkerhet-sts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-util</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>ca.szc.thirdparty.nl.jworks.markdown_to_asciidoc</groupId>
@@ -135,8 +139,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>ldap-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-ldap-klient</artifactId>
         </dependency>
 
         <!-- REST +  -->
@@ -176,10 +180,6 @@
         </dependency>
 
         <!-- CDI -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-core</artifactId>
@@ -345,8 +345,8 @@
             </dependency>
 
             <dependency>
-                <groupId>no.nav.foreldrepenger.felles</groupId>
-                <artifactId>felles-testutilities</artifactId>
+                <groupId>no.nav.k9.felles</groupId>
+                <artifactId>k9-felles-testutilities</artifactId>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -356,7 +356,7 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>no.nav.foreldrepenger.felles</groupId>
+                <groupId>no.nav.k9.felles</groupId>
                 <artifactId>felles-sikkerhet-testutilities</artifactId>
                 <scope>test</scope>
             </dependency>

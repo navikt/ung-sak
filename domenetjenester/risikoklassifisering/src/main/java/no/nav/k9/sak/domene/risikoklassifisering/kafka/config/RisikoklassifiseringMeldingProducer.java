@@ -3,7 +3,7 @@ package no.nav.k9.sak.domene.risikoklassifisering.kafka.config;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
 class RisikoklassifiseringMeldingProducer extends GenerellMeldingProducer implements MeldingProducer {

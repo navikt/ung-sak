@@ -11,7 +11,7 @@ import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettTilkjentYtelseF
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.ytelse.overlapp.VurderOverlappendeYtelserTask;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjenesteImpl;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped

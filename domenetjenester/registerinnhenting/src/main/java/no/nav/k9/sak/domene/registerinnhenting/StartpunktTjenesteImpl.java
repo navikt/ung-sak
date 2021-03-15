@@ -29,14 +29,13 @@ public class StartpunktTjenesteImpl implements StartpunktTjeneste {
 
     @Override
     public StartpunktType utledStartpunktForDiffBehandlingsgrunnlag(BehandlingReferanse revurdering, EndringsresultatDiff differanse) {
-        StartpunktType startpunktType = differanse.hentKunDelresultater().stream()
+        return differanse.hentKunDelresultater().stream()
             .map(diff -> {
                 var utleder = finnUtleder(diff.getGrunnlag());
                 return utleder.erBehovForStartpunktUtledning(diff) ? utleder.utledStartpunkt(revurdering, diff.getGrunnlagId1(), diff.getGrunnlagId2()) : StartpunktType.UDEFINERT;
             })
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
-        return startpunktType;
     }
 
     private StartpunktUtleder finnUtleder(Class<?> aggregat) {

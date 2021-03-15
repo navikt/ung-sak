@@ -23,8 +23,8 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 public class FagsakApplikasjonTjeneste {

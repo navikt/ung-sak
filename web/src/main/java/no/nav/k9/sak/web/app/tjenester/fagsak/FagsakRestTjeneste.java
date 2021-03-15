@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -57,10 +57,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -145,11 +145,13 @@ public class FagsakRestTjeneste {
 
         AktørId bruker = finnSakDto.getAktørId();
         AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
+        AktørId relatertPersonAktørId = finnSakDto.getRelatertPersonAktørId();
         var periode = finnSakDto.getPeriode();
 
         var fagsak = fagsakTjeneste.finnFagsakerForAktør(bruker)
             .stream()
             .filter(f -> pleietrengendeAktørId == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
+            .filter(f -> relatertPersonAktørId == null || Objects.equals(f.getRelatertPersonAktørId(), relatertPersonAktørId))
             .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
             .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
             .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
@@ -245,6 +247,7 @@ public class FagsakRestTjeneste {
             periode,
             personDto,
             fagsak.getPleietrengendeAktørId(),
+            fagsak.getRelatertPersonAktørId(),
             kanRevurderingOpprettes,
             fagsak.getSkalTilInfotrygd(),
             fagsak.getOpprettetTidspunkt(),

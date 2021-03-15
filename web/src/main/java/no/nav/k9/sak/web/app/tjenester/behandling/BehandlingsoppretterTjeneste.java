@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
-import static no.nav.vedtak.feil.LogLevel.INFO;
+import static no.nav.k9.felles.feil.LogLevel.INFO;
 
 import java.util.Objects;
 
@@ -22,10 +22,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 
 @ApplicationScoped
 public class BehandlingsoppretterTjeneste {
@@ -54,7 +54,7 @@ public class BehandlingsoppretterTjeneste {
         }
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
-    
+
         var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         return revurderingTjeneste.opprettManuellRevurdering(origBehandling, behandlingÅrsakType, enhet);
     }
@@ -65,10 +65,10 @@ public class BehandlingsoppretterTjeneste {
         if (!kanOppretteUnntaksbehandling) {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
         }
-    
+
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
             .orElse(null);
-    
+
         var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
     }

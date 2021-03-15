@@ -23,22 +23,22 @@ import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.kodeverk.dokument.VariantFormat;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.saf.AvsenderMottakerResponseProjection;
-import no.nav.saf.BrukerResponseProjection;
-import no.nav.saf.Datotype;
-import no.nav.saf.DokumentInfo;
-import no.nav.saf.DokumentInfoResponseProjection;
-import no.nav.saf.DokumentoversiktFagsakQueryRequest;
-import no.nav.saf.DokumentoversiktResponseProjection;
-import no.nav.saf.DokumentvariantResponseProjection;
-import no.nav.saf.FagsakInput;
-import no.nav.saf.Journalpost;
-import no.nav.saf.JournalpostResponseProjection;
-import no.nav.saf.LogiskVedleggResponseProjection;
-import no.nav.saf.RelevantDatoResponseProjection;
-import no.nav.saf.SakResponseProjection;
-import no.nav.vedtak.felles.integrasjon.saf.HentDokumentQuery;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.BrukerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Datotype;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentoversiktFagsakQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.DokumentoversiktResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.FagsakInput;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {

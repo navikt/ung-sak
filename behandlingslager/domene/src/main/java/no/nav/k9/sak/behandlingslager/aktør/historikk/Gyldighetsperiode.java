@@ -5,7 +5,7 @@ import java.time.Month;
 import java.time.Period;
 import java.util.Objects;
 
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class Gyldighetsperiode {
     private LocalDate fom;

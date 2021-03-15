@@ -10,7 +10,7 @@ import java.util.UUID;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 public class InntektArbeidYtelseGrunnlagBuilder {
 

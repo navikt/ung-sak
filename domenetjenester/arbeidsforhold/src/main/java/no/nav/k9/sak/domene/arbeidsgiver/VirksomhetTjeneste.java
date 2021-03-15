@@ -14,9 +14,9 @@ import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
-import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
-import no.nav.vedtak.felles.integrasjon.organisasjon.OrganisasjonstypeEReg;
-import no.nav.vedtak.util.LRUCache;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonstypeEReg;
+import no.nav.k9.felles.util.LRUCache;
 
 @ApplicationScoped
 public class VirksomhetTjeneste {

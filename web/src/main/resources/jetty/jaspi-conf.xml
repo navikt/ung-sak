@@ -10,7 +10,7 @@
             <protected>true</protected>
             <serverAuthContext>
                 <serverAuthModule>
-                    <className>no.nav.vedtak.sikkerhet.jaspic.OidcAuthModule</className>
+                    <className>no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule</className>
                 </serverAuthModule>
             </serverAuthContext>
         </serverAuthConfig>

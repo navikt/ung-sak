@@ -1,23 +1,23 @@
 package no.nav.k9.sak.domene.risikoklassifisering.konsument;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollSerialiseringUtil;
 import no.nav.k9.sak.domene.risikoklassifisering.json.KontrollresultatMapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.KontrollresultatWrapper;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.RisikovurderingTjeneste;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.kontroll.v1.KontrollResultatV1;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
 
 @ProsessTask(LesKontrollresultatTask.TASKTYPE)
 public class LesKontrollresultatTask implements ProsessTaskHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LesKontrollresultatTask.class);
-
     public static final String TASKTYPE = "risiko.klassifisering.resultat";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(LesKontrollresultatTask.class);
     private RisikovurderingTjeneste risikovurderingTjeneste;
     private KontrollresultatMapper kontrollresultatMapper;
 

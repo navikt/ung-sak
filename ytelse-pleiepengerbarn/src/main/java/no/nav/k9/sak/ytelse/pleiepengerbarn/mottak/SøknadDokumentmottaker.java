@@ -22,6 +22,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
+/**
+ * Erstattes av PSBSøknadDokumentmottaker
+ */
+@Deprecated(forRemoval = true)
 @Dependent
 class SøknadDokumentmottaker {
 
@@ -55,7 +59,7 @@ class SøknadDokumentmottaker {
     }
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, @SuppressWarnings("unused") LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, startDato.minusWeeks(25), startDato.plusWeeks(25));
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), startDato.plusWeeks(25));
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
@@ -81,24 +85,26 @@ class SøknadDokumentmottaker {
         return behandling;
     }
 
-    private void validerIngenÅpneBehandlinger(Fagsak fagsak) {
-        if (behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId()).size() > 0) {
-            throw new UnsupportedOperationException("PSB støtter ikke mottak av søknad for åpne behandlinger, saksnummer = " + fagsak.getSaksnummer());
-        }
-    }
-
     private Behandling tilknyttBehandling(Saksnummer saksnummer) {
         // FIXME K9 Legg til logikk for valg av fagsak
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow();
 
-        validerIngenÅpneBehandlinger(fagsak);
+        var sisteBehandling = behandlingsoppretter.hentForrigeBehandling(fagsak);
 
-        // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
-        return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        if (sisteBehandling.isEmpty()) {
+            return behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
+        } else {
+            if (!sisteBehandling.get().erSaksbehandlingAvsluttet()) {
+                return sisteBehandling.get();
+            }
+
+            // FIXME K9 Legg til logikk for valg av behandlingstype og BehandlingÅrsakType, og BehandlingType.UNNTAKSBEHANDLING (om aktuelt)
+            return behandlingsoppretter.opprettRevurdering(sisteBehandling.get(), BehandlingÅrsakType.UDEFINERT);
+        }
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, saksnummer, startDato, null);
+        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, null);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

@@ -18,7 +18,7 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.vedtak.apptjeneste.AppServiceHandler;
+import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 
 @ApplicationScoped
 public class HistorikkConsumer implements AppServiceHandler {

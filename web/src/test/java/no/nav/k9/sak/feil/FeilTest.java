@@ -12,9 +12,9 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.junit.jupiter.api.Test;
 
-import no.nav.vedtak.feil.deklarasjon.FunksjonellFeil;
-import no.nav.vedtak.feil.deklarasjon.IntegrasjonFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 
 public class FeilTest {
     private final List<String> duplikatFeil = new ArrayList<>();

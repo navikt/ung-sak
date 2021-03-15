@@ -6,7 +6,7 @@ import de.huxhorn.sulky.ulid.ULID;
 import no.nav.k9.rapid.behov.Behov;
 import no.nav.k9.rapid.behov.Behovssekvens;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Json;
-import no.nav.vedtak.log.mdc.MDCOperations;
+import no.nav.k9.felles.log.mdc.MDCOperations;
 
 import java.util.Map;
 import java.util.Optional;

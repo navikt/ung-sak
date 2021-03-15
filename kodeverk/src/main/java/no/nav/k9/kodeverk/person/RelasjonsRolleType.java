@@ -32,8 +32,6 @@ public enum RelasjonsRolleType implements Kodeverdi {
     SAMBOER("SAMB", "Samboer med"),
     MEDMOR("MMOR", "Medmor"),
 
-    // TODO: sjekk denne
-    @Deprecated
     ANNEN_PART_FRA_SØKNAD("ANPA", "Annen part fra søknad"),
 
     // TODO: sjekk denne
