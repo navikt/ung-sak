@@ -61,7 +61,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
 
             oppdaterAksjonspunktMedFristerFraRegel(regelResultat, opres);
 
-            håndtereAutomatiskAvslag(behandling, regelResultat, periode);
+            håndtereAutomatiskAvslag(behandling, regelResultat, periode, aktiviteter);
         } else if (!erVilkårOverstyrt(kontekst.getBehandlingId(), periode.getFomDato(), periode.getTomDato())) {
             // rydd bort tidligere aktiviteter
             opptjeningRepository.lagreOpptjeningResultat(behandling, periode.getFomDato(), null, Collections.emptyList());
@@ -83,11 +83,11 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
         }
     }
 
-    private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
+    private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningsAktiviteter) {
         if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
             // Legger til aksjonspunspunkt for å håndtere eventuelle 8-47 innvilgelser
             var håndterer = FagsakYtelseTypeRef.Lookup.find(automatiskAvslagHåndterer, behandling.getFagsakYtelseType()).orElseThrow();
-            håndterer.håndter(behandling, regelResultat, periode);
+            håndterer.håndter(behandling, regelResultat, periode, opptjeningsAktiviteter);
         }
     }
 

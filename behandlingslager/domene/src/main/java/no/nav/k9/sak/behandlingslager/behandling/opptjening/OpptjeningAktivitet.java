@@ -112,6 +112,10 @@ public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
         return periode.getTomDato();
     }
 
+    public DatoIntervallEntitet getDatoIntervallEntitet() {
+        return periode;
+    }
+
     public String getAktivitetReferanse() {
         return aktivitetReferanse;
     }

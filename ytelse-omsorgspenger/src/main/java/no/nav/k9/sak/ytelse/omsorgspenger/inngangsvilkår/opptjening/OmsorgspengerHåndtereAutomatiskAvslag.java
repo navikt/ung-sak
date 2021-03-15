@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.opptjening;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -10,6 +12,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.HåndtereAutomatiskAvslag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -32,10 +35,21 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
     }
 
     @Override
-    public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        if (utbetalingTilBrukerIPerioden(behandling, periode)) {
+    public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktivteter) {
+        if (utbetalingTilBrukerIPerioden(behandling, periode) || erMidlertidigInaktiv(periode, opptjeningAktivteter)) {
             regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET));
         }
+    }
+
+    private boolean erMidlertidigInaktiv(DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktiviteter) {
+        DatoIntervallEntitet midlertidigInaktivPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(28), periode.getFomDato());
+
+        if (opptjeningAktiviteter == null) {
+            throw new IllegalStateException("Opptjening TOM kan ikke være null");
+        }
+
+        Optional<OpptjeningAktivitet> overlapp = opptjeningAktiviteter.stream().filter(opptjeningAktivitet -> opptjeningAktivitet.getDatoIntervallEntitet().overlapper(midlertidigInaktivPeriode)).findFirst();
+        return overlapp.isPresent();
     }
 
     private boolean utbetalingTilBrukerIPerioden(Behandling behandling, DatoIntervallEntitet periode) {
