@@ -110,7 +110,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.felles.oidc-token</groupId>
-                <artifactId>sts</artifactId>
+                <artifactId>k9-sikkerhet-sts</artifactId>
                 <version>${felles.version}</version>
             </dependency>
 
