@@ -46,17 +46,19 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
 
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        Long behandlingId = kontekst.getBehandlingId();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         precondition(behandling);
 
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(kontekst.getBehandlingId());
+        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
 
-        var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType()).orElseThrow();
+        var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         tjeneste.foreslåBehandlingsresultatType(ref, kontekst);
 
-        postcondition(behandling);
+        postcondition(behandlingId);
 
         // Dette steget genererer ingen aksjonspunkter
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -73,8 +75,10 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         }
     }
 
-    protected void postcondition(Behandling behandling) {
+    protected void postcondition(Long behandlingId) {
         var ugyldigResultat = Set.of(BehandlingResultatType.IKKE_FASTSATT);
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultatType = behandling.getBehandlingResultatType();
         if (ugyldigResultat.contains(resultatType)) {
             throw new IllegalStateException(
