@@ -36,12 +36,10 @@ public class RevurderingTuppel {
         return ny;
     }
 
-    public static LocalDateTimeline<RevurderingTuppel> grunnlagTilTidslinje(SykdomGrunnlag forrigeGrunnlag) {
+    public static LocalDateTimeline<RevurderingTuppel> grunnlagTilTidslinje(SykdomGrunnlag grunnlag) {
         final Collection<LocalDateSegment<RevurderingTuppel>> segments = new ArrayList<>();
 
-        forrigeGrunnlag.getVurderinger().get(0).getSykdomVurdering().getType();
-
-        forrigeGrunnlag.getVurderinger().forEach(v -> {
+        grunnlag.getVurderinger().forEach(v -> {
             SykdomVurderingType type = v.getSykdomVurdering().getType();
             v.getPerioder().forEach(p -> {
                 RevurderingTuppel tuppel = new RevurderingTuppel();
@@ -54,11 +52,13 @@ public class RevurderingTuppel {
             });
         });
 
-        forrigeGrunnlag.getInnleggelser().getPerioder().forEach(p -> {
-            RevurderingTuppel tuppel = new RevurderingTuppel();
-            tuppel.innleggelser = p.getInnleggelser();
-            segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), tuppel));
-        });
+        if(grunnlag.getInnleggelser() != null) {
+            grunnlag.getInnleggelser().getPerioder().forEach(p -> {
+                RevurderingTuppel tuppel = new RevurderingTuppel();
+                tuppel.innleggelser = p.getInnleggelser();
+                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), tuppel));
+            });
+        }
 
         final LocalDateTimeline<RevurderingTuppel> tidslinje = new LocalDateTimeline<>(segments, new LocalDateSegmentCombinator<RevurderingTuppel, RevurderingTuppel, RevurderingTuppel>() {
             @Override

@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
@@ -104,8 +106,15 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();
 
-        final SykdomGrunnlag forrigeGrunnlag = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid()).get().getGrunnlag();
-        LocalDateTimeline<RevurderingTuppel> forrigeTidslinje = RevurderingTuppel.grunnlagTilTidslinje(forrigeGrunnlag);
+        final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid());
+        LocalDateTimeline<RevurderingTuppel> forrigeTidslinje;
+
+        if(forrigeGrunnlagBehandling.isPresent()) {
+            final SykdomGrunnlag forrigeGrunnlag = forrigeGrunnlagBehandling.get().getGrunnlag();
+            forrigeTidslinje = RevurderingTuppel.grunnlagTilTidslinje(forrigeGrunnlag);
+        } else {
+            forrigeTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        }
 
         var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
         var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
