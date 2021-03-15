@@ -2,10 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.AktørId;
@@ -13,6 +10,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.felles.aktivitet.Frilanser;
 import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
@@ -33,18 +31,14 @@ class SøknadOppgittFraværMapper {
     }
 
     Set<OppgittFraværPeriode> map() {
+
+        Set<OppgittFraværPeriode> oppgittFraværPerioder = new LinkedHashSet<>();
+
         Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
 
-        if (søknadsinnhold.getAktivitet().getArbeidstaker() != null) {
-            // TODO: Arbeidstaker. Se også {@link KravDokumentFravær#trekkUtAlleFraværOgValiderOverlapp}
-            throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
-        }
-
         var fraværsperioder = søknadsinnhold.getFraværsperioder();
-        Set<OppgittFraværPeriode> oppgittFraværPerioder;
-        oppgittFraværPerioder = new LinkedHashSet<>();
         for (FraværPeriode fp : fraværsperioder) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
@@ -68,6 +62,31 @@ class SøknadOppgittFraværMapper {
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
         }
+
+        if (søknadsinnhold.getAktivitet().getArbeidstaker() != null) {
+            for(Arbeidstaker arbeidstaker: søknadsinnhold.getAktivitet().getArbeidstaker()) {
+                mapArbeidstakerFraværPerioder(arbeidstaker, oppgittFraværPerioder);
+            }
+        }
+
         return oppgittFraværPerioder;
+    }
+
+    private void mapArbeidstakerFraværPerioder(Arbeidstaker arbeidstaker, Set<OppgittFraværPeriode> oppgittFraværPerioder) {
+        Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().verdi);
+
+        var fraværsperioder = søknadsinnhold.getFraværsperioder();
+        for (FraværPeriode fp : fraværsperioder) {
+            LocalDate fom = fp.getPeriode().getFraOgMed();
+            LocalDate tom = fp.getPeriode().getTilOgMed();
+            Duration varighet = fp.getDuration();
+
+            InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
+
+            OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(
+                journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
+
+            oppgittFraværPerioder.add(oppgittFraværPeriode);
+        }
     }
 }
