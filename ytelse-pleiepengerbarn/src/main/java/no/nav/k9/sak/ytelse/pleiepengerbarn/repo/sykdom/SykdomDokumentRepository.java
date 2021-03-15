@@ -15,6 +15,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 
 @Dependent
@@ -76,6 +77,7 @@ public class SykdomDokumentRepository {
         if (dokument.getId() == null) {
             throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
         }
+
         entityManager.persist(dokument);
         entityManager.flush();
     }

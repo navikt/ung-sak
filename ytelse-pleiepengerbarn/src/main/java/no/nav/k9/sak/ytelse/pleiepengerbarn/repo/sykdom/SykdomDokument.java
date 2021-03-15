@@ -28,7 +28,7 @@ public class SykdomDokument {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT")
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
@@ -36,10 +36,13 @@ public class SykdomDokument {
     @Column(name = "TYPE", nullable = false)
     @Convert(converter = SykdomDokumentTypeConverter.class)
     private SykdomDokumentType type;
-    
+
+    @Column(name = "MOTTATT", nullable = false)
+    private LocalDateTime mottatt;
+
     @Column(name = "DATERT", nullable = true)
     private LocalDate datert;
-    
+
     @Column(name = "JOURNALPOST_ID", nullable = false)
     private JournalpostId journalpostId;
 
@@ -51,29 +54,37 @@ public class SykdomDokument {
     private List<SykdomDokumentSak> dokumentSaker = new ArrayList<>();
 
     @DiffIgnore
-    @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
+    @Column(name = "OPPRETTET_AV", nullable = false, updatable = false)
     private String opprettetAv;
 
     @DiffIgnore
-    @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
+    @Column(name = "OPPRETTET_TID", nullable = false, updatable = false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
     @DiffIgnore
-    @Column(name = "ENDRET_AV", nullable = false, updatable=false)
+    @Column(name = "ENDRET_AV", nullable = false, updatable = false)
     private String endretAv;
 
     @DiffIgnore
-    @Column(name = "ENDRET_TID", nullable = false, updatable=false)
+    @Column(name = "ENDRET_TID", nullable = false, updatable = false)
     private LocalDateTime endretTidspunkt; // NOSONAR
-    
-    
+
+
     SykdomDokument() {
-        
+
     }
-    
-    public SykdomDokument(SykdomDokumentType type, JournalpostId journalpostId, String dokumentInfoId,
-            String opprettetAv, LocalDateTime opprettetTidspunkt, String endretAv, LocalDateTime endretTidspunkt) {
+
+    public SykdomDokument(
+            SykdomDokumentType type,
+            LocalDateTime mottatt,
+            JournalpostId journalpostId,
+            String dokumentInfoId,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt,
+            String endretAv,
+            LocalDateTime endretTidspunkt) {
         this.type = Objects.requireNonNull(type, "type");
+        this.mottatt = mottatt;
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
         this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
@@ -81,24 +92,32 @@ public class SykdomDokument {
         this.endretAv = Objects.requireNonNull(endretAv, "endretAv");
         this.endretTidspunkt = Objects.requireNonNull(endretTidspunkt, "endretTidspunkt");
     }
-    
+
 
     public Long getId() {
         return id;
     }
-    
+
     void setSykdomVurderinger(SykdomVurderinger sykdomVurderinger) {
         this.sykdomVurderinger = sykdomVurderinger;
     }
-    
+
     public SykdomVurderinger getSykdomVurderinger() {
         return sykdomVurderinger;
     }
-    
+
     public SykdomDokumentType getType() {
         return type;
     }
-    
+
+    public LocalDateTime getMottattTidspunkt() {
+        return mottatt;
+    }
+
+    public LocalDate getMottattDato() {
+        return mottatt.toLocalDate();
+    }
+
     public LocalDate getDatert() {
         return datert;
     }
@@ -130,11 +149,11 @@ public class SykdomDokument {
     public LocalDateTime getEndretTidspunkt() {
         return endretTidspunkt;
     }
-    
+
     public void setType(SykdomDokumentType type) {
         this.type = type;
     }
-    
+
     public void setDatert(LocalDate datert) {
         this.datert = datert;
     }
