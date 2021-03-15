@@ -108,14 +108,15 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         LocalDateTimeline<RevurderingTuppel> forrigeTidslinje = RevurderingTuppel.grunnlagTilTidslinje(forrigeGrunnlag);
 
         var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
+        var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
+
         SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, perioder);
         LocalDateTimeline<RevurderingTuppel> nyTidslinje = RevurderingTuppel.grunnlagTilTidslinje(utledetGrunnlag);
 
         LocalDateTimeline<Object> kombinertTidslinje = RevurderingTuppel.getKombinertTidslinje(forrigeTidslinje, nyTidslinje);
 
-        var vurderingsperioder = SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
 
-        LocalDateTimeline<Object> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioder);
+        LocalDateTimeline<Object> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioderTimeline);
 
         return new TreeSet<>(utvidedePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
