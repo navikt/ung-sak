@@ -66,7 +66,7 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.vedtak.feil.FeilFactory;
+import no.nav.k9.felles.feil.FeilFactory;
 
 @SqlResultSetMappings(value = {
     @SqlResultSetMapping(name = "PipDataResult", classes = {

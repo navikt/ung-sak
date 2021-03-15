@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public interface ÅrskvantumKlient {
@@ -33,6 +34,8 @@ public interface ÅrskvantumKlient {
     FullUttaksplanForBehandlinger hentFullUttaksplanForBehandling(List<UUID> behandlinger);
 
     ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag);
+
+    RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode);
 
     ÅrskvantumUttrekk hentUttrekk();
 }

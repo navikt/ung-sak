@@ -17,23 +17,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-bom</artifactId>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet</artifactId>
 		</dependency>
 
         <dependency>
-		    <groupId>no.nav.vedtak.prosesstask</groupId>
+		    <groupId>no.nav.k9.prosesstask</groupId>
 		    <artifactId>prosesstask</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-			<artifactId>unleash-klient</artifactId>
-		</dependency>
-
-		<!-- NB ! NB ! NB !: Denne modulen er kandidat til å skilles ut som eget 
-			bibliotek. Ikke legg inn flere avhengigheter til prosjektinterne moduler 
-			her. -->
 
 		<!-- Interne avhengigheter -->
 		<dependency>
@@ -50,8 +41,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.foreldrepenger.felles</groupId>
-			<artifactId>felles-testutilities</artifactId>
+			<groupId>no.nav.k9.felles</groupId>
+			<artifactId>k9-felles-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
 

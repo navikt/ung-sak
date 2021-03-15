@@ -17,10 +17,10 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandling</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
-            <artifactId>pdl-klient</artifactId>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-pdl-klient</artifactId>
         </dependency>
 
         <!-- Prosjektinterne avhengigheter -->
@@ -28,7 +28,7 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
-       
+
 		<!-- Test avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

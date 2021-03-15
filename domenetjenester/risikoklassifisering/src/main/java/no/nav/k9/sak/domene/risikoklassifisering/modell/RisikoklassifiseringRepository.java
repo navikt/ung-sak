@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.risikoklassifisering.modell;
 
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
+import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class RisikoklassifiseringRepository {
         this.entityManager = entityManager;
     }
 
-    
+
     public void lagreVurderingAvFaresignalerForRisikoklassifisering(FaresignalVurdering faresignalVurdering, long behandlingId) {
 
         Optional<RisikoklassifiseringEntitet> gammelEntitetOpt = hentRisikoklassifiseringForBehandling(behandlingId);
@@ -48,7 +48,7 @@ public class RisikoklassifiseringRepository {
         lagre(nyEntitet);
     }
 
-    
+
     public void lagreRisikoklassifisering(RisikoklassifiseringEntitet risikoklassifisering, Long behandlingId) {
         Objects.requireNonNull(risikoklassifisering, "risikoklassifisering");
         Objects.requireNonNull(risikoklassifisering.getBehandlingId(), "behandlingId");
@@ -58,7 +58,7 @@ public class RisikoklassifiseringRepository {
         lagre(risikoklassifisering);
     }
 
-    
+
     public Optional<RisikoklassifiseringEntitet> hentRisikoklassifiseringForBehandling(long behandlingId) {
         TypedQuery<RisikoklassifiseringEntitet> query = entityManager.createQuery("from RisikoklassifiseringEntitet where behandlingId = :behandlingId and erAktiv = :erAktiv", RisikoklassifiseringEntitet.class);
         query.setParameter("behandlingId", behandlingId);

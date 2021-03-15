@@ -18,19 +18,19 @@ import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
 import no.nav.k9.sak.web.app.util.LdapUtil;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBruker;
-import no.nav.vedtak.felles.integrasjon.ldap.LdapBrukeroppslag;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.sikkerhet.context.SubjectHandler;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
+import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class SjekkProsessering {
@@ -92,7 +92,7 @@ public class SjekkProsessering {
     /**
      * Betinget sjekk om innhent registeropplysninger (conditionally) og kjør prosess. Alt gjøres asynkront i form av prosess tasks.
      * Intern sjekk på om hvorvidt registeropplysninger må reinnhentes.
-     * @param sjekkSaksbehandler 
+     * @param sjekkSaksbehandler
      *
      * @return optional Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
@@ -108,7 +108,7 @@ public class SjekkProsessering {
         // henter alltid registeropplysninger og kjører alltid prosess
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
-    
+
     public boolean opprettTaskForOppfrisking(Behandling behandling) {
         if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return false;

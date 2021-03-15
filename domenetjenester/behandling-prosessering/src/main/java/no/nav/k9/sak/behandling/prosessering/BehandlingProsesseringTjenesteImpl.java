@@ -40,9 +40,9 @@ import no.nav.k9.sak.domene.registerinnhenting.task.InnhentMedlemskapOpplysninge
 import no.nav.k9.sak.domene.registerinnhenting.task.InnhentPersonopplysningerTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.SettRegisterdataInnhentetTidspunktTask;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskGruppe;
-import no.nav.vedtak.log.mdc.MDCOperations;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.felles.log.mdc.MDCOperations;
 
 /**
  * Grensesnitt for å kjøre behandlingsprosess, herunder gjenopptak, registeroppdatering, koordinering av sakskompleks mv.

@@ -1,7 +1,10 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
@@ -51,10 +54,19 @@ public class InnhentDokumentTjeneste {
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
-        var behandlingÅrsak = getBehandlingÅrsakType(mottattDokument, fagsak);
+        var brevkodeMap = mottattDokument
+            .stream()
+            .collect(Collectors.groupingBy(MottattDokument::getType));
+        var behandlingÅrsak = brevkodeMap.keySet()
+            .stream()
+            .sorted(Brevkode.COMP_REKKEFØLGE)
+            .map(it -> getBehandlingÅrsakType(it, fagsak))
+            .findFirst()
+            .orElseThrow();
+
         var resultat = finnEllerOpprettBehandling(fagsak, behandlingÅrsak);
 
-        lagreDokumenter(mottattDokument, resultat.behandling);
+        lagreDokumenter(brevkodeMap, resultat.behandling);
         if (resultat.nyopprettet) {
             asynkStartBehandling(resultat.behandling);
         } else {
@@ -95,9 +107,14 @@ public class InnhentDokumentTjeneste {
         }
     }
 
-    public void lagreDokumenter(Collection<MottattDokument> mottattDokument, Behandling behandling) {
-        Dokumentmottaker dokumentmottaker = getDokumentmottaker(mottattDokument, behandling.getFagsak());
-        dokumentmottaker.lagreDokumentinnhold(mottattDokument, behandling);
+    public void lagreDokumenter(Map<Brevkode, List<MottattDokument>> mottattDokument, Behandling behandling) {
+        mottattDokument.keySet()
+            .stream()
+            .sorted(Brevkode.COMP_REKKEFØLGE)
+            .forEach(key -> {
+                Dokumentmottaker dokumentmottaker = getDokumentmottaker(key, behandling.getFagsak());
+                dokumentmottaker.lagreDokumentinnhold(mottattDokument.get(key), behandling);
+            });
     }
 
 
@@ -107,10 +124,9 @@ public class InnhentDokumentTjeneste {
         kompletthetskontroller.asynkVurderKompletthet(behandling);
     }
 
-    private BehandlingÅrsakType getBehandlingÅrsakType(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
-        var dokumentmottaker = getDokumentmottaker(mottattDokument, fagsak);
-        var behandlingÅrsakType = dokumentmottaker.getBehandlingÅrsakType();
-        return behandlingÅrsakType;
+    private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {
+        var dokumentmottaker = getDokumentmottaker(brevkode, fagsak);
+        return dokumentmottaker.getBehandlingÅrsakType();
     }
 
     private void asynkStartBehandling(Behandling behandling) {
@@ -129,6 +145,18 @@ public class InnhentDokumentTjeneste {
         }
     }
 
+    private Dokumentmottaker getDokumentmottaker(Brevkode brevkode, Fagsak fagsak) {
+        return finnMottaker(brevkode, fagsak.getYtelseType());
+    }
+
+    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
+        String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
+        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode.getKode()));
+
+        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
+    }
+
     private static class BehandlingMedOpprettelseResultat {
         private Behandling behandling;
         private boolean nyopprettet;
@@ -145,18 +173,5 @@ public class InnhentDokumentTjeneste {
         private static BehandlingMedOpprettelseResultat eksisterendeBehandling(Behandling behandling) {
             return new BehandlingMedOpprettelseResultat(behandling, false);
         }
-    }
-
-    private Dokumentmottaker getDokumentmottaker(Collection<MottattDokument> mottattDokument, Fagsak fagsak) {
-        var brevkode = DokumentBrevkodeUtil.unikBrevkode(mottattDokument);
-        return finnMottaker(brevkode, fagsak.getYtelseType());
-    }
-
-    private Dokumentmottaker finnMottaker(Brevkode brevkode, FagsakYtelseType fagsakYtelseType) {
-        String fagsakYtelseTypeKode = fagsakYtelseType.getKode();
-        Instance<Dokumentmottaker> selected = mottakere.select(new DokumentGruppeRef.DokumentGruppeRefLiteral(brevkode.getKode()));
-
-        return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 }

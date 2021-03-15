@@ -1,8 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -41,9 +41,9 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingStatusListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -58,8 +58,8 @@ public class BehandlingBackendRestTjeneste {
 
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
-    
-    
+
+
     public BehandlingBackendRestTjeneste() {
         // for resteasy
     }
@@ -123,7 +123,7 @@ public class BehandlingBackendRestTjeneste {
 
         return Response.ok(new BehandlingStatusListe(result)).status(Status.ACCEPTED).build();
     }
-    
+
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
         @Override
         public AbacDataAttributter apply(Object obj) {

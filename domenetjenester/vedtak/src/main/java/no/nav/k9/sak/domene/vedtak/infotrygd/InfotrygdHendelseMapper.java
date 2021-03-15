@@ -13,11 +13,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import no.nav.foreldrepenger.kontrakter.feed.vedtak.v1.FeedElement;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 
 class InfotrygdHendelseMapper {
 
@@ -65,7 +65,7 @@ class InfotrygdHendelseMapper {
                 throw JsonMapperFeil.FACTORY.ioExceptionVedLesing(e).toException();
             }
         }
-        
+
         private static String toJson(Object dto) {
             try {
                 return MAPPER.writeValueAsString(dto);
@@ -74,14 +74,14 @@ class InfotrygdHendelseMapper {
             }
         }
 
-        
+
         interface JsonMapperFeil extends DeklarerteFeil {
 
             static final JsonMapperFeil FACTORY = FeilFactory.create(JsonMapperFeil.class);
 
             @TekniskFeil(feilkode = "F-728314", feilmelding = "Kunne ikke serialisere objekt til JSON", logLevel = LogLevel.WARN)
             Feil kunneIkkeSerialisereJson(JsonProcessingException cause);
-            
+
             @TekniskFeil(feilkode = "F-723328", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
             Feil ioExceptionVedLesing(IOException cause);
 

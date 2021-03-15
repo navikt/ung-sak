@@ -7,9 +7,9 @@ import java.util.function.Function;
 
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.vedtak.sikkerhet.abac.AbacAttributtType;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
  * Mapper om dtoer som har @AbacAttributt for å angi Abac nøkler for sporing, etc.

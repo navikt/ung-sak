@@ -16,6 +16,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "UttakPerioderGrunnlag")
 @Table(name = "GR_UTTAKSPERIODER")
@@ -28,11 +29,13 @@ public class UttaksPerioderGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
+    @ChangeTracked
     @ManyToOne
     @Immutable
     @JoinColumn(name = "relevant_soknadsperiode_id", nullable = false, updatable = false, unique = true)
     private UttakPerioderHolder relevanteSøknadsperioder;
 
+    @ChangeTracked
     @ManyToOne
     @Immutable
     @JoinColumn(name = "oppgitt_soknadsperiode_id", nullable = false, updatable = false, unique = true)

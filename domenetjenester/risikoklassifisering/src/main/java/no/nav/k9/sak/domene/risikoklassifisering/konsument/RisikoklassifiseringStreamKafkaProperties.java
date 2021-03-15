@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.risikoklassifisering.konsument;
 
 import no.nav.familie.topic.Topic;
 import no.nav.familie.topic.TopicManifest;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

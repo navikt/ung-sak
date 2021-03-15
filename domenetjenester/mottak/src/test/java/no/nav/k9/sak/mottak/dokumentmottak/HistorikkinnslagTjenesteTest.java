@@ -26,12 +26,12 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.saf.DokumentInfo;
-import no.nav.saf.Dokumentvariant;
-import no.nav.saf.Journalpost;
-import no.nav.saf.SkjermingType;
-import no.nav.saf.Variantformat;
-import no.nav.vedtak.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.Dokumentvariant;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.SkjermingType;
+import no.nav.k9.felles.integrasjon.saf.Variantformat;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 
 public class HistorikkinnslagTjenesteTest {

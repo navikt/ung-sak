@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
@@ -55,14 +57,14 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
-import no.nav.vedtak.util.Tuple;
+import no.nav.k9.felles.util.Tuple;
 
 @ApplicationScoped
 @Default
@@ -122,6 +124,30 @@ public class ÅrskvantumTjeneste {
     }
 
     private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {
+
+        var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
+        var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+
+        VilkårType vilkårType = VilkårType.OPPTJENINGSVILKÅRET;
+        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), vilkårType);
+        var fagsakFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
+        var oppgittFravær = grunnlag.getPerioder();
+        var relevantePerioder = utledPerioder(vilkårsperioder, fagsakFravær, oppgittFravær);
+
+        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
+        var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, relevantePerioder, behandling);
+
+        if (fraværPerioder.isEmpty()) {
+            // kan ikke være empty når vi sender årskvantum
+            throw new IllegalStateException("Har ikke fraværs perioder for fagsak.periode[" + ref.getFagsakPeriode() + "]"
+                + ",\trelevant perioder=" + relevantePerioder
+                + ",\toppgitt fravær=" + oppgittFravær
+                + ",\tvilkårsperioder[" + vilkårType + "]=" + vilkårsperioder
+                + ",\tfagsakFravær=" + fagsakFravær);
+        }
+
         var personMedRelasjoner = tpsTjeneste.hentBrukerForAktør(ref.getAktørId()).orElseThrow();
 
         var barna = personMedRelasjoner.getFamilierelasjoner()
@@ -132,15 +158,6 @@ public class ÅrskvantumTjeneste {
             .map((Tuple<Familierelasjon, Optional<Personinfo>> relasjonBarn) -> mapBarn(personMedRelasjoner, relasjonBarn))
             .collect(Collectors.toList());
 
-        var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
-        var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
-        var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
-        var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-        var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        var perioder = utledPerioderRelevantForBehandling(behandling, grunnlag);
-
-        var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, perioder, behandling);
-
         return new ÅrskvantumGrunnlag(ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid().toString(),
             fraværPerioder,
@@ -150,14 +167,6 @@ public class ÅrskvantumTjeneste {
             barna);
     }
 
-    private Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioderRelevantForBehandling(Behandling behandling, OppgittFravær grunnlag) {
-        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
-        var fagsakFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
-
-        var behandlingFravær = grunnlag.getPerioder();
-        return utledPerioder(vilkårsperioder, fagsakFravær, behandlingFravær);
-    }
-
     Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> utledPerioder(NavigableSet<DatoIntervallEntitet> vilkårsperioder,
                                                                                                       List<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> fagsakFravær,
                                                                                                       Set<OppgittFraværPeriode> behandlingFravær) {
@@ -165,7 +174,7 @@ public class ÅrskvantumTjeneste {
             .filter(it -> vilkårsperioder.stream().anyMatch(at -> at.overlapper(it.getPeriode().getPeriode())) ||
                 erNullTimerTilBehandling(behandlingFravær, it) ||
                 erAvslagPåSøknadsfristIBehandling(behandlingFravær, it))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean erAvslagPåSøknadsfristIBehandling(Set<OppgittFraværPeriode> behandlingFravær, no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode it) {
@@ -204,18 +213,23 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentUtbetalingGrunnlag(inputTilBeregning);
     }
 
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
+        return årskvantumKlient.hentRammevedtak(personIdent, periode);
+    }
+
     public ÅrskvantumUttrekk hentUttrekk() {
         return årskvantumKlient.hentUttrekk();
     }
 
-    private ArrayList<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref,
-                                                       Vilkårene vilkårene,
-                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                       Set<Inntektsmelding> sakInntektsmeldinger,
-                                                       Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
-                                                       Behandling behandling) {
+    private List<FraværPeriode> mapUttaksPerioder(BehandlingReferanse ref,
+                                                  Vilkårene vilkårene,
+                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                  Set<Inntektsmelding> sakInntektsmeldinger,
+                                                  Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
+                                                  Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
-        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, behandling.getFagsak().getPeriode(), perioder)
+        var fagsakPeriode = behandling.getFagsak().getPeriode();
+        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, fagsakPeriode, perioder)
             .values()
             .stream()
             .flatMap(Collection::stream)

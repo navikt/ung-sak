@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -26,7 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -42,6 +45,7 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
@@ -51,6 +55,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
 public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
+
+    private static final Logger log = LoggerFactory.getLogger(VurderSykdomOgKontinuerligTilsynSteg.class);
 
     public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
     private BehandlingRepositoryProvider repositoryProvider;
@@ -86,9 +92,9 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET); // OK
-        
+
         // TODO etter 18feb: Legge til støtte for at det legges inn vurderinger på utsiden av "perioder" som da trigger revurdering. Endre i PSBVilkårsPerioderTilVurderingTjeneste
-        
+
         final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = sykdomGrunnlagRepository.opprettGrunnlag(
             behandling.getFagsak().getSaksnummer(),
@@ -99,22 +105,27 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                 .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
                 .collect(Collectors.toList())
         );
-        
-        final boolean trengerInput = sykdomVurderingService.harAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+
+        final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandlingRepository.hentBehandling(kontekst.getBehandlingId()));
+        final boolean trengerInput = !sykdomAksjonspunkt.isKanLøseAksjonspunkt();
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet() && sykdomGrunnlagBehandling.isFørsteGrunnlagPåBehandling();
         if (trengerInput || førsteGangManuellRevurdering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
-       
+
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        
+
+        var builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
+
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(kontekst, periode, sykdomGrunnlagBehandling);
-            vilkårene = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
+            oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
             oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
+        builder.leggTil(vilkårBuilder);
 
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårene);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -133,17 +144,15 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return new Pleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
     }
 
-    private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+    private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
 
-        final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
         final var periode = vilkårData.getPeriode();
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
             .medUtfall(vilkårData.getUtfallType())
             .medMerknadParametere(vilkårData.getMerknadParametere())
             .medRegelEvaluering(vilkårData.getRegelEvaluering())
             .medRegelInput(vilkårData.getRegelInput())
-            .medAvslagsårsak(vilkårData.getAvslagsårsak()) 
+            .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
 
         if (vilkårData.getUtfallType().equals(Utfall.OPPFYLT)) {
@@ -151,6 +160,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             ekstraVilkårresultat.getPleieperioder()
                 .stream()
                 .filter(it -> Pleiegrad.INGEN.equals(it.getGrad()))
+                .filter(it -> periode.overlapper(it.getFraOgMed(), it.getTilOgMed()))
                 .forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFraOgMed(), it.getTilOgMed())
                     .medUtfall(Utfall.IKKE_OPPFYLT)
                     .medMerknadParametere(vilkårData.getMerknadParametere())
@@ -159,9 +169,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
                     .medAvslagsårsak(Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM)
                     .medMerknad(vilkårData.getVilkårUtfallMerknad())));
         }
-        builder.leggTil(vilkårBuilder);
-
-        return builder.build();
     }
 
     @Override

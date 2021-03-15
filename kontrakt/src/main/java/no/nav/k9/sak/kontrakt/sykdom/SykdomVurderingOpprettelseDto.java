@@ -26,7 +26,7 @@ public class SykdomVurderingOpprettelseDto {
     @JsonProperty(value = "behandlingUuid", required = true)
     @Valid
     private UUID behandlingUuid;
-    
+
     @JsonProperty(value = "type", required = true)
     @NotNull
     @Valid
@@ -51,23 +51,23 @@ public class SykdomVurderingOpprettelseDto {
     @Size(max = 100)
     @Valid
     private Set<String> tilknyttedeDokumenter;
-    
+
     @JsonProperty(value = "dryRun")
     @Valid
     private boolean dryRun;
 
     public SykdomVurderingOpprettelseDto() {
-     
+
     }
-    
+
     public SykdomVurderingOpprettelseDto(String behandlingUuid) {
         this.behandlingUuid = UUID.fromString(behandlingUuid);
     }
-    
+
     public SykdomVurderingOpprettelseDto(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
     }
-    
+
     @AbacAttributt("behandlingUuid")
     public UUID getBehandlingUuid() {
         return behandlingUuid;
@@ -92,21 +92,21 @@ public class SykdomVurderingOpprettelseDto {
     public Set<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
     }
-    
+
     public boolean isDryRun() {
         return dryRun;
     }
-    
+
     public SykdomVurderingOpprettelseDto medTekst(String tekst) {
         this.tekst = tekst;
         return this;
     }
-    
+
     public SykdomVurderingOpprettelseDto medResultat(Resultat resultat) {
         this.resultat = resultat;
         return this;
     }
-    
+
     public SykdomVurderingOpprettelseDto medPerioder(List<Periode> perioder) {
         this.perioder = perioder;
         return this;
@@ -114,6 +114,11 @@ public class SykdomVurderingOpprettelseDto {
 
     public SykdomVurderingOpprettelseDto medTilknyttedeDokumenter(Set<String> tilknyttedeDokumenter) {
         this.tilknyttedeDokumenter = tilknyttedeDokumenter;
+        return this;
+    }
+
+    public SykdomVurderingOpprettelseDto medType(SykdomVurderingType type) {
+        this.type = type;
         return this;
     }
 }

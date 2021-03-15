@@ -81,6 +81,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             _100,
             Set.of(),
             mapInngangsvilkår(input.getInngangsvilkår()),
+            _100,
             null,
             Set.of(),
             input.getBehandlingUUID(),

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.risikoklassifisering.konsument;
 
-import no.nav.vedtak.apptjeneste.AppServiceHandler;
+import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;

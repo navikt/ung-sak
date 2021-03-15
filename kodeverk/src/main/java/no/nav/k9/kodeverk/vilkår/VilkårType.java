@@ -53,9 +53,10 @@ public enum VilkårType implements Kodeverdi {
             Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10",
                 FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-10",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-10"),
-        Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
-        Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
-        Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
+            Avslagsårsak.IKKE_DOKUMENTERT_OMSORGEN_FOR,
+            Avslagsårsak.IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM,
+            Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN),
     ALDERSVILKÅR(VilkårTypeKoder.K9_VK_3,
         "Aldersvilkåret",
             Map.of(
@@ -115,7 +116,7 @@ public enum VilkårType implements Kodeverdi {
     UTVIDETRETT(VilkårTypeKoder.K9_VK_9_6, "Utvidet rett",
             Map.of(FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
-            Avslagsårsak.IKKE_UTVIDETRETT),
+            Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR),
     /**
      * Brukes i stedet for null der det er optional.
      */

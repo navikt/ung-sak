@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.vedtak.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class VilkårResultatRepository {
@@ -125,10 +125,10 @@ public class VilkårResultatRepository {
             " order by 1, 2";
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("behandlingId", behandlingId);
-        
+
         @SuppressWarnings("unchecked")
         List<Tuple> resultList = query.getResultList();
-        
+
         List<VilkårPeriodeResultatDto> dtoer = new ArrayList<>();
         for (var t : resultList) {
             var vt = VilkårType.fraKode(t.get("vilkar_type", String.class));
@@ -140,7 +140,7 @@ public class VilkårResultatRepository {
             var angittUtfall = overstyrtUtfall != null ? overstyrtUtfall : utfall;
             dtoer.add(new VilkårPeriodeResultatDto(vt, new Periode(fom, tom), avslagsårsak, angittUtfall));
         }
-        
+
         return List.copyOf(dtoer);
 
     }

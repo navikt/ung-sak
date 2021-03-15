@@ -8,6 +8,7 @@ import javax.enterprise.inject.Alternative;
 
 import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @RequestScoped
@@ -62,6 +63,11 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
 
     @Override
     public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlag årskvantumGrunnlag) {
+        return null;
+    }
+
+    @Override
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
         return null;
     }
 

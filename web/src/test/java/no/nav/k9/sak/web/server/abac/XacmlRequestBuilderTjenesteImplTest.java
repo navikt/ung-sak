@@ -1,11 +1,11 @@
 package no.nav.k9.sak.web.server.abac;
 
 import no.nav.k9.abac.BeskyttetRessursKoder;
-import no.nav.vedtak.sikkerhet.abac.*;
-import no.nav.vedtak.sikkerhet.pdp.PdpConsumer;
-import no.nav.vedtak.sikkerhet.pdp.PdpKlientImpl;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlRequestBuilder;
-import no.nav.vedtak.sikkerhet.pdp.xacml.XacmlResponseWrapper;
+import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.k9.felles.sikkerhet.pdp.PdpConsumer;
+import no.nav.k9.felles.sikkerhet.pdp.PdpKlientImpl;
+import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlRequestBuilder;
+import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlResponseWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /** Håndterer preconditions for å kunne innhente + ekstra log parametere.  Tillater ikke kjøring dersom saksbehandling er avsluttet (utvikler-feil). */
 public abstract class UnderBehandlingProsessTask extends BehandlingProsessTask {
@@ -27,7 +27,7 @@ public abstract class UnderBehandlingProsessTask extends BehandlingProsessTask {
         var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
 
         logContext(behandling);
-        
+
         if (behandling.erAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()

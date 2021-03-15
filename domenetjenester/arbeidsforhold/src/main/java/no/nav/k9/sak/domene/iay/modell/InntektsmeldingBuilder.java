@@ -18,7 +18,7 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class InntektsmeldingBuilder {
 
@@ -123,6 +123,7 @@ public class InntektsmeldingBuilder {
     public InntektsmeldingBuilder medArbeidsforholdId(EksternArbeidsforholdRef arbeidsforholdId) {
         precondition();
         this.eksternArbeidsforholdId = arbeidsforholdId;
+        kladd.setEksternArbeidsforholdRef(arbeidsforholdId);
         return this;
     }
 

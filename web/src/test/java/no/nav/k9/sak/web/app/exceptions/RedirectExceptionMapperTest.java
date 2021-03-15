@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
 import no.nav.k9.sak.test.util.Whitebox;
-import no.nav.vedtak.sikkerhet.ContextPathHolder;
+import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 @SuppressWarnings("deprecation")
 public class RedirectExceptionMapperTest {

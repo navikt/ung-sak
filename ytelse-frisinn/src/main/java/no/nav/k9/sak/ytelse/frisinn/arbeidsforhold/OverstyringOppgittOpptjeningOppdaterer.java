@@ -17,15 +17,11 @@ import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
@@ -46,8 +42,6 @@ import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittFrilansDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
 import no.nav.k9.sak.kontrakt.frisinn.SøknadsperiodeOgOppgittOpptjeningV2Dto;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftOverstyrOppgittOpptjeningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -56,9 +50,6 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private UttakRepository uttakRepository;
     private HistorikkTjenesteAdapter historikkAdapter;
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
-    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
-    private boolean toggletVilkårsperioder;
 
     OverstyringOppgittOpptjeningOppdaterer() {
         // for CDI proxy
@@ -66,16 +57,10 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
 
     @Inject
     public OverstyringOppgittOpptjeningOppdaterer(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, UttakRepository uttakRepository,
-                                                  HistorikkTjenesteAdapter historikkAdapter,
-                                                  BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                                  @FagsakYtelseTypeRef("FRISINN") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                  @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+                                                  HistorikkTjenesteAdapter historikkAdapter) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.uttakRepository = uttakRepository;
         this.historikkAdapter = historikkAdapter;
-        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
@@ -91,14 +76,6 @@ public class OverstyringOppgittOpptjeningOppdaterer implements AksjonspunktOppda
         uttakRepository.lagreOgFlushFastsattUttak(param.getBehandlingId(), new UttakAktivitet(perioderSomSkalMed));
 
         inntektArbeidYtelseTjeneste.lagreOverstyrtOppgittOpptjening(param.getBehandlingId(), oppgittOpptjeningBuilder);
-
-        if (toggletVilkårsperioder) {
-            var vilkårsperioder = vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
-            for (DatoIntervallEntitet vilkårsperiode : vilkårsperioder) {
-                beregningsgrunnlagVilkårTjeneste.settVilkårutfallTilIkkeVurdert(param.getBehandlingId(), vilkårsperiode);
-            }
-        }
 
         historikkAdapter.opprettHistorikkInnslag(param.getBehandlingId(), HistorikkinnslagType.FAKTA_ENDRET);
         return OppdateringResultat.utenOveropp();

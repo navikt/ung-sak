@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.vedtak.konfig.Tid;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 public class VurderBehandlingerUnderIverksettelse {
@@ -68,7 +68,7 @@ public class VurderBehandlingerUnderIverksettelse {
             .map(beh -> behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(beh.getId()).orElse(null))
             .filter(Objects::nonNull)
             .min(Comparator.comparing(BehandlingVedtak::getOpprettetTidspunkt));
-        
+
         return venter.map(BehandlingVedtak::getBehandlingId)
             .flatMap(behandlingRepository::hentBehandlingHvisFinnes);
     }

@@ -27,18 +27,18 @@
             <artifactId>kontrakt</artifactId>
             <scope>provided</scope> <!-- ikke trekk med transitivt for andre moduler -->
         </dependency>
-        
+
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-feil</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-feil</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>

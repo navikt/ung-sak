@@ -16,15 +16,15 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.åpneBehandlingForEndringer";
-    
+
     public static final String START_STEG = "behandlingskontroll.startSteg";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -43,7 +43,7 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
     @Override
     protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
         var steg = BehandlingStegType.fraKode(prosessTaskData.getPropertyValue(START_STEG));
-        
+
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
         reaktiverAksjonspunkter(kontekst, behandling, steg);
         behandling.setÅpnetForEndring(true);

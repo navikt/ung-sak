@@ -191,8 +191,6 @@ spec:
       value: "false"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
-    - name: FRISINN_VILKARSPERIODER
-      value: "false"
     - name: TOTRINN_TEMP_DEAKTIVERT
       value: "true"
     - name: "AKSJONSPUNKT_7035_ENABLED"
@@ -202,7 +200,7 @@ spec:
     - name: UNNTAKSBEHANDLING
       value: "false"
     - name: VURDER_SOKNADSFRIST
-      value: "false"
+      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

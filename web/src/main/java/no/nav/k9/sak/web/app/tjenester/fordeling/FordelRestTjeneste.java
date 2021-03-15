@@ -1,7 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.fordeling;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.vedtak.feil.LogLevel.WARN;
+import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -58,15 +58,15 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.FeilFactory;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.sikkerhet.abac.AbacDataAttributter;
-import no.nav.vedtak.sikkerhet.abac.AbacDto;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.vedtak.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.vedtak.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -118,6 +118,13 @@ public class FordelRestTjeneste {
             pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
         }
 
+        AktørId relatertPersonAktørId = null;
+        if (opprettSakDto.getRelatertPersonAktørId() != null) {
+            relatertPersonAktørId = new AktørId(opprettSakDto.getRelatertPersonAktørId());
+        }
+
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
         Periode periode = opprettSakDto.getPeriode();
         if (periode == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
@@ -125,7 +132,7 @@ public class FordelRestTjeneste {
 
         var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
@@ -141,9 +148,10 @@ public class FordelRestTjeneste {
 
         AktørId bruker = finnSakDto.getAktørId();
         AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
+        AktørId relatertPersonAktørId = finnSakDto.getRelatertPersonAktørId();
         var periode = finnSakDto.getPeriode();
 
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, bruker, pleietrengendeAktørId, periode.getFom(), periode.getTom());
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, bruker, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
 
         return fagsak.isPresent() ? new SaksnummerDto(fagsak.get().getSaksnummer().getVerdi()) : null;
     }
@@ -208,18 +216,13 @@ public class FordelRestTjeneste {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
         }
 
-        Set<Brevkode> typer = mottattJournalposter.stream().map(m -> m.getType()).collect(Collectors.toSet());
-        if (typer.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike typer: " + typer);
-        }
-
         Set<FagsakYtelseType> ytelseTyper = mottattJournalposter.stream().map(m -> m.getYtelseType()).collect(Collectors.toSet());
         if (ytelseTyper.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
         }
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
-            .map(m -> mapJournalpost(m))
+            .map(this::mapJournalpost)
             .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
             .collect(Collectors.toList());
 

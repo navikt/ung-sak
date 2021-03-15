@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 public class VurderProsessTaskStatusForPollingApi {
     private static final Logger log = LoggerFactory.getLogger(VurderProsessTaskStatusForPollingApi.class);

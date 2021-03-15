@@ -18,10 +18,10 @@ import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RequestWrapper;
 import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.RisikovurderingRequest;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
-import no.nav.vedtak.konfig.Tid;
-import no.nav.vedtak.log.mdc.MDCOperations;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.log.mdc.MDCOperations;
 
 @ApplicationScoped
 public class Risikoklassifisering {

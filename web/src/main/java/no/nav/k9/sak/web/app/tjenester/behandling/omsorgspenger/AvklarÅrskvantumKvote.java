@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.årskvantum;
+package no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger;
 
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;

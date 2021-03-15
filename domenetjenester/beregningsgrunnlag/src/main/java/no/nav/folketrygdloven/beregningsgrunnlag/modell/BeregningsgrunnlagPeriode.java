@@ -1,6 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
+import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

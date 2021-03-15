@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -52,7 +53,9 @@ public class SøknadsperioderHolder extends BaseEntitet {
 
     public SøknadsperioderHolder(Collection<Søknadsperioder> perioder) {
         Objects.requireNonNull(perioder);
-        this.perioder = new LinkedHashSet<>(perioder);
+        this.perioder = perioder.stream()
+            .map(Søknadsperioder::new)
+            .collect(Collectors.toCollection(LinkedHashSet::new));;
     }
 
     public Long getId() {

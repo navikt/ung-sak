@@ -13,8 +13,8 @@ import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.vedtak.exception.VLException;
-import no.nav.vedtak.util.LRUCache;
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.util.LRUCache;
 
 @ApplicationScoped
 public class ArbeidsgiverTjeneste {

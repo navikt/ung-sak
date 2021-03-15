@@ -98,11 +98,12 @@ public class SøknadsperiodeGrunnlag extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SøknadsperiodeGrunnlag that = (SøknadsperiodeGrunnlag) o;
-        return Objects.equals(relevanteSøknadsperioder, that.relevanteSøknadsperioder);
+        return Objects.equals(oppgitteSøknadsperioder, that.oppgitteSøknadsperioder)
+         && Objects.equals(relevanteSøknadsperioder, that.relevanteSøknadsperioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(relevanteSøknadsperioder);
+        return Objects.hash(oppgitteSøknadsperioder, relevanteSøknadsperioder);
     }
 }

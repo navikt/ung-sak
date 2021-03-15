@@ -14,5 +14,5 @@ public interface SøknadMottakTjeneste<V extends InnsendingInnhold> {
 
     Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, V søknad);
 
-    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato);
+    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato);
 }

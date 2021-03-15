@@ -38,12 +38,12 @@
             <artifactId>uttak</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-util</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles</groupId>
-            <artifactId>felles-feil</artifactId>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-feil</artifactId>
         </dependency>
 
         <!-- Test avhengigheter -->

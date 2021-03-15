@@ -18,20 +18,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(HåndterMottattDokumentTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
-    private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
-
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";
     public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
     public static final String BEHANDLING_ÅRSAK_TYPE_KEY = "arsakType";
-
+    private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private FagsakRepository fagsakRepository;
@@ -86,9 +84,16 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     }
 
     private void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter) {
-        Brevkode brevkode = DokumentBrevkodeUtil.unikBrevkode(mottatteDokumenter);
-        DokumentValidator validator = dokumentValidatorProvider.finnValidator(brevkode);
-        validator.validerDokumenter(behandlingId, mottatteDokumenter);
+        var mottatteDokumenterMap = mottatteDokumenter.stream()
+            .collect(Collectors.groupingBy(MottattDokument::getType));
+
+        mottatteDokumenterMap.keySet()
+            .stream()
+            .sorted(Brevkode.COMP_REKKEFØLGE)
+            .forEach(key -> {
+                DokumentValidator validator = dokumentValidatorProvider.finnValidator(key);
+                validator.validerDokumenter(behandlingId, mottatteDokumenterMap.get(key));
+            });
     }
 
 }

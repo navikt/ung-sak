@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
-import no.nav.vedtak.konfig.KonfigVerdi;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @Dependent
 public class K9OppdragRestKlient {

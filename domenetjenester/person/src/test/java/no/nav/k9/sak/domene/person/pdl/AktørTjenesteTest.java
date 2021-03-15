@@ -14,11 +14,11 @@ import org.mockito.Mockito;
 import no.nav.k9.sak.test.util.aktør.FiktiveFnr;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.pdl.HentIdenterBolkResult;
-import no.nav.pdl.IdentGruppe;
-import no.nav.pdl.IdentInformasjon;
-import no.nav.pdl.Identliste;
-import no.nav.vedtak.felles.integrasjon.pdl.PdlKlient;
+import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResult;
+import no.nav.k9.felles.integrasjon.pdl.IdentGruppe;
+import no.nav.k9.felles.integrasjon.pdl.IdentInformasjon;
+import no.nav.k9.felles.integrasjon.pdl.Identliste;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 
 public class AktørTjenesteTest {
     private final PersonIdent personIdent = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());

@@ -3,11 +3,11 @@ package no.nav.k9.sak.web.app.tjenester.fagsak;
 import java.time.LocalDateTime;
 
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
-import no.nav.vedtak.feil.Feil;
-import no.nav.vedtak.feil.LogLevel;
-import no.nav.vedtak.feil.deklarasjon.DeklarerteFeil;
-import no.nav.vedtak.feil.deklarasjon.TekniskFeil;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 interface FagsakProsessTaskFeil extends DeklarerteFeil, ProsessTaskFeilmelder {
 

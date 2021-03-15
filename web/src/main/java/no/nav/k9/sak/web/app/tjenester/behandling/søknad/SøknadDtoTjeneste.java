@@ -119,8 +119,6 @@ public class SøknadDtoTjeneste {
 
                 var dto = new AngittPersonDto()
                     .setAktørId(p.getAktørId())
-                    .setNavn(p.getNavn())
-                    .setFødselsdato(p.getFødselsdato())
                     .setRolle(p.getRolle())
                     .setSituasjonKode(p.getSituasjonKode())
                     .setTilleggsopplysninger(p.getTilleggsopplysninger());

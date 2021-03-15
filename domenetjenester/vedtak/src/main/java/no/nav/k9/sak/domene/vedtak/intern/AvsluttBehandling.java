@@ -22,8 +22,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.k9.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class AvsluttBehandling {
@@ -62,13 +62,13 @@ public class AvsluttBehandling {
         var ref = BehandlingReferanse.fra(behandling);
         avsluttBehandling(ref);
     }
-    
+
     void avsluttBehandling(BehandlingReferanse ref) {
         log.info("Avslutter behandling: {}", ((ref != null) ? ref.getBehandlingUuid() : "MANGLER ref")); //$NON-NLS-1$
         var behandlingId = ref.getBehandlingId();
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        
+
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElseThrow(() -> BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(ref).toException());
         vedtak.setIverksettingStatus(IverksettingStatus.IVERKSATT);

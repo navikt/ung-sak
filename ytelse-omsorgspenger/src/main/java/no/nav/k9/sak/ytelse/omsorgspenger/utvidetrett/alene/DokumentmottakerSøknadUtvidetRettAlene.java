@@ -69,7 +69,6 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
     }
 
     void persister(Søknad søknad, Behandling behandling) {
-        var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerMidlertidigAlene) søknad.getYtelse();
 
@@ -89,17 +88,13 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
-            .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) // TODO: hente riktig språk
+            .medSpråkkode(getSpråkValg(søknad.getSpråk()))
         ;
-
         if (innsendt.getBarn() != null) {
             for (var barn : innsendt.getBarn()) {
-                if (barn.getPersonIdent() != null) {
-                    var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi())).orElseThrow();
-                    søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
-                } else if (barn.getFødselsdato() != null) {
-                    søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(null, barn.getFødselsdato(), RelasjonsRolleType.BARN));
-                }
+                var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
+                    .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
+                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
             }
         }
 

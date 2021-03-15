@@ -1,7 +1,7 @@
 package no.nav.k9.sak.sikkerhet.abac;
 
-import no.nav.vedtak.sikkerhet.abac.AbacAttributtType;
-import no.nav.vedtak.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
  * AbacAttributtTyper som er i bruk for sporingslogg / PDP (Policy Decision Point)

@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRequest;
 import no.nav.k9.sak.domene.risikoklassifisering.tjeneste.rest.FaresignalerRespons;
-import no.nav.vedtak.felles.integrasjon.rest.OidcRestClient;
-import no.nav.vedtak.konfig.KonfigVerdi;
-import no.nav.vedtak.util.LRUCache;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.util.LRUCache;
 
 @ApplicationScoped
 public class HentFaresignalerTjeneste {

@@ -3,13 +3,13 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.behov.BehovKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.*;
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -54,9 +54,9 @@ public class UtvidetRettBehovKlientTest {
         var utvidetRett = new MidlertidigAlene(
             new Saksnummer("ENSAK125"),
             UUID.fromString("5dc41c02-7148-11eb-9439-0242ac130002"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
-            new Søker(NorskIdentitetsnummer.of("29099011111")),
+            new Person(new AktørId("29099011111")),
+            null,
             null
         );
         assertThrows(IllegalStateException.class, () -> klient.avslått(utvidetRett));
@@ -74,24 +74,24 @@ public class UtvidetRettBehovKlientTest {
         new KroniskSyktBarn(
             new Saksnummer("ENSAK123"),
             UUID.fromString("0a98ac74-6970-47a5-8b0b-a14ead63082a"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
-            new Søker(NorskIdentitetsnummer.of("29099011111")),
-            new Barn(NorskIdentitetsnummer.of("01011811111"), LocalDate.parse("2018-01-01"))
+            new Person(new AktørId("29099011111")),
+            new Person(new AktørId("01011811111")),
+            new Periode("2021-01-01/2021-12-31")
         ),
-        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"identitetsnummer\":\"29099011111\"},\"barn\":{\"identitetsnummer\":\"01011811111\",\"fødselsdato\":\"2018-01-01\"}}"
+        "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2021-01-01\",\"tom\":\"2021-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
     private static UtvidetRettSerialisering midlertidigAlene = new UtvidetRettSerialisering<>(
         new MidlertidigAlene(
             new Saksnummer("ENSAK124"),
             UUID.fromString("b684c176-7147-11eb-9439-0242ac130002"),
-            ZonedDateTime.parse("2021-02-17T15:57:00.684Z"),
             ZonedDateTime.parse("2021-02-17T15:57:00.684+02"),
-            new Søker(NorskIdentitetsnummer.of("29099011111")),
-            new AnnenForelder(NorskIdentitetsnummer.of("01011811111"))
+            new Person(new AktørId("29099011111")),
+            new Person(new AktørId("01011811111")),
+            new Periode("2022-01-01/2022-12-31")
         ),
-        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"søknadMottatt\":\"2021-02-17T15:57:00.684Z\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"identitetsnummer\":\"29099011111\"},\"annenForelder\":{\"identitetsnummer\":\"01011811111\"}}"
+        "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2022-01-01\",\"tom\":\"2022-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
     private static class TestBehovKlient extends BehovKlient {

@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.beregning;
 
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
+import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.time.LocalDate;
 import java.util.Objects;

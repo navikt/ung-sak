@@ -1,6 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt;
 
-import static no.nav.vedtak.konfig.Tid.TIDENES_ENDE;
+import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
 import java.util.EnumSet;
 import java.util.List;

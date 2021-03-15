@@ -96,6 +96,7 @@ public class BehandlendeEnhetTjeneste {
         Set<AktørId> allePersoner = new HashSet<>();
         allePersoner.add(hovedPerson);
         Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId()).ifPresent(allePersoner::add);
+        Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId()).ifPresent(allePersoner::add);
 
         allePersoner.addAll(finnAktørIdFraPersonopplysninger(behandling));
 

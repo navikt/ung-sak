@@ -61,6 +61,14 @@ public class MapFraÅrskvantumResultatTest {
         assertThat(perioder.stream().filter(p -> !p.getErOppholdsPeriode())).hasSize(2);
     }
 
+    @Test
+    void map_frilanser_arbeidsforhold() {
+        var arbeidsforhold = new Arbeidsforhold("FL", null, null, null);
+        var resultat = MapFraÅrskvantumResultat.mapArbeidsforhold(arbeidsforhold);
+        assertThat(resultat.erFrilanser()).isTrue();
+        assertThat(resultat.getIdentifikator()).isNull();
+        assertThat(resultat.getArbeidsforholdId()).isNull();
+    }
 
     private Uttaksplan lagUttaksplan() {
         Uttaksplan uttaksplanOmsorgspenger = new Uttaksplan("123", UUID.randomUUID(), lagAktiviteter(), false, true, Bekreftet.SYSTEMBEKREFTET, null, emptyList());

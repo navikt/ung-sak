@@ -65,6 +65,10 @@ public class FagsakDto {
     @Valid
     private AktørId pleietrengendeAktørId;
 
+    @JsonProperty(value = "relatertPersonAktørId", required = false)
+    @Valid
+    private AktørId relatertPersonAktørId;
+
     public FagsakDto() {
         // Injiseres i test
     }
@@ -75,6 +79,7 @@ public class FagsakDto {
                      Periode periode,
                      PersonDto person,
                      AktørId pleietrengendeAktørId,
+                     AktørId relatertPersonAktørId,
                      Boolean kanRevurderingOpprettes,
                      Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
@@ -85,6 +90,7 @@ public class FagsakDto {
         this.gyldigPeriode = periode;
         this.person = person;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.relatertPersonAktørId = relatertPersonAktørId;
         this.opprettet = opprettetTidspunkt;
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;

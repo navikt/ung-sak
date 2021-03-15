@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,40 +17,26 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnMapper;
 import no.nav.k9.sak.ytelse.frisinn.mapper.FrisinnSøknadsperiodeMapper;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @FagsakYtelseTypeRef("FRISINN")
 @ApplicationScoped
 public class FrisinnYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<FrisinnGrunnlag> {
 
     private UttakRepository uttakRepository;
-    private Boolean toggletVilkårsperioder;
 
     FrisinnYtelsesspesifiktGrunnlagMapper() {
     }
 
     @Inject
-    public FrisinnYtelsesspesifiktGrunnlagMapper(UttakRepository uttakRepository,
-                                                 @KonfigVerdi(value = "FRISINN_VILKARSPERIODER", defaultVerdi = "false") Boolean toggletVilkårsperioder) {
+    public FrisinnYtelsesspesifiktGrunnlagMapper(UttakRepository uttakRepository) {
         this.uttakRepository = uttakRepository;
-        this.toggletVilkårsperioder = toggletVilkårsperioder;
     }
 
     @Override
     public FrisinnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
         var origFastsattUttak = ref.getOriginalBehandlingId().map(origBehandlingId -> uttakRepository.hentFastsattUttak(origBehandlingId));
-
-        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos;
-        if (toggletVilkårsperioder) {
-            periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak)
-                .stream()
-                .filter(p -> vilkårsperiode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom())))
-                .collect(Collectors.toList());
-        } else {
-            periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);
-        }
-
+        List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);
         return new FrisinnGrunnlag(periodeMedSøkerInfoDtos, finnFrisinnBehandlingType(fastsattUttak, origFastsattUttak));
     }
 

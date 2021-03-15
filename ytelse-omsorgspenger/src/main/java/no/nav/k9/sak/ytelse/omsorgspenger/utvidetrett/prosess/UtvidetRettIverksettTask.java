@@ -1,10 +1,19 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -15,38 +24,27 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Barn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Søker;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(UtvidetRettIverksettTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UtvidetRettIverksettTask.class);
+    private static final Set<LocalDate> UGYLDIGE_DATOER_FOR_PERIODE = Set.of(
+        Tid.TIDENES_BEGYNNELSE,
+        Tid.TIDENES_ENDE);
     public static final String TASKTYPE = "iverksetteVedtak.sendUtvidetRett";
 
     private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-
     private UtvidetRettKlient utvidetRettKlient;
-
-    private PersoninfoAdapter personinfoAdapter;
-
-    private PersonopplysningTjeneste personopplysningTjeneste;
 
     protected UtvidetRettIverksettTask() {
     }
@@ -55,14 +53,10 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     public UtvidetRettIverksettTask(SøknadRepository søknadRepository,
                                     VilkårResultatRepository vilkårResultatRepository,
                                     BehandlingRepository behandlingRepository,
-                                    PersoninfoAdapter personinfoAdapter,
-                                    PersonopplysningTjeneste personopplysningTjeneste,
                                     UtvidetRettKlient utvidetRettKlient) {
         this.søknadRepository = søknadRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
-        this.personinfoAdapter = personinfoAdapter;
-        this.personopplysningTjeneste = personopplysningTjeneste;
         this.utvidetRettKlient = utvidetRettKlient;
     }
 
@@ -101,46 +95,43 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     }
 
     private UtvidetRett mapMidlertidigAlene(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
+        var aktørIdSøker = behandling.getAktørId();
+        var aktørIdAnnenForelder = behandling.getFagsak().getRelatertPersonAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
-        var søkerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId());
 
-        var personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), søknad.getMottattDato());
-
-        // TODO : annenforelder
-        /*
-         * var relasjon = personopplysninger.getSøkersRelasjoner().stream().filter(r -> r.getAktørId().equals(annenForelderAktørId)).findFirst()
-         * .orElseThrow(() -> new IllegalStateException("Har ikke relasjon fra søker til annenForelder: " + annenForelderAktørId));
-         */
         return new MidlertidigAlene()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
-            .setTidspunkt(ZonedDateTime.now())
-// .setAnnenForelder(new AnnenForelder(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())))
-            .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
+            .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
+            .setAnnenForelder(new Person(aktørIdAnnenForelder))
+            .setSøker(new Person(aktørIdSøker))
+            .setPeriode(periode(vilkårene));
     }
 
     private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
-        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
+        var aktørIdSøker = behandling.getAktørId();
+        var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
-        var søkerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId());
-
-        var barnIdent = personinfoAdapter.hentIdentForAktørId(pleietrengendeAktørId);
-        var barnInfo = personinfoAdapter.hentKjerneinformasjon(pleietrengendeAktørId);
-
-        var personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), søknad.getMottattDato());
-
-        var relasjon = personopplysninger.getSøkersRelasjoner().stream().filter(r -> r.getAktørId().equals(pleietrengendeAktørId)).findFirst()
-            .orElseThrow(() -> new IllegalStateException("Har ikke relasjon fra søker til barn: " + pleietrengendeAktørId));
 
         return new KroniskSyktBarn()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
-            .setSøknadMottatt(søknad.getMottattDato().atStartOfDay(ZoneId.systemDefault()))
-            .setTidspunkt(ZonedDateTime.now())
-            .setBarn(new Barn(NorskIdentitetsnummer.of(barnIdent.get().getIdent()), barnInfo.getFødselsdato()))
-            .setSøker(new Søker(NorskIdentitetsnummer.of(søkerIdent.get().getIdent())));
-
+            .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
+            .setBarn(new Person(aktørIdBarn))
+            .setSøker(new Person(aktørIdSøker))
+            .setPeriode(periode(vilkårene));
     }
 
+    private Periode periode(Vilkårene vilkårene) {
+        var vilkår = vilkårene.getVilkår(VilkårType.UTVIDETRETT);
+        var perioder = vilkår.orElseThrow().getPerioder();
+        var fom = perioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
+        var tom = perioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
+        var periode = new Periode(fom, tom);
+        if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
+            throw new IllegalStateException("Ugylidig periode for vedtak om utvidet rett " + periode.toString());
+        }
+        return periode;
+
+    }
 }
