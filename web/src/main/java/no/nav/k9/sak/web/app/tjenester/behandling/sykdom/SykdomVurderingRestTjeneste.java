@@ -71,7 +71,7 @@ public class SykdomVurderingRestTjeneste {
     public static final String BASE_PATH = "/behandling/sykdom/vurdering";
     public static final String VURDERING = "/";
     public static final String VURDERING_VERSJON = "/versjon";
-    public static final String VURDERING_PATH = BASE_PATH + VURDERING;
+    public static final String VURDERING_PATH = BASE_PATH;
     public static final String VURDERING_VERSJON_PATH = BASE_PATH + VURDERING_VERSJON;
     private static final String VURDERING_OVERSIKT_KTP = "/oversikt/KONTINUERLIG_TILSYN_OG_PLEIE";
     private static final String VURDERING_OVERSIKT_TOO = "/oversikt/TO_OMSORGSPERSONER";
@@ -148,7 +148,6 @@ public class SykdomVurderingRestTjeneste {
     }
 
     @GET
-    @Path(VURDERING)
     @Operation(description = "Henter informasjon om én gitt vurdering.",
         summary = "En gitt vurdering angitt med ID.",
         tags = "sykdom",
@@ -242,7 +241,6 @@ public class SykdomVurderingRestTjeneste {
     }
 
     @POST
-    @Path(VURDERING)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter en ny vurdering.",
         summary = "Oppretter en ny vurdering.",

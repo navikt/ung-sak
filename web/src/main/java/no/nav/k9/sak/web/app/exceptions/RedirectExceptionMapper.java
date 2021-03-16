@@ -2,19 +2,18 @@ package no.nav.k9.sak.web.app.exceptions;
 
 import java.net.URI;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.resteasy.spi.ApplicationException;
 import org.owasp.encoder.Encode;
 
-import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
-
+import no.nav.k9.sak.kontrakt.FeilDto;
 
 @Provider
-public class RedirectExceptionMapper implements ExceptionMapper<ApplicationException> {
+public class RedirectExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     private String loadBalancerUrl = System.getProperty("loadbalancer.url");
 
@@ -22,7 +21,7 @@ public class RedirectExceptionMapper implements ExceptionMapper<ApplicationExcep
 
     @SuppressWarnings("resource")
     @Override
-    public Response toResponse(ApplicationException exception) {
+    public Response toResponse(WebApplicationException exception) {
         Response response = generalRestExceptionMapper.toResponse(exception);
         String feilmelding = ((FeilDto) response.getEntity()).getFeilmelding();
         String enkodetFeilmelding = Encode.forUriComponent(feilmelding);

@@ -62,22 +62,23 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
-        Optional<Long> behandlingIder = utledBehandlingIder(attributter);
-        Optional<PipBehandlingsData> behandlingData = behandlingIder.isPresent()
-            ? pipRepository.hentDataForBehandling(behandlingIder.get())
+        Optional<Long> behandlingId = utledBehandlingIder(attributter);
+        Optional<PipBehandlingsData> behandlingData = behandlingId.isPresent()
+            ? pipRepository.hentDataForBehandling(behandlingId.get())
             : Optional.empty();
         Set<Long> fagsakIder = behandlingData.isPresent()
             ? utledFagsakIder(attributter, behandlingData.get())
             : utledFagsakIder(attributter);
 
-        behandlingData.ifPresent(pipBehandlingsData -> validerSamsvarBehandlingOgFagsak(behandlingIder.get(), pipBehandlingsData.getFagsakId(), fagsakIder));
+        behandlingData.ifPresent(pipBehandlingsData -> {
+            validerSamsvarBehandlingOgFagsak(behandlingId.get(), pipBehandlingsData.getFagsakId(), fagsakIder);
+            LOG_CONTEXT.add("behandling", behandlingId.get());
+            LOG_CONTEXT.add("saksnummer", pipBehandlingsData.getSaksnummer());
+        });
 
         if (!fagsakIder.isEmpty()) {
             LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
         }
-        behandlingIder.ifPresent(behId -> {
-            LOG_CONTEXT.add("behandling", behId);
-        });
 
         Set<AktørId> aktørIder = utledAktørIder(attributter, fagsakIder);
         Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(AppAbacAttributtType.AKSJONSPUNKT_KODE));
@@ -141,6 +142,8 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         } else if (behandlingsIder.size() == 1) {
             return Optional.of(behandlingsIder.iterator().next());
         }
+
+        // Støtter p.t. kun en behandlingsid
         throw FeilFactory.create(PdpRequestBuilderFeil.class).ugyldigInputFlereBehandlingIder(behandlingsIder).toException();
     }
 

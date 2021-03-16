@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.jboss.resteasy.api.validation.ResteasyViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +30,6 @@ public class ConstraintViolationMapper implements ExceptionMapper<ConstraintViol
     @Override
     public Response toResponse(ConstraintViolationException exception) {
         Set<ConstraintViolation<?>> constraintViolations = exception.getConstraintViolations();
-
-        if (constraintViolations.isEmpty() && exception instanceof ResteasyViolationException) {
-            String message = ((ResteasyViolationException) exception).getException().getMessage();
-            log.error(message);
-            Feil feil = FeltValideringFeil.FACTORY.feilIOppsettAvFeltvalidering();
-            return lagResponse(new FeilDto(FeilType.GENERELL_FEIL, feil.getFeilmelding()));
-        }
 
         Collection<FeltFeilDto> feilene = new ArrayList<>();
         for (ConstraintViolation<?> constraintViolation : constraintViolations) {

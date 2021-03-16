@@ -1,18 +1,15 @@
 package no.nav.k9.sak.web.app.exceptions;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.resteasy.spi.ApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import no.nav.k9.sak.kontrakt.FeilDto;
-import no.nav.k9.sak.kontrakt.FeilType;
-import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
@@ -20,14 +17,17 @@ import no.nav.k9.felles.feil.FunksjonellFeil;
 import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.felles.log.util.LoggerUtils;
+import no.nav.k9.sak.kontrakt.FeilDto;
+import no.nav.k9.sak.kontrakt.FeilType;
+import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
 
 @Provider
-public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationException> {
+public class GeneralRestExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralRestExceptionMapper.class);
 
     @Override
-    public Response toResponse(ApplicationException exception) {
+    public Response toResponse(WebApplicationException exception) {
         Throwable cause = exception.getCause();
 
         if (cause instanceof TomtResultatException) {
@@ -136,14 +136,14 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<ApplicationEx
             ((VLException) cause).log(LOGGER);
         } else if (cause instanceof UnsupportedOperationException) {
             String message = cause.getMessage() != null ? LoggerUtils.removeLineBreaks(cause.getMessage()) : "";
-            LOGGER.info("Fikk ikke-implementert-feil: " + message, cause); //NOSONAR //$NON-NLS-1$
+            LOGGER.info("Fikk ikke-implementert-feil: " + message, cause); // NOSONAR //$NON-NLS-1$
         } else {
             String message = cause.getMessage() != null ? LoggerUtils.removeLineBreaks(cause.getMessage()) : "";
-            LOGGER.error("Fikk uventet feil: " + message, cause); //NOSONAR //$NON-NLS-1$
+            LOGGER.error("Fikk uventet feil: " + message, cause); // NOSONAR //$NON-NLS-1$
         }
 
         // key for å tracke prosess -- nullstill denne
-        MDC.remove("prosess");  //$NON-NLS-1$
+        MDC.remove("prosess"); //$NON-NLS-1$
     }
 
 }

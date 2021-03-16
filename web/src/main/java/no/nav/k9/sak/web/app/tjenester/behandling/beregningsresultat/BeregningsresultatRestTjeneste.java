@@ -20,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -30,8 +32,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path(BeregningsresultatRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,8 +40,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 public class BeregningsresultatRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/beregningsresultat";
-    public static final String BEREGNINGSRESULTAT = "/";
-    static public final String BEREGNINGSRESULTAT_PATH = BASE_PATH + BEREGNINGSRESULTAT;
+    static public final String BEREGNINGSRESULTAT_PATH = BASE_PATH;
     public static final String HAR_SAMME_RESULTAT = "/har-samme-resultat";
     static public final String HAR_SAMME_RESULTAT_PATH = BASE_PATH + HAR_SAMME_RESULTAT;
     public static final String UTBETALT = "/utbetalt";
@@ -64,7 +63,6 @@ public class BeregningsresultatRestTjeneste {
     // FIXME K9 Erstatt denne tjenesten
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path(BEREGNINGSRESULTAT)
     @Operation(description = "Hent beregningsresultat med uttaksplan for foreldrepenger behandling", summary = ("Returnerer beregningsresultat med uttaksplan for behandling."), tags = "beregningsresultat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Deprecated
@@ -80,7 +78,6 @@ public class BeregningsresultatRestTjeneste {
 
     // FIXME K9 Erstatt denne tjenesten
     @GET
-    @Path(BEREGNINGSRESULTAT)
     @Operation(description = "Hent beregningsresultat med uttaksplan for foreldrepenger behandling", summary = ("Returnerer beregningsresultat med uttaksplan for behandling."), tags = "beregningsresultat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")

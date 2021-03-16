@@ -1,17 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
-import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,8 +14,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
+import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -34,8 +34,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 public class OmsorgenForRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/omsorg-for";
-    public static final String OMSORGEN_FOR_OPPLYSNINGER = "";
-    public static final String OMSORGEN_FOR_OPPLYSNINGER_PATH = BASE_PATH + OMSORGEN_FOR_OPPLYSNINGER;
+    public static final String OMSORGEN_FOR_OPPLYSNINGER_PATH = BASE_PATH;
     private OmsorgenForDtoMapper dtoMapper;
     private BehandlingRepository behandlingRepository;
 
@@ -49,7 +48,6 @@ public class OmsorgenForRestTjeneste {
     }
 
     @GET
-    @Path(OMSORGEN_FOR_OPPLYSNINGER)
     @Operation(description = "Hent omsorgen for opplysninger",
         summary = ("Returnerer informasjon saksbehandler har skrevet inn fra legeerklæring " +
             "og vurderinger vedrørende kontinuerlig tilsyn & pleie"),

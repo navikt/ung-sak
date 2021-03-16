@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.inject.Any;
@@ -81,10 +82,12 @@ public class BehandlingDtoTjenesteImplTest {
         Set<Behandling> behandlinger = new HashSet<>();
         behandlinger.add(lagBehandling());
         for (Behandling behandling : behandlinger) {
-            for (ResourceLink dtoLink : tjeneste.lagUtvidetBehandlingDto(behandling, null).getLinks()) {
+            List<ResourceLink> links = tjeneste.lagUtvidetBehandlingDto(behandling, null).getLinks();
+            for (ResourceLink dtoLink : links) {
                 assertThat(routeExists(dtoLink)).withFailMessage("Route " + dtoLink.toString() + " does not exist.").isTrue();
             }
-            for (ResourceLink dtoLink : tjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling).getLinks()) {
+            List<ResourceLink> revurderingLinks = tjeneste.lagUtvidetBehandlingDtoForRevurderingensOriginalBehandling(behandling).getLinks();
+            for (ResourceLink dtoLink : revurderingLinks) {
                 assertThat(routeExists(dtoLink)).withFailMessage("Route " + dtoLink.toString() + " does not exist.").isTrue();
             }
         }
