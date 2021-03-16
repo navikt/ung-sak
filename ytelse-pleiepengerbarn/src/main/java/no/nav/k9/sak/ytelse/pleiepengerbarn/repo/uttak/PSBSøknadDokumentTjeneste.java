@@ -34,8 +34,8 @@ public class PSBSøknadDokumentTjeneste implements SøknadDokumentTjeneste {
 
     @Override
     public DiffResult diffResultat(EndringsresultatDiff diff, boolean onlyTrackedFields) {
-        var grunnlag1 = repository.hentGrunnlagBasertPåId((Long) diff.getGrunnlagId1());
-        var grunnlag2 = repository.hentGrunnlagBasertPåId((Long) diff.getGrunnlagId2());
+        var grunnlag1 = repository.hentGrunnlagBasertPåId((Long) diff.getGrunnlagId1()).orElse(null);
+        var grunnlag2 = repository.hentGrunnlagBasertPåId((Long) diff.getGrunnlagId2()).orElse(null);
 
         return new RegisterdataDiffsjekker(onlyTrackedFields).getDiffEntity().diff(grunnlag1, grunnlag2);
     }

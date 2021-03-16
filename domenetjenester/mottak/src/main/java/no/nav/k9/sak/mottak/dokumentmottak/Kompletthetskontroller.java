@@ -13,6 +13,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringsFeil;
@@ -27,7 +29,6 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 /**
  * Denne klassen evaluerer hvilken effekt en ekstern hendelse (dokument, forretningshendelse) har på en åpen behandlings
@@ -59,7 +60,7 @@ public class Kompletthetskontroller {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
-    public void asynkVurderKompletthet(Behandling behandling) {
+    public ProsessTaskData asynkVurderKompletthet(Behandling behandling) {
         preconditionIkkeAksepterKobling(behandling);
 
         // Ta snapshot av gjeldende grunnlag-id-er før oppdateringer
@@ -67,8 +68,8 @@ public class Kompletthetskontroller {
 
         // gjør komplethetsjekk i en senere task (etter at inntektsmeldinger er lagret til abakus)
         var kompletthetskontrollerTask = KompletthetskontrollerVurderKompletthetTask.init(behandling, grunnlagSnapshot);
-        prosessTaskRepository.lagre(kompletthetskontrollerTask);
 
+        return kompletthetskontrollerTask;
     }
 
     public void vurderKompletthetOgFortsett(Behandling behandling, Long behandlingId, EndringsresultatSnapshot grunnlagSnapshot) {

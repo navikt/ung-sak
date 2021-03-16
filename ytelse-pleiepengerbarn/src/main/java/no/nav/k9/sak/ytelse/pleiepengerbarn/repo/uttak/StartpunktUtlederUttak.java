@@ -17,7 +17,7 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktU
 
 @ApplicationScoped
 @GrunnlagRef("UttakPerioderGrunnlag")
-class StartpunktUtlederUttak implements StartpunktUtleder {
+public class StartpunktUtlederUttak implements StartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
 
@@ -33,17 +33,18 @@ class StartpunktUtlederUttak implements StartpunktUtleder {
     }
 
     @Override
-    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        return hentAlleStartpunktFor(ref, (Long) grunnlagId1, (Long) grunnlagId2).stream()
+    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object nyttGrunnlag, Object gammeltGrunnlag) {
+        return hentAlleStartpunktFor(ref, (Long) nyttGrunnlag, (Long) gammeltGrunnlag)
+            .stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
 
-    private List<StartpunktType> hentAlleStartpunktFor(BehandlingReferanse ref, Long grunnlagId1, Long grunnlagId2) { // NOSONAR
+    private List<StartpunktType> hentAlleStartpunktFor(BehandlingReferanse ref, Long nyttGrunnlag, Long gammeltGrunnlag) { // NOSONAR
 
         var startpunkter = new ArrayList<StartpunktType>();
 
-        var orginaleJournalposter = uttakPerioderGrunnlagRepository.hentGrunnlagBasertPåId(grunnlagId1)
+        var orginaleJournalposter = uttakPerioderGrunnlagRepository.hentGrunnlagBasertPåId(gammeltGrunnlag)
             .stream()
             .map(UttaksPerioderGrunnlag::getOppgitteSøknadsperioder)
             .map(UttakPerioderHolder::getPerioderFraSøknadene)
@@ -51,7 +52,7 @@ class StartpunktUtlederUttak implements StartpunktUtleder {
             .map(PerioderFraSøknad::getJournalpostId)
             .collect(Collectors.toSet());
 
-        var nyeJournalposter = uttakPerioderGrunnlagRepository.hentGrunnlagBasertPåId(grunnlagId2)
+        var nyeJournalposter = uttakPerioderGrunnlagRepository.hentGrunnlagBasertPåId(nyttGrunnlag)
             .stream()
             .map(UttaksPerioderGrunnlag::getOppgitteSøknadsperioder)
             .map(UttakPerioderHolder::getPerioderFraSøknadene)
@@ -62,7 +63,7 @@ class StartpunktUtlederUttak implements StartpunktUtleder {
         nyeJournalposter.removeAll(orginaleJournalposter);
 
         if (!nyeJournalposter.isEmpty()) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "Tilkommet ny søknad(er) '" + nyeJournalposter + "'.");
+            leggTilStartpunkt(startpunkter, nyttGrunnlag, gammeltGrunnlag, StartpunktType.INIT_PERIODER, "Tilkommet ny søknad(er) '" + nyeJournalposter + "'.");
         }
 
         return startpunkter;
