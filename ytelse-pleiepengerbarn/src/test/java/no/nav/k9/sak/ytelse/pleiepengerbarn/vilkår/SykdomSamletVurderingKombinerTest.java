@@ -12,19 +12,19 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 
-class RevurderingTuppelKombinerTest {
+class SykdomSamletVurderingKombinerTest {
 
     @Test
     public void happyCase1() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
         tuppel1.innleggelser = dummyInnleggelser();
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.toOp = dummyVurdering(SykdomVurderingType.TO_OMSORGSPERSONER);
 
 
-        RevurderingTuppel kombinert = tuppel1.kombiner(tuppel2);
+        SykdomSamletVurdering kombinert = tuppel1.kombiner(tuppel2);
         assertThat(kombinert.ktp).isEqualTo(tuppel1.ktp);
         assertThat(kombinert.toOp).isEqualTo(tuppel2.toOp);
         assertThat(kombinert.innleggelser).isEqualTo(tuppel1.innleggelser);
@@ -32,13 +32,13 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void happyCase2() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.toOp = dummyVurdering(SykdomVurderingType.TO_OMSORGSPERSONER);
 
-        RevurderingTuppel kombinert = tuppel1.kombiner(tuppel2);
+        SykdomSamletVurdering kombinert = tuppel1.kombiner(tuppel2);
         assertThat(kombinert.ktp).isEqualTo(tuppel1.ktp);
         assertThat(kombinert.toOp).isEqualTo(tuppel2.toOp);
         assertThat(kombinert.innleggelser).isNull();
@@ -46,14 +46,14 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void happyCase3() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.toOp = dummyVurdering(SykdomVurderingType.TO_OMSORGSPERSONER);
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
         tuppel2.innleggelser = dummyInnleggelser();
 
-        RevurderingTuppel kombinert = tuppel1.kombiner(tuppel2);
+        SykdomSamletVurdering kombinert = tuppel1.kombiner(tuppel2);
         assertThat(kombinert.ktp).isEqualTo(tuppel2.ktp);
         assertThat(kombinert.toOp).isEqualTo(tuppel1.toOp);
         assertThat(kombinert.innleggelser).isEqualTo(tuppel2.innleggelser);
@@ -61,14 +61,14 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void sparseKombo() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.innleggelser = dummyInnleggelser();
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
 
 
-        RevurderingTuppel kombinert = tuppel1.kombiner(tuppel2);
+        SykdomSamletVurdering kombinert = tuppel1.kombiner(tuppel2);
         assertThat(kombinert.ktp).isEqualTo(tuppel2.ktp);
         assertThat(kombinert.toOp).isNull();
         assertThat(kombinert.innleggelser).isEqualTo(tuppel1.innleggelser);
@@ -76,10 +76,10 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void tillater_ikke_overlappende_tupler_med_forskjellige_vurderinger1() {
-         RevurderingTuppel tuppel1 = new RevurderingTuppel();
+         SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
          tuppel1.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
 
-         RevurderingTuppel tuppel2 = new RevurderingTuppel();
+         SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
          tuppel2.ktp = dummyVurdering(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE);
 
         assertThrows(IllegalStateException.class, () -> {
@@ -89,10 +89,10 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void tillater_ikke_overlappende_tupler_med_forskjellige_vurderinger2() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.toOp = dummyVurdering(SykdomVurderingType.TO_OMSORGSPERSONER);
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.toOp = dummyVurdering(SykdomVurderingType.TO_OMSORGSPERSONER);
 
         assertThrows(IllegalStateException.class, () -> {
@@ -102,10 +102,10 @@ class RevurderingTuppelKombinerTest {
 
     @Test
     public void tillater_ikke_overlappende_tupler_med_forskjellige_innleggelser() {
-        RevurderingTuppel tuppel1 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel1 = new SykdomSamletVurdering();
         tuppel1.innleggelser = dummyInnleggelser();
 
-        RevurderingTuppel tuppel2 = new RevurderingTuppel();
+        SykdomSamletVurdering tuppel2 = new SykdomSamletVurdering();
         tuppel2.innleggelser = dummyInnleggelser();
 
         assertThrows(IllegalStateException.class, () -> {

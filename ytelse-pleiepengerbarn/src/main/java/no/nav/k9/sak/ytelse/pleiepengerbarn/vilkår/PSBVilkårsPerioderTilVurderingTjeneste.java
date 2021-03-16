@@ -29,7 +29,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -107,25 +106,25 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();
 
         final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid());
-        LocalDateTimeline<RevurderingTuppel> forrigeTidslinje;
+        LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje;
 
-        if(forrigeGrunnlagBehandling.isPresent()) {
+        if (forrigeGrunnlagBehandling.isPresent()) {
             final SykdomGrunnlag forrigeGrunnlag = forrigeGrunnlagBehandling.get().getGrunnlag();
-            forrigeTidslinje = RevurderingTuppel.grunnlagTilTidslinje(forrigeGrunnlag);
+            forrigeTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
         } else {
             forrigeTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
         }
 
-        var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
+        var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
 
-        SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, perioder);
-        LocalDateTimeline<RevurderingTuppel> nyTidslinje = RevurderingTuppel.grunnlagTilTidslinje(utledetGrunnlag);
+        SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, SykdomUtils.toPeriodeList(perioder));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
 
-        LocalDateTimeline<Object> kombinertTidslinje = RevurderingTuppel.getKombinertTidslinje(forrigeTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> kombinertTidslinje = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje);
 
 
-        LocalDateTimeline<Object> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioderTimeline);
+        LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioderTimeline);
 
         return new TreeSet<>(utvidedePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))

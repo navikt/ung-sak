@@ -17,8 +17,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.validation.constraints.NotNull;
 
-import org.jetbrains.annotations.NotNull;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -52,7 +52,6 @@ public class SykdomGrunnlagRepository {
         return getSykdomGrunnlag(pleietrengendeAktørId, vurderingsperioder, grunnlagFraForrigeBehandling);
     }
 
-    @NotNull
     private SykdomGrunnlag getSykdomGrunnlag(AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
