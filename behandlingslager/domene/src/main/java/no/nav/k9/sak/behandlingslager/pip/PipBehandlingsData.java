@@ -9,9 +9,11 @@ public class PipBehandlingsData {
     private String fagsakStatus;
     private String ansvarligSaksbehandler;
     private Long fagsakId;
+    private String saksnummer;
 
-    public PipBehandlingsData(String behandligStatus, String ansvarligSaksbehandler, BigInteger fagsakId, String fagsakStatus) {
+    public PipBehandlingsData(String behandligStatus, String ansvarligSaksbehandler, BigInteger fagsakId, String fagsakStatus, String saksnummer) {
         this.behandligStatus = behandligStatus;
+        this.saksnummer = saksnummer;
         this.fagsakId = fagsakId.longValue();
         this.fagsakStatus = fagsakStatus;
         this.ansvarligSaksbehandler = ansvarligSaksbehandler;
@@ -45,6 +47,10 @@ public class PipBehandlingsData {
         return fagsakId;
     }
 
+    public String getSaksnummer() {
+        return saksnummer;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object == this) {
@@ -56,6 +62,7 @@ public class PipBehandlingsData {
         PipBehandlingsData other = (PipBehandlingsData) object;
         return Objects.equals(getBehandligStatus(), other.getBehandligStatus())
             && Objects.equals(getFagsakStatus(), other.getFagsakStatus())
+            && Objects.equals(getFagsakId(), other.getFagsakId())
             && Objects.equals(getAnsvarligSaksbehandler(), other.getAnsvarligSaksbehandler());
     }
 

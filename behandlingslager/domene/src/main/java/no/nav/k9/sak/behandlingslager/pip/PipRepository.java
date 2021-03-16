@@ -44,6 +44,7 @@ public class PipRepository {
             "b.ansvarlig_saksbehandler ansvarligSaksbehandler, " +
             "f.id fagsakId, " +
             "f.fagsak_status fagsakStatus " +
+            "f.saksnummer " +
             "FROM BEHANDLING b " +
             "JOIN FAGSAK f ON b.fagsak_id = f.id " +
             "WHERE b.id = :behandlingId";

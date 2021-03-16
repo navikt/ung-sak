@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,6 +38,16 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.jpa.TomtResultatException;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -63,16 +75,6 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.jpa.TomtResultatException;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -137,7 +139,9 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentBehandling(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+    public Response hentBehandling(@Context HttpServletRequest request,
+                                   @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto)
+            throws URISyntaxException {
         var behandlingId = behandlingIdDto.getBehandlingId();
         var behandling = behandlingId != null
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
@@ -146,7 +150,7 @@ public class BehandlingRestTjeneste {
         Optional<String> gruppeOpt = sjekkProsessering.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, true);
 
         // sender alltid til poll status slik at vi får sjekket på utestående prosess tasks også.
-        return Redirect.tilBehandlingPollStatus(behandling.getUuid(), gruppeOpt);
+        return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), gruppeOpt);
     }
 
     @GET
@@ -158,7 +162,8 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentBehandlingMidlertidigStatus(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto,
+    public Response hentBehandlingMidlertidigStatus(@Context HttpServletRequest request,
+                                                    @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
         var behandlingId = behandlingIdDto.getBehandlingId();
@@ -167,7 +172,7 @@ public class BehandlingRestTjeneste {
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
-        return Redirect.tilBehandlingEllerPollStatus(behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
+        return Redirect.tilBehandlingEllerPollStatus(request, behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
     }
 
     @GET
@@ -179,14 +184,14 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentBehandlingMidlertidigStatus(
+    public Response hentBehandlingMidlertidigStatus(@Context HttpServletRequest request,
                                                     @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
                                                     @QueryParam("gruppe") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) ProsessTaskGruppeIdDto gruppeDto)
             throws URISyntaxException {
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         String gruppe = gruppeDto == null ? null : gruppeDto.getGruppe();
         Optional<AsyncPollingStatus> prosessTaskGruppePågår = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, gruppe);
-        return Redirect.tilBehandlingEllerPollStatus(behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
+        return Redirect.tilBehandlingEllerPollStatus(request, behandling.getUuid(), prosessTaskGruppePågår.orElse(null));
     }
 
     @GET
@@ -298,7 +303,8 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response gjenopptaBehandling(@Parameter(description = "BehandlingId for behandling som skal gjenopptas") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) GjenopptaBehandlingDto dto)
+    public Response gjenopptaBehandling(@Context HttpServletRequest request,
+                                        @Parameter(description = "BehandlingId for behandling som skal gjenopptas") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) GjenopptaBehandlingDto dto)
             throws URISyntaxException {
         Long behandlingId = dto.getBehandlingId();
         Long behandlingVersjon = dto.getBehandlingVersjon();
@@ -309,7 +315,7 @@ public class BehandlingRestTjeneste {
         // gjenoppta behandling ( sparkes i gang asynkront, derav redirect til status url under )
         var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingId);
         Optional<String> gruppeOpt = behandlingsprosessTjeneste.gjenopptaBehandling(behandling);
-        return Redirect.tilBehandlingPollStatus(behandling.getUuid(), gruppeOpt);
+        return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), gruppeOpt);
     }
 
     @POST
@@ -338,7 +344,8 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprettNyBehandling(@Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
+    public Response opprettNyBehandling(@Context HttpServletRequest request,
+                                        @Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
             throws URISyntaxException {
         Saksnummer saksnummer = dto.getSaksnummer();
         BehandlingType behandlingType = BehandlingType.fraKode(dto.getBehandlingType().getKode());
@@ -353,7 +360,7 @@ public class BehandlingRestTjeneste {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
-            return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
+            return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 
         } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(behandlingType.getKode())) {
             throw new UnsupportedOperationException("Ikke implementert støtte for å opprette ny førstegangsbehandling for " + fagsak);
@@ -375,7 +382,9 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprettNyUnntaksbehandling(@Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto) {
+    public Response opprettNyUnntaksbehandling(@Context HttpServletRequest request,
+                                               @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
+            throws URISyntaxException {
         if (!unntaksbehandlingTogglet) {
             throw new UnsupportedOperationException("Unntaksbehandling er ikke aktivert");
         }
@@ -391,7 +400,7 @@ public class BehandlingRestTjeneste {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
             Behandling behandling = behandlingsoppretterTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
-            return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.of(gruppe));
+            return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny unntaksbehandling for behandlingType:" + kode);
@@ -434,7 +443,9 @@ public class BehandlingRestTjeneste {
     })
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response åpneBehandlingForEndringer(@Parameter(description = "BehandlingId for behandling som skal åpnes for endringer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReåpneBehandlingDto dto) {
+    public Response åpneBehandlingForEndringer(@Context HttpServletRequest request,
+                                               @Parameter(description = "BehandlingId for behandling som skal åpnes for endringer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReåpneBehandlingDto dto)
+            throws URISyntaxException {
         Long behandlingId = dto.getBehandlingId();
         Long behandlingVersjon = dto.getBehandlingVersjon();
 
@@ -449,7 +460,7 @@ public class BehandlingRestTjeneste {
         }
         behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId);
         behandling = behandlingsprosessTjeneste.hentBehandling(behandlingId);
-        return Redirect.tilBehandlingPollStatus(behandling.getUuid(), Optional.empty());
+        return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.empty());
     }
 
     @GET

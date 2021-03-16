@@ -74,7 +74,8 @@ import no.nav.k9.felles.feil.FeilFactory;
             @ColumnResult(name = "behandligStatus"),
             @ColumnResult(name = "ansvarligSaksbehandler"),
             @ColumnResult(name = "fagsakId"),
-            @ColumnResult(name = "fagsakStatus")
+                        @ColumnResult(name = "fagsakStatus"),
+                        @ColumnResult(name = "saksnummer")
         })
     })
 })

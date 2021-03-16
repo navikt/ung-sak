@@ -60,9 +60,10 @@ public class PdpRequestBuilderTest {
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
         String behandligStatus = BehandlingStatus.OPPRETTET.getKode();
         String ansvarligSaksbehandler = "Z123456";
+        String saksnummer = "ABC";
         String fagsakStatus = FagsakStatus.UNDER_BEHANDLING.getKode();
         when(pipRepository.hentDataForBehandling(any()))
-            .thenReturn(Optional.of(new PipBehandlingsData(behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID), fagsakStatus)));
+            .thenReturn(Optional.of(new PipBehandlingsData(behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID), fagsakStatus, saksnummer)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
@@ -151,9 +152,9 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FAGSAK_ID, 123L));
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
-
+        String saksnummer = "ABC";
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode())));
+            Optional.of(new PipBehandlingsData(BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
 
         // Assert
         Assertions.assertThrows(ManglerTilgangException.class, () -> {
