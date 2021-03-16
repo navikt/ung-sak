@@ -62,7 +62,7 @@ public class Aksjonspunkt extends BaseEntitet {
     @Convert(converter = VenteårsakKodeverdiConverter.class)
     @Column(name="vent_aarsak")
     private Venteårsak venteårsak = Venteårsak.UDEFINERT;
-    
+
     @Column(name="vent_aarsak_variant")
     private String venteårsakVariant;
 
@@ -83,7 +83,7 @@ public class Aksjonspunkt extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    
+
     @Column(name = "TOTRINN_BEHANDLING", nullable = false)
     private boolean toTrinnsBehandling;
 
@@ -251,16 +251,16 @@ public class Aksjonspunkt extends BaseEntitet {
     public Venteårsak getVenteårsak() {
         return venteårsak;
     }
-    
+
     /** Variant av venteårsak - er opp til den som setter å håndtere (ikke noe predefinert kodeverk). */
     public String getVenteårsakVariant() {
         return venteårsakVariant;
     }
-    
+
     void setVenteårsakVariant(String venteårsakVariant) {
         this.venteårsakVariant = venteårsakVariant;
     }
-    
+
     void setVenteårsak(Venteårsak venteårsak) {
         this.venteårsak = venteårsak;
     }
@@ -379,7 +379,7 @@ public class Aksjonspunkt extends BaseEntitet {
     public boolean erAvbrutt() {
         return Objects.equals(status, AksjonspunktStatus.AVBRUTT);
     }
-    
+
     public boolean avbryt() {
         if(erÅpentAksjonspunkt()) {
             this.status = AksjonspunktStatus.AVBRUTT;
@@ -396,7 +396,6 @@ public class Aksjonspunkt extends BaseEntitet {
             ", status=" + status +
             ", behandlingStegFunnet=" + getBehandlingStegFunnet() +
             ", versjon=" + versjon +
-            ", begrunnelse='" + begrunnelse + '\'' +
             ", periode=" + periode +
             ", toTrinnsBehandling=" + isToTrinnsBehandling() +
             ", fristTid=" + getFristTid() +
