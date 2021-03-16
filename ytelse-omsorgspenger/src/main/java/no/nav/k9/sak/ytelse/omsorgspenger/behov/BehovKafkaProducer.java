@@ -32,10 +32,10 @@ public class BehovKafkaProducer extends BehovKlient {
 
     @Inject
     public BehovKafkaProducer(
-        @KonfigVerdi(value = "KAFKA_BEHOV_TOPIC", defaultVerdi = "k9-rapid-v2", required = false) String topic,
+        @KonfigVerdi(value = "kafka.behov.topic", defaultVerdi = "k9-rapid-v2", required = false) String topic,
         @KonfigVerdi("bootstrap.servers") String bootstrapServers,
-        @KonfigVerdi("SYSTEMBRUKER_USERNAME") String username,
-        @KonfigVerdi("SYSTEMBRUKER_PASSWORD") String password) {
+        @KonfigVerdi("systembruker.username") String username,
+        @KonfigVerdi("systembruker.password") String password) {
         this.clientId = clientId();
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
