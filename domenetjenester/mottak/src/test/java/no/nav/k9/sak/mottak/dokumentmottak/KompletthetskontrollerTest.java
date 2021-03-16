@@ -112,7 +112,8 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
 
-        kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        prosessTaskRepository.lagre(prosessTaskData);
 
         verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
     }
@@ -130,7 +131,8 @@ public class KompletthetskontrollerTest {
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
         // Act
-        kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData1 = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        prosessTaskRepository.lagre(prosessTaskData1);
 
         // Assert
         verify(behandlingProsesseringTjeneste, times(0)).opprettTasksForGjenopptaOppdaterFortsett(eq(behandling), eq(false));
@@ -141,7 +143,8 @@ public class KompletthetskontrollerTest {
         primeProsessTaskRepositoryKompletthetskontroller(behandling);
 
         // Act 2
-        kompletthetskontroller.asynkVurderKompletthet(behandling);
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        prosessTaskRepository.lagre(prosessTaskData);
 
         // Assert 2
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
