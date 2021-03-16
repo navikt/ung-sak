@@ -15,8 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -32,11 +30,18 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
@@ -46,7 +51,7 @@ import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
 import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
-import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
+import no.nav.k9.sak.mottak.SøknadMottakTjenesteContainer;
 import no.nav.k9.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.k9.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
@@ -58,15 +63,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -83,8 +79,7 @@ public class FordelRestTjeneste {
     private SafAdapter safAdapter;
     private FagsakTjeneste fagsakTjeneste;
 
-    @SuppressWarnings("rawtypes")
-    private Instance<SøknadMottakTjeneste> søknadMottakere;
+    private SøknadMottakTjenesteContainer søknadMottakere;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
@@ -96,7 +91,7 @@ public class FordelRestTjeneste {
                               SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
-                              @SuppressWarnings("rawtypes") @Any Instance<SøknadMottakTjeneste> søknadMottakere) {
+                              SøknadMottakTjenesteContainer søknadMottakere) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -131,7 +126,7 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
-        var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
         var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
 
@@ -176,7 +171,7 @@ public class FordelRestTjeneste {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak for saksnummer=" + saksnummer));
         var mottattDokument = lagreMottattDokument(innsending, journalpostId, fagsak);
 
-        var søknadMottaker = finnSøknadMottakerTjeneste(ytelseType);
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
         var behandling = søknadMottaker.mottaSøknad(saksnummer, journalpostId, innsending.getInnhold());
 
         mottattDokument.setBehandlingId(behandling.getId());
@@ -228,12 +223,6 @@ public class FordelRestTjeneste {
             .collect(Collectors.toList());
 
         dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
-    }
-
-    @SuppressWarnings("rawtypes")
-    SøknadMottakTjeneste finnSøknadMottakerTjeneste(FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(søknadMottakere, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke støtte for ytelseType:" + ytelseType));
     }
 
     private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakDto mottattJournalpost) {
