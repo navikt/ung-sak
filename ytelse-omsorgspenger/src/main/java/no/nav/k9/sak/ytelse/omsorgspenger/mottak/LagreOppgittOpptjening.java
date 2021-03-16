@@ -63,30 +63,6 @@ public class LagreOppgittOpptjening {
                 .build());
         }
 
-        if (søknad.getAktivitet().getArbeidstaker() != null) {
-            for (Arbeidstaker arbeidstaker : søknad.getAktivitet().getArbeidstaker()) {
-                var arbeidsPerioder = arbeidstaker.getArbeidstidInfo().getPerioder();
-
-                for(Map.Entry<Periode, ArbeidstidPeriodeInfo> arbeidsPeriode : arbeidsPerioder.entrySet()) {
-                    var oppgittArbeidsforhold = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
-                    var fom = arbeidsPeriode.getKey().getFraOgMed();
-                    var tom = arbeidsPeriode.getKey().getTilOgMed();
-                    var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-                    // TODO: Abakus må støtte lagring av norsk orgnr
-                    var utenlandskVirksomhet = new OppgittUtenlandskVirksomhet(Landkoder.NOR, arbeidstaker.getOrganisasjonsnummer().verdi);
-                    // TODO: Inntekt må kunne oppgis i søknad ELLER kalkulus må godta ingen inntekt
-                    var inntekt = BigDecimal.valueOf(5000);
-
-                    oppgittArbeidsforhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-                        .medUtenlandskVirksomhet(utenlandskVirksomhet)
-                        .medInntekt(inntekt)
-                        .medPeriode(periode);
-                    builderOgStatus.builder.leggTilOppgittArbeidsforhold(oppgittArbeidsforhold);
-                }
-            }
-
-        }
-
         if (builderOgStatus.builder.build().harOpptjening() || !builderOgStatus.erNyopprettet) {
             iayTjeneste.lagreOppgittOpptjening(behandlingId, builderOgStatus.builder);
         }
