@@ -3,7 +3,8 @@ registries:
   maven-github:
     type: maven-repository
     url: https://maven.pkg.github.com/navikt/k9-felles
-    token: ${{secrets.GITHUB_ACCESS_TOKEN}}
+    username: x-access-token
+    password: ${{secrets.GITHUB_ACCESS_TOKEN}}
 
 updates:
   - package-ecosystem: maven
@@ -11,6 +12,7 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
+    
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
