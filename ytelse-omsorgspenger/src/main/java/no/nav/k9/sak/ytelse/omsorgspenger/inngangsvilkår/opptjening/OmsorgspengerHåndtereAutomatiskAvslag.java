@@ -41,8 +41,8 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
         }
     }
 
-    private boolean erMidlertidigInaktiv(DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktiviteter) {
-        DatoIntervallEntitet midlertidigInaktivPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(28), periode.getFomDato());
+    protected boolean erMidlertidigInaktiv(DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktiviteter) {
+        DatoIntervallEntitet midlertidigInaktivPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(28), periode.getTomDato());
 
         if (opptjeningAktiviteter == null) {
             throw new IllegalStateException("Opptjening TOM kan ikke være null");
