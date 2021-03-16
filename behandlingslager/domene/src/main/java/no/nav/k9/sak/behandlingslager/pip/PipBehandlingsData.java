@@ -63,12 +63,13 @@ public class PipBehandlingsData {
         return Objects.equals(getBehandligStatus(), other.getBehandligStatus())
             && Objects.equals(getFagsakStatus(), other.getFagsakStatus())
             && Objects.equals(getFagsakId(), other.getFagsakId())
+            && Objects.equals(getSaksnummer(), other.getSaksnummer())
             && Objects.equals(getAnsvarligSaksbehandler(), other.getAnsvarligSaksbehandler());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandligStatus, fagsakId, fagsakStatus, ansvarligSaksbehandler);
+        return Objects.hash(behandligStatus, fagsakId, saksnummer, fagsakStatus, ansvarligSaksbehandler);
     }
 
     @Override
@@ -76,6 +77,7 @@ public class PipBehandlingsData {
         // tar ikke med ansvarligSaksbehandlinger så ikke lekker sensitive personopplysninger i logg (inkl. stedslokaliserende, enhet)
         return getClass().getSimpleName() + "<"
             + "behandligStatus=" + behandligStatus + ", "
+            + "saksnummer=" + saksnummer + ", "
             + "fagsakId=" + fagsakId + ", "
             + "fagsakStatus=" + fagsakStatus + ", "
             + ">"; //$NON-NLS-1$
