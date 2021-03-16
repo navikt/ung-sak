@@ -1,6 +1,7 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import static java.time.LocalDate.now;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -22,11 +23,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -39,9 +43,6 @@ import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -165,8 +166,9 @@ public class KompletthetskontrollerTest {
 
         primeProsessTaskRepositoryKompletthetskontroller(behandling);
 
-        kompletthetskontroller.asynkVurderKompletthet(behandling);
-
+        var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
+        assertThat(prosessTaskData.getTaskType()).isEqualTo(KompletthetskontrollerVurderKompletthetTask.TASKTYPE);
+        prosessTaskRepository.lagre(prosessTaskData);
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
     }
 
