@@ -252,7 +252,6 @@ public class SykdomDokumentRestTjeneste {
     }
 
     @POST
-    @Path(DOKUMENT)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer metainformasjonen om et dokument.",
         summary = "Oppdaterer metainformasjonen om et dokument.",
