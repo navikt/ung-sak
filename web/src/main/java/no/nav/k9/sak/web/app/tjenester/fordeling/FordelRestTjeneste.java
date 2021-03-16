@@ -83,7 +83,8 @@ public class FordelRestTjeneste {
     private SafAdapter safAdapter;
     private FagsakTjeneste fagsakTjeneste;
 
-    private Instance<SøknadMottakTjeneste<?>> søknadMottakere;
+    @SuppressWarnings("rawtypes")
+    private Instance<SøknadMottakTjeneste> søknadMottakere;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
@@ -95,7 +96,7 @@ public class FordelRestTjeneste {
                               SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
-                              @Any Instance<SøknadMottakTjeneste<?>> søknadMottakere) { // NOSONAR
+                              @SuppressWarnings("rawtypes") @Any Instance<SøknadMottakTjeneste> søknadMottakere) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;

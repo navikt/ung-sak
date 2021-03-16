@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
@@ -73,21 +72,6 @@ public class ÅrskvantumRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumForbrukteDager getForbrukteDager(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
-    }
-
-    /**
-     * Hent den totale uttaksplanen for en sak.
-     */
-    @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path(FULL_UTTAKSPLAN_PATH)
-    @Operation(description = "Hent full uttaksplan", tags = "behandling - årskvantum/uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public FullUttaksplan getFullUttaksplan(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        return årskvantumTjeneste.hentFullUttaksplan(saksnummerDto.getVerdi());
     }
 
     /**

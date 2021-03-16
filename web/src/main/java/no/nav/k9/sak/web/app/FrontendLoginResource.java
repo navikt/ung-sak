@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 public class FrontendLoginResource {
 
     @GET
-    @Path("")
     public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo) {
         var uri = URI.create(redirectTo);
         var relativePath = "";

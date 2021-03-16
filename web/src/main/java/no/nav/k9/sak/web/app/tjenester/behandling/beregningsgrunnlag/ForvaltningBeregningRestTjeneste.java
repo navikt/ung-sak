@@ -57,16 +57,19 @@ public class ForvaltningBeregningRestTjeneste {
     private Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-    private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
+    
+    @SuppressWarnings("rawtypes")
+    private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper> ytelseGrunnlagMapper;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public ForvaltningBeregningRestTjeneste() {
     }
 
+    @SuppressWarnings("rawtypes")
     @Inject
     public ForvaltningBeregningRestTjeneste(@Any Instance<KalkulatorInputTjeneste> kalkulatorInputTjeneste,
-                                            @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                            @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper> ytelseGrunnlagMapper,
                                             BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
