@@ -42,10 +42,10 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
     }
 
     protected boolean erMidlertidigInaktiv(DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktiviteter) {
-        DatoIntervallEntitet midlertidigInaktivPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(28), periode.getTomDato());
+        DatoIntervallEntitet midlertidigInaktivPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(28), periode.getFomDato());
 
         if (opptjeningAktiviteter == null) {
-            throw new IllegalStateException("Opptjening TOM kan ikke være null");
+            throw new IllegalStateException("Fant ingen opptjeningsaktiviteter");
         }
 
         Optional<OpptjeningAktivitet> overlapp = opptjeningAktiviteter.stream().filter(opptjeningAktivitet -> opptjeningAktivitet.getDatoIntervallEntitet().overlapper(midlertidigInaktivPeriode)).findFirst();

@@ -89,10 +89,11 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
 
             if (harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjening.getOpptjeningPeriode()) == JA) {
                 AktørId aktørId = param.getAktørId();
-                if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, inntektArbeidYtelseGrunnlagOptional.get(), opptjening.getOpptjeningPeriode()) == JA) {
+                /*if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, inntektArbeidYtelseGrunnlagOptional.get(), opptjening.getOpptjeningPeriode()) == JA) {
                     logger.info("Utleder AP 5051 fra oppgitt næringsdrift");
                     return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
-                }
+                }*/
+
             }
         }
         return INGEN_AKSJONSPUNKTER;
