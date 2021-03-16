@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -14,6 +15,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.felles.aktivitet.Organisasjonsnummer;
+import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
@@ -62,16 +64,6 @@ public class LagreOppgittOpptjening {
         }
 
         if (søknad.getAktivitet().getArbeidstaker() != null) {
-            /*
-            List<Arbeidstaker>
-             -> Organisjonsnummer
-                norskIdentitetsnummer
-                ArbeidstidInfo
-                -> Duration jobberNormaltTimerPerdag
-                   Map<Periode, ArbeidstidPEriodeInfo> perioder
-                   Inntekt per periode?
-            */
-
             for (Arbeidstaker arbeidstaker : søknad.getAktivitet().getArbeidstaker()) {
                 var arbeidsPerioder = arbeidstaker.getArbeidstidInfo().getPerioder();
 
@@ -80,12 +72,15 @@ public class LagreOppgittOpptjening {
                     var fom = arbeidsPeriode.getKey().getFraOgMed();
                     var tom = arbeidsPeriode.getKey().getTilOgMed();
                     var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+                    // TODO: Abakus må støtte lagring av norsk orgnr
+                    var utenlandskVirksomhet = new OppgittUtenlandskVirksomhet(Landkoder.NOR, arbeidstaker.getOrganisasjonsnummer().verdi);
+                    // TODO: Inntekt må kunne oppgis i søknad ELLER kalkulus må godta ingen inntekt
+                    var inntekt = BigDecimal.valueOf(5000);
 
                     oppgittArbeidsforhold.medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-                        .medPeriode(periode)
-                        .medInntekt(BigDecimal.ONE)
-                        .medErUtenlandskInntekt(false);
-
+                        .medUtenlandskVirksomhet(utenlandskVirksomhet)
+                        .medInntekt(inntekt)
+                        .medPeriode(periode);
                     builderOgStatus.builder.leggTilOppgittArbeidsforhold(oppgittArbeidsforhold);
                 }
             }
