@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -37,13 +39,15 @@ public class InnhentDokumentTjeneste {
     private BehandlingRepository behandlingRepository;
 
     private BehandlingLåsRepository behandlingLåsRepository;
+    private ProsessTaskRepository taskRepository;
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
                                    DokumentmottakerFelles dokumentMottakerFelles,
                                    Behandlingsoppretter behandlingsoppretter,
                                    Kompletthetskontroller kompletthetskontroller,
-                                   BehandlingRepositoryProvider repositoryProvider) {
+                                   BehandlingRepositoryProvider repositoryProvider,
+                                   ProsessTaskRepository taskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -51,6 +55,7 @@ public class InnhentDokumentTjeneste {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
+        this.taskRepository = taskRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -66,12 +71,15 @@ public class InnhentDokumentTjeneste {
 
         var resultat = finnEllerOpprettBehandling(fagsak, behandlingÅrsak);
 
-        lagreDokumenter(brevkodeMap, resultat.behandling);
+        ProsessTaskData startTask;
         if (resultat.nyopprettet) {
-            asynkStartBehandling(resultat.behandling);
+            startTask = asynkStartBehandling(resultat.behandling);
         } else {
-            asynkVurderKompletthetForÅpenBehandling(resultat.behandling, behandlingÅrsak);
+            startTask = asynkVurderKompletthetForÅpenBehandling(resultat.behandling, behandlingÅrsak);
         }
+        lagreDokumenter(brevkodeMap, resultat.behandling);
+
+        taskRepository.lagre(startTask);
     }
 
     private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
@@ -118,10 +126,10 @@ public class InnhentDokumentTjeneste {
     }
 
 
-    void asynkVurderKompletthetForÅpenBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
+    ProsessTaskData asynkVurderKompletthetForÅpenBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
         dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
-        kompletthetskontroller.asynkVurderKompletthet(behandling);
+        return kompletthetskontroller.asynkVurderKompletthet(behandling);
     }
 
     private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {
@@ -129,8 +137,8 @@ public class InnhentDokumentTjeneste {
         return dokumentmottaker.getBehandlingÅrsakType();
     }
 
-    private void asynkStartBehandling(Behandling behandling) {
-        dokumentMottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+    private ProsessTaskData asynkStartBehandling(Behandling behandling) {
+        return dokumentMottakerFelles.opprettTaskForÅStarteBehandling(behandling);
     }
 
     private Boolean erBehandlingAvsluttet(Optional<Behandling> sisteYtelsesbehandling) {
