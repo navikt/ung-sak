@@ -28,7 +28,7 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
     private final Avslagsårsak defaultAvslagsårsak = Avslagsårsak.IKKE_DOKUMENTERT_OMSORGEN_FOR;
     private final VilkårType vilkårType = VilkårType.OMSORGEN_FOR;
     private final HistorikkEndretFeltType historikkEndretFeltType = HistorikkEndretFeltType.OMSORG_FOR;
-    private final SkjermlenkeType skjermlenkeType = SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR;
+    private final SkjermlenkeType skjermlenkeType = SkjermlenkeType.FAKTA_OM_OMSORGENFOR;
 
     private HistorikkTjenesteAdapter historikkAdapter;
     private VilkårResultatRepository vilkårResultatRepository;
