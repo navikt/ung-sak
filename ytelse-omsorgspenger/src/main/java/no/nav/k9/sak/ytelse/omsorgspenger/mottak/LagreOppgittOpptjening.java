@@ -1,8 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -10,24 +8,16 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.felles.aktivitet.Organisasjonsnummer;
-import no.nav.k9.søknad.felles.type.Landkode;
-import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
-import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
-import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidPeriodeInfo;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -144,5 +134,4 @@ public class LagreOppgittOpptjening {
         // TODO Map ny i arbeidslivet
         return builder;
     }
-
 }

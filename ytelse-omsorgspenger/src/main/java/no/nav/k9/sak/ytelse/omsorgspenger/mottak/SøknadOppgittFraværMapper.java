@@ -2,7 +2,10 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.AktørId;
@@ -31,14 +34,13 @@ class SøknadOppgittFraværMapper {
     }
 
     Set<OppgittFraværPeriode> map() {
-
-        Set<OppgittFraværPeriode> oppgittFraværPerioder = new LinkedHashSet<>();
-
         Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
 
         var fraværsperioder = søknadsinnhold.getFraværsperioder();
+        Set<OppgittFraværPeriode> oppgittFraværPerioder;
+        oppgittFraværPerioder = new LinkedHashSet<>();
         for (FraværPeriode fp : fraværsperioder) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
