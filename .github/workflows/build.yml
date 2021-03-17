@@ -88,8 +88,7 @@ jobs:
         run: |
           docker build --pull --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
           echo "${{ secrets.GITHUB_ACCESS_TOKEN }}" | docker login --username "x-access-token" --password-stdin ghcr.io
-          docker push ${IMAGE_BASE_CR}:${TAG}
-          docker push ${IMAGE_BASE_CR}:latest
+          docker push ${IMAGE_BASE_CR} --all-tags
 
       - name: Lukk gamle issues
         uses: actions/github-script@v3
