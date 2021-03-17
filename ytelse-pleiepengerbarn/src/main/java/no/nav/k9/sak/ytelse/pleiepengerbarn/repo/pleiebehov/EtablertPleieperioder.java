@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.repo.pleiebehov;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,29 +19,29 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "Pleieperioder")
 @Table(name = "PB_PLEIEPERIODER")
-public class Pleieperioder extends BaseEntitet {
+public class EtablertPleieperioder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PB_PLEIEPERIODER")
     private Long id;
 
     @OneToMany(mappedBy = "pleieperioder", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<Pleieperiode> perioder = new ArrayList<>();
+    private List<EtablertPleieperiode> perioder = new ArrayList<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    Pleieperioder() {
+    EtablertPleieperioder() {
         // hibernate
     }
 
-    Pleieperioder(Pleieperioder pleieperioder) {
+    EtablertPleieperioder(EtablertPleieperioder pleieperioder) {
         Objects.requireNonNull(pleieperioder);
 
         this.perioder = pleieperioder.getPerioder()
             .stream()
-            .map(Pleieperiode::new)
+            .map(it -> new EtablertPleieperiode(it))
             .peek(it -> it.setPleieperioder(this))
             .collect(Collectors.toList());
     }
@@ -50,11 +50,11 @@ public class Pleieperioder extends BaseEntitet {
         return id;
     }
 
-    public List<Pleieperiode> getPerioder() {
+    public List<EtablertPleieperiode> getPerioder() {
         return perioder;
     }
 
-    void setPerioder(List<Pleieperiode> perioder) {
+    void setPerioder(List<EtablertPleieperiode> perioder) {
         this.perioder = perioder.stream()
             .peek(it -> it.setPleieperioder(this))
             .collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class Pleieperioder extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pleieperioder pleieperioder = (Pleieperioder) o;
+        EtablertPleieperioder pleieperioder = (EtablertPleieperioder) o;
         return Objects.equals(perioder, pleieperioder.perioder);
     }
 

@@ -16,7 +16,6 @@ import no.nav.k9.sak.domene.uttak.repo.Ferie;
 import no.nav.k9.sak.domene.uttak.repo.OppgittTilsynsordning;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperioder;
 import no.nav.k9.sak.domene.uttak.uttaksplan.input.Person;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -28,7 +27,6 @@ public class UttakInput {
     private Ferie ferie;
 
     private final InntektArbeidYtelseGrunnlag iayGrunnlag;
-    private Pleieperioder pleieperioder;
 
     private Person pleietrengende;
 
@@ -58,7 +56,6 @@ public class UttakInput {
         this.ferie = input.ferie;
         this.tilsynsordning = input.tilsynsordning;
         this.relaterteSaker = input.relaterteSaker;
-        this.pleieperioder = input.pleieperioder;
         this.medlemskapVilkår= input.medlemskapVilkår;
     }
 
@@ -84,10 +81,6 @@ public class UttakInput {
 
     public Vilkår getMedlemskap() {
         return medlemskapVilkår;
-    }
-
-    public Pleieperioder getPleieperioder() {
-        return pleieperioder;
     }
 
     public Person getPleietrengende() {
@@ -133,12 +126,6 @@ public class UttakInput {
     public UttakInput medFerie(Ferie ferie) {
         var newInput = new UttakInput(this);
         newInput.ferie = ferie;
-        return newInput;
-    }
-
-    public UttakInput medPleieperioder(Pleieperioder pleieperioder) {
-        var newInput = new UttakInput(this);
-        newInput.pleieperioder = pleieperioder;
         return newInput;
     }
 

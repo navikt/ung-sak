@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.repo.pleiebehov;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class PleiebehovResultat extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "pleieperioder_id", nullable = false, updatable = false, unique = true)
-    private Pleieperioder pleieperioder;
+    private EtablertPleieperioder pleieperioder;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -42,7 +42,7 @@ public class PleiebehovResultat extends BaseEntitet {
     PleiebehovResultat() {
     }
 
-    PleiebehovResultat(Long behandlingId, Pleieperioder pleieperioder) {
+    PleiebehovResultat(Long behandlingId, EtablertPleieperioder pleieperioder) {
         this.behandlingId = behandlingId;
         this.pleieperioder = pleieperioder; // NOSONAR
     }
@@ -51,7 +51,7 @@ public class PleiebehovResultat extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public Pleieperioder getPleieperioder() {
+    public EtablertPleieperioder getPleieperioder() {
         return pleieperioder;
     }
 

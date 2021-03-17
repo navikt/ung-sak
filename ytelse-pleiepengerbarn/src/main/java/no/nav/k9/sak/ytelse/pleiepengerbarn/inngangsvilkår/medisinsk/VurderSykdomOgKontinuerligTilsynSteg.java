@@ -35,16 +35,16 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovBuilder;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultat;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.PleiebehovResultatRepository;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PleiePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Pleiegrad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -132,16 +132,16 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     private void oppdaterResultatStruktur(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, VilkårData vilkårData) {
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
-        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(PleiebehovBuilder::builder).orElse(PleiebehovBuilder.builder());
+        var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periodeTilVurdering);
         final var vilkårresultat = ((MedisinskVilkårResultat) vilkårData.getEkstraVilkårresultat());
 
         vilkårresultat.getPleieperioder().forEach(periode -> builder.leggTil(utledPeriode(periode)));
-        resultatRepository.lagreOgFlush(behandlingRepository.hentBehandling(kontekst.getBehandlingId()), builder);
+        resultatRepository.lagreOgFlush(kontekst.getBehandlingId(), builder);
     }
 
-    private Pleieperiode utledPeriode(PleiePeriode periode) {
-        return new Pleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
+    private EtablertPleieperiode utledPeriode(PleiePeriode periode) {
+        return new EtablertPleieperiode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), no.nav.k9.kodeverk.medisinsk.Pleiegrad.fraKode(periode.getGrad().name()));
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {

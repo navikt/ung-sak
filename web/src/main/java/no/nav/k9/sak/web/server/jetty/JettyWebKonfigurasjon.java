@@ -3,13 +3,14 @@ package no.nav.k9.sak.web.server.jetty;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 public class JettyWebKonfigurasjon implements AppKonfigurasjon {
-    public static final String CONTEXT_PATH = "/k9/sak";
+    public static final String COOKIE_PATH = "/k9";
+    public static final String CONTEXT_PATH = COOKIE_PATH + "/sak";
     private static final String SWAGGER_HASH = "sha256-q/YPt9L9Ie+qVycDQ7fOW4abIqYB+EE3F18SkqJJZcQ=";
 
     private Integer serverPort;
 
     public JettyWebKonfigurasjon() {
-        ContextPathHolder.instance(CONTEXT_PATH);
+        ContextPathHolder.instance(CONTEXT_PATH, COOKIE_PATH);
     }
 
     public JettyWebKonfigurasjon(int serverPort) {
