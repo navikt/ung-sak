@@ -76,7 +76,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
 
     },
-    OMSORGSPENGER_KS("OMP_KS", "'Ekstra omsorgsdager kronisk syk", "OM", "OMS") {
+    OMSORGSPENGER_KS("OMP_KS", "Ekstra omsorgsdager kronisk syk", "OM", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
