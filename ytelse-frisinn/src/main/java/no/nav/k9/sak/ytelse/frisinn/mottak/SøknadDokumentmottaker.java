@@ -142,7 +142,7 @@ public class SøknadDokumentmottaker {
     private Behandling opprettEndringBehandling(JournalpostId journalpostId, FrisinnSøknad søknad, Behandling forrigeBehandling) {
         Behandling behandling;
         behandling = behandlingsoppretter.opprettRevurdering(forrigeBehandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-        soknadOversetter.persister(søknad, behandling);
+        soknadOversetter.persister(journalpostId, søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }
@@ -151,7 +151,7 @@ public class SøknadDokumentmottaker {
         Behandling behandling;
         // førstegangssøknad
         behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-        soknadOversetter.persister(søknad, behandling);
+        soknadOversetter.persister(journalpostId, søknad, behandling);
         dokumentmottakerFelles.opprettTaskForÅStarteBehandlingMedNySøknad(behandling, journalpostId);
         return behandling;
     }

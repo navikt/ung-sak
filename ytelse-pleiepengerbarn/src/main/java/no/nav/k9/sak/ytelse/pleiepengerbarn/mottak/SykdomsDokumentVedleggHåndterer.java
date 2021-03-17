@@ -45,17 +45,18 @@ public class SykdomsDokumentVedleggHåndterer {
                     .variantformat()
                     .filnavn()
                     .filtype()
-                    .saksbehandlerHarTilgang()
-                )
+                    .saksbehandlerHarTilgang())
                 .logiskeVedlegg(new LogiskVedleggResponseProjection()
                     .tittel()))
             .datoOpprettet()
             .relevanteDatoer(new RelevantDatoResponseProjection()
                 .dato()
-                .datotype()
-            );
+                .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        LocalDateTime mottattDato = journalpost.getRelevanteDatoer().stream().filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT).findFirst().get().getDato().toInstant().atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime();
+        LocalDateTime mottattDato = journalpost.getRelevanteDatoer() == null
+            ? LocalDateTime.now() // TODO: sørge for at alltid er med?
+            : journalpost.getRelevanteDatoer().stream().filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT).findFirst().get().getDato().toInstant().atZone(ZoneId.of("Europe/Oslo"))
+                .toLocalDateTime();
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
             final SykdomDokument dokument = new SykdomDokument(
                 SykdomDokumentType.UKLASSIFISERT,

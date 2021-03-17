@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 public class KompletthetssjekkerTestUtil {
 
@@ -61,6 +62,7 @@ public class KompletthetssjekkerTestUtil {
     public void byggOgLagreSøknadMed(Behandling behandling, boolean erEndringssøknad, LocalDate søknadsdato) {
         SøknadEntitet søknad = new SøknadEntitet.Builder().medElektroniskRegistrert(true)
             .medSøknadsdato(søknadsdato)
+            .medJournalpostId(new JournalpostId(2L))
             .medMottattDato(LocalDate.now())
             .medSøknadsperiode(søknadsdato, søknadsdato)
             .medErEndringssøknad(erEndringssøknad)
@@ -72,6 +74,7 @@ public class KompletthetssjekkerTestUtil {
     public void byggOgLagreFørstegangsSøknadMedMottattdato(Behandling behandling, LocalDate søknadsdato) {
         SøknadEntitet søknad = new SøknadEntitet.Builder().medElektroniskRegistrert(true)
             .medSøknadsdato(søknadsdato)
+            .medJournalpostId(new JournalpostId(1L))
             .medMottattDato(søknadsdato)
             .medSøknadsperiode(søknadsdato, søknadsdato)
             .medErEndringssøknad(false)

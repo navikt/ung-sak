@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -22,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 public class BehandlingRevurderingRepository {
@@ -73,8 +73,8 @@ public class BehandlingRevurderingRepository {
         return Collections.emptyList();
     }
 
-    public Optional<Behandling> hentSisteYtelsesbehandling(Long fagsakId) {
-        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+    public Optional<Behandling> hentSisteBehandling(Long fagsakId) {
+        return behandlingRepository.hentSisteBehandlingForFagsakId(fagsakId);
     }
 
     private List<Long> finnHenlagteBehandlingerEtter(Long fagsakId, Behandling sisteInnvilgede) {
