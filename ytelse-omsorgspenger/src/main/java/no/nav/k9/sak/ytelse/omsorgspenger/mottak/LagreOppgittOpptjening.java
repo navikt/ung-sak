@@ -52,6 +52,9 @@ public class LagreOppgittOpptjening {
             builderOgStatus.builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
+        if (søknad.getAktivitet().getArbeidstaker() != null) {
+            // TODO: Lagring av utenlands arbeidsforhold
+        }
 
         if (builderOgStatus.builder.build().harOpptjening() || !builderOgStatus.erNyopprettet) {
             iayTjeneste.lagreOppgittOpptjening(behandlingId, builderOgStatus.builder);

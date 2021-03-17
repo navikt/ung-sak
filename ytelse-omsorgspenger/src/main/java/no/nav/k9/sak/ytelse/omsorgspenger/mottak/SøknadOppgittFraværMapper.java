@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -35,6 +36,7 @@ class SøknadOppgittFraværMapper {
 
     Set<OppgittFraværPeriode> map() {
         Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
+        List<Arbeidstaker> arbeidstakerList = søknadsinnhold.getAktivitet().getArbeidstaker();
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
 
@@ -63,32 +65,17 @@ class SøknadOppgittFraværMapper {
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
-        }
+            if(arbeidstakerList != null) {
+                for(Arbeidstaker arbeidstaker: arbeidstakerList) {
+                    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().verdi);
+                    InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
 
-        if (søknadsinnhold.getAktivitet().getArbeidstaker() != null) {
-            for(Arbeidstaker arbeidstaker: søknadsinnhold.getAktivitet().getArbeidstaker()) {
-                mapArbeidstakerFraværPerioder(arbeidstaker, oppgittFraværPerioder);
+                    OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
+                    oppgittFraværPerioder.add(oppgittFraværPeriode);
+                }
             }
         }
 
         return oppgittFraværPerioder;
-    }
-
-    private void mapArbeidstakerFraværPerioder(Arbeidstaker arbeidstaker, Set<OppgittFraværPeriode> oppgittFraværPerioder) {
-        Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().verdi);
-
-        var fraværsperioder = søknadsinnhold.getFraværsperioder();
-        for (FraværPeriode fp : fraværsperioder) {
-            LocalDate fom = fp.getPeriode().getFraOgMed();
-            LocalDate tom = fp.getPeriode().getTilOgMed();
-            Duration varighet = fp.getDuration();
-
-            InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
-
-            OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(
-                journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
-
-            oppgittFraværPerioder.add(oppgittFraværPeriode);
-        }
     }
 }
