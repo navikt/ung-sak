@@ -22,10 +22,11 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
     @Override
     public Response toResponse(VLException exception) {
         String callId = MDCOperations.getCallId();
-        exception.log(log);
-        Feil feil = exception.getFeil();
-        String feilmelding = getVLExceptionFeilmelding(callId, feil);
 
+        Feil feil = exception.getFeil();
+        exception.log(log);
+
+        String feilmelding = getVLExceptionFeilmelding(callId, feil);
         try {
             return Response.serverError()
                 .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding))
@@ -53,7 +54,7 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
     }
 
     private String avsluttMedPunktum(String tekst) {
-        return tekst + (tekst.endsWith(".") ? " " : ". "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return (tekst == null ? "" : tekst + (tekst.endsWith(".") ? " " : ". "));
     }
 
 }

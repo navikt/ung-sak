@@ -36,6 +36,9 @@ import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.exception.FunksjonellException;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
@@ -216,6 +219,9 @@ public class FagsakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SøkeSakEllerBrukerDto søkestreng) {
         FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getSearchString());
+
+        if (true)
+            throw new FunksjonellException("hei", "sveis");
         return tilDtoer(view);
     }
 
