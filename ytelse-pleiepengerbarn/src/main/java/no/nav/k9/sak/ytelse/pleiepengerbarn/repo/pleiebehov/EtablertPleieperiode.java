@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.repo.pleiebehov;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov;
 
 import java.util.Objects;
 
@@ -21,7 +21,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "Pleieperiode")
 @Table(name = "PB_PLEIEPERIODE")
-public class Pleieperiode extends BaseEntitet {
+public class EtablertPleieperiode extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PB_PLEIEPERIODE")
@@ -39,21 +39,21 @@ public class Pleieperiode extends BaseEntitet {
 
     @ManyToOne
     @JoinColumn(name = "pleieperioder_id", nullable = false, updatable = false, unique = true)
-    private Pleieperioder pleieperioder;
+    private EtablertPleieperioder pleieperioder;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    Pleieperiode() {
+    EtablertPleieperiode() {
     }
 
-    public Pleieperiode(DatoIntervallEntitet periode, Pleiegrad grad) {
+    public EtablertPleieperiode(DatoIntervallEntitet periode, Pleiegrad grad) {
         this.periode = periode;
         this.grad = grad;
     }
 
-    Pleieperiode(Pleieperiode kontinuerligTilsynPeriode) {
+    EtablertPleieperiode(EtablertPleieperiode kontinuerligTilsynPeriode) {
         this.periode = kontinuerligTilsynPeriode.periode;
         this.grad = kontinuerligTilsynPeriode.grad;
     }
@@ -62,7 +62,7 @@ public class Pleieperiode extends BaseEntitet {
         return periode;
     }
 
-    void setPleieperioder(Pleieperioder pleieperioder) {
+    void setPleieperioder(EtablertPleieperioder pleieperioder) {
         this.pleieperioder = pleieperioder;
     }
 
@@ -74,7 +74,7 @@ public class Pleieperiode extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pleieperiode that = (Pleieperiode) o;
+        EtablertPleieperiode that = (EtablertPleieperiode) o;
         return grad == that.grad &&
             Objects.equals(periode, that.periode);
     }

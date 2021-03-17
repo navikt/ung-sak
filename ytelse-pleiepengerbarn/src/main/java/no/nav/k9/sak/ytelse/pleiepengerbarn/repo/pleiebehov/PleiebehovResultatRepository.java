@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.uttak.repo.pleiebehov;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @ApplicationScoped
@@ -38,10 +37,9 @@ public class PleiebehovResultatRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagreOgFlush(Behandling behandling, PleiebehovBuilder pleiebehovBuilder) {
-        Objects.requireNonNull(behandling, "behandling"); // NOSONAR $NON-NLS-1$
+    public void lagreOgFlush(Long behandlingId, EtablertPleiebehovBuilder pleiebehovBuilder) {
+        Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR $NON-NLS-1$
         Objects.requireNonNull(pleiebehovBuilder, "pleiebehovBuilder"); // NOSONAR $NON-NLS-1$
-        Long behandlingId = behandling.getId();
         final Optional<PleiebehovResultat> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
@@ -72,8 +70,8 @@ public class PleiebehovResultatRepository {
     /**
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
-    public void kopierGrunnlagFraEksisterendeBehandling(Behandling gammelBehandling, Behandling nyBehandling) {
-        Optional<PleiebehovResultat> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandling.getId());
-        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandling, new PleiebehovBuilder(entitet.getPleieperioder())));
+    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        Optional<PleiebehovResultat> søknadEntitet = hentEksisterendeGrunnlag(gammelBehandlingId);
+        søknadEntitet.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, new EtablertPleiebehovBuilder(entitet.getPleieperioder())));
     }
 }
