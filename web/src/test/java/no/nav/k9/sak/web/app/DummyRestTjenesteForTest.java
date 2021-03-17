@@ -9,9 +9,9 @@ import javax.ws.rs.core.Response;
 import io.swagger.v3.oas.annotations.Operation;
 
 @Path("/dummy/{var:.+}")
-public class DummyRestTjeneste {
+public class DummyRestTjenesteForTest {
 
-    public DummyRestTjeneste() {
+    public DummyRestTjenesteForTest() {
 
     }
 

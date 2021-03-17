@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.StartBeregningInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
@@ -55,7 +55,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     }
 
     @Inject
-    public FrisinnKalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
+    public FrisinnKalkulusTjeneste(KalkulusRestKlient restTjeneste,
                                    FagsakRepository fagsakRepository,
                                    @FagsakYtelseTypeRef("FRISINN") KalkulatorInputTjeneste kalkulatorInputTjeneste,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,

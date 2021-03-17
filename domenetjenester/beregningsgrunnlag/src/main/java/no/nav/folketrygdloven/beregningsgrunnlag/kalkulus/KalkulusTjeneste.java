@@ -99,7 +99,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Default
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
-    private KalkulusRestTjeneste restTjeneste;
+    private KalkulusRestKlient restTjeneste;
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private KalkulatorInputTjeneste kalkulatorInputTjeneste;
@@ -112,7 +112,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Inject
-    public KalkulusTjeneste(KalkulusRestTjeneste restTjeneste,
+    public KalkulusTjeneste(KalkulusRestKlient restTjeneste,
                             FagsakRepository fagsakRepository,
                             VilkårResultatRepository vilkårResultatRepository,
                             @FagsakYtelseTypeRef("*") KalkulatorInputTjeneste kalkulatorInputTjeneste,
@@ -336,7 +336,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             DatoIntervallEntitet.fraOgMedTilOgMed(grunnbeløp.getPeriode().getFom(), grunnbeløp.getPeriode().getTom()));
     }
 
-    protected KalkulusRestTjeneste getKalkulusRestTjeneste() {
+    protected KalkulusRestKlient getKalkulusRestTjeneste() {
         return restTjeneste;
     }
 

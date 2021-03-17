@@ -47,9 +47,9 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectRea
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
-public class KalkulusRestTjeneste {
+public class KalkulusRestKlient {
 
-    private static final Logger log = LoggerFactory.getLogger(KalkulusRestTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(KalkulusRestKlient.class);
     private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
@@ -70,12 +70,12 @@ public class KalkulusRestTjeneste {
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
 
-    protected KalkulusRestTjeneste() {
+    protected KalkulusRestKlient() {
         // cdi
     }
 
     @Inject
-    public KalkulusRestTjeneste(OidcRestClient oidcRestClient,
+    public KalkulusRestKlient(OidcRestClient oidcRestClient,
                                 @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
         this.oidcRestClient = oidcRestClient;
         this.kalkulusEndpoint = endpoint;
@@ -247,7 +247,7 @@ public class KalkulusRestTjeneste {
     }
 
     interface RestTjenesteFeil extends DeklarerteFeil {
-        KalkulusRestTjeneste.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestTjeneste.RestTjenesteFeil.class);
+        KalkulusRestKlient.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestKlient.RestTjenesteFeil.class);
 
         @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilKalkulus(String feilmelding);

@@ -99,6 +99,7 @@ public class FagsakRestTjeneste {
             @ApiResponse(responseCode = "303", description = "Pågående prosesstasks avsluttet", headers = @Header(name = HttpHeaders.LOCATION)),
             @ApiResponse(responseCode = "418", description = "ProsessTasks har feilet", headers = @Header(name = HttpHeaders.LOCATION), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AsyncPollingStatus.class)))
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentFagsakMidlertidigStatus(@Context HttpServletRequest request,
@@ -171,6 +172,7 @@ public class FagsakRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
         @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response hentBrukerForFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var personInfo = fagsakApplikasjonTjeneste.hentBruker(s.getVerdi());
@@ -207,6 +209,7 @@ public class FagsakRestTjeneste {
     @POST
     @Path(SOK_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Søk etter saker på saksnummer eller fødselsnummer", tags = "fagsak", summary = ("Spesifikke saker kan søkes via saksnummer. " +
         "Oversikt over saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer."))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
