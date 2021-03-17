@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -25,11 +24,11 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
@@ -126,7 +125,7 @@ public class MapInputTilUttakTjeneste {
         // NB! Kan gi issues ved lange fagsaker mtp ytelse
         var perioderFraSøknader = uttaksPerioderGrunnlag.getOppgitteSøknadsperioder()
             .getPerioderFraSøknadene();
-        var kravDokumenter = new TreeSet<>(vurderteSøknadsperioder.keySet());
+        var kravDokumenter = vurderteSøknadsperioder.keySet();
 
         if (perioderFraSøknader.size() != kravDokumenter.size()) {
             throw new IllegalStateException("Fant ikke alle dokumentene siden '" + kravDokumenter + "' != '" + perioderFraSøknader + "'");

@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +40,7 @@ class MapTilsynTest {
             List.of(new Tilsynsordning(List.of(new TilsynsordningPeriode(periodeTilVurdering, varighet)), Tilsynsordning.OppgittTilsynSvar.JA)),
             List.of()));
 
-        var tilsynsMap = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var tilsynsMap = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         var lukketPeriode = new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato());
         assertThat(tilsynsMap).containsOnlyKeys(lukketPeriode);
@@ -62,7 +61,7 @@ class MapTilsynTest {
             List.of(new Tilsynsordning(List.of(new TilsynsordningPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now()), varighet)), Tilsynsordning.OppgittTilsynSvar.JA)),
             List.of()));
 
-        var tilsynsMap = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var tilsynsMap = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         var lukketPeriode = new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato());
         assertThat(tilsynsMap).containsOnlyKeys(lukketPeriode);
@@ -91,7 +90,7 @@ class MapTilsynTest {
                 List.of(new Tilsynsordning(List.of(new TilsynsordningPeriode(periodeDel2, Duration.ZERO)), Tilsynsordning.OppgittTilsynSvar.JA)),
                 List.of()));
 
-        var tilsynsMap = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var tilsynsMap = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         var lukketPeriode = new LukketPeriode(periodeDel1.getFomDato(), periodeDel1.getTomDato().minusDays(1));
         var lukketPeriode1 = new LukketPeriode(periodeDel2.getFomDato(), periodeDel2.getTomDato());

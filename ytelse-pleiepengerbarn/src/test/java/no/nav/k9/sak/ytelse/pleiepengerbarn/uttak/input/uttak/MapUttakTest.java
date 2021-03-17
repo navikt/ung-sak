@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,7 @@ class MapUttakTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new SøktUttak(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), Duration.ZERO));
@@ -62,7 +61,7 @@ class MapUttakTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         var lukketPeriode = new LukketPeriode(periodeDel1.getFomDato(), periodeDel1.getTomDato());
         var lukketPeriode1 = new LukketPeriode(periodeDel2.getFomDato(), periodeDel2.getTomDato());
@@ -94,7 +93,7 @@ class MapUttakTest {
                 List.of(),
                 List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         var lukketPeriode = new LukketPeriode(periodeDel1.getFomDato(), periodeDel2.getFomDato().minusDays(1));
         var lukketPeriode1 = new LukketPeriode(periodeDel2.getFomDato(), periodeDel2.getTomDato());

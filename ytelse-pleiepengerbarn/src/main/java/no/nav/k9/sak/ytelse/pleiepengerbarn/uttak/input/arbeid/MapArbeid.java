@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -31,7 +30,7 @@ public class MapArbeid {
 
     private PsbInntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = new PsbInntektsmeldingerRelevantForBeregning();
 
-    public List<Arbeid> map(TreeSet<KravDokument> kravDokumenter,
+    public List<Arbeid> map(Set<KravDokument> kravDokumenter,
                             Set<PerioderFraSøknad> perioderFraSøknader,
                             LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                             Set<Inntektsmelding> sakInntektsmeldinger) {
@@ -39,7 +38,7 @@ public class MapArbeid {
         final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
         kravDokumenter.stream()
-            .sorted()
+            .sorted(KravDokument::compareTo)
             .forEachOrdered(at -> {
                 var dokumenter = perioderFraSøknader.stream()
                     .filter(it -> it.getJournalpostId().equals(at.getJournalpostId()))
