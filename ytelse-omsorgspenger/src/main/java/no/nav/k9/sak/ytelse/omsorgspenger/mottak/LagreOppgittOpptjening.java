@@ -1,15 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -22,6 +12,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.aktivitet.Organisasjonsnummer;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Dependent
 public class LagreOppgittOpptjening {
@@ -42,11 +41,6 @@ public class LagreOppgittOpptjening {
         Long behandlingId = behandling.getId();
         OppgittOpptjeningBuilderOgStatus builderOgStatus = initOpptjeningBuilder(behandling, tidspunkt);
 
-        if (søknad.getAktivitet().getArbeidstaker() != null) {
-            // TODO: arbeidstaker
-            throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
-        }
-
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
@@ -57,6 +51,9 @@ public class LagreOppgittOpptjening {
         if (søknad.getAktivitet().getFrilanser() != null) {
             builderOgStatus.builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
+        }
+        if (søknad.getAktivitet().getArbeidstaker() != null) {
+            // TODO: Lagring av utenlands arbeidsforhold
         }
 
         if (builderOgStatus.builder.build().harOpptjening() || !builderOgStatus.erNyopprettet) {

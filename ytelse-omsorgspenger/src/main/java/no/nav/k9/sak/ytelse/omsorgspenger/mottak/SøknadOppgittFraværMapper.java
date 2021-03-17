@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
 import no.nav.k9.søknad.felles.aktivitet.Frilanser;
 import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
@@ -34,13 +36,9 @@ class SøknadOppgittFraværMapper {
 
     Set<OppgittFraværPeriode> map() {
         Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
+        List<Arbeidstaker> arbeidstakerList = søknadsinnhold.getAktivitet().getArbeidstaker();
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
-
-        if (søknadsinnhold.getAktivitet().getArbeidstaker() != null) {
-            // TODO: Arbeidstaker. Se også {@link KravDokumentFravær#trekkUtAlleFraværOgValiderOverlapp}
-            throw new UnsupportedOperationException("Støtter ikke arbeidstaker for OMS");
-        }
 
         var fraværsperioder = søknadsinnhold.getFraværsperioder();
         Set<OppgittFraværPeriode> oppgittFraværPerioder;
@@ -67,7 +65,17 @@ class SøknadOppgittFraværMapper {
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
+            if(arbeidstakerList != null) {
+                for(Arbeidstaker arbeidstaker: arbeidstakerList) {
+                    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().verdi);
+                    InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
+
+                    OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
+                    oppgittFraværPerioder.add(oppgittFraværPeriode);
+                }
+            }
         }
+
         return oppgittFraværPerioder;
     }
 }
