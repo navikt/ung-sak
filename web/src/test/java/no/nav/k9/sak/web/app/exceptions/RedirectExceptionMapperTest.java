@@ -21,7 +21,7 @@ import no.nav.k9.sak.test.util.Whitebox;
 public class RedirectExceptionMapperTest {
 
     @Mock
-    private GeneralRestExceptionMapper generalRestExceptionMapper;
+    private VLExceptionMapper generalRestExceptionMapper;
 
     private RedirectExceptionMapper exceptionMapper;
 

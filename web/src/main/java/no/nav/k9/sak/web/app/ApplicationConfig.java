@@ -1,13 +1,12 @@
 package no.nav.k9.sak.web.app;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.server.ResourceConfig;
 
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
@@ -16,24 +15,16 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
-import no.nav.k9.sak.web.app.exceptions.ConstraintViolationMapper;
-import no.nav.k9.sak.web.app.exceptions.GeneralRestExceptionMapper;
-import no.nav.k9.sak.web.app.exceptions.JsonMappingExceptionMapper;
-import no.nav.k9.sak.web.app.exceptions.JsonParseExceptionMapper;
+import no.nav.k9.sak.web.app.exceptions.KnownExceptionMappers;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
 
-
 @ApplicationPath(ApplicationConfig.API_URI)
-public class ApplicationConfig extends Application {
+public class ApplicationConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
 
-    private Set<Object> singletons;
-
     public ApplicationConfig() {
-
-        singletons = Set.of(new JacksonJsonConfig());
 
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
@@ -59,25 +50,16 @@ public class ApplicationConfig extends Application {
         } catch (OpenApiConfigurationException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+
+        register(OpenApiResource.class);
+
+        registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));
+
+        register(new JacksonJsonConfig());
+
+        registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
+
+        property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
     }
 
-    @Override
-    public Set<Class<?>> getClasses() {
-        Set<Class<?>> classes = new HashSet<>(new RestImplementationClasses().getImplementationClasses());
-
-        classes.add(OpenApiResource.class);
-
-        classes.add(ConstraintViolationMapper.class);
-        classes.add(JsonMappingExceptionMapper.class);
-        classes.add(JsonParseExceptionMapper.class);
-        classes.add(GeneralRestExceptionMapper.class);
-        classes.add(JacksonJsonConfig.class);
-
-        return Collections.unmodifiableSet(classes);
-    }
-
-    @Override
-    public Set<Object> getSingletons() {
-        return singletons;
-    }
 }
