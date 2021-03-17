@@ -19,6 +19,7 @@ import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Objects;
@@ -51,6 +52,7 @@ public class IAYRegisterdataCallbackRestTjeneste {
     @POST
     @Path("/iay/callback")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Callback når registerinnhenting av IAY har blitt fullført i Abakus", tags = "registerdata")
     @BeskyttetRessurs(action = UPDATE, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")

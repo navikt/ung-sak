@@ -1,30 +1,21 @@
 package no.nav.k9.sak.web.app.oppgave;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+
+import org.glassfish.jersey.server.ResourceConfig;
 
 import no.nav.k9.sak.web.app.exceptions.RedirectExceptionMapper;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 
 @ApplicationPath("oppgaveredirect")
-public class OppgaveRedirectApplication extends Application {
+public class OppgaveRedirectApplication extends ResourceConfig {
 
-    private static final Set<Class<?>> CLASSES;
+    public OppgaveRedirectApplication() {
+        registerClasses(OppgaveRedirectTjeneste.class);
+        register(new JacksonJsonConfig());
+        register(new RedirectExceptionMapper());
 
-    static {
-        Set<Class<?>> klasser = new HashSet<>();
-        klasser.add(OppgaveRedirectTjeneste.class);
-        klasser.add(RedirectExceptionMapper.class);
-        klasser.add(JacksonJsonConfig.class);
-        CLASSES = Collections.unmodifiableSet(klasser);
+        property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
     }
 
-    @Override
-    public Set<Class<?>> getClasses() {
-        return CLASSES;
-    }
 }
