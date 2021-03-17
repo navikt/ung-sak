@@ -83,6 +83,8 @@ class SøknadOversetter {
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // TODO: Håndtere endringssøknad. "false" betyr at vi krever IMer.
+            .medJournalpostId(journalpostId)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
             .medSøknadsdato(maksSøknadsperiode.getFraOgMed())
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();

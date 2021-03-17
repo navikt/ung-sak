@@ -84,7 +84,7 @@ public class InnhentDokumentTjeneste {
 
     private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
         var fagsakId = fagsak.getId();
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteYtelsesbehandling(fagsak.getId());
+        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
 
         if (sisteYtelsesbehandling.isEmpty()) {
             // ingen tidligere behandling - Opprett ny førstegangsbehandling

@@ -20,6 +20,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
@@ -50,7 +51,7 @@ class LagreSøknad {
         this.behandlingRepository = behandlingRepository;
     }
 
-    void persister(FrisinnSøknad søknad, Behandling behandling) {
+    void persister(JournalpostId journalpostId, FrisinnSøknad søknad, Behandling behandling) {
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         var søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(søknad.getSøknadsperiode().getFraOgMed(), søknad.getSøknadsperiode().getTilOgMed());
@@ -63,6 +64,8 @@ class LagreSøknad {
             .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // støtter ikke endringssønader p.t.
             .medSøknadsdato(mottattDato)
+            .medJournalpostId(journalpostId)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);

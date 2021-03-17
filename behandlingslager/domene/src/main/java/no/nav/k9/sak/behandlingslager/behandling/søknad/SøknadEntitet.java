@@ -1,7 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.søknad;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.SpråkKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "Søknad")
 @Table(name = "SO_SOEKNAD")
@@ -42,6 +42,13 @@ public class SøknadEntitet extends BaseEntitet {
 
     @Column(name = "soeknadsdato", nullable = false)
     private LocalDate søknadsdato;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
+    private JournalpostId journalpostId;
+
+    @Column(name = "soeknad_id")
+    private String søknadId;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -59,9 +66,6 @@ public class SøknadEntitet extends BaseEntitet {
     @Convert(converter = SpråkKodeverdiConverter.class)
     @Column(name = "sprak_kode", nullable = false)
     private Språkkode språkkode = Språkkode.UDEFINERT;
-
-    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "søknad")
-    private Set<SøknadVedleggEntitet> søknadVedlegg = new HashSet<>(2);
 
     @Column(name = "begrunnelse_for_sen_innsending")
     private String begrunnelseForSenInnsending;
@@ -100,11 +104,6 @@ public class SøknadEntitet extends BaseEntitet {
         this.periode = søknadMal.getSøknadsperiode();
         if (søknadMal.getSpråkkode() != null) {
             this.språkkode = søknadMal.getSpråkkode();
-        }
-        for (SøknadVedleggEntitet aSøknadVedlegg : søknadMal.getSøknadVedlegg()) {
-            SøknadVedleggEntitet kopi = new SøknadVedleggEntitet(aSøknadVedlegg);
-            kopi.setSøknad(this);
-            this.søknadVedlegg.add(kopi);
         }
         this.brukerRolle = søknadMal.getRelasjonsRolleType();
     }
@@ -157,12 +156,24 @@ public class SøknadEntitet extends BaseEntitet {
         this.språkkode = språkkode;
     }
 
-    public Set<SøknadVedleggEntitet> getSøknadVedlegg() {
-        return Collections.unmodifiableSet(søknadVedlegg);
-    }
-
     public String getBegrunnelseForSenInnsending() {
         return begrunnelseForSenInnsending;
+    }
+
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
+
+    public String getSøknadId() {
+        return søknadId;
+    }
+
+    void setSøknadId(String søknadId) {
+        this.søknadId = søknadId;
+    }
+
+    void setJournalpostId(JournalpostId journalpostId) {
+        this.journalpostId = journalpostId;
     }
 
     void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
@@ -203,12 +214,13 @@ public class SøknadEntitet extends BaseEntitet {
         SøknadEntitet other = (SøknadEntitet) obj;
         return Objects.equals(this.mottattDato, other.mottattDato)
             && Objects.equals(this.søknadsdato, other.søknadsdato)
-            && Objects.equals(this.tilleggsopplysninger, other.tilleggsopplysninger)
-            && Objects.equals(this.søknadVedlegg, other.søknadVedlegg)
+            && Objects.equals(this.søknadId, other.søknadId)
+            && Objects.equals(this.journalpostId, other.journalpostId)
+            && Objects.equals(this.periode, other.periode)
             && Objects.equals(this.begrunnelseForSenInnsending, other.begrunnelseForSenInnsending)
             && Objects.equals(this.erEndringssøknad, other.erEndringssøknad)
             && Objects.equals(this.språkkode, other.språkkode)
-            && Objects.equals(this.periode, other.periode)
+            && Objects.equals(this.tilleggsopplysninger, other.tilleggsopplysninger)
             && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
     }
 
@@ -217,10 +229,11 @@ public class SøknadEntitet extends BaseEntitet {
         return Objects.hash(elektroniskRegistrert,
             mottattDato,
             erEndringssøknad,
+            journalpostId,
+            søknadId,
             søknadsdato,
             tilleggsopplysninger,
             språkkode,
-            søknadVedlegg,
             periode,
             begrunnelseForSenInnsending);
     }
@@ -235,6 +248,8 @@ public class SøknadEntitet extends BaseEntitet {
             + ", tilleggsopplysninger=" + tilleggsopplysninger
             + ", språkkode=" + språkkode
             + ", søknadperiode=" + periode
+            + ", journalpostId=" + journalpostId
+            + ", søknadId=" + søknadId
             + ", begrunnelseForSenInnsending=" + begrunnelseForSenInnsending
             + ">"; //$NON-NLS-1$
     }
@@ -279,13 +294,6 @@ public class SøknadEntitet extends BaseEntitet {
             return this;
         }
 
-        public Builder leggTilVedlegg(SøknadVedleggEntitet søknadVedlegg) {
-            SøknadVedleggEntitet sve = new SøknadVedleggEntitet(søknadVedlegg);
-            søknadMal.søknadVedlegg.add(sve);
-            sve.setSøknad(søknadMal);
-            return this;
-        }
-
         public Builder leggTilAngittPerson(SøknadAngittPersonEntitet angitt) {
             var sve = new SøknadAngittPersonEntitet(angitt);
             søknadMal.angittePersoner.add(sve);
@@ -295,6 +303,11 @@ public class SøknadEntitet extends BaseEntitet {
 
         public Builder medBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
             søknadMal.setBegrunnelseForSenInnsending(begrunnelseForSenInnsending);
+            return this;
+        }
+
+        public Builder medJournalpostId(JournalpostId journalpostId) {
+            søknadMal.setJournalpostId(journalpostId);
             return this;
         }
 
@@ -310,6 +323,11 @@ public class SøknadEntitet extends BaseEntitet {
 
         public Builder medSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
             søknadMal.setSøknadsperiode(søknadsperiode);
+            return this;
+        }
+
+        public Builder medSøknadId(String søknadId) {
+            søknadMal.setSøknadId(søknadId);
             return this;
         }
 

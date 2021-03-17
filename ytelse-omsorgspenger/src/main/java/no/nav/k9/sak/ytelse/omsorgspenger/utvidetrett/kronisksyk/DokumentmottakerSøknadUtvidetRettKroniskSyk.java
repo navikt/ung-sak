@@ -22,6 +22,7 @@ import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
@@ -62,18 +63,18 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
-            persister(søknad, behandling);
+            persister(dokument.getJournalpostId(), søknad, behandling);
         }
     }
 
-    void persister(Søknad søknad, Behandling behandling) {
+    void persister(JournalpostId journalpostId, Søknad søknad, Behandling behandling) {
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerKroniskSyktBarn) søknad.getYtelse();
 
-        lagreSøknad(behandlingId, søknad, søknadInnhold);
+        lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
     }
 
-    private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerKroniskSyktBarn innsendt) {
+    private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerKroniskSyktBarn innsendt) {
         var søknadsperiode = innsendt.getSøknadsperiode();
         boolean elektroniskSøknad = true;
         DatoIntervallEntitet datoIntervall = søknadsperiode == null
@@ -85,6 +86,8 @@ public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmot
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
+            .medJournalpostId(journalpostId)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medSpråkkode(getSpråkValg(søknad.getSpråk())) // TODO: hente riktig språk
         ;

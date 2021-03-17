@@ -173,7 +173,7 @@ public class KompletthetsjekkerTest {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
 
-        opprettSøknadMedPåkrevdVedlegg(behandling);
+        opprettSøknad(behandling);
 
         // Act
         KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderForsendelseKomplett(lagRef(behandling));
@@ -193,14 +193,9 @@ public class KompletthetsjekkerTest {
         return BehandlingReferanse.fra(behandling, stp);
     }
 
-    private void opprettSøknadMedPåkrevdVedlegg(Behandling behandling) {
+    private void opprettSøknad(Behandling behandling) {
         SøknadEntitet hentSøknad = søknadRepository.hentSøknad(behandling);
-        SøknadEntitet søknad = new SøknadEntitet.Builder(hentSøknad).leggTilVedlegg(
-            new SøknadVedleggEntitet.Builder()
-                .medSkjemanummer(KODE_INNTEKTSMELDING)
-                .medErPåkrevdISøknadsdialog(true)
-                .build())
-            .build();
+        SøknadEntitet søknad = new SøknadEntitet.Builder(hentSøknad).build();
         søknadRepository.lagreOgFlush(behandling, søknad);
     }
 
