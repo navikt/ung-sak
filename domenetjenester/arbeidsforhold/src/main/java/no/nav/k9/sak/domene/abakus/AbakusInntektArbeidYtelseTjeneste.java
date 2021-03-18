@@ -404,7 +404,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private Set<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+    private LinkedHashSet<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
         var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
         var dto = hentUnikeInntektsmeldinger(request);
         var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
