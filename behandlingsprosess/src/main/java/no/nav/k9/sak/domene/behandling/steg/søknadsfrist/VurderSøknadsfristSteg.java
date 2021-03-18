@@ -67,7 +67,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
             var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårResultatBuilder);
 
             Vilkårene oppdatertVilkår = resultatBuilder.build();
-            vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår);
+            vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår, behandling.getFagsak().getPeriode());
 
             if (kreverManuellAvklaring(oppdatertVilkår.getVilkår(VilkårType.SØKNADSFRIST))) {
                 // Legg til aksjonspunkt

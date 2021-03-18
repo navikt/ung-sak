@@ -79,6 +79,7 @@ import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -784,7 +785,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     public SøknadEntitet.Builder medSøknad() {
         if (søknadBuilder == null) {
-            søknadBuilder = new SøknadEntitet.Builder();
+            søknadBuilder = new SøknadEntitet.Builder()
+                .medJournalpostId(new JournalpostId(nyId()));
         }
         return søknadBuilder;
     }

@@ -76,7 +76,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
 
     },
-    OMSORGSPENGER_KS("OMP_KS", "Omsorgspenger - Utvidet rett Kronisk sykdom", "OM", "OMS") {
+    OMSORGSPENGER_KS("OMP_KS", "Ekstra omsorgsdager kronisk syk", "OM", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNonNull(pleietrengendeAktørId, "pleietrengende");
@@ -88,7 +88,7 @@ public enum FagsakYtelseType implements Kodeverdi {
             return false;
         }
     },
-    OMSORGSPENGER_MA("OMP_MA", "Omsorgspenger - Utvidet rett Midlertidig Alene", "OM", "OMS") {
+    OMSORGSPENGER_MA("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS") {
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
             requireNull(pleietrengendeAktørId, "pleietrengende");

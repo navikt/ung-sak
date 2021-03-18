@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,7 @@ class MapFerieTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).isEmpty();
     }
@@ -57,7 +56,7 @@ class MapFerieTest {
             List.of(),
             List.of(new FeriePeriode(periodeTilVurdering))));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
@@ -86,7 +85,7 @@ class MapFerieTest {
                 List.of(),
                 List.of()));
 
-        var result = mapper.map(new TreeSet<>(kravDokumenter), perioderFraSøknader, tidlinjeTilVurdering);
+        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new LukketPeriode(feriePeriode.getFomDato(), feriePeriode.getTomDato()));

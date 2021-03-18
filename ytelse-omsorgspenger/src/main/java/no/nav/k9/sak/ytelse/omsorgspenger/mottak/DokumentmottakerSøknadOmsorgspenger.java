@@ -123,12 +123,12 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
         var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
 
-        lagreSøknad(behandlingId, søknad, søknadInnhold);
+        lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
         lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søknad.getSøker());
     }
 
-    private void lagreSøknad(Long behandlingId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
+    private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
         var søknadsperiode = søknadInnhold.getSøknadsperiode();
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
@@ -137,6 +137,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
+            .medJournalpostId(journalpostId)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
         var søknadEntitet = søknadBuilder.build();

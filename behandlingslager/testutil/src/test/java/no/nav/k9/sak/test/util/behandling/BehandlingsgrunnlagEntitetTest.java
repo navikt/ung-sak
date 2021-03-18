@@ -43,6 +43,7 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.db.Repository;
 
@@ -86,6 +87,7 @@ public class BehandlingsgrunnlagEntitetTest {
 
         SøknadEntitet.Builder søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(søknadsdato, søknadsdato)
+            .medJournalpostId(new JournalpostId(1L))
             .medSøknadsdato(søknadsdato);
         søknadRepository.lagreOgFlush(behandling, søknadBuilder.build());
         repository.flush();

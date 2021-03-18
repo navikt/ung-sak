@@ -71,8 +71,14 @@ public class SykdomDokumentOversiktElement {
     }
 
     public SykdomDokumentOversiktElement(
-            String id, String versjon, SykdomDokumentType type, boolean annenPartErKilde, LocalDate datert,
-            LocalDate mottattDato, LocalDateTime mottattTidspunkt, boolean behandlet,
+            String id,
+            String versjon,
+            SykdomDokumentType type,
+            boolean annenPartErKilde,
+            LocalDate datert,
+            LocalDate mottattDato,
+            LocalDateTime mottattTidspunkt,
+            boolean behandlet,
             List<ResourceLink> links) {
         this.id = id;
         this.versjon = versjon;

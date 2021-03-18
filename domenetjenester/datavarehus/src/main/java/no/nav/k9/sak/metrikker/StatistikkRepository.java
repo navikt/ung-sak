@@ -51,6 +51,8 @@ public class StatistikkRepository {
     static final List<String> YTELSER = List.of(
         FagsakYtelseType.FRISINN,
         FagsakYtelseType.OMSORGSPENGER,
+        FagsakYtelseType.OMSORGSPENGER_KS,
+        FagsakYtelseType.OMSORGSPENGER_MA,
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         .stream().map(k -> k.getKode()).collect(Collectors.toList());
 

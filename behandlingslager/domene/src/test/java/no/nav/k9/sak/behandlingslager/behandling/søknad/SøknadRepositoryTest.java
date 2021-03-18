@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -135,6 +136,7 @@ public class SøknadRepositoryTest {
         return new SøknadEntitet.Builder()
             .medSøknadsperiode(søknadsperiode)
             .medSøknadsdato(søknadsperiode.getTomDato().plusDays(1))
+            .medJournalpostId(new JournalpostId(1L))
             .medErEndringssøknad(erEndringssøknad)
             .build();
     }

@@ -252,7 +252,6 @@ public class SykdomDokumentRestTjeneste {
     }
 
     @POST
-    @Path(DOKUMENT)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppdaterer metainformasjonen om et dokument.",
         summary = "Oppdaterer metainformasjonen om et dokument.",
@@ -274,9 +273,12 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
+        if(dokument.getType() != SykdomDokumentType.UKLASSIFISERT) {
+            throw new UnsupportedOperationException("Oppdatering av dokumenter mer enn en gang er ikke støttet ennå");
+        } // TODO: Håndtering av versjoner/historikk.
+
         dokument.setDatert(sykdomDokumentEndringDto.getDatert());
         dokument.setType(sykdomDokumentEndringDto.getType());
-        // TODO: Håndtering av versjoner/historikk.
 
         sykdomDokumentRepository.oppdater(dokument);
     }
@@ -307,7 +309,15 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final LocalDateTime nå = LocalDateTime.now();
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, sykdomDokumentOpprettelseDto.getJournalpostId(), null, getCurrentUserId(), nå, getCurrentUserId(), nå);
+        final SykdomDokument dokument = new SykdomDokument(
+            SykdomDokumentType.UKLASSIFISERT,
+            nå,
+            sykdomDokumentOpprettelseDto.getJournalpostId(),
+            null,
+            getCurrentUserId(),
+            nå,
+            getCurrentUserId(),
+            nå);
 
         sykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
     }

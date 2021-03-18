@@ -4,26 +4,25 @@ import java.net.URI;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
-import org.jboss.resteasy.spi.ApplicationException;
 import org.owasp.encoder.Encode;
 
-import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
+import no.nav.k9.sak.kontrakt.FeilDto;
 
-
-@Provider
-public class RedirectExceptionMapper implements ExceptionMapper<ApplicationException> {
+public class RedirectExceptionMapper implements ExceptionMapper<Throwable> {
 
     private String loadBalancerUrl = System.getProperty("loadbalancer.url");
 
-    private GeneralRestExceptionMapper generalRestExceptionMapper = new GeneralRestExceptionMapper();
+    private KnownExceptionMappers exceptionMappers = new KnownExceptionMappers();
 
-    @SuppressWarnings("resource")
+    @SuppressWarnings({ "resource", "unchecked" })
     @Override
-    public Response toResponse(ApplicationException exception) {
-        Response response = generalRestExceptionMapper.toResponse(exception);
+    public Response toResponse(Throwable exception) {
+
+        @SuppressWarnings("rawtypes")
+        ExceptionMapper exceptionMapper = exceptionMappers.getMapper(exception);
+        var response = exceptionMapper.toResponse(exception);
         String feilmelding = ((FeilDto) response.getEntity()).getFeilmelding();
         String enkodetFeilmelding = Encode.forUriComponent(feilmelding);
 
@@ -33,8 +32,8 @@ public class RedirectExceptionMapper implements ExceptionMapper<ApplicationExcep
         return responser.build();
     }
 
+
     protected String getBaseUrl() {
         return loadBalancerUrl + ContextPathHolder.instance().getContextPath();
     }
-
 }

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -27,13 +26,11 @@ import no.nav.k9.sak.domene.uttak.input.UttakInput;
 import no.nav.k9.sak.domene.uttak.repo.FeriePeriode;
 import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import no.nav.k9.sak.domene.uttak.repo.pleiebehov.Pleieperiode;
 import no.nav.k9.sak.domene.uttak.rest.UttakRestKlient;
 import no.nav.k9.sak.domene.uttak.uttaksplan.Uttaksplan;
 import no.nav.k9.sak.domene.uttak.uttaksplan.input.LovbestemtFerie;
 import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakArbeid;
 import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakMedlemskap;
-import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttakTilsynsbehov;
 import no.nav.k9.sak.domene.uttak.uttaksplan.input.UttaksplanRequest;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
@@ -41,7 +38,6 @@ import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforholdPeriodeInfo;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 @Default
@@ -116,7 +112,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
             utReq.setSøknadsperioder(lagSøknadsperioder(input));
             utReq.setArbeid(mapArbeid(input));
             utReq.setLovbestemtFerie(lagLovbestemtFerie(input));
-            utReq.setTilsynsbehov(lagTilsynsbehov(input));
 
             utReq.setMedlemskap(lagMedlemskap(input));
 
@@ -144,26 +139,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
         private UttakMedlemskap lagUttakMedlemskap(@SuppressWarnings("unused") VilkårPeriode value) {
             // TODO K9: Har ikke data her foreløpig
             return new UttakMedlemskap();
-        }
-
-        private Map<Periode, UttakTilsynsbehov> lagTilsynsbehov(UttakInput input) {
-            if (input.getPleieperioder() == null) {
-                return Collections.emptyMap();
-            }
-
-            var res = input.getPleieperioder().getPerioder().stream()
-                .filter(this::erPleiegradRelevantForUttak)
-                .map(uap -> new AbstractMap.SimpleEntry<>(tilPeriode(uap.getPeriode()), tilUttakTilsynsbehov(uap)))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-            return new TreeMap<>(res);
-        }
-
-        private boolean erPleiegradRelevantForUttak(Pleieperiode it) {
-            return !Set.of(Pleiegrad.INGEN, Pleiegrad.UDEFINERT).contains(it.getGrad());
-        }
-
-        private UttakTilsynsbehov tilUttakTilsynsbehov(Pleieperiode uap) {
-            return new UttakTilsynsbehov(uap.getGrad().getProsent());
         }
 
         private List<LovbestemtFerie> lagLovbestemtFerie(UttakInput input) {

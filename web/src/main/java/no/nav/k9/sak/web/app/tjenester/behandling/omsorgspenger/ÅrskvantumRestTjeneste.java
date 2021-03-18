@@ -1,17 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.aarskvantum.kontrakter.*;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -27,9 +18,21 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @Path(ÅrskvantumRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -63,7 +66,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(FORBRUKTEDAGER_PATH)
     @Operation(description = "Hent forbrukte dager", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer forbrukte dager av totalt årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ÅrskvantumForbrukteDager.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -78,28 +81,19 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(FULL_UTTAKSPLAN_PATH)
     @Operation(description = "Hent full uttaksplan", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public FullUttaksplan getFullUttaksplan(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        return årskvantumTjeneste.hentFullUttaksplan(saksnummerDto.getVerdi());
-    }
-
-    /**
-     * Hent den totale uttaksplanen for en sak.
-     */
-    @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path(FULL_UTTAKSPLAN_PATH)
-    @Operation(description = "Hent full uttaksplan", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer full uttaksplan hittil i år", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FullUttaksplan.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public FullUttaksplanForBehandlinger getFullUttaksplan(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
-                                                           @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-        return årskvantumTjeneste.hentUttaksplanForBehandling(saksnummerDto.getVerdi(), behandlingIdDto.getBehandlingUuid());
+    public Response getFullUttaksplan(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                                      @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        if (behandlingIdDto == null) {
+            var uttaksplan = årskvantumTjeneste.hentFullUttaksplan(saksnummerDto.getVerdi());
+            return Response.ok(uttaksplan).build();
+        } else {
+            var uttaksplanForBehandlinger = årskvantumTjeneste.hentUttaksplanForBehandling(saksnummerDto.getVerdi(), behandlingIdDto.getBehandlingUuid());
+            return Response.ok(uttaksplanForBehandlinger).build();
+        }
     }
 
     /**
@@ -109,7 +103,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(INPUT_PATH)
     @Operation(description = "Hent input til beregning av årskvantum", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "input til beregning av årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            @ApiResponse(responseCode = "200", description = "input til beregning av årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -127,7 +121,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(UTBETALINGSGRUNNLAG)
     @Operation(description = "Hent utbetalingsgrunnlag fra årskvantum", tags = "behandling - årskvantum/uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            @ApiResponse(responseCode = "200", description = "utbetalingsgrunnlag fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -142,7 +136,7 @@ public class ÅrskvantumRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(UTTREKK_PATH)
     @Operation(description = "Hent uttrekk fra årskvantum", tags = "behandling - årskvantum/uttrekk", responses = {
-        @ApiResponse(responseCode = "200", description = "uttrekk fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+            @ApiResponse(responseCode = "200", description = "uttrekk fra årskvantum", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")

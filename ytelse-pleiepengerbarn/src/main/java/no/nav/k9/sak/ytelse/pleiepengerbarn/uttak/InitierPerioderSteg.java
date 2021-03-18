@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -83,6 +84,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
                 .stream()
                 .filter(it -> it.getBehandlingId().equals(behandlingId))
                 .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+                .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
                 .map(MottattDokument::getJournalpostId)
                 .collect(Collectors.toSet());
 
@@ -105,6 +107,10 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .collect(Collectors.toSet());
 
         log.info("Fant {} dokumenter med perioder knyttet til behandlingen", perioderFraSøknader);
+
+        if (perioderFraSøknader.size() != mottatteDokumenter.size()) {
+            throw new IllegalStateException("Fant ikke alle forventede dokumenter.. " + perioderFraSøknader.size() + " != " + mottatteDokumenter.size());
+        }
 
         return new UttakPerioderHolder(perioderFraSøknader);
     }

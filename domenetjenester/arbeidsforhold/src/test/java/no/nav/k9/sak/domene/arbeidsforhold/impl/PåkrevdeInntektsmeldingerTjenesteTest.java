@@ -31,6 +31,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYScenarioB
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -129,6 +130,7 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         SøknadEntitet søknad = new SøknadEntitet.Builder()
             .medElektroniskRegistrert(true)
             .medSøknadsdato(DAGENS_DATO)
+            .medJournalpostId(new JournalpostId(1L))
             .medMottattDato(DAGENS_DATO)
             .medSøknadsperiode(DAGENS_DATO, DAGENS_DATO)
             .medErEndringssøknad(erEndringssøknad)

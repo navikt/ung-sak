@@ -86,7 +86,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 @Transactional
 public class ForvaltningMidlertidigDriftRestTjeneste {
 
-    private static final String JSON_UTF8 = "application/json; charset=UTF-8";
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -128,7 +127,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Operation(description = "Opprett behandling hvor saksbehandler kan legge inn inntektsopplysninger", summary = ("Returnerer saksnummer som er tilknyttet den nye fagsaken som har blitt opprettet."), tags = "frisinn", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
     })
-    @Produces(JSON_UTF8)
+    @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public Response opprettManuellFrisinnSøknad(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ManuellSøknadDto manuellSøknadDto) {
         PersonIdent fnr = new PersonIdent(manuellSøknadDto.getFnr());

@@ -43,7 +43,8 @@ public class PipRepository {
             "b.behandling_status behandligStatus, " +
             "b.ansvarlig_saksbehandler ansvarligSaksbehandler, " +
             "f.id fagsakId, " +
-            "f.fagsak_status fagsakStatus " +
+            "f.fagsak_status fagsakStatus, " +
+            "f.saksnummer " +
             "FROM BEHANDLING b " +
             "JOIN FAGSAK f ON b.fagsak_id = f.id " +
             "WHERE b.id = :behandlingId";
@@ -69,7 +70,8 @@ public class PipRepository {
             "b.behandling_status behandligStatus, " +
             "b.ansvarlig_saksbehandler ansvarligSaksbehandler, " +
             "f.id fagsakId, " +
-            "f.fagsak_status fagsakStatus " +
+            "f.fagsak_status fagsakStatus, " +
+            "f.saksnummer " +
             "FROM BEHANDLING b " +
             "JOIN FAGSAK f ON b.fagsak_id = f.id " +
             "WHERE b.uuid = :behandlingUuid";

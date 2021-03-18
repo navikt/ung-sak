@@ -121,17 +121,9 @@ public class PersonopplysningDtoTjeneste {
     }
 
     private void leggTilBarnSøktFor(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, Behandling behandling) {
-        List<PersonopplysningDto> barnSøktFor = new ArrayList<>();
-
         Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId()).ifPresent(aktørId -> {
-            barnSøktFor.addAll(aggregat.getBarna()
-                .stream()
-                .filter(it -> it.getAktørId().equals(aktørId))
-                .map(e -> enkelMapping(e, aggregat))
-                .collect(Collectors.toList()));
+            dto.setBarnSoktFor(List.of(enkelMapping(aggregat.getPersonopplysning(aktørId), aggregat)));
         });
-
-        dto.setBarnSoktFor(barnSøktFor);
     }
 
     private PersonopplysningDto enkelMapping(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {

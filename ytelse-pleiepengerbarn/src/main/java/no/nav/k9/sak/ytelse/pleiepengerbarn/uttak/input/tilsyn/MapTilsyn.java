@@ -3,10 +3,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -19,12 +19,12 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 public class MapTilsyn {
 
-    public Map<LukketPeriode, Duration> map(TreeSet<KravDokument> kravDokumenter,
+    public Map<LukketPeriode, Duration> map(Set<KravDokument> kravDokumenter,
                                             Set<PerioderFraSøknad> perioderFraSøknader,
                                             LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-
+        var kravDokumenterSorted = kravDokumenter.stream().sorted(KravDokument::compareTo).collect(Collectors.toCollection(LinkedHashSet::new));
         var resultatTimeline = new LocalDateTimeline<Duration>(List.of());
-        for (KravDokument kravDokument : kravDokumenter) {
+        for (KravDokument kravDokument : kravDokumenterSorted) {
             var dokumenter = perioderFraSøknader.stream()
                 .filter(it -> it.getJournalpostId().equals(kravDokument.getJournalpostId()))
                 .collect(Collectors.toSet());

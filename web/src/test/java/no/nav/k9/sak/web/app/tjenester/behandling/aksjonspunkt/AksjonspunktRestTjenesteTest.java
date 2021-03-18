@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +68,7 @@ public class AksjonspunktRestTjenesteTest {
                 begrunnelse,
                 aksjonspunktGodkjenningDtos));
 
-        aksjonspunktRestTjeneste.bekreft(BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
+        aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
 
         verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong());
     }
@@ -78,7 +80,7 @@ public class AksjonspunktRestTjenesteTest {
             when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);
             Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
             aksjonspunkt.add(new AvklarFortsattMedlemskapDto(begrunnelse, new ArrayList<>()));
-            aksjonspunktRestTjeneste.bekreft(BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
+            aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
         });
     }
 

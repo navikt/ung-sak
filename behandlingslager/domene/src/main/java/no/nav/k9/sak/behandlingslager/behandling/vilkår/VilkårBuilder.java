@@ -48,11 +48,35 @@ public class VilkårBuilder {
     }
 
     VilkårBuilder(Vilkår vilkåret) {
+        this(vilkåret, null);
+    }
+
+    VilkårBuilder(Vilkår vilkåret, LocalDateInterval boundry) {
         this.vilkåret = new Vilkår(vilkåret);
         this.vilkårTidslinje = new LocalDateTimeline<>(vilkåret.getPerioder()
             .stream()
-            .map(a -> new LocalDateSegment<>(a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), new WrappedVilkårPeriode(a)))
+            .map(a -> toSegment(a, boundry))
+            .filter(s -> s != null)
             .collect(Collectors.toList()));
+    }
+
+    private LocalDateSegment<WrappedVilkårPeriode> toSegment(VilkårPeriode a, LocalDateInterval boundry) {
+
+        var vilkårDatoInterval = new LocalDateInterval(a.getPeriode().getFomDato(), a.getPeriode().getTomDato());
+
+        if (boundry != null) {
+            var overlapp = vilkårDatoInterval.overlap(boundry);
+            if (overlapp.isPresent()) {
+                var nyPeriode = overlapp.get();
+                var nyVilkårPeriode = new VilkårPeriodeBuilder(a).medPeriode(nyPeriode.getFomDato(), nyPeriode.getTomDato()).build();
+                return new LocalDateSegment<>(nyPeriode.getFomDato(), nyPeriode.getTomDato(), new WrappedVilkårPeriode(nyVilkårPeriode));
+            } else {
+                return null;
+            }
+        } else {
+            var vilkårSegment = new LocalDateSegment<>(vilkårDatoInterval, new WrappedVilkårPeriode(a));
+            return vilkårSegment;
+        }
     }
 
     boolean erMellomliggendePeriode(LocalDate firstDate, LocalDate secondDate) {
@@ -110,7 +134,7 @@ public class VilkårBuilder {
     public VilkårBuilder leggTil(VilkårPeriodeBuilder periodeBuilder) {
         validerBuilder();
         var periode = periodeBuilder.build();
-        var segment = new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new WrappedVilkårPeriode(periode));
+        var segment = toSegment(periode, null);
         var periodeTidslinje = new LocalDateTimeline<>(List.of(segment));
 
         this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, this::sjekkVurdering, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -219,7 +243,6 @@ public class VilkårBuilder {
      */
     public Vilkår build() {
         validerBuilder();
-
 
         if (dummy) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke bygge en dummy");

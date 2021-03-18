@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -65,7 +64,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
     @Override
     public Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        var result = new TreeMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
+        var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
 
         var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
             .stream()
@@ -99,7 +98,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         return mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst()
-            .map(MottattDokument::getMottattTidspunkt)
+            .map(MottattDokument::getInnsendingstidspunkt)
             .orElseThrow();
     }
 

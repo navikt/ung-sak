@@ -15,6 +15,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 
 @Dependent
@@ -42,7 +43,7 @@ public class SykdomDokumentRepository {
 
         return q.getResultList();
     }
-    
+
     public List<SykdomDokument> henDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
                 .stream()
@@ -76,6 +77,7 @@ public class SykdomDokumentRepository {
         if (dokument.getId() == null) {
             throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
         }
+
         entityManager.persist(dokument);
         entityManager.flush();
     }
@@ -87,7 +89,7 @@ public class SykdomDokumentRepository {
         }
         return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
     }
-    
+
     SykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
                 "SELECT si "
@@ -113,6 +115,14 @@ public class SykdomDokumentRepository {
     }
 
     public SykdomInnleggelser hentInnleggelse(UUID behandlingUUID) {
+        var sykdomInnleggelser = hentInnleggelseOrNull(behandlingUUID);
+        if (sykdomInnleggelser != null) {
+            return sykdomInnleggelser;
+        }
+        return new SykdomInnleggelser(null, null, Collections.emptyList(), null, null);
+    }
+
+    public SykdomInnleggelser hentInnleggelseOrNull(UUID behandlingUUID) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
                 "SELECT gi " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
@@ -187,7 +197,7 @@ public class SykdomDokumentRepository {
         }
         return new SykdomDiagnosekoder(null, null, new ArrayList<>(), null, null);
     }
-    
+
     SykdomDiagnosekoder hentDiagnosekoderOrNull(AktørId pleietrengende) {
         final TypedQuery<SykdomDiagnosekoder> q = entityManager.createQuery(
             "SELECT sd " +
