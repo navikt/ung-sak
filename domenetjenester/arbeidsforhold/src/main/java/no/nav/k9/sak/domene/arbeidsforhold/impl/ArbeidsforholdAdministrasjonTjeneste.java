@@ -238,7 +238,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             return dto;
         }
         if (collect.size() > 1) {
-            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme.");
+            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme: " + collect);
         }
         return collect.get(0);
     }
@@ -256,7 +256,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             return dto;
         }
         if (collect.size() > 1) {
-            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme.");
+            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme: " + collect);
         }
         return collect.get(0);
     }
