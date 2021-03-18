@@ -28,7 +28,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Fakta om medlemskap"),
     FAKTA_OM_MEDISINSK("FAKTA_OM_MEDISINSK", "Fakta om medisinsk"),
     FAKTA_OM_ÅRSKVANTUM("FAKTA_OM_ÅRSKVANTUM", "Fakta om årskvantum"),
-    FAKTA_OM_UTVIDETRETT("FAKTA_OM_UTVIDETRETT", "Fakta om omsorgspenger utvidet rett"),
+    FAKTA_OM_UTVIDETRETT("FAKTA_OM_UTVIDETRETT", "Fakta om omsorgsdager utvidet rett"),
     FAKTA_OM_OMSORGENFOR("FAKTA_OM_OMSORGEN_FOR", "Fakta om omsorgen for"),
     FAKTA_OM_OPPTJENING("FAKTA_OM_OPPTJENING", "Fakta om opptjening"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
