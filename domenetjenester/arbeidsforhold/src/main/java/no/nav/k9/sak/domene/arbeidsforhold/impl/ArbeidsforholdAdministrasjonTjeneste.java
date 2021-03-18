@@ -6,7 +6,6 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.NYTT_
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.SLÅTT_SAMMEN_MED_ANNET;
 import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde.INNTEKTSKOMPONENTEN;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -22,7 +21,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.ArbeidsforholdWrapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -37,22 +35,14 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyrtePerioder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
-import no.nav.k9.sak.domene.iay.modell.Permisjon;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdAksjonspunktÅrsak;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.MottattInntektsmeldingDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.PermisjonDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.typer.Stillingsprosent;
 
 /**
  * Håndterer administrasjon(saksbehandlers input) vedrørende arbeidsforhold.
@@ -91,8 +81,8 @@ public class ArbeidsforholdAdministrasjonTjeneste {
      * Rydder opp i inntektsmeldinger som blir erstattet
      *
      * @param behandlingId behandlingId
-     * @param aktørId      aktørId
-     * @param builder      ArbeidsforholdsOverstyringene som skal lagrers
+     * @param aktørId aktørId
+     * @param builder ArbeidsforholdsOverstyringene som skal lagrers
      */
     public void lagre(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder) {
         inntektArbeidYtelseTjeneste.lagreArbeidsforhold(behandlingId, aktørId, builder);
@@ -142,158 +132,24 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                           UtledArbeidsforholdParametere param) {
 
-        var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var inntektsmeldinger = new LinkedHashSet<>(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()));
 
         var arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
         var filter = new YrkesaktivitetFilter(arbeidsforholdInformasjon, iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
-        var arbeidsforhold = new LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto>();
-        utledArbeidsforholdFraInntektsmeldinger(arbeidsforhold, inntektsmeldinger);
-        utledArbeidsforholdFraYrkesaktivteter(arbeidsforhold, yrkesaktiviteter, arbeidsforholdInformasjon);
-        utledArbeidsforholdFraArbeidsforholdInformasjon(arbeidsforhold, filter.getArbeidsforholdOverstyringer(), arbeidsforholdInformasjon);
+        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon);
+        mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
+        mapper.utledArbeidsforholdFraYrkesaktivteter(yrkesaktiviteter);
+        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
 
-        if (param.getVurderArbeidsforhold()) {
-            markerArbeidsforholdMedAksjonspunktÅrsaker(arbeidsforhold, ref, arbeidsforholdInformasjon, iayGrunnlag);
+        if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
+            var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
+            mapper.mapVurdering(vurderinger);
         }
 
-        return arbeidsforhold;
-    }
-
-    private void markerArbeidsforholdMedAksjonspunktÅrsaker(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> arbeidsforhold, BehandlingReferanse ref, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon, InntektArbeidYtelseGrunnlag grunnlag) {
-        if (!arbeidsforhold.isEmpty()) {
-            var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, grunnlag)
-                .entrySet()
-                .stream()
-                .filter(it -> it.getValue()
-                    .stream()
-                    .anyMatch(at -> !at.getÅrsaker().isEmpty()))
-                .distinct()
-                .collect(Collectors.toList());
-            vurderinger.forEach(entry -> mapVurdering(arbeidsforhold, entry, arbeidsforholdInformasjon));
-        }
-    }
-
-    private void mapVurdering(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> arbeidsforhold, Map.Entry<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> entry, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        entry.getValue().forEach(af -> {
-            var dto = finnEllerOpprett(arbeidsforhold, entry.getKey(), af.getRef(), arbeidsforholdInformasjon);
-            dto.setAksjonspunktÅrsaker(af.getÅrsaker().stream().map(it -> ArbeidsforholdAksjonspunktÅrsak.fraKode(it.name())).collect(Collectors.toSet()));
-        });
-    }
-
-    private void utledArbeidsforholdFraArbeidsforholdInformasjon(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                                                 Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer,
-                                                                 Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        arbeidsforholdOverstyringer.forEach(overstyring -> mapOverstyring(result, overstyring, arbeidsforholdInformasjon));
-    }
-
-    private void mapOverstyring(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                ArbeidsforholdOverstyring overstyring,
-                                Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        var dto = finnEllerOpprett(result, overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef(), arbeidsforholdInformasjon);
-        if (Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(overstyring.getHandling())) {
-            dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
-            dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
-            dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
-        }
-        dto.setHandlingType(overstyring.getHandling());
-        dto.setBegrunnelse(overstyring.getBegrunnelse());
-    }
-
-    private Set<PeriodeDto> mapAnsettelsesPerioder(List<ArbeidsforholdOverstyrtePerioder> arbeidsforholdOverstyrtePerioder) {
-        return arbeidsforholdOverstyrtePerioder.stream()
-            .map(it -> new PeriodeDto(it.getOverstyrtePeriode().getFomDato(), it.getOverstyrtePeriode().getTomDato()))
-            .collect(Collectors.toSet());
-    }
-
-    private void utledArbeidsforholdFraYrkesaktivteter(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                                       Collection<Yrkesaktivitet> yrkesaktiviteter,
-                                                       Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-
-        yrkesaktiviteter.forEach(yr -> mapYrkesaktivitet(result, yr, arbeidsforholdInformasjon));
-
-    }
-
-    private void mapYrkesaktivitet(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                   Yrkesaktivitet yr,
-                                   Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        var dto = finnEllerOpprett(result, yr.getArbeidsgiver(), yr.getArbeidsforholdRef(), arbeidsforholdInformasjon);
-
-        dto.leggTilKilde(ArbeidsforholdKilde.AAREGISTERET);
-        dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(yr.getAnsettelsesPeriode()));
-        dto.setPermisjoner(mapPermisjoner(yr.getPermisjon()));
-        dto.setStillingsprosent(yr.getStillingsprosentFor(LocalDate.now()).map(Stillingsprosent::getVerdi).orElse(BigDecimal.ZERO));
-    }
-
-    private InntektArbeidYtelseArbeidsforholdV2Dto finnEllerOpprett(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result, Inntektsmelding im) {
-        Objects.requireNonNull(result, "result");
-        var collect = result.stream()
-            .filter(it -> gjelderSammeArbeidsforhold(it, im.getArbeidsgiver(), im.getArbeidsforholdRef()))
-            .collect(Collectors.toList());
-
-        if (collect.isEmpty()) {
-            var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(im.getArbeidsgiver(), new ArbeidsforholdIdDto(im.getArbeidsforholdRef().getUUIDReferanse(), im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)));
-            result.add(dto);
-            return dto;
-        }
-        if (collect.size() > 1) {
-            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme: " + collect);
-        }
-        return collect.get(0);
-    }
-
-    private InntektArbeidYtelseArbeidsforholdV2Dto finnEllerOpprett(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        Objects.requireNonNull(result, "result");
-        Objects.requireNonNull(arbeidsgiver, "arbeidsgiver");
-        var collect = result.stream()
-            .filter(it -> gjelderSammeArbeidsforhold(it, arbeidsgiver, arbeidsforholdRef))
-            .collect(Collectors.toList());
-
-        if (collect.isEmpty()) {
-            var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(arbeidsgiver, mapArbeidsforholdsId(arbeidsgiver, arbeidsforholdRef, arbeidsforholdInformasjon));
-            result.add(dto);
-            return dto;
-        }
-        if (collect.size() > 1) {
-            throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel, kan ikke forekomme: " + collect);
-        }
-        return collect.get(0);
-    }
-
-    private List<PermisjonDto> mapPermisjoner(Collection<Permisjon> permisjon) {
-        return permisjon.stream()
-            .map(it -> new PermisjonDto(it.getFraOgMed(), it.getTilOgMed(), it.getProsentsats().getVerdi(), it.getPermisjonsbeskrivelseType()))
-            .collect(Collectors.toList());
-    }
-
-    private Set<PeriodeDto> mapAnsettelsesPerioder(Collection<AktivitetsAvtale> ansettelsesPeriode) {
-        return ansettelsesPeriode.stream()
-            .map(AktivitetsAvtale::getPeriode)
-            .map(it -> new PeriodeDto(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toSet());
-    }
-
-    private void utledArbeidsforholdFraInntektsmeldinger(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                                         Set<Inntektsmelding> inntektsmeldinger) {
-        inntektsmeldinger.forEach(im -> mapInntektsmeldingTilArbeidsforhold(result, im));
-    }
-
-    private void mapInntektsmeldingTilArbeidsforhold(LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto> result,
-                                                     Inntektsmelding im) {
-        var dto = finnEllerOpprett(result, im);
-
-        dto.leggTilInntektsmelding(new MottattInntektsmeldingDto(im.getJournalpostId(), im.getInnsendingstidspunkt(), DokumentStatus.GYLDIG, null));
-        dto.leggTilKilde(ArbeidsforholdKilde.INNTEKTSMELDING);
-    }
-
-    private ArbeidsforholdIdDto mapArbeidsforholdsId(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
-        return new ArbeidsforholdIdDto(arbeidsforholdRef.getUUIDReferanse(), arbeidsforholdInformasjon.map(it -> it.finnEkstern(arbeidsgiver, arbeidsforholdRef)).map(EksternArbeidsforholdRef::getReferanse).orElse(null));
-    }
-
-    private boolean gjelderSammeArbeidsforhold(InntektArbeidYtelseArbeidsforholdV2Dto it, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
-        return it.getArbeidsgiver().getIdentifikator().equals(arbeidsgiver.getIdentifikator()) &&
-            arbeidsforholdRef.gjelderFor(InternArbeidsforholdRef.ref(it.getArbeidsforhold().getInternArbeidsforholdId()));
+        return mapper.getArbeidsforhold();
     }
 
     private void sjekkHarAksjonspunktForVurderArbeidsforhold(BehandlingReferanse ref, Set<ArbeidsforholdWrapper> arbeidsforhold,
@@ -492,7 +348,6 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             wrapper.setBrukArbeidsforholdet(true);
         }
     }
-
 
     private ArbeidsforholdKilde utledKilde(Optional<DatoIntervallEntitet> avtale, LocalDate mottattDatoInntektsmelding, ArbeidsforholdHandlingType handling) {
         if (Objects.equals(handling, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER)) {

@@ -209,4 +209,17 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
         this.yrkestittel = yrkestittel;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + "<id=" + id
+            + ", arbeidsgiver=MASKERT"
+            + ", arbeidsforhold=" + arbeidsforhold
+            + ", ansettelsesPerioder=" + ansettelsesPerioder
+            + ", handlingType=" + handlingType
+            + ", aksjonspunktÅrsaker=" + aksjonspunktÅrsaker
+            + ", inntektsmeldinger=" + inntektsmeldinger
+            + ">";
+    }
+
 }
