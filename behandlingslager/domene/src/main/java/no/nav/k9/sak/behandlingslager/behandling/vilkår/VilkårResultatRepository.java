@@ -85,8 +85,8 @@ public class VilkårResultatRepository {
                 deaktiverVilkårsResultat(vilkårsResultat.get());
             }
 
-            var nyttVilkårsResultat = new VilkårsResultat(behandlingId, resultat);
-            entityManager.persist(resultat);
+            var nyttVilkårsResultat = new VilkårsResultat(behandlingId, nyttResultat);
+            entityManager.persist(nyttResultat);
             entityManager.persist(nyttVilkårsResultat);
             entityManager.flush();
         } else {
