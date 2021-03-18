@@ -9,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -36,7 +37,7 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
 
     @Override
     public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktivteter) {
-        if (utbetalingTilBrukerIPerioden(behandling, periode) || erMidlertidigInaktiv(periode, opptjeningAktivteter)) {
+        if (utbetalingTilBrukerIPerioden(behandling, periode)) {
             regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET));
         }
     }
@@ -48,7 +49,10 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
             throw new IllegalStateException("Fant ingen opptjeningsaktiviteter");
         }
 
-        Optional<OpptjeningAktivitet> overlapp = opptjeningAktiviteter.stream().filter(opptjeningAktivitet -> opptjeningAktivitet.getDatoIntervallEntitet().overlapper(midlertidigInaktivPeriode)).findFirst();
+        Optional<OpptjeningAktivitet> overlapp = opptjeningAktiviteter.stream()
+            .filter(opptjeningAktivitet -> opptjeningAktivitet.getDatoIntervallEntitet().overlapper(midlertidigInaktivPeriode))
+            .filter(opptjeningAktivitet -> opptjeningAktivitet.getKlassifisering() == OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)
+            .findFirst();
         return overlapp.isPresent();
     }
 
