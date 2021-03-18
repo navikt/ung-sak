@@ -106,30 +106,28 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();
 
         final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid());
-        LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje;
+        LocalDateTimeline<SykdomSamletVurdering> forrigeBehandlingTidslinje;
 
         if (forrigeGrunnlagBehandling.isPresent()) {
             final SykdomGrunnlag forrigeGrunnlag = forrigeGrunnlagBehandling.get().getGrunnlag();
-            forrigeTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
+            forrigeBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
         } else {
-            forrigeTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+            forrigeBehandlingTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
         }
 
         var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
 
         SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, SykdomUtils.toPeriodeList(perioder));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
+        LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
 
-        LocalDateTimeline<Boolean> kombinertTidslinje = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeBehandlingTidslinje, nyBehandlingTidslinje);
 
-
-        LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(kombinertTidslinje, vurderingsperioderTimeline);
+        LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerSidenForrigeBehandling, vurderingsperioderTimeline);
 
         return new TreeSet<>(utvidedePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
             .collect(Collectors.toList()));
-
     }
 
     @Override

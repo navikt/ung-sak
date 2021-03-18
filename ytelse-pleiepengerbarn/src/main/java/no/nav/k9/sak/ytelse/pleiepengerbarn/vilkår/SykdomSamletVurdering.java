@@ -51,23 +51,23 @@ public class SykdomSamletVurdering {
         grunnlag.getVurderinger().forEach(v -> {
             SykdomVurderingType type = v.getSykdomVurdering().getType();
             v.getPerioder().forEach(p -> {
-                SykdomSamletVurdering tuppel = new SykdomSamletVurdering();
+                SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
                 if (type == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE) {
-                    tuppel.setKtp(v.getSykdomVurdering());
+                    samletVurdering.setKtp(v.getSykdomVurdering());
                 } else if (type == SykdomVurderingType.TO_OMSORGSPERSONER) {
-                    tuppel.setToOp(v.getSykdomVurdering());
+                    samletVurdering.setToOp(v.getSykdomVurdering());
                 } else {
                     throw new IllegalArgumentException("Ukjent vurderingstype");
                 }
-                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), tuppel));
+                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), samletVurdering));
             });
         });
 
         if (grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
-                SykdomSamletVurdering tuppel = new SykdomSamletVurdering();
-                tuppel.setInnleggelser(p.getInnleggelser());
-                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), tuppel));
+                SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
+                samletVurdering.setInnleggelser(p.getInnleggelser());
+                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), samletVurdering));
             });
         }
 
@@ -87,9 +87,7 @@ public class SykdomSamletVurdering {
         return nyTidslinje.combine(forrigeTidslinje, new LocalDateSegmentCombinator<SykdomSamletVurdering, SykdomSamletVurdering, Boolean>() {
             @Override
             public LocalDateSegment<Boolean> combine(LocalDateInterval localDateInterval, LocalDateSegment<SykdomSamletVurdering> left, LocalDateSegment<SykdomSamletVurdering> right) {
-                if(right == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                } else if (left == null) {
+                if (right == null || left == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 }
                 SykdomInnleggelser innleggelser1 = left.getValue().getInnleggelser();
