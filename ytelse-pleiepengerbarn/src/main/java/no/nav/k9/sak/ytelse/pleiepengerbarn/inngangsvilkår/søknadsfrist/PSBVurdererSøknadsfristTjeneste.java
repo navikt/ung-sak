@@ -98,7 +98,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         return mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst()
-            .map(MottattDokument::getMottattTidspunkt)
+            .map(MottattDokument::getInnsendingstidspunkt)
             .orElseThrow();
     }
 
