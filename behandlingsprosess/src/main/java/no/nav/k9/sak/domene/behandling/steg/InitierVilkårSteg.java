@@ -9,6 +9,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -27,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @BehandlingStegRef(kode = "INIT_VILKÅR")
 @BehandlingTypeRef
@@ -73,7 +73,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null));
         if (!valideringDeaktivert) {
-            vilkårBuilder.medBoundry(behandling.getFagsak().getPeriode());
+            vilkårBuilder.medBoundry(behandling.getFagsak().getPeriode(), true);
         }
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
@@ -91,7 +91,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
         validerResultat(vilkårResultat, vilkårPeriodeMap);
 
-        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat, behandling.getFagsak().getPeriode());
     }
 
     private void validerResultat(Vilkårene vilkårResultat, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {
