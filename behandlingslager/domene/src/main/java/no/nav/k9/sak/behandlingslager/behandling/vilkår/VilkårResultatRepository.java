@@ -14,20 +14,23 @@ import javax.persistence.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class VilkårResultatRepository {
 
     private static final Logger log = LoggerFactory.getLogger(VilkårResultatRepository.class);
     private EntityManager entityManager;
+    private BehandlingRepository behandlingRepository;
 
     public VilkårResultatRepository() {
         // for CDI proxy
@@ -36,6 +39,7 @@ public class VilkårResultatRepository {
     @Inject
     public VilkårResultatRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
+        this.behandlingRepository = new BehandlingRepository(entityManager);
     }
 
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
@@ -58,12 +62,25 @@ public class VilkårResultatRepository {
     }
 
     public void lagre(Long behandlingId, Vilkårene resultat) {
+        lagre(behandlingId, resultat, null);
+    }
+
+    public void lagre(Long behandlingId, Vilkårene resultat, DatoIntervallEntitet fagsakPeriode) {
         Objects.requireNonNull(resultat, "Vilkårsresultat");
 
+        var nyttResultat = resultat;
+        if (fagsakPeriode != null) {
+            nyttResultat = new VilkårResultatBuilder(resultat)
+                .medBoundry(fagsakPeriode, true)
+                .build();
+        }
+
         var vilkårsResultat = hentVilkårsResultat(behandlingId);
+        Vilkårene gammeltResultat = vilkårsResultat.map(VilkårsResultat::getVilkårene).orElse(null);
+
         var differ = vilkårsDiffer();
 
-        if (differ.areDifferent(vilkårsResultat.map(VilkårsResultat::getVilkårene).orElse(null), resultat)) {
+        if (differ.areDifferent(gammeltResultat, nyttResultat)) {
             if (vilkårsResultat.isPresent()) {
                 deaktiverVilkårsResultat(vilkårsResultat.get());
             }
@@ -93,7 +110,10 @@ public class VilkårResultatRepository {
             return;
         }
 
-        lagre(tilBehandlingId, fraBehandlingVilkår.get());
+        var behandling = behandlingRepository.hentBehandling(tilBehandlingId);
+        var fagsakPeriode = behandling.getFagsak().getPeriode();
+
+        lagre(tilBehandlingId, fraBehandlingVilkår.get(), fagsakPeriode);
     }
 
     private void kopieringPrecondition(Long fraBehandlingId, Long tilBehandlingId) {

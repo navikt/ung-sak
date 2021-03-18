@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,8 +63,13 @@ public class Vilkårene extends BaseEntitet {
     Vilkårene(Vilkårene resultat) {
         if (resultat != null) {
             // For kopi mellom behandlinger
-            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).collect(Collectors.toSet());
+            this.vilkårne = resultat.vilkårne.stream().map(Vilkår::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
+    }
+
+    /** Oppretter vilkårne fra eksisternede, men med avkapping ifht. angitt boundry. */
+    Vilkårene(Collection<Vilkår> vilkår, LocalDateInterval boundry) {
+        this.vilkårne = vilkår.stream().map(v -> new VilkårBuilder(v, boundry).build()).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static VilkårResultatBuilder builder() {

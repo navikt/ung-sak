@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -28,15 +29,15 @@ public class VilkårResultatBuilder {
     private int mellomliggendePeriodeAvstand = 0;
     private KantIKantVurderer kantIKantVurderer = new IngenVurdering();
     private boolean built;
-    private DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+    private LocalDateInterval boundry = new LocalDateInterval(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
     private LocalDateTimeline<WrappedVilkårPeriode> fullstendigTidslinje = null;
 
+    private boolean kappOverskytende;
+
     public VilkårResultatBuilder() {
-        super();
     }
 
     VilkårResultatBuilder(Vilkårene eksisterendeResultat) {
-        super();
         if (eksisterendeResultat != null) {
             this.kladd = new Vilkårene(eksisterendeResultat);
         }
@@ -83,19 +84,31 @@ public class VilkårResultatBuilder {
      * OBS: Returnerer alltid nytt vilkårresultat.
      */
     public Vilkårene build() {
-        if (built) throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
-        validerPerioder();
-        built = true;
-        return kladd;
+        if (built)
+            throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
+
+        if (!kappOverskytende) {
+            validerPerioder();
+            built = true;
+            return kladd;
+        } else {
+            var ny = new Vilkårene(kladd.getVilkårene(), boundry);
+            built = true;
+            return ny;
+        }
+
     }
 
     private void validerPerioder() {
         var invalidVilkårMap = new HashMap<VilkårType, List<VilkårPeriode>>();
-        kladd.getVilkårene().forEach(v -> invalidVilkårMap.put(v.getVilkårType(), v.getPerioder().stream().filter(it -> gårUtenforBoundry(it.getPeriode())).collect(Collectors.toList())));
-        var harPerioderSomGårUtoverGrensen = invalidVilkårMap.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty());
-        if (harPerioderSomGårUtoverGrensen) {
-            log.warn("Behandligen har vilkår med perioder[{}] som strekker seg utover maks({}) for fagsaken", invalidVilkårMap, boundry);
-            throw new IllegalStateException("Behandligen har perioder som strekker seg utover maks(" + boundry + ") for fagsaken: " + invalidVilkårMap);
+
+        if (!kappOverskytende) {
+            kladd.getVilkårene().forEach(v -> invalidVilkårMap.put(v.getVilkårType(), v.getPerioder().stream().filter(it -> gårUtenforBoundry(it.getPeriode())).collect(Collectors.toList())));
+            var harPerioderSomGårUtoverGrensen = invalidVilkårMap.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty());
+            if (harPerioderSomGårUtoverGrensen) {
+                log.warn("Behandligen har vilkår med perioder[{}] som strekker seg utover maks({}) for fagsaken", invalidVilkårMap, boundry);
+                throw new IllegalStateException("Behandligen har perioder som strekker seg utover maks(" + boundry + ") for fagsaken: " + invalidVilkårMap);
+            }
         }
     }
 
@@ -130,8 +143,9 @@ public class VilkårResultatBuilder {
         return this;
     }
 
-    public VilkårResultatBuilder medBoundry(DatoIntervallEntitet periode) {
-        this.boundry = periode;
+    public VilkårResultatBuilder medBoundry(DatoIntervallEntitet periode, boolean kappOverskytende) {
+        this.boundry = new LocalDateInterval(periode.getFomDato(), periode.getTomDato());
+        this.kappOverskytende = kappOverskytende;
         return this;
     }
 
