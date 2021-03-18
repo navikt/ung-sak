@@ -2,8 +2,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -159,6 +161,10 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
+        //TODO: fyll beredskap og nattevåksperioder med data fra aksjonspunkt når det er ferdig
+        final Set<LukketPeriode> beredskapsperioder = new HashSet<>();
+        final Set<LukketPeriode> nattevåksperioder = new HashSet<>();
+
         return new Uttaksgrunnlag(
             barn,
             søker,
@@ -170,7 +176,10 @@ public class MapInputTilUttakTjeneste {
             pleiebehov,
             lovbestemtFerie,
             inngangsvilkår,
-            tilsynsperioder);
+            tilsynsperioder,
+            beredskapsperioder,
+            nattevåksperioder
+            );
     }
 
     private Map<LukketPeriode, Pleiebehov> toPleiebehov(PleiebehovResultat pleiebehov) {
