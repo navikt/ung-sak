@@ -62,7 +62,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         søknadsperiodeRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakPerioderGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         pleiebehovResultatRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId);
+        beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
