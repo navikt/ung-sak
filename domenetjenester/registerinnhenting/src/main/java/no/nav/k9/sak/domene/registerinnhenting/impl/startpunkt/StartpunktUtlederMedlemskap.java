@@ -12,14 +12,14 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.medlem.MedlemEndringIdentifiserer;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
-class StartpunktUtlederMedlemskap implements StartpunktUtleder {
+class StartpunktUtlederMedlemskap implements EndringStartpunktUtleder {
 
     private MedlemskapRepository medlemskapRepository;
     private MedlemEndringIdentifiserer endringIdentifiserer;

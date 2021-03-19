@@ -22,7 +22,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -30,7 +30,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
-class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
+class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;

@@ -22,7 +22,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 /**
- * Marker type som implementerer interface {@link StartpunktUtleder}.
+ * Marker type som implementerer interface {@link EndringStartpunktUtleder}.
  */
 @Qualifier
 @Inherited

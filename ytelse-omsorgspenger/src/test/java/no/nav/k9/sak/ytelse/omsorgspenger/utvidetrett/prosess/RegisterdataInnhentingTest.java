@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtlederPersonopplysning;
 
@@ -18,7 +18,7 @@ public class RegisterdataInnhentingTest {
 
     @Test
     void skal_hente_StartpunktUtleder_for_PersonInformasjon() throws Exception {
-        var utlederOpt = StartpunktUtleder.finnUtleder(CDI.current().select(StartpunktUtleder.class), "PersonInformasjon", FagsakYtelseType.OMSORGSPENGER_KS);
+        var utlederOpt = EndringStartpunktUtleder.finnUtleder(CDI.current().select(EndringStartpunktUtleder.class), "PersonInformasjon", FagsakYtelseType.OMSORGSPENGER_KS);
         assertThat(utlederOpt).isPresent().get().isInstanceOf(StartpunktUtlederUtvidetRettPersonopplysning.class);
     }
 

@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 
+/** NB navnet her brukes av @GrunnlagRef i BehandlingÅrsakUtleder/StartpunktUtleder. */
 public class InntektArbeidYtelseGrunnlag {
 
     @DiffIgnore

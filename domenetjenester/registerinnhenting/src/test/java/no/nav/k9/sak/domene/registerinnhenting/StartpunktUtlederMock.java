@@ -9,7 +9,7 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @Alternative
 @GrunnlagRef("GrunnlagAggregatMock")
 @FagsakYtelseTypeRef
-class StartpunktUtlederMock implements StartpunktUtleder {
+class StartpunktUtlederMock implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {

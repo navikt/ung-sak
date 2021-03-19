@@ -16,14 +16,14 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("FRISINN")
-class StartpunktUtlederPersonopplysning implements StartpunktUtleder {
+class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     private PersonopplysningRepository personopplysningRepository;
 
