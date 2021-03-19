@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
@@ -15,6 +16,9 @@ import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
+@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederMedlemskap implements StartpunktUtleder {
 
     private MedlemskapRepository medlemskapRepository;

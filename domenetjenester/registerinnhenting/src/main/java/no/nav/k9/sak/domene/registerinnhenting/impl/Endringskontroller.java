@@ -79,7 +79,7 @@ public class Endringskontroller {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()))
             .utledStartpunktForDiffBehandlingsgrunnlag(ref, endringsresultat);
 
-        if (startpunkt.equals(StartpunktType.UDEFINERT)) {
+        if (startpunkt == null || startpunkt.equals(StartpunktType.UDEFINERT)) {
             return; // Ingen detekterte endringer - ingen tilbakespoling
         }
 

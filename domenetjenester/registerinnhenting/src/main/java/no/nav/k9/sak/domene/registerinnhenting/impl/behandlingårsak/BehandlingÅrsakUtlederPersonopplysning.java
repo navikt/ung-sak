@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
@@ -19,7 +20,8 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
-class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsakUtleder {
+@FagsakYtelseTypeRef("*")
+public class BehandlingÅrsakUtlederPersonopplysning implements BehandlingÅrsakUtleder {
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederPersonopplysning.class);
 
     private PersonopplysningRepository personopplysningRepository;

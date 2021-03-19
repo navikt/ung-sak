@@ -10,6 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
@@ -17,6 +18,7 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktU
 
 @ApplicationScoped
 @GrunnlagRef("UttakPerioderGrunnlag")
+@FagsakYtelseTypeRef("PSB")
 public class StartpunktUtlederUttak implements StartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();

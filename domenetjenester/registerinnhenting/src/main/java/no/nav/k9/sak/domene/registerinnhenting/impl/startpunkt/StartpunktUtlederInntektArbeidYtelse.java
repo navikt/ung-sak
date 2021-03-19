@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -26,6 +27,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
+@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("FRISINN")
 class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
