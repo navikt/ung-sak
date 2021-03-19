@@ -67,7 +67,7 @@ public class SykdomVurderingService {
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
         final boolean harUklassifiserteDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.UKLASSIFISERT);
-        final boolean manglerGodkjentLegeerklæring = !sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
+        final boolean manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring(pleietrengende);
         final boolean manglerDiagnosekode = sykdomDokumentRepository.hentDiagnosekoder(pleietrengende).getDiagnosekoder().isEmpty();
 
         final var ktp = hentVurderingerForKontinuerligTilsynOgPleie(behandling);
@@ -79,17 +79,29 @@ public class SykdomVurderingService {
         return new SykdomAksjonspunkt(harUklassifiserteDokumenter, manglerDiagnosekode, manglerGodkjentLegeerklæring, manglerVurderingAvKontinuerligTilsynOgPleie, manglerVurderingAvToOmsorgspersoner);
     }
 
+    private boolean manglerGodkjentLegeerklæring(final AktørId pleietrengende) {
+        return !sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream().anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
+    }
+
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
         final var vurderingerOgPerioder = utledPerioder(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
+        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
+            vurderingerOgPerioder.fjernAlleResterendeVurderingsperioder();
+        } else {
+            vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
+        }
 
         return vurderingerOgPerioder;
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForToOmsorgspersoner(Behandling behandling) {
         final SykdomVurderingerOgPerioder vurderingerOgPerioder = utledPerioder(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
-        vurderingerOgPerioder.beholdKunResterendeVurderingsperioderSomFinnesI(hentKontinuerligTilsynOgPleiePerioder(behandling));
-        vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
+        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
+            vurderingerOgPerioder.fjernAlleResterendeVurderingsperioder();
+        } else {
+            vurderingerOgPerioder.beholdKunResterendeVurderingsperioderSomFinnesI(hentKontinuerligTilsynOgPleiePerioder(behandling));
+            vurderingerOgPerioder.trekkFraResterendeVurderingsperioder(hentInnleggelsesperioder(behandling));
+        }
 
         return vurderingerOgPerioder;
     }
@@ -227,6 +239,10 @@ public class SykdomVurderingService {
 
         public List<Periode> getNyeSøknadsperioder() {
             return Collections.unmodifiableList(nyeSøknadsperioder);
+        }
+        
+        void fjernAlleResterendeVurderingsperioder() {
+            this.resterendeVurderingsperioder = List.of();
         }
 
         void trekkFraResterendeVurderingsperioder(List<Periode> perioder) {
