@@ -51,13 +51,13 @@ public class RegisterdataEndringshåndterer {
      */
     @Inject
     public RegisterdataEndringshåndterer( // NOSONAR jobber med å redusere
-                                          BehandlingRepositoryProvider repositoryProvider,
-                                          @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
-                                          Endringskontroller endringskontroller,
-                                          EndringsresultatSjekker endringsresultatSjekker,
-                                          RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
-                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                         BehandlingRepositoryProvider repositoryProvider,
+                                         @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
+                                         Endringskontroller endringskontroller,
+                                         EndringsresultatSjekker endringsresultatSjekker,
+                                         RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
+                                         BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
+                                         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
 
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -128,10 +128,8 @@ public class RegisterdataEndringshåndterer {
     private void lagBehandlingÅrsakerOgHistorikk(Behandling behandling, EndringsresultatDiff endringsresultat) {
         Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>();
         behandlingÅrsakTyper.add(BehandlingÅrsakType.RE_REGISTEROPPLYSNING);
-        if (!FagsakYtelseType.ENGANGSTØNAD.equals(behandling.getFagsakYtelseType())) {
-            var ref = BehandlingReferanse.fra(behandling, this.skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
-            behandlingÅrsakTyper.addAll(behandlingÅrsakTjeneste.utledBehandlingÅrsakerBasertPåDiff(ref, endringsresultat));
-        }
+        var ref = BehandlingReferanse.fra(behandling, this.skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
+        behandlingÅrsakTyper.addAll(behandlingÅrsakTjeneste.utledBehandlingÅrsakerBasertPåDiff(ref, endringsresultat));
         leggTilBehandlingsårsaker(behandling, behandlingÅrsakTyper);
         lagHistorikkinnslag(behandling, behandlingÅrsakTyper);
     }

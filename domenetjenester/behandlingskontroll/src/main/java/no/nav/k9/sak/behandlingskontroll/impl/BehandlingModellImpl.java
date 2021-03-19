@@ -374,7 +374,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
      * Visit alle steg definert i denne modellen.
      *
      * @param førsteSteg - Kode for første steg vi starter fra. Hvis null, begynn fra begynnelsen.
-     * @param visitor    - kalles for hvert steg definert
+     * @param visitor - kalles for hvert steg definert
      * @return null hvis alle steg til slutt ble kalt. Eller siste stegType som ble forsøkt.
      */
     @Override
@@ -464,7 +464,8 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
                 return i;
             }
         }
-        throw new IllegalArgumentException("Ukjent behandlingssteg: " + stegKode + ", [fagsakYtelseType=" + fagsakYtelseType + ",behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //
+        throw new IllegalArgumentException("Ukjent behandlingssteg: " + stegKode + ", [fagsakYtelseType=" + fagsakYtelseType + ",behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+                                                                                                                                                                           // //
         // NOSONAR
     }
 
@@ -535,6 +536,9 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
 
         public BehandlingModell build() {
             var b = modell;
+            if (!modell.harStartpunkt()) {
+                throw new IllegalStateException("Modellen må definere minst ett steg med startpunkt");
+            }
             modell = null;
             return b;
         }
@@ -546,5 +550,13 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
             }
             return this;
         }
+    }
+
+    public boolean harStartpunkt() {
+        return !startpunktTilSteg.isEmpty();
+    }
+
+    public Map<StartpunktType, BehandlingStegType> getStartpunktTilSteg() {
+        return Collections.unmodifiableMap(startpunktTilSteg);
     }
 }
