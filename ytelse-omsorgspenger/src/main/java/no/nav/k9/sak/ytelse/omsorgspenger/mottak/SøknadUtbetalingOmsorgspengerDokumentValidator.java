@@ -2,13 +2,13 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
@@ -18,10 +18,10 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
+@DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 public class SøknadUtbetalingOmsorgspengerDokumentValidator implements DokumentValidator {
 
     private SøknadParser søknadParser;
@@ -47,9 +47,9 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
         int i = 0;
         for (Søknad søknad : søknader) {
             var brevkode = mottattBrevkoder.get(i++);
-            Brevkode forventetBrevkode = Brevkode.SØKNAD_UTBETALING_OMS;
-            if (!Objects.equals(brevkode, forventetBrevkode)) {
-                throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkode + ", fikk: " + brevkode);
+            List<Brevkode> forventetBrevkoder = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
+            if (!forventetBrevkoder.contains(brevkode)) {
+                throw new IllegalArgumentException("Forventet brevkode: " + forventetBrevkoder + ", fikk: " + brevkode);
             }
             validerInnhold(søknad);
         }
