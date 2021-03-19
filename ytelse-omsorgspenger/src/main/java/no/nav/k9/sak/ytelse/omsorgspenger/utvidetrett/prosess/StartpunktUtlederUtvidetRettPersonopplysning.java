@@ -15,14 +15,14 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktUtlederLogger;
 
 @ApplicationScoped
 @GrunnlagRef("PersonInformasjon")
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
-class StartpunktUtlederUtvidetRettPersonopplysning implements StartpunktUtleder {
+class StartpunktUtlederUtvidetRettPersonopplysning implements EndringStartpunktUtleder {
 
     private static final StartpunktType DEFAULT_STARTPUNKT = StartpunktType.INIT_PERIODER;
     private final String source = this.getClass().getSimpleName();

@@ -33,7 +33,7 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -46,8 +46,8 @@ public class EndringskontrollerTest {
     private KontrollerFaktaAksjonspunktUtleder kontrollerFaktaTjenesteMock;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenesterMock;
     private BehandlingskontrollTjeneste behandlingskontrollTjenesteMock;
-    private Instance<StartpunktTjeneste> startpunktTjenesteProviderMock;
-    private StartpunktTjeneste startpunktTjenesteMock;
+    private Instance<EndringStartpunktTjeneste> startpunktTjenesteProviderMock;
+    private EndringStartpunktTjeneste startpunktTjenesteMock;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjenesteMock;
     private InternalManipulerBehandling internalManipulerBehandling = new InternalManipulerBehandling();
 
@@ -64,7 +64,7 @@ public class EndringskontrollerTest {
         when(behandlingskontrollTjenesteMock.finnAksjonspunktDefinisjonerFraOgMed(any(), any(BehandlingStegType.class), anyBoolean())).thenReturn(new HashSet<>());
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.KONTROLLER_FAKTA);
 
-        startpunktTjenesteMock = mock(StartpunktTjeneste.class);
+        startpunktTjenesteMock = mock(EndringStartpunktTjeneste.class);
         startpunktTjenesteProviderMock = new UnitTestLookupInstanceImpl<>(startpunktTjenesteMock);
     }
 

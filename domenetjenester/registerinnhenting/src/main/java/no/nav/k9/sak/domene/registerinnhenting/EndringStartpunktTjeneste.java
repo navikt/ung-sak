@@ -15,20 +15,19 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-public class StartpunktTjenesteImpl implements StartpunktTjeneste {
+public class EndringStartpunktTjeneste {
 
-    private Instance<StartpunktUtleder> utledere;
+    private Instance<EndringStartpunktUtleder> utledere;
 
-    StartpunktTjenesteImpl() {
+    EndringStartpunktTjeneste() {
         // For CDI
     }
 
     @Inject
-    public StartpunktTjenesteImpl(@Any Instance<StartpunktUtleder> utledere) {
+    public EndringStartpunktTjeneste(@Any Instance<EndringStartpunktUtleder> utledere) {
         this.utledere = utledere;
     }
 
-    @Override
     public StartpunktType utledStartpunktForDiffBehandlingsgrunnlag(BehandlingReferanse revurdering, EndringsresultatDiff differanse) {
         return differanse.hentKunDelresultater().stream()
             .map(diff -> {
@@ -39,8 +38,8 @@ public class StartpunktTjenesteImpl implements StartpunktTjeneste {
             .orElse(StartpunktType.UDEFINERT);
     }
 
-    private StartpunktUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType ytelseType) {
-        var utleder = StartpunktUtleder.finnUtleder(utledere, aggregat, ytelseType);
+    private EndringStartpunktUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType ytelseType) {
+        var utleder = EndringStartpunktUtleder.finnUtleder(utledere, aggregat, ytelseType);
         return utleder.orElseThrow(() -> new IllegalArgumentException("Ingen implementasjoner funnet for StartpunktUtleder:" + aggregat + ", ytelseType=" + ytelseType));
     }
 

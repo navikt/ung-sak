@@ -28,7 +28,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 @ExtendWith(JpaExtension.class)
 public class StartpunktTjenesteImplTest {
 
-    private StartpunktTjeneste tjeneste;
+    private EndringStartpunktTjeneste tjeneste;
 
     @Inject
     private EntityManager entityManager;
@@ -37,12 +37,12 @@ public class StartpunktTjenesteImplTest {
 
     @Any
     @Inject
-    private Instance<StartpunktUtleder> startpunktUtledere;
+    private Instance<EndringStartpunktUtleder> startpunktUtledere;
 
     @BeforeEach
     public void before() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        tjeneste = new StartpunktTjenesteImpl(startpunktUtledere);
+        tjeneste = new EndringStartpunktTjeneste(startpunktUtledere);
     }
 
     @Test

@@ -32,12 +32,15 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
+import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.DiffOgReposisjonerTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.InnhentIAYIAbakusTask;
@@ -66,13 +69,13 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     private Instance<InformasjonselementerUtleder> informasjonselementer;
 
-    private Instance<StartpunktUtleder> startpunktUtledere;
+    private Instance<EndringStartpunktUtleder> startpunktUtledere;
 
     @Inject
     public BehandlingProsesseringTjenesteImpl(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                               RegisterdataEndringshåndterer registerdataEndringshåndterer,
                                               @Any Instance<InformasjonselementerUtleder> informasjonselementer,
-                                              @Any Instance<StartpunktUtleder> startpunktUtledere,
+                                              @Any Instance<EndringStartpunktUtleder> startpunktUtledere,
                                               EndringsresultatSjekker endringsresultatSjekker,
                                               FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -282,25 +285,33 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         var tasks = new ArrayList<ProsessTaskData>();
 
-        var innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
-        innhentPersonopplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        tasks.add(innhentPersonopplysniger);
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            var innhentPersonopplysniger = new ProsessTaskData(InnhentPersonopplysningerTask.TASKTYPE);
+            innhentPersonopplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            tasks.add(innhentPersonopplysniger);
+        });
 
-        StartpunktUtleder.finnUtleder(startpunktUtledere, "MedlemskapAggregat", behandling.getFagsakYtelseType()).ifPresent(u -> {
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             var innhentMedlemskapOpplysniger = new ProsessTaskData(InnhentMedlemskapOpplysningerTask.TASKTYPE);
             innhentMedlemskapOpplysniger.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
             tasks.add(innhentMedlemskapOpplysniger);
         });
 
-        if (skalInnhenteAbakus(behandling)) {
-            var abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
-            abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            tasks.add(abakusRegisterInnheting);
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            if (skalInnhenteAbakus(behandling)) {
+                var abakusRegisterInnheting = new ProsessTaskData(InnhentIAYIAbakusTask.TASKTYPE);
+                abakusRegisterInnheting.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+                tasks.add(abakusRegisterInnheting);
+            }
+        });
+
+        if (tasks.isEmpty()) {
+            throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
         }
-        gruppe.addNesteParallell(tasks);
 
         log.info("Henter inn registerdata: {}", gruppe.getTasks().stream().map(ProsessTaskGruppe.Entry::getTask).map(ProsessTaskData::getTaskType).collect(Collectors.toList()));
 
+        gruppe.addNesteParallell(tasks);
         ProsessTaskData oppdaterInnhentTidspunkt = new ProsessTaskData(SettRegisterdataInnhentetTidspunktTask.TASKTYPE);
         oppdaterInnhentTidspunkt.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(oppdaterInnhentTidspunkt);
