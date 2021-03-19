@@ -37,7 +37,7 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
 
     @Override
     public void håndter(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode, List<OpptjeningAktivitet> opptjeningAktivteter) {
-        if (utbetalingTilBrukerIPerioden(behandling, periode)) {
+        if (utbetalingTilBrukerIPerioden(behandling, periode) || erMidlertidigInaktiv(periode, opptjeningAktivteter)) {
             regelResultat.getAksjonspunktDefinisjoner().add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET));
         }
     }
