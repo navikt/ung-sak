@@ -129,9 +129,8 @@ public @interface FagsakYtelseTypeRef {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(s));
                 if (inst.isUnsatisfied()) {
                     return;
-                } else if (inst.isAmbiguous() || inst.isResolvable()) {
-                    resultat.add(inst);
                 }
+                resultat.add(inst);
             };
 
             search.accept(ytelseTypeKode);

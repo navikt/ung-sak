@@ -83,7 +83,7 @@ public @interface GrunnlagRef {
                     if (selected.isUnsatisfied()) {
                         continue; // matchet ikke
                     } else if (selected.isResolvable()) {
-                        return Optional.of(getInstance(inst));
+                        return Optional.of(getInstance(selected));
                     } else if (selected.isAmbiguous()) {
                         throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", ytelseType=" + ytelseType);
                     }
