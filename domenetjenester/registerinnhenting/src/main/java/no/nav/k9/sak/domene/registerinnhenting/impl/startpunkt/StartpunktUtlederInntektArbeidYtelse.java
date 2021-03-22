@@ -70,7 +70,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
             var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, grunnlag2);
             boolean erInntektsmeldingEndret = !StartpunktType.UDEFINERT.equals(startpunktType);
             if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "inntektsmelding");
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "tilkommet inntektsmeldinger");
             }
         } else {
             boolean erInntektsmeldingEndret = diff.erEndringPåInntektsmelding();
