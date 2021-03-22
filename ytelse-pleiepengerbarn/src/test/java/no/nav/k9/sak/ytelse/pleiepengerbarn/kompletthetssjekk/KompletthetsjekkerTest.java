@@ -32,7 +32,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadVedleggEntitet;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;

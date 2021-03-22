@@ -68,16 +68,6 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
         this.søknadRepository = søknadRepository;
     }
 
-    @Override
-    public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        if (!getKomplethetsjekker(ref).erSøknadMottatt(ref)) {
-            // Litt implisitt forutsetning her, men denne sjekken skal bare ha bli kalt dersom søknad eller IM er mottatt
-            LOGGER.info("Behandling {} er ikke komplett - søknad er ikke mottatt", ref.getBehandlingId()); // NOSONAR //$NON-NLS-1$
-            return KompletthetResultat.ikkeOppfylt(fellesUtil.finnVentefristTilManglendeSøknad(), Venteårsak.AVV_DOK);
-        }
-        return KompletthetResultat.oppfylt();
-    }
-
     private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
         return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
     }

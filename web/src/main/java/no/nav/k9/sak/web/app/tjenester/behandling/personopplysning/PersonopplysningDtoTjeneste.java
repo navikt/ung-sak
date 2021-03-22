@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;

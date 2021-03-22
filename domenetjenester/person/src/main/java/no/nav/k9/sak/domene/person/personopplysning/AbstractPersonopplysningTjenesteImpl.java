@@ -31,6 +31,7 @@ public abstract class AbstractPersonopplysningTjenesteImpl implements StandardPe
         this.personopplysningRepository = personopplysningRepository;
     }
 
+    @Override
     public PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref, LocalDate vurderingspunkt) {
         return hentGjeldendePersoninformasjonPåTidspunkt(ref.getBehandlingId(), ref.getAktørId(), vurderingspunkt);
     }

@@ -11,9 +11,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -24,6 +22,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -32,8 +32,6 @@ import no.nav.k9.sak.kontrakt.medlem.MedlemV2Dto;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.medlem.MedlemDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -63,27 +61,6 @@ public class PersonRestTjeneste {
         this.personopplysningDtoTjeneste = personopplysningTjeneste;
         this.personopplysningFnrFinder = personopplysningFnrFinder;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
-    }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path(PERSONOPPLYSNINGER_PATH)
-    @Operation(description = "Hent informasjon om personopplysninger søker i behandling", tags = "behandling - person", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Personopplysninger, null hvis ikke finnes (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonopplysningDto.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @Deprecated
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public PersonopplysningDto getPersonopplysninger(@NotNull @Parameter(description = "BehandlingId for aktuell behandling") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        Long behandlingId = getBehandlingsId(behandlingIdDto);
-        Optional<PersonopplysningDto> personopplysningDto = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, LocalDate.now());
-        if (personopplysningDto.isPresent()) {
-            PersonopplysningDto pers = personopplysningDto.get();
-            personopplysningFnrFinder.oppdaterMedPersonIdent(pers);
-            return pers;
-        } else {
-            return null;
-        }
     }
 
     @GET

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
-
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
@@ -11,9 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,11 +25,9 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -43,8 +38,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -69,14 +70,6 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-
 
 /**
  * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
@@ -99,7 +92,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         // For Rest-CDI
     }
 
-
     @Inject
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                                    TpsTjeneste tpsTjeneste,
@@ -116,7 +108,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
-
     /**
      * @deprecated Bør fjernes når FRISINN nedlegges.
      */
@@ -125,7 +116,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Path("/frisinn/opprett-manuell-frisinn/TO_BE_REMOVED")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Opprett behandling hvor saksbehandler kan legge inn inntektsopplysninger", summary = ("Returnerer saksnummer som er tilknyttet den nye fagsaken som har blitt opprettet."), tags = "frisinn", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
     })
     @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
@@ -160,51 +151,16 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         var behandling = frisinnSøknadMottaker.mottaSøknad(fagsak.getSaksnummer(), null, frisinnSøknadInnsending);
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        //ønsker at saksbehandler må ta stilling til disse
+        // ønsker at saksbehandler må ta stilling til disse
         behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
 
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
 
-    /**
-     * @deprecated Bør fjernes når Omsorgspenger er ajour med behandlinger ifht korona backlogg.
-     */
-    @Deprecated(forRemoval = true)
-    @GET
-    @Path("/uttrekk-aksjonspunkt-9003")
-    @Operation(description = "Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt.", summary = ("Henter fødselsnummer for alle personer med fagsak som har åpent 9003-aksjonspunkt."), tags = "forvaltning", responses = {
-        @ApiResponse(responseCode = "200", description = "Gir linjeskiftseparerte fødselsnummere,", content = @Content(mediaType = MediaType.TEXT_PLAIN))
-    })
-    @Produces(MediaType.TEXT_PLAIN)
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public Response personerMedAksjonspunkt9003(@TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid @Parameter(description = "Sidenummer (starter på 0)") @QueryParam("side") int side,
-            @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) @Valid @Parameter(description = "Antall per side") @QueryParam("antall") int antall) {
-        final List<AktørId> aktører = new ArrayList<>(aksjonspunktRepository.hentAktørerMedAktivtAksjonspunkt(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE));
-        Collections.sort(aktører);
-
-        final int begin = side * antall;
-        if (begin >= aktører.size()) {
-            return Response.ok("").build();
-        }
-
-        final int end = Math.min(begin + antall, aktører.size());
-
-        final String[] result = aktører.subList(begin, end).stream()
-            .map(a -> tpsTjeneste.hentFnr(a)
-                .map(PersonIdent::getIdent)
-                .orElse("UKJENT AKTØRID")
-            )
-            .distinct()
-            .toArray(String[]::new);
-
-        return Response.ok(String.join("\n", result)).build();
-    }
-
     @POST
     @Path("/manuell-revurdering")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(description = "Oppretter manuell revurdering med annet som årsak.",
-               summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
+    @Operation(description = "Oppretter manuell revurdering med annet som årsak.", summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void revurderAlleSomAnnenFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
         var alleSaksnummer = Objects.requireNonNull(opprettManuellRevurdering.getSaksnumre(), "saksnumre");

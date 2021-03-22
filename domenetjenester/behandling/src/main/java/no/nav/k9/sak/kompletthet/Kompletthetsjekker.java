@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 
 public interface Kompletthetsjekker {
-    KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref);
 
     KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref);
 

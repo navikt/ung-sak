@@ -179,7 +179,6 @@ public class KompletthetskontrollerTest {
     public void skal_opprette_historikkinnslag_for_tidlig_mottatt_søknad() {
         // Arrange
         LocalDateTime frist = LocalDateTime.now().minusSeconds(30);
-        when(kompletthetsjekker.vurderSøknadMottatt(any())).thenReturn(KompletthetResultat.oppfylt());
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
 
@@ -197,7 +196,6 @@ public class KompletthetskontrollerTest {
     public void skal_opprette_historikkinnslag_ikke_komplett() {
         // Arrange
         LocalDateTime frist = LocalDateTime.now();
-        when(kompletthetsjekker.vurderSøknadMottatt(any())).thenReturn(KompletthetResultat.oppfylt());
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.oppfylt());
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK));
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
