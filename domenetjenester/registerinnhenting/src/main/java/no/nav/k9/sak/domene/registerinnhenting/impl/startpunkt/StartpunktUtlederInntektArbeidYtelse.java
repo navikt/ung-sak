@@ -21,8 +21,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
-import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
+import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -75,7 +75,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
         } else {
             boolean erInntektsmeldingEndret = diff.erEndringPåInntektsmelding();
             if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "inntektsmelding");
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.BEREGNING, "inntektsmelding");
             }
         }
 
