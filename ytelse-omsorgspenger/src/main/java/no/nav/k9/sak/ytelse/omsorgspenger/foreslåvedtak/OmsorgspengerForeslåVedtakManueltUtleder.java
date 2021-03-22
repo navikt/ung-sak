@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.foreslåvedtak;
 
+import java.util.List;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -16,6 +18,7 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 @ApplicationScoped
 public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
 
+    private static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     OmsorgspengerForeslåVedtakManueltUtleder() {
@@ -33,7 +36,7 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
     }
 
     private boolean harSøknad(Behandling behandling) {
-        var omsorgspengerSøknader = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(), Brevkode.SØKNAD_UTBETALING_OMS, false, DokumentStatus.GYLDIG);
+        var omsorgspengerSøknader = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(), BREVKODER_SØKNAD_OMS, false, DokumentStatus.GYLDIG);
         return !omsorgspengerSøknader.isEmpty();
     }
 

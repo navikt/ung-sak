@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -20,13 +21,16 @@ import no.nav.k9.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktUtleder;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
-class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
+@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("FRISINN")
+class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -71,7 +75,7 @@ class StartpunktUtlederInntektArbeidYtelse implements StartpunktUtleder {
         } else {
             boolean erInntektsmeldingEndret = diff.erEndringPåInntektsmelding();
             if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "inntektsmelding");
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.BEREGNING, "inntektsmelding");
             }
         }
 

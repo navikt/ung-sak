@@ -12,10 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 
 @ApplicationScoped
 @GrunnlagRef("MedlemskapAggregat")
+@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("FRISINN")
 class BehandlingÅrsakUtlederMedlemskap implements BehandlingÅrsakUtleder {
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederMedlemskap.class);
 

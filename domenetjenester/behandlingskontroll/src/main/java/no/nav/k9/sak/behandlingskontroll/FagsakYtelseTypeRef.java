@@ -8,10 +8,12 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -35,7 +37,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.ContainerOfFagsakYt
 @Stereotype
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD})
+@Target({ ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD })
 @Documented
 public @interface FagsakYtelseTypeRef {
 
@@ -46,7 +48,9 @@ public @interface FagsakYtelseTypeRef {
      *
      * @see no.nav.k9.kodeverk.behandling.FagsakYtelseType
      */
-    String value() default "*";
+    String value()
+
+    default "*";
 
     /**
      * container for repeatable annotations.
@@ -55,7 +59,7 @@ public @interface FagsakYtelseTypeRef {
      */
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD})
+    @Target({ ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD })
     @Documented
     public @interface ContainerOfFagsakYtelseTypeRef {
         FagsakYtelseTypeRef[] value();
@@ -117,6 +121,23 @@ public @interface FagsakYtelseTypeRef {
             return find(null, instances, ytelseTypeKode.getKode());
         }
 
+        public static <I> List<Instance<I>> list(Class<I> cls, Instance<I> instances, String ytelseTypeKode) {
+            Objects.requireNonNull(instances, "instances");
+
+            final List<Instance<I>> resultat = new ArrayList<>();
+            Consumer<String> search = (String s) -> {
+                var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(s));
+                if (inst.isUnsatisfied()) {
+                    return;
+                }
+                resultat.add(inst);
+            };
+
+            search.accept(ytelseTypeKode);
+            search.accept("*"); // finn default
+            return List.copyOf(resultat);
+        }
+
         public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String ytelseTypeKode) {
             Objects.requireNonNull(instances, "instances");
 
@@ -126,9 +147,12 @@ public @interface FagsakYtelseTypeRef {
                     return Optional.of(getInstance(inst));
                 } else {
                     if (inst.isAmbiguous()) {
+
                         String className = cls != null ? cls.getName() : "null";
-                        String instancesClassName = classNameFromInstance(instances);
-                        throw new IllegalStateException("Har flere matchende instanser for klasse={" + className + "}, fra instances klass={" + instancesClassName + "}, fagsakType={" + fagsakLiteral + "}");
+                        String instancesClassName = classNameFromInstance(
+                            instances);
+                        throw new IllegalStateException(
+                            "Har flere matchende instanser for klasse={" + className + "}, fra instances klass={" + instancesClassName + "}, fagsakType={" + fagsakLiteral + "}");
                     }
                 }
             }
@@ -145,16 +169,13 @@ public @interface FagsakYtelseTypeRef {
         }
 
         private static <I> Instance<I> select(Class<I> cls, Instance<I> instances, Annotation anno) {
-            return cls != null
-                ? instances.select(cls, anno)
-                : instances.select(anno);
+            return cls != null ? instances.select(cls, anno) : instances.select(anno);
         }
 
         private static <I> I getInstance(Instance<I> inst) {
             var i = inst.get();
             if (i.getClass().isAnnotationPresent(Dependent.class)) {
-                throw new IllegalStateException(
-                    "Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + i.getClass());
+                throw new IllegalStateException("Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + i.getClass());
             }
             return i;
         }

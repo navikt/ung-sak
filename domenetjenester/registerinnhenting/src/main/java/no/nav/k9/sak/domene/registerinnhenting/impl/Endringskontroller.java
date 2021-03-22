@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
-import no.nav.k9.sak.domene.registerinnhenting.StartpunktTjeneste;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
@@ -43,7 +43,7 @@ public class Endringskontroller {
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
     private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenester;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private Instance<StartpunktTjeneste> startpunktTjenester;
+    private Instance<EndringStartpunktTjeneste> startpunktTjenester;
 
     Endringskontroller() {
         // For CDI proxy
@@ -51,7 +51,7 @@ public class Endringskontroller {
 
     @Inject
     public Endringskontroller(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                              @Any Instance<StartpunktTjeneste> startpunktTjenester,
+                              @Any Instance<EndringStartpunktTjeneste> startpunktTjenester,
                               OppgaveTjeneste oppgaveTjeneste,
                               RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
                               @Any Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenester,
@@ -79,7 +79,7 @@ public class Endringskontroller {
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()))
             .utledStartpunktForDiffBehandlingsgrunnlag(ref, endringsresultat);
 
-        if (startpunkt.equals(StartpunktType.UDEFINERT)) {
+        if (startpunkt == null || startpunkt.equals(StartpunktType.UDEFINERT)) {
             return; // Ingen detekterte endringer - ingen tilbakespoling
         }
 

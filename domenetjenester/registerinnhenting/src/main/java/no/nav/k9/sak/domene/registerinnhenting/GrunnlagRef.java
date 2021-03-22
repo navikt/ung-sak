@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.registerinnhenting;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -19,8 +18,11 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.persistence.Entity;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+
 /**
- * Marker type som implementerer interface {@link StartpunktUtleder}.
+ * Marker type som implementerer interface {@link EndringStartpunktUtleder}.
  */
 @Qualifier
 @Inherited
@@ -49,14 +51,13 @@ public @interface GrunnlagRef {
         }
     }
 
-
     final class Lookup {
 
         private Lookup() {
         }
 
         private static String getName(Class<?> aggregat) {
-            String aggrNavn = aggregat.isAnnotationPresent(Entity.class) ? aggregat.getAnnotation(Entity.class).name()  : aggregat.getSimpleName();
+            String aggrNavn = aggregat.isAnnotationPresent(Entity.class) ? aggregat.getAnnotation(Entity.class).name() : aggregat.getSimpleName();
             return aggrNavn;
         }
 
@@ -64,46 +65,39 @@ public @interface GrunnlagRef {
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
          * injected med riktig forventet klassetype og @Any qualifier.
          */
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggregatClass) {
-            return find(cls, instances, getName(aggregatClass));
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggregatClass, FagsakYtelseType ytelseType) {
+            return find(cls, instances, getName(aggregatClass), ytelseType);
         }
 
-        /**
-         * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
-         * injected med riktig forventet klassetype og @Any qualifier.
-         */
-        public static <I> Optional<I> find(Instance<I> instances, Class<?> aggregatClass) {
-            return find(null, instances, getName(aggregatClass));
-        }
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggrNavn, FagsakYtelseType ytelseType) {
+            Objects.requireNonNull(instances);
+            Objects.requireNonNull(aggrNavn);
+            Objects.requireNonNull(ytelseType);
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggregatClassName) {
-            Objects.requireNonNull(instances, "instances");
+            var fagsakInstances = FagsakYtelseTypeRef.Lookup.list(cls, instances, ytelseType.getKode());
 
-            for (var fagsakLiteral : coalesce(aggregatClassName, "*")) {
-                var inst = select(cls, instances, new GrunnlagRefLiteral(fagsakLiteral));
-                if (inst.isResolvable()) {
-                    return Optional.of(getInstance(inst));
-                } else {
-                    if (inst.isAmbiguous()) {
-                        throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral);
+            for (var inst : fagsakInstances) {
+                for (var navn : coalesce(aggrNavn, "*")) {
+
+                    Instance<I> selected = inst.select(new GrunnlagRef.GrunnlagRefLiteral(navn));
+                    if (selected.isUnsatisfied()) {
+                        continue; // matchet ikke
+                    } else if (selected.isResolvable()) {
+                        return Optional.of(getInstance(selected));
+                    } else if (selected.isAmbiguous()) {
+                        throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", ytelseType=" + ytelseType);
                     }
+
                 }
             }
 
             return Optional.empty();
         }
 
-        private static <I> Instance<I> select(Class<I> cls, Instance<I> instances, Annotation anno) {
-            return cls != null
-                ? instances.select(cls, anno)
-                : instances.select(anno);
-        }
-
         private static <I> I getInstance(Instance<I> inst) {
             var i = inst.get();
             if (i.getClass().isAnnotationPresent(Dependent.class)) {
-                throw new IllegalStateException(
-                    "Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + i.getClass());
+                throw new IllegalStateException("Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + i.getClass());
             }
             return i;
         }

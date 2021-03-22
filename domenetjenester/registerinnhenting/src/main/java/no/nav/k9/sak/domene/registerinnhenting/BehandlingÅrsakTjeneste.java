@@ -8,9 +8,9 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.persistence.Entity;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
@@ -29,31 +29,18 @@ public class BehandlingÅrsakTjeneste {
     }
 
     public Set<BehandlingÅrsakType> utledBehandlingÅrsakerBasertPåDiff(BehandlingReferanse behandling, EndringsresultatDiff endringsresultatDiff) {
-        //For alle aggregat som har endringer, utled behandlingsårsak.
+        // For alle aggregat som har endringer, utled behandlingsårsak.
         return endringsresultatDiff.hentDelresultater().stream()
             .filter(EndringsresultatDiff::erSporedeFeltEndret)
-            .map(diff -> finnUtleder(diff.getGrunnlag())
-                .utledBehandlingÅrsaker(behandling, diff.getGrunnlagId1(), diff.getGrunnlagId2())).flatMap(Collection::stream)
+            .map(diff -> finnUtleder(diff.getGrunnlag(), behandling.getFagsakYtelseType())
+                .utledBehandlingÅrsaker(behandling, diff.getGrunnlagId1(), diff.getGrunnlagId2()))
+            .flatMap(Collection::stream)
             .filter(årsak -> !årsak.equals(BehandlingÅrsakType.UDEFINERT))
             .collect(Collectors.toSet());
     }
 
-    private BehandlingÅrsakUtleder finnUtleder(Class<?> aggregat) {
-        String aggrNavn = aggregat.getSimpleName();
-        if(aggregat.isAnnotationPresent(Entity.class)) {
-            aggrNavn = aggregat.getAnnotation(Entity.class).name();
-        }
-
-        Instance<BehandlingÅrsakUtleder> selected = utledere.select(new GrunnlagRef.GrunnlagRefLiteral(aggrNavn));
-        if (selected.isAmbiguous()) {
-            throw new IllegalArgumentException("Mer enn en implementasjon funnet for BehandlingÅrsakUtleder:" + aggrNavn);
-        } else if (selected.isUnsatisfied()) {
-            throw new IllegalArgumentException("Ingen implementasjoner funnet for BehandlingÅrsakUtleder:" + aggrNavn);
-        }
-        BehandlingÅrsakUtleder minInstans = selected.get();
-        if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {
-            throw new IllegalStateException("Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + minInstans.getClass());
-        }
-        return selected.get();
+    private BehandlingÅrsakUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType ytelseType) {
+        var utleder = BehandlingÅrsakUtleder.finnUtleder(utledere, aggregat, ytelseType);
+        return utleder.orElseThrow(() -> new IllegalArgumentException("Ingen implementasjoner funnet for BehandlingÅrsakUtleder:" + aggregat + ", ytelseType=" + ytelseType));
     }
 }

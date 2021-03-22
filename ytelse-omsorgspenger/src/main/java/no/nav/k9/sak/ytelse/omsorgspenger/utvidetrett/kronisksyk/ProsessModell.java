@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellImpl;
+import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
 public class ProsessModell {
@@ -26,6 +27,7 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
@@ -47,6 +49,7 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)

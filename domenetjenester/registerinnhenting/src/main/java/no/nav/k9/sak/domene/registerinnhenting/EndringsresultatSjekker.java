@@ -49,6 +49,8 @@ public class EndringsresultatSjekker {
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private BehandlingRepository behandlingRepository;
 
+    private Instance<EndringStartpunktUtleder> startpunktUtledere;
+
     EndringsresultatSjekker() {
         // For CDI
     }
@@ -57,12 +59,14 @@ public class EndringsresultatSjekker {
     public EndringsresultatSjekker(PersonopplysningTjeneste personopplysningTjeneste,
                                    MedlemTjeneste medlemTjeneste,
                                    @Any Instance<InformasjonselementerUtleder> informasjonselementer,
+                                   @Any Instance<EndringStartpunktUtleder> startpunktUtledere,
                                    @Any Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
         this.informasjonselementer = informasjonselementer;
+        this.startpunktUtledere = startpunktUtledere;
         this.søknadsDokumentTjenester = søknadsDokumentTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = provider.getOpptjeningRepository();
@@ -102,31 +106,40 @@ public class EndringsresultatSjekker {
         return !(finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType()).utled(behandling.getType()).isEmpty());
     }
 
-    public EndringsresultatDiff finnSporedeEndringerPåBehandlingsgrunnlag(Long behandlingId, EndringsresultatSnapshot idSnapshotFør) {
+    public EndringsresultatDiff finnSporedeEndringerPåBehandlingsgrunnlag(Long behandlingId, EndringsresultatSnapshot snapshotFør) {
         final boolean kunSporedeEndringer = true;
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
         // Del 1: Finn diff mellom grunnlagets id før og etter oppdatering
         EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
-        EndringsresultatDiff idDiff = idSnapshotNå.minus(idSnapshotFør);
+        EndringsresultatDiff idDiff = idSnapshotNå.minus(snapshotFør);
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)
         EndringsresultatDiff sporedeEndringerDiff = EndringsresultatDiff.opprettForSporingsendringer();
-        idDiff.hentDelresultat(PersonInformasjonEntitet.class)
-            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
-        idDiff.hentDelresultat(MedlemskapAggregat.class)
-            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
 
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (inkludererBeregning(behandling)) {
-            idDiff.hentDelresultat(InntektArbeidYtelseGrunnlag.class).ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> {
-                InntektArbeidYtelseGrunnlag grunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId1());
-                InntektArbeidYtelseGrunnlag grunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId2());
-                return new IAYGrunnlagDiff(grunnlag1, grunnlag2).diffResultat(kunSporedeEndringer);
-            }));
-        }
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            idDiff.hentDelresultat(PersonInformasjonEntitet.class)
+                .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
+        });
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, MedlemskapAggregat.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            idDiff.hentDelresultat(MedlemskapAggregat.class)
+                .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
+        });
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
+            if (inkludererBeregning(behandling)) {
+                idDiff.hentDelresultat(InntektArbeidYtelseGrunnlag.class).ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> {
+                    InntektArbeidYtelseGrunnlag grunnlag1 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId1());
+                    InntektArbeidYtelseGrunnlag grunnlag2 = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, (UUID) idEndring.getGrunnlagId2());
+                    return new IAYGrunnlagDiff(grunnlag1, grunnlag2).diffResultat(kunSporedeEndringer);
+                }));
+            }
+        });
+
         var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
         søknadDokumentTjeneste.ifPresent(dokumentTjeneste -> idDiff.hentDelresultat(dokumentTjeneste.getGrunnlagsKlasse())
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> dokumentTjeneste.diffResultat(idEndring, kunSporedeEndringer))));
-
 
         return sporedeEndringerDiff;
     }

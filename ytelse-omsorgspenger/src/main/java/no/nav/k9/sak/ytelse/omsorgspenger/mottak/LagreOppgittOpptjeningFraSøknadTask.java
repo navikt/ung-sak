@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -21,8 +23,6 @@ import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 /**
  * lagrer inntektsmeldinger til abakus asynk i egen task.
@@ -35,6 +35,8 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
     private static final Logger log = LoggerFactory.getLogger(LagreOppgittOpptjeningFraSøknadTask.class);
 
     static final String TASKTYPE = "lagre.oppgitt.opptjening.søknad.oms.til.abakus";
+
+    static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
 
     private final SøknadParser søknadParser = new SøknadParser();
     private LagreOppgittOpptjening lagreOppgittOpptjeningTjeneste;
@@ -60,7 +62,7 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
         var behandlingId = behandling.getId();
 
         //henter alle som er til BEHANDLER
-        List<MottattDokument> ubehandledeDokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, Brevkode.SØKNAD_UTBETALING_OMS, true, DokumentStatus.BEHANDLER);
+        List<MottattDokument> ubehandledeDokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, BREVKODER_SØKNAD_OMS, true, DokumentStatus.BEHANDLER);
         if (ubehandledeDokumenter.isEmpty()) {
             log.info("Fant ingen ubehandlede søknader om utbetaling av omsorgspenger nå - er allerede håndtert. Avbryter task");
             return;

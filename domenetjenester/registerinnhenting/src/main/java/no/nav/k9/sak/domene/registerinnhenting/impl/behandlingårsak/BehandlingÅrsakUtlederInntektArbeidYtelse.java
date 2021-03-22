@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -22,6 +23,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @GrunnlagRef("InntektArbeidYtelseGrunnlag")
+@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("FRISINN")
 class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtleder {
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederInntektArbeidYtelse.class);
 

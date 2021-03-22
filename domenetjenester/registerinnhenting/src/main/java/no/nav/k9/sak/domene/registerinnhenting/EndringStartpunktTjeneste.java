@@ -7,6 +7,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
@@ -14,32 +15,32 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-public class StartpunktTjenesteImpl implements StartpunktTjeneste {
+public class EndringStartpunktTjeneste {
 
-    private Instance<StartpunktUtleder> utledere;
+    private Instance<EndringStartpunktUtleder> utledere;
 
-    StartpunktTjenesteImpl() {
+    EndringStartpunktTjeneste() {
         // For CDI
     }
 
     @Inject
-    public StartpunktTjenesteImpl(@Any Instance<StartpunktUtleder> utledere) {
+    public EndringStartpunktTjeneste(@Any Instance<EndringStartpunktUtleder> utledere) {
         this.utledere = utledere;
     }
 
-    @Override
     public StartpunktType utledStartpunktForDiffBehandlingsgrunnlag(BehandlingReferanse revurdering, EndringsresultatDiff differanse) {
         return differanse.hentKunDelresultater().stream()
             .map(diff -> {
-                var utleder = finnUtleder(diff.getGrunnlag());
+                var utleder = finnUtleder(diff.getGrunnlag(), revurdering.getFagsakYtelseType());
                 return utleder.erBehovForStartpunktUtledning(diff) ? utleder.utledStartpunkt(revurdering, diff.getGrunnlagId1(), diff.getGrunnlagId2()) : StartpunktType.UDEFINERT;
             })
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
 
-    private StartpunktUtleder finnUtleder(Class<?> aggregat) {
-        return GrunnlagRef.Lookup.find(StartpunktUtleder.class, utledere, aggregat).orElseThrow();
+    private EndringStartpunktUtleder finnUtleder(Class<?> aggregat, FagsakYtelseType ytelseType) {
+        var utleder = EndringStartpunktUtleder.finnUtleder(utledere, aggregat, ytelseType);
+        return utleder.orElseThrow(() -> new IllegalArgumentException("Ingen implementasjoner funnet for StartpunktUtleder:" + aggregat + ", ytelseType=" + ytelseType));
     }
 
 }
