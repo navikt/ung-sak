@@ -23,12 +23,13 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 public class SykdomVurderingOversiktMapper {
     public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder) {
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
-                behandlingUuid, saksnummer, sykdomVurderingerOgPerioder.getSaksnummerForPerioder(), sykdomVurderingerOgPerioder.getVurderingerTidslinje()
+                behandlingUuid, saksnummer, sykdomVurderingerOgPerioder
             )
             .compress()
             .stream()
@@ -44,8 +45,11 @@ public class SykdomVurderingOversiktMapper {
                 );
     }
     
-    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(UUID behandlingUuid, Saksnummer saksnummer, LocalDateTimeline<Set<Saksnummer>> søktePerioder, LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje) {
-        return vurderingerTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingVersjon, Set<Saksnummer>, SykdomVurderingOversiktElement>() {
+    private LocalDateTimeline<SykdomVurderingOversiktElement> tilSykdomVurderingOversiktElement(UUID behandlingUuid, Saksnummer saksnummer,  SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder) {
+        final LocalDateTimeline<Set<Saksnummer>> søktePerioder = sykdomVurderingerOgPerioder.getSaksnummerForPerioder();
+        final LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje = sykdomVurderingerOgPerioder.getVurderingerTidslinje();
+        
+        final LocalDateTimeline<SykdomVurderingOversiktElement> elements = vurderingerTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingVersjon, Set<Saksnummer>, SykdomVurderingOversiktElement>() {
             @Override
             public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingVersjon> vurdering, LocalDateSegment<Set<Saksnummer>> relevanteSaksnummer) {
                 final String sykdomVurderingId = "" + vurdering.getValue().getSykdomVurdering().getId();
@@ -58,10 +62,42 @@ public class SykdomVurderingOversiktMapper {
                     s.contains(saksnummer),
                     antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer)),
                     behandlingUuid.equals(vurdering.getValue().getEndretBehandlingUuid()),
+                    false,
                     Arrays.asList(linkForGetVurdering(behandlingUuid.toString(), sykdomVurderingId), linkForEndreVurdering(behandlingUuid.toString()))
                 ));
             }
-        }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        }, LocalDateTimeline.JoinStyle.LEFT_JOIN).compress();
+        
+        
+        return medInnleggelser(elements, sykdomVurderingerOgPerioder.getInnleggelsesperioder());
+    }
+
+    private LocalDateTimeline<SykdomVurderingOversiktElement> medInnleggelser(LocalDateTimeline<SykdomVurderingOversiktElement> elements, List<Periode> innleggelsesperioder) {
+        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = SykdomUtils.toLocalDateTimeline(innleggelsesperioder);
+        return elements.combine(innleggelsesperioderTidslinje, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Boolean, SykdomVurderingOversiktElement>() {
+            @Override
+            public LocalDateSegment<SykdomVurderingOversiktElement> combine(
+                    LocalDateInterval datoInterval,
+                    LocalDateSegment<SykdomVurderingOversiktElement> vs,
+                    LocalDateSegment<Boolean> innleggelse) {
+                
+                final SykdomVurderingOversiktElement v = (vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
+                final boolean erInnleggelsesperiode = (innleggelse != null);
+                
+                return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval,
+                    new SykdomVurderingOversiktElement(
+                        v.getId(),
+                        v.getResultat(),
+                        new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()),
+                        v.isGjelderForSøker(),
+                        v.isGjelderForAnnenPart(),
+                        v.isEndretIDenneBehandlingen(),
+                        erInnleggelsesperiode,
+                        v.getLinks()
+                    )
+                );
+            }
+        }, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     private ResourceLink linkForGetVurdering(String behandlingUuid, String sykdomVurderingId) {
