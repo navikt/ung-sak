@@ -1,6 +1,7 @@
 package no.nav.k9.sak.økonomi.tilkjentytelse;
 
 import java.time.Year;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -42,22 +43,35 @@ public class MapperForTilkjentYtelse {
     }
 
     private TilkjentYtelsePeriodeV1 mapPeriode(BeregningsresultatPeriode periode) {
-        List<TilkjentYtelseAndelV1> andeler = periode.getBeregningsresultatAndelList()
-            .stream()
-            .map(this::mapAndel)
-            .filter(andel -> andel.getSatsBeløp() != 0)
-            .collect(Collectors.toList());
-
+        List<BeregningsresultatAndel> brAndeler = periode.getBeregningsresultatAndelList();
+        List<TilkjentYtelseAndelV1> andeler = mapAndeler(brAndeler);
         if (andeler.isEmpty()) {
             logger.info("Periode {}-{} hadde ingen beløp over 0 og ble ignorert", periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom());
             return null;
         }
-
         return new TilkjentYtelsePeriodeV1(periode.getBeregningsresultatPeriodeFom(), periode.getBeregningsresultatPeriodeTom(), andeler);
     }
 
-    private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel) {
-        TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel);
+    private List<TilkjentYtelseAndelV1> mapAndeler(List<BeregningsresultatAndel> brAndeler) {
+        //unngår å sende arbeidsgiver-id når det kan unngås, siden det er delvis lokaliserende informasjon
+        boolean sendArbeidsgiverIdForBrukersAndeler = harAndelerTilBrukerForskjelligeArbeidsgivere(brAndeler);
+
+        return brAndeler.stream()
+            .map(brAndel -> mapAndel(brAndel, sendArbeidsgiverIdForBrukersAndeler))
+            .filter(andel -> andel.getSatsBeløp() != 0)
+            .collect(Collectors.toList());
+    }
+
+    private boolean harAndelerTilBrukerForskjelligeArbeidsgivere(Collection<BeregningsresultatAndel> andeler) {
+        return andeler.stream()
+            .filter(BeregningsresultatAndel::erBrukerMottaker)
+            .map(BeregningsresultatAndel::getArbeidsgiver)
+            .distinct()
+            .count() > 1;
+    }
+
+    private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel, boolean sendArbeidsgiverIdForBrukersAndeler) {
+        TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel, sendArbeidsgiverIdForBrukersAndeler);
         resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
         var feriepenger = andel.getFeriepengerÅrsbeløp();
         if (feriepenger != null) {
@@ -68,7 +82,7 @@ public class MapperForTilkjentYtelse {
         return resultat;
     }
 
-    private TilkjentYtelseAndelV1 mapAndelUtenFeriepenger(BeregningsresultatAndel andel) {
+    private TilkjentYtelseAndelV1 mapAndelUtenFeriepenger(BeregningsresultatAndel andel, boolean sendArbeidsgiverIdForBrukersAndeler) {
         Inntektskategori inntektskategori = MapperForInntektskategori.mapInntektskategori(andel.getInntektskategori());
         int dagsats = andel.getDagsats();
 
@@ -77,7 +91,8 @@ public class MapperForTilkjentYtelse {
             : TilkjentYtelseAndelV1.refusjon(inntektskategori, dagsats, satsType);
 
         Optional<Arbeidsgiver> arbeidsgiverOpt = andel.getArbeidsgiver();
-        if (!andel.erBrukerMottaker() && arbeidsgiverOpt.isPresent()) {
+        boolean brukArbeidsgiverIdHvisFinnes = !andel.erBrukerMottaker() || sendArbeidsgiverIdForBrukersAndeler;
+        if (brukArbeidsgiverIdHvisFinnes && arbeidsgiverOpt.isPresent()) {
             if (andel.erArbeidsgiverPrivatperson()) {
                 andelV1.medArbeidsgiverAktørId(arbeidsgiverOpt.get().getIdentifikator());
             } else {
