@@ -1,34 +1,35 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.opptjening;
 
-import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening.HåndtereAutomatiskAvslag;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.RegelResultat;
+import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.OMPVurderSøknadsfristTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
 public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomatiskAvslag {
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private OMPVurderSøknadsfristTjeneste vurderSøknadsfristTjeneste;
 
-    public OmsorgspengerHåndtereAutomatiskAvslag() {
+    OmsorgspengerHåndtereAutomatiskAvslag() {
+        // CDI
     }
 
     @Inject
-    public OmsorgspengerHåndtereAutomatiskAvslag(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+    public OmsorgspengerHåndtereAutomatiskAvslag(@FagsakYtelseTypeRef("OMP") OMPVurderSøknadsfristTjeneste vurderSøknadsfristTjeneste) {
+        this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
     }
 
     @Override
@@ -39,29 +40,17 @@ public class OmsorgspengerHåndtereAutomatiskAvslag implements HåndtereAutomati
     }
 
     private boolean utbetalingTilBrukerIPerioden(Behandling behandling, DatoIntervallEntitet periode) {
-        var inntektsmeldingAggregat = inntektArbeidYtelseTjeneste.finnGrunnlag(behandling.getId())
-            .flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
-        return inntektsmeldingAggregat.filter(aggregat -> utbetalingTilBrukerIPerioden(aggregat, periode))
-            .isPresent();
-    }
+        var kravDokumentListMap = vurderSøknadsfristTjeneste.vurderSøknadsfrist(BehandlingReferanse.fra(behandling));
 
-    private boolean utbetalingTilBrukerIPerioden(InntektsmeldingAggregat inntektsmeldingAggregat,
-                                                 DatoIntervallEntitet periode) {
-        var inntektsmeldinger = inntektsmeldingAggregat.getInntektsmeldingerSomSkalBrukes();
-        var inntektsmeldingSomMatcherUttak = inntektsmeldinger.stream()
-            .filter(it -> it.getOppgittFravær() != null &&
-                it.getOppgittFravær().stream()
-                    .anyMatch(fravære -> periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(fravære.getFom(), fravære.getTom()))))
+        var relevanteDokumenter = kravDokumentListMap.entrySet()
+            .stream()
+            .filter(it -> KravDokumentType.SØKNAD.equals(it.getKey().getType())) // Søknaden er alltid fra bruker
+            .filter(it -> it.getValue()
+                .stream()
+                .filter(at -> Utfall.OPPFYLT.equals(at.getUtfall()))
+                .anyMatch(at -> at.getPeriode().overlapper(periode)))
             .collect(Collectors.toSet());
 
-        if (inntektsmeldingSomMatcherUttak.isEmpty()) {
-            return false;
-        } else {
-            return inntektsmeldingSomMatcherUttak.stream()
-                .anyMatch(v -> {
-                    var refusjon = v.getRefusjonBeløpPerMnd();
-                    return refusjon == null || refusjon.getVerdi() == null || BigDecimal.ZERO.compareTo(refusjon.getVerdi()) == 0;
-                });
-        }
+        return !relevanteDokumenter.isEmpty();
     }
 }
