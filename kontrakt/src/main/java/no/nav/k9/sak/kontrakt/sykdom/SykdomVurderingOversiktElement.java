@@ -1,10 +1,10 @@
 package no.nav.k9.sak.kontrakt.sykdom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -35,7 +35,6 @@ public class SykdomVurderingOversiktElement {
      */
     @JsonProperty(value = "id")
     @Size(max = 50)
-    @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
@@ -60,6 +59,10 @@ public class SykdomVurderingOversiktElement {
     @Valid
     private boolean endretIDenneBehandlingen;
 
+    @JsonProperty(value = "erInnleggelsesperiode")
+    @Valid
+    private boolean erInnleggelsesperiode;
+    
 
     @JsonProperty(value = "links")
     @Size(max = 100)
@@ -68,14 +71,15 @@ public class SykdomVurderingOversiktElement {
 
 
     public SykdomVurderingOversiktElement(String id, Resultat resultat, Periode periode,
-            boolean gjelderForSøker, boolean gjelderForAnnenPart, boolean endretIDenneBehandlingen, List<ResourceLink> links) {
+            boolean gjelderForSøker, boolean gjelderForAnnenPart, boolean endretIDenneBehandlingen, boolean erInnleggelsesperiode, List<ResourceLink> links) {
         this.id = id;
         this.resultat = resultat;
         this.periode = periode;
         this.gjelderForSøker = gjelderForSøker;
         this.gjelderForAnnenPart = gjelderForAnnenPart;
         this.endretIDenneBehandlingen = endretIDenneBehandlingen;
-        this.links = links;
+        this.erInnleggelsesperiode = erInnleggelsesperiode;
+        this.links = new ArrayList<>(links);
     }
 
     public SykdomVurderingOversiktElement(){
@@ -100,5 +104,17 @@ public class SykdomVurderingOversiktElement {
 
     public boolean isGjelderForAnnenPart() {
         return gjelderForAnnenPart;
+    }
+    
+    public boolean isEndretIDenneBehandlingen() {
+        return endretIDenneBehandlingen;
+    }
+    
+    public boolean isErInnleggelsesperiode() {
+        return erInnleggelsesperiode;
+    }
+    
+    public List<ResourceLink> getLinks() {
+        return Collections.unmodifiableList(links);
     }
 }
