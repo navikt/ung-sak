@@ -93,13 +93,19 @@ class ArbeidsforholdMapper {
 
             void mapOverstyring(ArbeidsforholdOverstyring overstyring) {
                 var dto = finnEllerOpprett(overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef());
-                if (Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(overstyring.getHandling())) {
+                var handling = overstyring.getHandling();
+                String begrunnelse = overstyring.getBegrunnelse();
+
+                if (Set.of(ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING, ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER).contains(handling)) {
                     dto.leggTilKilde(ArbeidsforholdKilde.SAKSBEHANDLER);
-                    dto.setStillingsprosent(overstyring.getStillingsprosent().getVerdi());
+                    var stillingsprosent = overstyring.getStillingsprosent();
+                    dto.setStillingsprosent(stillingsprosent.getVerdi());
                     dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
+                } else {
+                    throw new UnsupportedOperationException("Kan ikke mappe overstyring:" + overstyring + ", {begrunnelse=" + begrunnelse + "} til en ArbeidsforholdKilde");
                 }
-                dto.setHandlingType(overstyring.getHandling());
-                dto.setBegrunnelse(overstyring.getBegrunnelse());
+                dto.setHandlingType(handling);
+                dto.setBegrunnelse(begrunnelse);
             }
 
             private Set<PeriodeDto> mapAnsettelsesPerioder(List<ArbeidsforholdOverstyrtePerioder> arbeidsforholdOverstyrtePerioder) {
