@@ -17,11 +17,6 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 public class DummyKompletthetSjekker implements Kompletthetsjekker {
 
     @Override
-    public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        return null;
-    }
-
-    @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         return KompletthetResultat.oppfylt();
     }

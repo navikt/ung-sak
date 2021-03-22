@@ -60,16 +60,6 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     }
 
     @Override
-    public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        if (!getKomplethetsjekker(ref).erSøknadMottatt(ref)) {
-            // Litt implisitt forutsetning her, men denne sjekken skal bare ha bli kalt dersom søknad eller IM er mottatt
-            LOGGER.info("Behandling {} er ikke komplett - søknad er ikke mottatt", ref.getBehandlingId()); // NOSONAR //$NON-NLS-1$
-            return KompletthetResultat.ikkeOppfylt(fellesUtil.finnVentefristTilManglendeSøknad(), Venteårsak.AVV_DOK);
-        }
-        return KompletthetResultat.oppfylt();
-    }
-
-    @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         return KompletthetResultat.oppfylt();
     }

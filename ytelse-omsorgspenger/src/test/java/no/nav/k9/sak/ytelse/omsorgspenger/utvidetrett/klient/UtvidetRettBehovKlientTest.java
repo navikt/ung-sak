@@ -70,7 +70,7 @@ public class UtvidetRettBehovKlientTest {
         assertThrows(IllegalStateException.class, () -> klient.avslått(utvidetRett));
     }
 
-    private static UtvidetRettSerialisering kroniskSyktBarnMedIdentitetsnummer = new UtvidetRettSerialisering<>(
+    private static UtvidetRettSerialisering<?> kroniskSyktBarnMedIdentitetsnummer = new UtvidetRettSerialisering<>(
         new KroniskSyktBarn(
             new Saksnummer("ENSAK123"),
             UUID.fromString("0a98ac74-6970-47a5-8b0b-a14ead63082a"),
@@ -82,7 +82,7 @@ public class UtvidetRettBehovKlientTest {
         "{\"saksnummer\":\"ENSAK123\",\"behandlingId\":\"0a98ac74-6970-47a5-8b0b-a14ead63082a\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"barn\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2021-01-01\",\"tom\":\"2021-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
-    private static UtvidetRettSerialisering midlertidigAlene = new UtvidetRettSerialisering<>(
+    private static UtvidetRettSerialisering<?> midlertidigAlene = new UtvidetRettSerialisering<>(
         new MidlertidigAlene(
             new Saksnummer("ENSAK124"),
             UUID.fromString("b684c176-7147-11eb-9439-0242ac130002"),

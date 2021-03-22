@@ -15,9 +15,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.OppgittOpptjeningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.PeriodeDto;
-import no.nav.k9.sak.kontrakt.frisinn.PeriodeMedSNOgFLDto;
 
 public class FrisinnMapper {
 
@@ -49,7 +47,7 @@ public class FrisinnMapper {
 
     private static PeriodeDto finnMåned(DatoIntervallEntitet periode) {
         LocalDate tomDato = periode.getTomDato();
-        //spesial behandling der april søknader starter med fom i mars
+        // spesial behandling der april søknader starter med fom i mars
 
         if (tomDato.isEqual(SISTE_DAG_I_APRIL)) {
             return new PeriodeDto(SISTE_DAG_I_MARS, tomDato);
@@ -63,7 +61,8 @@ public class FrisinnMapper {
             .stream()
             .filter(p -> p.getAktivitetType() == aktivitetType)
             .map(uttakAktivitetPeriode -> {
-                PeriodeMedSøkerInfoDto dto = new PeriodeMedSøkerInfoDto(new Periode(uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato()), aktivitetType == UttakArbeidType.FRILANSER, aktivitetType == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
+                PeriodeMedSøkerInfoDto dto = new PeriodeMedSøkerInfoDto(new Periode(uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato()),
+                    aktivitetType == UttakArbeidType.FRILANSER, aktivitetType == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
                 return new LocalDateSegment<>(uttakAktivitetPeriode.getPeriode().getFomDato(), uttakAktivitetPeriode.getPeriode().getTomDato(), dto);
             }).collect(Collectors.toList());
@@ -80,13 +79,4 @@ public class FrisinnMapper {
         return new LocalDateSegment<>(interval, new PeriodeMedSøkerInfoDto(new Periode(interval.getFomDato(), interval.getTomDato()), false, true));
     }
 
-    public static PeriodeMedSNOgFLDto map(PeriodeDto måned, OppgittOpptjeningDto dto, UttakAktivitet fastsattUttak) {
-        PeriodeMedSNOgFLDto periodeMedSNOgFLDto = new PeriodeMedSNOgFLDto();
-        periodeMedSNOgFLDto.setMåned(måned);
-        periodeMedSNOgFLDto.setOppgittIMåned(dto);
-        periodeMedSNOgFLDto.setSøkerFL(fastsattUttak.getPerioder().stream().anyMatch(p -> måned.getTom().equals(p.getPeriode().getTomDato()) && p.getAktivitetType() == UttakArbeidType.FRILANSER));
-        periodeMedSNOgFLDto.setSøkerSN(fastsattUttak.getPerioder().stream().anyMatch(p -> måned.getTom().equals(p.getPeriode().getTomDato()) && p.getAktivitetType() == UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE));
-
-        return periodeMedSNOgFLDto;
-    }
 }

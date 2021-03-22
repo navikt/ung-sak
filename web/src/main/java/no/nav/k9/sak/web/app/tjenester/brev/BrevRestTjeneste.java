@@ -51,7 +51,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 @Transactional
 public class BrevRestTjeneste {
 
-    public static final String VARSEL_REVURDERING_PATH = "/brev/varsel/revurdering";
     public static final String HENT_VEDTAKVARSEL_PATH = "/brev/vedtak";
     public static final String BREV_BESTILL_PATH = "/brev/bestill";
     private static final Logger LOGGER = LoggerFactory.getLogger(BrevRestTjeneste.class);
@@ -115,16 +114,8 @@ public class BrevRestTjeneste {
         dokumentBehandlingTjeneste.settBehandlingPåVent(behandlingId, avvResponsRevurdering, null);
     }
 
-    @GET
-    @Path(VARSEL_REVURDERING_PATH)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    @Operation(description = "Sjekk har varsel sendt om revurdering", tags = "brev")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Boolean harSendtVarselOmRevurdering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        return vedtakVarselRepository.hentHvisEksisterer(behandlingUuid.getBehandlingUuid()).orElse(new VedtakVarsel()).getErVarselOmRevurderingSendt(); // NOSONAR
-    }
-
+    /** @deprecated brukes bare av FRISINN (per 2021-03-22). */
+    @Deprecated(forRemoval = true)
     @GET
     @Path(HENT_VEDTAKVARSEL_PATH)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")

@@ -32,12 +32,6 @@ public class OmsorgspengerKompletthetsjekkerRevurdering implements Kompletthetsj
     }
 
     @Override
-    public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        // Ikke relevant for revurdering - denne kontrollen er allerede håndtert av førstegangsbehandlingen
-        return KompletthetResultat.oppfylt();
-    }
-
-    @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         // Ikke relevant for revurdering - denne kontrollen er allerede håndtert av førstegangsbehandlingen
         return KompletthetResultat.oppfylt();

@@ -33,11 +33,6 @@ public class UtvidetRettKompletthetSjekker implements Kompletthetsjekker {
     }
 
     @Override
-    public KompletthetResultat vurderSøknadMottatt(BehandlingReferanse ref) {
-        return KompletthetResultat.oppfylt();
-    }
-
-    @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
         return KompletthetResultat.oppfylt();
     }
