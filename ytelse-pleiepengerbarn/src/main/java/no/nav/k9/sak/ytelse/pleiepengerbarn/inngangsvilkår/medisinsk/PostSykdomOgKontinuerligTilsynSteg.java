@@ -19,7 +19,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -37,7 +36,6 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
     private static final Logger log = LoggerFactory.getLogger(PostSykdomOgKontinuerligTilsynSteg.class);
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     PostSykdomOgKontinuerligTilsynSteg() {
@@ -47,7 +45,6 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Inject
     public PostSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                               @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
@@ -55,9 +52,10 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET); // OK
+        final var perioderMedlemskap = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDLEMSKAPSVILKÅRET);
 
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        var oppdatertResultatBuilder = justerVilkårsperioderEtterSykdom(vilkårene, perioder, perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDLEMSKAPSVILKÅRET));
+        var oppdatertResultatBuilder = justerVilkårsperioderEtterSykdom(vilkårene, perioder, perioderMedlemskap);
 
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertResultatBuilder.build());
 
@@ -72,26 +70,26 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .collect(Collectors.toSet());
 
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
+            .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
         justerPeriodeForMedlemskap(innvilgetePerioder, resultatBuilder, medlemskapsPerioderTilVurdering);
-        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder);
+        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, sykdomsPerioderTilVurdering);
 
         return resultatBuilder;
     }
 
-    private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> innvilgetePerioder, VilkårResultatBuilder resultatBuilder) {
+    private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> innvilgetePerioder, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering) {
         if (innvilgetePerioder.isEmpty()) {
             return;
         }
 
-        var fom = innvilgetePerioder.stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
-        var tom = innvilgetePerioder.stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
-
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-
-            vilkårBuilder = vilkårBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+            for (DatoIntervallEntitet datoIntervallEntitet : sykdomsPerioderTilVurdering) {
+                vilkårBuilder = vilkårBuilder.tilbakestill(datoIntervallEntitet);
+            }
             for (VilkårPeriode vilkårPeriode : innvilgetePerioder) {
                 vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode()).medUtfall(Utfall.IKKE_VURDERT));
             }
@@ -102,6 +100,9 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private void justerPeriodeForMedlemskap(Set<VilkårPeriode> innvilgetePerioder, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> perioder) {
 
         if (perioder.isEmpty()) {
+            return;
+        }
+        if (innvilgetePerioder.isEmpty()) {
             return;
         }
 
@@ -118,7 +119,6 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
             vilkårBuilder = vilkårBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(originFom, fom.minusDays(1)));
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom));
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }

@@ -51,6 +51,7 @@ public class VilkårResultatBuilder {
     public VilkårBuilder hentBuilderFor(VilkårType vilkårType) {
         final var vilkåret = kladd.getVilkårene().stream().filter(v -> vilkårType.equals(v.getVilkårType())).findFirst().orElse(new Vilkår(vilkårType));
         var vilkårBuilder = new VilkårBuilder(vilkåret)
+            .medKantIKantVurderer(kantIKantVurderer)
             .medType(vilkårType);
         if (fullstendigTidslinje != null) {
             vilkårBuilder.medFullstendigTidslinje(fullstendigTidslinje);
