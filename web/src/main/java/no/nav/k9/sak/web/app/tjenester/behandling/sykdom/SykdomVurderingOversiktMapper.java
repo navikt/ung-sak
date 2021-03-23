@@ -81,7 +81,7 @@ public class SykdomVurderingOversiktMapper {
                     LocalDateSegment<SykdomVurderingOversiktElement> vs,
                     LocalDateSegment<Boolean> innleggelse) {
                 
-                final SykdomVurderingOversiktElement v = (vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
+                final SykdomVurderingOversiktElement v = (vs != null && vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
                 final boolean erInnleggelsesperiode = (innleggelse != null);
                 
                 return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval,
