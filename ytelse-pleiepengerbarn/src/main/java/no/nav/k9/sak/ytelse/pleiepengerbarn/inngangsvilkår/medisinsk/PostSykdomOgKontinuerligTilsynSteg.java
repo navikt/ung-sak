@@ -34,7 +34,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
-    private static final Logger log = LoggerFactory.getLogger(PostSykdomOgKontinuerligTilsynSteg.class);
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -51,7 +50,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET); // OK
+        final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET); // OK
         final var perioderMedlemskap = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDLEMSKAPSVILKÅRET);
 
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());

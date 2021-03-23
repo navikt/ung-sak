@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,7 +88,8 @@ public class MapInputTilUttakTjeneste {
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
         var pleiebehov = pleiebehovResultatRepository.hent(referanse.getBehandlingId());
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var fagsak = behandling.getFagsak();
@@ -106,6 +108,7 @@ public class MapInputTilUttakTjeneste {
             .medVilkårene(vilkårene)
             .medPleiebehovResultat(pleiebehov)
             .medPerioderTilVurdering(perioderTilVurdering)
+            .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
             .medVurderteSøknadsperioder(vurderteSøknadsperioder)
             .medInntektsmeldinger(sakInntektsmeldinger)
             .medPersonopplysninger(personopplysningerAggregat)
@@ -118,7 +121,6 @@ public class MapInputTilUttakTjeneste {
     private Uttaksgrunnlag toRequestData(InputParametere input) {
 
         var behandling = input.getBehandling();
-        var perioderTilVurdering = input.getPerioderTilVurdering();
         var vurderteSøknadsperioder = input.getVurderteSøknadsperioder();
         var uttaksPerioderGrunnlag = input.getUttaksGrunnlag();
         var personopplysningerAggregat = input.getPersonopplysningerAggregat();
@@ -144,9 +146,7 @@ public class MapInputTilUttakTjeneste {
             .map(Saksnummer::toString)
             .collect(Collectors.toList());
 
-        var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-            .collect(Collectors.toList()));
+        var tidslinjeTilVurdering = new LocalDateTimeline<>(mapPerioderTilVurdering(input));
 
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -180,6 +180,21 @@ public class MapInputTilUttakTjeneste {
             beredskapsperioder,
             nattevåksperioder
             );
+    }
+
+    private List<LocalDateSegment<Boolean>> mapPerioderTilVurdering(InputParametere input) {
+
+        var result = input.getPerioderTilVurdering()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        result.addAll(input.getUtvidetRevurderingPerioder()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toList()));
+
+        return result;
     }
 
     private Map<LukketPeriode, Pleiebehov> toPleiebehov(PleiebehovResultat pleiebehov) {

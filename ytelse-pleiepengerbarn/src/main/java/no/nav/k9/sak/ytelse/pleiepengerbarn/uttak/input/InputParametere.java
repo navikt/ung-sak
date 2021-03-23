@@ -29,6 +29,7 @@ public class InputParametere {
     private PleiebehovResultat pleiebehovResultat;
     private Set<Inntektsmelding> sakInntektsmeldinger;
     private Set<Saksnummer> relaterteSaker;
+    private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
 
     public InputParametere() {
     }
@@ -112,5 +113,14 @@ public class InputParametere {
 
     public Set<Saksnummer> getRelaterteSaker() {
         return relaterteSaker;
+    }
+
+    public InputParametere medUtvidetPerioderRevurdering(NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder) {
+        this.utvidetRevurderingPerioder = utvidetRevurderingPerioder;
+        return this;
+    }
+
+    public NavigableSet<DatoIntervallEntitet> getUtvidetRevurderingPerioder() {
+        return utvidetRevurderingPerioder;
     }
 }
