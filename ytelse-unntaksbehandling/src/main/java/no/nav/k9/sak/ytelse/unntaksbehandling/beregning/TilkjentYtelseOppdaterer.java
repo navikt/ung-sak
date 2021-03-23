@@ -1,11 +1,10 @@
 package no.nav.k9.sak.ytelse.unntaksbehandling.beregning;
 
-
 import static java.lang.String.format;
 import static java.util.Map.entry;
 import static java.util.Optional.ofNullable;
-import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
 import static no.nav.k9.felles.feil.LogLevel.INFO;
+import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -16,8 +15,13 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -45,10 +49,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftTilkjentYtelseDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -93,7 +93,9 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         }
 
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
-        getFeriepengerTjeneste(behandling).beregnFeriepenger(nyttBeregningsresultat);
+
+        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
+
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
@@ -110,7 +112,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             var tilSøker = Optional.ofNullable(tyAndel.getTilSoker()).orElse(0);
             var refusjon = Optional.ofNullable(tyAndel.getRefusjon()).orElse(0);
 
-            // Søkers andel  - obligatorisk for Beregningsresultat
+            // Søkers andel - obligatorisk for Beregningsresultat
             var søkersAndel = byggAndel(tyAndel, tilSøker, true);
             søkersAndel.buildFor(brPeriode);
 
@@ -130,8 +132,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medUtbetalingsgrad(tyAndel.getUtbetalingsgrad())
             .medArbeidsgiver(OrgNummer.erGyldigOrgnr(tyAndel.getArbeidsgiver().getIdentifikator())
                 ? Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiver().getIdentifikator())
-                : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator()))
-            )
+                : Arbeidsgiver.person(new AktørId(tyAndel.getArbeidsgiver().getIdentifikator())))
             .medArbeidsforholdRef(InternArbeidsforholdRef.ref(tyAndel.getArbeidsforholdRef()))
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))
             .medInntektskategori(tyAndel.getInntektskategori())
@@ -157,8 +158,13 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         historikkAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
     }
 
-    private BeregnFeriepengerTjeneste getFeriepengerTjeneste(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
+    private Optional<BeregnFeriepengerTjeneste> getFeriepengerTjeneste(Behandling behandling) {
+        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+        if (ytelseType == FagsakYtelseType.FRISINN) {
+            return Optional.empty();
+        }
+        return Optional.of(FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, behandling.getFagsakYtelseType()).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregnFeriepengerTjeneste.class.getSimpleName() + " for ytelse=" + ytelseType)));
     }
 
     interface TilkjentYtelseOppdatererFeil extends DeklarerteFeil {
@@ -173,17 +179,16 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
     static class InntektskategoriTilAktivitetstatusMapper {
         private static final Map<Inntektskategori, AktivitetStatus> INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP = Map.ofEntries(
-            entry(Inntektskategori.ARBEIDSTAKER,/*                  */ AktivitetStatus.ARBEIDSTAKER),
-            entry(Inntektskategori.FRILANSER,/*                     */ AktivitetStatus.FRILANSER),
-            entry(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE,/*   */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
-            entry(Inntektskategori.DAGPENGER,/*                     */ AktivitetStatus.DAGPENGER),
-            entry(Inntektskategori.ARBEIDSAVKLARINGSPENGER,/*       */ AktivitetStatus.ARBEIDSAVKLARINGSPENGER),
-            entry(Inntektskategori.SJØMANN,/*                       */ AktivitetStatus.ARBEIDSTAKER),
-            entry(Inntektskategori.DAGMAMMA,/*                      */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
-            entry(Inntektskategori.JORDBRUKER,/*                    */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
-            entry(Inntektskategori.FISKER,/*                        */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
-            entry(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER,/* */ AktivitetStatus.ARBEIDSTAKER)
-        );
+            entry(Inntektskategori.ARBEIDSTAKER, /*                  */ AktivitetStatus.ARBEIDSTAKER),
+            entry(Inntektskategori.FRILANSER, /*                     */ AktivitetStatus.FRILANSER),
+            entry(Inntektskategori.SELVSTENDIG_NÆRINGSDRIVENDE, /*   */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.DAGPENGER, /*                     */ AktivitetStatus.DAGPENGER),
+            entry(Inntektskategori.ARBEIDSAVKLARINGSPENGER, /*       */ AktivitetStatus.ARBEIDSAVKLARINGSPENGER),
+            entry(Inntektskategori.SJØMANN, /*                       */ AktivitetStatus.ARBEIDSTAKER),
+            entry(Inntektskategori.DAGMAMMA, /*                      */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.JORDBRUKER, /*                    */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.FISKER, /*                        */ AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE),
+            entry(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, /* */ AktivitetStatus.ARBEIDSTAKER));
 
         static AktivitetStatus aktivitetStatusFor(Inntektskategori inntektskategori) {
             return ofNullable(INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.get(inntektskategori))
