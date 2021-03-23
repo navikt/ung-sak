@@ -23,6 +23,10 @@ public final class SykdomUtils {
         return t.stream().map(l -> new Periode(l.getFom(), l.getTom())).collect(Collectors.toList());
     }
 
+    public static List<Periode> toPeriodeList(NavigableSet<DatoIntervallEntitet> datoer) {
+        return datoer.stream().map(i -> new Periode(i.getFomDato(), i.getTomDato())).collect(Collectors.toList());
+    }
+
     public static LocalDateTimeline<Boolean> toLocalDateTimeline(List<Periode> perioder) {
         return new LocalDateTimeline<Boolean>(perioder.stream().map(p -> new LocalDateSegment<Boolean>(p.getFom(), p.getTom(), true)).collect(Collectors.toList())).compress();
     }
