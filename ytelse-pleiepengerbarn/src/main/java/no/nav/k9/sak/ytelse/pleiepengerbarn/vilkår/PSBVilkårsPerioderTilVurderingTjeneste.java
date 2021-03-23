@@ -29,6 +29,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -125,7 +126,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerSidenForrigeBehandling, vurderingsperioderTimeline);
 
-        return new TreeSet<>(utvidedePerioder.stream()
+        LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
+        LocalDateTimeline<Boolean> beholdKunSøktePerioder = utvidedePerioder.intersection(søktePerioderTimeline);
+
+        return new TreeSet<>(beholdKunSøktePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
             .collect(Collectors.toList()));
     }
