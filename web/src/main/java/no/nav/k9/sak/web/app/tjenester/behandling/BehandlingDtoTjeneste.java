@@ -324,8 +324,12 @@ public class BehandlingDtoTjeneste {
         boolean ytelseMedBeregning = InformasjonselementerUtleder.finnTjeneste(informasjonselementer, behandling.getFagsakYtelseType(), behandling.getType()).harBeregnetYtelse(behandling.getType());
 
         if (ytelseMedBeregning) {
+            // FIXME: fjern denne, skal bare ha "arbeidsforhold" som rel
             dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold-v1", uuidQueryParams));
+            dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold", uuidQueryParams));
+
             dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
+
 
             dto.leggTil(getFraMap(OpptjeningRestTjeneste.PATH_V2, "opptjening-v2", uuidQueryParams));
             dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
