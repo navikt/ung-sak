@@ -175,7 +175,7 @@ public class SykdomVurderingRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
-        final List<SykdomDokument> dokumenterSomErRelevanteForSykdom = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(pleietrengende);
+        final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende);
 
         final List<SykdomVurderingVersjon> versjoner;
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
@@ -194,7 +194,7 @@ public class SykdomVurderingRestTjeneste {
             sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
         }
 
-        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, dokumenterSomErRelevanteForSykdom, sykdomUtlededePerioder);
+        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
     }
 
     @POST

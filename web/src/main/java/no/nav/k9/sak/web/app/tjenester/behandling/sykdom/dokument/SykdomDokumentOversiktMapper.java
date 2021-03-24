@@ -126,8 +126,10 @@ public class SykdomDokumentOversiktMapper {
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
 
-    public List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
-        return dokumenter.stream().map(d -> new SykdomDokumentDto(
+    public List<SykdomDokumentDto> mapSykdomsdokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
+        return dokumenter.stream()
+                .filter(d -> d.getType().isRelevantForSykdom() || ids.contains(d.getId()))
+                .map(d -> new SykdomDokumentDto(
                     "" + d.getId(),
                     d.getType(),
                     ids.contains(d.getId()),

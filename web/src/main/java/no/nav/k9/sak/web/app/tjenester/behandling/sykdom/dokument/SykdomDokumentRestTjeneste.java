@@ -119,8 +119,8 @@ public class SykdomDokumentRestTjeneste {
             BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final List<SykdomDokument> dokumenter = sykdomDokumentRepository.henDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.mapDokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
+        final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
+        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
     }
 
     @GET

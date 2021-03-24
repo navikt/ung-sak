@@ -41,7 +41,7 @@ public class SykdomVurderingMapper {
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
-    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> relevanteDokumenterForSykdom, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
+    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> alleDokumenter, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
         final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
 
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
@@ -54,7 +54,7 @@ public class SykdomVurderingMapper {
                     v.getTekst(),
                     v.getResultat(),
                     mapPerioder(v.getPerioder()),
-                    mapDokumenter(behandlingUuid, v.getDokumenter(), relevanteDokumenterForSykdom),
+                    mapDokumenter(behandlingUuid, v.getDokumenter(), alleDokumenter),
                     v.getEndretAv(),
                     v.getEndretTidspunkt())
             )
@@ -72,9 +72,9 @@ public class SykdomVurderingMapper {
     }
 
 
-    private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> relevanteDokumenterForSykdom) {
+    private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> alleDokumenter) {
         final Set<Long> ids = tilknyttedeDokumenter.stream().map(d -> d.getId()).collect(Collectors.toUnmodifiableSet());
-        return dokumentMapper.mapDokumenter(behandlingUuid, relevanteDokumenterForSykdom, ids);
+        return dokumentMapper.mapSykdomsdokumenter(behandlingUuid, alleDokumenter, ids);
     }
 
 
