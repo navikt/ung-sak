@@ -273,9 +273,6 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
-        if(dokument.getType() != SykdomDokumentType.UKLASSIFISERT) {
-            throw new UnsupportedOperationException("Oppdatering av dokumenter mer enn en gang er ikke støttet ennå");
-        } // TODO: Håndtering av versjoner/historikk.
 
         dokument.setDatert(sykdomDokumentEndringDto.getDatert());
         dokument.setType(sykdomDokumentEndringDto.getType());
