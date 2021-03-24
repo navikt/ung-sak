@@ -25,7 +25,6 @@ import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
-import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.søknad.AngittPersonDto;
 import no.nav.k9.sak.kontrakt.søknad.ArbeidsgiverDto;
@@ -45,7 +44,6 @@ public class SøknadDtoTjeneste {
 
     private BehandlingRepositoryProvider repositoryProvider;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private KompletthetsjekkerProvider kompletthetsjekkerProvider;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private MedlemTjeneste medlemTjeneste;
     private PersoninfoAdapter personinfoAdapter;
@@ -57,13 +55,11 @@ public class SøknadDtoTjeneste {
     @Inject
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                             KompletthetsjekkerProvider kompletthetsjekkerProvider,
                              PersoninfoAdapter personinfoAdapter,
                              ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                              MedlemTjeneste medlemTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -135,7 +131,7 @@ public class SøknadDtoTjeneste {
     }
 
     private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {
-        Kompletthetsjekker kompletthetsjekker = kompletthetsjekkerProvider.finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType());
+        Kompletthetsjekker kompletthetsjekker = Kompletthetsjekker.finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType());
         List<ManglendeVedlegg> alleManglendeVedlegg = new ArrayList<>(kompletthetsjekker.utledAlleManglendeVedleggForForsendelse(ref));
         List<ManglendeVedlegg> vedleggSomIkkeKommer = List.copyOf(kompletthetsjekker.utledAlleManglendeVedleggSomIkkeKommer(ref));
 

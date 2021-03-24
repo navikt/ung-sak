@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD;
+import static no.nav.k9.sak.kompletthet.Kompletthetsjekker.finnKompletthetsjekkerFor;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,29 +31,22 @@ public class KompletthetModell {
 
     static {
         Map<AksjonspunktDefinisjon, BiFunction<KompletthetModell, BehandlingReferanse, KompletthetResultat>> map = new EnumMap<>(AksjonspunktDefinisjon.class);
-        map.put(AUTO_VENTER_PÅ_KOMPLETT_SØKNAD, (kontroller, ref) -> finnKompletthetssjekker(kontroller, ref).vurderForsendelseKomplett(ref));
-        map.put(VENT_PGA_FOR_TIDLIG_SØKNAD, (kontroller, ref) -> finnKompletthetssjekker(kontroller, ref).vurderSøknadMottattForTidlig(ref));
-        map.put(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, (kontroller, ref) -> finnKompletthetssjekker(kontroller, ref).vurderEtterlysningInntektsmelding(ref));
+        map.put(AUTO_VENTER_PÅ_KOMPLETT_SØKNAD, (kontroller, ref) -> finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType()).vurderForsendelseKomplett(ref));
+        map.put(VENT_PGA_FOR_TIDLIG_SØKNAD, (kontroller, ref) -> finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType()).vurderSøknadMottattForTidlig(ref));
+        map.put(AUTO_VENT_ETTERLYST_INNTEKTSMELDING, (kontroller, ref) -> finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType()).vurderEtterlysningInntektsmelding(ref));
 
         KOMPLETTHETSFUNKSJONER = Collections.unmodifiableMap(map);
     }
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private KompletthetsjekkerProvider kompletthetsjekkerProvider;
 
     public KompletthetModell() {
         // For CDI proxy
     }
 
     @Inject
-    public KompletthetModell(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                             KompletthetsjekkerProvider kompletthetsjekkerProvider) {
+    public KompletthetModell(BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
-    }
-
-    private static Kompletthetsjekker finnKompletthetssjekker(KompletthetModell kompletthetModell, BehandlingReferanse ref) {
-        return kompletthetModell.kompletthetsjekkerProvider.finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType());
     }
 
     /**
@@ -62,12 +56,11 @@ public class KompletthetModell {
      **/
     // Rangering 1: Tidligste steg (dvs. autopunkt ville blitt eksekvert tidligst i behandlingsstegene)
     public List<AksjonspunktDefinisjon> rangerKompletthetsfunksjonerKnyttetTilAutopunkt(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        Comparator<AksjonspunktDefinisjon> stegRekkefølge = (apDef1, apDef2) ->
-            behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, apDef1.getBehandlingSteg(), apDef2.getBehandlingSteg());
+        Comparator<AksjonspunktDefinisjon> stegRekkefølge = (apDef1, apDef2) -> behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, apDef1.getBehandlingSteg(),
+            apDef2.getBehandlingSteg());
         // Rangering 2: Autopunkt som kjøres igjen ved gjenopptakelse blir eksekvert FØR ikke-gjenopptagende i samme behandlingssteg
-        //      Det er bare en implisitt antakelse at kodes riktig i stegene der Autopunkt brukes; bør forbedre dette.
-        Comparator<AksjonspunktDefinisjon> tilbakehoppRekkefølge = (apDef1, apDef2) ->
-            Boolean.compare(apDef1.tilbakehoppVedGjenopptakelse(), apDef2.tilbakehoppVedGjenopptakelse());
+        // Det er bare en implisitt antakelse at kodes riktig i stegene der Autopunkt brukes; bør forbedre dette.
+        Comparator<AksjonspunktDefinisjon> tilbakehoppRekkefølge = (apDef1, apDef2) -> Boolean.compare(apDef1.tilbakehoppVedGjenopptakelse(), apDef2.tilbakehoppVedGjenopptakelse());
 
         return KOMPLETTHETSFUNKSJONER.keySet().stream()
             .sorted(stegRekkefølge
@@ -78,7 +71,7 @@ public class KompletthetModell {
     public boolean erKompletthetssjekkPassert(Long behandlingId) {
         return behandlingskontrollTjeneste.erStegPassert(behandlingId, BehandlingStegType.VURDER_KOMPLETTHET);
     }
-    
+
     public boolean erRegisterInnhentingPassert(Long behandlingId) {
         return behandlingskontrollTjeneste.erStegPassert(behandlingId, BehandlingStegType.INNHENT_REGISTEROPP);
     }

@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -63,6 +65,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
 
     @JsonProperty(value = "kilde", required = true)
     @NotNull
+    @NotEmpty
     @Valid
     private Set<ArbeidsforholdKilde> kilder;
 
@@ -124,7 +127,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     public void leggTilKilde(ArbeidsforholdKilde kilde) {
         Objects.requireNonNull(kilde);
         if (this.kilder == null) {
-            this.kilder = new HashSet<>();
+            this.kilder = new LinkedHashSet<>();
         }
         this.kilder.add(kilde);
     }

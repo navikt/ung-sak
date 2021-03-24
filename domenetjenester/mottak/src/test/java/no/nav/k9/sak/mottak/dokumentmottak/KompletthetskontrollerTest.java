@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,21 +27,25 @@ import org.mockito.quality.Strictness;
 
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
-import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -55,14 +61,9 @@ public class KompletthetskontrollerTest {
 
     @Mock
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    @Mock
-    private KompletthetsjekkerProvider kompletthetsjekkerProvider;
 
     @Mock
     private DokumentmottakerFelles dokumentmottakerFelles;
-
-    @Mock
-    private Kompletthetsjekker kompletthetsjekker;
 
     @Mock
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
@@ -77,19 +78,19 @@ public class KompletthetskontrollerTest {
     private Behandling behandling;
     private MottattDokument mottattDokument;
 
+    private static Kompletthetsjekker kompletthetsjekker;
+
     @BeforeEach
     public void oppsett() {
         MockitoAnnotations.initMocks(this);
 
-        var scenario = TestScenarioBuilder.builderMedSøknad();
+        kompletthetsjekker = Mockito.mock(Kompletthetsjekker.class);
+
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OBSOLETE);
         behandling = scenario.lagMocked();
 
-        // Simuler at provider alltid gir kompletthetssjekker
-        when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
-
-        KompletthetModell modell = new KompletthetModell(behandlingskontrollTjeneste, kompletthetsjekkerProvider);
+        KompletthetModell modell = new KompletthetModell(behandlingskontrollTjeneste);
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
-
 
         kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
             modell,
@@ -109,7 +110,6 @@ public class KompletthetskontrollerTest {
         Behandling behandling = scenario.lagre(repositoryProvider); // Skulle gjerne mocket, men da funker ikke AP_DEF
         LocalDateTime ventefrist = LocalDateTime.now().plusDays(1);
 
-        when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
 
         var prosessTaskData = kompletthetskontroller.asynkVurderKompletthet(behandling);
@@ -121,12 +121,11 @@ public class KompletthetskontrollerTest {
     @Test
     public void skal_beholde_behandling_på_vent_dersom_kompletthet_ikke_er_oppfylt_deretter_slippe_videre() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OBSOLETE);
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD);
         Behandling behandling = scenario.lagre(repositoryProvider); // Skulle gjerne mocket, men da funker ikke AP_DEF
         LocalDateTime ventefrist = LocalDateTime.now().plusDays(1);
 
-        when(kompletthetsjekkerProvider.finnKompletthetsjekkerFor(any(), any())).thenReturn(kompletthetsjekker);
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.ikkeOppfylt(ventefrist, Venteårsak.AVV_FODSEL));
         when(behandlingskontrollTjeneste.erStegPassert(behandling.getId(), BehandlingStegType.VURDER_UTLAND)).thenReturn(true);
 
@@ -209,5 +208,37 @@ public class KompletthetskontrollerTest {
         verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
         verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
             Venteårsak.AVV_DOK);
+    }
+
+    @ApplicationScoped
+    @FagsakYtelseTypeRef("OBSOLETE")
+    @BehandlingTypeRef
+    static class DummyKompletthetSjekker implements Kompletthetsjekker {
+
+        @Override
+        public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
+            return kompletthetsjekker.vurderSøknadMottattForTidlig(ref);
+        }
+
+        @Override
+        public KompletthetResultat vurderForsendelseKomplett(BehandlingReferanse ref) {
+            return kompletthetsjekker.vurderForsendelseKomplett(ref);
+        }
+
+        @Override
+        public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
+            return kompletthetsjekker.utledAlleManglendeVedleggForForsendelse(ref);
+        }
+
+        @Override
+        public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
+            return kompletthetsjekker.utledAlleManglendeVedleggSomIkkeKommer(ref);
+        }
+
+        @Override
+        public boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref) {
+            return kompletthetsjekker.erForsendelsesgrunnlagKomplett(ref);
+        }
+
     }
 }

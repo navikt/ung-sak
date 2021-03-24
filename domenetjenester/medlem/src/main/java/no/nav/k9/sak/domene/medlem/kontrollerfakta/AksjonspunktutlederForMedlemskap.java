@@ -44,7 +44,7 @@ public class AksjonspunktutlederForMedlemskap implements AksjonspunktUtleder {
         Set<LocalDate> finnVurderingsdatoer = tjeneste.finnVurderingsdatoer(behandlingId);
         Set<MedlemResultat> resultat = new HashSet<>();
         if (!finnVurderingsdatoer.isEmpty()) {
-            BehandlingReferanse ref = BehandlingReferanse.fra(behandling, param.getSkjæringstidspunkt());
+            BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
             finnVurderingsdatoer.forEach(dato -> resultat.addAll(vurderMedlemskapTjeneste.vurderMedlemskap(ref, dato)));
         }
         if (!resultat.isEmpty()) {

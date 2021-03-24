@@ -102,6 +102,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkårPeriodeSet;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();

@@ -42,9 +42,6 @@ public class OmsorgspengerRammevedtakTjeneste {
             .orElseGet(() -> { throw new IllegalStateException("Kunne ikke finne person for aktørId."); }); // todo: send aktørId når Årskvantum får PDL-integrasjon
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
-        if(søknad == null) {
-            throw new IllegalStateException("Kunne ikke finne søknad tilknyttet behandling: " + behandlingUuid);
-        }
         DatoIntervallEntitet søknadsperiode = søknad.getSøknadsperiode();
 
         return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(søknadsperiode.getFomDato(), søknadsperiode.getTomDato()));

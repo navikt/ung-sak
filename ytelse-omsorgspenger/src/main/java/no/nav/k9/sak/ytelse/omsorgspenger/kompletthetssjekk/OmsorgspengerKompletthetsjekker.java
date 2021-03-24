@@ -27,7 +27,6 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
-import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef("BT-002")
@@ -36,7 +35,6 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private static final Logger LOGGER = LoggerFactory.getLogger(OmsorgspengerKompletthetsjekker.class);
     public static final int ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING = 3;
 
-    private Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad;
     private Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -47,12 +45,10 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     }
 
     @Inject
-    public OmsorgspengerKompletthetsjekker(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
-                                           @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
+    public OmsorgspengerKompletthetsjekker(@Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
                                            InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil) {
-        this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -111,10 +107,6 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
             .toLocalDate()
             .plusDays(ANTALL_DAGER_VENTER_PÅ_INNTEKTSMELDING);
         return fellesUtil.finnVentefrist(muligFrist);
-    }
-
-    private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
-        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
     }
 
     private KompletthetssjekkerInntektsmelding getKompletthetsjekkerInntektsmelding(BehandlingReferanse ref) {
