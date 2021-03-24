@@ -111,7 +111,10 @@ public class ÅrskvantumTjeneste {
 
     public void bekreftUttaksplan(Long behandlingId) {
         årskvantumKlient.settUttaksplanTilManueltBekreftet(behandlingRepository.hentBehandling(behandlingId).getUuid());
+    }
 
+    public void innvilgeEllerAvslåPeriodeneManuelt(Long behandlingId, boolean innvilgePeriodene) {
+        årskvantumKlient.innvilgeEllerAvslåPeriodeneManuelt(behandlingRepository.hentBehandling(behandlingId).getUuid(), innvilgePeriodene);
     }
 
     public void slettUttaksplan(Long behandlingId) {

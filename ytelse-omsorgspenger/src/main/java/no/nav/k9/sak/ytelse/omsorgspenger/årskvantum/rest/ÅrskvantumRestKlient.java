@@ -88,6 +88,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene) {
+        try {
+            var request = new ManuellVurderingRequest(behandlingUUID.toString(), innvilgePeriodene);
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/innvilgEllerAvslaa" + behandlingUUID.toString());
+            restKlient.patch(endpoint, request);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilInnvilgeEllerAvslåPeriodeneManuelt(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public void slettUttaksplan(UUID behandlingUUID) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/slett?behandlingUUID=" + behandlingUUID.toString());
@@ -222,6 +233,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000096", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil klarteIkkeHenteUttaksplanForBehandlinger(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000097", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilInnvilgeEllerAvslåPeriodeneManuelt(String feilmelding, Throwable t);
     }
 
 }

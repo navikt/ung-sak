@@ -32,6 +32,11 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene) {
+
+    }
+
+    @Override
     public void slettUttaksplan(UUID behandlingUUID) {
 
     }
