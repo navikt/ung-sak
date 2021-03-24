@@ -56,10 +56,11 @@ public class UtvidetRettKompletthetSjekker implements Kompletthetsjekker {
             var fristTid = søknad.getMottattDato().plus(frist).atStartOfDay();
 
             if (fristTid.isBefore(LocalDateTime.now())) {
-                log.warn("Frist for søknad mottatt {} utløpt {}, mangler vedlegg/dokumentasjon", søknad.getMottattDato(), fristTid);
+                log.warn("Frist for søknad mottatt {} utløpt {}, mangler vedlegg/dokumentasjon. Venter 1 dag til", søknad.getMottattDato(), fristTid);
+                return KompletthetResultat.ikkeOppfylt(LocalDateTime.now().plusDays(1), Venteårsak.AVV_DOK);
+            } else {
+                return KompletthetResultat.ikkeOppfylt(fristTid, Venteårsak.AVV_DOK);
             }
-
-            return KompletthetResultat.ikkeOppfylt(fristTid, Venteårsak.AVV_DOK);
         }
     }
 
