@@ -55,7 +55,7 @@ public class SøknadsperioderHolder extends BaseEntitet {
         Objects.requireNonNull(perioder);
         this.perioder = perioder.stream()
             .map(Søknadsperioder::new)
-            .collect(Collectors.toCollection(LinkedHashSet::new));;
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Long getId() {

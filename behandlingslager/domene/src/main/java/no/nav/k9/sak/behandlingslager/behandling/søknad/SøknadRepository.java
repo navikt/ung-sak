@@ -14,8 +14,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @Dependent
 public class SøknadRepository {
@@ -37,7 +37,12 @@ public class SøknadRepository {
         if (behandlingId == null) {
             return null;
         }
-        return hentSøknadHvisEksisterer(behandlingId).orElse(null);
+        return hentSøknad(behandlingId);
+    }
+
+    public SøknadEntitet hentSøknad(Long behandlingId) {
+        return hentSøknadHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Kunne ikke finne søknad tilknyttet behandling: " + behandlingId));
     }
 
     public Optional<SøknadEntitet> hentSøknadHvisEksisterer(Long behandlingId) {

@@ -33,7 +33,6 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
-import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 
 @ApplicationScoped
 @BehandlingTypeRef
@@ -45,7 +44,7 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
     private static final Integer VENTEFRIST_ETTER_MOTATT_DATO_UKER = 1;
     private static final Integer VENTEFRIST_ETTER_ETTERLYSNING_UKER = 3;
 
-    private Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad;
+    private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
     private Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
     private KompletthetsjekkerFelles fellesUtil;
@@ -56,7 +55,7 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
     }
 
     @Inject
-    public PsbKompletthetsjekker(@Any Instance<KompletthetssjekkerSøknad> kompletthetssjekkerSøknad,
+    public PsbKompletthetsjekker(KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
                                  @Any Instance<KompletthetssjekkerInntektsmelding> kompletthetssjekkerInntektsmelding,
                                  InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                  KompletthetsjekkerFelles fellesUtil,
@@ -68,17 +67,13 @@ public class PsbKompletthetsjekker implements Kompletthetsjekker {
         this.søknadRepository = søknadRepository;
     }
 
-    private KompletthetssjekkerSøknad getKomplethetsjekker(BehandlingReferanse ref) {
-        return BehandlingTypeRef.Lookup.get(KompletthetssjekkerSøknad.class, kompletthetssjekkerSøknad, ref.getFagsakYtelseType(), ref.getBehandlingType());
-    }
-
     private KompletthetssjekkerInntektsmelding getKompletthetsjekkerInntektsmelding(BehandlingReferanse ref) {
         return BehandlingTypeRef.Lookup.get(KompletthetssjekkerInntektsmelding.class, kompletthetssjekkerInntektsmelding, ref.getFagsakYtelseType(), ref.getBehandlingType());
     }
 
     @Override
     public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
-        Optional<LocalDateTime> forTidligFrist = getKomplethetsjekker(ref).erSøknadMottattForTidlig(ref);
+        Optional<LocalDateTime> forTidligFrist = kompletthetssjekkerSøknad.erSøknadMottattForTidlig(ref);
         return forTidligFrist.map(localDateTime -> KompletthetResultat.ikkeOppfylt(localDateTime, Venteårsak.FOR_TIDLIG_SOKNAD)).orElseGet(KompletthetResultat::oppfylt);
     }
 

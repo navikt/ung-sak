@@ -22,21 +22,14 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.Inngangsvilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårTypeRef;
-import no.nav.k9.sak.kompletthet.KompletthetsjekkerProvider;
+import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 
 @ApplicationScoped
 @VilkårTypeRef(VilkårTypeKoder.FP_VK_34)
 public class InngangsvilkårSøkersOpplysningsplikt implements Inngangsvilkår {
 
-    private KompletthetsjekkerProvider kompletthetsjekkerProvider;
-
-    public InngangsvilkårSøkersOpplysningsplikt() {
-        // for CDI proxy
-    }
-
     @Inject
-    public InngangsvilkårSøkersOpplysningsplikt(KompletthetsjekkerProvider kompletthetsjekkerProvider) {
-        this.kompletthetsjekkerProvider = kompletthetsjekkerProvider;
+    public InngangsvilkårSøkersOpplysningsplikt() {
     }
 
     @Override
@@ -60,7 +53,7 @@ public class InngangsvilkårSøkersOpplysningsplikt implements Inngangsvilkår {
                 // For revurdering skal det ikke utføres vilkårskontroll om opplysningsplikt (NOOP)
                 resultater.put(periode, oppfylt);
             } else {
-                boolean søknadKomplett = this.kompletthetsjekkerProvider.finnKompletthetsjekkerFor(ytelseType, behandlingType).erForsendelsesgrunnlagKomplett(ref);
+                boolean søknadKomplett = Kompletthetsjekker.finnKompletthetsjekkerFor(ytelseType, behandlingType).erForsendelsesgrunnlagKomplett(ref);
                 if (søknadKomplett) {
                     resultater.put(periode, oppfylt);
                 } else {

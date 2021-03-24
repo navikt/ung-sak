@@ -42,7 +42,6 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.mottak.inntektsmelding.DefaultKompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
-import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetssjekkerSøknad;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -99,7 +98,7 @@ public class KompletthetsjekkerTest {
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
         psbKompletthetsjekker = new PsbKompletthetsjekker(
-            new UnitTestLookupInstanceImpl<>(kompletthetssjekkerSøknad),
+            kompletthetssjekkerSøknad,
             new UnitTestLookupInstanceImpl<>(kompletthetssjekkerInntektsmelding),
             inntektsmeldingTjeneste,
             kompletthetsjekkerFelles,
