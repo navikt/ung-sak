@@ -50,7 +50,6 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
@@ -83,8 +82,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    private AksjonspunktRepository aksjonspunktRepository;
-
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
 
@@ -96,14 +93,12 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef("FRISINN") FrisinnSøknadMottaker frisinnSøknadMottaker,
                                                    TpsTjeneste tpsTjeneste,
                                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                                   AksjonspunktRepository aksjonspunktRepository,
                                                    FagsakTjeneste fagsakTjeneste,
                                                    ProsessTaskRepository prosessTaskRepository) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.aksjonspunktRepository = aksjonspunktRepository;
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
     }
