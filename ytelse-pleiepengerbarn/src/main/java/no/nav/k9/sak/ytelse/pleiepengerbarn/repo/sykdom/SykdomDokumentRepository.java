@@ -43,7 +43,7 @@ public class SykdomDokumentRepository {
         return q.getResultList();
     }
 
-    public List<SykdomDokument> henDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
+    public List<SykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
                 .stream()
                 .filter(d -> d.getType().isRelevantForSykdom())
