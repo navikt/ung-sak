@@ -99,9 +99,7 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     }
 
     /**
-     * Unik identifikator for arbeidsforholdet til aktøren i bedriften. Selve nøkkelen er ikke unik, men er unik for arbeidstaker hos
-     * arbeidsgiver.
-     * <p>
+     * Unik identifikator for arbeidsforholdet til aktøren i bedriften.
      * NB! Vil kun forekomme i aktiviteter som er hentet inn fra aa-reg
      *
      * @return {@code ArbeidsforholdRef.ref(null)} hvis ikke tilstede

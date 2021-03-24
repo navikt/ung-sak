@@ -284,15 +284,16 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == this) {
+    public boolean equals(Object obj) {
+        if (obj == this) {
             return true;
         }
-        if (!(object instanceof AbstractLocalDateInterval)) {
+        if (obj == null || obj.getClass() != this.getClass()) {
             return false;
         }
-        var annen = (AbstractLocalDateInterval) object;
-        return Objects.equals(this.getFomDato(), annen.getFomDato()) && Objects.equals(this.getTomDato(), annen.getTomDato());
+        var annen = (AbstractLocalDateInterval) obj;
+        return Objects.equals(this.getFomDato(), annen.getFomDato())
+            && Objects.equals(this.getTomDato(), annen.getTomDato());
     }
 
     @Override
@@ -305,9 +306,9 @@ public abstract class AbstractLocalDateInterval implements Comparable<AbstractLo
         if (getFomDato().equals(TIDENES_BEGYNNELSE) && getTomDato().equals(TIDENES_ENDE)) {
             return "Periode: (,)";
         } else if (getFomDato().equals(TIDENES_BEGYNNELSE)) {
-            return String.format("Periode: [%s,)", getFomDato().format(FORMATTER));
-        } else if (getTomDato().equals(TIDENES_ENDE)) {
             return String.format("Periode: (,%s]", getTomDato().format(FORMATTER));
+        } else if (getTomDato().equals(TIDENES_ENDE)) {
+            return String.format("Periode: [%s,)", getFomDato().format(FORMATTER));
         } else {
             return String.format("Periode: [%s,%s]", getFomDato().format(FORMATTER), getTomDato().format(FORMATTER));
         }

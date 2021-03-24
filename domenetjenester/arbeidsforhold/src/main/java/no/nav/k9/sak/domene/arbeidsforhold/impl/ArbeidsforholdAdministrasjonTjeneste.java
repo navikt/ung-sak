@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -11,6 +11,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
 import no.nav.k9.sak.typer.AktørId;
@@ -60,16 +61,17 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                           UtledArbeidsforholdParametere param) {
 
-        var inntektsmeldinger = new LinkedHashSet<>(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()));
+        var inntektsmeldinger = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE); // ta i rekkefølge mottatt
+        inntektsmeldinger.addAll(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()));
 
         var arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
         var filter = new YrkesaktivitetFilter(arbeidsforholdInformasjon, iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
-        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon);
+        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
         mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
-        mapper.utledArbeidsforholdFraYrkesaktivteter(yrkesaktiviteter);
+        mapper.utledArbeidsforholdFraYrkesaktiviteter(yrkesaktiviteter);
         mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
 
         if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {

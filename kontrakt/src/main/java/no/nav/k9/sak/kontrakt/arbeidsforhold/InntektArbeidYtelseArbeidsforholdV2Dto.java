@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -81,7 +82,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     private BigDecimal stillingsprosent;
 
     @JsonProperty(value = "aksjonspunktÅrsaker")
-    private Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker = new HashSet<>();
+    private Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker = new LinkedHashSet<>();
 
     @JsonProperty(value = "inntektsmeldinger")
     private Set<MottattInntektsmeldingDto> inntektsmeldinger;
@@ -168,22 +169,22 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
         return ansettelsesPerioder;
     }
 
-    public void setAnsettelsesPerioder(Set<PeriodeDto> ansettelsesPerioder) {
-        this.ansettelsesPerioder = ansettelsesPerioder;
+    public void setAnsettelsesPerioder(Collection<PeriodeDto> ansettelsesPerioder) {
+        this.ansettelsesPerioder = ansettelsesPerioder == null ? null : new LinkedHashSet<>(ansettelsesPerioder);
     }
 
     public Set<ArbeidsforholdAksjonspunktÅrsak> getAksjonspunktÅrsaker() {
         return aksjonspunktÅrsaker;
     }
 
-    public void setAksjonspunktÅrsaker(Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker) {
-        this.aksjonspunktÅrsaker = aksjonspunktÅrsaker;
+    public void setAksjonspunktÅrsaker(Collection<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker) {
+        this.aksjonspunktÅrsaker = aksjonspunktÅrsaker == null ? null : new LinkedHashSet<>(aksjonspunktÅrsaker);
     }
 
     public void leggTilAksjonspunktÅrsak(ArbeidsforholdAksjonspunktÅrsak aksjonspunktÅrsak) {
         Objects.requireNonNull(aksjonspunktÅrsak);
         if (this.aksjonspunktÅrsaker == null) {
-            this.aksjonspunktÅrsaker = new HashSet<>();
+            this.aksjonspunktÅrsaker = new LinkedHashSet<>();
         }
         this.aksjonspunktÅrsaker.add(aksjonspunktÅrsak);
     }
@@ -216,7 +217,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     public String toString() {
         return getClass().getSimpleName()
             + "<id=" + id
-            + ", arbeidsgiver=MASKERT"
+            + ", arbeidsgiver=" + arbeidsgiver
             + ", arbeidsforhold=" + arbeidsforhold
             + ", ansettelsesPerioder=" + ansettelsesPerioder
             + ", handlingType=" + handlingType
