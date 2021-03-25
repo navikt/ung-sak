@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import org.junit.jupiter.api.Test;
@@ -17,12 +18,13 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 public class BehandlingDumpTest {
 
     @Inject
+    @Any
     private BehandlingDump behandlingDump;
 
     @Inject
     BehandlingRepositoryProvider behandlingRepositoryProvider;
 
-    private TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMP);
+    private TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OBSOLETE);
 
     @Test
     void test_dump_behandling() throws Exception {
@@ -32,11 +34,6 @@ public class BehandlingDumpTest {
         var dumpOutput = behandlingDump.dump(fagsak);
 
         assertThat(dumpOutput).isNotEmpty().hasSize(2);
-
-        for (var c : dumpOutput) {
-            System.out.println(c.getPath());
-            System.out.println(c.getContent());
-        }
     }
 
 }

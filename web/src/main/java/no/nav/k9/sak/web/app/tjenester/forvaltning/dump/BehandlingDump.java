@@ -29,11 +29,11 @@ public class BehandlingDump implements DebugDumpFagsak {
     @SuppressWarnings("unused")
     private EntityManager entityManager;
 
-    BehandlingDump() {
+    protected BehandlingDump() {
     }
 
     @Inject
-    BehandlingDump(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, EntityManager entityManager) {
+    protected BehandlingDump(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, EntityManager entityManager) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.entityManager = entityManager;
