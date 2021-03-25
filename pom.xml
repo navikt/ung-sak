@@ -38,7 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <junit.version>5.7.1</junit.version>
-        <felles.version>0.1.11</felles.version>
+        <felles.version>0.1.12</felles.version>
         <swagger.version>2.1.7</swagger.version>
         <fp-kontrakter.version>5.2.1</fp-kontrakter.version>
         <k9format.version>5.1.16</k9format.version>
@@ -82,13 +82,6 @@
 
             <!-- Felles biblioteker - Importerte avhengigheter. -->
             <dependency>
-                <groupId>no.nav.k9.prosesstask</groupId>
-                <artifactId>prosesstask-root</artifactId>
-                <version>0.1.6</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
                 <groupId>no.nav.k9.felles</groupId>
                 <artifactId>k9-felles-root</artifactId>
@@ -96,7 +89,6 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-
             <dependency>
                 <groupId>no.nav.k9.felles.sikkerhet</groupId>
                 <artifactId>k9-felles-sikkerhet</artifactId>
@@ -138,6 +130,14 @@
                 <version>${felles.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>no.nav.k9.prosesstask</groupId>
+                <artifactId>prosesstask-root</artifactId>
+                <version>0.1.6</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter</groupId>
                 <artifactId>fp-kontrakter-root</artifactId>
