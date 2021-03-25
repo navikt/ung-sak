@@ -138,6 +138,9 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     }
 
     void leggTilPermisjon(Permisjon permisjon) {
+        if (permisjon == null) {
+            return;
+        }
         this.permisjon.add(permisjon);
         permisjon.setYrkesaktivitet(this);
     }
@@ -176,8 +179,11 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
         return Optional.ofNullable(avtaler.get(0).getProsentsats());
     }
 
-    void leggTilAktivitetsAvtale(AktivitetsAvtale aktivitetsAvtale) {
-        this.aktivitetsAvtale.add(aktivitetsAvtale);
+    void leggTilAktivitetsAvtale(AktivitetsAvtale avtale) {
+        if (avtale == null) {
+            return;
+        }
+        this.aktivitetsAvtale.add(avtale);
     }
 
     /**

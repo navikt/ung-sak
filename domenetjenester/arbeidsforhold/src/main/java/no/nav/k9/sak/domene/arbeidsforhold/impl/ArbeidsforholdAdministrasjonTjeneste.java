@@ -1,5 +1,8 @@
 package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
+import java.util.Collection;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -11,8 +14,10 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
 import no.nav.k9.sak.typer.AktørId;
@@ -73,13 +78,10 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
+        Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer = filter.getArbeidsforholdOverstyringer();
         if (this.nyArbeidsforholdMapper) {
             var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
-            mapper.utledArbeidsforholdFraYrkesaktiviteter(yrkesaktiviteter);
-            mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
-
-            // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
-            mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
+            mapArbeidsforhold(mapper, yrkesaktiviteter, arbeidsforholdOverstyringer, inntektsmeldinger);
 
             if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
                 var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
@@ -91,7 +93,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
             var mapper = new OldArbeidsforholdMapper(arbeidsforholdInformasjon);
             mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
             mapper.utledArbeidsforholdFraYrkesaktivteter(yrkesaktiviteter);
-            mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
+            mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(arbeidsforholdOverstyringer);
 
             if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
                 var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
@@ -100,6 +102,18 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
             return mapper.getArbeidsforhold();
         }
+    }
+
+    void mapArbeidsforhold(ArbeidsforholdMapper mapper,
+                                   Collection<Yrkesaktivitet> yrkesaktiviteter,
+                                   Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer,
+                                   NavigableSet<Inntektsmelding> inntektsmeldinger) {
+
+        mapper.utledArbeidsforholdFraYrkesaktiviteter(Objects.requireNonNull(yrkesaktiviteter));
+        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(Objects.requireNonNull(arbeidsforholdOverstyringer));
+
+        // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
+        mapper.utledArbeidsforholdFraInntektsmeldinger(Objects.requireNonNull(inntektsmeldinger));
     }
 
     /**

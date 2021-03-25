@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
+import static no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledInntektsmeldingerTest.GenererImArbeidsforhold.inntektsmeldinger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -22,22 +23,19 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
-    private static final Arbeidsgiver VIRKSOMHET = Arbeidsgiver.virksomhet("900300200");
-
-    private static final AtomicInteger COUNTER = new AtomicInteger(0);
-    private static final AtomicInteger KANALREF = new AtomicInteger(0);
+    private GenererImArbeidsforhold generator = new GenererImArbeidsforhold();
 
     @Test
     void uten_arbeidsforholdinformasjon() throws Exception {
         var mapper = new ArbeidsforholdMapper(null);
-        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(List.of());
+        mapper.utledArbeidsforholdFraInntektsmeldinger(new TreeSet<>());
         assertThat(mapper.getArbeidsforhold()).isEmpty();
     }
 
     @Test
     void håndter_im_med_og_uten_arbeidsforholdref_en_arbeidsgiver() throws Exception {
         var mapper = new ArbeidsforholdMapper(null);
-        var ims = setOf(nyttArbeidsforholdSpes().build(), nyttArbeidsforholdGen().build());
+        var ims = inntektsmeldinger(generator.inntektsmeldingMed().build(), generator.inntektsmeldingUten().build());
         mapper.utledArbeidsforholdFraInntektsmeldinger(ims);
 
         assertThat(mapper.getArbeidsforhold()).hasSize(2);
@@ -47,16 +45,16 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
     @Test
     void håndter_im_med_og_uten_arbeidsforholdref_en_arbeidsgiver_er_uavhengig_av_rekkefølge() throws Exception {
-        var arbeidsforholdSpes = nyttArbeidsforholdSpes().build();
+        var arbeidsforholdSpes = generator.inntektsmeldingMed().build();
 
         var mapper1 = new ArbeidsforholdMapper(null);
-        var ims1 = setOf(arbeidsforholdSpes, nyttArbeidsforholdGen().build());
+        var ims1 = inntektsmeldinger(arbeidsforholdSpes, generator.inntektsmeldingUten().build());
         mapper1.utledArbeidsforholdFraInntektsmeldinger(ims1);
         List<ArbeidsforholdIdDto> arbeidsforhold1 = mapper1.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsforhold).collect(Collectors.toList());
         assertThat(arbeidsforhold1).hasSize(2);
 
         var mapper2 = new ArbeidsforholdMapper(null);
-        var ims2 = setOf(nyttArbeidsforholdGen().build(), arbeidsforholdSpes);
+        var ims2 = inntektsmeldinger(generator.inntektsmeldingUten().build(), arbeidsforholdSpes);
         mapper2.utledArbeidsforholdFraInntektsmeldinger(ims2);
         List<ArbeidsforholdIdDto> arbeidsforhold2 = mapper2.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsforhold).collect(Collectors.toList());
         assertThat(arbeidsforhold2).hasSize(2);
@@ -68,13 +66,13 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
     @Test
     void håndter_im_med_og_uten_arbeidsforholdref_to_arbeidsgiver() throws Exception {
         var mapper1 = new ArbeidsforholdMapper(null);
-        var ims1 = setOf(nyttArbeidsforholdGen(Arbeidsgiver.virksomhet("01")).build());
+        var ims1 = inntektsmeldinger(generator.inntektsmeldingUten(Arbeidsgiver.virksomhet("01")).build());
         mapper1.utledArbeidsforholdFraInntektsmeldinger(ims1);
         List<Arbeidsgiver> arbeidsgiver1 = mapper1.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsgiver).collect(Collectors.toList());
         assertThat(arbeidsgiver1).hasSize(1).allMatch(a -> a.getArbeidsgiverOrgnr().equals("01"));
 
         var mapper2 = new ArbeidsforholdMapper(null);
-        var ims2 = setOf(nyttArbeidsforholdGen(Arbeidsgiver.virksomhet("02")).build());
+        var ims2 = inntektsmeldinger(generator.inntektsmeldingUten(Arbeidsgiver.virksomhet("02")).build());
         mapper2.utledArbeidsforholdFraInntektsmeldinger(ims2);
         List<Arbeidsgiver> arbeidsgiver2 = mapper2.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsgiver).collect(Collectors.toList());
         assertThat(arbeidsgiver2).hasSize(1).allMatch(a -> a.getArbeidsgiverOrgnr().equals("02"));
@@ -86,7 +84,7 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
     @Test
     void håndter_im_med_og_med_arbeidsforholdref_en_arbeidsgiver() throws Exception {
         var mapper = new ArbeidsforholdMapper(null);
-        var ims = setOf(nyttArbeidsforholdSpes().build(), nyttArbeidsforholdSpes().build());
+        var ims = inntektsmeldinger(generator.inntektsmeldingMed().build(), generator.inntektsmeldingMed().build());
         mapper.utledArbeidsforholdFraInntektsmeldinger(ims);
 
         assertThat(mapper.getArbeidsforhold()).hasSize(2);
@@ -102,34 +100,73 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
         assertThat(kilder).containsOnly(expectedKilder);
     }
 
-    private static InntektsmeldingBuilder nyttArbeidsforholdSpes() {
-        return nyttArbeidsforholdSpes(VIRKSOMHET);
-    }
+    static class GenererImArbeidsforhold {
 
-    private static InntektsmeldingBuilder nyttArbeidsforholdSpes(Arbeidsgiver arbeidsgiver) {
-        return nyttArbeidsforholdGen(arbeidsgiver)
-            .medArbeidsforholdId(EksternArbeidsforholdRef.ref("ref-" + COUNTER.incrementAndGet()))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef());
-    }
+        private static final Arbeidsgiver VIRKSOMHET = Arbeidsgiver.virksomhet("80");
 
-    private static InntektsmeldingBuilder nyttArbeidsforholdGen() {
-        return nyttArbeidsforholdGen(VIRKSOMHET);
-    }
+        private final AtomicInteger counter = new AtomicInteger(0);
+        private final AtomicInteger kanalref = new AtomicInteger(0);
 
-    private static InntektsmeldingBuilder nyttArbeidsforholdGen(Arbeidsgiver arbeidsgiver) {
-        int next = KANALREF.incrementAndGet();
-        return InntektsmeldingBuilder.builder()
-            .medKanalreferanse("AltinnPortal-" + next)
-            .medJournalpostId(String.valueOf(10000000 + next))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
-            .medArbeidsgiver(arbeidsgiver);
-    }
+        private Arbeidsgiver virksomhet;
 
-    private static NavigableSet<Inntektsmelding> setOf(Inntektsmelding... inntektsmeldinger) {
-        var ims = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE);
-        for (var im : inntektsmeldinger) {
-            ims.add(im);
+        GenererImArbeidsforhold() {
+            this(VIRKSOMHET);
         }
-        return ims;
+
+        GenererImArbeidsforhold(Arbeidsgiver virksomhet) {
+            this.virksomhet = virksomhet;
+        }
+
+        InntektsmeldingBuilder inntektsmeldingMed() {
+            return inntektsmeldingMed(virksomhet);
+        }
+
+        InntektsmeldingBuilder inntektsmeldingMed(Arbeidsgiver arbeidsgiver) {
+            var eksternRef = EksternArbeidsforholdRef.ref("im-ref-" + counter.incrementAndGet());
+            var internRef = InternArbeidsforholdRef.namedRef(eksternRef.getReferanse());
+            return inntektsmelding(arbeidsgiver, eksternRef, internRef);
+        }
+
+        InntektsmeldingBuilder inntektsmelding(EksternArbeidsforholdRef eksternRef, InternArbeidsforholdRef internRef) {
+            return inntektsmeldingUten(virksomhet)
+                .medArbeidsforholdId(eksternRef)
+                .medArbeidsforholdId(internRef);
+        }
+
+        InntektsmeldingBuilder inntektsmelding(Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef eksternRef, InternArbeidsforholdRef internRef) {
+            return inntektsmeldingUten(arbeidsgiver)
+                .medArbeidsforholdId(eksternRef)
+                .medArbeidsforholdId(internRef);
+        }
+
+        InntektsmeldingBuilder inntektsmeldingUten() {
+            return inntektsmeldingUten(virksomhet);
+        }
+
+        InntektsmeldingBuilder inntektsmeldingUten(Arbeidsgiver arbeidsgiver) {
+            int next = kanalref.incrementAndGet();
+            return InntektsmeldingBuilder.builder()
+                .medKanalreferanse("AltinnPortal-" + next)
+                .medJournalpostId(String.valueOf(10000000 + next))
+                .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+                .medArbeidsgiver(arbeidsgiver);
+        }
+
+        static NavigableSet<Inntektsmelding> inntektsmeldinger(InntektsmeldingBuilder... inntektsmeldinger) {
+            var ims = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE);
+            for (var im : inntektsmeldinger) {
+                ims.add(im.build());
+            }
+            return ims;
+        }
+
+        static NavigableSet<Inntektsmelding> inntektsmeldinger(Inntektsmelding... inntektsmeldinger) {
+            var ims = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE);
+            for (var im : inntektsmeldinger) {
+                ims.add(im);
+            }
+            return ims;
+        }
+
     }
 }
