@@ -27,7 +27,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
-@Path("/dump")
+@Path("/diagnostikk")
 @ApplicationScoped
 @Transactional
 public class DebugRestTjeneste {
