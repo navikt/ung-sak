@@ -70,9 +70,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
         var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
-        mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
         mapper.utledArbeidsforholdFraYrkesaktiviteter(yrkesaktiviteter);
         mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
+
+        // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
+        mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
 
         if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
             var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
