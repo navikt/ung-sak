@@ -112,10 +112,17 @@ public class BeregningsgrunnlagVilkårTjeneste {
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
                 .medUtfall(oppfylt ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
-                .medMerknad(oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041)
+                .medMerknad(finnVilkårUtfallMerknad(oppfylt, true))
                 .medAvslagsårsak(oppfylt ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG));
         builder.leggTil(vilkårBuilder);
         return builder;
+    }
+
+    private VilkårUtfallMerknad finnVilkårUtfallMerknad(boolean oppfylt, boolean hypotetiskCheckboxSvar) {
+        if (oppfylt && hypotetiskCheckboxSvar) {
+            return VilkårUtfallMerknad.VM_7847;
+        }
+        return oppfylt ? VilkårUtfallMerknad.UDEFINERT : VilkårUtfallMerknad.VM_1041;
     }
 
     private VilkårsPerioderTilVurderingTjeneste getVilkårsPerioderTilVurderingTjeneste(Behandling behandling) {
