@@ -68,13 +68,11 @@ jobs:
         shell: bash
         run: |
           echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
-          mvn install -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
+          mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
           echo "Deployed artifacts"
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         env:
-          GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
-          GITHUB_PASSWORD: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
           DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
       
@@ -87,7 +85,7 @@ jobs:
       - name: Bygg og laste opp docker-image
         run: |
           docker build --pull --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
-          #echo "${{ secrets.GITHUB_ACCESS_TOKEN }}" | docker login --username "x-access-token" --password-stdin ghcr.io
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login --username "x-access-token" --password-stdin ghcr.io
           docker push ${IMAGE_BASE_CR} --all-tags
 
       - name: Lukk gamle issues
