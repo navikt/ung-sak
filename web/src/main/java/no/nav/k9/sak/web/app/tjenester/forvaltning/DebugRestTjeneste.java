@@ -55,7 +55,7 @@ public class DebugRestTjeneste {
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer=" + saksnummer));
 
-        var streamingOutput = dumpsters.dumper(saksnummer);
+        var streamingOutput = dumpsters.dumper(fagsak.getYtelseType(), saksnummer);
 
         return Response.ok(streamingOutput)
             .type(MediaType.TEXT_PLAIN)

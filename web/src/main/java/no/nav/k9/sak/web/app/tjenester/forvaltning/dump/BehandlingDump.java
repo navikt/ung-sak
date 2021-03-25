@@ -11,6 +11,8 @@ import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -18,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
+@FagsakYtelseTypeRef
 public class BehandlingDump implements DebugDumpFagsak {
 
     private BehandlingRepository behandlingRepository;
@@ -37,12 +40,12 @@ public class BehandlingDump implements DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(Saksnummer saksnummer) {
+    public List<DumpOutput> dump(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
         var resultat = new ArrayList<DumpOutput>();
 
         resultat.addAll(dumpFagsak(saksnummer));
 
-        resultat.addAll(dumpBehandlinger(saksnummer));
+        resultat.addAll(dumpBehandlinger(ytelseType, saksnummer));
         return Collections.unmodifiableList(resultat);
     }
 
@@ -65,12 +68,13 @@ public class BehandlingDump implements DebugDumpFagsak {
         return List.of(DebugDumpsters.dumpAsCsv(true, fagsak, saksnummer + ".csv", sb, toCsv));
     }
 
-    private List<DumpOutput> dumpBehandlinger(Saksnummer saksnummer) {
+    private List<DumpOutput> dumpBehandlinger(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
         var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
 
         var resultat = new ArrayList<DumpOutput>();
 
-        var dumpstere = CDI.current().select(DebugDumpBehandling.class);
+        var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, CDI.current().select(DebugDumpBehandling.class), ytelseType.getKode());
+
         for (var b : behandlinger) {
             var toCsv = new LinkedHashMap<String, Function<Behandling, ?>>();
             var path = "behandling-" + b.getId();
@@ -103,15 +107,16 @@ public class BehandlingDump implements DebugDumpFagsak {
             var sb = new StringBuilder(200);
             resultat.add(DebugDumpsters.dumpAsCsv(true, b, path + "/behandling.csv", sb, toCsv));
 
-            for (var dumper : dumpstere) {
-                dumper.dump(b)
-                    .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
+            for (var inst : dumpstere) {
+                for (var dumper : inst) {
+                    dumper.dump(b)
+                        .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
+                }
             }
 
         }
 
         return Collections.unmodifiableList(resultat);
     }
-
 
 }

@@ -16,28 +16,32 @@ import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.core.StreamingOutput;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class DebugDumpsters {
 
-    public StreamingOutput dumper(Saksnummer saksnummer) {
+    public StreamingOutput dumper(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
         StreamingOutput streamingOutput = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                var dumpsters = CDI.current().select(DebugDumpFagsak.class);
-                dumpsters.forEach(ddp -> {
-                    var dumps = ddp.dump(saksnummer);
-                    for (var dump : dumps) {
-                        ZipEntry zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
-                        try {
-                            zipOut.putNextEntry(zipEntry);
-                            zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
-                            zipOut.closeEntry();
-                        } catch (IOException e) {
-                            throw new IllegalStateException("Kunne ikke zippe dump fra : " + ddp);
+                var dumpsters = FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, CDI.current().select(DebugDumpFagsak.class), ytelseType.getKode());
+                for (var inst : dumpsters) {
+                    for (var ddp : inst) {
+                        var dumps = ddp.dump(ytelseType, saksnummer);
+                        for (var dump : dumps) {
+                            ZipEntry zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
+                            try {
+                                zipOut.putNextEntry(zipEntry);
+                                zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
+                                zipOut.closeEntry();
+                            } catch (IOException e) {
+                                throw new IllegalStateException("Kunne ikke zippe dump fra : " + ddp);
+                            }
                         }
                     }
-                });
+                }
 
             } finally {
                 outputStream.flush();
@@ -46,6 +50,7 @@ public class DebugDumpsters {
         };
 
         return streamingOutput;
+
     }
 
     static <V> DumpOutput dumpAsCsv(boolean includeHeader, V input, String path, StringBuilder sb, Map<String, Function<V, ?>> valueMapper) {
