@@ -94,13 +94,16 @@ public class BeregningsgrunnlagVilkårTjeneste {
             .leggTil(vilkårBuilder
                 .hentBuilderFor(vilkårsPeriode)
                 .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medMerknad(finnVilkårUtfallMerknad(avslagsårsak))
+                .medMerknad(finnVilkårUtfallMerknad(avslagsårsak, true))
                 .medAvslagsårsak(avslagsårsak));
         builder.leggTil(vilkårBuilder);
         return builder;
     }
 
-    private VilkårUtfallMerknad finnVilkårUtfallMerknad(Avslagsårsak avslagsårsak) {
+    private VilkårUtfallMerknad finnVilkårUtfallMerknad(Avslagsårsak avslagsårsak, boolean hypotetiskCheckboxSvar) {
+        if (hypotetiskCheckboxSvar) {
+            return VilkårUtfallMerknad.VM_7847;
+        }
         return VilkårUtfallMerknad.fraKode(avslagsårsak.getKode());
     }
 
@@ -177,6 +180,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
 
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId()).flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+
         var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
 
