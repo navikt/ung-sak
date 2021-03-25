@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 
 import java.util.Objects;
 
@@ -49,7 +49,7 @@ public class DiagnostikkRestTjeneste {
     @Path("/sak")
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(description = "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response dumpSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
 
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
@@ -59,7 +59,7 @@ public class DiagnostikkRestTjeneste {
 
         return Response.ok(streamingOutput)
             .type(MediaType.TEXT_PLAIN)
-            .header("Content-Disposition", String.format("attachment; filename=\"%s_v%s.zip\"", saksnummer.getVerdi(), fagsak.getVersjon()))
+            .header("Content-Disposition", String.format("attachment; filename=\"%s-%s-v%s.zip\"", fagsak.getYtelseType(), saksnummer.getVerdi(), fagsak.getVersjon()))
             .build();
 
     }
