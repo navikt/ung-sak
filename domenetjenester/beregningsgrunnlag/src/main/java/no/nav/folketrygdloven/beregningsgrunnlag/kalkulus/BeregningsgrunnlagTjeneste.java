@@ -28,6 +28,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.BeregningsgrunnlagPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -60,7 +61,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat startBeregning(BehandlingReferanse referanse, List<DatoIntervallEntitet> vilkårsperioder) {
-        if(vilkårsperioder == null || vilkårsperioder.isEmpty()){
+        if (vilkårsperioder == null || vilkårsperioder.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en vilkårsperiode");
         }
         var skjæringstidspunkter = vilkårsperioder.stream()
@@ -71,7 +72,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
         if (bgReferanser.size() != skjæringstidspunkter.size()) {
             throw new IllegalStateException("Mismatch størrelse bgReferanser: " + bgReferanser + ", skjæringstidspunkter:" + skjæringstidspunkter);
-        } else if (bgReferanser.isEmpty()){
+        } else if (bgReferanser.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en bgReferanse");
         }
 
@@ -88,7 +89,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public SamletKalkulusResultat fortsettBeregning(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter, BehandlingStegType stegType) {
-        if(skjæringstidspunkter == null || skjæringstidspunkter.isEmpty()){
+        if (skjæringstidspunkter == null || skjæringstidspunkter.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
         }
         var bgReferanser = finnReferanseEllerLagNy(ref.getBehandlingId(), skjæringstidspunkter, true, false);
@@ -115,7 +116,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> stpTilDtoMap, BehandlingReferanse ref) {
-        if(stpTilDtoMap == null || stpTilDtoMap.isEmpty()){
+        if (stpTilDtoMap == null || stpTilDtoMap.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst ett ytelseGrunnlag");
         }
         var sortertMap = new TreeMap<>(stpTilDtoMap);
@@ -180,6 +181,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     @Override
     public List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref) {
+
+        var beregningsgrunnlag = hentBeregningsgrunnlag(ref);
+        if (beregningsgrunnlag.isEmpty()) {
+            return List.of();
+        } else {
+            return beregningsgrunnlag.get().getBeregningsgrunnlagListe()
+                .stream()
+                .filter(bg -> bg.getBeregningsgrunnlag() != null)
+                .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
+                .sorted(Comparator.comparing(BeregningsgrunnlagDto::getSkjæringstidspunkt))
+                .collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref) {
         var beregningsgrunnlagPerioderGrunnlag = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         if (beregningsgrunnlagPerioderGrunnlag.isPresent()) {
             var tjeneste = finnTjeneste(ref.getFagsakYtelseType());
@@ -195,14 +212,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                 .filter(it -> Objects.nonNull(it.getReferanse()))
                 .collect(Collectors.toSet());
 
-            return bgReferanser.isEmpty() ? List.of() : tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser).getBeregningsgrunnlagListe()
-                .stream()
-                .filter(bg -> bg.getBeregningsgrunnlag() != null)
-                .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
-                .sorted(Comparator.comparing(BeregningsgrunnlagDto::getSkjæringstidspunkt))
-                .collect(Collectors.toList());
+            return Optional.of(tjeneste.hentBeregningsgrunnlagListeDto(ref, bgReferanser));
         }
-        return List.of();
+        return Optional.empty();
     }
 
     @Override

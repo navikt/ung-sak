@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @CdiDbAwareTest
 public class BehandlingDumpTest {
@@ -28,8 +28,8 @@ public class BehandlingDumpTest {
     void test_dump_behandling() throws Exception {
         Behandling behandling = scenario.lagre(behandlingRepositoryProvider);
 
-        Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
-        var dumpOutput = behandlingDump.dump(saksnummer);
+        Fagsak fagsak = behandling.getFagsak();
+        var dumpOutput = behandlingDump.dump(fagsak);
 
         assertThat(dumpOutput).isNotEmpty().hasSize(2);
 

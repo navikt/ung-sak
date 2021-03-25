@@ -30,17 +30,17 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Path("/diagnostikk")
 @ApplicationScoped
 @Transactional
-public class DebugRestTjeneste {
+public class DiagnostikkRestTjeneste {
 
     private FagsakRepository fagsakRepository;
     private DebugDumpsters dumpsters;
 
-    DebugRestTjeneste() {
+    DiagnostikkRestTjeneste() {
         // for proxy
     }
 
     @Inject
-    DebugRestTjeneste(FagsakRepository fagsakRepository, DebugDumpsters dumpsters) {
+    DiagnostikkRestTjeneste(FagsakRepository fagsakRepository, DebugDumpsters dumpsters) {
         this.fagsakRepository = fagsakRepository;
         this.dumpsters = dumpsters;
     }
@@ -55,7 +55,7 @@ public class DebugRestTjeneste {
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer=" + saksnummer));
 
-        var streamingOutput = dumpsters.dumper(fagsak.getYtelseType(), saksnummer);
+        var streamingOutput = dumpsters.dumper(fagsak);
 
         return Response.ok(streamingOutput)
             .type(MediaType.TEXT_PLAIN)

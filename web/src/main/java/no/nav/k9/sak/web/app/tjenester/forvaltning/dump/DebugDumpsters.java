@@ -16,20 +16,21 @@ import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.core.StreamingOutput;
 
 import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @Dependent
 public class DebugDumpsters {
 
-    public StreamingOutput dumper(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
+    public StreamingOutput dumper(Fagsak fagsak) {
+        var ytelseType = fagsak.getYtelseType();
+        var saksnummer = fagsak.getSaksnummer();
         StreamingOutput streamingOutput = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
                 var dumpsters = FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, CDI.current().select(DebugDumpFagsak.class), ytelseType.getKode());
                 for (var inst : dumpsters) {
                     for (var ddp : inst) {
-                        var dumps = ddp.dump(ytelseType, saksnummer);
+                        var dumps = ddp.dump(fagsak);
                         for (var dump : dumps) {
                             ZipEntry zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
                             try {

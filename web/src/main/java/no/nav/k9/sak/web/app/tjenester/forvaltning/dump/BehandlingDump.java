@@ -40,9 +40,11 @@ public class BehandlingDump implements DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
+    public List<DumpOutput> dump(Fagsak fagsak) {
         var resultat = new ArrayList<DumpOutput>();
 
+        var saksnummer = fagsak.getSaksnummer();
+        var ytelseType = fagsak.getYtelseType();
         resultat.addAll(dumpFagsak(saksnummer));
 
         resultat.addAll(dumpBehandlinger(ytelseType, saksnummer));
