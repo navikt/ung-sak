@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -18,12 +16,10 @@ import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class InntektsmeldingBuilder {
 
     public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
-    private static final Logger log = LoggerFactory.getLogger(InntektsmeldingBuilder.class);
     private final Inntektsmelding kladd;
     private EksternArbeidsforholdRef eksternArbeidsforholdId;
     private boolean erBygget;

@@ -13,9 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -39,7 +36,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 class ArbeidsforholdMapper {
-    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdMapper.class);
 
     private final Set<InntektArbeidYtelseArbeidsforholdV2Dto> result = new LinkedHashSet<>();
     private Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon;
@@ -50,14 +46,15 @@ class ArbeidsforholdMapper {
 
     void utledArbeidsforholdFraInntektsmeldinger(NavigableSet<Inntektsmelding> inntektsmeldinger) {
 
+        FinnMatchArbeidsforhold matchArbeidsforhold = new FinnMatchArbeidsforhold(this.result);
         class Mapper {
-            private FinnMatchArbeidsforhold matchArbeidsforhold = new FinnMatchArbeidsforhold();
 
             void mapInntektsmeldingTilArbeidsforhold(Inntektsmelding im) {
                 var dtos = matchArbeidsforhold.finnEllerOpprett(im);
                 for (var dto : dtos) {
                     dto.leggTilInntektsmelding(new MottattInntektsmeldingDto(im.getJournalpostId(), im.getInnsendingstidspunkt(), DokumentStatus.GYLDIG, null));
                     dto.leggTilKilde(ArbeidsforholdKilde.INNTEKTSMELDING);
+                    result.add(dto);
                 }
             }
 
@@ -74,12 +71,13 @@ class ArbeidsforholdMapper {
 
     void utledArbeidsforholdFraYrkesaktiviteter(Collection<Yrkesaktivitet> yrkesaktiviteter) {
 
+        FinnEksaktArbeidsforhold finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold(this.result, this.arbeidsforholdInformasjon);
+
         class Mapper {
-            private FinnEksaktArbeidsforhold finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold();
 
             void mapYrkesaktivitet(Yrkesaktivitet yr) {
                 var dto = finnEksaktArbeidsforhold.finnEllerOpprett(yr.getArbeidsgiver(), yr.getArbeidsforholdRef());
-
+                result.add(dto);
                 dto.leggTilKilde(ArbeidsforholdKilde.AAREGISTERET);
                 dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(yr.getAnsettelsesPeriode()));
                 dto.setPermisjoner(mapPermisjoner(yr.getPermisjon()));
@@ -110,11 +108,13 @@ class ArbeidsforholdMapper {
 
     void utledArbeidsforholdFraArbeidsforholdInformasjon(Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer) {
 
+        FinnEksaktArbeidsforhold finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold(this.result, this.arbeidsforholdInformasjon);
+
         class Mapper {
-            private final FinnEksaktArbeidsforhold finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold();
 
             void mapOverstyring(ArbeidsforholdOverstyring overstyring) {
                 var dto = finnEksaktArbeidsforhold.finnEllerOpprett(overstyring.getArbeidsgiver(), overstyring.getArbeidsforholdRef());
+                result.add(dto);
                 var handling = overstyring.getHandling();
                 String begrunnelse = overstyring.getBegrunnelse();
 
@@ -143,7 +143,7 @@ class ArbeidsforholdMapper {
     }
 
     void mapVurdering(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverÅrsaker) {
-        var finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold();
+        var finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold(this.result, null);
         var vurderinger = arbeidsgiverÅrsaker
             .entrySet()
             .stream()
@@ -184,13 +184,22 @@ class ArbeidsforholdMapper {
         return !getArbeidsforhold().isEmpty();
     }
 
-    class FinnEksaktArbeidsforhold {
+    static class FinnEksaktArbeidsforhold {
+
+        private final Set<InntektArbeidYtelseArbeidsforholdV2Dto> input;
+        private Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon;
+
+        FinnEksaktArbeidsforhold(Set<InntektArbeidYtelseArbeidsforholdV2Dto> input, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
+            this.input = Collections.unmodifiableSet(input);
+            this.arbeidsforholdInformasjon = arbeidsforholdInformasjon;
+
+        }
+
         InntektArbeidYtelseArbeidsforholdV2Dto finnEllerOpprett(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
             Objects.requireNonNull(arbeidsgiver, "arbeidsgiver");
             var collect = finn(arbeidsgiver, arbeidsforholdRef);
             if (collect.isEmpty()) {
-                var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(arbeidsgiver, mapArbeidsforholdsId(arbeidsgiver, arbeidsforholdRef, arbeidsforholdInformasjon));
-                result.add(dto);
+                var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(arbeidsgiver, mapArbeidsforholdsId(arbeidsgiver, arbeidsforholdRef, Objects.requireNonNull(arbeidsforholdInformasjon)));
                 return dto;
             } else {
                 return collect.get();
@@ -200,11 +209,11 @@ class ArbeidsforholdMapper {
         Optional<InntektArbeidYtelseArbeidsforholdV2Dto> finn(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
             Objects.requireNonNull(arbeidsgiver, "arbeidsgiver");
 
-            var collect = result.stream()
+            var collect = input.stream()
                 .filter(it -> gjelderEksaktArbeidsforhold(it, arbeidsgiver, arbeidsforholdRef))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
             if (collect.size() > 1) {
-                throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel for [" + arbeidsforholdRef + "], kan ikke forekomme, men fant " + collect + ", blant:" + result);
+                throw new IllegalStateException("Flere arbeidsforhold med samme nøkkel for [" + arbeidsforholdRef + "], kan ikke forekomme, men fant " + collect + ", blant:" + input);
             } else if (collect.size() == 1) {
                 return Optional.of(collect.iterator().next());
             } else {
@@ -224,10 +233,17 @@ class ArbeidsforholdMapper {
 
     }
 
-    class FinnMatchArbeidsforhold {
+    static class FinnMatchArbeidsforhold {
+        private final Set<InntektArbeidYtelseArbeidsforholdV2Dto> input;
+
+        FinnMatchArbeidsforhold(Set<InntektArbeidYtelseArbeidsforholdV2Dto> input) {
+            this.input = Collections.unmodifiableSet(input);
+
+        }
+
         Set<InntektArbeidYtelseArbeidsforholdV2Dto> finnEllerOpprett(Inntektsmelding im) {
             var angitt = im.getArbeidsforholdRef();
-            var collect = result.stream()
+            var collect = input.stream()
                 .filter(it -> {
                     boolean match = gjelderSammeArbeidsforhold(it, im.getArbeidsgiver(), angitt);
                     var fraListe = InternArbeidsforholdRef.ref(it.getArbeidsforhold().getInternArbeidsforholdId());
@@ -237,13 +253,31 @@ class ArbeidsforholdMapper {
                 })
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
+            var utvalgt = new LinkedHashSet<InntektArbeidYtelseArbeidsforholdV2Dto>();
+
             if (collect.isEmpty()) {
-                var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(im.getArbeidsgiver(),
-                    new ArbeidsforholdIdDto(angitt.getUUIDReferanse(), im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)));
-                result.add(dto);
-                return Set.of(dto);
+                var dto = nyDto(im, angitt);
+                utvalgt.add(dto);
+            } else {
+                utvalgt.addAll(collect);
+
+                if (!im.gjelderForEtSpesifiktArbeidsforhold()) {
+                    boolean finnerIngenEksaktMatchende = new FinnEksaktArbeidsforhold(collect, Optional.empty()).finn(im.getArbeidsgiver(), im.getArbeidsforholdRef()).isEmpty();
+                    if (finnerIngenEksaktMatchende) {
+                        var dto = nyDto(im, angitt);
+                        utvalgt.add(dto);
+                    }
+                }
+
             }
-            return collect;
+
+            return utvalgt;
+        }
+
+        private InntektArbeidYtelseArbeidsforholdV2Dto nyDto(Inntektsmelding im, InternArbeidsforholdRef angitt) {
+            var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(im.getArbeidsgiver(),
+                new ArbeidsforholdIdDto(angitt.getUUIDReferanse(), im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)));
+            return dto;
         }
 
         private boolean gjelderSammeArbeidsforhold(InntektArbeidYtelseArbeidsforholdV2Dto it, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {

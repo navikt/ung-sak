@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
@@ -24,6 +25,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private boolean nyArbeidsforholdMapper;
 
     ArbeidsforholdAdministrasjonTjeneste() {
         // CDI
@@ -31,9 +33,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
     @Inject
     public ArbeidsforholdAdministrasjonTjeneste(VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste,
-                                                InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+                                                InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                                @KonfigVerdi(value = "ARBEIDSFORHOLD_MAPPER_NY", defaultVerdi = "true") boolean nyArbeidsforholdMapper) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
+        this.nyArbeidsforholdMapper = nyArbeidsforholdMapper;
     }
 
     /**
@@ -69,19 +73,33 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
-        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
-        mapper.utledArbeidsforholdFraYrkesaktiviteter(yrkesaktiviteter);
-        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
+        if (this.nyArbeidsforholdMapper) {
+            var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
+            mapper.utledArbeidsforholdFraYrkesaktiviteter(yrkesaktiviteter);
+            mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
 
-        // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
-        mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
+            // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
+            mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
 
-        if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
-            var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
-            mapper.mapVurdering(vurderinger);
+            if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
+                var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
+                mapper.mapVurdering(vurderinger);
+            }
+
+            return mapper.getArbeidsforhold();
+        } else {
+            var mapper = new OldArbeidsforholdMapper(arbeidsforholdInformasjon);
+            mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
+            mapper.utledArbeidsforholdFraYrkesaktivteter(yrkesaktiviteter);
+            mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
+
+            if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
+                var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
+                mapper.mapVurdering(vurderinger);
+            }
+
+            return mapper.getArbeidsforhold();
         }
-
-        return mapper.getArbeidsforhold();
     }
 
     /**
