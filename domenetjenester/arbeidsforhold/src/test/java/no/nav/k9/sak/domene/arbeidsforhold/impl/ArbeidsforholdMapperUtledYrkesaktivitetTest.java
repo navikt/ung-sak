@@ -70,7 +70,7 @@ public class ArbeidsforholdMapperUtledYrkesaktivitetTest {
 
         private ArbeidType arbeidType = ArbeidType.ORDINÆRT_ARBEIDSFORHOLD;
         private Arbeidsgiver virksomhet;
-        private ArbeidsforholdInformasjonBuilder arbeidsforholdBuilder = ArbeidsforholdInformasjonBuilder.builder(Optional.empty());
+        private ArbeidsforholdInformasjonBuilder arbeidsforholdBuilder;
 
         LocalDate fom = LocalDate.now().minusDays(20);
         LocalDate tom = fom.plusDays(100);
@@ -80,7 +80,12 @@ public class ArbeidsforholdMapperUtledYrkesaktivitetTest {
         }
 
         GenererYrkArbeidsforhold(Arbeidsgiver virksomhet) {
+            this(virksomhet, ArbeidsforholdInformasjonBuilder.builder(Optional.empty()));
+        }
+
+        GenererYrkArbeidsforhold(Arbeidsgiver virksomhet, ArbeidsforholdInformasjonBuilder builder) {
             this.virksomhet = virksomhet;
+            this.arbeidsforholdBuilder = builder;
         }
 
         ArbeidsforholdInformasjon getArbeidsforholdInformasjon() {

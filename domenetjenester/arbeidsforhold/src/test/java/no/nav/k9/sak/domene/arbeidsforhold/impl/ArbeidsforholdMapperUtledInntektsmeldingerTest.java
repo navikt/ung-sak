@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +14,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
@@ -27,14 +30,18 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
     @Test
     void uten_arbeidsforholdinformasjon() throws Exception {
-        var mapper = new ArbeidsforholdMapper(null);
+        var mapper = mapper(generator);
         mapper.utledArbeidsforholdFraInntektsmeldinger(new TreeSet<>());
         assertThat(mapper.getArbeidsforhold()).isEmpty();
     }
 
+    private ArbeidsforholdMapper mapper(GenererImArbeidsforhold generator) {
+        return generator.mapper();
+    }
+
     @Test
     void håndter_im_med_og_uten_arbeidsforholdref_en_arbeidsgiver() throws Exception {
-        var mapper = new ArbeidsforholdMapper(null);
+        var mapper = mapper(generator);
         var ims = inntektsmeldinger(generator.inntektsmeldingMed().build(), generator.inntektsmeldingUten().build());
         mapper.utledArbeidsforholdFraInntektsmeldinger(ims);
 
@@ -47,13 +54,13 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
     void håndter_im_med_og_uten_arbeidsforholdref_en_arbeidsgiver_er_uavhengig_av_rekkefølge() throws Exception {
         var arbeidsforholdSpes = generator.inntektsmeldingMed().build();
 
-        var mapper1 = new ArbeidsforholdMapper(null);
+        var mapper1 = mapper(generator);
         var ims1 = inntektsmeldinger(arbeidsforholdSpes, generator.inntektsmeldingUten().build());
         mapper1.utledArbeidsforholdFraInntektsmeldinger(ims1);
         List<ArbeidsforholdIdDto> arbeidsforhold1 = mapper1.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsforhold).collect(Collectors.toList());
         assertThat(arbeidsforhold1).hasSize(2);
 
-        var mapper2 = new ArbeidsforholdMapper(null);
+        var mapper2 = mapper(generator);
         var ims2 = inntektsmeldinger(generator.inntektsmeldingUten().build(), arbeidsforholdSpes);
         mapper2.utledArbeidsforholdFraInntektsmeldinger(ims2);
         List<ArbeidsforholdIdDto> arbeidsforhold2 = mapper2.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsforhold).collect(Collectors.toList());
@@ -65,13 +72,13 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
     @Test
     void håndter_im_med_og_uten_arbeidsforholdref_to_arbeidsgiver() throws Exception {
-        var mapper1 = new ArbeidsforholdMapper(null);
+        var mapper1 = mapper(generator);
         var ims1 = inntektsmeldinger(generator.inntektsmeldingUten(Arbeidsgiver.virksomhet("01")).build());
         mapper1.utledArbeidsforholdFraInntektsmeldinger(ims1);
         List<Arbeidsgiver> arbeidsgiver1 = mapper1.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsgiver).collect(Collectors.toList());
         assertThat(arbeidsgiver1).hasSize(1).allMatch(a -> a.getArbeidsgiverOrgnr().equals("01"));
 
-        var mapper2 = new ArbeidsforholdMapper(null);
+        var mapper2 = mapper(generator);
         var ims2 = inntektsmeldinger(generator.inntektsmeldingUten(Arbeidsgiver.virksomhet("02")).build());
         mapper2.utledArbeidsforholdFraInntektsmeldinger(ims2);
         List<Arbeidsgiver> arbeidsgiver2 = mapper2.getArbeidsforhold().stream().map(InntektArbeidYtelseArbeidsforholdV2Dto::getArbeidsgiver).collect(Collectors.toList());
@@ -83,7 +90,7 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
     @Test
     void håndter_im_med_og_med_arbeidsforholdref_en_arbeidsgiver() throws Exception {
-        var mapper = new ArbeidsforholdMapper(null);
+        var mapper = mapper(generator);
         var ims = inntektsmeldinger(generator.inntektsmeldingMed().build(), generator.inntektsmeldingMed().build());
         mapper.utledArbeidsforholdFraInntektsmeldinger(ims);
 
@@ -106,6 +113,7 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
 
         private final AtomicInteger counter = new AtomicInteger(0);
         private final AtomicInteger kanalref = new AtomicInteger(0);
+        private final ArbeidsforholdInformasjonBuilder arbeidsforholdInformasjon;
 
         private Arbeidsgiver virksomhet;
 
@@ -113,8 +121,19 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
             this(VIRKSOMHET);
         }
 
+
         GenererImArbeidsforhold(Arbeidsgiver virksomhet) {
+            this(virksomhet, ArbeidsforholdInformasjonBuilder.builder(Optional.empty()));
+        }
+
+        GenererImArbeidsforhold(Arbeidsgiver virksomhet, ArbeidsforholdInformasjonBuilder builder) {
             this.virksomhet = virksomhet;
+            this.arbeidsforholdInformasjon = builder;
+        }
+
+
+        ArbeidsforholdMapper mapper() {
+            return new ArbeidsforholdMapper(arbeidsforholdInformasjon.build());
         }
 
         InntektsmeldingBuilder inntektsmeldingMed() {
@@ -128,12 +147,11 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
         }
 
         InntektsmeldingBuilder inntektsmelding(EksternArbeidsforholdRef eksternRef, InternArbeidsforholdRef internRef) {
-            return inntektsmeldingUten(virksomhet)
-                .medArbeidsforholdId(eksternRef)
-                .medArbeidsforholdId(internRef);
+            return inntektsmelding(virksomhet, eksternRef, internRef);
         }
 
         InntektsmeldingBuilder inntektsmelding(Arbeidsgiver arbeidsgiver, EksternArbeidsforholdRef eksternRef, InternArbeidsforholdRef internRef) {
+            arbeidsforholdInformasjon.leggTil(arbeidsgiver, internRef, eksternRef);
             return inntektsmeldingUten(arbeidsgiver)
                 .medArbeidsforholdId(eksternRef)
                 .medArbeidsforholdId(internRef);
@@ -152,6 +170,10 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
                 .medArbeidsgiver(arbeidsgiver);
         }
 
+        ArbeidsforholdInformasjon getArbeidsforholdInformasjon() {
+            return arbeidsforholdInformasjon.build();
+        }
+
         static NavigableSet<Inntektsmelding> inntektsmeldinger(InntektsmeldingBuilder... inntektsmeldinger) {
             var ims = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE);
             for (var im : inntektsmeldinger) {
@@ -167,6 +189,7 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
             }
             return ims;
         }
+
 
     }
 }
