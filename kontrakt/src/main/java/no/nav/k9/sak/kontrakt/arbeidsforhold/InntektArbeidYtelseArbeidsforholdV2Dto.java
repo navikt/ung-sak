@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -117,7 +118,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     }
 
     public Set<ArbeidsforholdKilde> getKilde() {
-        return kilder;
+        return kilder == null ? Set.of() : Collections.unmodifiableSet(kilder);
     }
 
     public void setKilde(Set<ArbeidsforholdKilde> kilder) {
@@ -133,7 +134,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     }
 
     public List<PermisjonDto> getPermisjoner() {
-        return permisjoner;
+        return permisjoner == null ? List.of() : Collections.unmodifiableList(permisjoner);
     }
 
     public void setPermisjoner(List<PermisjonDto> permisjoner) {
@@ -165,7 +166,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     }
 
     public Set<PeriodeDto> getAnsettelsesPerioder() {
-        return ansettelsesPerioder;
+        return ansettelsesPerioder == null ? Set.of() : Collections.unmodifiableSet(ansettelsesPerioder);
     }
 
     public void setAnsettelsesPerioder(Collection<PeriodeDto> ansettelsesPerioder) {
@@ -173,7 +174,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     }
 
     public Set<ArbeidsforholdAksjonspunktÅrsak> getAksjonspunktÅrsaker() {
-        return aksjonspunktÅrsaker;
+        return aksjonspunktÅrsaker == null ? Set.of() : Collections.unmodifiableSet(aksjonspunktÅrsaker);
     }
 
     public void setAksjonspunktÅrsaker(Collection<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker) {
@@ -189,7 +190,7 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     }
 
     public Set<MottattInntektsmeldingDto> getInntektsmeldinger() {
-        return inntektsmeldinger;
+        return inntektsmeldinger == null ? Set.of() : Collections.unmodifiableSet(inntektsmeldinger);
     }
 
     public void setInntektsmeldinger(Set<MottattInntektsmeldingDto> inntektsmeldinger) {
