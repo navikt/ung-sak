@@ -36,6 +36,9 @@ public class AvklarOpptjeningsvilkåretDto {
     @JsonProperty(value = "erVilkarOk")
     private boolean erVilkarOk;
 
+    @JsonProperty(value = "er847Ok")
+    private boolean er847Ok;
+
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
