@@ -51,10 +51,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ env.PREVIOUS_CACHE_KEY }}
             
-      - name: Build
+      - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn verify -U --batch-mode --file pom.xml -DtrimStackTrace=false
+          mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
