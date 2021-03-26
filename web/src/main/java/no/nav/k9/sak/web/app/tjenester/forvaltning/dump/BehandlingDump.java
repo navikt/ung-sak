@@ -66,7 +66,7 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("status", Fagsak::getStatus);
         toCsv.put("opprettet_tid", Fagsak::getOpprettetTidspunkt);
         toCsv.put("endret_tid", Fagsak::getEndretTidspunkt);
-        return List.of(DebugDumpsters.dumpAsCsvSingleInput(true, fagsak, saksnummer + ".csv", toCsv));
+        return List.of(DebugDumpsters.dumpAsCsvSingleInput(true, fagsak, "fagsak.csv", toCsv));
     }
 
     private List<DumpOutput> dumpBehandlinger(FagsakYtelseType ytelseType, Saksnummer saksnummer) {

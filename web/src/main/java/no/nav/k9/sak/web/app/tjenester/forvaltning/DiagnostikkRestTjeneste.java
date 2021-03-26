@@ -47,7 +47,7 @@ public class DiagnostikkRestTjeneste {
 
     @POST
     @Path("/sak")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response dumpSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
@@ -58,7 +58,7 @@ public class DiagnostikkRestTjeneste {
         var streamingOutput = dumpsters.dumper(fagsak);
 
         return Response.ok(streamingOutput)
-            .type(MediaType.TEXT_PLAIN)
+            .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"%s-%s-v%s.zip\"", fagsak.getYtelseType(), saksnummer.getVerdi(), fagsak.getVersjon()))
             .build();
 

@@ -68,7 +68,7 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
             }
             for (var im : data) {
                 var content = iayMapper.writeValueAsString(im);
-                relativePath = "abakus-inntektsmelding-" + im.getIndexKey();
+                relativePath = "abakus-inntektsmelding-" + im.getArbeidsgiver().getIdentifikator() + "-journalpost_" + im.getJournalpostId().getVerdi();
                 resultat.add(new DumpOutput(relativePath + ".json", content));
             }
         } catch (TekniskException e) {

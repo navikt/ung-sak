@@ -14,7 +14,6 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef
 @FagsakYtelseTypeRef("OMP")
 @FagsakYtelseTypeRef("PSB")
 @FagsakYtelseTypeRef("FRISINN")
@@ -36,7 +35,7 @@ public class OpptjeningsresultatDump implements DebugDumpFagsak {
         var sql = "select "
             + "  f.saksnummer "
             + ", rs.behandling_id "
-            + ", rs.opprettet_tid "
+            + " , replace(cast(rs.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
             + ", opp.opptjent_periode "
             + ", opp.fom as opp_fom "
             + ", opp.tom as opp_tom "
@@ -47,7 +46,7 @@ public class OpptjeningsresultatDump implements DebugDumpFagsak {
             + ", oa.aktivitet_referanse "
             + ", oa.klassifisering "
             + ", oa.referanse_type "
-            + ", oa.opprettet_tid as oa_opprettet_tid "
+            + ", replace(cast(oa.opprettet_tid as varchar), ' ', 'T') oa_opprettet_tid"
             + " from rs_opptjening rs "
             + "  inner join behandling b on b.id=rs.behandling_id "
             + "  inner join fagsak f on f.id=b.fagsak_id "

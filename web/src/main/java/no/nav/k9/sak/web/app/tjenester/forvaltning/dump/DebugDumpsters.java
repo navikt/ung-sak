@@ -41,7 +41,7 @@ public class DebugDumpsters {
                                 zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
                                 zipOut.closeEntry();
                             } catch (IOException e) {
-                                throw new IllegalStateException("Kunne ikke zippe dump fra : " + ddp);
+                                throw new IllegalStateException("Kunne ikke zippe dump fra : " + ddp, e);
                             }
                         }
                     }
@@ -63,7 +63,7 @@ public class DebugDumpsters {
             sb.append(csvHeader(valueMapper));
         }
         for (var v : input) {
-            sb.append(csvValueRow(v, valueMapper));
+            sb.append(csvValueRow(v, valueMapper)).append('\n');
         }
         return new DumpOutput(path, sb.toString());
     }
