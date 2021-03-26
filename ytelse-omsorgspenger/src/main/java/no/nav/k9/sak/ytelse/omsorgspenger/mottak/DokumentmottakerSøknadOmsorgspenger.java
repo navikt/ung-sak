@@ -34,7 +34,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -184,12 +183,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     }
 
     private Collection<ArbeidsforholdReferanse> finnArbeidsforhold(Long behandlingId) {
-        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElseThrow();
-        Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
-        if (arbeidsforholdInformasjon.isPresent()) {
-            return arbeidsforholdInformasjon.get().getArbeidsforholdReferanser();
+        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId);
+        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getArbeidsforholdInformasjon().isPresent()) {
+            return iayGrunnlag.get().getArbeidsforholdInformasjon().get().getArbeidsforholdReferanser();
         } else {
-            logger.warn("Har ikke arbeidsforholdsinformasjon for behandlign={}", behandlingId);
+            logger.warn("Har ikke arbeidsforholdsinformasjon for behandling={}", behandlingId);
             return Collections.emptyList();
         }
     }
@@ -203,11 +201,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             bosteder.getPerioder().forEach((periode, opphold) -> {
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.getLand().getLandkode()))
-                    .medPeriode(
-                        Objects.requireNonNull(periode.getFraOgMed()),
-                        Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
-                    .build());
+                        .medLand(finnLandkode(opphold.getLand().getLandkode()))
+                        .medPeriode(
+                            Objects.requireNonNull(periode.getFraOgMed()),
+                            Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
+                        .build());
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
