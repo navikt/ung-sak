@@ -124,7 +124,9 @@ class ArbeidsforholdMapper {
                     dto.setStillingsprosent(stillingsprosent.getVerdi());
                     dto.setAnsettelsesPerioder(mapAnsettelsesPerioder(overstyring.getArbeidsforholdOverstyrtePerioder()));
                 } else {
-                    throw new UnsupportedOperationException("Kan ikke mappe overstyring:" + overstyring + ", {begrunnelse=" + begrunnelse + "} til en ArbeidsforholdKilde");
+                    if (dto.getKilde().isEmpty()) {
+                        throw new UnsupportedOperationException("Kan ikke mappe overstyring:" + overstyring + ", {begrunnelse=" + begrunnelse + "} til en ArbeidsforholdKilde som matcher: " + dto);
+                    }
                 }
                 dto.setHandlingType(handling);
                 dto.setBegrunnelse(begrunnelse);
