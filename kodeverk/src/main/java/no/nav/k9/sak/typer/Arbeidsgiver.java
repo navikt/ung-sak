@@ -141,9 +141,9 @@ public class Arbeidsgiver implements IndexKey {
     private static String toString(Arbeidsgiver arb) {
         // litt maskering for feilsøking nå
         if (arb.getErVirksomhet()) {
-            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + ">";
+            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
         } else {
-            return "PersonligArbeidsgiver<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + ">";
+            return "PersonligArbeidsgiver<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
         }
     }
 
