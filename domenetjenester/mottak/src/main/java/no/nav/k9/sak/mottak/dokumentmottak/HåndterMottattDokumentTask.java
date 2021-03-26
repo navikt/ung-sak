@@ -57,6 +57,9 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var fagsakId = prosessTaskData.getFagsakId();
         var behandlingId = prosessTaskData.getBehandlingId() != null ? Long.valueOf(prosessTaskData.getBehandlingId()) : null;
+        var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
+
+        FagsakProsessTask.logContext(fagsak);
 
         // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
@@ -74,7 +77,6 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
         mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
 
-        var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
         innhentDokumentTjeneste.mottaDokument(fagsak, mottatteDokumenter);
     }
 

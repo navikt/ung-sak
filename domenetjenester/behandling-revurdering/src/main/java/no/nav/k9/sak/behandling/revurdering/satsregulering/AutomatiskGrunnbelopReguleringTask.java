@@ -60,6 +60,9 @@ public class AutomatiskGrunnbelopReguleringTask extends FagsakProsessTask {
         }
 
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+
+        FagsakProsessTask.logContext(fagsak);
+
         var enhet = enhetTjeneste.finnBehandlendeEnhetFor(fagsak);
         Behandling origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
             .orElseThrow(() -> new IllegalStateException("Kan ikke revurdere fagsak uten tidligere avsluttet behandling"));

@@ -107,8 +107,8 @@ public class BehandlingRestTjeneste {
     private SjekkProsessering sjekkProsessering;
     private Boolean unntaksbehandlingTogglet;
 
-    public BehandlingRestTjeneste() {
-        // for resteasy
+    BehandlingRestTjeneste() {
+        // for proxy
     }
 
     @Inject

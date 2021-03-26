@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderKonsekvensTask;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -50,6 +51,8 @@ public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
         var behandlingId = prosessTaskData.getBehandlingId();
 
         Behandling behandlingForRevurdering = behandlingRepository.hentBehandling(behandlingId);
+
+        BehandlingProsessTask.logContext(behandlingForRevurdering);
 
         List<Behandling> åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsakId);
         if (åpneBehandlinger.stream().map(Behandling::getType).anyMatch(BehandlingType.REVURDERING::equals)) {
