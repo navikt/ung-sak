@@ -91,7 +91,7 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene) {
         try {
             var request = new ManuellVurderingRequest(behandlingUUID.toString(), innvilgePeriodene);
-            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/innvilgEllerAvslaa" + behandlingUUID.toString());
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/innvilgEllerAvslaa");
             restKlient.patch(endpoint, request);
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilInnvilgeEllerAvslåPeriodeneManuelt(e.getMessage(), e).toException();
