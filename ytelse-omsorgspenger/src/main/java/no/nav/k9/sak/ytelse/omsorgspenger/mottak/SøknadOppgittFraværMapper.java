@@ -2,20 +2,20 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.felles.opptjening.Frilanser;
-import no.nav.k9.søknad.felles.opptjening.Arbeidstaker;
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
@@ -27,16 +27,17 @@ class SøknadOppgittFraværMapper {
     private final OmsorgspengerUtbetaling søknadsinnhold;
     private final Søker søker;
     private final JournalpostId journalpostId;
+    private Collection<ArbeidsforholdReferanse> arbeidsforholdene;
 
-    public SøknadOppgittFraværMapper(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId) {
+    public SøknadOppgittFraværMapper(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId, Collection<ArbeidsforholdReferanse> arbeidsforhold) {
         this.søknadsinnhold = søknadsinnhold;
         this.søker = søker;
         this.journalpostId = journalpostId;
+        this.arbeidsforholdene = arbeidsforhold;
     }
 
     Set<OppgittFraværPeriode> map() {
         Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
-        List<Arbeidstaker> arbeidstakerList = søknadsinnhold.getAktivitet().getArbeidstaker();
         var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
             .orElse(Collections.emptyList());
 
@@ -65,14 +66,12 @@ class SøknadOppgittFraværMapper {
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
-            if(arbeidstakerList != null) {
-                for(Arbeidstaker arbeidstaker: arbeidstakerList) {
-                    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().getVerdi());
-                    InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
+            for (ArbeidsforholdReferanse arbeidsforhold : arbeidsforholdene) {
+                Arbeidsgiver arbeidsgiver = arbeidsforhold.getArbeidsgiver();
+                InternArbeidsforholdRef arbeidsforholdRef = arbeidsforhold.getInternReferanse();
 
-                    OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
-                    oppgittFraværPerioder.add(oppgittFraværPeriode);
-                }
+                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
+                oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
         }
 
