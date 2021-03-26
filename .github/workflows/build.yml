@@ -67,9 +67,7 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          echo "Building artifacts $(echo $GITHUB_SHA | cut -c1-7)"
           mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dchangelist= -Dsha1=-$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7) -Dfile.encoding=UTF-8
-          echo "Deployed artifacts"
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
