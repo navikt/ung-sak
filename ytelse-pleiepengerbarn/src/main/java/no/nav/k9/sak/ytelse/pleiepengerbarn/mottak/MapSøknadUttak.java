@@ -25,9 +25,9 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.LovbestemtFerie;
-import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
-import no.nav.k9.søknad.felles.aktivitet.Frilanser;
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
+import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker;
+import no.nav.k9.søknad.felles.opptjening.Frilanser;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
@@ -92,12 +92,13 @@ class MapSøknadUttak {
         return new UttakAktivitet(mappedPerioder);
     }
 
+    //TODO endre, Får ikke Frilanser som input
     private UttakAktivitetPeriode lagUttakAktivitetPeriode(Frilanser input) {
-        if (input == null || input.startdato == null) {
+        if (input == null || input.getSluttdato() == null) {
             return null;
         }
         // TODO: trengs noen perioder for frilanser?
-        return new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, DatoIntervallEntitet.fraOgMed(input.startdato));
+        return new UttakAktivitetPeriode(UttakArbeidType.FRILANSER, DatoIntervallEntitet.fraOgMed(input.getStartdato()));
     }
 
     private Collection<UttakAktivitetPeriode> lagUttakAktivitetPeriode(Arbeidstaker input) {
@@ -107,18 +108,18 @@ class MapSøknadUttak {
 
         InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
         var arbeidsgiver = input.getOrganisasjonsnummer() != null
-            ? Arbeidsgiver.virksomhet(input.getOrganisasjonsnummer().verdi)
+            ? Arbeidsgiver.virksomhet(input.getOrganisasjonsnummer().getVerdi())
             : (input.getNorskIdentitetsnummer() != null
-                ? Arbeidsgiver.fra(new AktørId(input.getNorskIdentitetsnummer().verdi))
+                ? Arbeidsgiver.fra(new AktørId(input.getNorskIdentitetsnummer().getVerdi()))
                 : null);
 
         var mappedPerioder = input.getArbeidstidInfo().getPerioder().entrySet().stream()
             .map(entry -> {
                 Periode k = entry.getKey();
                 return new UttakAktivitetPeriode(k.getFraOgMed(), k.getTilOgMed(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef,
-                        input.getArbeidstidInfo().getJobberNormaltTimerPerDag(),
+                        entry.getValue().getJobberNormaltTimerPerDag(),
                         new BigDecimal(entry.getValue().getFaktiskArbeidTimerPerDag().toMillis()).divide(
-                            new BigDecimal(input.getArbeidstidInfo().getJobberNormaltTimerPerDag().toMillis()
+                            new BigDecimal(entry.getValue().getJobberNormaltTimerPerDag().toMillis()
                         ), 6, RoundingMode.HALF_UP) );
             })
             .collect(Collectors.toList());
@@ -129,8 +130,8 @@ class MapSøknadUttak {
         if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return null;
         }
-        var mappedPerioder = input.getPerioder().stream()
-            .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed())))
+        var mappedPerioder = input.getPerioder().keySet().stream()
+            .map(lovbestemtFeriePeriodeInfo -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(lovbestemtFeriePeriodeInfo.getFraOgMed(), lovbestemtFeriePeriodeInfo.getTilOgMed())))
             .collect(Collectors.toSet());
 
         return new Ferie(mappedPerioder);

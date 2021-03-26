@@ -139,7 +139,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
         var søknadEntitet = søknadBuilder.build();
@@ -175,10 +175,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         // TODO: Hva skal vi ha som "oppholdNå"? Er dette relevant for k9 eller bruker vi en annen tolkning for medlemskap?
         // TODO kontrakt har utenlandsopphold, skal dette benyttes?
         if (bosteder != null) {
-            bosteder.perioder.forEach((periode, opphold) -> {
+            bosteder.getPerioder().forEach((periode, opphold) -> {
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.land.landkode))
+                    .medLand(finnLandkode(opphold.getLand().getLandkode()))
                     .medPeriode(
                         Objects.requireNonNull(periode.getFraOgMed()),
                         Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
@@ -190,7 +190,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private Språkkode getSpråkValg(Språk språk) {
         if (språk != null) {
-            return Språkkode.fraKode(språk.dto.toUpperCase());
+            return Språkkode.fraKode(språk.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }
