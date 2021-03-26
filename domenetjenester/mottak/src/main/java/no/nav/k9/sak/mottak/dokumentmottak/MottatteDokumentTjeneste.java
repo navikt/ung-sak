@@ -92,7 +92,7 @@ public class MottatteDokumentTjeneste {
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
         DokumentStatus nyStatus = DokumentStatus.MOTTATT;
         if (dokument.getStatus() == DokumentStatus.UGYLDIG) {
-            logger.info("Mottok ugyldig dokument {} på behandling {}", dokument.getId(), dokument.getBehandlingId());
+            logger.info("Mottok ugyldig dokument med jounalpostId={} på fagsak={}", dokument.getJournalpostId().getVerdi(), dokument.getFagsakId());
             nyStatus = DokumentStatus.UGYLDIG;
         }
         MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument, nyStatus);
