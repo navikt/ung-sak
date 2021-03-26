@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 

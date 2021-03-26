@@ -84,7 +84,7 @@ public class AvklarArbeidsforholdOppdatererTest {
     public void oppsett() {
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         var arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(tpsTjeneste, virksomhetTjeneste);
-        var arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste, iayTjeneste);
+        var arbeidsforholdAdministrasjonTjeneste = new ArbeidsforholdAdministrasjonTjeneste(vurderArbeidsforholdTjeneste, iayTjeneste, true);
         var arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
         var arbeidsforholdHistorikkinnslagTjeneste = new ArbeidsforholdHistorikkinnslagTjeneste(historikkAdapter, arbeidsgiverHistorikkinnslagTjeneste);
         oppdaterer = new AvklarArbeidsforholdOppdaterer(

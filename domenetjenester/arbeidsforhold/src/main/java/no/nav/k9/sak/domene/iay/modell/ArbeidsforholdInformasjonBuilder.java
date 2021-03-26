@@ -29,8 +29,13 @@ public class ArbeidsforholdInformasjonBuilder {
 
     public ArbeidsforholdInformasjonBuilder leggTil(ArbeidsforholdOverstyringBuilder overstyringBuilder) {
         if (!overstyringBuilder.isOppdatering()) {
-            kladd.leggTilOverstyring(overstyringBuilder.build());
+            leggTil(overstyringBuilder.build());
         }
+        return this;
+    }
+
+    public ArbeidsforholdInformasjonBuilder leggTil(ArbeidsforholdOverstyring overstyring) {
+        kladd.leggTilOverstyring(overstyring);
         return this;
     }
 

@@ -11,7 +11,7 @@ public class ArbeidsforholdMedÅrsak {
     private InternArbeidsforholdRef ref;
     private Set<AksjonspunktÅrsak> årsaker = new HashSet<>();
 
-    ArbeidsforholdMedÅrsak(){
+    ArbeidsforholdMedÅrsak() {
         // default ctor
     }
 
@@ -33,9 +33,19 @@ public class ArbeidsforholdMedÅrsak {
     }
 
     @Override
+    public String toString() {
+        return getClass().getSimpleName() +
+            "<ref=" + ref +
+            ", årsaker=" + årsaker +
+            ">";
+    }
+
+    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         ArbeidsforholdMedÅrsak that = (ArbeidsforholdMedÅrsak) o;
         return Objects.equals(ref, that.ref);
     }

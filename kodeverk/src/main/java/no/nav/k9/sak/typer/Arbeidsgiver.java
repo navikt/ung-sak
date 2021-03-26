@@ -25,7 +25,7 @@ public class Arbeidsgiver implements IndexKey {
      */
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
-    @Size(max=20)
+    @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsgiverOrgnr;
 
@@ -43,7 +43,7 @@ public class Arbeidsgiver implements IndexKey {
     protected Arbeidsgiver(String arbeidsgiverOrgnr, AktørId arbeidsgiverAktørId) {
         this.arbeidsgiverOrgnr = nonEmpty(arbeidsgiverOrgnr);
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
-        
+
         if (this.arbeidsgiverAktørId == null && this.arbeidsgiverOrgnr == null) {
             throw new IllegalArgumentException("Utvikler-feil: arbeidsgiver uten hverken orgnr eller aktørId");
         } else if (this.arbeidsgiverAktørId != null && this.arbeidsgiverOrgnr != null) {
@@ -52,7 +52,7 @@ public class Arbeidsgiver implements IndexKey {
     }
 
     private String nonEmpty(String str) {
-        return str==null || str.trim().isEmpty()?null: str.trim();
+        return str == null || str.trim().isEmpty() ? null : str.trim();
     }
 
     @Override
@@ -135,10 +135,16 @@ public class Arbeidsgiver implements IndexKey {
 
     @Override
     public String toString() {
-        return "Arbeidsgiver{" +
-            "virksomhet=" + getOrgnr() +
-            ", arbeidsgiverAktørId='" + getAktørId() + '\'' +
-            '}';
+        return toString(this);
+    }
+
+    private static String toString(Arbeidsgiver arb) {
+        // litt maskering for feilsøking nå
+        if (arb.getErVirksomhet()) {
+            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + ">";
+        } else {
+            return "PersonligArbeidsgiver<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + ">";
+        }
     }
 
     public static Arbeidsgiver fra(Arbeidsgiver arbeidsgiver) {

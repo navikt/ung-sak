@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.arbeidsforhold;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -36,7 +37,6 @@ public class MottattInntektsmeldingDto {
     @JsonProperty(value = "status")
     private DokumentStatus status;
 
-
     @JsonProperty(value = "begrunnelse")
     @Size(max = 400)
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -47,7 +47,7 @@ public class MottattInntektsmeldingDto {
                                      @JsonProperty(value = "mottattTidspunkt") @NotNull LocalDateTime mottattTidspunkt,
                                      @JsonProperty(value = "status") @Valid @NotNull DokumentStatus status,
                                      @JsonProperty(value = "begrunnelse") @Size(max = 400) @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
-        this.journalpostId = journalpostId;
+        this.journalpostId = Objects.requireNonNull(journalpostId);
         this.mottattTidspunkt = mottattTidspunkt;
         this.status = status;
         this.begrunnelse = begrunnelse;
@@ -71,8 +71,26 @@ public class MottattInntektsmeldingDto {
 
     @Override
     public String toString() {
-        return "MottattInntektsmeldingDto{" +
-            "journalpostId=" + journalpostId +
-            '}';
+        return getClass().getSimpleName() +
+            "<journalpostId=" + journalpostId +
+            ", mottattTidspunkt=" + mottattTidspunkt +
+            ", status=" + status +
+            ">";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass())
+            return false;
+        var other = (MottattInntektsmeldingDto) obj;
+        return Objects.equals(journalpostId, other.journalpostId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(journalpostId);
+    }
+
 }
