@@ -14,9 +14,9 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import no.nav.k9.søknad.felles.aktivitet.Arbeidstaker;
-import no.nav.k9.søknad.felles.aktivitet.Frilanser;
-import no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.felles.opptjening.Frilanser;
+import no.nav.k9.søknad.felles.opptjening.Arbeidstaker;
+import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -49,8 +49,8 @@ class SøknadOppgittFraværMapper {
             Duration varighet = fp.getDuration();
             for (SelvstendigNæringsdrivende sn : snAktiviteter) {
                 InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
-                var arbeidsgiver = sn.organisasjonsnummer != null
-                    ? Arbeidsgiver.virksomhet(sn.organisasjonsnummer.verdi)
+                var arbeidsgiver = sn.getOrganisasjonsnummer() != null
+                    ? Arbeidsgiver.virksomhet(sn.getOrganisasjonsnummer().getVerdi())
                     : (søker.getPersonIdent() != null
                     ? Arbeidsgiver.fra(new AktørId(søker.getPersonIdent().getVerdi()))
                     : null);
@@ -67,7 +67,7 @@ class SøknadOppgittFraværMapper {
             }
             if(arbeidstakerList != null) {
                 for(Arbeidstaker arbeidstaker: arbeidstakerList) {
-                    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().verdi);
+                    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet(arbeidstaker.getOrganisasjonsnummer().getVerdi());
                     InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
 
                     OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);

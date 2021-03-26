@@ -18,7 +18,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.søknad.felles.aktivitet.Organisasjonsnummer;
+import no.nav.k9.søknad.felles.opptjening.Organisasjonsnummer;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 @Dependent
@@ -70,11 +70,11 @@ public class LagreOppgittOpptjening {
         return OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
     }
 
-    private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende sn) {
-        if (sn.perioder.size() != 1) {
-            throw new IllegalArgumentException("Må ha eksakt en periode. Størrelse var " + sn.perioder.size());
+    private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
+        if (sn.getPerioder().size() != 1) {
+            throw new IllegalArgumentException("Må ha eksakt en periode. Størrelse var " + sn.getPerioder().size());
         }
-        var entry = sn.perioder.entrySet().iterator().next();
+        var entry = sn.getPerioder().entrySet().iterator().next();
         var info = entry.getValue();
         if (info.getVirksomhetstyper().isEmpty()) {
             throw new IllegalArgumentException("Må ha minst en virksomhetstype.");
@@ -88,20 +88,20 @@ public class LagreOppgittOpptjening {
     }
 
     private EgenNæringBuilder mapNæringForVirksomhetType(no.nav.k9.søknad.felles.type.Periode periode,
-                                                         no.nav.k9.søknad.felles.aktivitet.SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo info,
-                                                         no.nav.k9.søknad.felles.aktivitet.VirksomhetType type,
+                                                         no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo info,
+                                                         no.nav.k9.søknad.felles.opptjening.VirksomhetType type,
                                                          Organisasjonsnummer organisasjonsnummer) {
         var builder = EgenNæringBuilder.ny();
-        builder.medVirksomhet(organisasjonsnummer != null ? new OrgNummer(organisasjonsnummer.verdi) : null);
+        builder.medVirksomhet(organisasjonsnummer != null ? new OrgNummer(organisasjonsnummer.getVerdi()) : null);
         builder.medPeriode(periode.getTilOgMed() != null
             ? DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed())
             : DatoIntervallEntitet.fraOgMed(periode.getFraOgMed()));
-        builder.medBruttoInntekt(info.bruttoInntekt);
+        builder.medBruttoInntekt(info.getBruttoInntekt());
         builder.medVirksomhetType(VirksomhetType.fraKode(type.getKode()));
-        builder.medRegnskapsførerNavn(info.regnskapsførerNavn);
-        builder.medRegnskapsførerTlf(info.regnskapsførerTlf);
-        builder.medVarigEndring(info.erVarigEndring);
-        builder.medNyoppstartet(info.erNyoppstartet);
+        builder.medRegnskapsførerNavn(info.getRegnskapsførerNavn());
+        builder.medRegnskapsførerTlf(info.getRegnskapsførerTlf());
+        builder.medVarigEndring(info.getErVarigEndring());
+        builder.medNyoppstartet(info.getErNyoppstartet());
         // TODO Map ny i arbeidslivet
         return builder;
     }

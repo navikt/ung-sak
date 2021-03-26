@@ -89,7 +89,7 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medSpråkkode(getSpråkValg(søknad.getSpråk()))
         ;
@@ -118,7 +118,7 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
 
     private Språkkode getSpråkValg(Språk språk) {
         if (språk != null) {
-            return Språkkode.fraKode(språk.dto.toUpperCase());
+            return Språkkode.fraKode(språk.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }
