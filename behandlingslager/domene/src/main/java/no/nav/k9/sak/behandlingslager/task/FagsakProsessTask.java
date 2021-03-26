@@ -5,16 +5,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 
 /**
  * Task som utfører noe på en fagsak, før prosessen kjøres videre.
  * Sikrer at fagsaklås task på riktig plass..
  */
 public abstract class FagsakProsessTask implements ProsessTaskHandler {
+
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     private FagsakLåsRepository fagsakLåsRepository;
     private BehandlingLåsRepository behandlingLåsRepository;
@@ -60,4 +64,17 @@ public abstract class FagsakProsessTask implements ProsessTaskHandler {
         }
         return Collections.emptyList();
     }
+
+    /** log mdc cleares automatisk når task har kjørt, så trenger ikke kalle clearLogContext. */
+    public static void logContext(Fagsak fagsak) {
+        LOG_CONTEXT.add("saksnummer", fagsak.getSaksnummer());
+        LOG_CONTEXT.add("ytelseType", fagsak.getYtelseType());
+    }
+
+    /** symmetri til #logContext. */
+    public static void clearLogContext() {
+        LOG_CONTEXT.remove("saksnummer");
+        LOG_CONTEXT.remove("ytelseType");
+    }
+
 }

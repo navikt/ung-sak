@@ -66,8 +66,7 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("status", Fagsak::getStatus);
         toCsv.put("opprettet_tid", Fagsak::getOpprettetTidspunkt);
         toCsv.put("endret_tid", Fagsak::getEndretTidspunkt);
-        var sb = new StringBuilder(200);
-        return List.of(DebugDumpsters.dumpAsCsv(true, fagsak, saksnummer + ".csv", sb, toCsv));
+        return List.of(DebugDumpsters.dumpAsCsvSingleInput(true, fagsak, saksnummer + ".csv", toCsv));
     }
 
     private List<DumpOutput> dumpBehandlinger(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
@@ -106,8 +105,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
             toCsv.put("endret_tid", Behandling::getEndretTidspunkt);
 
-            var sb = new StringBuilder(200);
-            resultat.add(DebugDumpsters.dumpAsCsv(true, b, path + "/behandling.csv", sb, toCsv));
+            resultat.add(DebugDumpsters.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
 
             for (var inst : dumpstere) {
                 for (var dumper : inst) {
