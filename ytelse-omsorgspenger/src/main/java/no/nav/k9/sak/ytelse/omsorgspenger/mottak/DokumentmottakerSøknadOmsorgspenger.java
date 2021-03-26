@@ -2,13 +2,18 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -28,6 +33,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -51,12 +60,15 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
+    private static final Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadOmsorgspenger.class);
+
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -73,7 +85,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                         BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
-                                        SøknadParser søknadParser,
+                                        InntektArbeidYtelseTjeneste iayTjeneste, SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
@@ -82,6 +94,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.iayTjeneste = iayTjeneste;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.dokumentValidator = dokumentValidator;
@@ -155,7 +168,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
             .map(OppgittFravær::getPerioder)
             .orElse(Set.of());
-        var søktFraværFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId).map();
+        Collection<ArbeidsforholdReferanse> arbeidsforhold = finnArbeidsforhold(behandlingId);
+        var søktFraværFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId, arbeidsforhold).map();
         søktFravær.addAll(søktFraværFraTidligere);
         søktFravær.addAll(søktFraværFraSøknad);
 
@@ -167,6 +181,17 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .map(grunnlag -> grunnlag.getOppgittFraværFraSøknad().getMaksPeriode())
             .orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
+    }
+
+    private Collection<ArbeidsforholdReferanse> finnArbeidsforhold(Long behandlingId) {
+        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElseThrow();
+        Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
+        if (arbeidsforholdInformasjon.isPresent()) {
+            return arbeidsforholdInformasjon.get().getArbeidsforholdReferanser();
+        } else {
+            logger.warn("Har ikke arbeidsforholdsinformasjon for behandlign={}", behandlingId);
+            return Collections.emptyList();
+        }
     }
 
     private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
