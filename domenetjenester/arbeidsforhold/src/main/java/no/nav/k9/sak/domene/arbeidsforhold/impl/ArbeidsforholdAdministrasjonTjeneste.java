@@ -110,10 +110,11 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                    NavigableSet<Inntektsmelding> inntektsmeldinger) {
 
         mapper.utledArbeidsforholdFraYrkesaktiviteter(Objects.requireNonNull(yrkesaktiviteter));
-        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(Objects.requireNonNull(arbeidsforholdOverstyringer));
 
-        // ta inntektsmeldinger etter yrkesaktivitet og arbeidsforhold informasjon (beriker med inntektsmeldinger som matcher angitt)
+        // ta inntektsmeldinger etter yrkesaktivitet (beriker med inntektsmeldinger som matcher angitt)
         mapper.utledArbeidsforholdFraInntektsmeldinger(Objects.requireNonNull(inntektsmeldinger));
+
+        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(Objects.requireNonNull(arbeidsforholdOverstyringer));
     }
 
     /**
