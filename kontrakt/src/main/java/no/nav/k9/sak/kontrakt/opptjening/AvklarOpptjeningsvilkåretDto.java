@@ -93,4 +93,12 @@ public class AvklarOpptjeningsvilkåretDto {
     public void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
     }
+
+    public boolean getEr847Ok() {
+        return er847Ok;
+    }
+
+    public void setEr847Ok(boolean er847Ok) {
+        this.er847Ok = er847Ok;
+    }
 }

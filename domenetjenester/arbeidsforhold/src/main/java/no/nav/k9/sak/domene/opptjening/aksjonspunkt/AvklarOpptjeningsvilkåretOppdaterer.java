@@ -11,6 +11,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -55,15 +56,16 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
                 var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
             }
-            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder);
+            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder, avklarOpptjeningsvilkåretDto.getEr847Ok());
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder) {
+    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder, boolean er847Ok) {
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfall(utfallType)
+            .medMerknad(er847Ok ? VilkårUtfallMerknad.VM_7847 : null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
