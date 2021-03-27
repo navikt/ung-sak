@@ -8,7 +8,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
@@ -26,7 +26,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private ÅrskvantumRestKlient restKlient;
     private String fileName = "årskvantum-fulluttaksplan.json";
-    private ObjectMapper om = DefaultJsonMapper.getObjectMapper(); // samme som ÅrskvantumRestklient bruker
+    private ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter(); // samme som ÅrskvantumRestklient bruker
 
     ÅrskvantumDump() {
         // for proxy
@@ -41,7 +41,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     public List<DumpOutput> dump(Behandling behandling) {
         try {
             var uttaksplan = restKlient.hentFullUttaksplanForBehandling(List.of(behandling.getUuid()));
-            var content = om.writeValueAsString(uttaksplan);
+            var content = ow.writeValueAsString(uttaksplan);
             return List.of(new DumpOutput(fileName, content));
         } catch (TekniskException | IOException e) {
             StringWriter sw = new StringWriter();
@@ -55,7 +55,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     public List<DumpOutput> dump(Fagsak fagsak) {
         try {
             var uttaksplan = restKlient.hentFullUttaksplan(fagsak.getSaksnummer());
-            var content = om.writeValueAsString(uttaksplan);
+            var content = ow.writeValueAsString(uttaksplan);
             return List.of(new DumpOutput(fileName, content));
         } catch (TekniskException | IOException e) {
             StringWriter sw = new StringWriter();

@@ -9,7 +9,7 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.felles.exception.TekniskException;
@@ -26,7 +26,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 @FagsakYtelseTypeRef("FRISINN")
 public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
 
-    private final ObjectMapper iayMapper = IayGrunnlagJsonMapper.getMapper();
+    private final ObjectWriter iayMapper = IayGrunnlagJsonMapper.getMapper().writerWithDefaultPrettyPrinter();
     private AbakusTjenesteAdapter tjeneste;
 
     AbakusDump() {
