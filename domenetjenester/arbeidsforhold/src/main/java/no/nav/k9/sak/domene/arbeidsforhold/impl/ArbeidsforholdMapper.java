@@ -13,6 +13,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -36,6 +39,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 class ArbeidsforholdMapper {
+    private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdMapper.class);
 
     private final Set<InntektArbeidYtelseArbeidsforholdV2Dto> result = new LinkedHashSet<>();
     private Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon;
@@ -144,7 +148,14 @@ class ArbeidsforholdMapper {
         arbeidsforholdOverstyringer.forEach(overstyring -> m.mapOverstyring(overstyring));
     }
 
-    void mapVurdering(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverÅrsaker) {
+    void mapVurderinger(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverÅrsaker) {
+
+        if (arbeidsgiverÅrsaker.isEmpty()) {
+            return; // quick exit
+        }
+
+        log.info("Map vurderinger: {}", arbeidsgiverÅrsaker);
+
         var finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold(this.result, null);
 
         for (var vurd : arbeidsgiverÅrsaker.entrySet()) {
@@ -223,8 +234,9 @@ class ArbeidsforholdMapper {
         }
 
         private boolean gjelderEksaktArbeidsforhold(InntektArbeidYtelseArbeidsforholdV2Dto it, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef) {
+            var expectedRef = arbeidsforholdRef == null ? null : arbeidsforholdRef.getUUIDReferanse();
             return it.getArbeidsgiver().getIdentifikator().equals(arbeidsgiver.getIdentifikator()) &&
-                Objects.equals(arbeidsforholdRef, InternArbeidsforholdRef.ref(it.getArbeidsforhold().getInternArbeidsforholdId()));
+                Objects.equals(expectedRef, it.getArbeidsforhold().getInternArbeidsforholdId());
         }
 
         private ArbeidsforholdIdDto mapArbeidsforholdsId(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Optional<ArbeidsforholdInformasjon> arbeidsforholdInformasjon) {
@@ -276,8 +288,9 @@ class ArbeidsforholdMapper {
         }
 
         private InntektArbeidYtelseArbeidsforholdV2Dto nyDto(Inntektsmelding im, InternArbeidsforholdRef angitt) {
+            var expectedRef = angitt == null ? null : angitt.getUUIDReferanse();
             var dto = new InntektArbeidYtelseArbeidsforholdV2Dto(im.getArbeidsgiver(),
-                new ArbeidsforholdIdDto(angitt.getUUIDReferanse(), im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)));
+                new ArbeidsforholdIdDto(expectedRef, im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)));
             return dto;
         }
 

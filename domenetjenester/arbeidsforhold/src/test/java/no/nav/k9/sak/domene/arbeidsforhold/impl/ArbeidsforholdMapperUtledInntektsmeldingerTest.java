@@ -121,16 +121,18 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
             this(VIRKSOMHET);
         }
 
-
         GenererImArbeidsforhold(Arbeidsgiver virksomhet) {
             this(virksomhet, ArbeidsforholdInformasjonBuilder.builder(Optional.empty()));
+        }
+
+        GenererImArbeidsforhold(ArbeidsforholdInformasjonBuilder arbInfo) {
+            this(VIRKSOMHET, arbInfo);
         }
 
         GenererImArbeidsforhold(Arbeidsgiver virksomhet, ArbeidsforholdInformasjonBuilder builder) {
             this.virksomhet = virksomhet;
             this.arbeidsforholdInformasjon = builder;
         }
-
 
         ArbeidsforholdMapper mapper() {
             return new ArbeidsforholdMapper(arbeidsforholdInformasjon.build());
@@ -189,7 +191,6 @@ public class ArbeidsforholdMapperUtledInntektsmeldingerTest {
             }
             return ims;
         }
-
 
     }
 }
