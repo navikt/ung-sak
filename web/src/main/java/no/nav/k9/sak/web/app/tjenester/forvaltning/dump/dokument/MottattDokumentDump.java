@@ -49,7 +49,7 @@ public class MottattDokumentDump implements DebugDumpFagsak {
             + ", m.feilmelding "
             + ", m.kildesystem "
             + ", replace(cast(m.innsendingstidspunkt as varchar), ' ', 'T') innsendingstidspunkt "
-            + ", convert_from(lo_get(payload), 'UTF8') as payload "
+            + ", regexp_replace(regexp_replace(convert_from(lo_get(payload), 'UTF8'), '\\\\n', '\\n'), '\\\\', '') payload"
             + "from mottatt_dokument m "
             + "inner join fagsak f on f.id=m.fagsak_id "
             + "where f.saksnummer=:saksnummer";
