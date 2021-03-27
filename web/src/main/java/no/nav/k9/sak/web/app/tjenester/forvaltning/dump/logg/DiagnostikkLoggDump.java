@@ -31,9 +31,6 @@ public class DiagnostikkLoggDump implements DebugDumpFagsak {
 
     @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
-        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId()));
-        entityManager.flush();
-
         var sql = "select"
             + "   f.saksnummer"
             + " , d.fagsak_id"

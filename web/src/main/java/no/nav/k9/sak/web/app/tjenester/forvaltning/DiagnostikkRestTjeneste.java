@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -25,6 +26,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("/diagnostikk")
@@ -34,14 +36,16 @@ public class DiagnostikkRestTjeneste {
 
     private FagsakRepository fagsakRepository;
     private DebugDumpsters dumpsters;
+    private EntityManager entityManager;
 
     DiagnostikkRestTjeneste() {
         // for proxy
     }
 
     @Inject
-    DiagnostikkRestTjeneste(FagsakRepository fagsakRepository, DebugDumpsters dumpsters) {
+    DiagnostikkRestTjeneste(FagsakRepository fagsakRepository, EntityManager entityManager, DebugDumpsters dumpsters) {
         this.fagsakRepository = fagsakRepository;
+        this.entityManager = entityManager;
         this.dumpsters = dumpsters;
     }
 
@@ -54,6 +58,13 @@ public class DiagnostikkRestTjeneste {
 
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer=" + saksnummer));
+
+        /*
+         * logg tilgang til tabell - må gjøres før dumps (siden StreamingOutput ikke kjører i scope av denne metoden på stacken,
+         * og derfor ikke har nytte av @Transactional.
+         */
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId()));
+        entityManager.flush();
 
         var streamingOutput = dumpsters.dumper(fagsak);
 

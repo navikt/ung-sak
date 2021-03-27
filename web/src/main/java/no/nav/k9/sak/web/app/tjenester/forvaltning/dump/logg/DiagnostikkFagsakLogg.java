@@ -26,7 +26,7 @@ public class DiagnostikkFagsakLogg extends BaseEntitet {
         // Hibernate
     }
 
-    DiagnostikkFagsakLogg(Long fagsakId) {
+    public DiagnostikkFagsakLogg(Long fagsakId) {
         this.fagsakId = fagsakId;
     }
 

@@ -146,17 +146,14 @@ class ArbeidsforholdMapper {
 
     void mapVurdering(Map<Arbeidsgiver, Set<ArbeidsforholdMedÅrsak>> arbeidsgiverÅrsaker) {
         var finnEksaktArbeidsforhold = new FinnEksaktArbeidsforhold(this.result, null);
-        var vurderinger = arbeidsgiverÅrsaker
-            .entrySet()
-            .stream()
-            .filter(it -> it.getValue()
-                .stream()
-                .anyMatch(at -> !at.getÅrsaker().isEmpty()))
-            .distinct()
-            .collect(Collectors.toList());
 
-        vurderinger.stream().forEach(vurd -> {
-            vurd.getValue().forEach(af -> {
+        for (var vurd : arbeidsgiverÅrsaker.entrySet()) {
+            for (var af : vurd.getValue()) {
+
+                if (af.getÅrsaker().isEmpty()) {
+                    continue; // skip
+                }
+
                 var dto = finnEksaktArbeidsforhold.finn(vurd.getKey(), af.getRef());
                 if (dto.isPresent()) {
                     var aksjonspunktÅrsaker = af.getÅrsaker().stream().map(it -> ArbeidsforholdAksjonspunktÅrsak.fraKode(it.name())).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -164,10 +161,12 @@ class ArbeidsforholdMapper {
                 } else {
                     // inkonsistens i data - noe som er fjernet?
                     throw new IllegalStateException(
-                        String.format("Inkonsistens i informasjonsmodell: Fant ingen arbeidsforhold for angitt vurdering [%s, arbeidsforholdMedÅrsak=%s], blant: %s", vurd.getKey(), af, result));
+                        String.format("Inkonsistens i informasjonsmodell: Fant ingen arbeidsforhold for angitt vurdering [%s, arbeidsforholdMedÅrsak=%s], blant: %s", vurd.getKey(), af,
+                            result));
                 }
-            });
-        });
+
+            }
+        }
     }
 
     public Set<InntektArbeidYtelseArbeidsforholdV2Dto> getArbeidsforhold() {
