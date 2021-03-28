@@ -85,7 +85,7 @@ public class ArbeidsforholdAdministrasjonTjeneste {
 
             if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
                 var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
-                mapper.mapVurdering(vurderinger);
+                mapper.mapVurderinger(vurderinger);
             }
 
             return mapper.getArbeidsforhold();

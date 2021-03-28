@@ -75,10 +75,23 @@ public class ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest {
 
         private Arbeidsgiver virksomhet;
 
-        private final ArbeidsforholdInformasjonBuilder arbInfo = ArbeidsforholdInformasjonBuilder.oppdatere(Optional.empty());
+        private final ArbeidsforholdInformasjonBuilder arbInfo;
 
         GenererArbinfoArbeidsforhold() {
             this(VIRKSOMHET);
+        }
+
+        GenererArbinfoArbeidsforhold(Arbeidsgiver virksomhet) {
+            this(virksomhet, ArbeidsforholdInformasjonBuilder.oppdatere(Optional.empty()));
+        }
+
+        GenererArbinfoArbeidsforhold(Arbeidsgiver virksomhet, ArbeidsforholdInformasjonBuilder arbInfo) {
+            this.virksomhet = virksomhet;
+            this.arbInfo = arbInfo;
+        }
+
+        GenererArbinfoArbeidsforhold(ArbeidsforholdInformasjonBuilder arbInfo) {
+            this(VIRKSOMHET, arbInfo);
         }
 
         InternArbeidsforholdRef arbeidsforholdUten() {
@@ -111,10 +124,6 @@ public class ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest {
             return internRef;
         }
 
-        GenererArbinfoArbeidsforhold(Arbeidsgiver virksomhet) {
-            this.virksomhet = virksomhet;
-        }
-
         ArbeidsforholdInformasjon arbeidsforholdInformasjon() {
             return arbeidsforholdInformasjon(null);
         }
@@ -136,13 +145,11 @@ public class ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest {
 
         ArbeidsforholdOverstyring overstyringLagtTil(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internRef, LocalDate fom, LocalDate tom) {
             DatoIntervallEntitet overstyrtPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-            var stillingsprosent = defaultStillingsprosent;
-            return overstyringLagtTil(arbeidsgiver, internRef, overstyrtPeriode, stillingsprosent);
+            return overstyringLagtTil(arbeidsgiver, internRef, overstyrtPeriode, defaultStillingsprosent);
         }
 
         ArbeidsforholdOverstyring overstyringLagtTil(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef internRef, DatoIntervallEntitet overstyrtPeriode, Stillingsprosent stillingsprosent) {
-            var handlingType = defaultHandling;
-            return overstyring(arbeidsgiver, internRef, handlingType, overstyrtPeriode, stillingsprosent);
+            return overstyring(arbeidsgiver, internRef, defaultHandling, overstyrtPeriode, stillingsprosent);
         }
 
         ArbeidsforholdOverstyring overstyring(Arbeidsgiver arbeidsgiver,
@@ -166,8 +173,12 @@ public class ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest {
             return overstyring;
         }
 
-        static List<ArbeidsforholdOverstyring> overstyringer(ArbeidsforholdOverstyring overstyringUten, ArbeidsforholdOverstyring overstyringMed) {
-            return List.of(overstyringMed, overstyringUten);
+        static List<ArbeidsforholdOverstyring> overstyringer(ArbeidsforholdOverstyring... ovs) {
+            return List.of(ovs);
+        }
+
+        public ArbeidsforholdOverstyring overstyring(Arbeidsgiver arbeidsgiver, ArbeidsforholdHandlingType handlingType) {
+            return overstyring(arbeidsgiver, InternArbeidsforholdRef.nullRef(), handlingType, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), defaultStillingsprosent);
         }
     }
 
