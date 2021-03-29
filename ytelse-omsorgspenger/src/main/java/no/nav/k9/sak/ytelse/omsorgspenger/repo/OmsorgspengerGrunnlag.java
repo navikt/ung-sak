@@ -26,6 +26,7 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "fravaer_id")
     private OppgittFravær oppgittFravær;
