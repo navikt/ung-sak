@@ -54,7 +54,7 @@ public class ÅpneProsessTaskDump implements DebugDumpFagsak {
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
-        String path = "vilkårresultat.csv";
+        String path = "åpne_prosess_task.csv";
 
         @SuppressWarnings("unchecked")
         List<Tuple> results = query.getResultList();

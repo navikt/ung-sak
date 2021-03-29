@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.aksjonspunkt;
+package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.omsorgspenger;
 
 import java.util.List;
 
@@ -14,17 +14,17 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef
-public class AksjonspunktDump implements DebugDumpFagsak {
+@FagsakYtelseTypeRef("OMP")
+public class OppgittFraværDump implements DebugDumpFagsak {
 
     private EntityManager entityManager;
 
-    AksjonspunktDump() {
+    OppgittFraværDump() {
         // for proxys
     }
 
     @Inject
-    AksjonspunktDump(EntityManager entityManager) {
+    OppgittFraværDump(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -32,27 +32,31 @@ public class AksjonspunktDump implements DebugDumpFagsak {
     public List<DumpOutput> dump(Fagsak fagsak) {
         var sql = ""
             + "select f.saksnummer"
-            + ", b.fagsak_id"
-            + ", a.behandling_id"
-            + ", a.aksjonspunkt_def"
-            + ", a.aksjonspunkt_status"
-            + ", a.periode_fom"
-            + ", a.periode_tom"
-            + ", a.begrunnelse"
-            + ", a.totrinn_behandling"
-            + ", a.behandling_steg_funnet"
-            + ", a.frist_tid"
-            + " , replace(cast(a.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
-            + ", a.vent_aarsak"
-            + ", a.vent_aarsak_variant "
-            + " from aksjonspunkt a"
-            + " inner join behandling b on b.id=a.behandling_id"
+            + ", f.id as fagsak_id"
+            + ", gr.behandling_id"
+            + ", b.behandling_status"
+            + ", b.behandling_resultat_type"
+            + ", omp.fom"
+            + ", omp.tom"
+            + ", omp.fravaer_per_dag"
+            + ", omp.aktivitet_type"
+            + ", omp.arbeidsgiver_aktor_id"
+            + ", omp.arbeidsgiver_orgnr"
+            + ", omp.arbeidsforhold_intern_id"
+            + ", omp.journalpost_id"
+            + ", omp.fravaer_arsak"
+            + ", replace(cast(omp.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
+            + " from "
+            + " gr_omp_aktivitet gr"
+            + " inner join behandling b on b.id=gr.behandling_id and gr.aktiv=true"
             + " inner join fagsak f on f.id=b.fagsak_id"
-            + " where f.saksnummer=:saksnummer";
+            + " inner join omp_oppgitt_fravaer_periode omp on omp.fravaer_id=gr.fravaer_id"
+            + " where f.saksnummer=:saksnummer"
+            + " order by 1, 2, 3, omp.opprettet_tid;";
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
-        String path = "aksjonspunkt.csv";
+        String path = "omsorgspenger_oppgitt_fravær.csv";
 
         @SuppressWarnings("unchecked")
         List<Tuple> results = query.getResultList();
