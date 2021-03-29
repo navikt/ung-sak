@@ -14,13 +14,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -403,7 +403,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
         var oppgittFravær = new OppgittFravær(
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
+            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
         var åpenPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), Tid.TIDENES_ENDE);
         var egenNæringBuilder = OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
@@ -437,7 +437,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var oppgittFravær = new OppgittFravær(
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
+            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
         var frilans = OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny();
         var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()

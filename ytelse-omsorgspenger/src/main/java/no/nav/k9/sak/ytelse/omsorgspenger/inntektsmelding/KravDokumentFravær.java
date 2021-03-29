@@ -30,6 +30,7 @@ public class KravDokumentFravær {
         var sortedIm = inntektsmeldinger.stream().sorted(Inntektsmelding.COMP_REKKEFØLGE).collect(Collectors.toCollection(LinkedHashSet::new));
 
         var aktivitetType = UttakArbeidType.ARBEIDSTAKER;
+        var fraværÅrsak = FraværÅrsak.UDEFINERT;
         Map<AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold, List<WrappedOppgittFraværPeriode>> mapByAktivitet = new LinkedHashMap<>();
         for (var im : sortedIm) {
             var arbeidsgiver = im.getArbeidsgiver();
@@ -37,7 +38,7 @@ public class KravDokumentFravær {
             var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
             var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
             var liste = im.getOppgittFravær().stream()
-                .map(pa -> new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag(), FraværÅrsak.UDEFINERT), im.getInnsendingstidspunkt(), Utfall.OPPFYLT))
+                .map(pa -> new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag(), fraværÅrsak), im.getInnsendingstidspunkt(), Utfall.OPPFYLT))
                 .collect(Collectors.toList());
 
             var timeline = mapTilTimeline(aktiviteter);
@@ -98,7 +99,7 @@ public class KravDokumentFravær {
 
     private WrappedOppgittFraværPeriode opprettHoldKonsistens(LocalDateSegment<WrappedOppgittFraværPeriode> segment) {
         var value = segment.getValue().getPeriode();
-        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), FraværÅrsak.UDEFINERT),
+        return new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(segment.getFom(), segment.getTom(), value.getAktivitetType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getFraværPerDag(), value.getFraværÅrsak()),
             segment.getValue().getInnsendingstidspunkt(),
             segment.getValue().getSøknadsfristUtfall());
     }

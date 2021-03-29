@@ -1,12 +1,13 @@
 package no.nav.k9.kodeverk.uttak;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import no.nav.k9.kodeverk.api.Kodeverdi;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -64,7 +65,7 @@ public enum FraværÅrsak implements Kodeverdi {
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent UttakArbeidType: " + kode);
+            throw new IllegalArgumentException("Ukjent FraværÅrsak: " + kode);
         }
         return ad;
     }

@@ -4,20 +4,32 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
 import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -152,6 +164,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         return fraværPerDag;
     }
 
+    public FraværÅrsak getFraværÅrsak() {
+        return fraværÅrsak;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -163,13 +179,14 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(fraværPerDag, that.fraværPerDag)
             && Objects.equals(aktivitetType, that.aktivitetType)
+            && Objects.equals(fraværÅrsak, that.fraværÅrsak)
             && Objects.equals(arbeidsgiver, that.arbeidsgiver)
             && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, journalpostId, fraværPerDag, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(periode, journalpostId, fraværPerDag, aktivitetType, fraværÅrsak, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override
@@ -179,6 +196,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             ", periode=" + periode +
             ", journalpostId=" + journalpostId +
             ", aktivitetType=" + arbeidsgiver +
+            ", fraværÅrsak=" + fraværÅrsak +
             (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
             (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +
             (fraværPerDag != null ? ", jobberNormaltPerUke=" + fraværPerDag : "") +
