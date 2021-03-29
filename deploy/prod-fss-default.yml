@@ -201,8 +201,6 @@ spec:
       value: "false"
     - name: VURDER_SOKNADSFRIST
       value: "true"
-    - name: "ARBEIDSFORHOLD_MAPPER_NY"
-      value: "false"
       
     # Audit logging
     - name: AUDITLOGGER_ENABLED
