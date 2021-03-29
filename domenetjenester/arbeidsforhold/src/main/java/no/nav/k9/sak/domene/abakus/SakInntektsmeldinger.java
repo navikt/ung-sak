@@ -26,7 +26,7 @@ class SakInntektsmeldinger {
     }
 
     Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Long behandlingId, UUID eksternReferanse) {
-        if (eksternReferanse == null) {
+        if (eksternReferanse == null || data.isEmpty()) {
             return Set.of();
         }
         var key = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.grunnlagEksternReferanse.equals(eksternReferanse)).findAny().orElseThrow();
