@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,10 +17,12 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import no.nav.k9.søknad.felles.opptjening.Frilanser;
-import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
+import no.nav.k9.søknad.felles.opptjening.Arbeidstaker;
+import no.nav.k9.søknad.felles.opptjening.Organisasjonsnummer;
+import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
+import no.nav.k9.søknad.felles.type.PersonIdent;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 
@@ -38,45 +41,47 @@ class SøknadOppgittFraværMapper {
     }
 
     Set<OppgittFraværPeriode> map() {
-        Frilanser frilanser = søknadsinnhold.getAktivitet().getFrilanser();
-        var snAktiviteter = Optional.ofNullable(søknadsinnhold.getAktivitet().getSelvstendigNæringsdrivende())
-            .orElse(Collections.emptyList());
+        var opptj = Objects.requireNonNull(søknadsinnhold.getAktivitet());
 
-        var fraværsperioder = søknadsinnhold.getFraværsperioder();
-        Set<OppgittFraværPeriode> oppgittFraværPerioder;
-        oppgittFraværPerioder = new LinkedHashSet<>();
-        for (FraværPeriode fp : fraværsperioder) {
+        var atAktiviteter = Optional.ofNullable(opptj.getArbeidstaker()).orElse(Collections.emptyList());
+        var snAktiviteter = Optional.ofNullable(opptj.getSelvstendigNæringsdrivende()).orElse(Collections.emptyList());
+        var frilanser = opptj.getFrilanser();
+
+        Set<OppgittFraværPeriode> oppgittFraværPerioder = new LinkedHashSet<>();
+        for (FraværPeriode fp : søknadsinnhold.getFraværsperioder()) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
             Duration varighet = fp.getDuration();
             FraværÅrsak fraværÅrsak = FraværÅrsak.fraKode(fp.getÅrsak().getKode());
-            for (SelvstendigNæringsdrivende sn : snAktiviteter) {
-                InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
-                var arbeidsgiver = sn.getOrganisasjonsnummer() != null
-                    ? Arbeidsgiver.virksomhet(sn.getOrganisasjonsnummer().getVerdi())
-                    : (søker.getPersonIdent() != null
-                    ? Arbeidsgiver.fra(new AktørId(søker.getPersonIdent().getVerdi()))
-                    : null);
 
+            for (SelvstendigNæringsdrivende sn : snAktiviteter) {
+                Arbeidsgiver arbeidsgiver = byggArbeidsgiver(sn.getOrganisasjonsnummer(), søker.getPersonIdent());
+                InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
+            for (Arbeidstaker arbeidstaker : atAktiviteter) {
+                Arbeidsgiver arbeidsgiver = byggArbeidsgiver(arbeidstaker.getOrganisasjonsnummer(), søker.getPersonIdent());
+                InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her
+                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
+                oppgittFraværPerioder.add(oppgittFraværPeriode);
+            }
             if (frilanser != null) {
-                //TODO skal filtrere/bruke frilanser.jobberFortsattSomFrilanser og frilanser.startdato?
                 Arbeidsgiver arbeidsgiver = null;
                 InternArbeidsforholdRef arbeidsforholdRef = null;
                 OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
-            for (ArbeidsforholdReferanse arbeidsforhold : arbeidsforholdene) {
-                Arbeidsgiver arbeidsgiver = arbeidsforhold.getArbeidsgiver();
-                InternArbeidsforholdRef arbeidsforholdRef = arbeidsforhold.getInternReferanse();
-
-                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
-                oppgittFraværPerioder.add(oppgittFraværPeriode);
-            }
         }
 
         return oppgittFraværPerioder;
+    }
+
+    private Arbeidsgiver byggArbeidsgiver(Organisasjonsnummer organisasjonsnummer, PersonIdent personIdent) {
+        return organisasjonsnummer != null
+            ? Arbeidsgiver.virksomhet(organisasjonsnummer.getVerdi())
+            : (personIdent != null
+            ? Arbeidsgiver.fra(new AktørId(personIdent.getVerdi()))
+            : null);
     }
 }
