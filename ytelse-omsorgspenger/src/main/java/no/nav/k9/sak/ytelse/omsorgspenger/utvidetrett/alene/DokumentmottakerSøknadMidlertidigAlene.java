@@ -34,7 +34,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidler
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_MA")
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
-public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker {
+public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
 
@@ -42,12 +42,12 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
 
     private PersoninfoAdapter personinfoAdapter;
 
-    DokumentmottakerSøknadUtvidetRettAlene() {
+    DokumentmottakerSøknadMidlertidigAlene() {
         // for CDI proxy
     }
 
     @Inject
-    DokumentmottakerSøknadUtvidetRettAlene(BehandlingRepositoryProvider repositoryProvider,
+    DokumentmottakerSøknadMidlertidigAlene(BehandlingRepositoryProvider repositoryProvider,
                                            PersoninfoAdapter personinfoAdapter,
                                            MottatteDokumentRepository mottatteDokumentRepository) {
         this.personinfoAdapter = personinfoAdapter;

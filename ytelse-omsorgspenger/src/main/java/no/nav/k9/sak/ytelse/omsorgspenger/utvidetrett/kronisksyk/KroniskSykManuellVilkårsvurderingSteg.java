@@ -29,9 +29,9 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
 @BehandlingTypeRef
 @ApplicationScoped
-public class UtvidetRettKroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
+public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
 
-    private static final Logger log = LoggerFactory.getLogger(UtvidetRettKroniskSykManuellVilkårsvurderingSteg.class);
+    private static final Logger log = LoggerFactory.getLogger(KroniskSykManuellVilkårsvurderingSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -39,12 +39,12 @@ public class UtvidetRettKroniskSykManuellVilkårsvurderingSteg implements Behand
     private AksjonspunktDefinisjon aksjonspunktDef = AksjonspunktDefinisjon.VURDER_OMS_UTVIDET_RETT;
     private SøknadRepository søknadRepository;
 
-    public UtvidetRettKroniskSykManuellVilkårsvurderingSteg() {
+    public KroniskSykManuellVilkårsvurderingSteg() {
         // CDO
     }
 
     @Inject
-    public UtvidetRettKroniskSykManuellVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
+    public KroniskSykManuellVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
                                                             SøknadRepository søknadRepository,
                                                             VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
