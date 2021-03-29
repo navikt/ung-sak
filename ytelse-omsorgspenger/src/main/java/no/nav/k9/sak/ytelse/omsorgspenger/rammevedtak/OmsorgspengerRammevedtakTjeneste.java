@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
+package no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak;
 
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
