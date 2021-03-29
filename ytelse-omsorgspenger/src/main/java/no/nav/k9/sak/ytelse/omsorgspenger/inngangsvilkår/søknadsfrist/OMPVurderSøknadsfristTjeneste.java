@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -186,7 +187,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
         var value = segment.getValue();
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
         var raw = value.getRaw();
-        var fraværPeriode = new OppgittFraværPeriode(segment.getFom(), segment.getTom(), raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag());
+        var fraværPeriode = new OppgittFraværPeriode(segment.getFom(), segment.getTom(), raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag(), FraværÅrsak.UDEFINERT);
 
         return new VurdertSøktPeriode<>(periode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getUtfall(), fraværPeriode);
     }

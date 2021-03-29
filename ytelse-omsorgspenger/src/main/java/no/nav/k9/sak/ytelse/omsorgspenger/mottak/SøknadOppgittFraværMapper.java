@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.typer.AktørId;
@@ -48,6 +49,7 @@ class SøknadOppgittFraværMapper {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
             Duration varighet = fp.getDuration();
+            FraværÅrsak fraværÅrsak = FraværÅrsak.fraKode(fp.getÅrsak().getKode());
             for (SelvstendigNæringsdrivende sn : snAktiviteter) {
                 InternArbeidsforholdRef arbeidsforholdRef = null; // får ikke fra søknad, setter default null her, tolker om til InternArbeidsforholdRef.nullRef() ved fastsette uttak.
                 var arbeidsgiver = sn.getOrganisasjonsnummer() != null
@@ -56,21 +58,21 @@ class SøknadOppgittFraværMapper {
                     ? Arbeidsgiver.fra(new AktørId(søker.getPersonIdent().getVerdi()))
                     : null);
 
-                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, arbeidsforholdRef, varighet);
+                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
             if (frilanser != null) {
                 //TODO skal filtrere/bruke frilanser.jobberFortsattSomFrilanser og frilanser.startdato?
                 Arbeidsgiver arbeidsgiver = null;
                 InternArbeidsforholdRef arbeidsforholdRef = null;
-                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet);
+                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.FRILANSER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
             for (ArbeidsforholdReferanse arbeidsforhold : arbeidsforholdene) {
                 Arbeidsgiver arbeidsgiver = arbeidsforhold.getArbeidsgiver();
                 InternArbeidsforholdRef arbeidsforholdRef = arbeidsforhold.getInternReferanse();
 
-                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet);
+                OppgittFraværPeriode oppgittFraværPeriode = new OppgittFraværPeriode(journalpostId, fom, tom, UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, varighet, fraværÅrsak);
                 oppgittFraværPerioder.add(oppgittFraværPeriode);
             }
         }

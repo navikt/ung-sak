@@ -4,19 +4,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import javax.persistence.*;
 
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
+import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
 import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -61,6 +52,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
 
+    @Convert(converter = FraværÅrsakKodeConverter.class)
+    @ChangeTracked
+    @Column(name = "fravaer_arsak", nullable = false, updatable = false)
+    private FraværÅrsak fraværÅrsak;
+
     @ChangeTracked
     @Embedded
     private Arbeidsgiver arbeidsgiver;
@@ -90,17 +86,18 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
         this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.fraværPerDag = fraværPerDag;
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        this.fraværÅrsak = fraværÅrsak;
     }
 
-    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
-        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag);
+    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
+        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, fraværÅrsak);
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
@@ -110,6 +107,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this.fraværPerDag = periode.fraværPerDag;
         this.aktivitetType = Objects.requireNonNull(periode.aktivitetType, "aktivitetType");
         this.periode = periode.periode;
+        this.fraværÅrsak = periode.fraværÅrsak;
     }
 
 
