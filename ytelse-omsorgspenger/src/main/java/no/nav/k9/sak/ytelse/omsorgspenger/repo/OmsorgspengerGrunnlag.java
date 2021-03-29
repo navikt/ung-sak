@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "OmsorgspengerGrunnlag")
 @Table(name = "GR_OMP_AKTIVITET")
@@ -25,10 +26,12 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "fravaer_id")
     private OppgittFravær oppgittFravær;
 
+    @ChangeTracked
     @ManyToOne
     @JoinColumn(name = "fravaer_id_fra_soeknad")
     private OppgittFravær oppgittFraværFraSøknad;
@@ -48,6 +51,10 @@ public class OmsorgspengerGrunnlag extends BaseEntitet {
         this.behandlingId = behandlingId;
         this.oppgittFravær = oppgittFravær;
         this.oppgittFraværFraSøknad = oppgittFraværFraSøknad;
+    }
+
+    Long getId() {
+        return id;
     }
 
     public OppgittFravær getOppgittFravær() {
