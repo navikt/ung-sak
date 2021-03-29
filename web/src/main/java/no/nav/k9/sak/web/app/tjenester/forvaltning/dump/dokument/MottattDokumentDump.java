@@ -50,9 +50,9 @@ public class MottattDokumentDump implements DebugDumpFagsak {
             + ", m.kildesystem "
             + ", replace(cast(m.innsendingstidspunkt as varchar), ' ', 'T') innsendingstidspunkt "
             + ", regexp_replace(regexp_replace(convert_from(lo_get(payload), 'UTF8'), '\\\\n', '\\n'), '\\\\', '') payload"
-            + "from mottatt_dokument m "
-            + "inner join fagsak f on f.id=m.fagsak_id "
-            + "where f.saksnummer=:saksnummer";
+            + " from mottatt_dokument m "
+            + " inner join fagsak f on f.id=m.fagsak_id "
+            + " where f.saksnummer=:saksnummer";
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());

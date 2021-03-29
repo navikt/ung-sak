@@ -53,7 +53,7 @@ public class SøknadDump implements DebugDumpFagsak {
             + ", soan.rolle as annen_part_rolle"
             + ", soan.aktoer_id as annen_part_aktoer_id"
             + ", soan.situasjon_kode as annen_part_situasjon_kode"
-            + ", soan.tilleggsopplysninger"
+            + ", soan.tilleggsopplysninger as annen_part_tilleggsopplysninger"
             + " from "
             + " gr_soeknad gr"
             + " inner join behandling b on b.id=gr.behandling_id and gr.aktiv=true"
