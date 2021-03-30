@@ -1,5 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
@@ -12,12 +15,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-
 @ApplicationScoped
-@Default
 public class OmsorgspengerRammevedtakTjeneste {
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
@@ -25,21 +23,24 @@ public class OmsorgspengerRammevedtakTjeneste {
     private SøknadRepository søknadRepository;
 
     @Inject
-    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste, PersoninfoAdapter personinfoAdapter, SøknadRepository søknadRepository) {
+    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste, PersoninfoAdapter personinfoAdapter,
+                                            SøknadRepository søknadRepository) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
     }
 
-    public OmsorgspengerRammevedtakTjeneste() {
+    OmsorgspengerRammevedtakTjeneste() {
         // for CDI
     }
 
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         PersonIdent personIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId())
-            .orElseGet(() -> { throw new IllegalStateException("Kunne ikke finne person for aktørId."); }); // todo: send aktørId når Årskvantum får PDL-integrasjon
+            .orElseGet(() -> {
+                throw new IllegalStateException("Kunne ikke finne person for aktørId.");
+            }); // todo: send aktørId når Årskvantum får PDL-integrasjon
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
         DatoIntervallEntitet søknadsperiode = søknad.getSøknadsperiode();
