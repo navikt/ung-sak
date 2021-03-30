@@ -21,8 +21,38 @@ categories:
     labels:
       - 'bump'
       - 'dependencies'
-include-labels:
-  - 'domene/kontrakt'
+  - title: '📝 Kontraktendringer'
+    labels:
+      - 'domene/kontrakt'
+      
+autolabeler:
+  - label: 'chore'
+    title:
+      - '/^chore:/i'
+    files:
+      - '*.md'
+  - label: 'bug'
+    branch:
+      - '/fix\/.+/'
+    title:
+      - '/^fix:/i'
+  - label: 'feature'
+    branch:
+      - '/feature\/.+/'
+    title:
+      - '/^feature:/i'
+    body:
+      - '/^[A-Z]{3,8}-[0-9]{1,4}:/'
+  - label: 'domene/kontrakt'
+    files:
+      - 'kontrakt/src/main/java/**'
+      - 'kodeverk/src/main/java/**'
+  - label: 'migreringer'
+    files:
+       - 'migreringer/src/main/**'
+  - label: 'web'
+    files:
+       - 'web/src/main/**'
 template: |
   ## What's Changed
   $CHANGES
