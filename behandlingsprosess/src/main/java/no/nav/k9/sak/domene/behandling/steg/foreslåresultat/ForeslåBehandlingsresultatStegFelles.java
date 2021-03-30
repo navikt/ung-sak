@@ -9,9 +9,11 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -102,6 +104,16 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         if (!ikkeVurdertePerioder.isEmpty()) {
             throw new IllegalStateException(
                 "Vilkåret " + vilkår.getVilkårType() + " har en eller flere perioder som ikke er vurdert: " + ikkeVurdertePerioder);
+        }
+    }
+
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
+        if (!BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT.equals(tilSteg)) {
+            var behandlingId = kontekst.getBehandlingId();
+            Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+            behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
+            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
     }
 }
