@@ -41,7 +41,7 @@
         <felles.version>0.1.14</felles.version>
         <swagger.version>2.1.7</swagger.version>
         <fp-kontrakter.version>5.2.1</fp-kontrakter.version>
-        <k9format.version>5.1.29</k9format.version>
+        <k9format.version>5.1.30</k9format.version>
     </properties>
 
     <repositories>
@@ -137,7 +137,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            
+
             <dependency>
                 <groupId>no.nav.foreldrepenger.kontrakter</groupId>
                 <artifactId>fp-kontrakter-root</artifactId>
