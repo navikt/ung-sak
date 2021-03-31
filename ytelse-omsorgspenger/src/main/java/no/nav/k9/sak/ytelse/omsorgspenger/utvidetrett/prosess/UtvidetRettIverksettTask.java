@@ -5,11 +5,13 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.typer.Periode;
@@ -69,32 +71,33 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var søknad = søknadRepository.hentSøknad(behandling);
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        var iverksett = mapIverksett(behandling, søknad, vilkårene);
         var utfall = behandling.getBehandlingResultatType();
 
         if (utfall == BehandlingResultatType.INNVILGET || utfall == BehandlingResultatType.INNVILGET_ENDRING) {
-            utvidetRettKlient.innvilget(iverksett);
+            var periode = periode(vilkårene, Utfall.OPPFYLT);
+            utvidetRettKlient.innvilget(mapIverksett(behandling, søknad, periode));
         } else if (utfall == BehandlingResultatType.AVSLÅTT) {
-            utvidetRettKlient.avslått(iverksett);
+            var periode = periode(vilkårene, Utfall.IKKE_OPPFYLT);
+            utvidetRettKlient.avslått(mapIverksett(behandling, søknad, periode));
         } else {
             throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=" + utfall);
         }
     }
 
-    private UtvidetRett mapIverksett(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
+    private UtvidetRett mapIverksett(Behandling behandling, SøknadEntitet søknad, Periode periode) {
         var ytelseType = behandling.getFagsakYtelseType();
 
         switch (ytelseType) {
             case OMSORGSPENGER_KS:
-                return mapKroniskSyktBarn(behandling, søknad, vilkårene);
+                return mapKroniskSyktBarn(behandling, søknad, periode);
             case OMSORGSPENGER_MA:
-                return mapMidlertidigAlene(behandling, søknad, vilkårene);
+                return mapMidlertidigAlene(behandling, søknad, periode);
             default:
                 throw new UnsupportedOperationException("Støtter ikke ytelsetype=" + ytelseType);
         }
     }
 
-    private UtvidetRett mapMidlertidigAlene(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
+    private UtvidetRett mapMidlertidigAlene(Behandling behandling, SøknadEntitet søknad, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdAnnenForelder = behandling.getFagsak().getRelatertPersonAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -105,10 +108,10 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
             .setAnnenForelder(new Person(aktørIdAnnenForelder))
             .setSøker(new Person(aktørIdSøker))
-            .setPeriode(periode(vilkårene));
+            .setPeriode(periode);
     }
 
-    private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Vilkårene vilkårene) {
+    private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -119,19 +122,20 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
             .setBarn(new Person(aktørIdBarn))
             .setSøker(new Person(aktørIdSøker))
-            .setPeriode(periode(vilkårene));
+            .setPeriode(periode);
     }
 
-    private Periode periode(Vilkårene vilkårene) {
-        var vilkår = vilkårene.getVilkår(VilkårType.UTVIDETRETT);
-        var perioder = vilkår.orElseThrow().getPerioder();
-        var fom = perioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
-        var tom = perioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
+    private Periode periode(Vilkårene vilkårene, Utfall utfall) {
+        var vilkårsperioder = vilkårene.getVilkår(VilkårType.UTVIDETRETT)
+            .orElseThrow().getPerioder().stream().filter(p -> p.getGjeldendeUtfall() == utfall)
+            .collect(Collectors.toList());
+
+        var fom = vilkårsperioder.stream().min(Comparator.comparing(VilkårPeriode::getFom)).map(VilkårPeriode::getFom).orElseThrow();
+        var tom = vilkårsperioder.stream().max(Comparator.comparing(VilkårPeriode::getTom)).map(VilkårPeriode::getTom).orElseThrow();
         var periode = new Periode(fom, tom);
         if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
             throw new IllegalStateException("Ugylidig periode for vedtak om utvidet rett " + periode.toString());
         }
         return periode;
-
     }
 }
