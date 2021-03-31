@@ -341,7 +341,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var pågår = fagsakProsessTaskRepository.sjekkStatusProsessTasks(behandling.getFagsakId(), behandling.getId(), null);
         Optional<ProsessTaskData> firstMatch = pågår.stream().filter(p -> tasktyper.contains(p.getTaskType())).findFirst();
         if (firstMatch.isPresent()) {
-            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(firstMatch.get()).toException();
+            var t = firstMatch.get();
+            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(t.getId(), t.getTaskType(), t.getStatus()).toException();
         }
     }
 

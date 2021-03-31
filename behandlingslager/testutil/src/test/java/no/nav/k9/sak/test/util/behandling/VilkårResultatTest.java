@@ -33,7 +33,7 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.db.Repository;
+import no.nav.k9.sak.db.util.Repository;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ExtendWith(CdiAwareExtension.class)

@@ -4,7 +4,6 @@ import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 
 @Converter(autoApply = true)
 public class FraværÅrsakKodeConverter implements AttributeConverter<FraværÅrsak, String> {
