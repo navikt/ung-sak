@@ -71,6 +71,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private SøknadOppgittFraværMapper mapper;
 
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
@@ -86,6 +87,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         ProsessTaskRepository prosessTaskRepository,
                                         InntektArbeidYtelseTjeneste iayTjeneste, SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
+                                        SøknadOppgittFraværMapper mapper,
                                         @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
@@ -96,6 +98,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.iayTjeneste = iayTjeneste;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.mapper = mapper;
         this.dokumentValidator = dokumentValidator;
     }
 
@@ -168,7 +171,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .map(OppgittFravær::getPerioder)
             .orElse(Set.of());
         Collection<ArbeidsforholdReferanse> arbeidsforhold = finnArbeidsforhold(behandlingId);
-        var søktFraværFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId, arbeidsforhold).map();
+        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId, arbeidsforhold);
         søktFravær.addAll(søktFraværFraTidligere);
         søktFravær.addAll(søktFraværFraSøknad);
 

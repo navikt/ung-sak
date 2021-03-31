@@ -11,10 +11,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -30,21 +33,22 @@ import no.nav.k9.søknad.felles.type.PersonIdent;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 
+@Dependent
 class SøknadOppgittFraværMapper {
 
-    private final OmsorgspengerUtbetaling søknadsinnhold;
-    private final Søker søker;
-    private final JournalpostId journalpostId;
-    private Collection<ArbeidsforholdReferanse> arbeidsforholdene;
+    private AktørTjeneste aktørTjeneste;
 
-    public SøknadOppgittFraværMapper(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId, Collection<ArbeidsforholdReferanse> arbeidsforhold) {
-        this.søknadsinnhold = søknadsinnhold;
-        this.søker = søker;
-        this.journalpostId = journalpostId;
-        this.arbeidsforholdene = arbeidsforhold;
+    public SøknadOppgittFraværMapper() {
+        // CDI
     }
 
-    Set<OppgittFraværPeriode> map() {
+    @Inject
+    public SøknadOppgittFraværMapper(AktørTjeneste aktørTjeneste) {
+        this.aktørTjeneste = aktørTjeneste;
+    }
+
+
+    Set<OppgittFraværPeriode> map(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId, Collection<ArbeidsforholdReferanse> arbeidsforhold) {
         var opptj = Objects.requireNonNull(søknadsinnhold.getAktivitet());
 
         var atAktiviteter = Optional.ofNullable(opptj.getArbeidstaker()).orElse(Collections.emptyList());
@@ -60,20 +64,20 @@ class SøknadOppgittFraværMapper {
             List<AktivitetFravær> aktivitetFravær = Objects.requireNonNull(fp.getAktivitetFravær());
 
             if (aktivitetFravær.contains(AktivitetFravær.SELVSTENDIG_VIRKSOMHET)) {
-                oppgittFraværPerioder.addAll(mapSn(snAktiviteter, fom, tom, varighet, fraværÅrsak));
+                oppgittFraværPerioder.addAll(mapSn(snAktiviteter, søker, journalpostId, fom, tom, varighet, fraværÅrsak));
             }
             if (aktivitetFravær.contains(AktivitetFravær.ARBEIDSTAKER)) {
-                oppgittFraværPerioder.addAll(mapAt(atAktiviteter, fom, tom, varighet, fraværÅrsak));
+                oppgittFraværPerioder.addAll(mapAt(atAktiviteter, søker, journalpostId, fom, tom, varighet, fraværÅrsak));
             }
             if (aktivitetFravær.contains(AktivitetFravær.FRILANSER)) {
-                oppgittFraværPerioder.addAll(mapFl(frilanser, fom, tom, varighet, fraværÅrsak));
+                oppgittFraværPerioder.addAll(mapFl(frilanser, journalpostId, fom, tom, varighet, fraværÅrsak));
             }
         }
 
         return oppgittFraværPerioder;
     }
 
-    private Set<OppgittFraværPeriode> mapSn(List<SelvstendigNæringsdrivende> snAktiviteter, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
+    private Set<OppgittFraværPeriode> mapSn(List<SelvstendigNæringsdrivende> snAktiviteter, Søker søker, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
         return snAktiviteter.stream()
             .map(sn -> {
                 Arbeidsgiver arbeidsgiver = byggArbeidsgiver(sn.getOrganisasjonsnummer(), søker.getPersonIdent());
@@ -84,7 +88,7 @@ class SøknadOppgittFraværMapper {
             .collect(Collectors.toSet());
     }
 
-    private Set<OppgittFraværPeriode> mapAt(List<Arbeidstaker> atAktiviteter, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
+    private Set<OppgittFraværPeriode> mapAt(List<Arbeidstaker> atAktiviteter, Søker søker, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
         return atAktiviteter.stream()
             .map(arbeidstaker -> {
                 Arbeidsgiver arbeidsgiver = byggArbeidsgiver(arbeidstaker.getOrganisasjonsnummer(), søker.getPersonIdent());
@@ -96,7 +100,7 @@ class SøknadOppgittFraværMapper {
             .collect(Collectors.toSet());
     }
 
-    private Set<OppgittFraværPeriode> mapFl(Frilanser frilanser, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
+    private Set<OppgittFraværPeriode> mapFl(Frilanser frilanser, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Duration varighet, FraværÅrsak fraværÅrsak) {
         if (frilanser != null) {
             Arbeidsgiver arbeidsgiver = null;
             InternArbeidsforholdRef arbeidsforholdRef = null;
@@ -109,10 +113,13 @@ class SøknadOppgittFraværMapper {
     }
 
     private Arbeidsgiver byggArbeidsgiver(Organisasjonsnummer organisasjonsnummer, PersonIdent personIdent) {
-        return organisasjonsnummer != null
-            ? Arbeidsgiver.virksomhet(organisasjonsnummer.getVerdi())
-            : (personIdent != null
-            ? Arbeidsgiver.fra(new AktørId(personIdent.getVerdi()))
-            : null);
+        if (organisasjonsnummer != null) {
+            return Arbeidsgiver.virksomhet(organisasjonsnummer.getVerdi());
+        } else if (personIdent != null) {
+            var aktørId = aktørTjeneste.hentAktørIdForPersonIdent(new no.nav.k9.sak.typer.PersonIdent(personIdent.getVerdi())).orElseThrow(() -> new IllegalArgumentException("Finner ingen aktørid for fnr"));
+            return Arbeidsgiver.fra(aktørId);
+        } else {
+            return null;
+        }
     }
 }
