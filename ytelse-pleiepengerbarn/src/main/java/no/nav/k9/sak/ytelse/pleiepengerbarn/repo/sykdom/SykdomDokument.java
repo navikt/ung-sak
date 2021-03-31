@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -15,7 +16,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
@@ -33,15 +36,8 @@ public class SykdomDokument {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
 
-    @Column(name = "TYPE", nullable = false)
-    @Convert(converter = SykdomDokumentTypeConverter.class)
-    private SykdomDokumentType type;
-
-    @Column(name = "MOTTATT", nullable = false)
-    private LocalDateTime mottatt;
-
-    @Column(name = "DATERT", nullable = true)
-    private LocalDate datert;
+    @OneToMany(mappedBy = "dokument", cascade = CascadeType.PERSIST)
+    private SykdomDokumentInformasjon informasjon;
 
     @Column(name = "JOURNALPOST_ID", nullable = false)
     private JournalpostId journalpostId;
@@ -61,36 +57,53 @@ public class SykdomDokument {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable = false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    @DiffIgnore
-    @Column(name = "ENDRET_AV", nullable = false, updatable = false)
-    private String endretAv;
-
-    @DiffIgnore
-    @Column(name = "ENDRET_TID", nullable = false, updatable = false)
-    private LocalDateTime endretTidspunkt; // NOSONAR
-
-
     SykdomDokument() {
 
     }
 
     public SykdomDokument(
-            SykdomDokumentType type,
-            LocalDateTime mottatt,
             JournalpostId journalpostId,
             String dokumentInfoId,
+            SykdomDokumentInformasjon informasjon,
             String opprettetAv,
-            LocalDateTime opprettetTidspunkt,
-            String endretAv,
-            LocalDateTime endretTidspunkt) {
-        this.type = Objects.requireNonNull(type, "type");
-        this.mottatt = mottatt;
+            LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
+        if(informasjon.getDokument() != null && informasjon.getDokument() != this) {
+            throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
+        }
+        informasjon.setDokument(this);
+        this.informasjon = informasjon;
         this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
         this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
-        this.endretAv = Objects.requireNonNull(endretAv, "endretAv");
-        this.endretTidspunkt = Objects.requireNonNull(endretTidspunkt, "endretTidspunkt");
+    }
+
+    public SykdomDokumentType getType() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getType();
+    }
+
+    public LocalDate getDatert() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getDatert();
+    }
+
+    public LocalDate getMottattDato() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getMottattDato();
+    }
+
+    public LocalDateTime getMottattTidspunkt() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getMottattTidspunkt();
     }
 
 
@@ -106,28 +119,24 @@ public class SykdomDokument {
         return sykdomVurderinger;
     }
 
-    public SykdomDokumentType getType() {
-        return type;
-    }
-
-    public LocalDateTime getMottattTidspunkt() {
-        return mottatt;
-    }
-
-    public LocalDate getMottattDato() {
-        return mottatt.toLocalDate();
-    }
-
-    public LocalDate getDatert() {
-        return datert;
-    }
-
     public JournalpostId getJournalpostId() {
         return journalpostId;
     }
 
     public String getDokumentInfoId() {
         return dokumentInfoId;
+    }
+
+    public void setInformasjon(SykdomDokumentInformasjon informasjon) {
+        if (informasjon.getDokument() != null && informasjon.getDokument() != this) {
+            throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
+        }
+        informasjon.setDokument(this);
+        this.informasjon = informasjon;
+    }
+
+    public SykdomDokumentInformasjon getInformasjon() {
+        return informasjon;
     }
 
     public List<SykdomDokumentSak> getDokumentSaker() {
@@ -143,18 +152,10 @@ public class SykdomDokument {
     }
 
     public String getEndretAv() {
-        return endretAv;
+        return informasjon.getOpprettetAv();
     }
 
     public LocalDateTime getEndretTidspunkt() {
-        return endretTidspunkt;
-    }
-
-    public void setType(SykdomDokumentType type) {
-        this.type = type;
-    }
-
-    public void setDatert(LocalDate datert) {
-        this.datert = datert;
+        return informasjon.getOpprettetTidspunkt();
     }
 }

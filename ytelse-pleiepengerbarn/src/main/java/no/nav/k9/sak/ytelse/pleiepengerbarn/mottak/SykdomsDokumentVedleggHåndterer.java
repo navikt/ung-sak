@@ -19,7 +19,9 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @Dependent
 public class SykdomsDokumentVedleggHåndterer {
@@ -58,13 +60,17 @@ public class SykdomsDokumentVedleggHåndterer {
             : journalpost.getRelevanteDatoer().stream().filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT).findFirst().get().getDato().toInstant().atZone(ZoneId.of("Europe/Oslo"))
                 .toLocalDateTime();
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
-            final SykdomDokument dokument = new SykdomDokument(
+            final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
                 SykdomDokumentType.UKLASSIFISERT,
+                null,
                 mottattDato,
+                0L,
+                "VL",
+                mottattidspunkt);
+            final SykdomDokument dokument = new SykdomDokument(
                 journalpostId,
                 dokumentInfo.getDokumentInfoId(),
-                "VL",
-                mottattidspunkt,
+                informasjon,
                 "VL",
                 mottattidspunkt);
             sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);

@@ -49,6 +49,7 @@ import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.k9.felles.exception.ManglerTilgangException;
@@ -274,8 +275,16 @@ public class SykdomDokumentRestTjeneste {
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
 
-        dokument.setDatert(sykdomDokumentEndringDto.getDatert());
-        dokument.setType(sykdomDokumentEndringDto.getType());
+        SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
+        dokument.setInformasjon(new SykdomDokumentInformasjon(
+            dokument,
+            sykdomDokumentEndringDto.getType(),
+            sykdomDokumentEndringDto.getDatert(),
+            gmlInformasjon.getMottattTidspunkt(),
+            gmlInformasjon.getVersjon()+1,
+            getCurrentUserId(),
+            LocalDateTime.now()
+            ));
 
         sykdomDokumentRepository.oppdater(dokument);
     }
@@ -306,13 +315,17 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final LocalDateTime nå = LocalDateTime.now();
-        final SykdomDokument dokument = new SykdomDokument(
+        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
             SykdomDokumentType.UKLASSIFISERT,
+            nå.toLocalDate(),
             nå,
+            0L,
+            getCurrentUserId(),
+            nå);
+        final SykdomDokument dokument = new SykdomDokument(
             sykdomDokumentOpprettelseDto.getJournalpostId(),
             null,
-            getCurrentUserId(),
-            nå,
+            informasjon,
             getCurrentUserId(),
             nå);
 

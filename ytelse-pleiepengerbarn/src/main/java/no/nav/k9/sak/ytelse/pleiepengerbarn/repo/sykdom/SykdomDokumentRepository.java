@@ -33,26 +33,45 @@ public class SykdomDokumentRepository {
 
     public List<SykdomDokument> hentAlleDokumenterFor(AktørId pleietrengende) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
-                "SELECT d From SykdomDokument as d "
+            "SELECT d From SykdomDokument as d "
                 + "inner join d.sykdomVurderinger as sv "
                 + "inner join sv.person as p "
                 + "where p.aktørId = :aktørId", SykdomDokument.class);
 
         q.setParameter("aktørId", pleietrengende);
 
-        return q.getResultList();
+        List<SykdomDokument> dokuments = q.getResultList();
+
+        return dokuments;
     }
 
     public List<SykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
-                .stream()
-                .filter(d -> d.getType().isRelevantForSykdom())
-                .collect(Collectors.toList());
+            .stream()
+            .filter(d -> d.getType().isRelevantForSykdom())
+            .collect(Collectors.toList());
+    }
+
+    public Optional<SykdomDokumentInformasjon> hentDokumentInformasjon(Long dokumentId) {
+        final TypedQuery<SykdomDokumentInformasjon> q = entityManager.createQuery(
+            "SELECT i " +
+                "FROM SykdomDokumentInformasjon as i " +
+                "   inner join i.dokument as d " +
+                "where d.id = :dokumentId " +
+                "and i.versjon = " +
+                "   ( select max(ii.versjon)" +
+                "   from SykdomDokumentInformasjon as ii " +
+                "       inner join ii.dokument as di " +
+                "  where di.id = d.id) ", SykdomDokumentInformasjon.class);
+
+        q.setParameter("dokumentId", dokumentId);
+
+        return q.getResultList().stream().findFirst();
     }
 
     public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
-                "SELECT d From SykdomDokument as d "
+            "SELECT d From SykdomDokument as d "
                 + "inner join d.sykdomVurderinger as sv "
                 + "inner join sv.person as p "
                 + "where p.aktørId = :aktørId"
@@ -61,7 +80,9 @@ public class SykdomDokumentRepository {
         q.setParameter("dokumentId", dokumentId);
         q.setParameter("aktørId", pleietrengende);
 
-        return q.getResultList().stream().findFirst();
+        Optional<SykdomDokument> dokument = q.getResultList().stream().findFirst();
+
+        return dokument;
     }
 
     public void lagre(SykdomDokument dokument, AktørId pleietrengende) {
@@ -77,7 +98,7 @@ public class SykdomDokumentRepository {
             throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
         }
 
-        entityManager.persist(dokument);
+        entityManager.persist(dokument.getInformasjon());
         entityManager.flush();
     }
 
@@ -91,7 +112,7 @@ public class SykdomDokumentRepository {
 
     SykdomInnleggelser hentInnleggelseOrNull(AktørId pleietrengende) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
-                "SELECT si "
+            "SELECT si "
                 + "FROM SykdomInnleggelser as si "
                 + "  inner join si.vurderinger as sv "
                 + "  inner join sv.person as p "
@@ -123,15 +144,15 @@ public class SykdomDokumentRepository {
 
     public SykdomInnleggelser hentInnleggelseOrNull(UUID behandlingUUID) {
         final TypedQuery<SykdomInnleggelser> q = entityManager.createQuery(
-                "SELECT gi " +
+            "SELECT gi " +
                 "FROM SykdomGrunnlagBehandling as sgb " +
-                    "inner join sgb.grunnlag as sg " +
-                    "inner join sg.innleggelser as gi " +
+                "inner join sgb.grunnlag as sg " +
+                "inner join sg.innleggelser as gi " +
                 "where sgb.behandlingUuid = :behandlingUuid " +
-                    "and sgb.versjon = " +
-                    "( select max(sgb2.versjon) " +
-                    "From SykdomGrunnlagBehandling as sgb2 " +
-                    "where sgb2.behandlingUuid = sgb.behandlingUuid )"
+                "and sgb.versjon = " +
+                "( select max(sgb2.versjon) " +
+                "From SykdomGrunnlagBehandling as sgb2 " +
+                "where sgb2.behandlingUuid = sgb.behandlingUuid )"
             , SykdomInnleggelser.class);
         q.setParameter("behandlingUuid", behandlingUUID);
 
@@ -146,7 +167,7 @@ public class SykdomDokumentRepository {
     }
 
     public void opprettEllerOppdaterInnleggelser(SykdomInnleggelser innleggelser, AktørId pleietrengende) {
-        if(innleggelser.getId() != null) {
+        if (innleggelser.getId() != null) {
             throw new IllegalStateException("Innleggelser skal aldri oppdateres. Man skal alltid inserte ny");
         }
         SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, innleggelser.getOpprettetAv(), innleggelser.getOpprettetTidspunkt());
@@ -183,7 +204,7 @@ public class SykdomDokumentRepository {
             throw new IllegalStateException("Fant ikke unik SykdomInnleggelser å erstatte", e);
         }
 
-        innleggelser.setVersjon(innleggelser.getVersjon()+1);
+        innleggelser.setVersjon(innleggelser.getVersjon() + 1);
 
         entityManager.persist(innleggelser);
         entityManager.flush();
@@ -222,13 +243,13 @@ public class SykdomDokumentRepository {
     }
 
     public void opprettEllerOppdaterDiagnosekoder(SykdomDiagnosekoder diagnosekoder, AktørId pleietrengende) {
-        if(diagnosekoder.getId() != null) {
+        if (diagnosekoder.getId() != null) {
             throw new IllegalStateException("Diagnosekoder skal aldri oppdateres. Man skal alltid inserte ny");
         }
         SykdomVurderinger vurderinger = sykdomVurderingRepository.hentEllerLagreSykdomVurderinger(pleietrengende, diagnosekoder.getOpprettetAv(), diagnosekoder.getOpprettetTidspunkt());
         diagnosekoder.setVurderinger(vurderinger);
         boolean lagNy = diagnosekoder.getVersjon() == null;
-        if(lagNy) {
+        if (lagNy) {
             opprettDiagnosekoder(diagnosekoder);
         } else {
             oppdaterDiagnosekoder(diagnosekoder, pleietrengende);
