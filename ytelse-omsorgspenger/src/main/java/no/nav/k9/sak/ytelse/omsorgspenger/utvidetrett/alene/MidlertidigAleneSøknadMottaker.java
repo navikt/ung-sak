@@ -46,7 +46,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         Objects.requireNonNull(startDato);
-        var datoIntervall = sluttDato != null ? DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato) : DatoIntervallEntitet.fraOgMed(startDato);
+        var datoIntervall = DatoIntervallEntitet.fraOgMed(startDato);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         if (fagsak.isPresent()) {
             return fagsak.get();
