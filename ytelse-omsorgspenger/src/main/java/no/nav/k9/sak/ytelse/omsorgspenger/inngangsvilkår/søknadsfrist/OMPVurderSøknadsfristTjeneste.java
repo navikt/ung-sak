@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -28,7 +30,6 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -84,42 +85,46 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søknaderMedPerioder) {
 
         var result = new HashMap<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>>();
-        var sortedKeys = søknaderMedPerioder.keySet()
+        var sortedSøknaderMedPerioder = søknaderMedPerioder.keySet()
             .stream()
             .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        sortedKeys.forEach(key -> {
-                var value = søknaderMedPerioder.get(key);
-                if (vurderSøknadsfrist && key.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
-                    var timeline = new LocalDateTimeline<>(value.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).collect(Collectors.toList()));
-                    var vurdertTimeline = defaultVurderer.vurderPeriode(key, timeline);
+        sortedSøknaderMedPerioder.forEach(doc -> {
+            var søktePerioder = søknaderMedPerioder.get(doc);
+            var aktivitetTyper = søktePerioder.stream().map(SøktPeriode::getType).collect(Collectors.toSet());
+            for (UttakArbeidType aktivitetType : aktivitetTyper) {
+                var søktePerioderPerAktivitet = søktePerioder.stream().filter(it -> it.getType().equals(aktivitetType)).collect(Collectors.toList());
+                if (vurderSøknadsfrist && doc.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
+                        var timeline = new LocalDateTimeline<>(søktePerioderPerAktivitet.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).collect(Collectors.toList()));
+                        var vurdertTimeline = defaultVurderer.vurderPeriode(doc, timeline);
 
-                    List<LocalDateInterval> avviksIntervallerTilVurdering = avviksVurderere.keySet().stream().filter(it -> !timeline.intersection(it).isEmpty()).collect(Collectors.toList());
-                    if (avviksVurderere.keySet().stream().anyMatch(it -> !timeline.intersection(it).isEmpty())) {
-                        for (LocalDateInterval localDateInterval : avviksIntervallerTilVurdering) {
-                            SøknadsfristPeriodeVurderer<OppgittFraværPeriode> vurderer = avviksVurderere.get(localDateInterval);
-                            LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> unntaksvurdertTimeline = vurderer.vurderPeriode(key, timeline);
+                        List<LocalDateInterval> avviksIntervallerTilVurdering = avviksVurderere.keySet().stream().filter(it -> !timeline.intersection(it).isEmpty()).collect(Collectors.toList());
+                        if (avviksVurderere.keySet().stream().anyMatch(it -> !timeline.intersection(it).isEmpty())) {
+                            for (LocalDateInterval localDateInterval : avviksIntervallerTilVurdering) {
+                                SøknadsfristPeriodeVurderer<OppgittFraværPeriode> vurderer = avviksVurderere.get(localDateInterval);
+                                LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> unntaksvurdertTimeline = vurderer.vurderPeriode(doc, timeline);
 
-                            vurdertTimeline = vurdertTimeline.combine(unntaksvurdertTimeline, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                                vurdertTimeline = vurdertTimeline.combine(unntaksvurdertTimeline, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                            }
                         }
-                    }
 
-                    if (KravDokumentType.INNTEKTSMELDING.equals(key.getType()) && vurdertTimeline.stream().anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getValue().getUtfall()))) {
-                        var skalEndresUtfallPå = utledAvslåttePerioderSomHarTidligereVærtInnvilget(result, key, value, vurdertTimeline);
-                        vurdertTimeline = vurdertTimeline.combine(skalEndresUtfallPå, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                    }
+                        if (KravDokumentType.INNTEKTSMELDING.equals(doc.getType()) && vurdertTimeline.stream().anyMatch(it -> Utfall.IKKE_OPPFYLT.equals(it.getValue().getUtfall()))) {
+                            var skalEndresUtfallPå = utledAvslåttePerioderSomHarTidligereVærtInnvilget(result, doc, søktePerioderPerAktivitet, vurdertTimeline);
+                            vurdertTimeline = vurdertTimeline.combine(skalEndresUtfallPå, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                        }
 
-                    result.put(key, vurdertTimeline.compress()
-                        .stream()
-                        .map(this::konsistens)
-                        .collect(Collectors.toList()));
+                        result.put(doc, vurdertTimeline.compress()
+                            .stream()
+                            .map(this::konsistens)
+                            .collect(Collectors.toList()));
                 } else {
-                    result.put(key, value
+                    result.put(doc, søktePerioderPerAktivitet
                         .stream()
                         .map(it -> new VurdertSøktPeriode<>(it.getPeriode(), it.getType(), it.getArbeidsgiver(), it.getArbeidsforholdRef(), Utfall.OPPFYLT, it.getRaw()))
                         .collect(Collectors.toList()));
                 }
-            });
+            }
+        });
 
         return result;
     }
@@ -186,7 +191,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
         var value = segment.getValue();
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom());
         var raw = value.getRaw();
-        var fraværPeriode = new OppgittFraværPeriode(segment.getFom(), segment.getTom(), raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag());
+        var fraværPeriode = new OppgittFraværPeriode(segment.getFom(), segment.getTom(), raw.getAktivitetType(), raw.getArbeidsgiver(), raw.getArbeidsforholdRef(), raw.getFraværPerDag(), raw.getFraværÅrsak());
 
         return new VurdertSøktPeriode<>(periode, value.getType(), value.getArbeidsgiver(), value.getArbeidsforholdRef(), value.getUtfall(), fraværPeriode);
     }

@@ -61,6 +61,10 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad);
     }
 
+    Optional<OmsorgspengerGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
+        return hentEksisterendeGrunnlagBasertPåGrunnlagId(grunnlagId);
+    }
+
     public void lagreOgFlushOppgittFravær(Long behandlingId, OppgittFravær input) {
         var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
         var eksisterendeFraværFraSøknad = eksisterendeGrunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad).orElse(null);
@@ -118,6 +122,17 @@ public class OmsorgspengerGrunnlagRepository {
         }
         eksisterende.setAktiv(false);
         lagreOgFlushNyttGrunnlag(eksisterende);
+    }
+
+    private Optional<OmsorgspengerGrunnlag> hentEksisterendeGrunnlagBasertPåGrunnlagId(Long id) {
+        var query = entityManager.createQuery(
+            "SELECT s " +
+                "FROM OmsorgspengerGrunnlag s " +
+                "WHERE s.id = :grunnlagId ", OmsorgspengerGrunnlag.class);
+
+        query.setParameter("grunnlagId", id);
+
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
 }

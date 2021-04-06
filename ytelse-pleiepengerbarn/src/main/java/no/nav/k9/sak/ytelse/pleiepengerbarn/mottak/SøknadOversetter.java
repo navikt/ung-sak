@@ -84,7 +84,7 @@ class SøknadOversetter {
             .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // TODO: Håndtere endringssøknad. "false" betyr at vi krever IMer.
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSøknadsdato(maksSøknadsperiode.getFraOgMed())
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
@@ -128,9 +128,9 @@ class SøknadOversetter {
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {
-        final var norskIdentitetsnummer = barn.norskIdentitetsnummer;
+        final var norskIdentitetsnummer = barn.getPersonIdent();
         if (norskIdentitetsnummer != null) {
-            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi)).orElseThrow();
+            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.getVerdi())).orElseThrow();
             fagsakRepository.oppdaterPleietrengende(fagsakId, aktørId);
         } else {
             throw new IllegalArgumentException();
@@ -150,7 +150,7 @@ class SøknadOversetter {
                 // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
                 // boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.getLand().landkode))
+                    .medLand(finnLandkode(opphold.getLand().getLandkode()))
                     .medPeriode(
                         Objects.requireNonNull(periode.getFraOgMed()),
                         Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
@@ -163,7 +163,7 @@ class SøknadOversetter {
 
     private Språkkode getSpraakValg(Språk spraak) {
         if (spraak != null) {
-            return Språkkode.fraKode(spraak.dto.toUpperCase());
+            return Språkkode.fraKode(spraak.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }

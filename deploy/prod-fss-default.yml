@@ -201,7 +201,7 @@ spec:
       value: "false"
     - name: VURDER_SOKNADSFRIST
       value: "true"
-
+      
     # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"

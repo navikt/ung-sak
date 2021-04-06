@@ -87,7 +87,8 @@ public class VilkårResultatDto {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<periode=" + periode
+        return getClass().getSimpleName()
+            + "<periode=" + periode
             + (utfall == null ? "" : ", utfall=" + utfall)
             + (avslagsårsak == null ? "" : ", avslagsårsak=" + avslagsårsak) + ">";
     }

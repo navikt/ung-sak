@@ -1,16 +1,20 @@
 package no.nav.k9.sak.domene.iay.modell;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class AktivitetsAvtale implements IndexKey {
+
+    public static final Comparator<AktivitetsAvtale> COMPARATOR = Comparator.comparing(AktivitetsAvtale::getPeriode)
+        .thenComparing(Comparator.comparing(AktivitetsAvtale::getSisteLønnsendringsdato, Comparator.nullsFirst(Comparator.naturalOrder())));
 
     @ChangeTracked
     private Stillingsprosent prosentsats;
@@ -133,9 +137,10 @@ public class AktivitetsAvtale implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof AktivitetsAvtale))
+        if (o == null || o.getClass() != this.getClass())
             return false;
-        AktivitetsAvtale that = (AktivitetsAvtale) o;
+
+        var that = (AktivitetsAvtale) o;
         return Objects.equals(beskrivelse, that.beskrivelse) &&
             Objects.equals(prosentsats, that.prosentsats) &&
             Objects.equals(periode, that.periode) &&

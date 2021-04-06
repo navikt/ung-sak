@@ -2,13 +2,18 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -28,6 +33,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -51,15 +59,19 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
+    private static final Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadOmsorgspenger.class);
+
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskRepository prosessTaskRepository;
+    private InntektArbeidYtelseTjeneste iayTjeneste;
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private SøknadOppgittFraværMapper mapper;
 
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
@@ -73,8 +85,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                         BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
-                                        SøknadParser søknadParser,
+                                        InntektArbeidYtelseTjeneste iayTjeneste, SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
+                                        SøknadOppgittFraværMapper mapper,
                                         @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
@@ -82,8 +95,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.iayTjeneste = iayTjeneste;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.mapper = mapper;
         this.dokumentValidator = dokumentValidator;
     }
 
@@ -139,7 +154,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medErEndringssøknad(false)
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
         var søknadEntitet = søknadBuilder.build();
@@ -155,7 +170,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
             .map(OppgittFravær::getPerioder)
             .orElse(Set.of());
-        var søktFraværFraSøknad = new SøknadOppgittFraværMapper(ytelse, søker, journalpostId).map();
+        Collection<ArbeidsforholdReferanse> arbeidsforhold = finnArbeidsforhold(behandlingId);
+        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId, arbeidsforhold);
         søktFravær.addAll(søktFraværFraTidligere);
         søktFravær.addAll(søktFraværFraSøknad);
 
@@ -169,20 +185,30 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
+    private Collection<ArbeidsforholdReferanse> finnArbeidsforhold(Long behandlingId) {
+        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId);
+        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getArbeidsforholdInformasjon().isPresent()) {
+            return iayGrunnlag.get().getArbeidsforholdInformasjon().get().getArbeidsforholdReferanser();
+        } else {
+            logger.warn("Har ikke arbeidsforholdsinformasjon for behandling={}", behandlingId);
+            return Collections.emptyList();
+        }
+    }
+
     private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
         // TODO: Hva skal vi ha som "oppholdNå"? Er dette relevant for k9 eller bruker vi en annen tolkning for medlemskap?
         // TODO kontrakt har utenlandsopphold, skal dette benyttes?
         if (bosteder != null) {
-            bosteder.perioder.forEach((periode, opphold) -> {
+            bosteder.getPerioder().forEach((periode, opphold) -> {
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.land.landkode))
-                    .medPeriode(
-                        Objects.requireNonNull(periode.getFraOgMed()),
-                        Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
-                    .build());
+                        .medLand(finnLandkode(opphold.getLand().getLandkode()))
+                        .medPeriode(
+                            Objects.requireNonNull(periode.getFraOgMed()),
+                            Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
+                        .build());
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
@@ -190,7 +216,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private Språkkode getSpråkValg(Språk språk) {
         if (språk != null) {
-            return Språkkode.fraKode(språk.dto.toUpperCase());
+            return Språkkode.fraKode(språk.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }

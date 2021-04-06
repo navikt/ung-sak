@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.db.Repository;
+import no.nav.k9.sak.db.util.Repository;
 
 
 @ExtendWith(CdiAwareExtension.class)

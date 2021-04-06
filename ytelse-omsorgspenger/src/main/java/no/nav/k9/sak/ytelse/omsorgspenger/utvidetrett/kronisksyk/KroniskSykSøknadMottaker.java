@@ -1,6 +1,7 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,20 +21,19 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
 @ApplicationScoped
-public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
+public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
     private PersoninfoAdapter personInfoAdapter;
 
-    UtvidetRettSøknadMottaker() {
+    KroniskSykSøknadMottaker() {
         // proxy
     }
 
     @Inject
-    public UtvidetRettSøknadMottaker(SaksnummerRepository saksnummerRepository,
+    public KroniskSykSøknadMottaker(SaksnummerRepository saksnummerRepository,
                                      FagsakTjeneste fagsakTjeneste,
                                      PersoninfoAdapter personInfoAdapter) {
         this.fagsakTjeneste = fagsakTjeneste;
@@ -50,16 +50,15 @@ public class UtvidetRettSøknadMottaker implements SøknadMottakTjeneste<Innsend
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
 
-        if (pleietrengendeAktørId != null) {
-            var personinfo = personInfoAdapter.hentBrukerBasisForAktør(pleietrengendeAktørId).orElseThrow(() -> new IllegalStateException("Fant ikke personinfo for angitt pleietrengende aktørId"));
-            var fødselsdato = personinfo.getFødselsdato();
-            LocalDate maksdato = fødselsdato.plusYears(18).withMonth(12).withDayOfMonth(31); // slutt av kalenderår 18 år
-            if (sluttDato == null || sluttDato.isAfter(maksdato)) {
-                sluttDato = maksdato;
-            }
-            if (startDato == null || startDato.isBefore(fødselsdato)) {
-                startDato = fødselsdato;
-            }
+        Objects.requireNonNull(pleietrengendeAktørId);
+        var personinfo = personInfoAdapter.hentBrukerBasisForAktør(pleietrengendeAktørId).orElseThrow(() -> new IllegalStateException("Fant ikke personinfo for angitt pleietrengende aktørId"));
+        var fødselsdato = personinfo.getFødselsdato();
+        LocalDate maksdato = fødselsdato.plusYears(18).withMonth(12).withDayOfMonth(31); // slutt av kalenderår 18 år
+        if (sluttDato == null || sluttDato.isAfter(maksdato)) {
+            sluttDato = maksdato;
+        }
+        if (startDato == null || startDato.isBefore(fødselsdato)) {
+            startDato = fødselsdato;
         }
 
         var datoIntervall = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);

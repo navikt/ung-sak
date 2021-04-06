@@ -1,7 +1,10 @@
 package no.nav.k9.sak.domene.arbeidsforhold.impl;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -10,7 +13,10 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto;
 import no.nav.k9.sak.typer.AktørId;
@@ -60,24 +66,38 @@ public class ArbeidsforholdAdministrasjonTjeneste {
                                                                           InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                           UtledArbeidsforholdParametere param) {
 
-        var inntektsmeldinger = new LinkedHashSet<>(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()));
+        var inntektsmeldinger = new TreeSet<Inntektsmelding>(Inntektsmelding.COMP_REKKEFØLGE); // ta i rekkefølge mottatt
+        inntektsmeldinger.addAll(inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()));
 
         var arbeidsforholdInformasjon = iayGrunnlag.getArbeidsforholdInformasjon();
         var filter = new YrkesaktivitetFilter(arbeidsforholdInformasjon, iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
         var yrkesaktiviteter = filter.getAlleYrkesaktiviteter();
 
-        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon);
-        mapper.utledArbeidsforholdFraInntektsmeldinger(inntektsmeldinger);
-        mapper.utledArbeidsforholdFraYrkesaktivteter(yrkesaktiviteter);
-        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(filter.getArbeidsforholdOverstyringer());
+        Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer = filter.getArbeidsforholdOverstyringer();
+        var mapper = new ArbeidsforholdMapper(arbeidsforholdInformasjon.orElse(null));
+        mapArbeidsforhold(mapper, yrkesaktiviteter, arbeidsforholdOverstyringer, inntektsmeldinger);
 
         if (param.getVurderArbeidsforhold() && mapper.harArbeidsforhold()) {
             var vurderinger = vurderArbeidsforholdTjeneste.vurderMedÅrsak(ref, iayGrunnlag);
-            mapper.mapVurdering(vurderinger);
+            mapper.mapVurderinger(vurderinger);
         }
 
         return mapper.getArbeidsforhold();
+
+    }
+
+    void mapArbeidsforhold(ArbeidsforholdMapper mapper,
+                           Collection<Yrkesaktivitet> yrkesaktiviteter,
+                           Collection<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer,
+                           NavigableSet<Inntektsmelding> inntektsmeldinger) {
+
+        mapper.utledArbeidsforholdFraYrkesaktiviteter(Objects.requireNonNull(yrkesaktiviteter));
+
+        // ta inntektsmeldinger etter yrkesaktivitet (beriker med inntektsmeldinger som matcher angitt)
+        mapper.utledArbeidsforholdFraInntektsmeldinger(Objects.requireNonNull(inntektsmeldinger));
+
+        mapper.utledArbeidsforholdFraArbeidsforholdInformasjon(Objects.requireNonNull(arbeidsforholdOverstyringer));
     }
 
     /**

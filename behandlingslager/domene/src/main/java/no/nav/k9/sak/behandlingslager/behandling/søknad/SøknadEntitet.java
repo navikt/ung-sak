@@ -47,6 +47,7 @@ public class SøknadEntitet extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
+    /** eksern Id for mottatt søknad (ikke fra gr_soeknad). */
     @Column(name = "soeknad_id")
     private String søknadId;
 

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -18,11 +20,13 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -36,14 +40,22 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SøknadRepository søknadRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste;
 
     AvklarUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter, VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter
+                      , SøknadRepository søknadRepository
+                      , @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste
+                      , VilkårResultatRepository vilkårResultatRepository
+                      , BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
+        this.søknadRepository = søknadRepository;
+        this.vilkårsPerioderTjeneste = vilkårsPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
     }
@@ -82,7 +94,6 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
         }
         return angittPeriode;
-
     }
 
     private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {

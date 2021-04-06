@@ -7,6 +7,7 @@ import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,11 +23,13 @@ import org.hibernate.annotations.Immutable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -40,6 +43,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMP_OPPGITT_FRAVAER_PERIODE")
     private Long id;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
@@ -59,6 +63,11 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
     @ChangeTracked
     @Column(name = "aktivitet_type", nullable = false, updatable = false)
     private UttakArbeidType aktivitetType;
+
+    @Convert(converter = FraværÅrsakKodeConverter.class)
+    @ChangeTracked
+    @Column(name = "fravaer_arsak", nullable = false, updatable = false)
+    private FraværÅrsak fraværÅrsak;
 
     @ChangeTracked
     @Embedded
@@ -89,17 +98,18 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this.fraværPerDag = fraværPerDag;
     }
 
-    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
+    public OppgittFraværPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
         this.journalpostId = journalpostId;
         this.arbeidsgiver = arbeidsgiver;
         this.arbeidsforholdRef = arbeidsforholdRef;
         this.fraværPerDag = fraværPerDag;
         this.aktivitetType = Objects.requireNonNull(aktivitetType, "aktivitetType");
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        this.fraværÅrsak = fraværÅrsak;
     }
 
-    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag) {
-        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag);
+    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
+        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, fraværÅrsak);
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
@@ -109,6 +119,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this.fraværPerDag = periode.fraværPerDag;
         this.aktivitetType = Objects.requireNonNull(periode.aktivitetType, "aktivitetType");
         this.periode = periode.periode;
+        this.fraværÅrsak = periode.fraværÅrsak;
     }
 
 
@@ -153,6 +164,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         return fraværPerDag;
     }
 
+    public FraværÅrsak getFraværÅrsak() {
+        return fraværÅrsak;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -164,13 +179,14 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(fraværPerDag, that.fraværPerDag)
             && Objects.equals(aktivitetType, that.aktivitetType)
+            && Objects.equals(fraværÅrsak, that.fraværÅrsak)
             && Objects.equals(arbeidsgiver, that.arbeidsgiver)
             && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, journalpostId, fraværPerDag, aktivitetType, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(periode, journalpostId, fraværPerDag, aktivitetType, fraværÅrsak, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override
@@ -180,6 +196,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             ", periode=" + periode +
             ", journalpostId=" + journalpostId +
             ", aktivitetType=" + arbeidsgiver +
+            ", fraværÅrsak=" + fraværÅrsak +
             (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
             (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +
             (fraværPerDag != null ? ", jobberNormaltPerUke=" + fraværPerDag : "") +

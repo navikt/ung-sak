@@ -34,7 +34,7 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidler
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_MA")
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
-public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker {
+public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
 
@@ -42,12 +42,12 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
 
     private PersoninfoAdapter personinfoAdapter;
 
-    DokumentmottakerSøknadUtvidetRettAlene() {
+    DokumentmottakerSøknadMidlertidigAlene() {
         // for CDI proxy
     }
 
     @Inject
-    DokumentmottakerSøknadUtvidetRettAlene(BehandlingRepositoryProvider repositoryProvider,
+    DokumentmottakerSøknadMidlertidigAlene(BehandlingRepositoryProvider repositoryProvider,
                                            PersoninfoAdapter personinfoAdapter,
                                            MottatteDokumentRepository mottatteDokumentRepository) {
         this.personinfoAdapter = personinfoAdapter;
@@ -81,7 +81,7 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
         boolean elektroniskSøknad = true;
         DatoIntervallEntitet datoIntervall = søknadsperiode == null
             ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
-            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed());
+            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
 
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(datoIntervall)
@@ -89,7 +89,7 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
             .medSpråkkode(getSpråkValg(søknad.getSpråk()))
         ;
@@ -118,7 +118,7 @@ public class DokumentmottakerSøknadUtvidetRettAlene implements Dokumentmottaker
 
     private Språkkode getSpråkValg(Språk språk) {
         if (språk != null) {
-            return Språkkode.fraKode(språk.dto.toUpperCase());
+            return Språkkode.fraKode(språk.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }
