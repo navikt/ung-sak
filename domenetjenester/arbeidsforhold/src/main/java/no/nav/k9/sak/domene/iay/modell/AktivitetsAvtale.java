@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.iay.modell;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -11,6 +12,9 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class AktivitetsAvtale implements IndexKey {
+
+    public static final Comparator<AktivitetsAvtale> COMPARATOR = Comparator.comparing(AktivitetsAvtale::getPeriode)
+        .thenComparing(Comparator.comparing(AktivitetsAvtale::getSisteLønnsendringsdato, Comparator.nullsFirst(Comparator.naturalOrder())));
 
     @ChangeTracked
     private Stillingsprosent prosentsats;
