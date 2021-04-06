@@ -74,6 +74,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personstatus;
@@ -257,7 +259,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandlingVedtakRepository;
     }
 
-    public BehandlingVedtak mockBehandlingVedtak() {
+    private BehandlingVedtak mockBehandlingVedtak() {
         if (behandlingVedtak == null) {
             behandlingVedtak = Mockito.mock(BehandlingVedtak.class);
         }
@@ -675,7 +677,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
-        fagsak.setPeriode(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
+        FagsakTestUtil.oppdaterPeriode(fagsak, periode);
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }

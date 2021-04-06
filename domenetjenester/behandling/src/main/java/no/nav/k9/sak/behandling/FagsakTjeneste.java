@@ -15,6 +15,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -80,6 +81,10 @@ public class FagsakTjeneste {
             return Optional.empty();
         }
         return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
+    }
+
+    public void oppdaterFagsak(Fagsak fagsak, DatoIntervallEntitet periode) {
+        fagsakRepository.oppdaterPeriode(fagsak.getId(), periode.getFomDato(), periode.getTomDato());
     }
 
 }
