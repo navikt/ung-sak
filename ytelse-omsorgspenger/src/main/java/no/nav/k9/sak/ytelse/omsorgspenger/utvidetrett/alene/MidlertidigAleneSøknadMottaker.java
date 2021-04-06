@@ -49,16 +49,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
         var datoIntervall = DatoIntervallEntitet.fraOgMed(startDato);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         if (fagsak.isPresent()) {
-            var f = fagsak.get();
-            var fp = f.getPeriode();
-            if (fp.getFomDato().isAfter(startDato)) {
-                fp = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, fp.getTomDato());
-            }
-            if (fp.getTomDato().isBefore(sluttDato)) {
-                fp = DatoIntervallEntitet.fraOgMedTilOgMed(fp.getFomDato(), sluttDato);
-            }
-            fagsakTjeneste.oppdaterFagsak(f, fp);
-            return f;
+            return fagsak.get();
         }
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
