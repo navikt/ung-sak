@@ -9,12 +9,14 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.JoinFormula;
@@ -32,14 +34,8 @@ public class SykdomDokumentInformasjon {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SYKDOM_DOKUMENT_INFORMASJON")
     private Long id;
 
-    @ManyToOne
-    @JoinFormula("(" +
-        "SELECT di.id " +
-        "FROM sykdom_dokument_info di " +
-        "WHERE di.sykdom_dokument_id = id " +
-        "ORDER BY di.versjon DESC " +
-        "LIMIT 1" +
-        ")")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SYKDOM_DOKUMENT_ID")
     private SykdomDokument dokument;
 
     @Column(name = "VERSJON", nullable = false)

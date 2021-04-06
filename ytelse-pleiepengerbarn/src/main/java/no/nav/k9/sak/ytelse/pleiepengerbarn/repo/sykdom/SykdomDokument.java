@@ -20,6 +20,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.JoinFormula;
+
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -36,7 +38,8 @@ public class SykdomDokument {
     @JoinColumn(name = "SYKDOM_VURDERINGER_ID", nullable = false, updatable = false, unique = true) //TODO:modifiers
     private SykdomVurderinger sykdomVurderinger;
 
-    @OneToMany(mappedBy = "dokument", cascade = CascadeType.PERSIST)
+    @ManyToOne
+    @JoinFormula("(SELECT i.id FROM SYKDOM_DOKUMENT_INFORMASJON i where i.SYKDOM_DOKUMENT_ID = id ORDER BY i.VERSJON DESC LIMIT 1)")
     private SykdomDokumentInformasjon informasjon;
 
     @Column(name = "JOURNALPOST_ID", nullable = false)

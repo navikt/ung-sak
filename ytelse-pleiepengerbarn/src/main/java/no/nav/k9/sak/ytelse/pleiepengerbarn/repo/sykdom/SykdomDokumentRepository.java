@@ -90,6 +90,7 @@ public class SykdomDokumentRepository {
         dokument.setSykdomVurderinger(sykdomVurderinger);
 
         entityManager.persist(dokument);
+        entityManager.persist(dokument.getInformasjon());
         entityManager.flush();
     }
 
