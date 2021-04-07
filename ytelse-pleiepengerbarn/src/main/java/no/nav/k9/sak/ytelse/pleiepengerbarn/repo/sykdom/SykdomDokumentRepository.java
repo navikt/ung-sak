@@ -52,23 +52,6 @@ public class SykdomDokumentRepository {
             .collect(Collectors.toList());
     }
 
-    public Optional<SykdomDokumentInformasjon> hentDokumentInformasjon(Long dokumentId) {
-        final TypedQuery<SykdomDokumentInformasjon> q = entityManager.createQuery(
-            "SELECT i " +
-                "FROM SykdomDokumentInformasjon as i " +
-                "   inner join i.dokument as d " +
-                "where d.id = :dokumentId " +
-                "and i.versjon = " +
-                "   ( select max(ii.versjon)" +
-                "   from SykdomDokumentInformasjon as ii " +
-                "       inner join ii.dokument as di " +
-                "  where di.id = d.id) ", SykdomDokumentInformasjon.class);
-
-        q.setParameter("dokumentId", dokumentId);
-
-        return q.getResultList().stream().findFirst();
-    }
-
     public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
