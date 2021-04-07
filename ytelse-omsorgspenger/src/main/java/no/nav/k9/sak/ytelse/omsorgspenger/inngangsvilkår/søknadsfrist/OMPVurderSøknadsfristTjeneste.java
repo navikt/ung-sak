@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -94,6 +95,7 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
             var aktivitetTyper = søktePerioder.stream().map(SøktPeriode::getType).collect(Collectors.toSet());
             for (UttakArbeidType aktivitetType : aktivitetTyper) {
                 var søktePerioderPerAktivitet = søktePerioder.stream().filter(it -> it.getType().equals(aktivitetType)).collect(Collectors.toList());
+                List<VurdertSøktPeriode<OppgittFraværPeriode>> vurderteSøktePerioder = new ArrayList<>();
                 if (vurderSøknadsfrist && doc.getInnsendingsTidspunkt().isAfter(startDatoValidering.atStartOfDay())) {
                         var timeline = new LocalDateTimeline<>(søktePerioderPerAktivitet.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).collect(Collectors.toList()));
                         var vurdertTimeline = defaultVurderer.vurderPeriode(doc, timeline);
@@ -113,16 +115,19 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
                             vurdertTimeline = vurdertTimeline.combine(skalEndresUtfallPå, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                         }
 
-                        result.put(doc, vurdertTimeline.compress()
-                            .stream()
-                            .map(this::konsistens)
-                            .collect(Collectors.toList()));
+                    vurderteSøktePerioder.addAll(vurdertTimeline.compress()
+                        .stream()
+                        .map(this::konsistens)
+                        .collect(Collectors.toList()));
                 } else {
-                    result.put(doc, søktePerioderPerAktivitet
+                    vurderteSøktePerioder.addAll(søktePerioderPerAktivitet
                         .stream()
                         .map(it -> new VurdertSøktPeriode<>(it.getPeriode(), it.getType(), it.getArbeidsgiver(), it.getArbeidsforholdRef(), Utfall.OPPFYLT, it.getRaw()))
                         .collect(Collectors.toList()));
                 }
+                var gjeldende = result.getOrDefault(doc, new ArrayList<>());
+                gjeldende.addAll(vurderteSøktePerioder);
+                result.put(doc, gjeldende);
             }
         });
 
