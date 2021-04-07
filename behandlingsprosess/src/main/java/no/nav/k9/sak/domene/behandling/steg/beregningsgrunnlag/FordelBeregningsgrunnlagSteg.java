@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -59,7 +60,8 @@ public class FordelBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
                 if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
                     beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
                 } else if (kalkulusResultat.getVilkårOppfylt() != null) {
-                    beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, periode, kalkulusResultat.getVilkårOppfylt());
+                    Avslagsårsak avslagsårsak = kalkulusResultat.getVilkårOppfylt() ? null : Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
+                    beregningsgrunnlagVilkårTjeneste.lagreVilkårresultat(kontekst, periode, avslagsårsak);
                 }
                 aksjonspunktResultater.addAll(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
             }
