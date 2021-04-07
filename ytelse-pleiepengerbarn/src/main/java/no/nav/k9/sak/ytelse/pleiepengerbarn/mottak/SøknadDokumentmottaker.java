@@ -23,7 +23,7 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
 /**
- * Erstattes av PSBSøknadDokumentmottaker
+ * Erstattes av DokumentmottakerPleiepengerSyktBarnSøknad
  */
 @Deprecated(forRemoval = true)
 @Dependent
