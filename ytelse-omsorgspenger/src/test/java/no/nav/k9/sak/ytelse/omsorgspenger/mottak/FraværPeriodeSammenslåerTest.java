@@ -25,11 +25,12 @@ class FraværPeriodeSammenslåerTest {
     void skal_slå_sammen_perioder_som_ligger_inntil_hverandre_og_har_samme_innhold() {
         FraværPeriode fp1 = new FraværPeriode(iDag, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp2 = new FraværPeriode(iMorgen, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
+        FraværPeriode fp3 = new FraværPeriode(iOverimorgen, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2, fp3));
         assertThat(resultat).hasSize(1);
         FraværPeriode sammenslåttPeriode = resultat.get(0);
-        assertThat(sammenslåttPeriode.getPeriode()).isEqualTo(new Periode(nå, nå.plusDays(1)));
+        assertThat(sammenslåttPeriode.getPeriode()).isEqualTo(new Periode(nå, nå.plusDays(2)));
         assertThat(sammenslåttPeriode.getDuration()).isEqualTo(Duration.ofHours(4));
         assertThat(sammenslåttPeriode.getÅrsak()).isEqualTo(FraværÅrsak.ORDINÆRT_FRAVÆR);
         assertThat(sammenslåttPeriode.getAktivitetFravær()).containsOnly(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET);
