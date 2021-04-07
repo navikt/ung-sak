@@ -40,14 +40,14 @@ public class InntektsmeldingFilterYtelseImpl implements InntektsmeldingFilterYte
     @Override
     public <V> Map<Arbeidsgiver, Set<V>> filtrerInntektsmeldingerForYtelseUtvidet(BehandlingReferanse referanse, Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag,
                                                                                   Map<Arbeidsgiver, Set<V>> påkrevde) {
-        if (!inntektArbeidYtelseGrunnlag.isPresent()) {
+        if (inntektArbeidYtelseGrunnlag.isEmpty()) {
             return påkrevde;
         }
         Map<Arbeidsgiver, Set<V>> filtrert = new HashMap<>();
         Map<Arbeidsgiver, Set<Inntektspost>> inntekterPrArbgiver = hentInntekterForUtledningAvInntektsmeldinger(referanse, inntektArbeidYtelseGrunnlag.get());
-        påkrevde.entrySet().forEach(entry -> {
-            if (inntekterPrArbgiver.get(entry.getKey()) != null && !inntekterPrArbgiver.get(entry.getKey()).isEmpty()) {
-                filtrert.put(entry.getKey(), entry.getValue());
+        påkrevde.forEach((key, value) -> {
+            if (inntekterPrArbgiver.get(key) != null && !inntekterPrArbgiver.get(key).isEmpty()) {
+                filtrert.put(key, value);
             }
         });
         // Ligg til annen logikk, som fx utelate arbeidsforhold med stillingsprosent 0.

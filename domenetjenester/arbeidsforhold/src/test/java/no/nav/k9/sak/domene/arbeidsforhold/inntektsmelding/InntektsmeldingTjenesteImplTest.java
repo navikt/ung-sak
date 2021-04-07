@@ -160,12 +160,12 @@ public class InntektsmeldingTjenesteImplTest {
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, false)).isNotEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, false, skjæringstidspunkt.getUtledetSkjæringstidspunkt())).isNotEmpty();
 
         lagreInntektsmelding(I_DAG.minusDays(2), behandling, arbId1Intern, arbId1);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, false)).isEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, false, skjæringstidspunkt.getUtledetSkjæringstidspunkt())).isEmpty();
     }
 
     @Test
@@ -179,7 +179,7 @@ public class InntektsmeldingTjenesteImplTest {
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false)).isNotEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false, behandlingReferanse.getUtledetSkjæringstidspunkt())).isNotEmpty();
     }
 
     @Test
@@ -194,7 +194,7 @@ public class InntektsmeldingTjenesteImplTest {
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false)).isEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false, behandlingReferanse.getUtledetSkjæringstidspunkt())).isEmpty();
         LØNNSPOST = BigDecimal.TEN;
     }
 
@@ -209,7 +209,7 @@ public class InntektsmeldingTjenesteImplTest {
         BehandlingReferanse behandlingReferanse = lagReferanse(behandling);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false)).isEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(behandlingReferanse, false, behandlingReferanse.getUtledetSkjæringstidspunkt())).isEmpty();
     }
 
     private BehandlingReferanse lagReferanse(Behandling behandling) {
@@ -233,12 +233,12 @@ public class InntektsmeldingTjenesteImplTest {
         BehandlingReferanse behandlingReferanse = lagReferanse(revurdering);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, true)).isNotEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, true, skjæringstidspunkt.getUtledetSkjæringstidspunkt())).isNotEmpty();
 
         lagreInntektsmelding(I_DAG, revurdering, ARBEIDSFORHOLD_ID, ARBEIDSFORHOLD_ID_EKSTERN);
 
         // Act+Assert
-        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, true)).isEmpty();
+        assertThat(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(behandlingReferanse, true, skjæringstidspunkt.getUtledetSkjæringstidspunkt())).isEmpty();
 
         final List<Inntektsmelding> nyeInntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(behandlingReferanse, I_DAG);
         assertThat(nyeInntektsmeldinger).hasSize(1);

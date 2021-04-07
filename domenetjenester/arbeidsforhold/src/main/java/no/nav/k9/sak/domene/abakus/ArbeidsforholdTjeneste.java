@@ -26,10 +26,6 @@ public class ArbeidsforholdTjeneste {
 
     private AbakusTjeneste abakusTjeneste;
 
-    ArbeidsforholdTjeneste() {
-        // CDI proxy
-    }
-
     @Inject
     public ArbeidsforholdTjeneste(AbakusTjeneste abakusTjeneste) {
         this.abakusTjeneste = abakusTjeneste;

@@ -1,11 +1,13 @@
 package no.nav.k9.sak.kompletthet;
 
 import java.util.List;
+import java.util.Map;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface Kompletthetsjekker {
 

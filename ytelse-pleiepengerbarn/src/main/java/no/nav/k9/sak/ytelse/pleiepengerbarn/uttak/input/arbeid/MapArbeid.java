@@ -18,7 +18,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PsbInntektsmeldingerRelevantForBeregning;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInntektsmeldingerRelevantForBeregning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
@@ -28,7 +28,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 public class MapArbeid {
 
-    private PsbInntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = new PsbInntektsmeldingerRelevantForBeregning();
+    private PSBInntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = new PSBInntektsmeldingerRelevantForBeregning();
 
     public List<Arbeid> map(Set<KravDokument> kravDokumenter,
                             Set<PerioderFraSøknad> perioderFraSøknader,
