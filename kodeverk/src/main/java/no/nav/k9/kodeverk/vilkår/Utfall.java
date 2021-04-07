@@ -1,6 +1,8 @@
 package no.nav.k9.kodeverk.vilkår;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,11 +21,11 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Utfall implements Kodeverdi {
-    OPPFYLT("OPPFYLT", "Oppfylt"),
-    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt"),
-    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert"),
-    IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant"),
-    UDEFINERT("-", "Ikke definert"),
+    OPPFYLT("OPPFYLT", "Oppfylt", 2),
+    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt", 1),
+    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert", 3),
+    IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant", 4),
+    UDEFINERT("-", "Ikke definert", 0),
     ;
 
     public static final String KODEVERK = "VILKAR_UTFALL_TYPE";
@@ -39,15 +41,20 @@ public enum Utfall implements Kodeverdi {
 
     @JsonIgnore
     private String navn;
+
     private String kode;
+
+    @JsonIgnore
+    private int rank;
 
     private Utfall(String kode) {
         this.kode = kode;
     }
 
-    private Utfall(String kode, String navn) {
+    private Utfall(String kode, String navn, int rank) {
         this.kode = kode;
         this.navn = navn;
+        this.rank = rank;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -88,9 +95,22 @@ public enum Utfall implements Kodeverdi {
         return kode;
     }
 
+    int getRank() {
+        return rank;
+    }
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
 
+    public static Utfall ranger(Collection<Utfall> utfall) {
+        if (utfall == null || utfall.isEmpty()) {
+            return null;
+        }
+        return utfall.stream()
+            .filter(u -> u != UDEFINERT)
+            .sorted(Comparator.comparing(Utfall::getRank))
+            .findFirst().orElse(null);
+    }
 }

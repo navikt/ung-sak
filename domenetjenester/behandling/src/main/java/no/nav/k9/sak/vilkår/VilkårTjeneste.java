@@ -3,6 +3,7 @@ package no.nav.k9.sak.vilkår;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -32,6 +35,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -231,4 +236,34 @@ public class VilkårTjeneste {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
+    public LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat(Long behandlingId) {
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
+        if (vilkårene.isEmpty()) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        }
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var tjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
+        List<DatoIntervallEntitet> allePerioder = tjeneste.utled(behandlingId).values().stream().flatMap(v -> v.stream()).sorted().collect(Collectors.toList());
+
+        if (allePerioder.isEmpty()) {
+            return LocalDateTimeline.EMPTY_TIMELINE;
+        }
+        var maksPeriode = DatoIntervallEntitet.minmax(allePerioder);
+        var timelinePerVilkår = vilkårene.get().getVilkårTidslinjer(maksPeriode);
+
+        return samletVilkårUtfall(timelinePerVilkår);
+    }
+
+    LocalDateTimeline<VilkårUtfallSamlet> samletVilkårUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> timelinePerVilkår) {
+        var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
+
+        for (var e : timelinePerVilkår.entrySet()) {
+            LocalDateTimeline<VilkårUtfall> utfallTimeline = e.getValue().mapValue(v -> new VilkårUtfall(e.getKey(), v.getAvslagsårsak(), v.getUtfall()));
+            timeline = timeline.crossJoin(utfallTimeline, StandardCombinators::allValues);
+        }
+
+        var resultat = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v));
+        return resultat;
+    }
 }
