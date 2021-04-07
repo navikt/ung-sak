@@ -1,37 +1,33 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import no.nav.k9.søknad.felles.fravær.FraværPeriode;
-import no.nav.k9.søknad.felles.type.Periode;
-
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.k9.søknad.felles.fravær.FraværPeriode;
+import no.nav.k9.søknad.felles.type.Periode;
+
 public class FraværPeriodeSammenslåer {
-    public static List<FraværPeriode> slåSammen(List<FraværPeriode> fraværperioder) {
+    public static List<FraværPeriode> slåSammen(List<FraværPeriode> søknadsperioder) {
+        var sorterteSøknadsperioder = søknadsperioder.stream().sorted().collect(Collectors.toList());
+        var sammenslåttePerioder = new LinkedList<FraværPeriode>();
 
-        var sortertPeriode = fraværperioder.stream().sorted().collect(Collectors.toList());
-        var nyePerioder = new LinkedList<FraværPeriode>();
-
-        for (FraværPeriode søknadPeriode : sortertPeriode) {
-            if (nyePerioder.isEmpty()) {
-                nyePerioder.add(søknadPeriode);
+        for (FraværPeriode søknadPeriode : sorterteSøknadsperioder) {
+            if (sammenslåttePerioder.isEmpty()) {
+                sammenslåttePerioder.add(søknadPeriode);
                 continue;
             }
-            var sammenslåttPeriode = nyePerioder.getLast();
+            var sammenslåttPeriode = sammenslåttePerioder.getLast();
 
-            var dagerMellan = ChronoUnit.DAYS.between(
-                sammenslåttPeriode.getPeriode().getTilOgMed(),
-                søknadPeriode.getPeriode().getFraOgMed());
-
-            if (dagerMellan == 1 &&
+            boolean periodenLiggerInntilForrigePeriode = ChronoUnit.DAYS.between(sammenslåttPeriode.getPeriode().getTilOgMed(), søknadPeriode.getPeriode().getFraOgMed()) == 1;
+            if (periodenLiggerInntilForrigePeriode &&
                 søknadPeriode.getDuration().equals(sammenslåttPeriode.getDuration()) &&
                 søknadPeriode.getÅrsak().equals(sammenslåttPeriode.getÅrsak()) &&
                 søknadPeriode.getAktivitetFravær().equals(sammenslåttPeriode.getAktivitetFravær())) {
 
-                nyePerioder.removeLast();
-                nyePerioder.add(new FraværPeriode(
+                sammenslåttePerioder.removeLast();
+                sammenslåttePerioder.add(new FraværPeriode(
                     new Periode(
                         sammenslåttPeriode.getPeriode().getFraOgMed(),
                         søknadPeriode.getPeriode().getTilOgMed()),
@@ -40,10 +36,10 @@ public class FraværPeriodeSammenslåer {
                     søknadPeriode.getAktivitetFravær()
                 ));
             } else {
-                nyePerioder.add(søknadPeriode);
+                sammenslåttePerioder.add(søknadPeriode);
             }
         }
 
-        return nyePerioder;
+        return sammenslåttePerioder;
     }
 }
