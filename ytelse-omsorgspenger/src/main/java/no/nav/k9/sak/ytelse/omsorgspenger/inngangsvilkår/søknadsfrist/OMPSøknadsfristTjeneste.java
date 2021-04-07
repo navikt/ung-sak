@@ -92,12 +92,13 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     }
 
     private LocalDateTimeline<Utfall> slåSammenTidslinjer(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurdertePerioder) {
-        var vilkårTimeline = new LocalDateTimeline<Utfall>(List.of());
-        var timelines = vurdertePerioder.values()
-            .stream()
-            .map(this::mapTilTimeline).collect(Collectors.toList());
-        for (LocalDateTimeline<Utfall> timeline : timelines) {
-            vilkårTimeline = mergeTimeline(vilkårTimeline, timeline);
+        LocalDateTimeline<Utfall> vilkårTimeline = new LocalDateTimeline<>(List.of());
+        List<LocalDateTimeline<Utfall>> timelinesForKravDok = vurdertePerioder.values().stream()
+            .map(this::mapKravDokUtfallTilTimeline)
+            .collect(Collectors.toList());
+        // Merge utfall søknadsfrist ved overlapp fra forskjellige kravdokumenter
+        for (LocalDateTimeline<Utfall> timelineForKravDok : timelinesForKravDok) {
+            vilkårTimeline = mergeTimeline(vilkårTimeline, timelineForKravDok);
         }
         return vilkårTimeline.compress();
     }
@@ -135,11 +136,22 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
         return Utfall.IKKE_OPPFYLT;
     }
 
-    private LocalDateTimeline<Utfall> mapTilTimeline(List<VurdertSøktPeriode<OppgittFraværPeriode>> perioder) {
-        List<LocalDateSegment<Utfall>> segments = perioder.stream()
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it.getUtfall()))
-            .collect(Collectors.toList());
+    private LocalDateTimeline<Utfall> mapKravDokUtfallTilTimeline(List<VurdertSøktPeriode<OppgittFraværPeriode>> søktePerioderFraKravDok) {
+        var timeline = new LocalDateTimeline<Utfall>(List.of());
+        for (VurdertSøktPeriode<OppgittFraværPeriode> søktPeriode : søktePerioderFraKravDok) {
+            var segment = new LocalDateSegment<>(søktPeriode.getPeriode().getFomDato(), søktPeriode.getPeriode().getTomDato(), søktPeriode.getUtfall());
+            timeline = timeline.combine(segment, this::sjekkKonsistensInnenforKravDok, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return timeline;
+    }
 
-        return new LocalDateTimeline<>(segments);
+    private LocalDateSegment<Utfall> sjekkKonsistensInnenforKravDok(LocalDateInterval di, LocalDateSegment<Utfall> lhs, LocalDateSegment<Utfall> rhs) {
+        if (lhs != null && rhs != null && lhs.getValue() != rhs.getValue()) {
+            throw new IllegalArgumentException("Skal ha samme utfall av søknadsvilkåret for overlappende perioder " +
+                "i samme kravdokument, fikk lhs=" + lhs + ", rhs=" + rhs);
+        }
+        var konsistentUtfall = lhs != null ? lhs.getValue() : rhs.getValue();
+        return new LocalDateSegment<>(di, konsistentUtfall);
+
     }
 }
