@@ -49,8 +49,8 @@ public class FastsettOpptjeningsperiodeSteg extends FastsettOpptjeningsperiodeSt
     }
 
     @Override
-    protected void ryddOppVilkårsPeriode(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, DatoIntervallEntitet periode) {
-        super.ryddOppVilkårsPeriode(kontekst, modell, periode);
+    protected void tilbakestill(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, DatoIntervallEntitet periode) {
+        super.tilbakestill(kontekst, modell, periode);
         new RyddOpptjening(behandlingRepository, opptjeningRepository, vilkårResultatRepository, kontekst).ryddOpp(periode);
     }
 

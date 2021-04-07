@@ -219,6 +219,9 @@ public class JettyServer {
         webAppContext.setBaseResource(createResourceCollection());
         webAppContext.setContextPath(appKonfigurasjon.getContextPath());
         webAppContext.setConfigurations(CONFIGURATIONS);
+
+        webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
+
         /*
          * lar jetty scanne flere jars for web resources (eks. WebFilter/WebListener annotations),
          * men bare de som matchr pattern for raskere oppstart
