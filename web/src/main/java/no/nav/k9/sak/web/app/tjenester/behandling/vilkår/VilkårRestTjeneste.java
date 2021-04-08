@@ -78,7 +78,7 @@ public class VilkårRestTjeneste {
     @GET
     @Path(VILKÅR_SAMLET_PATH)
     @Operation(description = "Hent informasjon om vilkår samlet for en behandling", tags = "vilkår", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårResultatContainer.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -113,6 +113,7 @@ public class VilkårRestTjeneste {
         return Response.ok(dto).cacheControl(cc).build();
     }
 
+    @Schema
     public static class VilkårResultatContainer {
 
         @JsonProperty(value = "vilkårTidslinje")
