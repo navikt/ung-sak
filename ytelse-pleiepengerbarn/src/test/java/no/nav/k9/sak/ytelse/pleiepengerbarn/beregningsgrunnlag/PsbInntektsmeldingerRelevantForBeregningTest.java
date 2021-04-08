@@ -15,7 +15,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 
 class PsbInntektsmeldingerRelevantForBeregningTest {
 
-    private PsbInntektsmeldingerRelevantForBeregning tjeneste = new PsbInntektsmeldingerRelevantForBeregning();
+    private PSBInntektsmeldingerRelevantForBeregning tjeneste = new PSBInntektsmeldingerRelevantForBeregning();
 
     @Test
     void skal_velge_rett_inntektsmelding() {

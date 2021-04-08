@@ -1,5 +1,6 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,18 +37,18 @@ public class DefaultKompletthetssjekkerInntektsmelding implements Kompletthetssj
      * @return Manglende påkrevde inntektsmeldinger som ennå ikke er mottatt
      */
     @Override
-    public List<ManglendeVedlegg> utledManglendeInntektsmeldinger(BehandlingReferanse ref) {
-        return doUtledManglendeInntektsmeldinger(ref, true);
+    public List<ManglendeVedlegg> utledManglendeInntektsmeldinger(BehandlingReferanse ref, LocalDate vurderingsdato) {
+        return doUtledManglendeInntektsmeldinger(ref, true, vurderingsdato);
     }
 
     @Override
-    public List<ManglendeVedlegg> utledManglendeInntektsmeldingerFraGrunnlag(BehandlingReferanse ref) {
-        return doUtledManglendeInntektsmeldinger(ref, false);
+    public List<ManglendeVedlegg> utledManglendeInntektsmeldingerFraGrunnlag(BehandlingReferanse ref, LocalDate vurderingsdato) {
+        return doUtledManglendeInntektsmeldinger(ref, false, vurderingsdato);
     }
 
-    private List<ManglendeVedlegg> doUtledManglendeInntektsmeldinger(BehandlingReferanse ref, boolean spørAAregDirekte) {
-        List<ManglendeVedlegg> manglendeVedlegg = (spørAAregDirekte ? inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(ref, false)
-            : inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(ref, false))
+    private List<ManglendeVedlegg> doUtledManglendeInntektsmeldinger(BehandlingReferanse ref, boolean spørAAregDirekte, LocalDate vurderingsdato) {
+        List<ManglendeVedlegg> manglendeVedlegg = (spørAAregDirekte ? inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(ref, false, vurderingsdato)
+            : inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(ref, false, vurderingsdato))
             .keySet()
             .stream()
             .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, it.getIdentifikator()))

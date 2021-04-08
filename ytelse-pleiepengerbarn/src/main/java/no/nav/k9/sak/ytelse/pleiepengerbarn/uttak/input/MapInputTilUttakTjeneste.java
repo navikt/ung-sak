@@ -178,8 +178,7 @@ public class MapInputTilUttakTjeneste {
             inngangsvilkår,
             tilsynsperioder,
             beredskapsperioder,
-            nattevåksperioder
-            );
+            nattevåksperioder);
     }
 
     private List<LocalDateSegment<Boolean>> mapPerioderTilVurdering(InputParametere input) {

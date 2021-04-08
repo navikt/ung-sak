@@ -18,7 +18,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
-public class PsbInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
+public class PSBInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
     @Override
     public List<Inntektsmelding> utledInntektsmeldingerSomGjelderForPeriode(Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
