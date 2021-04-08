@@ -42,7 +42,7 @@ public class OppgittFraværDump implements DebugDumpFagsak {
             + ", omp.aktivitet_type"
             + ", omp.arbeidsgiver_aktor_id"
             + ", omp.arbeidsgiver_orgnr"
-            + ", omp.arbeidsforhold_intern_id"
+            + ", cast(omp.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id"
             + ", omp.journalpost_id"
             + ", omp.fravaer_arsak"
             + ", replace(cast(omp.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
