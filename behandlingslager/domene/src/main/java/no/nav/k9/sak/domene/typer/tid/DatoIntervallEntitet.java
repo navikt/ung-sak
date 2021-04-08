@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -95,6 +96,15 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
 
     public static DatoIntervallEntitet fra(Periode periode) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+    }
+
+    public static DatoIntervallEntitet minmax(Collection<DatoIntervallEntitet> perioder) {
+        if (perioder.isEmpty()) {
+            return null;
+        }
+        var min = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
+        var max = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
+        return DatoIntervallEntitet.fraOgMedTilOgMed(min, max);
     }
 
 }

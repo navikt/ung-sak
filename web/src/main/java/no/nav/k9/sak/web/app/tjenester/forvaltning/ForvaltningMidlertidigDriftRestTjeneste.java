@@ -154,10 +154,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     @POST
     @Path("/manuell-revurdering")
-    @Consumes(MediaType.TEXT_PLAIN)
     @Operation(description = "Oppretter manuell revurdering med annet som årsak.", summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void revurderAlleSomAnnenFeil(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
+    public void opprettNyManuellRevurderingEllerTilbakestillingAvÅpenBehandling(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
         var alleSaksnummer = Objects.requireNonNull(opprettManuellRevurdering.getSaksnumre(), "saksnumre");
         var saknumre = new LinkedHashSet<>(Arrays.asList(alleSaksnummer.split("\\s+")));
 
