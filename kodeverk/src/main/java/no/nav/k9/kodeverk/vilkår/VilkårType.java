@@ -116,7 +116,8 @@ public enum VilkårType implements Kodeverdi {
     UTVIDETRETT(VilkårTypeKoder.K9_VK_9_6, "Utvidet rett",
             Map.of(FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
-            Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR),
+            Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR, Avslagsårsak.IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
+        Avslagsårsak.IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN),
     /**
      * Brukes i stedet for null der det er optional.
      */
