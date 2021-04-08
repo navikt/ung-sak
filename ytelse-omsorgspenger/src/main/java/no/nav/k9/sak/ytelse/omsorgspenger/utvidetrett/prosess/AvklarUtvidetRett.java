@@ -2,6 +2,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -21,9 +23,10 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -67,20 +70,26 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var fagsak = behandling.getFagsak();
 
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        var vilkårBuilder = param.getVilkårResultatBuilder();
+        var vilkårResultatBuilder = param.getVilkårResultatBuilder();
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
         var periode = dto.getPeriode();
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var timeline = vilkårene.getVilkårTimeline(vilkårType);
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
         if (periode == null) {
             // overskriver hele
-            var vilkårene = vilkårResultatRepository.hent(behandlingId);
-            var timeline = vilkårene.getVilkårTimeline(vilkårType);
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
         } else {
+            var tilbakestillPerioder = timeline.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()))
+                .collect(Collectors.toCollection(TreeSet::new));
+
+            vilkårBuilder.tilbakestill(tilbakestillPerioder);
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
         }
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
@@ -96,13 +105,12 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         return angittPeriode;
     }
 
-    private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
-        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+    private void oppdaterUtfallOgLagre(VilkårBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
         Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? defaultAvslagsårsak : avslagsårsak) : null;
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+        builder.leggTil(builder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
             .medAvslagsårsak(settAvslagsårsak));
-        builder.leggTil(vilkårBuilder);
+
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
