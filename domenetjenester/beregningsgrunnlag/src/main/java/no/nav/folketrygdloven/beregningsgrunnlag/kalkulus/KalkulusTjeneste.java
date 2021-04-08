@@ -23,6 +23,7 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
@@ -379,8 +380,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .sorted(Map.Entry.comparingByValue())
             .map(entry -> {
                 UUID bgReferanse = entry.getKey();
-                var vilkårsPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue()).getPeriode();
-                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriode);
+                var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue());
+
+                var vilkårsMerknad = vilkårPeriode.getMerknad();
+                var vilkårsPeriodeDatoIntervall = vilkårPeriode.getPeriode();
+                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriodeDatoIntervall);
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
                     kalkulatorInputTjeneste.byggDto(
                         behandlingReferanse,
@@ -388,7 +392,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                         iayGrunnlag,
                         sakInntektsmeldinger,
                         ytelsesGrunnlag,
-                        vilkårsPeriode));
+                        vilkårsPeriodeDatoIntervall,
+                        vilkårsMerknad));
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 

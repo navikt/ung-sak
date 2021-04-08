@@ -23,6 +23,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto.MidlertidigInaktiv;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -56,16 +57,17 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
                 var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
             }
-            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder, avklarOpptjeningsvilkåretDto.getEr847Ok());
+            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder, avklarOpptjeningsvilkåretDto.getMidlertidigInaktiv());
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder, boolean er847Ok) {
+    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder, MidlertidigInaktiv midlertidigInaktiv) {
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfall(utfallType)
-            .medMerknad(er847Ok ? VilkårUtfallMerknad.VM_7847 : null)
+            .medMerknad(MidlertidigInaktiv.TYPE_A.equals(midlertidigInaktiv) ? VilkårUtfallMerknad.VM_7847_A : null)
+            .medMerknad(MidlertidigInaktiv.TYPE_B.equals(midlertidigInaktiv) ? VilkårUtfallMerknad.VM_7847_B : null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 

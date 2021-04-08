@@ -62,7 +62,8 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_7003("7003", "Søker er medmor (foreldre2) og har søkt på vegne av seg selv"),
     VM_7004("7004", "Søker er far og har søkt på vegne av seg selv"),
     VM_7006("7006", "Venter på opptjeningsopplysninger"),
-    VM_7847("7847", "Midlertidig inaktiv jf folketrygdloven §§ 8-47"),
+    VM_7847_A("7847_A", "Midlertidig inaktiv jf folketrygdloven §§ 8-47"),
+    VM_7847_B("7847_B", "Midlertidig inaktiv jf folketrygdloven §§ 8-47"),
 
     VM_8000("8000", "søkt frilans uten frilansinntekt"),
     VM_8001("8001", "avkortet grunnet annen inntekt"),

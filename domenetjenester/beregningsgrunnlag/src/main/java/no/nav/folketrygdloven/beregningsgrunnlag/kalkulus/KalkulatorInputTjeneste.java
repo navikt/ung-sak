@@ -15,6 +15,7 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -45,7 +46,8 @@ public class KalkulatorInputTjeneste {
                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
                                       Collection<Inntektsmelding> sakInntektsmeldinger,
                                       YtelsespesifiktGrunnlagDto ytelseGrunnlag,
-                                      DatoIntervallEntitet vilkårsperiode) {
+                                      DatoIntervallEntitet vilkårsperiode,
+                                      VilkårUtfallMerknad vilkårsMerknad) {
         var stp = finnSkjæringstidspunkt(vilkårsperiode);
 
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
@@ -59,7 +61,7 @@ public class KalkulatorInputTjeneste {
             throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 
-        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get());
+        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get(), vilkårsMerknad);
 
         KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 

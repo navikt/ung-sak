@@ -36,8 +36,8 @@ public class AvklarOpptjeningsvilkåretDto {
     @JsonProperty(value = "erVilkarOk")
     private boolean erVilkarOk;
 
-    @JsonProperty(value = "er847Ok")
-    private boolean er847Ok;
+    @JsonProperty(value = "midlertidigInaktiv")
+    private MidlertidigInaktiv midlertidigInaktiv;
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
@@ -94,11 +94,21 @@ public class AvklarOpptjeningsvilkåretDto {
         this.begrunnelse = begrunnelse;
     }
 
-    public boolean getEr847Ok() {
-        return er847Ok;
+    public MidlertidigInaktiv getMidlertidigInaktiv() {
+        return midlertidigInaktiv;
     }
 
-    public void setEr847Ok(boolean er847Ok) {
-        this.er847Ok = er847Ok;
+    public void setMidlertidigInaktiv(MidlertidigInaktiv midlertidigInaktiv) {
+        this.midlertidigInaktiv = midlertidigInaktiv;
+    }
+
+    public enum MidlertidigInaktiv {
+        TYPE_A("8-47-A"),
+        TYPE_B("8-47-B");
+
+        MidlertidigInaktiv(String s) {
+        }
     }
 }
+
+
