@@ -4,6 +4,12 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,8 +34,12 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Provider;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -154,6 +164,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     @POST
     @Path("/manuell-revurdering")
+    @Consumes(MediaType.TEXT_PLAIN)
     @Operation(description = "Oppretter manuell revurdering med annet som årsak.", summary = ("Oppretter manuell revurdering med annet som årsak."), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void opprettNyManuellRevurderingEllerTilbakestillingAvÅpenBehandling(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
@@ -208,7 +219,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         @NotNull
         @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "OpprettManuellRevurdering [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-        private final String saksnumre;
+        private String saksnumre;
+
+        public OpprettManuellRevurdering() {
+            // empty ctor
+        }
 
         public OpprettManuellRevurdering(@NotNull String saksnumre) {
             this.saksnumre = saksnumre;
@@ -222,6 +237,32 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett();
+        }
+
+        @Provider
+        public static class OpprettManuellRevurderingMessageBodyReader implements MessageBodyReader<OpprettManuellRevurdering> {
+
+            @Override
+            public boolean isReadable(Class<?> type, Type genericType,
+                                      Annotation[] annotations, MediaType mediaType) {
+                return (type == OpprettManuellRevurdering.class);
+            }
+
+            @Override
+            public OpprettManuellRevurdering readFrom(Class<OpprettManuellRevurdering> type, Type genericType,
+                                                      Annotation[] annotations, MediaType mediaType,
+                                                      MultivaluedMap<String, String> httpHeaders,
+                                                      InputStream inputStream)
+                    throws IOException, WebApplicationException {
+                var sb = new StringBuilder(200);
+                try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(inputStream))) {
+                    sb.append(br.readLine()).append('\n');
+                }
+
+                return new OpprettManuellRevurdering(sb.toString());
+
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import no.nav.k9.sak.web.app.exceptions.KnownExceptionMappers;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.OpprettManuellRevurderingMessageBodyReader;
 
 @ApplicationPath(ApplicationConfig.API_URI)
 public class ApplicationConfig extends ResourceConfig {
@@ -56,6 +57,8 @@ public class ApplicationConfig extends ResourceConfig {
         registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));
 
         register(new JacksonJsonConfig());
+
+        register(new OpprettManuellRevurderingMessageBodyReader());
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
 
