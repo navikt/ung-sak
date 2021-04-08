@@ -107,7 +107,7 @@ public class InngangsvilkårOversetter {
     }
 
     private LocalDateTimeline<SykdomVurderingVersjon> toTidslinjeFor(SykdomGrunnlag grunnlag, SykdomVurderingType type) {
-        return SykdomUtils.tilTidslinje(grunnlag.getVurderinger().stream().filter(v -> v.getSykdomVurdering().getType() == type).collect(Collectors.toList()));
+        return SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), type);
     }
 
     public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
