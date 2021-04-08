@@ -54,7 +54,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
 
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, startDato, sluttDato);
+        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, startDato, datoIntervall.getTomDato());
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
