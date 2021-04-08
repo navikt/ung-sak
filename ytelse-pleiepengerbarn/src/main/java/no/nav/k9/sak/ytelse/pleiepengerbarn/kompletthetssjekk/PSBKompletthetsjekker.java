@@ -232,7 +232,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
 
     private Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
         return inntektsmeldinger.stream()
-            .filter(im -> relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
+            .filter(im -> im.getStartDatoPermisjon().isEmpty() || relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
             .collect(Collectors.toSet());
     }
 
