@@ -12,6 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
 
 public final class SykdomUtils {
@@ -48,7 +49,10 @@ public final class SykdomUtils {
         }, JoinStyle.LEFT_JOIN).compress();
     }
 
-
+    public static LocalDateTimeline<SykdomVurderingVersjon> tilTidslinjeForType(Collection<SykdomVurderingVersjon> vurderinger, SykdomVurderingType type) {
+        return SykdomUtils.tilTidslinje(vurderinger.stream().filter(v -> v.getSykdomVurdering().getType() == type).collect(Collectors.toList()));
+    }
+    
     public static LocalDateTimeline<SykdomVurderingVersjon> tilTidslinje(Collection<SykdomVurderingVersjon> vurderinger) {
         final Collection<LocalDateSegment<SykdomVurderingVersjon>> segments = new ArrayList<>();
         for (SykdomVurderingVersjon vurdering : vurderinger) {
