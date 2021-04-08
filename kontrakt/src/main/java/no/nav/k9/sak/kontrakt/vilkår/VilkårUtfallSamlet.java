@@ -19,6 +19,10 @@ import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
+/**
+ * Angir et samlet resultat av vilkår for perioder der ulike vilkår overlapper.
+ * Typisk vil samlet resultat være {@link Utfall#IKKE_OPPFYLT} dersom et av vilkårene for en periode ikke er oppfylt.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -63,18 +67,18 @@ public class VilkårUtfallSamlet {
         @Valid
         private Avslagsårsak avslagsårsak;
 
-        @JsonProperty(value = "vilkårStatus", required = true)
+        @JsonProperty(value = "vilkårUtfall", required = true)
         @NotNull
         @Valid
-        private Utfall vilkårStatus = Utfall.IKKE_VURDERT;
+        private Utfall vilkårUtfall = Utfall.IKKE_VURDERT;
 
         @JsonCreator
         public VilkårUtfall(@JsonProperty(value = "vilkårType", required = true) VilkårType vilkårType,
                             @JsonProperty(value = "avslagsårsak") Avslagsårsak avslagsårsak,
-                            @JsonProperty(value = "vilkårStatus", required = true) Utfall vilkårStatus) {
+                            @JsonProperty(value = "vilkårUtfall", required = true) Utfall vilkårUtfall) {
             this.vilkårType = vilkårType;
             this.avslagsårsak = avslagsårsak;
-            this.vilkårStatus = vilkårStatus;
+            this.vilkårUtfall = vilkårUtfall;
         }
 
         public VilkårType getVilkårType() {
@@ -90,11 +94,11 @@ public class VilkårUtfallSamlet {
         }
 
         public Utfall getVilkårStatus() {
-            return vilkårStatus;
+            return vilkårUtfall;
         }
 
         public void setUtfall(Utfall utfall) {
-            this.vilkårStatus = utfall;
+            this.vilkårUtfall = utfall;
         }
 
         @Override
@@ -106,20 +110,20 @@ public class VilkårUtfallSamlet {
             var other = (VilkårUtfall) obj;
 
             return Objects.equals(this.vilkårType, other.vilkårType)
-                && Objects.equals(this.vilkårStatus, other.vilkårStatus)
+                && Objects.equals(this.vilkårUtfall, other.vilkårUtfall)
                 && Objects.equals(this.avslagsårsak, other.avslagsårsak);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(vilkårType, vilkårStatus, avslagsårsak);
+            return Objects.hash(vilkårType, vilkårUtfall, avslagsårsak);
         }
 
         @Override
         public String toString() {
             return getClass().getSimpleName()
                 + "<vilkårType=" + vilkårType
-                + (vilkårStatus == null ? "" : ", utfall=" + vilkårStatus)
+                + (vilkårUtfall == null ? "" : ", utfall=" + vilkårUtfall)
                 + (avslagsårsak == null ? "" : ", avslagsårsak=" + avslagsårsak) + ">";
         }
     }
