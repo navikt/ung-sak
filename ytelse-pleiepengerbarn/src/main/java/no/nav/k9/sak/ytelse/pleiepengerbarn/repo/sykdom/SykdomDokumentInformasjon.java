@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -15,16 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.JoinFormula;
-
-import net.bytebuddy.asm.Advice;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
-import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "SykdomDokumentInformasjon")
 @Table(name = "SYKDOM_DOKUMENT_INFORMASJON")
