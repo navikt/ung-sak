@@ -49,12 +49,8 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         return new DatoIntervallEntitet(fomDato, TIDENES_ENDE);
     }
 
-    public static DatoIntervallEntitet fraOgMedPlusArbeidsdager(LocalDate fom, int antallArbeidsdager) {
-        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, finnTomDato(fom, antallArbeidsdager));
-    }
-
-    public static DatoIntervallEntitet tilOgMedMinusArbeidsdager(LocalDate tom, int antallArbeidsdager) {
-        return DatoIntervallEntitet.fraOgMedTilOgMed(finnFomDato(tom, antallArbeidsdager), tom);
+    public static DatoIntervallEntitet tilOgMed(LocalDate tom) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(TIDENES_BEGYNNELSE, tom);
     }
 
     @Override
@@ -96,7 +92,15 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
     }
 
     public static DatoIntervallEntitet fra(Periode periode) {
-        return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+        if (periode.getFom() != null && periode.getTom() != null) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+        } else if (periode.getFom() != null) {
+            return DatoIntervallEntitet.fraOgMed(periode.getFom());
+        } else if (periode.getTom() != null) {
+            return DatoIntervallEntitet.tilOgMed(periode.getTom());
+        } else {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(TIDENES_BEGYNNELSE, TIDENES_ENDE);
+        }
     }
 
     public static DatoIntervallEntitet minmax(Collection<DatoIntervallEntitet> perioder) {
