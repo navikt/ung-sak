@@ -62,6 +62,8 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + grunnlag.getBehandlingUUID() + ": " + constraints);
             }
             return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilÅrskvantum(e.getMessage(), e).toException();
         }
@@ -118,6 +120,8 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingUUID=" + behandlingUUID + ": " + constraints);
             }
             return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e.getMessage(), e).toException();
         }
@@ -136,6 +140,8 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", saksnummer=" + saksnummer + ": " + constraints);
             }
             return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForFagsak(e.getMessage(), e).toException();
         }
@@ -151,6 +157,8 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
                 throw new IllegalStateException("Ugyldig response fra " + endpoint + ", : " + constraints);
             }
             return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForFagsak(e.getMessage(), e).toException();
         }

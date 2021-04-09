@@ -42,6 +42,7 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -205,8 +206,10 @@ public class AbakusTjeneste {
                     throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // rethrow
         } catch (RuntimeException re) {
-            throw new IllegalStateException("Feil ved henting av data fra abakus: endpoint=" + httpKall.getURI() + (json != null ? ", input=" + json : ""), re);
+            throw new IllegalStateException("Feil ved henting av data fra abakus: endpoint=" + httpKall.getURI() + (json != null ? ", input=" + json.replaceAll("\\d{8,}", "x") : ""), re);
         }
     }
 

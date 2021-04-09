@@ -71,12 +71,7 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
                 relativePath = "abakus-inntektsmelding-" + im.getArbeidsgiver().getIdentifikator() + "-journalpost_" + im.getJournalpostId().getVerdi();
                 resultat.add(new DumpOutput(relativePath + ".json", content));
             }
-        } catch (TekniskException e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            resultat.add(new DumpOutput("abakus-inntektsmeldinger-ERROR.txt", sw.toString()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);

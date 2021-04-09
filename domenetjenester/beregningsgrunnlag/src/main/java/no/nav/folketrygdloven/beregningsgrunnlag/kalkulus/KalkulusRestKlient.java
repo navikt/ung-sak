@@ -36,6 +36,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -162,7 +163,7 @@ public class KalkulusRestKlient {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, reader));
         } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -170,7 +171,7 @@ public class KalkulusRestKlient {
         try {
             utfør(endpoint, json);
         } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -188,9 +189,11 @@ public class KalkulusRestKlient {
                         + " endpoint=" + httpPost.getURI()
                         + ", HTTP status=" + httpResponse.getStatusLine()
                         + ". HTTP Errormessage=" + responseBody;
-                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(endpoint, feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // rethrow
         } catch (RuntimeException re) {
             log.warn("Feil ved henting av data. uri=" + endpoint, re);
             throw re;
@@ -221,11 +224,13 @@ public class KalkulusRestKlient {
                     + ", HTTP status=" + httpResponse.getStatusLine()
                     + ". HTTP Errormessage=" + responseBody;
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
-                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(endpoint, feilmelding).toException();
                 } else {
-                    throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // retrhow
         } catch (RuntimeException re) {
             log.warn("Feil ved henting av data. uri=" + endpoint, re);
             throw re;
@@ -249,11 +254,11 @@ public class KalkulusRestKlient {
     interface RestTjenesteFeil extends DeklarerteFeil {
         KalkulusRestKlient.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestKlient.RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
-        Feil feilVedKallTilKalkulus(String feilmelding);
+        @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus [%s]: %s", logLevel = LogLevel.ERROR)
+        Feil feilVedKallTilKalkulus(URI endpoint, String feilmelding);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000002", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilKalkulus(String feilmelding);
+        @TekniskFeil(feilkode = "F-FT-K-1000002", feilmelding = "Feil ved kall til Kalkulus [%s]: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilKalkulus(URI endpoint, String feilmelding);
 
         @TekniskFeil(feilkode = "F-FT-K-1000003", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
