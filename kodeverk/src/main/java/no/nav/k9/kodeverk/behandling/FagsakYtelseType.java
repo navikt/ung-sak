@@ -279,7 +279,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     }
 
     public Set<FagsakYtelseType> hentYtelserForOverlappSjekk() {
-        return OVERLAPPSJEKK_RELATERT_YTELSE.computeIfAbsent(this, y -> Set.of());
+        return OVERLAPPSJEKK_RELATERT_YTELSE.getOrDefault(this, Set.of());
     }
 
     public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {
