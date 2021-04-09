@@ -54,13 +54,13 @@ public class SykdomSamletVurdering {
             samletVurdering.setKtp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
-        
+
         SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setToOp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
-        
+
         if (grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
                 SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
@@ -81,7 +81,15 @@ public class SykdomSamletVurdering {
         return tidslinje;
     }
 
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
+    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjellerFullKombinertTidslinje(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
+        return finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    }
+
+    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjellerKunOverlappendeTidslinje(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
+        return finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje, LocalDateTimeline.JoinStyle.INNER_JOIN);
+    }
+
+    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje, LocalDateTimeline.JoinStyle joinStyle) {
         return nyTidslinje.combine(forrigeTidslinje, new LocalDateSegmentCombinator<SykdomSamletVurdering, SykdomSamletVurdering, Boolean>() {
             @Override
             public LocalDateSegment<Boolean> combine(LocalDateInterval localDateInterval, LocalDateSegment<SykdomSamletVurdering> left, LocalDateSegment<SykdomSamletVurdering> right) {
@@ -115,7 +123,7 @@ public class SykdomSamletVurdering {
                 }
                 return null;
             }
-        }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
+        }, joinStyle).compress();
     }
 
     public SykdomVurderingVersjon getKtp() {

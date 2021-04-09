@@ -119,6 +119,23 @@ public class SykdomGrunnlagRepository {
                 .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).get());
     }
 
+    Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {
+        final TypedQuery<UUID> q = entityManager.createQuery(
+            "Select sgb.behandlingUuid "
+                + "From SykdomGrunnlagBehandling as sgb "
+                + "Where sgb.saksnummer = :saksnummer "
+                + "  And sgb.behandlingsnummer = ( "
+                + "    Select max(sgb2.behandlingsnummer) "
+                + "    From SykdomGrunnlagBehandling as sgb2 "
+                + "    Where sgb2.saksnummer = :saksnummer "
+                + "  ) "
+            , UUID.class);
+
+        q.setParameter("saksnummer", saksnummer);
+
+        return q.getResultList().stream().findFirst();
+    }
+
     Optional<UUID> hentSisteBehandlingMedUnntakAv(Saksnummer saksnummer, UUID behandlingUuid) {
         final TypedQuery<UUID> q = entityManager.createQuery(
                 "Select sgb.behandlingUuid "

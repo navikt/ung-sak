@@ -22,7 +22,7 @@ public class SykdomGrunnlagBehandling {
     @ManyToOne
     @JoinColumn(name = "SOEKER_PERSON_ID", nullable = false)
     private SykdomPerson søker;
-    
+
     @ManyToOne
     @JoinColumn(name = "PLEIETRENGENDE_PERSON_ID", nullable = false)
     private SykdomPerson pleietrengende;
@@ -48,11 +48,11 @@ public class SykdomGrunnlagBehandling {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    
+
     SykdomGrunnlagBehandling() {
-        
+
     }
-    
+
     public SykdomGrunnlagBehandling(SykdomGrunnlag grunnlag, SykdomPerson søker, SykdomPerson pleietrengende, Saksnummer saksnummer,
             UUID behandlingUuid, Long behandlingsnummer, Long versjon, String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
@@ -66,24 +66,28 @@ public class SykdomGrunnlagBehandling {
         this.opprettetAv = opprettetAv;
         this.opprettetTidspunkt = opprettetTidspunkt;
     }
-    
+
 
     public SykdomGrunnlag getGrunnlag() {
         return grunnlag;
     }
-    
+
     public Long getBehandlingsnummer() {
         return behandlingsnummer;
     }
-    
+
     public Long getVersjon() {
         return versjon;
     }
-    
+
     public Saksnummer getSaksnummer() {
         return saksnummer;
     }
-    
+
+    public UUID getBehandlingUuid() {
+        return behandlingUuid;
+    }
+
     public boolean isFørsteGrunnlagPåBehandling() {
         return versjon == 0;
     }

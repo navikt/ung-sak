@@ -123,7 +123,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, SykdomUtils.toPeriodeList(perioder));
         LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
 
-        LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeBehandlingTidslinje, nyBehandlingTidslinje);
+        LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(forrigeBehandlingTidslinje, nyBehandlingTidslinje);
 
         LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerSidenForrigeBehandling, vurderingsperioderTimeline);
 
