@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -20,16 +21,23 @@ import javax.inject.Inject;
 import javax.persistence.Tuple;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class DebugDumpsters {
 
-    private Instance<DebugDumpFagsak> dumpere;
+    private static final Logger log = LoggerFactory.getLogger(DebugDumpsters.class);
 
-    DebugDumpsters() {
+    private @Any Instance<DebugDumpFagsak> dumpere;
+
+    protected DebugDumpsters() {
         //
     }
 
@@ -43,23 +51,9 @@ public class DebugDumpsters {
         var saksnummer = fagsak.getSaksnummer();
         StreamingOutput streamingOutput = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                var dumpsters = FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType.getKode());
-                for (var inst : dumpsters) {
-                    for (var ddp : inst) {
-                        var dumps = ddp.dump(fagsak);
-                        for (var dump : dumps) {
-                            ZipEntry zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
-                            try {
-                                zipOut.putNextEntry(zipEntry);
-                                zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
-                                zipOut.closeEntry();
-                            } catch (IOException e) {
-                                throw new IllegalStateException("Kunne ikke zippe dump fra : " + ddp, e);
-                            }
-                        }
-                    }
-                }
-
+                var dumpsters = findDumpsters(ytelseType);
+                List<DumpOutput> allDumps = dumpOutput(fagsak, dumpsters);
+                allDumps.forEach(dump -> addToZip(saksnummer, zipOut, dump));
             } finally {
                 outputStream.flush();
                 outputStream.close();
@@ -68,6 +62,37 @@ public class DebugDumpsters {
 
         return streamingOutput;
 
+    }
+
+    private List<Instance<DebugDumpFagsak>> findDumpsters(FagsakYtelseType ytelseType) {
+        return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType.getKode());
+    }
+
+    private void addToZip(Saksnummer saksnummer, ZipOutputStream zipOut, DumpOutput dump) {
+        var zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
+        try {
+            zipOut.putNextEntry(zipEntry);
+            zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
+            zipOut.closeEntry();
+        } catch (IOException e) {
+            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
+        }
+    }
+
+    private List<DumpOutput> dumpOutput(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
+        var dumpers = dumpsters.stream().flatMap(v -> v.stream()).collect(Collectors.toList());
+        var dumperNames = dumpers.stream().map(d -> d.getClass().getName()).collect(Collectors.toList());
+        log.info("Dumper fra: {}", dumperNames);
+
+        List<DumpOutput> allDumps = dumpers.stream().flatMap(ddp -> {
+            try {
+                return ddp.dump(fagsak).stream();
+            } catch (Exception e) {
+                log.warn("Kunne ikke dumpe fra : {}", ddp);
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
+        return allDumps;
     }
 
     public static <V> DumpOutput dumpAsCsv(boolean includeHeader, List<V> input, String path, Map<String, Function<V, ?>> valueMapper) {
