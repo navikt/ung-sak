@@ -68,7 +68,7 @@ public class PeriodeForVedtakTest {
         ));
 
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, true));
-        assertEquals("Ugyldig periode for vedtak om utvidet rett Periode<fom=2021-04-09, tom=9999-12-31>", exception.getMessage());
+        assertEquals("Ugyldig periode for vedtak om utvidet rett. Periode<fom=2021-04-09, tom=9999-12-31>", exception.getMessage());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class PeriodeForVedtakTest {
         exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, false));
         assertEquals("Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>]", exception.getMessage());
     }
-    
+
     private static VilkårUtfallSamlet.VilkårUtfall oppfylt() {
         return new VilkårUtfallSamlet.VilkårUtfall(VilkårType.UTVIDETRETT, null, Utfall.OPPFYLT);
     }

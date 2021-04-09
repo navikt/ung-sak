@@ -149,7 +149,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private static Periode gyldigPeriode(LocalDate fom, LocalDate tom) {
         var periode = new Periode(fom, tom);
         if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
-            throw new IllegalStateException("Ugyldig periode for vedtak om utvidet rett " + periode.toString());
+            throw new IllegalStateException("Ugyldig periode for vedtak om utvidet rett. " + periode);
         }
         return periode;
     }
