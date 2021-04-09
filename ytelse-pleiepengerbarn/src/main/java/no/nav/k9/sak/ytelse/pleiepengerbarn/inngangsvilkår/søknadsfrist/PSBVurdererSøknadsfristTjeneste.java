@@ -82,6 +82,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder)
             .map(SøknadsperioderHolder::getPerioder)
             .flatMap(Collection::stream)
+            .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .map(it -> new SøknadsPeriodeDokumenter(it.getJournalpostId(), it.getPerioder()))
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, dokument));
 
