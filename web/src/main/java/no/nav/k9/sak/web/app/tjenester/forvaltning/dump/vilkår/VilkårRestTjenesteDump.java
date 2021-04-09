@@ -45,7 +45,7 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
                 String str;
                 try {
                     str = ow.writeValueAsString(entity);
-                } catch (TekniskException | IOException e) {
+                } catch (Exception e) {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
                     e.printStackTrace(pw);
