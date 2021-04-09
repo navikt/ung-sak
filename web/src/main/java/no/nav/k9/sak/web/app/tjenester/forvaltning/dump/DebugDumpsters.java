@@ -13,8 +13,10 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import javax.persistence.Tuple;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -22,15 +24,26 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
-@Dependent
+@ApplicationScoped
 public class DebugDumpsters {
+
+    private Instance<DebugDumpFagsak> dumpere;
+
+    DebugDumpsters() {
+        //
+    }
+
+    @Inject
+    public DebugDumpsters(@Any Instance<DebugDumpFagsak> dumpere) {
+        this.dumpere = dumpere;
+    }
 
     public StreamingOutput dumper(Fagsak fagsak) {
         var ytelseType = fagsak.getYtelseType();
         var saksnummer = fagsak.getSaksnummer();
         StreamingOutput streamingOutput = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                var dumpsters = FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, CDI.current().select(DebugDumpFagsak.class), ytelseType.getKode());
+                var dumpsters = FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType.getKode());
                 for (var inst : dumpsters) {
                     for (var ddp : inst) {
                         var dumps = ddp.dump(fagsak);

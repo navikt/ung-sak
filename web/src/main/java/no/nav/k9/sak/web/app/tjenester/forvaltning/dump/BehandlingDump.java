@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
@@ -29,14 +30,19 @@ public class BehandlingDump implements DebugDumpFagsak {
     @SuppressWarnings("unused")
     private EntityManager entityManager;
 
+    private Instance<DebugDumpBehandling> behandlingDumpere;
+
     protected BehandlingDump() {
     }
 
     @Inject
-    protected BehandlingDump(BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository, EntityManager entityManager) {
+    protected BehandlingDump(BehandlingRepository behandlingRepository,
+                             @Any Instance<DebugDumpBehandling> behandlingDumpere,
+                             FagsakRepository fagsakRepository, EntityManager entityManager) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.entityManager = entityManager;
+        this.behandlingDumpere = behandlingDumpere;
     }
 
     @Override
@@ -74,7 +80,7 @@ public class BehandlingDump implements DebugDumpFagsak {
 
         var resultat = new ArrayList<DumpOutput>();
 
-        var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, CDI.current().select(DebugDumpBehandling.class), ytelseType.getKode());
+        var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType.getKode());
 
         for (var b : behandlinger) {
             var toCsv = new LinkedHashMap<String, Function<Behandling, ?>>();
