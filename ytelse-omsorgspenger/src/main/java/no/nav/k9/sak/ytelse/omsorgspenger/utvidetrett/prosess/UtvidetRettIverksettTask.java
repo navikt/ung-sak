@@ -80,7 +80,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             var iverksett = mapIverksett(behandling, søknad, periodeForVedtak(samletVilkårsresultat, false));
             utvidetRettKlient.avslått(iverksett);
         } else {
-            throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=" + utfall);
+            throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=[" + utfall + "]");
         }
     }
 
@@ -93,7 +93,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             case OMSORGSPENGER_MA:
                 return mapMidlertidigAlene(behandling, søknad, periode);
             default:
-                throw new UnsupportedOperationException("Støtter ikke ytelsetype=" + ytelseType);
+                throw new UnsupportedOperationException("Støtter ikke ytelseType=[" + ytelseType + "]");
         }
     }
 
@@ -134,7 +134,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         } else if (!innvilget && ikkeOppfyltePerioder.size() == 1 && oppfyltePerioder.isEmpty()) {
             return ikkeOppfyltePerioder.get(0);
         } else {
-            throw new IllegalStateException(String.format("Uventet vilkårsutfall for utvidet rett. Innvilget=[%s], OppfyltePerioder=[%s], IkkeOppfyltePerioder=[%s]", innvilget, oppfyltePerioder, ikkeOppfyltePerioder));
+            throw new IllegalStateException(String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder=%s", innvilget, oppfyltePerioder, ikkeOppfyltePerioder));
         }
     }
 
@@ -149,7 +149,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private static Periode gyldigPeriode(LocalDate fom, LocalDate tom) {
         var periode = new Periode(fom, tom);
         if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
-            throw new IllegalStateException("Ugylidig periode for vedtak om utvidet rett " + periode.toString());
+            throw new IllegalStateException("Ugyldig periode for vedtak om utvidet rett " + periode.toString());
         }
         return periode;
     }
