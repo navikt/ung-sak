@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -51,11 +52,8 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     }
 
     @Inject
-    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter
-                      , SøknadRepository søknadRepository
-                      , @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste
-                      , VilkårResultatRepository vilkårResultatRepository
-                      , BehandlingRepository behandlingRepository) {
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter, SøknadRepository søknadRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste,
+                      VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
         this.søknadRepository = søknadRepository;
         this.vilkårsPerioderTjeneste = vilkårsPerioderTjeneste;
@@ -76,12 +74,17 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         var periode = dto.getPeriode();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
+
         var timeline = vilkårene.getVilkårTimeline(vilkårType);
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        if (periode == null) {
-            // overskriver hele
+
+        boolean erAvslag = dto.getAvslagsårsak() != null;
+        if (erAvslag || erÅpenPeriode(periode)) {
+            // overskriver hele vilkårperioden
+            // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
         } else {
+            // overskriver bare avgrenset periode
             var tilbakestillPerioder = timeline.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()))
                 .collect(Collectors.toCollection(TreeSet::new));
 
@@ -89,8 +92,13 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
         }
+
         vilkårResultatBuilder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
+    }
+
+    private boolean erÅpenPeriode(Periode periode) {
+        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
@@ -99,7 +107,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             throw new UnsupportedOperationException("Kan ikke angi periode for ytelseType=" + fagsak.getYtelseType());
         }
         var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
-        if (!fagsakPeriode.contains(angittPeriode)) {
+        if (!angittPeriode.isOpenStart() && !fagsakPeriode.contains(angittPeriode)) {
             throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
         }
         return angittPeriode;
