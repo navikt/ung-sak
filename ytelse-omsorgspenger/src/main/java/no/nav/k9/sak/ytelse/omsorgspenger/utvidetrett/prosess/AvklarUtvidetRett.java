@@ -6,8 +6,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -22,14 +20,13 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -43,22 +40,16 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SøknadRepository søknadRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste;
 
     AvklarUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter
-                      , SøknadRepository søknadRepository
-                      , @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTjeneste
-                      , VilkårResultatRepository vilkårResultatRepository
-                      , BehandlingRepository behandlingRepository) {
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter,
+                      VilkårResultatRepository vilkårResultatRepository,
+                      BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
-        this.søknadRepository = søknadRepository;
-        this.vilkårsPerioderTjeneste = vilkårsPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
     }
@@ -76,12 +67,17 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         var periode = dto.getPeriode();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
+
         var timeline = vilkårene.getVilkårTimeline(vilkårType);
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        if (periode == null) {
-            // overskriver hele
+
+        boolean erAvslag = dto.getAvslagsårsak() != null;
+        if (erAvslag || erÅpenPeriode(periode)) {
+            // overskriver hele vilkårperioden
+            // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
         } else {
+            // overskriver bare avgrenset periode
             var tilbakestillPerioder = timeline.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()))
                 .collect(Collectors.toCollection(TreeSet::new));
 
@@ -89,16 +85,24 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
         }
+
         vilkårResultatBuilder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
+    private boolean erÅpenPeriode(Periode periode) {
+        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
+    }
+
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
-        Objects.requireNonNull(angittPeriode);
         if (FagsakYtelseType.OMSORGSPENGER_KS == fagsak.getYtelseType()) {
             throw new UnsupportedOperationException("Kan ikke angi periode for ytelseType=" + fagsak.getYtelseType());
         }
-        var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
+        if (Objects.requireNonNull(angittPeriode).isOpenStart()) {
+            throw new IllegalArgumentException("Angitt periode kan ikke ha åpen start. angitt=" + angittPeriode);
+        }
+
+        var fagsakPeriode = fagsak.getPeriode().toLocalDateInterval();
         if (!fagsakPeriode.contains(angittPeriode)) {
             throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
         }

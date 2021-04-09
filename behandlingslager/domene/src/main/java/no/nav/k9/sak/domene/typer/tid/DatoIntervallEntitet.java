@@ -8,6 +8,7 @@ import javax.persistence.Embeddable;
 
 import com.vladmihalcea.hibernate.type.range.Range;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.typer.Periode;
 
 /**
@@ -105,6 +106,10 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         var min = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
         var max = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
         return DatoIntervallEntitet.fraOgMedTilOgMed(min, max);
+    }
+
+    public LocalDateInterval toLocalDateInterval() {
+        return new LocalDateInterval(fomDato, tomDato);
     }
 
 }
