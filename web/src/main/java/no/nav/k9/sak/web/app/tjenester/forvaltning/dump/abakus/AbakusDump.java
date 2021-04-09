@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.abakus;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -47,7 +45,7 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
             }
             var content = iayMapper.writeValueAsString(data.get());
             return List.of(new DumpOutput("abakus-iaygrunnlag.json", content));
-        } catch (TekniskException | IOException e) {
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);

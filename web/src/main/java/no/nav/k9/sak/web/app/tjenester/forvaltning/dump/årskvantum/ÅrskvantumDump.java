@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.årskvantum;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -10,7 +9,6 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -43,7 +41,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
             var uttaksplan = restKlient.hentFullUttaksplanForBehandling(List.of(behandling.getUuid()));
             var content = ow.writeValueAsString(uttaksplan);
             return List.of(new DumpOutput(fileName, content));
-        } catch (TekniskException | IOException e) {
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
@@ -57,7 +55,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
             var uttaksplan = restKlient.hentFullUttaksplan(fagsak.getSaksnummer());
             var content = ow.writeValueAsString(uttaksplan);
             return List.of(new DumpOutput(fileName, content));
-        } catch (TekniskException | IOException e) {
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);

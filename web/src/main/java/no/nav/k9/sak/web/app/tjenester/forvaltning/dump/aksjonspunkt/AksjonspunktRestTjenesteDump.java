@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.aksjonspunkt;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -10,7 +9,6 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
