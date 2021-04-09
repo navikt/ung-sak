@@ -45,23 +45,29 @@ public class OverlappendeYtelserTjeneste {
     }
 
     public Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> finnOverlappendeYtelser(BehandlingReferanse ref) {
-        var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
-        if (tilkjentYtelsePerioder.isEmpty()) {
+        var ytelseTyperSomSjekkesMot = ref.getFagsakYtelseType().hentYtelserForOverlappSjekk();
+        if (ytelseTyperSomSjekkesMot.isEmpty()) {
             return Map.of();
         }
 
+        var tilkjentYtelsePerioder = hentTilkjentYtelsePerioder(ref);
         var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
             .getAktørYtelseFraRegister(ref.getAktørId());
-        if (aktørYtelse.isPresent() && !tilkjentYtelsePerioder.isEmpty()) {
-            var innvilgetTimeline = new LocalDateTimeline<Boolean>(List.of());
-            for (LocalDateSegment<Boolean> periode : tilkjentYtelsePerioder) {
-                innvilgetTimeline = innvilgetTimeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
-            innvilgetTimeline = innvilgetTimeline.compress();
-
-            return doFinnOverlappendeYtelser(innvilgetTimeline, aktørYtelse.get(), ref.getFagsakYtelseType().hentYtelserForOverlappSjekk());
+        if (tilkjentYtelsePerioder.isEmpty() && aktørYtelse.isEmpty()) {
+            return Map.of();
         }
-        return Map.of();
+
+        return doFinnOverlappendeYtelser(tilkjentYtelsePerioder, aktørYtelse.get(), ytelseTyperSomSjekkesMot);
+    }
+
+    private Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(Set<LocalDateSegment<Boolean>> tilkjentYtelsePerioder, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
+        var innvilgetTimeline = new LocalDateTimeline<Boolean>(List.of());
+        for (LocalDateSegment<Boolean> periode : tilkjentYtelsePerioder) {
+            innvilgetTimeline = innvilgetTimeline.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        innvilgetTimeline = innvilgetTimeline.compress();
+
+        return doFinnOverlappendeYtelser(innvilgetTimeline, aktørYtelse, ytelseTyperSomSjekkesMot);
     }
 
     Map<FagsakYtelseType, NavigableSet<LocalDateInterval>> doFinnOverlappendeYtelser(LocalDateTimeline<Boolean> tilkjentYtelseTimeline, AktørYtelse aktørYtelse, Set<FagsakYtelseType> ytelseTyperSomSjekkesMot) {
