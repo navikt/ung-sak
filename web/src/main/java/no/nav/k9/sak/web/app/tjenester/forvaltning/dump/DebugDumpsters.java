@@ -2,6 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -88,8 +90,10 @@ public class DebugDumpsters {
             try {
                 return ddp.dump(fagsak).stream();
             } catch (Exception e) {
-                log.warn("Kunne ikke dumpe fra : {}", ddp);
-                return Stream.empty();
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                return Stream.of(new DumpOutput(ddp.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
             }
         }).collect(Collectors.toList());
         return allDumps;

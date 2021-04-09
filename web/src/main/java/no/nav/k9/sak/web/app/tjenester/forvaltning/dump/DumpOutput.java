@@ -20,4 +20,8 @@ public class DumpOutput {
         return content;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<" + relativePath + ", size=" + (content == null ? "(null)" : content.length()) + ">";
+    }
 }
