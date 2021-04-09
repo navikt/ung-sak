@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -28,12 +29,12 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.OMSORGEN_FOR, toTimeline(List.of()),
             VilkårType.UTVIDETRETT, toTimeline(List.of()));
-        var output = vilkårTjeneste.samletVilkårUtfall(input);
+        var output = vilkårTjeneste.samletVilkårUtfall(input, input.keySet());
         assertThat(output).isEmpty();
     }
 
     @Test
-    void har_samlet_utfall_oppfylt() throws Exception {
+    void har_samlet_utfall_oppfylt_for_begge_vilkår() throws Exception {
 
         var vilkårTjeneste = new VilkårTjeneste();
 
@@ -46,14 +47,40 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
             VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
-        var output = vilkårTjeneste.samletVilkårUtfall(input);
+        var output = vilkårTjeneste.samletVilkårUtfall(input, input.keySet());
+        assertThat(output).isNotEmpty();
+
+        // sjekk intervaller ok
+        LocalDateInterval p2 = new LocalDateInterval(f2, t1);
+        assertThat(output.getLocalDateIntervals()).isEqualTo(new TreeSet<>(List.of(p2)));
+
+        // sjekk hvert intervall -samlet utfall og underliggende
+        assertThat(output.getSegment(p2).getValue().getSamletUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(output.getSegment(p2).getValue().getUnderliggendeVilkårUtfall()).hasSize(2);
+    }
+
+    @Test
+    void har_samlet_utfall_oppfylt_for_minst_omsorgfor_vilkår() throws Exception {
+
+        var vilkårTjeneste = new VilkårTjeneste();
+
+        LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
+        LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
+
+        var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
+        var vilkårUtvidetRett = List.of(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
+
+        Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
+            VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
+            VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
+        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.OMSORGEN_FOR));
+
         assertThat(output).isNotEmpty();
 
         // sjekk intervaller ok
         LocalDateInterval p1 = new LocalDateInterval(f1, f1);
         LocalDateInterval p2 = new LocalDateInterval(f2, t1);
-        LocalDateInterval p3 = new LocalDateInterval(t2, t2);
-        assertThat(output.getLocalDateIntervals()).isEqualTo(new TreeSet<>(List.of(p1, p2, p3)));
+        assertThat(output.getLocalDateIntervals()).isEqualTo(new TreeSet<>(List.of(p1, p2)));
 
         // sjekk hvert intervall -samlet utfall og underliggende
         assertThat(output.getSegment(p1).getValue().getSamletUtfall()).isEqualTo(Utfall.OPPFYLT);
@@ -62,9 +89,39 @@ public class VilkårTjenesteSamletUtfallTest {
         assertThat(output.getSegment(p2).getValue().getSamletUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(output.getSegment(p2).getValue().getUnderliggendeVilkårUtfall()).hasSize(2);
 
+    }
+
+    @Test
+    void har_samlet_utfall_oppfylt_for_minst_utvidetrett_vilkår() throws Exception {
+
+        var vilkårTjeneste = new VilkårTjeneste();
+
+        LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
+        LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
+
+        var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
+        var vilkårUtvidetRett = List.of(
+            new VilkårPeriodeBuilder().medPeriode(f2, t1).medUtfall(Utfall.OPPFYLT).build(),
+            new VilkårPeriodeBuilder().medPeriode(t1.plusDays(1), t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
+
+        Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
+            VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
+            VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
+        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UTVIDETRETT));
+
+        assertThat(output).isNotEmpty();
+
+        // sjekk intervaller ok
+        LocalDateInterval p2 = new LocalDateInterval(f2, t1);
+        LocalDateInterval p3 = new LocalDateInterval(t2, t2);
+        assertThat(output.getLocalDateIntervals()).isEqualTo(new TreeSet<>(List.of(p2, p3)));
+
+        // sjekk hvert intervall -samlet utfall og underliggende
+        assertThat(output.getSegment(p2).getValue().getSamletUtfall()).isEqualTo(Utfall.OPPFYLT);
+        assertThat(output.getSegment(p2).getValue().getUnderliggendeVilkårUtfall()).hasSize(2);
+
         assertThat(output.getSegment(p3).getValue().getSamletUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(output.getSegment(p3).getValue().getUnderliggendeVilkårUtfall()).hasSize(1);
-
     }
 
     private LocalDateTimeline<VilkårPeriode> toTimeline(List<VilkårPeriode> vilkårOmsorgFor) {

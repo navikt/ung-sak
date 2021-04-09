@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -252,10 +253,11 @@ public class VilkårTjeneste {
         var maksPeriode = DatoIntervallEntitet.minmax(allePerioder);
         var timelinePerVilkår = vilkårene.get().getVilkårTidslinjer(maksPeriode);
 
-        return samletVilkårUtfall(timelinePerVilkår);
+        Set<VilkårType> alleForventedeVilkårTyper = timelinePerVilkår.keySet();
+        return samletVilkårUtfall(timelinePerVilkår, alleForventedeVilkårTyper);
     }
 
-    LocalDateTimeline<VilkårUtfallSamlet> samletVilkårUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> timelinePerVilkår) {
+    LocalDateTimeline<VilkårUtfallSamlet> samletVilkårUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> timelinePerVilkår, Set<VilkårType> minimumVilkår) {
         var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
 
         for (var e : timelinePerVilkår.entrySet()) {
@@ -263,7 +265,8 @@ public class VilkårTjeneste {
             timeline = timeline.crossJoin(utfallTimeline, StandardCombinators::allValues);
         }
 
-        var resultat = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v));
+        var resultat = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v))
+            .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(minimumVilkår));
         return resultat;
     }
 }
