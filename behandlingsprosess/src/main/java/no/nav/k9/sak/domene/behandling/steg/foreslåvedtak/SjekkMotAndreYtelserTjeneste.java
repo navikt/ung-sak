@@ -45,37 +45,42 @@ public class SjekkMotAndreYtelserTjeneste {
     }
 
     public List<AksjonspunktDefinisjon> sjekkMotGsakOppgaverOgOverlappendeYtelser(AktørId aktørid, Behandling behandling) {
-        if (ikkeSkalSjekkeGsakOppgaver(behandling)) {
-            return new ArrayList<>();
-        }
-
         List<Historikkinnslag> historikkInnslagFraRepo = historikkRepository.hentHistorikk(behandling.getId());
         List<AksjonspunktDefinisjon> aksjonspunktliste = new ArrayList<>();
 
-        if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, behandling.getFagsakYtelseType())) {
-            aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
-            opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+        if (skalSjekkeGsakOppgaver(behandling)) {
+            if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, behandling.getFagsakYtelseType())) {
+                aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+            }
+            if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_DOKUMENT, behandling.getFagsakYtelseType())) {
+                aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
+            }
         }
-        if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_DOKUMENT, behandling.getFagsakYtelseType())) {
-            aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK);
-            opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
-        }
-        if (harOverlappendeYtelser(behandling)) {
-            aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK);
-            opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+
+        if (skalSjekkeOverlappendeYtelser(behandling)) {
+            if (harOverlappendeYtelser(behandling)) {
+                aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+            }
         }
         return aksjonspunktliste;
     }
 
-    private boolean ikkeSkalSjekkeGsakOppgaver(Behandling behandling) {
+    private boolean skalSjekkeGsakOppgaver(Behandling behandling) {
         if (!behandling.getFagsakYtelseType().vurderÅpneOppgaverFørVedtak()) {
             return false;
         }
-        boolean sjekkMotÅpneGsakOppgaver = behandling.getAksjonspunkter().stream()
+        boolean sjekkMotÅpneGsakOppgaverUtført = behandling.getAksjonspunkter().stream()
             .anyMatch(ap ->
                 (ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK) && ap.erUtført())
                     || (ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK) && ap.erUtført()));
-        return sjekkMotÅpneGsakOppgaver;
+        return !sjekkMotÅpneGsakOppgaverUtført;
+    }
+
+    private boolean skalSjekkeOverlappendeYtelser(Behandling behandling) {
+        return !behandling.getFagsakYtelseType().hentYtelserForOverlappSjekk().isEmpty();
     }
 
     private void opprettHistorikkinnslagOmVurderingFørVedtak(Behandling behandling, OppgaveÅrsak begrunnelse, List<Historikkinnslag> historikkInnslagFraRepo) {
