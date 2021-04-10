@@ -1,10 +1,13 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -16,6 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef("OMP_KS")
@@ -52,9 +56,14 @@ public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
         var fagsak = behandling.getFagsak();
 
         var søknad = søknadRepository.hentSøknad(behandling);
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
 
-        if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, søknad.getMottattDato(), fagsak.getPeriode().getTomDato())) {
-            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, søknad.getMottattDato());
+        var vilkårTimeline = vilkårene.getVilkårTimeline(vilkårType);
+        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknad.getMottattDato(), fagsak.getPeriode().getTomDato()));
+
+        if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate())) {
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType,
+                new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
             behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(a -> a.avbryt());
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();

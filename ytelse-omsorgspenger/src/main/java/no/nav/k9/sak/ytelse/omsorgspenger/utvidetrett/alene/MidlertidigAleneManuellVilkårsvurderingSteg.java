@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -18,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef("OMP_MA")
@@ -63,7 +66,8 @@ public class MidlertidigAleneManuellVilkårsvurderingSteg implements BehandlingS
         var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
 
         if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate())) {
-            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, søknadsperiode.getFomDato());
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType,
+                new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
             behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(a -> a.avbryt());
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
