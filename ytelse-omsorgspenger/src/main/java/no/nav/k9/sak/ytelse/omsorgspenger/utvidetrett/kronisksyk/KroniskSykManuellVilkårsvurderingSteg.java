@@ -16,6 +16,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @FagsakYtelseTypeRef("OMP_KS")
@@ -54,6 +55,7 @@ public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
         var søknad = søknadRepository.hentSøknad(behandling);
 
         if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, søknad.getMottattDato(), fagsak.getPeriode().getTomDato())) {
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, søknad.getMottattDato());
             behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(a -> a.avbryt());
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();

@@ -63,6 +63,7 @@ public class MidlertidigAleneManuellVilkårsvurderingSteg implements BehandlingS
         var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
 
         if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate())) {
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, søknadsperiode.getFomDato());
             behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(a -> a.avbryt());
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();

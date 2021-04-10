@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarOmsorgenForDto;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -62,7 +63,8 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
-        if (periode == null) {
+        boolean erAvslag = dto.getAvslagsårsak() != null;
+        if (erAvslag || erÅpenPeriode(periode)) {
             // overskriver hele
             var vilkårene = vilkårResultatRepository.hent(behandlingId);
             var timeline = vilkårene.getVilkårTimeline(vilkårType);
@@ -77,6 +79,10 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
         }
 
         return OppdateringResultat.utenOveropp();
+    }
+
+    private boolean erÅpenPeriode(Periode periode) {
+        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
     }
 
     private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
