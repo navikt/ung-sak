@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -12,6 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
@@ -30,11 +34,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeB
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.db.util.Repository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.sak.db.util.Repository;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -52,9 +54,6 @@ public class VilkårResultatTest {
     private Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
     private Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
     private Behandling behandling1;
-
-
-
 
     @BeforeEach
     public void setup() {
@@ -207,6 +206,34 @@ public class VilkårResultatTest {
         assertThat(vilkår2.getPerioder()).hasSize(1);
         final var vilkårPeriode1 = vilkår1.getPerioder().get(0);
         assertThat(vilkårPeriode1.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+    }
+
+    @Test
+    void skal_slette_vilkårperiode() throws Exception {
+        VilkårType vilkårType = VilkårType.MEDLEMSKAPSVILKÅRET;
+
+        // Arrange
+        VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();
+        LocalDate t1 = LocalDate.now();
+        LocalDate tend = Tid.TIDENES_ENDE;
+        vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(vilkårType)
+            .leggTil(new VilkårPeriodeBuilder()
+                .medUtfall(Utfall.IKKE_VURDERT)
+                .medPeriode(t1, tend)));
+
+        var vilkårResultat = vilkårResultatBuilder.build();
+
+        var nyVrb = Vilkårene.builderFraEksisterende(vilkårResultat);
+
+        LocalDate t2 = t1.plusDays(10);
+        nyVrb.slettPerioder(vilkårType, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(t2, tend)));
+
+        var nyvilkår = nyVrb.build();
+        var nytimeline = nyvilkår.getVilkårTimeline(vilkårType);
+
+        assertThat(nytimeline.getLocalDateIntervals()).hasSize(1);
+        assertThat(nytimeline.getLocalDateIntervals()).containsOnly(new LocalDateInterval(t1, t2.minusDays(1)));
+
     }
 
     @Test

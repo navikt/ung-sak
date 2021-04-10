@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,6 +18,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -40,6 +39,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SøknadRepository søknadRepository;
 
     AvklarUtvidetRett() {
         // for CDI proxy
@@ -48,9 +48,11 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     @Inject
     AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter,
                       VilkårResultatRepository vilkårResultatRepository,
+                      SøknadRepository søknadRepository,
                       BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.søknadRepository = søknadRepository;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -69,24 +71,24 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
         var timeline = vilkårene.getVilkårTimeline(vilkårType);
-        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-
         boolean erAvslag = dto.getAvslagsårsak() != null;
         if (erAvslag || erÅpenPeriode(periode)) {
             // overskriver hele vilkårperioden
             // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
+            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
+            vilkårResultatBuilder.leggTil(vilkårBuilder);
         } else {
-            // overskriver bare avgrenset periode
-            var tilbakestillPerioder = timeline.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato()))
-                .collect(Collectors.toCollection(TreeSet::new));
+            var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
+            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, DatoIntervallEntitet.fraOgMed(søknadsperiode.getFomDato()));
 
-            vilkårBuilder.tilbakestill(tilbakestillPerioder);
+            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
+            vilkårResultatBuilder.leggTil(vilkårBuilder);
         }
 
-        vilkårResultatBuilder.leggTil(vilkårBuilder);
+
         return OppdateringResultat.utenOveropp();
     }
 

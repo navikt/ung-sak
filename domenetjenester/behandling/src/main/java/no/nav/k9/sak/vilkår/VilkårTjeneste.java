@@ -166,6 +166,12 @@ public class VilkårTjeneste {
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);
     }
 
+    public void settVilkårutfallTilIkkeVurdert(Long behandlingId, VilkårType vilkårType, LocalDate fom) {
+        hentVilkårResultat(behandlingId).getVilkår(vilkårType).ifPresent(vt -> {
+            settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMed(fom))));
+        });
+    }
+
     private void nullstillBehandlingsresultat(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = hentBehandling(behandlingId);
