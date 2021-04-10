@@ -63,11 +63,13 @@ public class AvklarUtvidetRettTest {
 
     @Test
     void reset_vilkår_perioder() throws Exception {
+        LocalDate søknadFom = date("2021-04-09");
+        LocalDate søknadTom = date("2021-11-16");
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-
-        var scenario = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.OMSORGSPENGER_MA);
-        scenario.leggTilVilkår(VT, Utfall.IKKE_VURDERT, periode("2021-04-09", "2021-11-16"));
-        scenario.leggTilVilkår(VilkårType.OMSORGEN_FOR, Utfall.OPPFYLT, periode("2021-04-09", null));
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER_MA);
+        scenario.medSøknad().medSøknadsperiode(søknadFom, søknadTom);
+        scenario.leggTilVilkår(VT, Utfall.IKKE_VURDERT, new Periode(søknadFom, søknadTom));
+        scenario.leggTilVilkår(VilkårType.OMSORGEN_FOR, Utfall.OPPFYLT, new Periode(søknadFom, null));
         scenario.leggTilAksjonspunkt(APDEF, null);
 
         var behandling = scenario.lagre(repositoryProvider);
