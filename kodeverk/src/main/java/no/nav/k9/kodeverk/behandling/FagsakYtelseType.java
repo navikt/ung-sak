@@ -253,6 +253,12 @@ public enum FagsakYtelseType implements Kodeverdi {
             OPPLÆRINGSPENGER,
             FRISINN));
 
+    /** Hvilke ytelser som skal sjekkes mot overlapp */
+    private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE = Map.of(
+        PLEIEPENGER_SYKT_BARN, Set.of(SYKEPENGER),
+        OMSORGSPENGER, Set.of(SYKEPENGER)
+    );
+
     /** Hvorvidt data for ektefelle/samboer og pleietrengende skal benyttes for ytelsen. */
     private static final Set<FagsakYtelseType> HAR_RELATERTE_PERSONER = Collections.unmodifiableSet(EnumSet.of(
         PLEIEPENGER_SYKT_BARN,
@@ -270,6 +276,10 @@ public enum FagsakYtelseType implements Kodeverdi {
             throw new IllegalStateException("Støtter ikke fagsakYtelseType" + ytelseType);
         }
         return relatertYtelseTypeSet.contains(this);
+    }
+
+    public Set<FagsakYtelseType> hentYtelserForOverlappSjekk() {
+        return OVERLAPPSJEKK_RELATERT_YTELSE.getOrDefault(this, Set.of());
     }
 
     public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {

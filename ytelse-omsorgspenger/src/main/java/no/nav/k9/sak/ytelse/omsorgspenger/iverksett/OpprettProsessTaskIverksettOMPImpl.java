@@ -9,9 +9,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettTilkjentYtelseFelles;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.ytelse.overlapp.VurderOverlappendeYtelserTask;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumDeaktiveringTjenesteImpl;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @FagsakYtelseTypeRef("OMP")
 @ApplicationScoped
@@ -35,9 +33,6 @@ public class OpprettProsessTaskIverksettOMPImpl extends OpprettProsessTaskIverks
 
     @Override
     public void opprettYtelsesSpesifikkeTasks(Behandling behandling) {
-        var taskData = new ProsessTaskData(VurderOverlappendeYtelserTask.TASKTYPE);
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        fagsakProsessTaskRepository.lagreNyGruppe(taskData);
         årskvantumDeaktiveringTjeneste.meldIfraOmIverksetting(behandling);
     }
 }

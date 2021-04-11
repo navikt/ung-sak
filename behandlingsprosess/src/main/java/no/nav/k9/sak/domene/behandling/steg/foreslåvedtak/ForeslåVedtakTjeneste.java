@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -25,14 +26,13 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ForeslåVedtakTjeneste.class);
 
-    private SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste;
+    private SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
@@ -47,10 +47,10 @@ class ForeslåVedtakTjeneste {
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           @KonfigVerdi(value = "TOTRINN_TEMP_DEAKTIVERT", defaultVerdi = "false") Boolean deaktiverTotrinnSelektivt,
-                          SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste,
+                          SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
         this.deaktiverTotrinnSelektivt = Objects.requireNonNull(deaktiverTotrinnSelektivt, "deaktiverTotrinnSelektivt");
-        this.sjekkMotEksisterendeOppgaverTjeneste = sjekkMotEksisterendeOppgaverTjeneste;
+        this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
@@ -63,7 +63,7 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>(sjekkMotEksisterendeOppgaverTjeneste.sjekkMotEksisterendeGsakOppgaver(behandling.getAktørId(), behandling));
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
