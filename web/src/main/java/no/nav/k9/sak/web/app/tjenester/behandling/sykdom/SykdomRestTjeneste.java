@@ -105,6 +105,7 @@ public class SykdomRestTjeneste {
                 aksjonspunkt.isManglerDiagnosekode(),
                 aksjonspunkt.isManglerGodkjentLegeerklæring(),
                 aksjonspunkt.isManglerVurderingAvKontinuerligTilsynOgPleie(),
-                aksjonspunkt.isManglerVurderingAvToOmsorgspersoner());
+                aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
+                aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling());
     }
 }
