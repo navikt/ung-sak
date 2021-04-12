@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
@@ -103,11 +105,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
         
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
-                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende);
-
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
+        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
+
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
+                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder);
+
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
         return new TreeSet<>(utvidedePerioder.stream()
