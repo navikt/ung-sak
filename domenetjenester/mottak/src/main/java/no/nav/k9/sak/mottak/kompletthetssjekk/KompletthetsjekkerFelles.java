@@ -58,10 +58,6 @@ public class KompletthetsjekkerFelles {
         return Optional.empty();
     }
 
-    public LocalDateTime finnVentefristTilManglendeSøknad() {
-        return LocalDateTime.now().plusWeeks(VENTEFRIST_FOR_MANGLENDE_SØKNAD);
-    }
-
     public void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
         BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, dokumentMalType, new MottakerDto(mottaker.id, mottaker.type.toString()));
         dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, HistorikkAktør.VEDTAKSLØSNINGEN);
