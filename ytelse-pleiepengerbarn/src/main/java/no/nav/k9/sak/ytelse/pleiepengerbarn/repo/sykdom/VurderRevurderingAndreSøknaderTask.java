@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
 
@@ -68,9 +69,15 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
             if (!kandidatsaksnummer.equals(vedtattSykdomGrunnlagBehandling.getSaksnummer())) {
                 SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer).map(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid)).get().get();
                 LocalDateTimeline<SykdomSamletVurdering> kandidatsakTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(kandidatSykdomBehandling.getGrunnlag());
-                LocalDateTimeline<Boolean> overlappendeTidslinje = SykdomSamletVurdering.finnGrunnlagsforskjellerKunOverlappendeTidslinje(vedtattSakTidslinje, kandidatsakTidslinje);
+                LocalDateTimeline<Boolean> overlappendeTidslinje = SykdomSamletVurdering.finnGrunnlagsforskjeller(vedtattSakTidslinje, kandidatsakTidslinje);
 
-                if (!overlappendeTidslinje.isEmpty()) {
+                LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(kandidatSykdomBehandling.getGrunnlag().getSøktePerioder()
+                    .stream()
+                    .map(p -> new Periode(p.getFom(), p.getTom()))
+                    .collect(Collectors.toList()));
+                LocalDateTimeline<Boolean> beholdKunSøktePerioder = overlappendeTidslinje.intersection(søktePerioderTimeline);
+
+                if (!beholdKunSøktePerioder.isEmpty()) {
                     final Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(kandidatsaksnummer, true).get();
                     final BehandlingÅrsakType behandlingÅrsak = BehandlingÅrsakType.BERØRT_BEHANDLING;
 
@@ -92,11 +99,8 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
                         prosessTaskRepository.lagre(tilbakeTilStart);
                     }
                 }
-
             }
         }
-
-
     }
 
     private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {

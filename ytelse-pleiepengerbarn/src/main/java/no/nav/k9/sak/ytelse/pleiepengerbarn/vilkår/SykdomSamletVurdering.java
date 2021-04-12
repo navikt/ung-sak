@@ -81,15 +81,7 @@ public class SykdomSamletVurdering {
         return tidslinje;
     }
 
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjellerFullKombinertTidslinje(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
-        return finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-    }
-
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjellerKunOverlappendeTidslinje(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
-        return finnGrunnlagsforskjeller(forrigeTidslinje, nyTidslinje, LocalDateTimeline.JoinStyle.INNER_JOIN);
-    }
-
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje, LocalDateTimeline.JoinStyle joinStyle) {
+    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
         return nyTidslinje.combine(forrigeTidslinje, new LocalDateSegmentCombinator<SykdomSamletVurdering, SykdomSamletVurdering, Boolean>() {
             @Override
             public LocalDateSegment<Boolean> combine(LocalDateInterval localDateInterval, LocalDateSegment<SykdomSamletVurdering> left, LocalDateSegment<SykdomSamletVurdering> right) {
@@ -123,7 +115,7 @@ public class SykdomSamletVurdering {
                 }
                 return null;
             }
-        }, joinStyle).compress();
+        }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
     }
 
     public SykdomVurderingVersjon getKtp() {

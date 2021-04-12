@@ -40,7 +40,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isEmpty());
     }
@@ -59,7 +59,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -92,7 +92,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -114,7 +114,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -136,7 +136,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -158,7 +158,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertFalse(timeline.isContinuous());
         LocalDateInterval first = timeline.getLocalDateIntervals().first();
@@ -184,7 +184,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, innleggelser));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -203,7 +203,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(Collections.emptyList(), innleggelser));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -230,7 +230,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
@@ -261,7 +261,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
 
 
-        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjellerFullKombinertTidslinje(gmlTidslinje, nyTidslinje);
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
 
         Assertions.assertTrue(timeline.isContinuous());
         LocalDateInterval interval = timeline.getLocalDateIntervals().first();
