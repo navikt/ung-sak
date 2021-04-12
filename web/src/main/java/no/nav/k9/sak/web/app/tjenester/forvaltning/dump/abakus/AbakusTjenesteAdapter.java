@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.abakus;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -20,6 +21,8 @@ import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -47,11 +50,13 @@ class AbakusTjenesteAdapter {
     }
 
     @Inject
-    AbakusTjenesteAdapter(AbakusTjeneste abakusTjeneste,
-                                 BehandlingRepository behandlingRepository,
-                                 FagsakRepository fagsakRepository) {
+    AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
+                          BehandlingRepository behandlingRepository,
+                          SystemUserOidcRestClient restClient,
+                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
+                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
-        this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
+        this.abakusTjeneste = new AbakusTjeneste(restClient, endpoint, callbackUrl);
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
     }
 
@@ -62,12 +67,12 @@ class AbakusTjenesteAdapter {
 
     public Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer) {
         Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-    
+
         if (fagsakOpt.isPresent()) {
             Fagsak fagsak = fagsakOpt.get();
             // Hent grunnlag fra abakus
             return hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getYtelseType());
-    
+
         }
         return Set.of();
     }

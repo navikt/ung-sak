@@ -12,6 +12,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
@@ -60,7 +62,7 @@ public class KalkulusRestKlient {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
 
-    private OidcRestClient oidcRestClient;
+    private CloseableHttpClient restClient;
     private URI kalkulusEndpoint;
     private URI startEndpoint;
     private URI fortsettEndpoint;
@@ -76,9 +78,19 @@ public class KalkulusRestKlient {
     }
 
     @Inject
-    public KalkulusRestKlient(OidcRestClient oidcRestClient,
-                                @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
-        this.oidcRestClient = oidcRestClient;
+    public KalkulusRestKlient(OidcRestClient restClient,
+                              @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
+        this(endpoint);
+        this.restClient = restClient;
+    }
+
+    public KalkulusRestKlient(SystemUserOidcRestClient restClient,
+                              URI endpoint) {
+        this(endpoint);
+        this.restClient = restClient;
+    }
+
+    private KalkulusRestKlient(URI endpoint) {
         this.kalkulusEndpoint = endpoint;
         this.startEndpoint = toUri("/api/kalkulus/v1/start/bolk");
         this.fortsettEndpoint = toUri("/api/kalkulus/v1/fortsett/bolk");
@@ -87,7 +99,6 @@ public class KalkulusRestKlient {
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
-
     }
 
     public List<TilstandResponse> startBeregning(StartBeregningListeRequest request) {
@@ -178,7 +189,7 @@ public class KalkulusRestKlient {
     private void utfør(URI endpoint, String json) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (!isOk(responseCode)) {
                 if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
@@ -204,7 +215,7 @@ public class KalkulusRestKlient {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {
                 return responseHandler.handleResponse(httpResponse);
