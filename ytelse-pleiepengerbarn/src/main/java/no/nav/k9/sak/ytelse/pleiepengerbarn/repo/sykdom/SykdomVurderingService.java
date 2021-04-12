@@ -117,21 +117,9 @@ public class SykdomVurderingService {
         return vurderingerOgPerioder;
     }
     
-    private boolean harDataSomIkkeHarBlittTattMedIBehandling(Behandling behandling, final AktørId pleietrengende) {
-        // TODO: Bedre måte å hente opp søkte perioder:
-        var grunnlagForBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid());
-        if (grunnlagForBehandling.isEmpty()) {
-            return false;
-        }
-        final List<Periode> nyeVurderingsperioder = grunnlagForBehandling.get()
-                .getGrunnlag()
-                .getSøktePerioder()
-                .stream()
-                .map(p -> new Periode(p.getFom(), p.getTom()))
-                .collect(Collectors.toList());
-        
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = utledRelevanteEndringerSidenForrigeBehandling(
-                behandling.getFagsak().getSaksnummer(), behandling.getUuid(), pleietrengende, nyeVurderingsperioder);
+    private boolean harDataSomIkkeHarBlittTattMedIBehandling(Behandling behandling, final AktørId pleietrengende) {       
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = utledRelevanteEndringerSidenForrigeGrunnlag(
+                behandling.getFagsak().getSaksnummer(), behandling.getUuid(), pleietrengende);
         return !endringerISøktePerioder.isEmpty();
     }
 
@@ -210,19 +198,45 @@ public class SykdomVurderingService {
                );
     }
     
+    public LocalDateTimeline<Boolean> utledRelevanteEndringerSidenForrigeGrunnlag(final Saksnummer saksnummer, final UUID behandlingUuid, final AktørId pleietrengende) {
+        final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje = hentGrunnlagTidslinje(saksnummer, behandlingUuid);
+
+        return utledRelevanteEndringerMotTidslinje(saksnummer, behandlingUuid, pleietrengende, forrigeGrunnlagTidslinje, List.of());
+    }
+
     public LocalDateTimeline<Boolean> utledRelevanteEndringerSidenForrigeBehandling(final Saksnummer saksnummer, final UUID behandlingUuid,
             final AktørId pleietrengende, List<Periode> nyeVurderingsperioder) {
         final LocalDateTimeline<SykdomSamletVurdering> forrigeBehandlingTidslinje = hentForrigeBehandlingTidslinje(saksnummer, behandlingUuid);
 
+        return utledRelevanteEndringerMotTidslinje(saksnummer, behandlingUuid, pleietrengende, forrigeBehandlingTidslinje, nyeVurderingsperioder);
+    }
+    
+    private LocalDateTimeline<Boolean> utledRelevanteEndringerMotTidslinje(final Saksnummer saksnummer, final UUID behandlingUuid,
+            final AktørId pleietrengende, final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje, List<Periode> nyeVurderingsperioder) {
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, nyeVurderingsperioder);
         final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
-        final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeBehandlingTidslinje, nyBehandlingTidslinje);
+        final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
 
         final LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
         final LocalDateTimeline<Boolean> endringerISøktePerioder = endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
         return endringerISøktePerioder;
     }
+    
 
+    @SuppressWarnings("unchecked")
+    private LocalDateTimeline<SykdomSamletVurdering> hentGrunnlagTidslinje(Saksnummer saksnummer, UUID behandlingUuid) {
+        final Optional<SykdomGrunnlagBehandling> grunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
+        LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
+
+        if (grunnlagBehandling.isPresent()) {
+            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get().getGrunnlag();
+            grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
+        } else {
+            grunnlagBehandlingTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        }
+        return grunnlagBehandlingTidslinje;
+    }
+    
     @SuppressWarnings("unchecked")
     private LocalDateTimeline<SykdomSamletVurdering> hentForrigeBehandlingTidslinje(Saksnummer saksnummer, UUID behandlingUuid) {
         final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
