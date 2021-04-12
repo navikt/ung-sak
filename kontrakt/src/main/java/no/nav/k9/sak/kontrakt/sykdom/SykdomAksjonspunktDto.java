@@ -36,19 +36,25 @@ public class SykdomAksjonspunktDto {
     @Valid
     private final boolean manglerVurderingAvToOmsorgspersoner;
 
+    @JsonProperty(value = "harDataSomIkkeHarBlittTattMedIBehandling")
+    @Valid
+    private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
+    
     
     public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
             boolean harUklassifiserteDokumenter,
             boolean manglerDiagnosekode,
             boolean manglerGodkjentLegeerklæring,
             boolean manglerVurderingAvKontinuerligTilsynOgPleie,
-            boolean manglerVurderingAvToOmsorgspersoner) {
+            boolean manglerVurderingAvToOmsorgspersoner,
+            boolean harDataSomIkkeHarBlittTattMedIBehandling) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
+        this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
     }
 
 
@@ -74,5 +80,9 @@ public class SykdomAksjonspunktDto {
 
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
+    }
+    
+    public boolean isHarDataSomIkkeHarBlittTattMedIBehandling() {
+        return harDataSomIkkeHarBlittTattMedIBehandling;
     }
 }
