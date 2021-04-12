@@ -21,9 +21,13 @@ public class VilkårPeriodeBuilder {
         entitet = new VilkårPeriode(vilkårPeriode);
     }
 
-    public VilkårPeriodeBuilder medPeriode(LocalDate fom, LocalDate tom) {
-        this.entitet.setPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+    public VilkårPeriodeBuilder medPeriode(DatoIntervallEntitet periode) {
+        this.entitet.setPeriode(periode);
         return this;
+    }
+
+    public VilkårPeriodeBuilder medPeriode(LocalDate fom, LocalDate tom) {
+        return medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
     public VilkårPeriodeBuilder medAvslagsårsak(Avslagsårsak avslagsårsak) {

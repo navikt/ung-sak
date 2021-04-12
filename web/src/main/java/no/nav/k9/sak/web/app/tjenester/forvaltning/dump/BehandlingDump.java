@@ -80,8 +80,6 @@ public class BehandlingDump implements DebugDumpFagsak {
 
         var resultat = new ArrayList<DumpOutput>();
 
-        var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType.getKode());
-
         for (var b : behandlinger) {
             var toCsv = new LinkedHashMap<String, Function<Behandling, ?>>();
             var path = "behandling-" + b.getId();
@@ -113,6 +111,7 @@ public class BehandlingDump implements DebugDumpFagsak {
 
             resultat.add(DebugDumpsters.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
 
+            var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType.getKode());
             for (var inst : dumpstere) {
                 for (var dumper : inst) {
                     dumper.dump(b)

@@ -61,6 +61,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE = "5033";
     public static final String VURDERE_DOKUMENT_FØR_VEDTAK_KODE = "5034";
+    public static final String VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE = "5040";
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE = "5038";
     public static final String FORDEL_BEREGNINGSGRUNNLAG_KODE = "5046";

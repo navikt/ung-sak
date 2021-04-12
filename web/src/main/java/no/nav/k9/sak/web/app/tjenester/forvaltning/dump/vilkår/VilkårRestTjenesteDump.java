@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.vilkår;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -10,7 +9,6 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -38,25 +36,20 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
 
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
+        String relativePath = "rest/vilkår";
         try (var response = restTjeneste.getVilkårV3(new BehandlingUuidDto(behandling.getUuid()));) {
             var entity = response.getEntity();
-            String relativePath = "rest/vilkår";
             if (entity != null) {
-                String str;
-                try {
-                    str = ow.writeValueAsString(entity);
-                } catch (Exception e) {
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new PrintWriter(sw);
-                    e.printStackTrace(pw);
-                    return List.of(new DumpOutput(relativePath + "-ERROR.txt", sw.toString()));
-                }
-
+                String str = ow.writeValueAsString(entity);
                 return List.of(new DumpOutput(relativePath + ".json", str));
             } else {
                 return List.of();
             }
-
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            return List.of(new DumpOutput(relativePath + "-ERROR.txt", sw.toString()));
         }
     }
 

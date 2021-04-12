@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.historikk;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -10,7 +9,6 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -46,7 +44,7 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
             String str;
             try {
                 str = ow.writeValueAsString(dtoer);
-            } catch (TekniskException | IOException e) {
+            } catch (Exception e) {
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 e.printStackTrace(pw);

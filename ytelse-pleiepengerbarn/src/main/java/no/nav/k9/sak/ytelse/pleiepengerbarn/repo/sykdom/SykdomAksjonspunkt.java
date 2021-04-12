@@ -7,18 +7,21 @@ public class SykdomAksjonspunkt {
     private final boolean manglerGodkjentLegeerklæring;
     private final boolean manglerVurderingAvKontinuerligTilsynOgPleie;
     private final boolean manglerVurderingAvToOmsorgspersoner;
+    private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
     
     
     public SykdomAksjonspunkt(boolean harUklassifiserteDokumenter,
             boolean manglerDiagnosekode,
             boolean manglerGodkjentLegeerklæring,
             boolean manglerVurderingAvKontinuerligTilsynOgPleie,
-            boolean manglerVurderingAvToOmsorgspersoner) {
+            boolean manglerVurderingAvToOmsorgspersoner,
+            boolean harDataSomIkkeHarBlittTattMedIBehandling) {
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
         this.manglerVurderingAvKontinuerligTilsynOgPleie = manglerVurderingAvKontinuerligTilsynOgPleie;
         this.manglerVurderingAvToOmsorgspersoner = manglerVurderingAvToOmsorgspersoner;
+        this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
     }
 
 
@@ -44,5 +47,9 @@ public class SykdomAksjonspunkt {
 
     public boolean isManglerVurderingAvToOmsorgspersoner() {
         return manglerVurderingAvToOmsorgspersoner;
+    }
+    
+    public boolean isHarDataSomIkkeHarBlittTattMedIBehandling() {
+        return harDataSomIkkeHarBlittTattMedIBehandling;
     }
 }
