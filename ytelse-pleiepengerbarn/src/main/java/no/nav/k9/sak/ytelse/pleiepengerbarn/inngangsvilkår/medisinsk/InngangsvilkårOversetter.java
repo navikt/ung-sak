@@ -23,12 +23,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodel
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedKontinuerligTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedUtvidetBehov;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.BostedsAdresse;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.Relasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk.OmsorgenFor;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
@@ -40,17 +38,17 @@ public class InngangsvilkårOversetter {
 
     private BehandlingRepository behandlingRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
-    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
+    private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
 
     InngangsvilkårOversetter() {
         // for CDI proxy
     }
 
     @Inject
-    public InngangsvilkårOversetter(MedisinskGrunnlagRepository medisinskGrunnlagRepository,
+    public InngangsvilkårOversetter(OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
                                     BehandlingRepository behandlingRepository,
                                     BasisPersonopplysningTjeneste personopplysningTjeneste) {
-        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
+        this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
@@ -110,10 +108,12 @@ public class InngangsvilkårOversetter {
         return SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), type);
     }
 
-    public OmsorgenForGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
+    public OmsorgenForVilkårGrunnlag oversettTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
-        final var medisinskGrunnlag = medisinskGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        final var omsorgenForGrunnlag = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         final var pleietrengende = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPleietrengendeAktørId();
+        
+        // Lar denne stå her inntil videre selv om vi ikke bruker den:
         final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
@@ -122,9 +122,16 @@ public class InngangsvilkårOversetter {
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .collect(Collectors.toList());
-        return new OmsorgenForGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), medisinskGrunnlag.map(MedisinskGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null));
-    }
+        
+        // TODO OMSORG: Map inn verdi fremfor null:
+        /*
+        return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
+            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), omsorgenForGrunnlag.map(OmsorgenForGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null));
+            */
+        
+        return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
+                mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
+    } 
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
         return pleietrengendeBostedsadresser.stream()

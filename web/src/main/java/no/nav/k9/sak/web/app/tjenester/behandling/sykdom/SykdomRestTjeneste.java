@@ -38,7 +38,6 @@ public class SykdomRestTjeneste {
     private static final String SYKDOM_AKSJONSPUNKT = "/aksjonspunkt";
     public static final String SYKDOM_AKSJONSPUNKT_PATH = BASE_PATH + SYKDOM_AKSJONSPUNKT;
 
-    //private SykdomDtoMapper dtoMapper;
     private SykdomVurderingService sykdomVurderingService;
     private BehandlingRepository behandlingRepository;
 
@@ -50,30 +49,6 @@ public class SykdomRestTjeneste {
         this.sykdomVurderingService = sykdomVurderingService;
         this.behandlingRepository = behandlingRepository;
     }
-
-    /*
-    @GET
-    @Path(SYKDOMS_DTO)
-    @Operation(description = "Hent sykdoms opplysninger",
-        summary = ("Returnerer informasjon saksbehandler har skrevet inn fra legeerklæring " +
-            "og vurderinger vedrørende kontinuerlig tilsyn & pleie"),
-        tags = "sykdom",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "null hvis ikke eksisterer",
-                content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SykdomsDto.class)))
-        })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public SykdomsDto hentSykdomsInformasjonFor(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                                                @Parameter(description = BehandlingUuidDto.DESC)
-                                                @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                    BehandlingUuidDto behandlingUuid) {
-        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).map(Behandling::getId);
-        return behandling.map(behandlingId -> dtoMapper.map(behandlingId)).orElse(null);
-    }
-    */
 
     @GET
     @Path(SYKDOM_AKSJONSPUNKT)

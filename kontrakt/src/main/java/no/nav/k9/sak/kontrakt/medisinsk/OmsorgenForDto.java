@@ -1,43 +1,80 @@
 package no.nav.k9.sak.kontrakt.medisinsk;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OmsorgenForDto {
 
-    @JsonProperty(value = "morEllerFar")
-    private Boolean morEllerFar;
+    @JsonProperty(value = "periode")
+    @Valid
+    private Periode periode;
 
-    @JsonProperty(value = "sammeBosted")
-    private Boolean sammeBosted;
+    // TODO Omsorg: Endre til enum.
+    @JsonProperty(value = "relasjon")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String relasjon;
 
-    @JsonProperty(value = "harOmsorgenFor")
-    private Boolean harOmsorgenFor;
+    @JsonProperty(value = "relasjonsbeskrivelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String relasjonsbeskrivelse;
+    
+    @JsonProperty(value = "begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String begrunnelse;
+    
+    @JsonProperty(value = "resultat")
+    @Valid
+    private Resultat resultat;
 
-    @JsonCreator
-    public OmsorgenForDto(@JsonProperty(value = "morEllerFar") Boolean morEllerFar,
-                          @JsonProperty(value = "sammeBosted") Boolean sammeBosted,
-                          @JsonProperty(value = "harOmsorgenFor") Boolean harOmsorgenFor) {
-        this.morEllerFar = morEllerFar;
-        this.sammeBosted = sammeBosted;
-        this.harOmsorgenFor = harOmsorgenFor;
+    
+    OmsorgenForDto() {
+        
     }
 
-    public Boolean getMorEllerFar() {
-        return morEllerFar;
+    public OmsorgenForDto(Periode periode, String begrunnelse, String relasjon, String relasjonsbeskrivelse, Resultat resultat) {
+        this.periode = periode;
+        this.begrunnelse = begrunnelse;
+        this.relasjon = relasjon;
+        this.relasjonsbeskrivelse = relasjonsbeskrivelse;
+        this.resultat = resultat;
     }
 
-    public Boolean getSammeBosted() {
-        return sammeBosted;
+    
+    public Periode getPeriode() {
+        return periode;
     }
-
-    public Boolean getHarOmsorgenFor() {
-        return harOmsorgenFor;
+    
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+    
+    public String getRelasjon() {
+        return relasjon;
+    }
+    
+    public String getRelasjonsbeskrivelse() {
+        return relasjonsbeskrivelse;
+    }
+    
+    public Resultat getResultat() {
+        return resultat;
     }
 }

@@ -4,14 +4,14 @@ import java.util.List;
 
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 
-public class OmsorgenForGrunnlag implements VilkårGrunnlag {
+public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
 
     private final Relasjon relasjonMellomSøkerOgPleietrengende;
     private final List<BostedsAdresse> søkersAdresser;
     private final List<BostedsAdresse> pleietrengendeAdresser;
     private final Boolean erOmsorgsPerson;
 
-    public OmsorgenForGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> pleietrengendeAdresser, Boolean erOmsorgsPerson) {
+    public OmsorgenForVilkårGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> pleietrengendeAdresser, Boolean erOmsorgsPerson) {
 
         this.relasjonMellomSøkerOgPleietrengende = relasjonMellomSøkerOgPleietrengende;
         this.søkersAdresser = søkersAdresser;
