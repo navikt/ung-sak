@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -61,20 +63,29 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
 
-        final var vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, perioder);
+        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, perioder);
 
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final var oppdaterteVilkår = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
-
+        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
+        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        final VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
+        
+        for (VilkårData data : vilkårData) {
+            oppdaterBehandlingMedVilkårresultat(data, vilkårBuilder);
+        }
+        
+        builder.leggTil(vilkårBuilder);
+        final var oppdaterteVilkår = builder.build();
+        return oppdaterteVilkår;
+    }
 
-        final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
+    private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
         final var periode = vilkårData.getPeriode();
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
             .medUtfall(vilkårData.getUtfallType())
@@ -83,10 +94,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
-
-        builder.leggTil(vilkårBuilder);
-
-        return builder.build();
     }
 
     @Override

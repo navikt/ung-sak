@@ -70,7 +70,7 @@ public class OmsorgenFor extends BaseEntitet {
     void addPeriode(OmsorgenForPeriode periode) {
         final LocalDateTimeline<OmsorgenForPeriode> tidslinje = new LocalDateTimeline<OmsorgenForPeriode>(perioder.stream().map(p -> new LocalDateSegment<OmsorgenForPeriode>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList()));
         final LocalDateTimeline<OmsorgenForPeriode> nyTidslinje = tidslinje.combine(new LocalDateSegment<OmsorgenForPeriode>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), periode), StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
-        this.perioder = nyTidslinje.compress().stream().map(s -> s.getValue()).collect(Collectors.toList());
+        setPerioder(nyTidslinje.compress().stream().map(s -> s.getValue()).collect(Collectors.toList()));
     }
 
     @Override

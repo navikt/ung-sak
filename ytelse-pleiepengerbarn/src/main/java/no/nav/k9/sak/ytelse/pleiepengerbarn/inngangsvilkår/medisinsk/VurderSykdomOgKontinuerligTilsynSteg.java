@@ -62,7 +62,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     private BehandlingRepositoryProvider repositoryProvider;
     private PleiebehovResultatRepository resultatRepository;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private MedisinskVilkårTjeneste medisinskVilkårTjeneste;
+    private MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomVurderingService sykdomVurderingService;
@@ -76,7 +76,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     public VurderSykdomOgKontinuerligTilsynSteg(BehandlingRepositoryProvider repositoryProvider,
                                                 PleiebehovResultatRepository resultatRepository,
                                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                                MedisinskVilkårTjeneste medisinskVilkårTjeneste,
                                                 SykdomVurderingService sykdomVurderingService,
                                                 SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -84,7 +83,6 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         this.repositoryProvider = repositoryProvider;
         this.resultatRepository = resultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.medisinskVilkårTjeneste = medisinskVilkårTjeneste;
         this.sykdomVurderingService = sykdomVurderingService;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
     }
