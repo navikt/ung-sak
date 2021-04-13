@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.felles.integrasjon.saf.Datotype;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
@@ -23,6 +26,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository
 
 @Dependent
 public class SykdomsDokumentVedleggHåndterer {
+
+    private static final Logger log = LoggerFactory.getLogger(SykdomsDokumentVedleggHåndterer.class);
 
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SafTjeneste safTjeneste;
@@ -55,8 +60,16 @@ public class SykdomsDokumentVedleggHåndterer {
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
         LocalDateTime mottattDato = journalpost.getRelevanteDatoer() == null
             ? LocalDateTime.now() // TODO: sørge for at alltid er med?
-            : journalpost.getRelevanteDatoer().stream().filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT).findFirst().get().getDato().toInstant().atZone(ZoneId.of("Europe/Oslo"))
-                .toLocalDateTime();
+            : journalpost.getRelevanteDatoer().stream()
+            .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
+            .findFirst()
+            .orElseThrow()
+            .getDato()
+            .toInstant()
+            .atZone(ZoneId.of("Europe/Oslo"))
+            .toLocalDateTime();
+
+        log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
             final SykdomDokument dokument = new SykdomDokument(
                 SykdomDokumentType.UKLASSIFISERT,
