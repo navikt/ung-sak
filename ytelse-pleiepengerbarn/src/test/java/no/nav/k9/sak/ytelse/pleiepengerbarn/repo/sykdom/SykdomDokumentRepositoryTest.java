@@ -74,7 +74,7 @@ class SykdomDokumentRepositoryTest {
         final SykdomDokumentInformasjon nyInformasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, nå.toLocalDate(), nå, 1L, endretAv, nå);
         dokument.setInformasjon(nyInformasjon);
 
-        repo.oppdater(dokument);
+        repo.oppdater(dokument.getInformasjon());
         List<SykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
         assertThat(oppdaterteDokumenter.size()).isEqualTo(1);
         final SykdomDokumentInformasjon oppdatertInformasjon = oppdaterteDokumenter.get(0).getInformasjon();

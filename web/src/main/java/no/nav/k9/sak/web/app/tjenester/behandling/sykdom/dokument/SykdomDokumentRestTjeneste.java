@@ -286,7 +286,7 @@ public class SykdomDokumentRestTjeneste {
             LocalDateTime.now()
             ));
 
-        sykdomDokumentRepository.oppdater(dokument);
+        sykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
 
     /**

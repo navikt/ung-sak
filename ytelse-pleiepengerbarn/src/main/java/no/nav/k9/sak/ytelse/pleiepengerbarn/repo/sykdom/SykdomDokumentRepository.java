@@ -77,12 +77,12 @@ public class SykdomDokumentRepository {
         entityManager.flush();
     }
 
-    public void oppdater(SykdomDokument dokument) {
-        if (dokument.getId() == null) {
+    public void oppdater(SykdomDokumentInformasjon dokumentInformasjon) {
+        if (dokumentInformasjon.getDokument().getId() == null) {
             throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
         }
 
-        entityManager.persist(dokument.getInformasjon());
+        entityManager.persist(dokumentInformasjon);
         entityManager.flush();
     }
 
