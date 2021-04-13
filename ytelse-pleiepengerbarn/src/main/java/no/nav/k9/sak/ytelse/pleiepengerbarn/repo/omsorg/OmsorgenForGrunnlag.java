@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 public class OmsorgenForGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_MEDISINSK")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_OMSORGEN_FOR")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
@@ -45,7 +45,7 @@ public class OmsorgenForGrunnlag extends BaseEntitet {
 
     OmsorgenForGrunnlag(Long behandlingId, OmsorgenFor omsorgenFor) {
         this.behandlingId = behandlingId;
-        this.omsorgenFor = new OmsorgenFor(omsorgenFor);
+        this.omsorgenFor = omsorgenFor;
     }
 
     void setAktiv(boolean aktiv) {

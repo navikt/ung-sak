@@ -29,9 +29,9 @@ class OmsorgenForDtoMapper {
     }
 
     @Inject
-    public OmsorgenForDtoMapper(UttakRepository uttakRepository, OmsorgenForGrunnlagRepository medisinskGrunnlagRepository, BasisPersonopplysningTjeneste personopplysningTjeneste) {
+    public OmsorgenForDtoMapper(UttakRepository uttakRepository, OmsorgenForGrunnlagRepository omsorgenForRepository, BasisPersonopplysningTjeneste personopplysningTjeneste) {
         this.uttakRepository = uttakRepository;
-        this.omsorgenForGrunnlagRepository = medisinskGrunnlagRepository;
+        this.omsorgenForGrunnlagRepository = omsorgenForRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
@@ -79,8 +79,8 @@ class OmsorgenForDtoMapper {
     }
 
     /*
-    private Boolean utledOmsorgenFor(Optional<OmsorgenForGrunnlag> medisinskGrunnlag, boolean morEllerFar, boolean sammeBosted) {
-        var saksbehandlersOmsorgenFor = medisinskGrunnlag.map(OmsorgenForGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null);
+    private Boolean utledOmsorgenFor(Optional<OmsorgenForGrunnlag> omsorgenForRepository, boolean morEllerFar, boolean sammeBosted) {
+        var saksbehandlersOmsorgenFor = omsorgenForRepository.map(OmsorgenForGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null);
         if (morEllerFar && sammeBosted) {
             return true;
         } else if (morEllerFar && Objects.equals(true, saksbehandlersOmsorgenFor)) {

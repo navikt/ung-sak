@@ -123,7 +123,7 @@ class SøknadOversetter {
         final OmsorgenForPeriode omsorgForPeriode = new OmsorgenForPeriode(
                 DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(),periode.getTilOgMed()),
                 omsorg.getRelasjonTilBarnet(),
-                omsorg.getBeskrivelseAvOmsorgsrollen(),
+                omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "",
                 null,
                 Resultat.IKKE_VURDERT);
         omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);

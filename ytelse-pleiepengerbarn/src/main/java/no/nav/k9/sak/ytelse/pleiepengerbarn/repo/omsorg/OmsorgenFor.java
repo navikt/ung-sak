@@ -28,7 +28,7 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 public class OmsorgenFor extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_KONTINUERLIG_TILSYN")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_OMSORGEN_FOR")
     private Long id;
 
     @Immutable

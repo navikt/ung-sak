@@ -37,7 +37,7 @@ create table if not exists PSB_OMSORGEN_FOR_PERIODE
     TOM                    DATE                                   NOT NULL,
     RELASJON               VARCHAR(20)                            NOT NULL,
     RELASJONSBESKRIVELSE   VARCHAR(4000)                          NOT NULL,
-    BEGRUNNELSE            VARCHAR(4000)                          NOT NULL,
+    BEGRUNNELSE            VARCHAR(4000)                          ,
     RESULTAT               VARCHAR(20)                            NOT NULL,
     
     VERSJON                BIGINT       DEFAULT 0                 NOT NULL,
