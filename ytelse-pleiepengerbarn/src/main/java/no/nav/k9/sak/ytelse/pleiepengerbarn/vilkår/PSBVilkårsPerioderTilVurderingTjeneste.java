@@ -104,13 +104,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
         final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-        
+
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
-                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder);
+                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder).getDiffPerioder();
 
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
