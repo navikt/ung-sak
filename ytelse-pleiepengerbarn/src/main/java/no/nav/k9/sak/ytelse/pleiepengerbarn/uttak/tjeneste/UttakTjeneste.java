@@ -11,4 +11,6 @@ public interface UttakTjeneste {
 
     Uttaksplan opprettUttaksplan(Uttaksgrunnlag request);
 
+    void slettUttaksplan(UUID behandlingId);
+
 }

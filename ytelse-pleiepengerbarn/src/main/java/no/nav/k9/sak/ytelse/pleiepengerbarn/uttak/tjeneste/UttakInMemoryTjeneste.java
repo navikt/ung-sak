@@ -74,6 +74,11 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
         return plan;
     }
 
+    @Override
+    public void slettUttaksplan(UUID behandlingId) {
+        uttaksplaner.remove(behandlingId);
+    }
+
     private UttaksperiodeInfo mapTilUttaksperiodeInfo(SøktUttak periode, Uttaksgrunnlag input) {
         return new UttaksperiodeInfo(Utfall.OPPFYLT,
             _100,
