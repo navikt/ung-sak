@@ -68,7 +68,7 @@ public class SykdomDokument {
             LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
-        if(informasjon.getDokument() != null && informasjon.getDokument() != this) {
+        if (informasjon.getDokument() != null && informasjon.getDokument() != this) {
             throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
         }
         informasjon.setDokument(this);
