@@ -55,7 +55,8 @@ public class VurderUttakSteg implements BehandlingSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.VURDER_UTTAK.equals(tilSteg)) {
-            // TODO: Her implementerer du kallet Frode L.
+            var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            uttakTjeneste.slettUttaksplan(behandling.getUuid());
         }
     }
 }
