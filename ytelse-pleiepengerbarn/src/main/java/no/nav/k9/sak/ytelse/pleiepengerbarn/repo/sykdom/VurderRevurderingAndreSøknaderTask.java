@@ -35,6 +35,7 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private SykdomVurderingService sykdomVurderingService;
     private FagsakTjeneste fagsakTjeneste;
     private Behandlingsoppretter behandlingsoppretter;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -45,10 +46,11 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "iverksetteVedtak.vurderRevurderingAndreSøknader";
 
     @Inject
-    public VurderRevurderingAndreSøknaderTask(BehandlingRepository behandlingRepository, SykdomGrunnlagRepository sykdomGrunnlagRepository, SykdomVurderingRepository sykdomVurderingRepository, FagsakTjeneste fagsakTjeneste, Behandlingsoppretter behandlingsoppretter, BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste, ProsessTaskRepository prosessTaskRepository) {
+    public VurderRevurderingAndreSøknaderTask(BehandlingRepository behandlingRepository, SykdomGrunnlagRepository sykdomGrunnlagRepository, SykdomVurderingRepository sykdomVurderingRepository, SykdomVurderingService sykdomVurderingService, FagsakTjeneste fagsakTjeneste, Behandlingsoppretter behandlingsoppretter, BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste, ProsessTaskRepository prosessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
+        this.sykdomVurderingService = sykdomVurderingService;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
@@ -60,7 +62,6 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         Behandling vedtattBehandling = behandlingRepository.hentBehandling(behandlingId);
         SykdomGrunnlagBehandling vedtattSykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(vedtattBehandling.getUuid()).get();
-        LocalDateTimeline<SykdomSamletVurdering> vedtattSakTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(vedtattSykdomGrunnlagBehandling.getGrunnlag());
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
         List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende);
@@ -68,16 +69,11 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
             if (!kandidatsaksnummer.equals(vedtattSykdomGrunnlagBehandling.getSaksnummer())) {
                 SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer).map(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid)).get().get();
-                LocalDateTimeline<SykdomSamletVurdering> kandidatsakTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(kandidatSykdomBehandling.getGrunnlag());
-                LocalDateTimeline<Boolean> overlappendeTidslinje = SykdomSamletVurdering.finnGrunnlagsforskjeller(vedtattSakTidslinje, kandidatsakTidslinje);
 
-                LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(kandidatSykdomBehandling.getGrunnlag().getSøktePerioder()
-                    .stream()
-                    .map(p -> new Periode(p.getFom(), p.getTom()))
-                    .collect(Collectors.toList()));
-                LocalDateTimeline<Boolean> beholdKunSøktePerioder = overlappendeTidslinje.intersection(søktePerioderTimeline);
+                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
+                    kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, List.of());
 
-                if (!beholdKunSøktePerioder.isEmpty()) {
+                if (!endringerISøktePerioder.isEmpty()) {
                     final Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(kandidatsaksnummer, true).get();
                     final BehandlingÅrsakType behandlingÅrsak = BehandlingÅrsakType.BERØRT_BEHANDLING;
 
