@@ -27,7 +27,7 @@ public class TrekkUtFraværTjenesteTest {
 
         var inntektsmeldinger = parseInntektsmeldinger("01");
 
-        var trekkUt = new TrekkUtOppgittFraværPeriode(new VurderSøknadsfrist(false), new InntektsmeldingSøktePerioderMapper());
+        var trekkUt = new TrekkUtOppgittFraværPeriode(new VurderSøknadsfrist(true), new InntektsmeldingSøktePerioderMapper());
 
         var kravPerioder = trekkUt.mapFra(new LinkedHashSet<>(inntektsmeldinger), Map.of());
 
