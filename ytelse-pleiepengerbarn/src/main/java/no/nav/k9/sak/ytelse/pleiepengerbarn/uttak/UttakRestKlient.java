@@ -184,7 +184,7 @@ public class UttakRestKlient {
         @TekniskFeil(feilkode = "K9SAK-UT-1000016", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlanerForSaker(Collection<Saksnummer> saksnummere, Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-UT-1000017", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-UT-1000017", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke slette uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
         Feil feilKallSlettingAvUttaksplan(UUID behandlingUuid, Throwable t);
     }
 
