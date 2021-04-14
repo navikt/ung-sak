@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.medisinsk;
+package no.nav.k9.sak.kontrakt.omsorg;
 
 import java.util.ArrayList;
 import java.util.List;

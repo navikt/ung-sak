@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.medisinsk;
+package no.nav.k9.sak.kontrakt.omsorg;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
