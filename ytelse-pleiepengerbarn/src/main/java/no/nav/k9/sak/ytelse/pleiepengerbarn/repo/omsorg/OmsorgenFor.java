@@ -17,10 +17,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "OmsorgenFor")
@@ -53,6 +49,7 @@ public class OmsorgenFor extends BaseEntitet {
             .collect(Collectors.toList());
     }
 
+
     public Long getId() {
         return id;
     }
@@ -65,12 +62,6 @@ public class OmsorgenFor extends BaseEntitet {
         this.perioder = perioder.stream()
             .peek(it -> it.setOmsorgenFor(this))
             .collect(Collectors.toList());
-    }
-    
-    void addPeriode(OmsorgenForPeriode periode) {
-        final LocalDateTimeline<OmsorgenForPeriode> tidslinje = new LocalDateTimeline<OmsorgenForPeriode>(perioder.stream().map(p -> new LocalDateSegment<OmsorgenForPeriode>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList()));
-        final LocalDateTimeline<OmsorgenForPeriode> nyTidslinje = tidslinje.combine(new LocalDateSegment<OmsorgenForPeriode>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), periode), StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
-        setPerioder(nyTidslinje.compress().stream().map(s -> s.getValue()).collect(Collectors.toList()));
     }
 
     @Override
@@ -93,4 +84,6 @@ public class OmsorgenFor extends BaseEntitet {
     public int hashCode() {
         return Objects.hash(perioder);
     }
+    
+
 }

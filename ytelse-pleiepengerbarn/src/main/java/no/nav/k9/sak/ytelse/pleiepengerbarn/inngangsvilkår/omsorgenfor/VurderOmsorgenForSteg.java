@@ -69,8 +69,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-
-        // TODO Omsorg: Håndtere nye vurderinger på utsiden av perioderTilVurdering?
         
         final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
