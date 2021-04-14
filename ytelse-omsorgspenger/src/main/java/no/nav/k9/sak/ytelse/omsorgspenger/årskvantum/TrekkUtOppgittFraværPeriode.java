@@ -18,6 +18,8 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.InntektsmeldingSøktePerioderMapper;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.VurderSøknadsfrist;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @Dependent
@@ -47,6 +49,10 @@ class TrekkUtOppgittFraværPeriode {
         log.info("Fant {} inntektsmeldinger og {} søknader knyttet til behandlingen:", antallIM, antallSøknader);
 
         return Collections.unmodifiableMap(vurdertePerioder);
+    }
+
+    List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
+        return new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(fraværPerKravdokument);
     }
 
 }

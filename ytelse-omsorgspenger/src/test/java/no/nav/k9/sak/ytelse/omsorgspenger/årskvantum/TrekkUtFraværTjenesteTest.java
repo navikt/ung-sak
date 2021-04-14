@@ -1,6 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,7 +35,15 @@ public class TrekkUtFraværTjenesteTest {
 
         var kravPerioder = trekkUt.mapFra(new LinkedHashSet<>(inntektsmeldinger), Map.of());
 
-        System.out.println(kravPerioder);
+        var fravær = trekkUt.trekkUtFravær(kravPerioder);
+
+        String _0324 = "2020-03-24";
+        assertThat(fravær).anySatisfy(a -> {
+            assertThat(a.getPeriode()).isNotNull();
+            assertThat(a.getPeriode().getFom()).isEqualTo(LocalDate.parse(_0324));
+            assertThat(a.getPeriode().getTom()).isEqualTo(LocalDate.parse(_0324));
+            assertThat(a.getPeriode().getFraværPerDag()).isEqualTo(Duration.ofSeconds(0L));
+        });
 
     }
 

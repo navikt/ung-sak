@@ -88,7 +88,8 @@ public class VurderSøknadsfrist {
                         vurdertTimeline = vurdertTimeline.combine(skalEndresUtfallPå, TimelineMerger::mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                     }
 
-                    vurderteSøktePerioder.addAll(vurdertTimeline.compress()
+                    LocalDateTimeline<VurdertSøktPeriode<OppgittFraværPeriode>> komprimertTimeline = vurdertTimeline.compress();
+                    vurderteSøktePerioder.addAll(komprimertTimeline
                         .stream()
                         .map(this::konsistens)
                         .collect(Collectors.toList()));

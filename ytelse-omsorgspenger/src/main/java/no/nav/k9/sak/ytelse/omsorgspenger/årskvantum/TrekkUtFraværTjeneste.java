@@ -203,7 +203,7 @@ public class TrekkUtFraværTjeneste {
         }
     }
 
-    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværFraInntektsmelding) {
-        return new KravDokumentFravær().trekkUtAlleFraværOgValiderOverlapp(fraværFraInntektsmelding);
+    public List<WrappedOppgittFraværPeriode> trekkUtFravær(Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> fraværPerKravdokument) {
+        return mapOppgittFravær.trekkUtFravær(fraværPerKravdokument);
     }
 }
