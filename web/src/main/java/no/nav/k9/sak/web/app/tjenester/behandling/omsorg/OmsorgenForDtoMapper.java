@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -7,7 +8,11 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
+import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForOversiktDto;
@@ -37,35 +42,36 @@ class OmsorgenForDtoMapper {
 
     
     public OmsorgenForOversiktDto map(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
-        /* TODO Omsorg: Skal vi ta med informasjon fra PDL?
+        final var systemdata = hentSystemdata(behandlingId, aktørId, optPleietrengendeAktørId);
+        
+        final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        if (grunnlagOpt.isEmpty()) {
+            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), false, List.of());
+        }
+        
+        return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), false, toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder()));
+    }
+
+    private Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
         var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
         if (søknadsperioder.isPresent()) {
             var periode = mapTilPeriode(søknadsperioder.get());
-            var omsorgenForGrunnlag = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
             var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
             if (pleietrengende.isPresent()) {
                 var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
                 if (optAggregat.isPresent()) {
                     var aggregat = optAggregat.get();
                     var pleietrengendeAktørId = pleietrengende.get();
-
                     var relasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengendeAktørId)).collect(Collectors.toList());
 
-                    var morEllerFar = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
-                    var sammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
-                    var harOmsorgenFor = utledOmsorgenFor(omsorgenForGrunnlag, morEllerFar, sammeBosted);
-
-                    return new OmsorgenForDto(morEllerFar, sammeBosted, harOmsorgenFor);
+                    var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
+                    var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
+                    
+                    return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
                 }
             }
         }
-        */
-        final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
-        if (grunnlagOpt.isEmpty()) {
-            return new OmsorgenForOversiktDto(List.of());
-        }
-        
-        return new OmsorgenForOversiktDto(toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder()));
+        return new Systemdata(false, false);
     }
 
     private List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder) {
@@ -76,21 +82,6 @@ class OmsorgenForDtoMapper {
 
     private Periode toPeriode(OmsorgenForPeriode p) {
         return new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato());
-    }
-
-    /*
-    private Boolean utledOmsorgenFor(Optional<OmsorgenForGrunnlag> omsorgenForRepository, boolean morEllerFar, boolean sammeBosted) {
-        var saksbehandlersOmsorgenFor = omsorgenForRepository.map(OmsorgenForGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null);
-        if (morEllerFar && sammeBosted) {
-            return true;
-        } else if (morEllerFar && Objects.equals(true, saksbehandlersOmsorgenFor)) {
-            return true;
-        } else if (sammeBosted && Objects.equals(true, saksbehandlersOmsorgenFor)) {
-            return true;
-        } else if ((morEllerFar || sammeBosted) && saksbehandlersOmsorgenFor == null) {
-            return null;
-        }
-        return false;
     }
 
     private DatoIntervallEntitet mapTilPeriode(Søknadsperioder fordeling) {
@@ -107,5 +98,24 @@ class OmsorgenForDtoMapper {
             .orElseThrow();
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
-    */
+    
+    private static class Systemdata {
+        private final boolean registrertForeldrerelasjon;
+        private final boolean registrertSammeBosted;
+        
+        
+        public Systemdata(boolean registrertForeldrerelasjon, boolean registrertSammeBosted) {
+            this.registrertForeldrerelasjon = registrertForeldrerelasjon;
+            this.registrertSammeBosted = registrertSammeBosted;
+        }
+        
+        
+        public boolean isRegistrertForeldrerelasjon() {
+            return registrertForeldrerelasjon;
+        }
+        
+        public boolean isRegistrertSammeBosted() {
+            return registrertSammeBosted;
+        }
+    }
 }
