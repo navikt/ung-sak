@@ -16,6 +16,7 @@ import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForOversiktDto;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag;
@@ -42,14 +43,15 @@ class OmsorgenForDtoMapper {
 
     
     public OmsorgenForOversiktDto map(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
+        final boolean tvingManuellVurdering = false;
         final var systemdata = hentSystemdata(behandlingId, aktørId, optPleietrengendeAktørId);
         
         final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
-            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), false, List.of());
+            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, List.of());
         }
-        
-        return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), false, toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder()));
+        final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering ;
+        return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt));
     }
 
     private Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
@@ -74,10 +76,14 @@ class OmsorgenForDtoMapper {
         return new Systemdata(false, false);
     }
 
-    private List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder) {
+    private List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder, boolean ikkeVurdertBlirOppfylt) {
         return perioder.stream()
-                .map(p -> new OmsorgenForDto(toPeriode(p), p.getBegrunnelse(), p.getRelasjon(), p.getRelasjonsbeskrivelse(), p.getResultat()))
+                .map(p -> new OmsorgenForDto(toPeriode(p), p.getBegrunnelse(), p.getRelasjon(), p.getRelasjonsbeskrivelse(), p.getResultat(), mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt)))
                 .collect(Collectors.toList());
+    }
+
+    private Resultat mapResultatEtterAutomatikk(Resultat resultat, boolean ikkeVurdertBlirOppfylt) {
+        return (resultat == Resultat.IKKE_VURDERT && ikkeVurdertBlirOppfylt) ? Resultat.OPPFYLT : resultat;
     }
 
     private Periode toPeriode(OmsorgenForPeriode p) {

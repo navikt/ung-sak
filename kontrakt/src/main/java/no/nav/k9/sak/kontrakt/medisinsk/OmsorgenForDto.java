@@ -43,18 +43,23 @@ public class OmsorgenForDto {
     @JsonProperty(value = "resultat")
     @Valid
     private Resultat resultat;
+    
+    @JsonProperty(value = "resultatEtterAutomatikk")
+    @Valid
+    private Resultat resultatEtterAutomatikk;
 
     
     OmsorgenForDto() {
         
     }
 
-    public OmsorgenForDto(Periode periode, String begrunnelse, String relasjon, String relasjonsbeskrivelse, Resultat resultat) {
+    public OmsorgenForDto(Periode periode, String begrunnelse, String relasjon, String relasjonsbeskrivelse, Resultat resultat, Resultat resultatEtterAutomatikk) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.relasjon = relasjon;
         this.relasjonsbeskrivelse = relasjonsbeskrivelse;
         this.resultat = resultat;
+        this.resultatEtterAutomatikk = resultatEtterAutomatikk;
     }
 
     
@@ -76,5 +81,9 @@ public class OmsorgenForDto {
     
     public Resultat getResultat() {
         return resultat;
+    }
+    
+    public Resultat getResultatEtterAutomatikk() {
+        return resultatEtterAutomatikk;
     }
 }
