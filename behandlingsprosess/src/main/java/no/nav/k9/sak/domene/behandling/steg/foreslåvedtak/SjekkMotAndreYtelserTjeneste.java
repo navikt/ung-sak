@@ -51,18 +51,18 @@ public class SjekkMotAndreYtelserTjeneste {
         if (skalSjekkeGsakOppgaver(behandling)) {
             if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, behandling.getFagsakYtelseType())) {
                 aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
-                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, HistorikkinnslagType.BEH_AVBRUTT_VUR, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
             }
             if (oppgaveTjeneste.harÅpneOppgaverAvType(aktørid, OppgaveÅrsak.VURDER_DOKUMENT, behandling.getFagsakYtelseType())) {
                 aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK);
-                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, HistorikkinnslagType.BEH_AVBRUTT_VUR, OppgaveÅrsak.VURDER_DOKUMENT, historikkInnslagFraRepo);
             }
         }
 
         if (skalSjekkeOverlappendeYtelser(behandling)) {
             if (harOverlappendeYtelser(behandling)) {
                 aksjonspunktliste.add(AksjonspunktDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK);
-                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
+                opprettHistorikkinnslagOmVurderingFørVedtak(behandling, HistorikkinnslagType.BEH_AVBRUTT_OVERLAPP, OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE, historikkInnslagFraRepo);
             }
         }
         return aksjonspunktliste;
@@ -83,7 +83,7 @@ public class SjekkMotAndreYtelserTjeneste {
         return !behandling.getFagsakYtelseType().hentYtelserForOverlappSjekk().isEmpty();
     }
 
-    private void opprettHistorikkinnslagOmVurderingFørVedtak(Behandling behandling, OppgaveÅrsak begrunnelse, List<Historikkinnslag> historikkInnslagFraRepo) {
+    private void opprettHistorikkinnslagOmVurderingFørVedtak(Behandling behandling, HistorikkinnslagType historikkInnslagsType, OppgaveÅrsak begrunnelse, List<Historikkinnslag> historikkInnslagFraRepo) {
         // finne historikkinnslag hvor vi har en begrunnelse?
         List<Historikkinnslag> eksisterendeVurderHistInnslag = historikkInnslagFraRepo.stream()
             .filter(historikkinnslag -> {
@@ -94,10 +94,10 @@ public class SjekkMotAndreYtelserTjeneste {
 
         if (eksisterendeVurderHistInnslag.isEmpty()) {
             Historikkinnslag vurderFørVedtakInnslag = new Historikkinnslag();
-            vurderFørVedtakInnslag.setType(HistorikkinnslagType.BEH_AVBRUTT_VUR);
+            vurderFørVedtakInnslag.setType(historikkInnslagsType);
             vurderFørVedtakInnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
             HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = new HistorikkInnslagTekstBuilder()
-                .medHendelse(HistorikkinnslagType.BEH_AVBRUTT_VUR)
+                .medHendelse(historikkInnslagsType)
                 .medBegrunnelse(begrunnelse);
             historikkInnslagTekstBuilder.build(vurderFørVedtakInnslag);
             vurderFørVedtakInnslag.setBehandling(behandling);
