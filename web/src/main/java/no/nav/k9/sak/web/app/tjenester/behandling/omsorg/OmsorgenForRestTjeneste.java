@@ -23,7 +23,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForOversiktDto;
+import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Produces(MediaType.APPLICATION_JSON)

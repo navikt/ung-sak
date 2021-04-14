@@ -1,10 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -55,17 +53,7 @@ public class OmsorgenForTjeneste {
         this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
-    public List<VilkårData> vurderPerioder(BehandlingskontrollKontekst kontekst, Set<DatoIntervallEntitet> perioderTilVurdering) {
-        var startDato = perioderTilVurdering.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        var sluttDato = perioderTilVurdering.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-
-        final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
-        
-        // TODO Omsorg: Håndtere nye vurderinger på utsiden av perioderTilVurdering?
-        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), periodeTilVurdering);
-        final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(kontekst);
-        final var samletOmsorgenForTidslinje = slåSammenGrunnlagFraSystemOgVurdering(periodeTilVurdering, systemgrunnlag, vurdertOmsorgenForTidslinje);
-        
+    public List<VilkårData> vurderPerioder(BehandlingskontrollKontekst kontekst, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
         final List<VilkårData> resultat = new ArrayList<>();
         for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
             final var evaluation = new OmsorgenForVilkår().evaluer(s.getValue());
@@ -74,6 +62,13 @@ public class OmsorgenForTjeneste {
         }
 
         return resultat;
+    }
+
+    LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingskontrollKontekst kontekst, final DatoIntervallEntitet periodeTilVurdering) {
+        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), periodeTilVurdering);
+        final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(kontekst);
+        final var samletOmsorgenForTidslinje = slåSammenGrunnlagFraSystemOgVurdering(periodeTilVurdering, systemgrunnlag, vurdertOmsorgenForTidslinje);
+        return samletOmsorgenForTidslinje;
     }
 
     private LocalDateTimeline<OmsorgenForVilkårGrunnlag> slåSammenGrunnlagFraSystemOgVurdering(final DatoIntervallEntitet periodeTilVurdering,
