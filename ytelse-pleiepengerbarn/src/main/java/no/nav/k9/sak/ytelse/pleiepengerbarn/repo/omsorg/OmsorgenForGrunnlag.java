@@ -30,7 +30,7 @@ public class OmsorgenForGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "psb_omsorgen_for_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "omsorgen_for_id", nullable = false, updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
 
     @Column(name = "aktiv", nullable = false)

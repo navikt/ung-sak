@@ -23,11 +23,11 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
 
 @Entity(name = "OmsorgenForPeriode")
-@Table(name = "PSB_OMSORGEN_FOR_PERIODE")
+@Table(name = "OMSORGEN_FOR_PERIODE")
 public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_OMSORGEN_FOR_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMSORGEN_FOR_PERIODE")
     private Long id;
 
     @Embedded
@@ -54,7 +54,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     private Resultat resultat;
     
     @ManyToOne
-    @JoinColumn(name = "psb_omsorgen_for_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "omsorgen_for_id", nullable = false, updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
 
     @Version

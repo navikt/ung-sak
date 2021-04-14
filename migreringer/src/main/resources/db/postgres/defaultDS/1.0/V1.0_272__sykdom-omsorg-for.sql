@@ -19,7 +19,7 @@ drop sequence if exists SEQ_MD_OMSORGENFOR;
 
 -- Ny modell:
 
-create table if not exists PSB_OMSORGEN_FOR
+create table if not exists OMSORGEN_FOR
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
     VERSJON       BIGINT       DEFAULT 0                 NOT NULL,
@@ -29,10 +29,10 @@ create table if not exists PSB_OMSORGEN_FOR
     ENDRET_TID    TIMESTAMP(3)
 );
 
-create table if not exists PSB_OMSORGEN_FOR_PERIODE
+create table if not exists OMSORGEN_FOR_PERIODE
 (
     ID                     BIGINT                                 NOT NULL PRIMARY KEY,
-    PSB_OMSORGEN_FOR_ID    BIGINT REFERENCES PSB_OMSORGEN_FOR (id),
+    OMSORGEN_FOR_ID        BIGINT REFERENCES OMSORGEN_FOR (id),
     FOM                    DATE                                   NOT NULL,
     TOM                    DATE                                   NOT NULL,
     RELASJON               VARCHAR(20)                            NOT NULL,
@@ -47,15 +47,15 @@ create table if not exists PSB_OMSORGEN_FOR_PERIODE
     ENDRET_TID             TIMESTAMP(3)
 );
 
-create index IDX_PSB_OMSORGEN_FOR_PERIODE_1
-    on PSB_OMSORGEN_FOR_PERIODE (PSB_OMSORGEN_FOR_ID);
+create index IDX_OMSORGEN_FOR_PERIODE_1
+    on OMSORGEN_FOR_PERIODE (OMSORGEN_FOR_ID);
 
 
 create table GR_OMSORGEN_FOR
 (
     ID                     bigint                              not null PRIMARY KEY,
     BEHANDLING_ID          bigint                              not null,
-    PSB_OMSORGEN_FOR_ID    bigint,
+    OMSORGEN_FOR_ID    bigint,
     VERSJON                bigint       default 0              not null,
     AKTIV                  boolean      default true           not null,
     OPPRETTET_AV           VARCHAR(20)  default 'VL'           not null,
@@ -65,13 +65,13 @@ create table GR_OMSORGEN_FOR
     constraint FK_GR_OMSORGEN_FOR_1
         foreign key (BEHANDLING_ID) references BEHANDLING,
     constraint FK_GR_OMSORGEN_FOR_2
-        foreign key (PSB_OMSORGEN_FOR_ID) references PSB_OMSORGEN_FOR
+        foreign key (OMSORGEN_FOR_ID) references OMSORGEN_FOR
 );
 
 create index IDX_GR_OMSORGEN_FOR_1
     on GR_OMSORGEN_FOR (BEHANDLING_ID);
 create index IDX_GR_OMSORGEN_FOR_2
-    on GR_OMSORGEN_FOR (PSB_OMSORGEN_FOR_ID);
+    on GR_OMSORGEN_FOR (OMSORGEN_FOR_ID);
 CREATE UNIQUE INDEX UIDX_GR_OMSORGEN_FOR_01
     ON GR_OMSORGEN_FOR (
                      (CASE
@@ -85,5 +85,5 @@ CREATE UNIQUE INDEX UIDX_GR_OMSORGEN_FOR_01
         );
 
 create sequence if not exists SEQ_GR_OMSORGEN_FOR increment by 50 minvalue 1000000;
-create sequence if not exists SEQ_PSB_OMSORGEN_FOR increment by 50 minvalue 1000000;
-create sequence if not exists SEQ_PSB_OMSORGEN_FOR_PERIODE increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_OMSORGEN_FOR increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_OMSORGEN_FOR_PERIODE increment by 50 minvalue 1000000;

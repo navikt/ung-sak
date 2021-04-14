@@ -20,11 +20,11 @@ import org.hibernate.annotations.Immutable;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "OmsorgenFor")
-@Table(name = "PSB_OMSORGEN_FOR")
+@Table(name = "OMSORGEN_FOR")
 public class OmsorgenFor extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_OMSORGEN_FOR")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMSORGEN_FOR")
     private Long id;
 
     @Immutable
