@@ -29,6 +29,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     BEH_MAN_GJEN("BEH_MAN_GJEN", "Gjenoppta behandling", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_GJEN("BEH_GJEN", "Behandling gjenopptatt", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_AVBRUTT_VUR("BEH_AVBRUTT_VUR", "Vurdering før vedtak", HistorikkinnslagMal.MAL_TYPE_1),
+    BEH_AVBRUTT_OVERLAPP("BEH_AVBRUTT_OVERLAPP", "Vurdering av overlapp andre ytelser før vedtak", HistorikkinnslagMal.MAL_TYPE_1),
     VRS_REV_IKKE_SNDT("VRS_REV_IKKE_SNDT", "Varsel om revurdering ikke sendt", HistorikkinnslagMal.MAL_TYPE_1),
     VEDLEGG_MOTTATT("VEDLEGG_MOTTATT", "Vedlegg mottatt", HistorikkinnslagMal.MAL_TYPE_1),
     SPOLT_TILBAKE("SPOLT_TILBAKE", "Behandlingen er flyttet", HistorikkinnslagMal.MAL_TYPE_1),
