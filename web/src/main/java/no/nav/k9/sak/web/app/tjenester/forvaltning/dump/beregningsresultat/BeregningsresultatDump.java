@@ -57,7 +57,7 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
             + "   inner join br_periode bp on bp.beregningsresultat_fp_id=res.id "
             + "   inner join br_andel ba on ba.br_periode_id=bp.id "
             + " where br.aktiv=true and f.saksnummer=:saksnummer "
-            + " order by bp.br_periode_fom, b.id";
+            + " order by b.behandling_id, bp.br_periode_fom";
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
