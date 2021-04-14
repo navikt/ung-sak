@@ -110,6 +110,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraRegisterFunction(arbeidsforholdTjeneste);
+        var ventefrister = new ArrayList<LocalDateTime>();
         var result = utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction);
         for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : result.entrySet()) {
             var manglendeInntektsmeldinger = entry.getValue()
@@ -120,12 +121,25 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             if (!manglendeInntektsmeldinger.isEmpty()) {
                 loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
                 Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(entry.getKey());
-                return ventefristManglendeIM
-                    .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
-                    .orElse(KompletthetResultat.fristUtløpt());
+                ventefristManglendeIM.ifPresent(ventefrister::add);
             }
         }
-        return KompletthetResultat.oppfylt();
+        return utledKompletthetResultat(ventefrister);
+    }
+
+    private KompletthetResultat utledKompletthetResultat(List<LocalDateTime> ventefrister) {
+
+        if (ventefrister.isEmpty()) {
+            return KompletthetResultat.oppfylt();
+        }
+
+        var kompletthetResultat = ventefrister.stream()
+            .filter(it -> it.isAfter(LocalDateTime.now()))
+            .min(LocalDateTime::compareTo)
+            .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
+            .orElse(KompletthetResultat.fristUtløpt());
+
+        return kompletthetResultat;
     }
 
     private void loggManglendeInntektsmeldinger(Long behandlingId, @SuppressWarnings("unused") List<ManglendeVedlegg> manglendeInntektsmeldinger) {

@@ -30,4 +30,9 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
         return restKlient.opprettUttaksplan(request);
     }
+
+    @Override
+    public void slettUttaksplan(UUID behandlingId) {
+        restKlient.slettUttaksplan(behandlingId);
+    }
 }

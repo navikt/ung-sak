@@ -148,7 +148,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søknadsperiode = søknadInnhold.getSøknadsperiode();
         final boolean elektroniskSøknad = false;
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getFraOgMed()))
+            .medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed()))
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)

@@ -469,6 +469,6 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private boolean begrunnelseErEndret(String gammelBegrunnelse, String nyBegrunnelse) {
-        return !Objects.equals(gammelBegrunnelse, nyBegrunnelse);
+        return gammelBegrunnelse != null && !Objects.equals(gammelBegrunnelse, nyBegrunnelse);
     }
 }

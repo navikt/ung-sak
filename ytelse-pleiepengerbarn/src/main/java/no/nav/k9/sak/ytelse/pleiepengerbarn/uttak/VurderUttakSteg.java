@@ -3,9 +3,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -50,4 +52,11 @@ public class VurderUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
+        if (!BehandlingStegType.VURDER_UTTAK.equals(tilSteg)) {
+            var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            uttakTjeneste.slettUttaksplan(behandling.getUuid());
+        }
+    }
 }

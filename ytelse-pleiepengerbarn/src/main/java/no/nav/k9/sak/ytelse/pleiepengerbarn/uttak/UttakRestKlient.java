@@ -11,6 +11,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -104,6 +105,18 @@ public class UttakRestKlient {
         }
     }
 
+    public void slettUttaksplan(UUID behandlingUuid) {
+        Objects.requireNonNull(behandlingUuid);
+        var builder = new URIBuilder(endpointUttaksplan);
+        builder.addParameter("behandlingUUID", behandlingUuid.toString());
+        try {
+            var kall = new HttpDelete(builder.build());
+            utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallSlettingAvUttaksplan(behandlingUuid, e).toException();
+        }
+    }
+
     private <T> T utførOgHent(HttpUriRequest request, @SuppressWarnings("unused") String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
@@ -170,6 +183,9 @@ public class UttakRestKlient {
 
         @TekniskFeil(feilkode = "K9SAK-UT-1000016", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke hente uttaksplaner for saker: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilUttakForPlanerForSaker(Collection<Saksnummer> saksnummere, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-UT-1000017", feilmelding = "Feil ved kall til K9Uttak: Kunne ikke slette uttaksplan for behandling: %s", logLevel = LogLevel.WARN)
+        Feil feilKallSlettingAvUttaksplan(UUID behandlingUuid, Throwable t);
     }
 
 }
