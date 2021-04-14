@@ -48,17 +48,6 @@ public class PeriodeAndel {
         this(new Periode(fom, tom), varighetPerDag);
     }
 
-    public PeriodeAndel(LocalDate fom, LocalDate tom, BigDecimal timerPerDag) {
-        this(new Periode(fom, tom), toDuration(timerPerDag));
-    }
-
-    /**
-     * Antal hel dag skal telles med.
-     */
-    public PeriodeAndel(Periode periode) {
-        this(periode, (Duration) null);
-    }
-
     public PeriodeAndel(LocalDate fom, LocalDate tom) {
         this(new Periode(fom, tom), (Duration) null);
     }
