@@ -11,12 +11,12 @@ import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.opptjening.Organisasjonsnummer;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -25,20 +25,16 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 public class LagreOppgittOpptjening {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     @Inject
-    LagreOppgittOpptjening(BehandlingRepository behandlingRepository,
-                           InntektArbeidYtelseTjeneste iayTjeneste) {
-        this.behandlingRepository = behandlingRepository;
+    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste) {
         this.iayTjeneste = iayTjeneste;
     }
 
 
-    public void lagreOpptjening(Behandling behandling, ZonedDateTime tidspunkt, OmsorgspengerUtbetaling søknad) {
-
+    public void lagreOpptjening(Behandling behandling, OmsorgspengerUtbetaling søknad, MottattDokument dokument) {
         Long behandlingId = behandling.getId();
-        var builder = initOpptjeningBuilder(behandling, tidspunkt);
+        var builder = initOpptjeningBuilder(behandling, ZonedDateTime.now());
 
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
@@ -54,6 +50,8 @@ public class LagreOppgittOpptjening {
         if (søknad.getAktivitet().getArbeidstaker() != null) {
             // TODO: Lagring av utenlands arbeidsforhold
         }
+        builder.leggTilJournalpostId(dokument.getJournalpostId());
+        builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
         if (builder.build().harOpptjening()) {
             iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);

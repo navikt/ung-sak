@@ -1,6 +1,8 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import no.nav.abakus.iaygrunnlag.JournalpostId;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.Landkode;
@@ -83,7 +86,14 @@ class MapOppgittOpptjening {
             if (!oppgittOpptjening.harOpptjening())
                 return null;
 
-            var dto = new OppgittOpptjeningDto(oppgittOpptjening.getEksternReferanse(), oppgittOpptjening.getOpprettetTidspunkt());
+            JournalpostId journalpostId = oppgittOpptjening.getJournalpostId() != null
+                ? new JournalpostId(oppgittOpptjening.getJournalpostId().getVerdi())
+                : null;
+            OffsetDateTime innsendtTid = oppgittOpptjening.getInnsendingstidspunkt() != null
+                ? oppgittOpptjening.getInnsendingstidspunkt().atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                : null;
+            OffsetDateTime opprettetTid = oppgittOpptjening.getOpprettetTidspunkt().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+            var dto = new OppgittOpptjeningDto(journalpostId, innsendtTid, oppgittOpptjening.getEksternReferanse(), opprettetTid);
 
             dto.medArbeidsforhold(oppgittOpptjening.getOppgittArbeidsforhold().stream().map(MapTilDto::mapArbeidsforhold).sorted(COMP_OPPGITT_ARBEIDSFORHOLD)
                 .collect(Collectors.toList()));
@@ -93,7 +103,6 @@ class MapOppgittOpptjening {
                 oppgittOpptjening.getAnnenAktivitet().stream().map(MapTilDto::mapAnnenAktivitet).sorted(COMP_ANNEN_AKTIVITET).collect(Collectors.toList()));
 
             oppgittOpptjening.getFrilans().ifPresent(f -> dto.medFrilans(mapFrilans(f)));
-
             return dto;
         }
 

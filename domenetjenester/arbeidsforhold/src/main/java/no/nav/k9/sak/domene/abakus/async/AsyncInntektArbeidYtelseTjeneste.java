@@ -15,13 +15,13 @@ import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 /** Kaller kopier grunnlag i abakus i egen task (som gjør at feil som kan oppstå i det kallet håndteres isolert her). */
 @Dependent
@@ -75,7 +75,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
         var saksnummer = behandling.getFagsak().getSaksnummer();
         var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
+        var request = new OppgittOpptjeningMottattRequest(true, saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
 
         try {
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);

@@ -12,6 +12,7 @@ import java.util.UUID;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.OrgNummer;
 
 public class OppgittOpptjeningBuilder {
@@ -68,13 +69,21 @@ public class OppgittOpptjeningBuilder {
     }
 
     public OppgittFrilansBuilder getFrilansBuilder() {
-        return this.kladd.getFrilans().isPresent() ?
-            OppgittFrilansBuilder.fraEksisterende(kladd.getFrilans().get()) :
-            OppgittFrilansBuilder.ny();
+        return this.kladd.getFrilans().isPresent()
+            ? OppgittFrilansBuilder.fraEksisterende(kladd.getFrilans().get())
+            : OppgittFrilansBuilder.ny();
     }
 
     public OppgittOpptjening build() {
         return kladd;
+    }
+
+    public void leggTilJournalpostId(JournalpostId journalpostId) {
+        this.kladd.setJournalpostId(journalpostId);
+    }
+
+    public void leggTilInnsendingstidspunkt(LocalDateTime tidspunkt) {
+        this.kladd.setInnsendingstidspunkt(tidspunkt);
     }
 
     public static class EgenNæringBuilder {
