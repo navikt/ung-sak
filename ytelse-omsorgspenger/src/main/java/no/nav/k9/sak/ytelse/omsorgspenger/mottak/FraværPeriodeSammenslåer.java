@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
@@ -22,7 +23,7 @@ public class FraværPeriodeSammenslåer {
 
             boolean periodenLiggerInntilForrigePeriode = ChronoUnit.DAYS.between(sammenslåttPeriode.getPeriode().getTilOgMed(), søknadPeriode.getPeriode().getFraOgMed()) == 1;
             if (periodenLiggerInntilForrigePeriode &&
-                søknadPeriode.getDuration().equals(sammenslåttPeriode.getDuration()) &&
+                Optional.ofNullable(søknadPeriode.getDuration()).equals(Optional.ofNullable(sammenslåttPeriode.getDuration())) &&
                 søknadPeriode.getÅrsak().equals(sammenslåttPeriode.getÅrsak()) &&
                 søknadPeriode.getAktivitetFravær().equals(sammenslåttPeriode.getAktivitetFravær())) {
 
