@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
-public interface VurderSøknadsfristTjeneste<T> {
+public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
 
     Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(BehandlingReferanse referanse);
 

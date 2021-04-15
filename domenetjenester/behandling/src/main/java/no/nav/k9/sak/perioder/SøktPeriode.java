@@ -66,17 +66,20 @@ public class SøktPeriode<T> {
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         var that = (SøktPeriode) o;
         return type == that.type &&
-            Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
-            Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
+            Objects.equals(arbeidsgiver, that.arbeidsgiver)
+            && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef)
+            && Objects.equals(raw, that.raw);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, arbeidsgiver, arbeidsforholdRef);
+        return Objects.hash(type, arbeidsgiver, arbeidsforholdRef, raw);
     }
 
     @Override

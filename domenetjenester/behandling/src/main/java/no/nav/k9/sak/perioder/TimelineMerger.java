@@ -6,13 +6,14 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
 public final class TimelineMerger {
 
     private TimelineMerger() {
     }
 
-    public static <T> LocalDateSegment<VurdertSøktPeriode<T>> mergeSegments(LocalDateInterval di,
+    public static <T extends SøktPeriodeData> LocalDateSegment<VurdertSøktPeriode<T>> mergeSegments(LocalDateInterval di,
                                                                      LocalDateSegment<VurdertSøktPeriode<T>> førsteVersjon,
                                                                      LocalDateSegment<VurdertSøktPeriode<T>> sisteVersjon) {
         if ((førsteVersjon == null || førsteVersjon.getValue() == null) && sisteVersjon != null) {
@@ -36,7 +37,7 @@ public final class TimelineMerger {
         }
     }
 
-    private static <T> LocalDateSegment<VurdertSøktPeriode<T>> lagSegment(LocalDateInterval di, VurdertSøktPeriode<T> siste) {
+    private static <T extends SøktPeriodeData> LocalDateSegment<VurdertSøktPeriode<T>> lagSegment(LocalDateInterval di, VurdertSøktPeriode<T> siste) {
         if (siste == null) {
             return new LocalDateSegment<>(di, null);
         }

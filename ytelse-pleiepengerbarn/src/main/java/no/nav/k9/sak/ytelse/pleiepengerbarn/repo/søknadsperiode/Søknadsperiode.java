@@ -18,11 +18,12 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
 @Entity(name = "Søknadsperiode")
 @Table(name = "SP_SOEKNADSPERIODE")
 @Immutable
-public class Søknadsperiode extends BaseEntitet {
+public class Søknadsperiode extends BaseEntitet implements SøktPeriodeData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SP_SOEKNADSPERIODE")
@@ -56,6 +57,12 @@ public class Søknadsperiode extends BaseEntitet {
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+
+    @Override
+    public <V> V getPayload() {
+        // skal returnere data til bruk ved komprimering av perioder (dvs. uten periode)
+        return null;
     }
 
     @Override
