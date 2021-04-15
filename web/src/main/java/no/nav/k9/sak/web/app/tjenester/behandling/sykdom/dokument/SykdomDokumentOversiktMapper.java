@@ -38,7 +38,7 @@ public class SykdomDokumentOversiktMapper {
             .map(d -> {
                 return new SykdomDokumentOversiktElement(
                         "" + d.getId(),
-                        "1", // TODO: Sett riktig verdi.
+                        d.getVersjon().toString(),
                         d.getType(),
                         false,  // TODO: Sette riktig verdi.
                         d.getDatert(),
@@ -47,7 +47,7 @@ public class SykdomDokumentOversiktMapper {
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
-                            linkForEndreDokument(behandlingUuid, "" + d.getId(), "1") // TODO: Sett riktig verdi på versjon.
+                            linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
                         )
                     );
             })
