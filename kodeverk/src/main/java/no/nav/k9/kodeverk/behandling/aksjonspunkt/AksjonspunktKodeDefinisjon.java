@@ -95,10 +95,10 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
 
     public static final String AVKLAR_OMSORGEN_FOR_KODE_V2 = "9020";
-    
+
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
-    
+    public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";

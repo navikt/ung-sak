@@ -167,6 +167,12 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             .collect(Collectors.toList());
     }
 
+    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggForPerioder(BehandlingReferanse ref) {
+        var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
+            new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction);
+    }
+
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
                                                                                 BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
