@@ -45,11 +45,6 @@ public class Beløp implements IndexKey {
         this.verdi = verdi == null ? null : new BigDecimal(verdi);
     }
 
-    // Beleilig å kunne opprette gjennom int
-    public Beløp(Number verdi) {
-        this.verdi = verdi == null ? null : new BigDecimal(verdi.toString());
-    }
-
     // Beleilig å kunne opprette gjennom string
     public Beløp(String verdi) {
         this.verdi = verdi == null ? null : new BigDecimal(verdi);
