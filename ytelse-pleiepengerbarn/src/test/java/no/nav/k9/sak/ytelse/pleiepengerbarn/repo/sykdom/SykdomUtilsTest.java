@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
@@ -31,6 +32,40 @@ class SykdomUtilsTest {
 
         final NavigableSet<LocalDateSegment<SykdomVurderingVersjon>> segments = SykdomUtils.tilTidslinje(versjoner).toSegments();
         assertThat(segments.size()).isEqualTo(2);
+    }
+    
+    @Test
+    public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdag() {
+        var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
+        var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
+        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var segments = utvidedePerioder.toSegments();
+        assertThat(segments.size()).isEqualTo(0);
+    }
+    
+    @Test
+    public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdagMidten() {
+        var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), true);
+        var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 3), LocalDate.of(2020, 1, 3), true);
+        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var segments = utvidedePerioder.toSegments();
+        assertThat(segments.size()).isEqualTo(2);
+        assertThat(segments.first().getFom()).isEqualTo(LocalDate.of(2020, 1, 1));
+        assertThat(segments.first().getTom()).isEqualTo(LocalDate.of(2020, 1, 2));
+        assertThat(segments.last().getFom()).isEqualTo(LocalDate.of(2020, 1, 4));
+        assertThat(segments.last().getTom()).isEqualTo(LocalDate.of(2020, 1, 5));
+
+    }
+    
+    @Test
+    public void kunPerioderSomIkkeFinnesISkalStøtteEnkeltdagSlutten() {
+        var perioder = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 5), true);
+        var perdioderSomTrekkesFra = new LocalDateTimeline<Boolean>(LocalDate.of(2020, 1, 5), LocalDate.of(2020, 1, 5), true);
+        var utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(perioder, perdioderSomTrekkesFra);
+        var segments = utvidedePerioder.toSegments();
+        assertThat(segments.size()).isEqualTo(1);
+        assertThat(segments.first().getFom()).isEqualTo(LocalDate.of(2020, 1, 1));
+        assertThat(segments.first().getTom()).isEqualTo(LocalDate.of(2020, 1, 4));
     }
     
     @Test
