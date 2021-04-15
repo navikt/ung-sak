@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ class TrekkUtOppgittFraværPeriode {
     private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper;
     private VurderSøknadsfrist vurderSøknadsfrist;
 
+    @Inject
     TrekkUtOppgittFraværPeriode(VurderSøknadsfrist vurderSøknadsfrist,
                                 InntektsmeldingSøktePerioderMapper inntektsmeldingMapper) {
         this.vurderSøknadsfrist = vurderSøknadsfrist;

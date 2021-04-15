@@ -92,15 +92,27 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
     }
 
     public static DatoIntervallEntitet fra(Periode periode) {
-        if (periode.getFom() != null && periode.getTom() != null) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
-        } else if (periode.getFom() != null) {
-            return DatoIntervallEntitet.fraOgMed(periode.getFom());
-        } else if (periode.getTom() != null) {
-            return DatoIntervallEntitet.tilOgMed(periode.getTom());
+        LocalDate fom = periode.getFom();
+        LocalDate tom = periode.getTom();
+        return fra(fom, tom);
+    }
+
+    private static DatoIntervallEntitet fra(LocalDate fom, LocalDate tom) {
+        if (fom != null && tom != null) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+        } else if (fom != null) {
+            return DatoIntervallEntitet.fraOgMed(fom);
+        } else if (tom != null) {
+            return DatoIntervallEntitet.tilOgMed(tom);
         } else {
             return DatoIntervallEntitet.fraOgMedTilOgMed(TIDENES_BEGYNNELSE, TIDENES_ENDE);
         }
+    }
+
+    public static DatoIntervallEntitet fra(LocalDateInterval ld) {
+        LocalDate fom = ld.isOpenStart() ? null : ld.getFomDato();
+        LocalDate tom = ld.isOpenEnd() ? null : ld.getTomDato();
+        return DatoIntervallEntitet.fra(fom, tom);
     }
 
     public static DatoIntervallEntitet minmax(Collection<DatoIntervallEntitet> perioder) {

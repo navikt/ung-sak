@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.FraværÅrsakKodeConverter;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -37,7 +39,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Entity(name = "OmsorgspengerFraværPeriode")
 @Table(name = "OMP_OPPGITT_FRAVAER_PERIODE")
 @Immutable
-public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
+public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, SøktPeriodeData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMP_OPPGITT_FRAVAER_PERIODE")
@@ -112,6 +114,10 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
         this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, fraværÅrsak);
     }
 
+    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, OppgittFraværPeriode fra) {
+        this(null, fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak());
+    }
+
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {
         this.journalpostId = periode.journalpostId;
         this.arbeidsgiver = periode.arbeidsgiver;
@@ -166,6 +172,13 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
 
     public FraværÅrsak getFraværÅrsak() {
         return fraværÅrsak;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> V getPayload() {
+        // et lite objekt med periode dataene (ikke periode, ikke journalpostid) til sammenligning
+        return (V) Arrays.asList(fraværPerDag, aktivitetType, fraværÅrsak, arbeidsgiver, arbeidsforholdRef);
     }
 
     @Override
