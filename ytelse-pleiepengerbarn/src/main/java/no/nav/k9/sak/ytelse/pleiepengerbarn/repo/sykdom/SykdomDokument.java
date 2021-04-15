@@ -105,6 +105,13 @@ public class SykdomDokument {
         return informasjon.getMottattTidspunkt();
     }
 
+    public Long getVersjon() {
+        if (informasjon == null) {
+            throw new IllegalStateException("Dokument er ikke riktig initialisert!");
+        }
+        return informasjon.getVersjon();
+    }
+
 
     public Long getId() {
         return id;
