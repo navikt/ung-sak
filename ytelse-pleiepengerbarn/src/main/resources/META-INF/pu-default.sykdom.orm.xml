@@ -10,6 +10,7 @@
     <sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET" />
     <sequence-generator name="SEQ_SYKDOM_VURDERING_PERIODE" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_PERIODE" />
     <sequence-generator name="SEQ_SYKDOM_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT" />
+    <sequence-generator name="SEQ_SYKDOM_DOKUMENT_INFORMASJON" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT_INFORMASJON" />
     <sequence-generator name="SEQ_SYKDOM_DOKUMENT_SAK" allocation-size="5" sequence-name="SEQ_SYKDOM_DOKUMENT_SAK" />
     <sequence-generator name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" allocation-size="5" sequence-name="SEQ_SYKDOM_VURDERING_VERSJON_DOKUMENT" />
     <sequence-generator name="SEQ_SYKDOM_GRUNNLAG" allocation-size="5" sequence-name="SEQ_SYKDOM_GRUNNLAG" />
@@ -31,6 +32,7 @@
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjonBesluttet" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument" />
+    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentSak" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling" />

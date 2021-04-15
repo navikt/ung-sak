@@ -45,7 +45,7 @@ public class SykdomDokumentEndringDto {
     @NotNull
     private SykdomDokumentType type;
 
-    @JsonProperty(value = "datert", required = true)
+    @JsonProperty(value = "datert")
     @Valid
     @NotNull
     private LocalDate datert;

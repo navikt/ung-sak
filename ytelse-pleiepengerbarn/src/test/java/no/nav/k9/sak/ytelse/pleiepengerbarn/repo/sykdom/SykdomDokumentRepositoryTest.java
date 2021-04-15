@@ -36,7 +36,8 @@ class SykdomDokumentRepositoryTest {
         final JournalpostId journalpostId = new JournalpostId("journalpostId");
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
-        final SykdomDokument dokument = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, nå, journalpostId, null, endretAv, nå, endretAv, nå);
+        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
@@ -45,11 +46,43 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
-        final SykdomDokument dokument2 = new SykdomDokument(SykdomDokumentType.UKLASSIFISERT, nå, journalpostId, null, endretAv, nå, endretAv, nå);
+        final SykdomDokumentInformasjon informasjon2 = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, endretAv, nå);
         repo.lagre(dokument2, annenPleietrengendeAktørId);
 
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
         assertThat(repo.hentAlleDokumenterFor(annenPleietrengendeAktørId).size()).isEqualTo(1);
+    }
+
+    @Test
+    void lagreDokumentOgOppdaterInformasjon() {
+        final String endretAv = "saksbehandler";
+        final LocalDateTime nå = LocalDateTime.now();
+        final JournalpostId journalpostId = new JournalpostId("journalpostId");
+
+        final AktørId pleietrengendeAktørId = new AktørId("lala");
+        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, endretAv, nå);
+        repo.lagre(dokument, pleietrengendeAktørId);
+
+        final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        assertThat(dokumenter.size()).isEqualTo(1);
+        assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
+        assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
+
+        dokument = dokumenter.get(0);
+        final SykdomDokumentInformasjon nyInformasjon = new SykdomDokumentInformasjon(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS, nå.toLocalDate(), nå, 1L, endretAv, nå);
+        dokument.setInformasjon(nyInformasjon);
+
+        repo.oppdater(dokument.getInformasjon());
+        List<SykdomDokument> oppdaterteDokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
+        assertThat(oppdaterteDokumenter.size()).isEqualTo(1);
+        final SykdomDokumentInformasjon oppdatertInformasjon = oppdaterteDokumenter.get(0).getInformasjon();
+
+        assertThat(oppdatertInformasjon.getVersjon()).isEqualTo(1L);
+        assertThat(oppdatertInformasjon.getType()).isEqualTo(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS);
+        assertThat(repo.hentDokument(dokumenter.get(0).getId(), pleietrengendeAktørId).isPresent());
+        assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
     }
 
     @Test
