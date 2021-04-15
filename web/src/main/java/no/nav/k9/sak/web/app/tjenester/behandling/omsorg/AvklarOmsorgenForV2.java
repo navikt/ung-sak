@@ -44,7 +44,7 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
         Long behandlingId = param.getBehandlingId();
         
         // TODO Omsorg: Løkke over endringene slik at vi får bedre historikk=
-        lagHistorikkInnslag(param, "Lagt til manuell vurdering.");
+        lagHistorikkInnslag(param, "Omsorg manuelt behandlet.");
         
         final List<OmsorgenForSaksbehandlervurdering> nyeVurderinger = toOmsorgenForSaksbehandlervurderinger(dto);
         omsorgenForGrunnlagRepository.lagreNyeVurderinger(behandlingId, nyeVurderinger);
