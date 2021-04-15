@@ -199,7 +199,7 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey {
             ", fraværÅrsak=" + fraværÅrsak +
             (arbeidsgiver != null ? ", arbeidsgiver=" + arbeidsgiver : "") +
             (arbeidsforholdRef != null ? ", arbeidsforholdRef=" + arbeidsforholdRef : "") +
-            (fraværPerDag != null ? ", jobberNormaltPerUke=" + fraværPerDag : "") +
+            (fraværPerDag != null ? ", fraværPerDag=" + fraværPerDag : "") +
             ", versjon=" + versjon +
             '>';
     }
