@@ -35,9 +35,9 @@ public class VedtaksbrevHåndterer {
 
     @Inject
     public VedtaksbrevHåndterer(VedtakVarselRepository vedtakVarselRepository,
-                         HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
-                         OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
-                         VedtakTjeneste vedtakTjeneste) {
+                                HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
+                                OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
+                                VedtakTjeneste vedtakTjeneste) {
         this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
@@ -47,15 +47,14 @@ public class VedtaksbrevHåndterer {
     void oppdaterVedtaksbrev(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
         AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
         Behandling behandling = param.getBehandling();
+
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
-
             settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
-
-            if (!AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
-                AksjonspunktDefinisjon aksjonspunktDefinisjon1 = AksjonspunktDefinisjon.fraKode(dto.getKode());
-                behandling.getÅpentAksjonspunktMedDefinisjonOptional(aksjonspunktDefinisjon1)
+            boolean erForeslåVedtakAksjonspunkt = AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon);
+            if (!erForeslåVedtakAksjonspunkt) {
+                behandling.getÅpentAksjonspunktMedDefinisjonOptional(aksjonspunktDefinisjon)
                     .ifPresent(ap -> builder.medAvbruttAksjonspunkt());
-                registrerNyttKontrollpunktIAksjonspunktRepo(behandling, builder);
+                registerForeslåVedtakAksjonspunkt(behandling, builder);
             }
         }
 
@@ -102,7 +101,7 @@ public class VedtaksbrevHåndterer {
             && behandlingsresultat.getAvslagarsakFritekst() != null;
     }
 
-    private void registrerNyttKontrollpunktIAksjonspunktRepo(Behandling behandling, OppdateringResultat.Builder builder) {
+    private void registerForeslåVedtakAksjonspunkt(Behandling behandling, OppdateringResultat.Builder builder) {
         AksjonspunktDefinisjon foreslaVedtak = AksjonspunktDefinisjon.FORESLÅ_VEDTAK;
         AksjonspunktStatus target = behandling.getAksjonspunktMedDefinisjonOptional(foreslaVedtak)
             .map(ap -> AksjonspunktStatus.AVBRUTT.equals(ap.getStatus()) ? AksjonspunktStatus.OPPRETTET : ap.getStatus()).orElse(AksjonspunktStatus.UTFØRT);
