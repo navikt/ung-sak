@@ -205,11 +205,7 @@ public class SykdomVurderingService {
         final Optional<SykdomGrunnlagBehandling> grunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, List.of());
 
-        boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(grunnlagBehandling, utledetGrunnlag);
-
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(grunnlagBehandling, utledetGrunnlag);
-
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
+        return sammenlignGrunnlag(grunnlagBehandling, utledetGrunnlag);
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(
@@ -220,8 +216,11 @@ public class SykdomVurderingService {
         final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, nyeVurderingsperioder);
 
-        boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
+        return sammenlignGrunnlag(forrigeGrunnlagBehandling, utledetGrunnlag);
+    }
 
+    private SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+        boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
@@ -248,11 +247,11 @@ public class SykdomVurderingService {
         List<String> forrigeDiagnosekoder;
         if (grunnlagBehandling.isPresent()) {
             final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get().getGrunnlag();
-            forrigeDiagnosekoder = forrigeGrunnlag.getDiagnosekoder().getDiagnosekoder().stream().map(d -> d.getDiagnosekode()).sorted().collect(Collectors.toList());
+            forrigeDiagnosekoder = forrigeGrunnlag.getSammenlignbarDiagnoseliste();
         } else {
             forrigeDiagnosekoder = Collections.emptyList();
         }
-        final List<String> nyeDiagnosekoder = utledetGrunnlag.getDiagnosekoder().getDiagnosekoder().stream().map(d -> d.getDiagnosekode()).sorted().collect(Collectors.toList());
+        final List<String> nyeDiagnosekoder = utledetGrunnlag.getSammenlignbarDiagnoseliste();
 
         return !forrigeDiagnosekoder.equals(nyeDiagnosekoder);
     }
