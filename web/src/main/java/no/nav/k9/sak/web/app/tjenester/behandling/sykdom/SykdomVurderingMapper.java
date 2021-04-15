@@ -15,6 +15,7 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOpprettelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingVersjonDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentOversiktMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
@@ -41,7 +42,7 @@ public class SykdomVurderingMapper {
      * @param versjoner Versjonene som skal tas med i DTOen.
      * @return En SykdomVurderingDto der kun angitte versjoner har blitt tatt med.
      */
-    public SykdomVurderingDto map(UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> alleDokumenter, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
+    public SykdomVurderingDto map(AktørId aktørId, UUID behandlingUuid, List<SykdomVurderingVersjon> versjoner, List<SykdomDokument> alleDokumenter, SykdomVurderingerOgPerioder sykdomUtlededePerioder) {
         final SykdomVurdering vurdering = versjoner.get(0).getSykdomVurdering();
 
         if (versjoner.stream().anyMatch(v -> v.getSykdomVurdering() != vurdering)) {
@@ -54,7 +55,7 @@ public class SykdomVurderingMapper {
                     v.getTekst(),
                     v.getResultat(),
                     mapPerioder(v.getPerioder()),
-                    mapDokumenter(behandlingUuid, v.getDokumenter(), alleDokumenter),
+                    mapDokumenter(aktørId, behandlingUuid, v.getDokumenter(), alleDokumenter),
                     v.getEndretAv(),
                     v.getEndretTidspunkt())
             )
@@ -72,9 +73,9 @@ public class SykdomVurderingMapper {
     }
 
 
-    private List<SykdomDokumentDto> mapDokumenter(UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> alleDokumenter) {
+    private List<SykdomDokumentDto> mapDokumenter(AktørId aktørId, UUID behandlingUuid, List<SykdomDokument> tilknyttedeDokumenter, List<SykdomDokument> alleDokumenter) {
         final Set<Long> ids = tilknyttedeDokumenter.stream().map(d -> d.getId()).collect(Collectors.toUnmodifiableSet());
-        return dokumentMapper.mapSykdomsdokumenter(behandlingUuid, alleDokumenter, ids);
+        return dokumentMapper.mapSykdomsdokumenter(aktørId, behandlingUuid, alleDokumenter, ids);
     }
 
 

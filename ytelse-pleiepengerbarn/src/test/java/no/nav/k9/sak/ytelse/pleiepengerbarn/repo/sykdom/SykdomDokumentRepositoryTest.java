@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,13 +16,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -37,7 +37,7 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, endretAv, nå);
+        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
@@ -47,7 +47,7 @@ class SykdomDokumentRepositoryTest {
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
         final SykdomDokumentInformasjon informasjon2 = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, endretAv, nå);
+        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, null, null, null, endretAv, nå);
         repo.lagre(dokument2, annenPleietrengendeAktørId);
 
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
@@ -62,7 +62,7 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, endretAv, nå);
+        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);

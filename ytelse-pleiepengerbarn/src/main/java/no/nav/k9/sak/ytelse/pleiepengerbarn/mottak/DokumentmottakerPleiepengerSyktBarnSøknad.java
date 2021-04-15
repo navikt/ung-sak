@@ -73,7 +73,8 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(journalpostId,
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
+            journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             søknad.getMottattDato().toLocalDateTime());
     }
