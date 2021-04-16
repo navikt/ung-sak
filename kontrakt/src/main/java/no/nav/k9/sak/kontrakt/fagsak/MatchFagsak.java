@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -39,11 +40,13 @@ public class MatchFagsak {
 
     @JsonInclude(value = Include.NON_ABSENT)
     @JsonProperty(value = "pleietrengendeIdenter", required = false)
+    @Size(max = 20)
     @Valid
     private List<PersonIdent> pleietrengendeIdenter;
 
     @JsonInclude(value = Include.NON_ABSENT)
     @JsonProperty(value = "relatertPersonIdenter", required = false)
+    @Size(max = 20)
     @Valid
     private List<PersonIdent> relatertPersonIdenter;
 
