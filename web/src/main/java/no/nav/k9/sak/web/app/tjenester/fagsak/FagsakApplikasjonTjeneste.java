@@ -75,6 +75,13 @@ public class FagsakApplikasjonTjeneste {
 
     }
 
+    /**
+     * Finner matchende fagsaker for ytelse+bruker+periode .
+     * Hvis pleietrengende/relatertAnnenPart oppgis matches disse også. Merk dersom fagsak har pleietrengende/relatertAnnenPart OG det ikke
+     * oppgis som input, vil ikke fagsaken matche.
+     * Dette er lagt på som begrensning, slik at all tilgangskontroll håndteres før søker utføres (caller må kjenne til alle personer han ønsker
+     * å søke etter).
+     */
     public List<FagsakInfoDto> matchFagsaker(FagsakYtelseType ytelseType,
                                              PersonIdent bruker,
                                              Periode periode,
@@ -108,37 +115,28 @@ public class FagsakApplikasjonTjeneste {
                 if (ident.erAktørId()) {
                     map.put(new AktørId(ident.getAktørId()), ident);
                 } else if (ident.erNorskIdent()) {
-                    map.put(finnAktørId(ident), ident);
+                    AktørId aktørId = finnAktørId(ident);
+                    map.put(aktørId, ident);
                 }
             }
 
             boolean matcher(Fagsak f) {
                 boolean match = true;
-                if (f.getPleietrengendeAktørId() != null && !mapPleietrengende.isEmpty()) {
+                if (f.getPleietrengendeAktørId() != null) {
                     match &= mapPleietrengende.containsKey(f.getPleietrengendeAktørId());
                 }
-                if (match && f.getRelatertPersonAktørId() != null && !mapRelatertAnnenPart.isEmpty()) {
+                if (match && f.getRelatertPersonAktørId() != null) {
                     match &= mapRelatertAnnenPart.containsKey(f.getRelatertPersonAktørId());
                 }
                 return match;
             }
 
             PersonIdent getPleietrengende(AktørId aktørId) {
-                var v = mapPleietrengende.get(aktørId);
-                if (v == null && aktørId != null) {
-                    v = personinfoAdapter.hentIdentForAktørId(aktørId).orElse(null);
-                    mapPleietrengende.put(aktørId, v);
-                }
-                return v;
+                return mapPleietrengende.get(aktørId);
             }
 
             PersonIdent getRelatertAnnenPart(AktørId aktørId) {
-                var v = mapRelatertAnnenPart.get(aktørId);
-                if (v == null && aktørId != null) {
-                    v = personinfoAdapter.hentIdentForAktørId(aktørId).orElse(null);
-                    mapRelatertAnnenPart.put(aktørId, v);
-                }
-                return v;
+                return mapRelatertAnnenPart.get(aktørId);
             }
 
         }
