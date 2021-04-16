@@ -42,11 +42,11 @@ class OmsorgenForDtoMapper {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
     }
 
-    
+
     public OmsorgenForOversiktDto map(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
         final boolean tvingManuellVurdering = false;
         final var systemdata = hentSystemdata(behandlingId, aktørId, optPleietrengendeAktørId);
-        
+
         final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
             return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, List.of());
@@ -56,14 +56,14 @@ class OmsorgenForDtoMapper {
     }
 
     private Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
-    	final Optional<SøknadsperiodeGrunnlag> søknadsgrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingId);
+        final Optional<SøknadsperiodeGrunnlag> søknadsgrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingId);
         var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
-    	if (søknadsgrunnlag.isEmpty()
-    			|| søknadsgrunnlag.get().getOppgitteSøknadsperioder() == null
-    			|| søknadsgrunnlag.get().getOppgitteSøknadsperioder().getPerioder() == null
-    			|| pleietrengende.isEmpty()) {
-    		return new Systemdata(false, false);
-    	}
+        if (søknadsgrunnlag.isEmpty()
+                || søknadsgrunnlag.get().getOppgitteSøknadsperioder() == null
+                || søknadsgrunnlag.get().getOppgitteSøknadsperioder().getPerioder() == null
+                || pleietrengende.isEmpty()) {
+            return new Systemdata(false, false);
+        }
         var søknadsperioder = søknadsgrunnlag.get().getOppgitteSøknadsperioder();
         var periode = mapTilPeriode(søknadsperioder.getPerioder());
 
@@ -77,7 +77,7 @@ class OmsorgenForDtoMapper {
 
         var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
         var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
-        
+
         return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
 
     }
@@ -97,42 +97,42 @@ class OmsorgenForDtoMapper {
     }
 
     private DatoIntervallEntitet mapTilPeriode(Set<Søknadsperioder> søknadsperioder) {
-    	final List<DatoIntervallEntitet> perioder = søknadsperioder.stream()
-    			.map(p -> p.getPerioder())
-    			.flatMap(Set::stream)
-    			.map(s -> s.getPeriode())
-    			.collect(Collectors.toList());
-    	
+        final List<DatoIntervallEntitet> perioder = søknadsperioder.stream()
+                .map(p -> p.getPerioder())
+                .flatMap(Set::stream)
+                .map(s -> s.getPeriode())
+                .collect(Collectors.toList());
+
         final var fom = perioder
-        		.stream()
-        		.map(DatoIntervallEntitet::getFomDato)
-        		.min(LocalDate::compareTo)
-        		.orElseThrow();
-        
+                .stream()
+                .map(DatoIntervallEntitet::getFomDato)
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+
         final var tom = perioder
-        		.stream()
-        		.map(DatoIntervallEntitet::getTomDato)
-        		.max(LocalDate::compareTo)
-        		.orElseThrow();
-        
+                .stream()
+                .map(DatoIntervallEntitet::getTomDato)
+                .max(LocalDate::compareTo)
+                .orElseThrow();
+
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
-    
+
     private static class Systemdata {
         private final boolean registrertForeldrerelasjon;
         private final boolean registrertSammeBosted;
-        
-        
+
+
         public Systemdata(boolean registrertForeldrerelasjon, boolean registrertSammeBosted) {
             this.registrertForeldrerelasjon = registrertForeldrerelasjon;
             this.registrertSammeBosted = registrertSammeBosted;
         }
-        
-        
+
+
         public boolean isRegistrertForeldrerelasjon() {
             return registrertForeldrerelasjon;
         }
-        
+
         public boolean isRegistrertSammeBosted() {
             return registrertSammeBosted;
         }
