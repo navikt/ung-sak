@@ -1,11 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,12 +76,9 @@ public class TrekkUtFraværTjeneste {
             var fraværFraKravDokument = fraværPåBehandling(behandling);
             log.info("Legger til totalt {} perioder fra inntektsmeldinger og søknader", fraværFraKravDokument.size());
             if (fraværFraKravDokument.isEmpty()) {
-                // Dette bør da være manuelle "revurderinger" hvor vi behandler samme periode som forrige behandling på nytt
-                var oppgittOpt = annetOppgittFravær(behandlingId);
-                fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
-            } else {
-                fravær = fraværFraKravDokument;
+                throw new IllegalArgumentException("Forventer ny periode til behandling fra IM eller søknad, siden dette ikke er manuell revurdering.");
             }
+            fravær = fraværFraKravDokument;
         }
         log.info("Fravær har totalt {} perioder: {}",
             fravær.size(),
@@ -94,10 +89,6 @@ public class TrekkUtFraværTjeneste {
             throw new IllegalStateException("Utvikler feil, forventer fraværsperioder til behandlingen");
         }
         return new OppgittFravær(fravær);
-    }
-
-    Optional<OppgittFravær> annetOppgittFravær(Long behandlingId) {
-        return grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
     }
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
