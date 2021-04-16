@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell;
 
-import java.util.Objects;
-
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -17,20 +15,16 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
 
     @Override
     public Evaluation evaluate(OmsorgenForVilkårGrunnlag grunnlag) {
-
+        if (grunnlag.getErOmsorgsPerson() != null && grunnlag.getErOmsorgsPerson()) {
+            return ja();
+        }
+        
         final var relasjon = grunnlag.getRelasjonMellomSøkerOgPleietrengende();
         if (relasjon != null && erMorEllerFarTilPleietrengende(relasjon) && grunnlag.getErOmsorgsPerson() == null) {
             return ja();
         }
-        if (grunnlag.getErOmsorgsPerson() != null && grunnlag.getErOmsorgsPerson()) {
-            return ja();
-        }
 
         return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
-    }
-
-    private boolean saksbehandlerBekreftetOmsorgen(OmsorgenForVilkårGrunnlag grunnlag) {
-        return Objects.equals(grunnlag.getErOmsorgsPerson(), true);
     }
 
     private boolean harSammeBosted(OmsorgenForVilkårGrunnlag grunnlag) {

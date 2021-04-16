@@ -120,12 +120,10 @@ class SøknadOversetter {
     }
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
-        final OmsorgenForPeriode omsorgForPeriode = new OmsorgenForPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(),periode.getTilOgMed()),
+        final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
+                DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
                 omsorg.getRelasjonTilBarnet(),
-                omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "",
-                null,
-                Resultat.IKKE_VURDERT);
+                omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "");
         omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
     }
 

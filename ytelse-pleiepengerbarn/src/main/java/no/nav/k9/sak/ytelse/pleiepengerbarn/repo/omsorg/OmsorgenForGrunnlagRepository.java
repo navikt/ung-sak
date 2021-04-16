@@ -24,9 +24,6 @@ public class OmsorgenForGrunnlagRepository {
 
     private EntityManager entityManager;
 
-    OmsorgenForGrunnlagRepository() {
-        // CDI
-    }
 
     @Inject
     public OmsorgenForGrunnlagRepository(EntityManager entityManager) {
@@ -34,6 +31,7 @@ public class OmsorgenForGrunnlagRepository {
         this.entityManager = entityManager;
     }
 
+    
     public OmsorgenForGrunnlag hent(Long behandlingId) {
         return hentHvisEksisterer(behandlingId).orElseThrow();
     }
@@ -45,13 +43,6 @@ public class OmsorgenForGrunnlagRepository {
 
         return hentEksisterendeGrunnlag(behandlingId);
     }
-
-    /*
-    public void lagreNyePeriode(Long behandlingId, OmsorgenFor omsorgenFor) {
-        var omsorgenForGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        lagre(behandlingId, omsorgenFor);
-    }
-    */
 
     public void lagre(Long behandlingId, OmsorgenFor omsorgenFor) {
         final Optional<OmsorgenForGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);

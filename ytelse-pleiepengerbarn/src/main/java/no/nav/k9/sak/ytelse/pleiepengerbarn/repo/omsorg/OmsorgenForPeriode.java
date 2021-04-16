@@ -172,4 +172,9 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
             return false;
         return true;
     }
+    
+    public static final OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, String relasjon, String relasjonsbeskrivelse) {
+    	return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT);
+
+    }
 }

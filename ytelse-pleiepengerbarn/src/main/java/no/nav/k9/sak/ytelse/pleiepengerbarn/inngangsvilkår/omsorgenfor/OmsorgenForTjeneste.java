@@ -121,13 +121,7 @@ public class OmsorgenForTjeneste {
             .stream()
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .collect(Collectors.toList());
-        
-        // TODO OMSORG: Map inn verdi fremfor null:
-        /*
-        return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), omsorgenForGrunnlag.map(OmsorgenForGrunnlag::getOmsorgenFor).map(OmsorgenFor::getHarOmsorgFor).orElse(null));
-            */
-        
+
         return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
                 mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
     } 
