@@ -75,15 +75,15 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     }
 
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode) {
-        this(omsorgenForPeriode.periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjon, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
+        this(omsorgenForPeriode.periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
     }
     
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode) {
-        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjon, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
+        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
     }
     
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode, OmsorgenForSaksbehandlervurdering vurdering) {
-        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjon, vurdering.getBegrunnelse(), vurdering.getResultat());
+        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, vurdering.getBegrunnelse(), vurdering.getResultat());
     }
 
     public DatoIntervallEntitet getPeriode() {
