@@ -20,7 +20,7 @@ public class PersonDto {
     @JsonProperty("alder")
     private Integer alder;
 
-    @JsonProperty("diskresjonskode")
+    @JsonProperty(value = "diskresjonskode", required = false)
     private String diskresjonskode;
 
     @JsonProperty("dodsdato")

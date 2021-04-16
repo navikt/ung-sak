@@ -34,6 +34,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
     private static final int[] CHECKSUM_TO_VECTOR = new int[] { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
 
     private static final int FNR_LENGDE = 11;
+    private static final int AKTOR_ID_LENGDE = 13;
 
     private static final int PERSONNR_LENGDE = 5;
 
@@ -125,12 +126,30 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
 
     @AbacAttributt(value = "fnr", masker = true)
     public String getIdent() {
-        return ident;
+        return erGyldigFnr(ident) ? ident : null;
+    }
+
+    @AbacAttributt(value = "aktorId", masker = true)
+    public String getAktørId() {
+        return erAktørId() ? ident : null;
+    }
+
+    public boolean erAktørId() {
+        return ident != null && ident.length() == AKTOR_ID_LENGDE;
+    }
+
+    /** Er FNR eller DNR. (ikke FDAT, eller AktørId). */
+    public boolean erNorskIdent() {
+        return erFnr() || erDnr();
+    }
+
+    public boolean erFnr() {
+        return erGyldigFnr(ident) && !erDnr();
     }
 
     public boolean erDnr() {
         int n = Character.digit(ident.charAt(0), 10);
-        return n > 3 && n <= 7;
+        return n > 3 && n <= 7 && erGyldigFnr(ident);
     }
 
     @Override
@@ -145,8 +164,4 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
         return isFdatNummer(getPersonnummer(ident));
     }
 
-    @Override
-    public String toString() {
-        return PersonIdent.class.getSimpleName() + "<ident=" + ident + ">";
-    }
 }
