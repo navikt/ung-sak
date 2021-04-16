@@ -1,5 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -11,43 +14,73 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarsel;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtaksbrevOverstyringDto;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
-public abstract class AbstractVedtaksbrevOverstyringshåndterer {
+@ApplicationScoped
+public class VedtaksbrevHåndterer {
     protected HistorikkTjenesteAdapter historikkApplikasjonTjeneste;
     VedtakVarselRepository vedtakVarselRepository;
     protected OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
     private VedtakTjeneste vedtakTjeneste;
 
-    AbstractVedtaksbrevOverstyringshåndterer() {
-        // for CDI proxy
+    VedtaksbrevHåndterer() {
+        //
     }
 
-    AbstractVedtaksbrevOverstyringshåndterer(VedtakVarselRepository vedtakVarselRepository,
-                                             HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
-                                             OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
-                                             VedtakTjeneste vedtakTjeneste) {
+    @Inject
+    public VedtaksbrevHåndterer(VedtakVarselRepository vedtakVarselRepository,
+                                HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
+                                OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
+                                VedtakTjeneste vedtakTjeneste) {
         this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
         this.vedtakTjeneste = vedtakTjeneste;
     }
 
-    void oppdaterVedtaksbrevForFritekst(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
+    void oppdaterVedtaksbrev(VedtaksbrevOverstyringDto dto, AksjonspunktOppdaterParameter param, OppdateringResultat.Builder builder) {
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
+        Behandling behandling = param.getBehandling();
+
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
-
-            Behandling behandling = param.getBehandling();
-            opprettToTrinnsKontrollpunktForFritekstBrev(dto, behandling, builder);
-            opprettAksjonspunktForFatterVedtak(builder);
-            opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
-            opprettHistorikkinnslag(behandling);
+            boolean erForeslåVedtakAksjonspunkt = AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon);
+            if (!erForeslåVedtakAksjonspunkt) {
+                behandling.getÅpentAksjonspunktMedDefinisjonOptional(aksjonspunktDefinisjon)
+                    .ifPresent(ap -> builder.medAvbruttAksjonspunkt());
+                registerForeslåVedtakAksjonspunkt(behandling, builder);
+            }
         }
+
+        opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
+        opprettAksjonspunktForFatterVedtak(builder);
+        opprettHistorikkinnslag(behandling);
+    }
+
+    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId) {
+        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(v -> {
+            v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker());
+            if (dto.isSkalUndertrykkeBrev()) {
+                v.setVedtaksbrev(Vedtaksbrev.INGEN);
+            }
+            vedtakVarselRepository.lagre(behandlingId, v);
+        });
+    }
+
+    void oppdaterBegrunnelse(Behandling behandling, String begrunnelse) {
+        vedtakVarselRepository.hentHvisEksisterer(behandling.getId()).ifPresent(behandlingsresultat -> {
+            if ((behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt() || begrunnelse != null)
+                || skalNullstilleFritekstfelt(behandling, behandlingsresultat)) {
+                behandlingsresultat.setAvslagarsakFritekst(begrunnelse);
+            }
+        });
+        behandling.setAnsvarligSaksbehandler(getCurrentUserId());
     }
 
     private void settFritekstBrev(Long behandlingId, String overskrift, String fritekst) {
@@ -59,36 +92,23 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         });
     }
 
-    private void opprettToTrinnsKontrollpunktForFritekstBrev(BekreftetAksjonspunktDto dto, Behandling behandling, OppdateringResultat.Builder builder) {
-        if (!behandling.isToTrinnsBehandling()) {
-            behandling.setToTrinnsBehandling();
-        }
-        builder.medTotrinn();
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
-        if (!AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
-            ekskluderOrginaltAksjonspunktFraTotrinnsVurdering(dto, behandling, builder);
-            registrerNyttKontrollpunktIAksjonspunktRepo(behandling, builder);
-        }
-    }
-
-    void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
+    private void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
         builder.medEkstraAksjonspunktResultat(AksjonspunktDefinisjon.FATTER_VEDTAK, AksjonspunktStatus.OPPRETTET);
     }
 
-    private void ekskluderOrginaltAksjonspunktFraTotrinnsVurdering(BekreftetAksjonspunktDto dto, Behandling behandling, OppdateringResultat.Builder builder) {
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
-        behandling.getÅpentAksjonspunktMedDefinisjonOptional(aksjonspunktDefinisjon)
-            .ifPresent(ap -> builder.medAvbruttAksjonspunkt());
+    private boolean skalNullstilleFritekstfelt(Behandling behandling, VedtakVarsel behandlingsresultat) {
+        return !behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()
+            && behandlingsresultat.getAvslagarsakFritekst() != null;
     }
 
-    private void registrerNyttKontrollpunktIAksjonspunktRepo(Behandling behandling, OppdateringResultat.Builder builder) {
+    private void registerForeslåVedtakAksjonspunkt(Behandling behandling, OppdateringResultat.Builder builder) {
         AksjonspunktDefinisjon foreslaVedtak = AksjonspunktDefinisjon.FORESLÅ_VEDTAK;
         AksjonspunktStatus target = behandling.getAksjonspunktMedDefinisjonOptional(foreslaVedtak)
             .map(ap -> AksjonspunktStatus.AVBRUTT.equals(ap.getStatus()) ? AksjonspunktStatus.OPPRETTET : ap.getStatus()).orElse(AksjonspunktStatus.UTFØRT);
         builder.medEkstraAksjonspunktResultat(foreslaVedtak, target);
     }
 
-    void opprettHistorikkinnslag(Behandling behandling) {
+    private void opprettHistorikkinnslag(Behandling behandling) {
         VedtakResultatType vedtakResultatType = vedtakTjeneste.utledVedtakResultatType(behandling);
 
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder()
@@ -104,14 +124,7 @@ public abstract class AbstractVedtaksbrevOverstyringshåndterer {
         historikkApplikasjonTjeneste.lagInnslag(innslag);
     }
 
-    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId) {
-        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(v -> {
-                v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker());
-                if (dto.isSkalUndertrykkeBrev()) {
-                    v.setVedtaksbrev(Vedtaksbrev.INGEN);
-                }
-                vedtakVarselRepository.lagre(behandlingId, v);
-            }
-        );
+    protected String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }
