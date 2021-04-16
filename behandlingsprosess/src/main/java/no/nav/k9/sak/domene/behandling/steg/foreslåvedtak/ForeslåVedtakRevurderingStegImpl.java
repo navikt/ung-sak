@@ -12,11 +12,13 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -27,6 +29,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
 
 @BehandlingStegRef(kode = "FORVEDSTEG")
 @BehandlingTypeRef("BT-004") //Revurdering
@@ -38,6 +41,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester;
+    private FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
@@ -45,11 +49,13 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
                                      BehandlingRepositoryProvider repositoryProvider,
-                                     @Any Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester) {
+                                     @Any Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester,
+                                     FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.endringIBeregningTjenester = endringIBeregningTjenester;
+        this.formidlingDokumentdataTjeneste = formidlingDokumentdataTjeneste;
     }
 
     @Override
@@ -96,4 +102,10 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         return endringIBeregningTjeneste.vurderUgunst(orginalBehandling, revurdering, skjæringstidspuntk);
     }
 
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
+        if (!BehandlingStegType.FORESLÅ_VEDTAK.equals(tilSteg)) {
+            formidlingDokumentdataTjeneste.slettAllData(kontekst.getBehandlingId());
+        }
+    }
 }

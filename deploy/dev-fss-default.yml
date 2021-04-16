@@ -155,6 +155,8 @@ spec:
       value: http://pdl-api.default/graphql
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
+    - name: K9_FORMIDLING_DOKUMENTDATA_URL
+      value: http://k9-formidling-dokumentdata.k9saksbehandling/k9/formidling/dokumentdata
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
