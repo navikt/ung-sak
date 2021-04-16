@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.behandling;
+package no.nav.k9.sak.kontrakt.fagsak;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -105,21 +105,18 @@ public class FagsakDto {
             return false;
 
         var other = (FagsakDto) o;
+        return Objects.equals(saksnummer, other.saksnummer)
+            && Objects.equals(sakstype, other.sakstype)
+            && Objects.equals(status, other.status)
+            && Objects.equals(person, other.person)
+            && Objects.equals(gyldigPeriode, other.gyldigPeriode)
+            && Objects.equals(pleietrengendeAktørId, other.pleietrengendeAktørId)
+            && Objects.equals(relatertPersonAktørId, other.relatertPersonAktørId);
+    }
 
-        if (!saksnummer.equals(other.saksnummer))
-            return false;
-        if (!sakstype.equals(other.sakstype))
-            return false;
-        if (!status.equals(other.status))
-            return false;
-        if (!person.equals(other.person))
-            return false;
-        if (opprettet != null ? !opprettet.equals(other.opprettet) : other.opprettet != null)
-            return false;
-        if (!Objects.equals(gyldigPeriode, other.gyldigPeriode))
-            return false;
-
-        return endret != null ? endret.equals(other.endret) : other.endret == null;
+    @Override
+    public int hashCode() {
+        return Objects.hash(saksnummer, sakstype, status, person, gyldigPeriode, pleietrengendeAktørId, relatertPersonAktørId);
     }
 
     public LocalDateTime getEndret() {
@@ -148,18 +145,6 @@ public class FagsakDto {
 
     public FagsakStatus getStatus() {
         return status;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = saksnummer.hashCode();
-        result = 31 * result + sakstype.hashCode();
-        result = 31 * result + status.hashCode();
-        result = 31 * result + person.hashCode();
-        result = 31 * result + (opprettet != null ? opprettet.hashCode() : 0);
-        result = 31 * result + (endret != null ? endret.hashCode() : 0);
-        result = 31 * result + (gyldigPeriode != null ? gyldigPeriode.hashCode() : 0);
-        return result;
     }
 
     public void setEndret(LocalDateTime endret) {
@@ -192,7 +177,7 @@ public class FagsakDto {
 
     @Override
     public String toString() {
-        return "<saksnummer=" + saksnummer +
+        return getClass().getSimpleName() + "<saksnummer=" + saksnummer +
             ", sakstype=" + sakstype +
             ", status=" + status +
             ", gyldigPeriode=" + gyldigPeriode +

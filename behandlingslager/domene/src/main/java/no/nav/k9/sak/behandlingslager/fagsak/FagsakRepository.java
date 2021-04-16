@@ -144,18 +144,23 @@ public class FagsakRepository {
     public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         Query query;
 
+        String sqlString = "select f.* from Fagsak f"
+            + " where "
+            + "   f.bruker_aktoer_id = :brukerAktørId"
+            + "   and f.ytelse_type = :ytelseType"
+            + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true"
+            + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id:pleietrengendeAktørId")
+            + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id:relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
         query = entityManager.createNativeQuery(
-            "select f.* from Fagsak f"
-                + " where "
-                + "       coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')"
-                + "   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
-                + "   and f.bruker_aktoer_id = :brukerAktørId"
-                + "   and f.ytelse_type = :ytelseType"
-                + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
+            sqlString,
             Fagsak.class); // NOSONAR
 
-        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
-        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
+        if (pleietrengendeAktørId != null) {
+            query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId.getId()));
+        }
+        if (relatertPersonAktørId != null) {
+            query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId.getId()));
+        }
         query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);

@@ -29,7 +29,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
-import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
+import no.nav.k9.sak.kontrakt.fagsak.FagsakDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
