@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,9 +12,6 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForDto;
 import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
@@ -22,11 +20,14 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 
 @ApplicationScoped
 class OmsorgenForDtoMapper {
 
-    private UttakRepository uttakRepository;
+    private SøknadsperiodeRepository søknadsperiodeRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
 
@@ -35,10 +36,10 @@ class OmsorgenForDtoMapper {
     }
 
     @Inject
-    public OmsorgenForDtoMapper(UttakRepository uttakRepository, OmsorgenForGrunnlagRepository omsorgenForRepository, BasisPersonopplysningTjeneste personopplysningTjeneste) {
-        this.uttakRepository = uttakRepository;
+    public OmsorgenForDtoMapper(OmsorgenForGrunnlagRepository omsorgenForRepository, BasisPersonopplysningTjeneste personopplysningTjeneste, SøknadsperiodeRepository søknadsperiodeRepository) {
         this.omsorgenForGrunnlagRepository = omsorgenForRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
     }
 
     
@@ -55,25 +56,30 @@ class OmsorgenForDtoMapper {
     }
 
     private Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
-        var søknadsperioder = uttakRepository.hentOppgittSøknadsperioderHvisEksisterer(behandlingId);
-        if (søknadsperioder.isPresent()) {
-            var periode = mapTilPeriode(søknadsperioder.get());
-            var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
-            if (pleietrengende.isPresent()) {
-                var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
-                if (optAggregat.isPresent()) {
-                    var aggregat = optAggregat.get();
-                    var pleietrengendeAktørId = pleietrengende.get();
-                    var relasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengendeAktørId)).collect(Collectors.toList());
+    	final Optional<SøknadsperiodeGrunnlag> søknadsgrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingId);
+        var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
+    	if (søknadsgrunnlag.isEmpty()
+    			|| søknadsgrunnlag.get().getOppgitteSøknadsperioder() == null
+    			|| søknadsgrunnlag.get().getOppgitteSøknadsperioder().getPerioder() == null
+    			|| pleietrengende.isEmpty()) {
+    		return new Systemdata(false, false);
+    	}
+        var søknadsperioder = søknadsgrunnlag.get().getOppgitteSøknadsperioder();
+        var periode = mapTilPeriode(søknadsperioder.getPerioder());
 
-                    var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
-                    var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
-                    
-                    return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
-                }
-            }
+        var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
+        if (!optAggregat.isPresent()) {
+            return new Systemdata(false, false);
         }
-        return new Systemdata(false, false);
+        var aggregat = optAggregat.get();
+        var pleietrengendeAktørId = pleietrengende.get();
+        var relasjon = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengendeAktørId)).collect(Collectors.toList());
+
+        var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
+        var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
+        
+        return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
+
     }
 
     private List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder, boolean ikkeVurdertBlirOppfylt) {
@@ -90,18 +96,25 @@ class OmsorgenForDtoMapper {
         return new Periode(p.getPeriode().getFomDato(), p.getPeriode().getTomDato());
     }
 
-    private DatoIntervallEntitet mapTilPeriode(Søknadsperioder fordeling) {
-        final var perioder = fordeling.getPerioder();
-        final var fom = perioder.stream()
-            .map(Søknadsperiode::getPeriode)
-            .map(DatoIntervallEntitet::getFomDato)
-            .min(LocalDate::compareTo)
-            .orElseThrow();
-        final var tom = perioder.stream()
-            .map(Søknadsperiode::getPeriode)
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo)
-            .orElseThrow();
+    private DatoIntervallEntitet mapTilPeriode(Set<Søknadsperioder> søknadsperioder) {
+    	final List<DatoIntervallEntitet> perioder = søknadsperioder.stream()
+    			.map(p -> p.getPerioder())
+    			.flatMap(Set::stream)
+    			.map(s -> s.getPeriode())
+    			.collect(Collectors.toList());
+    	
+        final var fom = perioder
+        		.stream()
+        		.map(DatoIntervallEntitet::getFomDato)
+        		.min(LocalDate::compareTo)
+        		.orElseThrow();
+        
+        final var tom = perioder
+        		.stream()
+        		.map(DatoIntervallEntitet::getTomDato)
+        		.max(LocalDate::compareTo)
+        		.orElseThrow();
+        
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
     
