@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
@@ -36,7 +37,7 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVedtakAksjonspunktOppdaterer;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.OpprettToTrinnsgrunnlag;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.VedtaksbrevHåndterer;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -45,7 +46,7 @@ public class AksjonspunktOppdatererTest {
     @Inject
     public EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
     private TotrinnRepository totrinnRepository;
@@ -63,7 +64,7 @@ public class AksjonspunktOppdatererTest {
     private VedtakVarselRepository vedtakVarselRepository;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     }
 
@@ -74,8 +75,8 @@ public class AksjonspunktOppdatererTest {
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 
-        ForeslaVedtakAksjonspunktDto dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
-        ForeslåVedtakAksjonspunktOppdaterer foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(
+        var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
+        var vedtaksbrevHåndterer = new VedtaksbrevHåndterer(
             vedtakVarselRepository,
             mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
@@ -86,6 +87,8 @@ public class AksjonspunktOppdatererTest {
                 return "hello";
             }
         };
+
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer);
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");
     }
