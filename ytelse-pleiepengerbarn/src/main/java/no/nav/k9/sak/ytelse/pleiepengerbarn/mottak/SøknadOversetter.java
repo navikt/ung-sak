@@ -133,10 +133,13 @@ class SøknadOversetter {
         // TODO 18feb: Arbeidstid
         // TODO etter18feb: UttakPeriodeInfo
 
+        var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
+        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
+
         var perioderFraSøknad = new MapSøknadUttakPerioder(soknad, journalpostId).getPerioderFraSøknad();
         uttakPerioderGrunnlagRepository.lagre(behandlingId, perioderFraSøknad);
 
-        var maksPeriode = perioderFraSøknad.utledSøktPeriode();
+        var maksPeriode = mapUttakGrunnlag.getOppgittSøknadsperioder().getMaksPeriode();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
