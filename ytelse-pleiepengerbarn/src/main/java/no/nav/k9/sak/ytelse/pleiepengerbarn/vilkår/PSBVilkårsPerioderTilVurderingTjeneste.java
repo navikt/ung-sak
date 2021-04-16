@@ -70,6 +70,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         søktePerioder = new SøktePerioder(søknadsperiodeRepository);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
+        vilkårsPeriodisering.put(VilkårType.OMSORGEN_FOR, maksSøktePeriode);
     }
 
     @Override

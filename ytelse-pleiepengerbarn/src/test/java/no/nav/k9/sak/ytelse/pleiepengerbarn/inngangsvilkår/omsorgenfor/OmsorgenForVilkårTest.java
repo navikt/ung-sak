@@ -11,7 +11,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.BostedsAdresse;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkår;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.Relasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
@@ -20,7 +20,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med() {
-        final var grunnlag = new OmsorgenForGrunnlag(null,
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
             List.of(new BostedsAdresse("2", "a", null, null, "9999", "NOR")), null);
 
@@ -35,7 +35,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med_og_saksbehandler_ikke_har_vurdert() {
-        final var grunnlag = new OmsorgenForGrunnlag(null,
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
             List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")), null);
 
@@ -50,7 +50,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_far_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -63,7 +63,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_bor_sammen() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true), List.of(), List.of(), null);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -76,7 +76,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_far_ikke_bor_sammen_men_saksbehandler_mener_det_er_omsorg() {
-        final var grunnlag = new OmsorgenForGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of(), true);
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false), List.of(), List.of(), true);
 
         final var evaluation = new OmsorgenForVilkår().evaluer(grunnlag);
         EvaluationSummary summary = new EvaluationSummary(evaluation);

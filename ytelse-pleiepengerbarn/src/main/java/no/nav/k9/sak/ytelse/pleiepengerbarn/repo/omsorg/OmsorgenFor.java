@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.medisinsk;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,53 +19,54 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
-@Entity(name = "KontinuerligTilsyn")
-@Table(name = "MD_KONTINUERLIG_TILSYN")
-public class KontinuerligTilsyn extends BaseEntitet {
+@Entity(name = "OmsorgenFor")
+@Table(name = "OMSORGEN_FOR")
+public class OmsorgenFor extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MD_KONTINUERLIG_TILSYN")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OMSORGEN_FOR")
     private Long id;
 
     @Immutable
-    @OneToMany(mappedBy = "kontinuerligTilsyn", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<KontinuerligTilsynPeriode> perioder = new ArrayList<>();
+    @OneToMany(mappedBy = "omsorgenFor", cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    private List<OmsorgenForPeriode> perioder = new ArrayList<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    KontinuerligTilsyn() {
+    OmsorgenFor() {
         // hibernate
     }
 
-    KontinuerligTilsyn(KontinuerligTilsyn kontinuerligTilsyn) {
-        Objects.requireNonNull(kontinuerligTilsyn);
+    OmsorgenFor(OmsorgenFor omsorgenFor) {
+        Objects.requireNonNull(omsorgenFor);
 
-        this.perioder = kontinuerligTilsyn.getPerioder()
+        this.perioder = omsorgenFor.getPerioder()
             .stream()
-            .map(KontinuerligTilsynPeriode::new)
-            .peek(it -> it.setKontinuerligTilsyn(this))
+            .map(OmsorgenForPeriode::new)
+            .peek(it -> it.setOmsorgenFor(this))
             .collect(Collectors.toList());
     }
+
 
     public Long getId() {
         return id;
     }
 
-    public List<KontinuerligTilsynPeriode> getPerioder() {
+    public List<OmsorgenForPeriode> getPerioder() {
         return perioder;
     }
 
-    void setPerioder(List<KontinuerligTilsynPeriode> perioder) {
+    void setPerioder(List<OmsorgenForPeriode> perioder) {
         this.perioder = perioder.stream()
-            .peek(it -> it.setKontinuerligTilsyn(this))
+            .peek(it -> it.setOmsorgenFor(this))
             .collect(Collectors.toList());
     }
 
     @Override
     public String toString() {
-        return "KontinuerligTilsyn{" +
+        return "OmsorgenFor{" +
             "id=" + id +
             ", perioder=" + perioder +
             '}';
@@ -75,12 +76,14 @@ public class KontinuerligTilsyn extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        KontinuerligTilsyn kontinuerligTilsyn = (KontinuerligTilsyn) o;
-        return Objects.equals(perioder, kontinuerligTilsyn.perioder);
+        OmsorgenFor omsorgenFor = (OmsorgenFor) o;
+        return Objects.equals(perioder, omsorgenFor.perioder);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(perioder);
     }
+    
+
 }
