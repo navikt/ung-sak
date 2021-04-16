@@ -28,7 +28,7 @@ public class PersoninfoAdapterTest {
     private static final AktørId AKTØR_ID_BARN = AktørId.dummy();
 
     private static final PersonIdent PERSONIDENT_FNR_SØKER = new PersonIdent("07078516261");
-    private static final PersonIdent PERSONIDENT_FNR_BARN = new PersonIdent("02028033445");
+    private static final PersonIdent PERSONIDENT_FNR_BARN = new PersonIdent("02028033462");
 
     private Personinfo mockPersoninfo;
 
