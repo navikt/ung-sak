@@ -33,6 +33,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
@@ -52,11 +57,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.exception.TekniskException;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -85,6 +86,7 @@ public class SykdomDokumentRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
+    private SykdomVurderingRepository sykdomVurderingRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
 
@@ -93,9 +95,10 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
@@ -121,7 +124,7 @@ public class SykdomDokumentRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
+        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
     }
 
     @GET
@@ -249,7 +252,7 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.map(behandling.getUuid().toString(), dokumenter);
+        return sykdomDokumentOversiktMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid().toString(), dokumenter);
     }
 
     @POST
@@ -326,6 +329,9 @@ public class SykdomDokumentRestTjeneste {
             sykdomDokumentOpprettelseDto.getJournalpostId(),
             null,
             informasjon,
+            behandling.getUuid(),
+            behandling.getFagsak().getSaksnummer(),
+            sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
             getCurrentUserId(),
             nå);
 

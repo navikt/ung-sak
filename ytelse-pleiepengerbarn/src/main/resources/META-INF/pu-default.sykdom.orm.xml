@@ -33,7 +33,6 @@
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingPeriode" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon" />
-    <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentSak" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling" />
     <entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomSøktPeriode" />

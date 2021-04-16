@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +22,7 @@ import org.hibernate.annotations.JoinFormula;
 import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Entity(name = "SykdomDokument")
 @Table(name = "SYKDOM_DOKUMENT")
@@ -44,9 +46,15 @@ public class SykdomDokument {
     @Column(name = "DOKUMENT_INFO_ID", nullable = true)
     private String dokumentInfoId;
 
-    @OneToMany
-    @JoinColumn(name = "SYKDOM_DOKUMENT_ID")
-    private List<SykdomDokumentSak> dokumentSaker = new ArrayList<>();
+    @Column(name = "BEHANDLING_UUID")
+    private UUID behandlingUuid;
+    
+    @Column(name = "SAKSNUMMER")
+    private Saksnummer saksnummer;
+    
+    @ManyToOne
+    @JoinColumn(name = "PERSON_ID")
+    private SykdomPerson person;
 
     @DiffIgnore
     @Column(name = "OPPRETTET_AV", nullable = false, updatable = false)
@@ -64,6 +72,9 @@ public class SykdomDokument {
             JournalpostId journalpostId,
             String dokumentInfoId,
             SykdomDokumentInformasjon informasjon,
+            UUID behandlingUuid,
+            Saksnummer saksnummer,
+            SykdomPerson person,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
@@ -73,6 +84,9 @@ public class SykdomDokument {
         }
         informasjon.setDokument(this);
         this.informasjon = informasjon;
+        this.behandlingUuid = behandlingUuid;
+        this.saksnummer = saksnummer;
+        this.person = person;
         this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
         this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
     }
@@ -111,6 +125,18 @@ public class SykdomDokument {
         }
         return informasjon.getVersjon();
     }
+    
+    public UUID getBehandlingUuid() {
+        return behandlingUuid;
+    }
+    
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+    
+    public SykdomPerson getPerson() {
+        return person;
+    }
 
 
     public Long getId() {
@@ -143,10 +169,6 @@ public class SykdomDokument {
 
     public SykdomDokumentInformasjon getInformasjon() {
         return informasjon;
-    }
-
-    public List<SykdomDokumentSak> getDokumentSaker() {
-        return dokumentSaker;
     }
 
     public String getOpprettetAv() {

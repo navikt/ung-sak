@@ -18,13 +18,14 @@ import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 
 @Dependent
 public class SykdomsDokumentVedleggHåndterer {
@@ -32,15 +33,17 @@ public class SykdomsDokumentVedleggHåndterer {
     private static final Logger log = LoggerFactory.getLogger(SykdomsDokumentVedleggHåndterer.class);
 
     private SykdomDokumentRepository sykdomDokumentRepository;
+    private SykdomVurderingRepository sykdomVurderingRepository;
     private SafTjeneste safTjeneste;
 
     @Inject
-    public SykdomsDokumentVedleggHåndterer(SykdomDokumentRepository sykdomDokumentRepository, SafTjeneste safTjeneste) {
+    public SykdomsDokumentVedleggHåndterer(SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, SafTjeneste safTjeneste) {
         this.safTjeneste = safTjeneste;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
-    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt) {
+    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -84,6 +87,9 @@ public class SykdomsDokumentVedleggHåndterer {
                 journalpostId,
                 dokumentInfo.getDokumentInfoId(),
                 informasjon,
+                behandling.getUuid(),
+                behandling.getFagsak().getSaksnummer(),
+                sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);
             sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
