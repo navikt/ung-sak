@@ -41,7 +41,7 @@ public class SykdomDokumentOversiktMapper {
                         "" + d.getId(),
                         d.getVersjon().toString(),
                         d.getType(),
-                        aktørId.equals(d.getPerson().getAktørId()),
+                        !aktørId.equals(d.getPerson().getAktørId()),
                         d.getDatert(),
                         d.getMottattDato(),
                         d.getMottattTidspunkt(),
@@ -134,7 +134,7 @@ public class SykdomDokumentOversiktMapper {
                     "" + d.getId(),
                     d.getType(),
                     ids.contains(d.getId()),
-                    aktørId.equals(d.getPerson().getAktørId()),
+                    !aktørId.equals(d.getPerson().getAktørId()),
                     d.getDatert(),
                     behandlingUuid.equals(d.getBehandlingUuid()),
                     Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
