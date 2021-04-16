@@ -73,7 +73,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
         
-        if (harAksjonspunkt(samletOmsorgenForTidslinje)) {
+        if (!harAksjonspunkt(samletOmsorgenForTidslinje)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         }
         
@@ -92,10 +92,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
                     grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private DatoIntervallEntitet bestemPeriodeTilVurdering(final NavigableSet<DatoIntervallEntitet> perioder) {
