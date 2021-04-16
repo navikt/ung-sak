@@ -149,17 +149,17 @@ public class FagsakRepository {
             + "   f.bruker_aktoer_id = :brukerAktørId"
             + "   and f.ytelse_type = :ytelseType"
             + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true"
-            + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id:pleietrengendeAktørId")
-            + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id:relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
+            + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id = :pleietrengendeAktørId")
+            + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id = :relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
         query = entityManager.createNativeQuery(
             sqlString,
             Fagsak.class); // NOSONAR
 
         if (pleietrengendeAktørId != null) {
-            query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId.getId()));
+            query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
         }
         if (relatertPersonAktørId != null) {
-            query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId.getId()));
+            query.setParameter("relatertPersonAktørId", relatertPersonAktørId.getId());
         }
         query.setParameter("brukerAktørId", Objects.requireNonNull(bruker, "bruker").getId());
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
