@@ -67,11 +67,12 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
                 .medPeriode(avtale.getPeriode())
                 .medBegrunnelse(avtale.getBeskrivelse())
                 .medStillingsandel(finnStillingsprosent(registerAktivitet, skjæringstidspunkt));
-            harSaksbehandlerVurdert(builder, type, behandlingReferanse, registerAktivitet, vurderForSaksbehandling, grunnlag, opptjeningPeriode);
+            harSaksbehandlerVurdert(builder, type, behandlingReferanse, registerAktivitet, vurderForSaksbehandling, grunnlag, opptjeningPeriode, skjæringstidspunkt);
             settArbeidsgiverInformasjon(gjeldendeAktivitet(registerAktivitet, overstyrtAktivitet), builder);
             var input = new VurderStatusInput(type, behandlingReferanse);
             input.setGrunnlag(grunnlag);
             input.setOpptjeningPeriode(opptjeningPeriode);
+            input.setSkjæringstidspunkt(skjæringstidspunkt);
             input.setHarVærtSaksbehandlet(grunnlag.harBlittSaksbehandlet());
             input.setInntektsmeldinger(inntektsmeldinger);
             input.setRegisterAktivitet(registerAktivitet);
@@ -137,12 +138,13 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
 
     private static void harSaksbehandlerVurdert(OpptjeningsperiodeForSaksbehandling.Builder builder, OpptjeningAktivitetType type,
                                                 BehandlingReferanse behandlingReferanse, Yrkesaktivitet registerAktivitet,
-                                                OpptjeningAktivitetVurdering vurderForSaksbehandling, InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet opptjeningPeriode) {
+                                                OpptjeningAktivitetVurdering vurderForSaksbehandling, InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
         var input = new VurderStatusInput(type, behandlingReferanse);
         input.setHarVærtSaksbehandlet(false);
         input.setRegisterAktivitet(registerAktivitet);
         input.setGrunnlag(grunnlag);
         input.setOpptjeningPeriode(opptjeningPeriode);
+        input.setSkjæringstidspunkt(skjæringstidspunkt);
         if (vurderForSaksbehandling.vurderStatus(input).equals(VurderingsStatus.TIL_VURDERING)) {
             builder.medErManueltBehandlet();
         }

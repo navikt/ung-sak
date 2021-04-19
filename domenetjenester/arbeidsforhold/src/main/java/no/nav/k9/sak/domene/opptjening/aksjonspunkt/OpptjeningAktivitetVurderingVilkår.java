@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -29,12 +30,13 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
                                          Yrkesaktivitet overstyrtAktivitet,
                                          InntektArbeidYtelseGrunnlag iayGrunnlag,
                                          DatoIntervallEntitet opptjeningPeriode,
+                                         LocalDate skjæringstidspunkt,
                                          Set<Inntektsmelding> inntektsmeldinger) {
 
         if (OpptjeningAktivitetType.NÆRING.equals(type)) {
-            return vurderNæring(ref, iayGrunnlag, overstyrtAktivitet, opptjeningPeriode, ref.getAktørId());
+            return vurderNæring(ref, iayGrunnlag, overstyrtAktivitet, opptjeningPeriode, skjæringstidspunkt, ref.getAktørId());
         } else if (OpptjeningAktivitetType.FRILANS.equals(type)) {
-            return vurderFrilans(ref, iayGrunnlag, overstyrtAktivitet, opptjeningPeriode);
+            return vurderFrilans(ref, iayGrunnlag, overstyrtAktivitet, skjæringstidspunkt);
         } else if (OpptjeningAktivitetType.ARBEID.equals(type)) {
             var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), (Yrkesaktivitet) null);
             return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, opptjeningPeriode, inntektsmeldinger);
@@ -62,18 +64,18 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
         return VurderingsStatus.FERDIG_VURDERT_UNDERKJENT;
     }
 
-    private VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
-        return vurderBekreftetOpptjening.vurderFrilans(ref, iayGrunnlag, overstyrtAktivitet, opptjeningPeriode);
+    private VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, LocalDate skjæringstidspunkt) {
+        return vurderBekreftetOpptjening.vurderFrilans(ref, iayGrunnlag, overstyrtAktivitet, skjæringstidspunkt);
     }
 
-    private VurderingsStatus vurderNæring(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, AktørId aktørId) {
-        boolean harSøkt = vurderOppgittOpptjening.harSøkt(ref, iayGrunnlag, opptjeningPeriode);
+    private VurderingsStatus vurderNæring(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt, AktørId aktørId) {
+        boolean harSøkt = vurderOppgittOpptjening.harSøkt(ref, iayGrunnlag, skjæringstidspunkt);
         if (harSøkt) {
             //avklart med funksjonell at når egen næring er oppgitt i søknad, så er det automatisk godkjent som opptjeningsaktivitet
             return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
         }
 
-        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(ref.getBehandlingId(), aktørId, iayGrunnlag, opptjeningPeriode)) {
+        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(ref.getBehandlingId(), aktørId, iayGrunnlag, opptjeningPeriode, skjæringstidspunkt)) {
             if (overstyrtAktivitet != null) {
                 return VurderingsStatus.FERDIG_VURDERT_GODKJENT;
             }
@@ -89,6 +91,7 @@ public class OpptjeningAktivitetVurderingVilkår implements OpptjeningAktivitetV
             input.getOverstyrtAktivitet(),
             input.getIayGrunnlag(),
             input.getOpptjeningPeriode(),
+            input.getSkjæringstidspunkt(),
             input.getInntektsmeldinger());
     }
 }

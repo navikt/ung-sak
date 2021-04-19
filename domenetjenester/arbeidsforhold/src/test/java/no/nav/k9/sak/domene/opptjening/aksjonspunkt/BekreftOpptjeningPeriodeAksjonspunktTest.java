@@ -122,7 +122,7 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
         dto.setBegrunnelse("Ser greit ut");
 
         //Act
-        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), Collections.singletonList(dto), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag));
+        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), Collections.singletonList(dto), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag), iDag);
 
         InntektArbeidYtelseGrunnlag grunnlag = hentGrunnlag(behandling);
         assertThat(grunnlag.getBekreftetAnnenOpptjening(behandling.getAktørId())).isPresent();
@@ -181,7 +181,7 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
         dto3.setBegrunnelse("Ser greit ut");
 
         //Act
-        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), asList(dto, dto2, dto3), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag));
+        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), asList(dto, dto2, dto3), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag), iDag);
 
         InntektArbeidYtelseGrunnlag grunnlag = hentGrunnlag(behandling);
         assertThat(grunnlag.getBekreftetAnnenOpptjening(behandling.getAktørId())).isPresent();
@@ -199,7 +199,7 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
         LocalDate iDag = LocalDate.now();
         final Behandling behandling = opprettBehandling(iDag);
 
-        when(vurderOpptjening.girAksjonspunktForOppgittNæring(any(), any(), any(), any())).thenReturn(true);
+        when(vurderOpptjening.girAksjonspunktForOppgittNæring(any(), any(), any(), any(), any())).thenReturn(true);
         DatoIntervallEntitet periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(3), iDag.minusMonths(2));
         DatoIntervallEntitet periode1_2 = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(2), iDag.minusMonths(2));
 
@@ -219,7 +219,7 @@ public class BekreftOpptjeningPeriodeAksjonspunktTest {
         dto.setBegrunnelse("Ser greit ut");
 
         //Act
-        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), asList(dto), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag));
+        bekreftOpptjeningPeriodeAksjonspunkt.oppdater(behandling.getId(), behandling.getAktørId(), asList(dto), DatoIntervallEntitet.fraOgMedTilOgMed(iDag.minusMonths(10), iDag), iDag);
         InntektArbeidYtelseGrunnlag grunnlag = hentGrunnlag(behandling);
         assertThat(grunnlag.getBekreftetAnnenOpptjening(behandling.getAktørId())).isPresent();
 

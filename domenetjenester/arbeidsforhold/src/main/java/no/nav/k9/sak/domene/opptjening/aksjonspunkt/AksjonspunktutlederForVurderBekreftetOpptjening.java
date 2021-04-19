@@ -218,9 +218,9 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
         return girAksjonspunkt(filter, opptjeningPeriode, registerAktivitet, inntektsmeldinger);
     }
 
-    public VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
+    public VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, LocalDate skjæringstidspunkt) {
         OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(iayGrunnlag.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, opptjeningPeriode);
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, skjæringstidspunkt);
 
         // Avklart med funksjonell at når frilans arbeidsforhold er oppgitt i søknad, så er det automatisk godkjent som opptjeningsaktivitet
         boolean harSøkt = oppgittOpptjening.flatMap(OppgittOpptjening::getFrilans).isPresent();

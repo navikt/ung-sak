@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ public class VurderStatusInput {
     private InntektArbeidYtelseGrunnlag iayGrunnlag;
     private boolean harVærtSaksbehandlet;
     private DatoIntervallEntitet opptjeningPeriode;
+    private LocalDate skjæringstidspunkt;
     private Set<Inntektsmelding> inntektsmeldinger;
 
     public VurderStatusInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse) {
@@ -63,6 +65,14 @@ public class VurderStatusInput {
 
     public void setOpptjeningPeriode(DatoIntervallEntitet opptjeningPeriode) {
         this.opptjeningPeriode = opptjeningPeriode;
+    }
+
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
+    }
+
+    public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        this.skjæringstidspunkt = skjæringstidspunkt;
     }
 
     public Set<Inntektsmelding> getInntektsmeldinger() {

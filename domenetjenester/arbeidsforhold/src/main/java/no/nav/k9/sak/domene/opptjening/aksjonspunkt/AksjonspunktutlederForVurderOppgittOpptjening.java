@@ -83,7 +83,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
-            var oppgittOpptjening = søktePerioderProvider.hentOppgittOpptjening(behandlingId, iayGrunnlag, opptjening.getOpptjeningPeriode())
+            var oppgittOpptjening = søktePerioderProvider.hentOppgittOpptjening(behandlingId, iayGrunnlag, opptjening.getSkjæringstidspunkt())
                 .orElse(null);
             if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), annenOpptjening()) == JA) {
                 logger.info("Utleder AP 5051 fra oppgitt opptjening");
@@ -210,18 +210,18 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         }
     }
 
-    boolean harSøkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+    boolean harSøkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayg, LocalDate skjæringstidspunkt) {
         OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(ref.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayg, opptjeningPeriode);
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayg, skjæringstidspunkt);
         return oppgittOpptjening.map(o -> !o.getEgenNæring().isEmpty()).orElse(false);
     }
 
-    boolean girAksjonspunktForOppgittNæring(Long behandlingId, AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+    boolean girAksjonspunktForOppgittNæring(Long behandlingId, AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode, LocalDate skjæringstidspunkt) {
         if (opptjeningPeriode == null) {
             return false;
         }
         OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(iayg.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(behandlingId, iayg, opptjeningPeriode).orElse(null);
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(behandlingId, iayg, skjæringstidspunkt).orElse(null);
 
         return harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA &&
             manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayg, opptjeningPeriode) == JA;

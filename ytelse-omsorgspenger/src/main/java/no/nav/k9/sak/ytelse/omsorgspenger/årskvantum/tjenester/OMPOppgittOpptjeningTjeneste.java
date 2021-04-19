@@ -50,13 +50,6 @@ public class OMPOppgittOpptjeningTjeneste implements OppgittOpptjeningTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
-    // TODO Espen: Heller bruke stp enn opptjeningsperiode
-    @Override
-    public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet opptjeningsperiode) {
-        var stp = opptjeningsperiode.getTomDato().plusDays(1); // TODO: Litt dirty, iht. FastsettOpptjeningsperiode. Bør heller lagre stp eksplisitt på OpptjeningResultat#opptjeninger?
-        return hentOppgittOpptjening(behandlingId, iayGrunnlag, stp);
-    }
-
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         Objects.requireNonNull(behandlingId);
