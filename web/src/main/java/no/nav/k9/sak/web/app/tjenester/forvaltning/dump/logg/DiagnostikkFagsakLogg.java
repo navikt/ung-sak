@@ -22,12 +22,20 @@ public class DiagnostikkFagsakLogg extends BaseEntitet {
     @Column(name = "fagsak_id", nullable = false, updatable = false, insertable = true)
     private Long fagsakId;
 
+    @Column(name = "begrunnelse", updatable = false, length = 4000)
+    private String begrunnelse;
+
+    @Column(name = "tjeneste", updatable = false, length = 200)
+    private String tjeneste;
+
     DiagnostikkFagsakLogg() {
         // Hibernate
     }
 
-    public DiagnostikkFagsakLogg(Long fagsakId) {
+    public DiagnostikkFagsakLogg(Long fagsakId, String tjeneste, String begrunnelse) {
         this.fagsakId = fagsakId;
+        this.tjeneste = tjeneste;
+        this.begrunnelse = begrunnelse;
     }
 
     public Long getId() {
