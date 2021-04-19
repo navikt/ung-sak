@@ -104,6 +104,8 @@ public class AksjonspunktKodeDefinisjon {
 
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
+    public static final String VURDER_NATTEVÅK = "9200";
+    public static final String VURDER_BEREDSKAP = "9201";
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
