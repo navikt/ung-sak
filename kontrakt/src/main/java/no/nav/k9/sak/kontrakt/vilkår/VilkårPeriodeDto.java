@@ -137,8 +137,6 @@ public class VilkårPeriodeDto {
             + ", vilkarStatus=" + vilkarStatus
             + (avslagKode == null ? "" : ", avslagKode=" + avslagKode)
             + (begrunnelse == null ? "" : ", begrunnelse=" + begrunnelse)
-            + (input == null ? "" : ", input=" + input)
-            + (evaluering == null ? "" : ", evaluering=" + evaluering)
             + (merknadParametere == null ? "" : ", merknadParametere=" + merknadParametere)
             + (vurderesIBehandlingen == null ? "" : ", vurderesIBehandlingen=" + vurderesIBehandlingen)
             + ">";
