@@ -205,7 +205,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @POST
-    @Path("//marker-ugyldig")
+    @Path("/marker-ugyldig")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Markerer et mottatt dokument som ugyldig", summary = ("Markerer angitt dokument som ugyldig"), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
