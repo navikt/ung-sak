@@ -18,7 +18,6 @@ import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class UtledManglendeInntektsmeldingerFraGrunnlagFunction implements BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> {
 

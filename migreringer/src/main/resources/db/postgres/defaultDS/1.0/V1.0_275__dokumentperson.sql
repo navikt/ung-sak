@@ -1,0 +1,6 @@
+
+drop table SYKDOM_DOKUMENT_SAK;
+
+alter table SYKDOM_DOKUMENT add column BEHANDLING_UUID UUID;
+alter table SYKDOM_DOKUMENT add column SAKSNUMMER VARCHAR(19);
+alter table SYKDOM_DOKUMENT add column PERSON_ID BIGINT;

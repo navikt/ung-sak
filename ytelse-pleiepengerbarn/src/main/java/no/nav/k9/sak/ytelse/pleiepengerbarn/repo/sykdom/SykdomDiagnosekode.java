@@ -31,7 +31,6 @@ public class SykdomDiagnosekode {
     @Column(name = "OPPRETTET_AV", nullable = false, updatable=false)
     private String opprettetAv;
 
-
     @DiffIgnore
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR

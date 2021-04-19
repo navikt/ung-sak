@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity(name = "SykdomGrunnlag")
 @Table(name = "SYKDOM_GRUNNLAG")
@@ -50,9 +51,9 @@ public class SykdomGrunnlag {
     @Column(name = "OPPRETTET_TID", nullable = false, updatable=false)
     private LocalDateTime opprettetTidspunkt; // NOSONAR
 
-    
+
     SykdomGrunnlag() {}
-    
+
     public SykdomGrunnlag(UUID sykdomGrunnlagUUID, List<SykdomSøktPeriode> søktePerioder,
             List<SykdomRevurderingPeriode> revurderingPerioder, List<SykdomVurderingVersjon> vurderinger,
             SykdomInnleggelser innleggelser, SykdomDiagnosekoder diagnosekoder, String opprettetAv,
@@ -71,7 +72,7 @@ public class SykdomGrunnlag {
         this.søktePerioder = søktePerioder;
         søktePerioder.forEach(p -> p.setSykdomGrunnlag(this));
     }
-    
+
     private void setRevurderingPerioder(List<SykdomRevurderingPeriode> revurderingPerioder) {
         this.revurderingPerioder = revurderingPerioder;
         revurderingPerioder.forEach(p -> p.setSykdomGrunnlag(this));
@@ -107,6 +108,14 @@ public class SykdomGrunnlag {
 
     public SykdomDiagnosekoder getDiagnosekoder() {
         return diagnosekoder;
+    }
+
+    public List<String> getSammenlignbarDiagnoseliste() {
+        if (diagnosekoder != null) {
+            return getDiagnosekoder().getDiagnosekoder().stream().map(d -> d.getDiagnosekode()).sorted().collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     public void setDiagnosekoder(SykdomDiagnosekoder diagnosekoder) {

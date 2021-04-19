@@ -194,7 +194,7 @@ public class SykdomVurderingRestTjeneste {
             sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
         }
 
-        return sykdomVurderingMapper.map(behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
+        return sykdomVurderingMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid(), versjoner, alleDokumenter, sykdomUtlededePerioder);
     }
 
     @POST

@@ -23,8 +23,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.medisinsk.OmsorgenForDto;
-import no.nav.k9.sak.kontrakt.medisinsk.SykdomsDto;
+import no.nav.k9.sak.kontrakt.omsorg.OmsorgenForOversiktDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,14 +55,16 @@ public class OmsorgenForRestTjeneste {
             @ApiResponse(responseCode = "200",
                 description = "null hvis ikke eksisterer",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = SykdomsDto.class)))
+                    schema = @Schema(implementation = OmsorgenForOversiktDto.class)))
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public OmsorgenForDto hentSykdomsInformasjonFor(@NotNull @QueryParam(BehandlingUuidDto.NAME)
-                                                    @Parameter(description = BehandlingUuidDto.DESC)
-                                                    @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                        BehandlingUuidDto behandlingUuid) {
+    public OmsorgenForOversiktDto hentOmsorgenForInformasjon(
+            @NotNull @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid());
         return behandling.map(it -> dtoMapper.map(it.getId(), it.getAktørId(), it.getFagsak().getPleietrengendeAktørId())).orElse(null);
     }

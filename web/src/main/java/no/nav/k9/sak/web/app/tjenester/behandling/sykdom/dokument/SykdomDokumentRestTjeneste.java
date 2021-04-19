@@ -33,6 +33,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
@@ -49,13 +54,10 @@ import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.exception.TekniskException;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -84,6 +86,7 @@ public class SykdomDokumentRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
+    private SykdomVurderingRepository sykdomVurderingRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
 
@@ -92,9 +95,10 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
@@ -120,7 +124,7 @@ public class SykdomDokumentRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getUuid(), dokumenter, Collections.emptySet());
+        return sykdomDokumentOversiktMapper.mapSykdomsdokumenter(behandling.getFagsak().getAktørId(), behandling.getUuid(), dokumenter, Collections.emptySet());
     }
 
     @GET
@@ -248,7 +252,7 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
-        return sykdomDokumentOversiktMapper.map(behandling.getUuid().toString(), dokumenter);
+        return sykdomDokumentOversiktMapper.map(behandling.getFagsak().getAktørId(), behandling.getUuid().toString(), dokumenter);
     }
 
     @POST
@@ -274,10 +278,18 @@ public class SykdomDokumentRestTjeneste {
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
 
-        dokument.setDatert(sykdomDokumentEndringDto.getDatert());
-        dokument.setType(sykdomDokumentEndringDto.getType());
+        SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
+        dokument.setInformasjon(new SykdomDokumentInformasjon(
+            dokument,
+            sykdomDokumentEndringDto.getType(),
+            sykdomDokumentEndringDto.getDatert(),
+            gmlInformasjon.getMottattTidspunkt(),
+            gmlInformasjon.getVersjon()+1,
+            getCurrentUserId(),
+            LocalDateTime.now()
+            ));
 
-        sykdomDokumentRepository.oppdater(dokument);
+        sykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
 
     /**
@@ -306,13 +318,20 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final LocalDateTime nå = LocalDateTime.now();
-        final SykdomDokument dokument = new SykdomDokument(
+        final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
             SykdomDokumentType.UKLASSIFISERT,
+            nå.toLocalDate(),
             nå,
+            0L,
+            getCurrentUserId(),
+            nå);
+        final SykdomDokument dokument = new SykdomDokument(
             sykdomDokumentOpprettelseDto.getJournalpostId(),
             null,
-            getCurrentUserId(),
-            nå,
+            informasjon,
+            behandling.getUuid(),
+            behandling.getFagsak().getSaksnummer(),
+            sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
             getCurrentUserId(),
             nå);
 

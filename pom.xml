@@ -38,8 +38,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <junit.version>5.7.1</junit.version>
-        <felles.version>0.1.15</felles.version>
-        <swagger.version>2.1.7</swagger.version>
+        <felles.version>0.1.17</felles.version>
+        <swagger.version>2.1.8</swagger.version>
         <fp-kontrakter.version>5.2.1</fp-kontrakter.version>
         <k9format.version>5.1.33</k9format.version>
     </properties>
@@ -71,7 +71,7 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>7.7.3</version>
+                <version>7.8.1</version>
             </dependency>
 
             <dependency>
@@ -637,10 +637,6 @@
                     <artifactId>javax.activation-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.messaging.saaj</groupId>
-            <artifactId>saaj-impl</artifactId>
         </dependency>
     </dependencies>
 

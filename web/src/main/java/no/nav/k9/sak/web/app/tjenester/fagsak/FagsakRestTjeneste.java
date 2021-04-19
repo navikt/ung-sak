@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -51,14 +52,17 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingOpprettingDto;
-import no.nav.k9.sak.kontrakt.behandling.FagsakDto;
 import no.nav.k9.sak.kontrakt.behandling.SakRettigheterDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.fagsak.FagsakDto;
+import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto;
+import no.nav.k9.sak.kontrakt.fagsak.MatchFagsak;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
@@ -73,6 +77,7 @@ public class FagsakRestTjeneste {
     public static final String STATUS_PATH = PATH + "/status";
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
+    public static final String MATCH_PATH = PATH + "/match";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
@@ -169,8 +174,8 @@ public class FagsakRestTjeneste {
     @GET
     @Path(BRUKER_PATH)
     @Operation(description = "Hent brukerdata for aktørId", tags = "fagsak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
-        @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
+            @ApiResponse(responseCode = "200", description = "Returnerer person", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PersonDto.class))),
+            @ApiResponse(responseCode = "404", description = "Person ikke tilgjengelig")
     })
     @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -187,8 +192,8 @@ public class FagsakRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Path(RETTIGHETER_PATH)
     @Operation(description = "Hent rettigheter for saksnummer", tags = "fagsak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
-        @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
+            @ApiResponse(responseCode = "200", description = "Returnerer rettigheter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SakRettigheterDto.class))),
+            @ApiResponse(responseCode = "404", description = "Fagsak ikke tilgjengelig")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -217,6 +222,22 @@ public class FagsakRestTjeneste {
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SøkeSakEllerBrukerDto søkestreng) {
         FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getSearchString());
         return tilDtoer(view);
+    }
+
+    @POST
+    @Path(MATCH_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Søk etter saker på ytelse, bruker, og evt. pleieptrengende/relatertPerson", tags = "fagsak", summary = ("Finner matchende fagsaker for angitt ytelse, bruker, etc.. "))
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<FagsakInfoDto> matchFagsaker(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchFagsakAttributter.class) MatchFagsak matchFagsak) {
+        List<FagsakInfoDto> fagsaker = fagsakApplikasjonTjeneste.matchFagsaker(matchFagsak.getYtelseType(),
+            matchFagsak.getBruker(),
+            matchFagsak.getPeriode(),
+            matchFagsak.getPleietrengendeIdenter(),
+            matchFagsak.getRelatertPersonIdenter());
+        return fagsaker;
     }
 
     private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {
@@ -263,6 +284,29 @@ public class FagsakRestTjeneste {
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {
         return new PersonDto(pi.getNavn(), pi.getAlder(), String.valueOf(pi.getPersonIdent().getIdent()),
             pi.erKvinne(), pi.getPersonstatus(), pi.getDiskresjonskode(), pi.getDødsdato(), pi.getAktørId());
+    }
+
+    public static class MatchFagsakAttributter implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            var m = (MatchFagsak) obj;
+            var abac = AbacDataAttributter.opprett();
+
+            Optional.of(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
+            Optional.of(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+
+            Optional.ofNullable(m.getPleietrengendeIdenter()).stream().flatMap(List::stream).map(PersonIdent::getIdent)
+                .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
+            Optional.ofNullable(m.getPleietrengendeIdenter()).stream().flatMap(List::stream).map(PersonIdent::getAktørId)
+                .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+
+            Optional.ofNullable(m.getRelatertPersonIdenter()).stream().flatMap(List::stream).map(PersonIdent::getIdent)
+                .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
+            Optional.ofNullable(m.getRelatertPersonIdenter()).stream().flatMap(List::stream).map(PersonIdent::getAktørId)
+                .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+
+            return abac;
+        }
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {

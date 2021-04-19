@@ -1,8 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -13,20 +10,13 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodel
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskvilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 
-@ApplicationScoped
 public class MedisinskVilkårTjeneste {
 
-    private InngangsvilkårOversetter inngangsvilkårOversetter;
-    private VilkårUtfallOversetter utfallOversetter;
+    private InngangsvilkårOversetter inngangsvilkårOversetter = new InngangsvilkårOversetter();
+    private VilkårUtfallOversetter utfallOversetter = new VilkårUtfallOversetter();
 
     MedisinskVilkårTjeneste() {
-        // CDI
-    }
 
-    @Inject
-    MedisinskVilkårTjeneste(InngangsvilkårOversetter inngangsvilkårOversetter) {
-        this.inngangsvilkårOversetter = inngangsvilkårOversetter;
-        this.utfallOversetter = new VilkårUtfallOversetter();
     }
 
     public VilkårData vurderPerioder(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {

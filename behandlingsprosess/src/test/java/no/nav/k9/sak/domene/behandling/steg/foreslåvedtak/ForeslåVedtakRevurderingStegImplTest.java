@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -25,8 +26,10 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -42,11 +45,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderin
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -75,6 +78,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
     private Behandling orginalBehandling;
     private Behandling revurdering;
     private BehandlingskontrollKontekst kontekstRevurdering;
+    private FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste = mock(FormidlingDokumentdataTjeneste.class);
 
     @BeforeEach
     public void before() {
@@ -105,7 +109,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         endringIBeregningTjeneste = new DefaultErEndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
 
         foreslåVedtakRevurderingSteg =
-            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste));
+            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste), formidlingDokumentdataTjeneste);
         when(foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekstRevurdering)).thenReturn(behandleStegResultat);
         when(behandleStegResultat.getAksjonspunktResultater()).thenReturn(Collections.emptyList());
     }
@@ -133,11 +137,12 @@ public class ForeslåVedtakRevurderingStegImplTest {
         // Arrange
 
         // Act
-        foreslåVedtakRevurderingSteg.vedHoppOverBakover(kontekstRevurdering, null, null, null);
+        foreslåVedtakRevurderingSteg.vedHoppOverBakover(kontekstRevurdering, null, BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT, BehandlingStegType.FATTE_VEDTAK);
 
         // Assert
         revurdering = behandlingRepository.hentBehandling(revurdering.getId());
         assertThat(revurdering.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.IKKE_FASTSATT);
+        verify(formidlingDokumentdataTjeneste).slettAllData(eq(revurdering.getId()));
     }
 
     private Beregningsgrunnlag buildBeregningsgrunnlag(Long bruttoPerÅr) {

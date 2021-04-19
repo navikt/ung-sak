@@ -1,0 +1,49 @@
+{
+  "graderinger" : [ ],
+  "naturalYtelser" : [ ],
+  "utsettelsePerioder" : [ ],
+  "arbeidsgiver" : {
+    "arbeidsgiverOrgnr" : "987499296",
+    "arbeidsgiverAktørId" : null
+  },
+  "arbeidsforholdRef" : null,
+  "eksternArbeidsforholdRef" : null,
+  "startDatoPermisjon" : null,
+  "oppgittFravær" : [ {
+    "periode" : {
+      "fom" : "2020-03-13",
+      "tom" : "2020-03-18"
+    },
+    "varighetPerDag" : null
+  }, {
+    "periode" : {
+      "fom" : "2020-03-20",
+      "tom" : "2020-03-23"
+    },
+    "varighetPerDag" : null
+  }, {
+    "periode" : {
+      "fom" : "2020-03-25",
+      "tom" : "2020-03-26"
+    },
+    "varighetPerDag" : null
+  } ],
+  "nærRelasjon" : false,
+  "journalpostId" : "485751447",
+  "mottattDato" : "2020-09-28",
+  "inntektBeløp" : { "verdi": 34264.38 },
+  "refusjonBeløpPerMnd" : { "verdi": 34264.38 },
+  "refusjonOpphører" : "9999-12-31",
+  "innsendingstidspunkt" : "2020-09-28T10:21:16",
+  "kanalreferanse" : "AR390929720",
+  "kildesystem" : "AltinnPortal",
+  "endringerRefusjon" : [ ],
+  "innsendingsårsak" : {
+    "kode" : "NY",
+    "kodeverk" : "INNTEKTSMELDING_INNSENDINGSAARSAK"
+  },
+  "ytelseType" : {
+    "kode" : "-",
+    "kodeverk" : "FAGSAK_YTELSE"
+  }
+}

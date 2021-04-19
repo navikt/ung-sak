@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -193,17 +194,18 @@ public class MapInputTilUttakTjeneste {
 
     private List<LocalDateSegment<Boolean>> mapPerioderTilVurdering(InputParametere input) {
 
-        var result = input.getPerioderTilVurdering()
-            .stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        result.addAll(input.getUtvidetRevurderingPerioder()
+        var timeline = new LocalDateTimeline<>(input.getPerioderTilVurdering()
             .stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toList()));
 
-        return result;
+        var utvidetePerioder = new LocalDateTimeline<>(input.getUtvidetRevurderingPerioder()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toList()));
+        timeline = timeline.combine(utvidetePerioder, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return new ArrayList<>(timeline.toSegments());
     }
 
     private Map<LukketPeriode, Pleiebehov> toPleiebehov(PleiebehovResultat pleiebehov) {

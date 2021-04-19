@@ -36,6 +36,9 @@ jobs:
             create extension if not exists btree_gist;
           EOSQL
       - uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
@@ -55,7 +58,7 @@ jobs:
       - name: Build artifacts & deploy
         shell: bash
         run: |
-          mvn verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
+          mvn clean verify -e --batch-mode -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           DATASOURCE_HOST: localhost
