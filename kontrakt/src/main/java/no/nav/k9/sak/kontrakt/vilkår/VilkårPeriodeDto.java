@@ -61,6 +61,12 @@ public class VilkårPeriodeDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    /**
+     * indikerer om en vilkårsperiode er aktuell for vurdering i inneværende behandling
+     */
+    @JsonProperty("vurdersIBehandlingen")
+    private Boolean vurderesIBehandlingen;
+
     public VilkårPeriodeDto() {
     }
 
@@ -120,6 +126,10 @@ public class VilkårPeriodeDto {
         this.begrunnelse = begrunnelse;
     }
 
+    public Boolean getVurderesIBehandlingen() {
+        return vurderesIBehandlingen;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName()
@@ -130,7 +140,11 @@ public class VilkårPeriodeDto {
             + (input == null ? "" : ", input=" + input)
             + (evaluering == null ? "" : ", evaluering=" + evaluering)
             + (merknadParametere == null ? "" : ", merknadParametere=" + merknadParametere)
+            + (vurderesIBehandlingen == null ? "" : ", vurderesIBehandlingen=" + vurderesIBehandlingen)
             + ">";
     }
 
+    public void setVurderesIBehandlingen(Boolean vurderesIBehandlingen) {
+        this.vurderesIBehandlingen = vurderesIBehandlingen;
+    }
 }
