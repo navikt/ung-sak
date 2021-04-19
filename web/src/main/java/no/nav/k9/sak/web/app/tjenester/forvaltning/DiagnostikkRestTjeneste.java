@@ -9,31 +9,33 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.jetbrains.annotations.NotNull;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
-@Path("/diagnostikk")
+@Path(DiagnostikkRestTjeneste.BASE_PATH)
 @ApplicationScoped
 @Transactional
 public class DiagnostikkRestTjeneste {
 
+    static final String BASE_PATH = "/diagnostikk";
     private FagsakRepository fagsakRepository;
     private DebugDumpsters dumpsters;
     private EntityManager entityManager;
@@ -54,7 +56,8 @@ public class DiagnostikkRestTjeneste {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response dumpSak(@NotNull @QueryParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
+    public Response dumpSak(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                            @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse") @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) KortTekst begrunnelse) {
 
         var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer=" + saksnummer));
@@ -63,7 +66,7 @@ public class DiagnostikkRestTjeneste {
          * logg tilgang til tabell - må gjøres før dumps (siden StreamingOutput ikke kjører i scope av denne metoden på stacken,
          * og derfor ikke har nytte av @Transactional.
          */
-        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId()));
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), BASE_PATH + "/sak", begrunnelse.getTekst()));
         entityManager.flush();
 
         var streamingOutput = dumpsters.dumper(fagsak);
