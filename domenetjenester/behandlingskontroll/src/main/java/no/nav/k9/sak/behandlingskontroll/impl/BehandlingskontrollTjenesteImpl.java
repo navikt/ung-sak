@@ -767,7 +767,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
     @Override
     public Optional<BehandlingStegType> nesteSteg(Behandling behandling, BehandlingStegType behandlingStegType) {
-        if (inneholderSteg(behandling, behandlingStegType)) {
+        if (inneholderSteg(behandling.getFagsakYtelseType(), behandling.getType(), behandlingStegType)) {
             BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
             return modell.hvertStegEtter(behandlingStegType)
                 .map(BehandlingStegModell::getBehandlingStegType)
@@ -777,8 +777,8 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
     }
 
     @Override
-    public boolean inneholderSteg(Behandling behandling, BehandlingStegType behandlingStegType) {
-        BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
+    public boolean inneholderSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, BehandlingStegType behandlingStegType) {
+        BehandlingModell modell = getModell(behandlingType, ytelseType);
         return modell.hvertSteg()
             .anyMatch(steg -> steg.getBehandlingStegType().equals(behandlingStegType));
     }
