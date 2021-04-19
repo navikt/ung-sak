@@ -462,6 +462,7 @@ public class BehandlingDtoTjeneste {
         List<ResourceLink> links = new ArrayList<>();
         links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", behandlingUuidOgYtelse));
         links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", behandlingUuidOgYtelse));
+        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", behandlingUuidOgYtelse));
         links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
         links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
