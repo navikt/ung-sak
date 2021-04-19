@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
@@ -34,6 +35,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -45,8 +47,10 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     @Inject
-    public OmsorgspengerOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+    public OmsorgspengerOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser,
+                                                       OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
+        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
     }
 
     /**
@@ -71,18 +75,20 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
 
+        var oppgittOpptjening = finnOppgittOpptjening(behandlingReferanse, iayGrunnlag, stp).orElse(null);
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(),
-            finnOppgittOpptjening(iayGrunnlag).orElse(null), Set.of());
+            oppgittOpptjening, Set.of());
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
-            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
+            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), oppgittOpptjening))
             .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        return iayGrunnlag.getOverstyrtOppgittOpptjening().isPresent() ? iayGrunnlag.getOverstyrtOppgittOpptjening() : iayGrunnlag.getOppgittOpptjening();
+    public Optional<OppgittOpptjening> finnOppgittOpptjening(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
+        var oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(ref.getBehandlingId());
+        return oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, stp);
     }
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,

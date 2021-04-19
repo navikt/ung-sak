@@ -82,6 +82,8 @@ public class IAYTilDtoMapper {
 
         // OPPGITT OPPTJENING
         grunnlag.getOppgittOpptjening().ifPresent(oo -> dto.medOppgittOpptjening(new MapOppgittOpptjening().mapTilDto(oo)));
+        // TODO Tore: Fikse dto, brukes i lagring (kanskje ikke i bruk lenger?)
+        // grunnlag.getOppgittOpptjeningAggregat().ifPresent(ooa -> dto.medOverstyrtOppgittOpptjening(dto.getOppgittOpptjeningPrDokument()));
 
         return dto;
     }

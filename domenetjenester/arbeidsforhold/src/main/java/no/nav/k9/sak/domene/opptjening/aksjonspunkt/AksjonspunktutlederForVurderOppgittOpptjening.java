@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
 import no.nav.k9.sak.behandling.aksjonspunkt.Utfall;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -37,6 +38,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjeneste;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -49,6 +52,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     private OpptjeningRepository opptjeningRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private VirksomhetTjeneste virksomhetTjeneste;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     AksjonspunktutlederForVurderOppgittOpptjening() {
         // CDI
@@ -57,26 +61,30 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     @Inject
     public AksjonspunktutlederForVurderOppgittOpptjening(OpptjeningRepository opptjeningRepository,
                                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                                         VirksomhetTjeneste virksomhetTjeneste) {
+                                                         VirksomhetTjeneste virksomhetTjeneste,
+                                                         OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
         this.opptjeningRepository = opptjeningRepository;
         this.iayTjeneste = iayTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
+        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
 
         Long behandlingId = param.getBehandlingId();
+        var søktePerioderProvider = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(behandlingId);
 
-        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlagOptional = iayTjeneste.finnGrunnlag(behandlingId);
+        var iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElse(null);
         var fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
-        if (inntektArbeidYtelseGrunnlagOptional.isEmpty() || fastsattOpptjeningOptional.isEmpty()) {
+        if (iayGrunnlag == null || fastsattOpptjeningOptional.isEmpty()) {
             return INGEN_AKSJONSPUNKTER;
         }
-        OppgittOpptjening oppgittOpptjening = inntektArbeidYtelseGrunnlagOptional.get().getOppgittOpptjening().orElse(null);
 
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
+            var oppgittOpptjening = søktePerioderProvider.hentOppgittOpptjening(behandlingId, iayGrunnlag, opptjening.getOpptjeningPeriode())
+                .orElse(null);
             if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), annenOpptjening()) == JA) {
                 logger.info("Utleder AP 5051 fra oppgitt opptjening");
                 return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
@@ -89,7 +97,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
 
             if (harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjening.getOpptjeningPeriode()) == JA) {
                 AktørId aktørId = param.getAktørId();
-                if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, inntektArbeidYtelseGrunnlagOptional.get(), opptjening.getOpptjeningPeriode()) == JA) {
+                if (manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayGrunnlag, opptjening.getOpptjeningPeriode()) == JA) {
                     logger.info("Utleder AP 5051 fra oppgitt næringsdrift");
                     return opprettListeForAksjonspunkt(AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING);
                 }
@@ -202,11 +210,18 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         }
     }
 
-    boolean girAksjonspunktForOppgittNæring(AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+    boolean harSøkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
+        OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(ref.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayg, opptjeningPeriode);
+        return oppgittOpptjening.map(o -> !o.getEgenNæring().isEmpty()).orElse(false);
+    }
+
+    boolean girAksjonspunktForOppgittNæring(Long behandlingId, AktørId aktørId, InntektArbeidYtelseGrunnlag iayg, DatoIntervallEntitet opptjeningPeriode) {
         if (opptjeningPeriode == null) {
             return false;
         }
-        OppgittOpptjening oppgittOpptjening = iayg.getOppgittOpptjening().orElse(null);
+        OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(iayg.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(behandlingId, iayg, opptjeningPeriode).orElse(null);
 
         return harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA &&
             manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayg, opptjeningPeriode) == JA;

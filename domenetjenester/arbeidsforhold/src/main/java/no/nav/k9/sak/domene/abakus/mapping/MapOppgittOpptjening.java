@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -232,6 +233,8 @@ class MapOppgittOpptjening {
 
             var oppgittOpptjeningEksternReferanse = UUID.fromString(dto.getEksternReferanse().getReferanse());
             var builder = OppgittOpptjeningBuilder.ny(oppgittOpptjeningEksternReferanse, dto.getOpprettetTidspunkt());
+            Optional.ofNullable(dto.getJournalpostId()).ifPresent(jp -> builder.medJournalpostId(new no.nav.k9.sak.typer.JournalpostId(jp.getId())));
+            Optional.ofNullable(dto.getInnsendingstidspunkt()).ifPresent(tidspunkt -> builder.medInnsendingstidspunkt(tidspunkt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
 
             var annenAktivitet = mapEach(dto.getAnnenAktivitet(), MapFraDto::mapAnnenAktivitet);
             annenAktivitet.forEach(builder::leggTilAnnenAktivitet);

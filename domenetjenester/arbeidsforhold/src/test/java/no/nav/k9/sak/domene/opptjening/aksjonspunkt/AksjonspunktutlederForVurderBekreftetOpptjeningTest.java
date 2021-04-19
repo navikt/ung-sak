@@ -15,7 +15,9 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -39,6 +41,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -47,7 +50,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -64,6 +66,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutleder;
     private FagsakRepository fagsakRepository ;
     private BehandlingRepository behandlingRepository ;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     @BeforeEach
     public void setUp() {
@@ -72,8 +75,9 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         fagsakRepository = repositoryProvider.getFagsakRepository();
         behandlingRepository = repositoryProvider.getBehandlingRepository();
+        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
 
-        aksjonspunktutleder = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste);
+        aksjonspunktutleder = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningTjenesteProvider);
 
     }
 

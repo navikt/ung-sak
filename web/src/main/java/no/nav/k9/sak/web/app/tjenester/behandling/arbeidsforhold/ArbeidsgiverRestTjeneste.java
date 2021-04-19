@@ -1,23 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
-import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.k9.sak.domene.iay.modell.*;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,11 +23,36 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
-import java.util.stream.Collectors;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
+import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
+import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
+import no.nav.k9.sak.domene.iay.modell.AktørInntekt;
+import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyring;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
+import no.nav.k9.sak.domene.iay.modell.Inntekt;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -123,6 +142,17 @@ public class ArbeidsgiverRestTjeneste {
                 .map(OppgittOpptjening::getEgenNæring)
                 .orElse(Collections.emptyList())
                 .stream()
+                .map(OppgittEgenNæring::getVirksomhetOrgnr)
+                .filter(Objects::nonNull)
+                .map(Arbeidsgiver::virksomhet)
+                .forEach(arbeidsgivere::add);
+            // MERK: Tar ikke hensyn til vilkårsperioder under vurdering dersom man henter ut aggregat for oppgitt opptjening
+            iayg.getOppgittOpptjeningAggregat()
+                .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+                .orElse(List.of())
+                .stream()
+                .map(OppgittOpptjening::getEgenNæring)
+                .flatMap(Collection::stream)
                 .map(OppgittEgenNæring::getVirksomhetOrgnr)
                 .filter(Objects::nonNull)
                 .map(Arbeidsgiver::virksomhet)

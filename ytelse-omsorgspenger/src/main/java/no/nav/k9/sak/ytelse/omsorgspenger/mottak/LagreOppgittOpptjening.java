@@ -1,8 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -12,7 +11,6 @@ import javax.inject.Inject;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -34,8 +32,7 @@ public class LagreOppgittOpptjening {
 
     public void lagreOpptjening(Behandling behandling, OmsorgspengerUtbetaling søknad, MottattDokument dokument) {
         Long behandlingId = behandling.getId();
-        var builder = initOpptjeningBuilder(behandling, ZonedDateTime.now());
-
+        var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
@@ -54,19 +51,10 @@ public class LagreOppgittOpptjening {
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
         if (builder.build().harOpptjening()) {
-            iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
+            iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
         }
     }
 
-
-    private OppgittOpptjeningBuilder initOpptjeningBuilder(Behandling behandling, ZonedDateTime tidspunkt) {
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
-        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getOppgittOpptjening().isPresent()) {
-            // TODO: Støtte flere søknader på med oppgitt opptjening på samme behandling
-            throw new UnsupportedOperationException("Omsorgspenger støtter ikke flere søknader på samme behandling");
-        }
-        return OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
-    }
 
     private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
         if (sn.getPerioder().size() != 1) {

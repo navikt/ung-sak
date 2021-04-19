@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -47,6 +48,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
@@ -57,7 +59,6 @@ import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -77,6 +78,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     private OpptjeningRepository opptjeningRepository;
     private AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederForVurderOpptjening;
     private VilkårResultatRepository vilkårResultatRepository;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
     private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening;
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
     private InternArbeidsforholdRef ARBEIDSFORHOLD_ID;
@@ -92,10 +94,11 @@ public class OpptjeningsperioderTjenesteImplTest {
         virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
         fagsakRepository = new FagsakRepository(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste);
+        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
+        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningTjenesteProvider);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening( repositoryProvider.getOpptjeningRepository(), iayTjeneste);
-        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening);
+        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening( repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningTjenesteProvider);
+        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningTjenesteProvider);
         ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
         AKTØRID = AktørId.dummy();
 

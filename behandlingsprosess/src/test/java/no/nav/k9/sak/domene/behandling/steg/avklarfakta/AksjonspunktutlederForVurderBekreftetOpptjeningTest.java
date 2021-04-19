@@ -14,8 +14,10 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -36,6 +38,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
@@ -43,7 +46,6 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -55,11 +57,13 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private BehandlingRepositoryProvider repositoryProvider ;
     private InntektArbeidYtelseTjeneste iayTjeneste ;
     private Skjæringstidspunkt skjæringstidspunkt ;
+    private LocalDate stp;
+    private OpptjeningRepository opptjeningRepository;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     @Spy
     private AksjonspunktutlederForVurderBekreftetOpptjening utleder ;
 
-    private OpptjeningRepository opptjeningRepository;
 
     @BeforeEach
     public void oppsett() {
@@ -67,10 +71,13 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
+        stp = skjæringstidspunkt.getUtledetSkjæringstidspunkt();
+
+        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
 
         utleder = new AksjonspunktutlederForVurderBekreftetOpptjening(
             repositoryProvider.getOpptjeningRepository(),
-            iayTjeneste);
+            iayTjeneste, oppgittOpptjeningTjenesteProvider);
 
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();

@@ -24,7 +24,7 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
     }
 
     public VurderingsStatus vurderStatus(OpptjeningAktivitetType type,
-                                         BehandlingReferanse behandlingReferanse,
+                                         BehandlingReferanse ref,
                                          Yrkesaktivitet registerAktivitet,
                                          Yrkesaktivitet overstyrtAktivitet,
                                          InntektArbeidYtelseGrunnlag iayGrunnlag,
@@ -36,7 +36,7 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
         if (OpptjeningAktivitetType.ANNEN_OPPTJENING.contains(type)) {
             return vurderAnnenOpptjening(overstyrtAktivitet, harVærtSaksbehandlet);
         } else if (OpptjeningAktivitetType.NÆRING.equals(type)) {
-            return vurderNæring(behandlingReferanse.getAktørId(), overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
+            return vurderNæring(ref, ref.getAktørId(), overstyrtAktivitet, iayGrunnlag, harVærtSaksbehandlet, opptjeningPeriode);
         } else if (OpptjeningAktivitetType.ARBEID.equals(type)) {
             return vurderArbeid(filter, registerAktivitet, overstyrtAktivitet, harVærtSaksbehandlet, opptjeningPeriode, inntektsmeldinger);
         }
@@ -83,14 +83,16 @@ public class OpptjeningAktivitetVurderingAksjonspunkt implements OpptjeningAktiv
     }
 
     /**
+     *
+     * @param ref
      * @param aktørId              aktør
      * @param overstyrtAktivitet   aktiviteten
      * @param harVærtSaksbehandlet har saksbehandler tatt stilling til dette
      * @param opptjeningPeriode    opptjeningsperiode
      * @return vurderingsstatus
      */
-    private VurderingsStatus vurderNæring(AktørId aktørId, Yrkesaktivitet overstyrtAktivitet, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
-        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(aktørId, iayGrunnlag, opptjeningPeriode)) {
+    private VurderingsStatus vurderNæring(BehandlingReferanse ref, AktørId aktørId, Yrkesaktivitet overstyrtAktivitet, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean harVærtSaksbehandlet, DatoIntervallEntitet opptjeningPeriode) {
+        if (vurderOppgittOpptjening.girAksjonspunktForOppgittNæring(ref.getBehandlingId(), aktørId, iayGrunnlag, opptjeningPeriode)) {
             if (overstyrtAktivitet != null) {
                 return VurderingsStatus.GODKJENT;
             }

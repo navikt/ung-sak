@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -41,12 +42,12 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -59,6 +60,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
     private Skjæringstidspunkt skjæringstidspunkt ;
     private InntektArbeidYtelseTjeneste iayTjeneste ;
     private VirksomhetTjeneste virksomhetTjeneste ;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     @Spy
     private AksjonspunktutlederForVurderOppgittOpptjening utleder ;
@@ -71,8 +73,9 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
+        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
         utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
-            repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste);
+            repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste, oppgittOpptjeningTjenesteProvider);
 
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();

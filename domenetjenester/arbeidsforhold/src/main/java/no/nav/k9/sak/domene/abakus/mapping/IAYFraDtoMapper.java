@@ -1,8 +1,10 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
@@ -75,6 +77,12 @@ public class IAYFraDtoMapper {
 
         builder.medOverstyrtOppgittOpptjening(overstyrtOppgittOpptjening);
         builder.medOppgittOpptjening(oppgittOpptjening);
+        // TODO Tore: Skriv om DTO i abakus til å bruke aggregat, ikke map av journalposter
+        builder.medOppgittOpptjeningAggregat(Optional.ofNullable(dto.getOppgittOpptjeningPrDokument())
+            .map(it -> it.values().stream()
+                .map(this::mapOppgttOpptjening)
+                .collect(Collectors.toList()))
+            .orElse(List.of()));
         builder.setInntektsmeldinger(inntektsmeldinger);
         builder.medInformasjon(arbeidsforholdInformasjon);
     }

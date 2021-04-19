@@ -27,9 +27,10 @@ import no.nav.k9.sak.typer.AktørId;
 @Dependent
 public class AsyncInntektArbeidYtelseTjeneste {
 
-    static enum OpptjeningType {
+    public static enum OpptjeningType {
         NORMAL,
-        OVERSTYRT
+        NORMAL_AGGREGAT,
+        OVERSTYRT,
     }
 
     private ProsessTaskRepository prosessTaskRepository;
@@ -66,7 +67,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
         prosessTaskRepository.lagre(enkeltTask);
     }
 
-    public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder, boolean overstyrt) {
+    public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder, OpptjeningType opptjeningType) {
         if (oppgittOpptjeningBuilder == null) {
             return;
         }
@@ -82,7 +83,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
             enkeltTask.setCallIdFraEksisterende();
             enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktør.getIdent());
             enkeltTask.setSaksnummer(saksnummer.getVerdi());
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.LAGRE_OVERSTYRT, (overstyrt ? OpptjeningType.OVERSTYRT : OpptjeningType.NORMAL).name());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.LAGRE_OVERSTYRT, opptjeningType.name());
 
             var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);

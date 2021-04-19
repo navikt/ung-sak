@@ -34,8 +34,12 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Inntektspost;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjeneste;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -47,6 +51,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
     private static final Logger logger = LoggerFactory.getLogger(AksjonspunktutlederForVurderBekreftetOpptjening.class);
     private OpptjeningRepository opptjeningRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
 
     AksjonspunktutlederForVurderBekreftetOpptjening() {
         // CDI
@@ -54,9 +59,11 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
 
     @Inject
     public AksjonspunktutlederForVurderBekreftetOpptjening(OpptjeningRepository opptjeningRepository,
-                                                           InntektArbeidYtelseTjeneste iayTjeneste) {
+                                                           InntektArbeidYtelseTjeneste iayTjeneste,
+                                                           OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
         this.iayTjeneste = iayTjeneste;
         this.opptjeningRepository = opptjeningRepository;
+        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
@@ -209,5 +216,17 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
             return false;
         }
         return girAksjonspunkt(filter, opptjeningPeriode, registerAktivitet, inntektsmeldinger);
+    }
+
+    public VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, DatoIntervallEntitet opptjeningPeriode) {
+        OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(iayGrunnlag.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, opptjeningPeriode);
+
+        // Avklart med funksjonell at når frilans arbeidsforhold er oppgitt i søknad, så er det automatisk godkjent som opptjeningsaktivitet
+        boolean harSøkt = oppgittOpptjening.flatMap(OppgittOpptjening::getFrilans).isPresent();
+        return harSøkt || overstyrtAktivitet != null
+            ? VurderingsStatus.FERDIG_VURDERT_GODKJENT
+            : VurderingsStatus.FERDIG_VURDERT_UNDERKJENT;
+
     }
 }

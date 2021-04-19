@@ -8,14 +8,14 @@ import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(AsyncAbakusLagreOpptjeningTask.TASKTYPE)
@@ -24,7 +24,8 @@ class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "abakus.async.lagreopptjening";
 
-    /** Angir hvorvidt det er overstyrt opptjening som skal lagres. */
+    /** Angir hvilken type opptjening som skal lagres. */
+    // TODO Tore: Migere navn
     static final String LAGRE_OVERSTYRT = "opptjening.overstyrt";
 
     private AbakusTjeneste abakusTjeneste;
@@ -50,6 +51,9 @@ class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             switch (opptjeningType) {
                 case NORMAL:
                     abakusTjeneste.lagreOppgittOpptjening(request);
+                    break;
+                case NORMAL_AGGREGAT:
+                    abakusTjeneste.lagreOppgittOpptjeningV2(request);
                     break;
                 case OVERSTYRT:
                     abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);

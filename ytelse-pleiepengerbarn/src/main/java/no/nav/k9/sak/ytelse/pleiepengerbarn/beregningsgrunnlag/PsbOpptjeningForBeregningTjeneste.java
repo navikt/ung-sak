@@ -69,12 +69,13 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             return Collections.emptyList();
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(stp)).orElseThrow();
+        var oppgittOpptjening = finnOppgittOpptjening(behandlingReferanse, iayGrunnlag, stp).orElse(null);
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(),
-            finnOppgittOpptjening(iayGrunnlag).orElse(null), Set.of());
+            oppgittOpptjening, Set.of());
         return aktiviteter.stream()
             .filter(oa -> oa.getPeriode().getFomDato().isBefore(stp))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
-            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), iayGrunnlag))
+            .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType(), oppgittOpptjening))
             .collect(Collectors.toList());
     }
 
@@ -84,7 +85,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     @Override
-    public Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    public Optional<OppgittOpptjening> finnOppgittOpptjening(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
+        // TODO: Bør hentes som for OMP, men må da lagre på oppgittOpptjeningAggregat
         return iayGrunnlag.getOverstyrtOppgittOpptjening().isPresent() ? iayGrunnlag.getOverstyrtOppgittOpptjening() : iayGrunnlag.getOppgittOpptjening();
     }
 

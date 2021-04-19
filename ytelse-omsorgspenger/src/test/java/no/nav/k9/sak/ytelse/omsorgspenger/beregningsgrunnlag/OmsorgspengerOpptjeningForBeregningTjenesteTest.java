@@ -12,8 +12,10 @@ import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -27,6 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
@@ -34,7 +37,6 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -52,11 +54,13 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private OmsorgspengerOpptjeningForBeregningTjeneste tjeneste;
     private BehandlingReferanse ref;
     private AktørId aktørId;
+    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjeneste;
 
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
+        oppgittOpptjeningTjeneste = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
 
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);
@@ -64,7 +68,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
         ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
-        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)));
+        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)), oppgittOpptjeningTjeneste);
     }
 
     @Test

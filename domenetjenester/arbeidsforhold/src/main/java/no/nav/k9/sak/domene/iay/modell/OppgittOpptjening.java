@@ -50,6 +50,25 @@ public class OppgittOpptjening {
         this.opprettetTidspunkt = opprettetTidspunktOriginalt;
     }
 
+    OppgittOpptjening(OppgittOpptjening kopierFra) {
+        this.journalpostId = kopierFra.journalpostId;
+        this.innsendingstidspunkt = kopierFra.innsendingstidspunkt;
+
+        this.oppgittArbeidsforhold = kopierFra.oppgittArbeidsforhold == null
+            ? new ArrayList<>()
+            : kopierFra.oppgittArbeidsforhold.stream().map(OppgittArbeidsforhold::new).collect(Collectors.toList());
+
+        this.egenNæring = kopierFra.egenNæring == null
+            ? new ArrayList<>()
+            : kopierFra.egenNæring.stream().map(OppgittEgenNæring::new).collect(Collectors.toList());
+
+        this.annenAktivitet = kopierFra.annenAktivitet == null
+            ? new ArrayList<>()
+            : kopierFra.annenAktivitet.stream().map(OppgittAnnenAktivitet::new).collect(Collectors.toList());
+
+        this.frilans = kopierFra.frilans == null ? null : new OppgittFrilans(kopierFra.frilans);
+    }
+
     OppgittOpptjening(OppgittOpptjening kopierFra, UUID eksternReferanse, LocalDateTime opprettetTidspunktOriginalt) {
         Objects.requireNonNull(eksternReferanse, "eksternReferanse");
         this.uuid = eksternReferanse;
