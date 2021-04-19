@@ -8,7 +8,6 @@ import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OMSORGEN_FOR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSVILKÅRET;
-import static no.nav.k9.kodeverk.vilkår.VilkårType.SØKERSOPPLYSNINGSPLIKT;
 
 import java.util.List;
 
@@ -27,7 +26,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 public class InngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
-        SØKERSOPPLYSNINGSPLIKT,
         OMSORGEN_FOR,
         ALDERSVILKÅR,
         MEDISINSKEVILKÅR_UNDER_18_ÅR,
