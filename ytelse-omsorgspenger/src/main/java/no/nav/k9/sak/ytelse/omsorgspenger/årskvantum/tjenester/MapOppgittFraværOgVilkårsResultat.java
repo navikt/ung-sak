@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
+import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
@@ -109,7 +109,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettEgenNæringTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder) {
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         opptjeningAktivitetPerioder.forEach((di, opptjeningPerioder) -> {
-            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, opptjeningPerioder);
+            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, opptjeningPerioder);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
                 LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder);
@@ -119,17 +119,19 @@ public class MapOppgittFraværOgVilkårsResultat {
         return result;
     }
 
-    private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, List<OpptjeningAktivitetPeriode> opptjeningPerioder) {
+    private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, UttakArbeidType uttakArbeidType, List<OpptjeningAktivitetPeriode> opptjeningPerioder) {
         var perioderPerAktivitet = opptjeningPerioder.stream()
             .filter(akt -> akt.getOpptjeningAktivitetType().equals(opptjeningAktivitetType))
             .filter(akt -> List.of(VurderingsStatus.GODKJENT, VurderingsStatus.FERDIG_VURDERT_GODKJENT).contains(akt.getVurderingsStatus()))
-            .collect(Collectors.groupingBy(this::tilAktivitet));
+            .collect(Collectors.groupingBy(aktivitetPeriode -> tilAktivitet(aktivitetPeriode, uttakArbeidType)));
         return perioderPerAktivitet;
     }
 
-    private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode) {
-        var arbeidsgiver = aktivitetPeriode.getOrgnr() != null ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOrgnr()) : null;
-        return new Aktivitet(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef());
+    private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType) {
+        var arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
+            ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
+            : null;
+        return new Aktivitet(uttakArbeidType, arbeidsgiver, InternArbeidsforholdRef.nullRef());
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> byggOpptjeningAktivitetTidslinje(List<OpptjeningAktivitetPeriode> opptjeningPerioder) {
@@ -148,7 +150,7 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettOppgittFrilansTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder) {
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         opptjeningAktivitetPerioder.forEach((di, opptjeningPerioder) -> {
-            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, opptjeningPerioder);
+            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, UttakArbeidType.FRILANSER, opptjeningPerioder);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
                 LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder);
@@ -163,15 +165,6 @@ public class MapOppgittFraværOgVilkårsResultat {
         result.put(new Aktivitet(UttakArbeidType.ARBEIDSTAKER, yrkesaktivitet.getArbeidsgiver(), yrkesaktivitet.getArbeidsforholdRef()), tidlinje.compress());
     }
 
-    private void mapEgenNæringTilTidlinje(HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> result, OppgittEgenNæring egenNæring) {
-        var tidslinjeAlltidAktivt = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT))));
-        var arbeidsgiver = egenNæring.getOrgnr() != null ? Arbeidsgiver.virksomhet(egenNæring.getOrgnr()) : null;
-        var aktivitet = new Aktivitet(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef());
-        if (result.containsKey(aktivitet)) {
-            throw new IllegalArgumentException("Utviklerfeil: Kun ett orgnummer per selvstendig næringsdrivende, fikk flere for" + aktivitet.getArbeidsgiver());
-        }
-        result.put(aktivitet, tidslinjeAlltidAktivt.compress());
-    }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> opprettArbeidsforholdTidslinje(Yrkesaktivitet yrkesaktivitet, YrkesaktivitetFilter filter) {
         LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AVSLUTTET))));
