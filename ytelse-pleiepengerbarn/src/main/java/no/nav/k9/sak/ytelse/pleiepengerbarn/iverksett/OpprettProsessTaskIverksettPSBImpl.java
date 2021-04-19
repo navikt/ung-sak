@@ -10,7 +10,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksettTilkjentYtelseFelles;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.VurderRevurderingAndreSøknaderTask;
 
 
 @FagsakYtelseTypeRef("PSB")

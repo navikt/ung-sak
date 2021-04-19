@@ -119,7 +119,7 @@ public class SykdomGrunnlagRepository {
                 .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).get());
     }
 
-    Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {
+    public Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {
         final TypedQuery<UUID> q = entityManager.createQuery(
             "Select sgb.behandlingUuid "
                 + "From SykdomGrunnlagBehandling as sgb "
@@ -156,7 +156,7 @@ public class SykdomGrunnlagRepository {
         return q.getResultList().stream().findFirst();
     }
 
-    Optional<SykdomGrunnlagBehandling> hentGrunnlagForBehandling(UUID behandlingUuid) {
+    public Optional<SykdomGrunnlagBehandling> hentGrunnlagForBehandling(UUID behandlingUuid) {
         final TypedQuery<SykdomGrunnlagBehandling> q = entityManager.createQuery(
                 "SELECT sgb "
                 + "FROM SykdomGrunnlagBehandling as sgb "
