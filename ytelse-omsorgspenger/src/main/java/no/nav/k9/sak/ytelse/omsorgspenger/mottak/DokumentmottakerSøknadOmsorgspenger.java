@@ -179,9 +179,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         omsorgspengerGrunnlagRepository.lagreOgFlushOppgittFraværFraSøknad(behandlingId, fraværFraSøknad);
 
         // Utvide fagsakperiode
-        var maksPeriode = omsorgspengerGrunnlagRepository.hentGrunnlag(behandlingId)
-            .map(grunnlag -> grunnlag.getOppgittFraværFraSøknad().getMaksPeriode())
-            .orElseThrow();
+        var maksPeriode = omsorgspengerGrunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
