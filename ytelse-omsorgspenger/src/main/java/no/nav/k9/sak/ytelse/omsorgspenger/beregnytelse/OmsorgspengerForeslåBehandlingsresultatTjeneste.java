@@ -49,9 +49,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
-        var f = grunnlagRepository.hentOppgittFravær(behandlingId);
-        var maksPeriode = f.getMaksPeriode();
-        return maksPeriode;
+        return grunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
     }
 
     @Override
@@ -68,9 +66,9 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
                 .map(Aktivitet::getUttaksperioder)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        
+
         boolean avslå = uttaksperioder.stream().allMatch(it -> Utfall.AVSLÅTT.equals(it.getUtfall()));
-        
+
         if(avslå) {
             log.info("Avslår behandling {} pga alle uttaksperioder avslått: {}", ref.getBehandlingUuid(), uttaksperioder);
         }

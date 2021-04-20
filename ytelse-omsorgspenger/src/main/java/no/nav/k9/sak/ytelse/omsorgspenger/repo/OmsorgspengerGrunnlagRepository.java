@@ -1,7 +1,11 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.enterprise.context.Dependent;
@@ -10,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
 public class OmsorgspengerGrunnlagRepository {
@@ -39,11 +44,7 @@ public class OmsorgspengerGrunnlagRepository {
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFravær);
     }
 
-    public OppgittFravær hentOppgittFravær(Long behandlingId) {
-        return hentOppgittFraværHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Mangler oppgitt uttak for behandlingId=" + behandlingId));
-    }
-
-    public Optional<OppgittFravær> hentOppgittFraværHvisEksisterer(Long behandlingId) {
+    Optional<OppgittFravær> hentOppgittFraværHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();
         }
@@ -59,6 +60,56 @@ public class OmsorgspengerGrunnlagRepository {
         final var grunnlag = hentGrunnlag(behandlingId);
 
         return grunnlag.map(OmsorgspengerGrunnlag::getOppgittFraværFraSøknad);
+    }
+
+    /**
+     * Henter alle fraværsperioder fra begge mulige kilder (IM og søknad)
+     */
+    public Set<OppgittFraværPeriode> hentAlleFraværPerioder(Long behandlingId) {
+        if (behandlingId == null) {
+            return Set.of();
+        }
+        final var grunnlag = hentGrunnlag(behandlingId).orElse(null);
+        if (grunnlag == null) {
+            return Set.of();
+        }
+        Set<OppgittFraværPeriode> fraværPerioder = new HashSet<>();
+        var fraværPerioderIm = Optional.ofNullable(grunnlag.getOppgittFravær()).map(OppgittFravær::getPerioder);
+        fraværPerioderIm.ifPresent(fraværPerioder::addAll);
+        var fraværPerioderSøknad = Optional.ofNullable(grunnlag.getOppgittFraværFraSøknad()).map(OppgittFravær::getPerioder);
+        fraværPerioderSøknad.ifPresent(fraværPerioder::addAll);
+        return fraværPerioder;
+    }
+
+    public Optional<DatoIntervallEntitet> hentMaksPeriode(Long behandlingId) {
+        var perioder = hentAlleFraværPerioder(behandlingId);
+        if (perioder.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var fom = perioder.stream()
+            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
+            .map(OppgittFraværPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(LocalDate::compareTo);
+        var tom = perioder.stream()
+            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
+            .map(OppgittFraværPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(LocalDate::compareTo);
+
+        if (tom.isEmpty() && fom.isEmpty()) {
+            fom = perioder.stream()
+                .map(OppgittFraværPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getFomDato)
+                .min(LocalDate::compareTo);
+            tom = perioder.stream()
+                .map(OppgittFraværPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getTomDato)
+                .max(LocalDate::compareTo);
+        }
+
+        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom.orElseThrow(), tom.orElseThrow()));
     }
 
     Optional<OmsorgspengerGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
@@ -85,8 +136,10 @@ public class OmsorgspengerGrunnlagRepository {
      * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<OppgittFravær> søknadEntitet = hentOppgittFraværHvisEksisterer(gammelBehandlingId);
-        søknadEntitet.ifPresent(entitet -> lagreOgFlushOppgittFravær(nyBehandlingId, entitet));
+        Optional<OppgittFravær> søknadEntitetIm = hentOppgittFraværHvisEksisterer(gammelBehandlingId);
+        søknadEntitetIm.ifPresent(entitet -> lagreOgFlushOppgittFravær(nyBehandlingId, entitet));
+        Optional<OppgittFravær> oppgittFraværSøknad = hentOppgittFraværFraSøknadHvisEksisterer(gammelBehandlingId);
+        oppgittFraværSøknad.ifPresent(entitet -> lagreOgFlushOppgittFravær(nyBehandlingId, entitet));
     }
 
     private void lagreOgFlushNyttGrunnlag(OmsorgspengerGrunnlag grunnlagEntitet) {

@@ -8,9 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
@@ -45,8 +43,6 @@ import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInntektsmeldingerRelevantForBeregning;
 
 @ExtendWith(JpaExtension.class)
@@ -102,11 +98,8 @@ public class KompletthetsjekkerTest {
 
         psbKompletthetsjekker = new PSBKompletthetsjekker(
             kompletthetssjekkerSøknad,
-            perioderTilVurderingTjeneste,
-            new PSBInntektsmeldingerRelevantForBeregning(),
-            arbeidsforholdTjeneste,
             inntektsmeldingTjeneste,
-            inntektArbeidYtelseTjeneste,
+            new KompletthetForBeregningTjeneste(perioderTilVurderingTjeneste, new PSBInntektsmeldingerRelevantForBeregning(), arbeidsforholdTjeneste, inntektArbeidYtelseTjeneste),
             kompletthetsjekkerFelles,
             søknadRepository);
     }
@@ -154,12 +147,5 @@ public class KompletthetsjekkerTest {
         SøknadEntitet hentSøknad = søknadRepository.hentSøknad(behandling);
         SøknadEntitet søknad = new SøknadEntitet.Builder(hentSøknad).build();
         søknadRepository.lagreOgFlush(behandling, søknad);
-    }
-
-    private void mockManglendeInntektsmeldingGrunnlag() {
-        HashMap<Arbeidsgiver, Set<InternArbeidsforholdRef>> manglendeInntektsmeldinger = new HashMap<>();
-        manglendeInntektsmeldinger.put(Arbeidsgiver.virksomhet("1"), new HashSet<>());
-
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean(), any())).thenReturn(manglendeInntektsmeldinger);
     }
 }

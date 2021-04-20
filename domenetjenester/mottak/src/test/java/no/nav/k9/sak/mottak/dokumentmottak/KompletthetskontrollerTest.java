@@ -171,6 +171,7 @@ public class KompletthetskontrollerTest {
         LocalDateTime frist = LocalDateTime.now().minusSeconds(30);
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
+        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
 
         // Act
         mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
@@ -189,7 +190,7 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.oppfylt());
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK));
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
-
+        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
         mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
 
         // Act

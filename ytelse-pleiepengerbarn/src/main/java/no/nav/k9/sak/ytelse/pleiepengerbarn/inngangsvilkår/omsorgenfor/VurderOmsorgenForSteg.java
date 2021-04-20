@@ -69,14 +69,14 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-        
+
         final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
-        
-        if (!harAksjonspunkt(samletOmsorgenForTidslinje)) {
+
+        if (harAksjonspunkt(samletOmsorgenForTidslinje)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         }
-        
+
         final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, samletOmsorgenForTidslinje);
 
         final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårData);
@@ -92,10 +92,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
                     grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private DatoIntervallEntitet bestemPeriodeTilVurdering(final NavigableSet<DatoIntervallEntitet> perioder) {
@@ -107,16 +107,17 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
         final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
+            .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
         final VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
-        
+
         for (VilkårData data : vilkårData) {
             oppdaterBehandlingMedVilkårresultat(data, vilkårBuilder);
         }
-        
+
         builder.leggTil(vilkårBuilder);
-        final var oppdaterteVilkår = builder.build();
-        return oppdaterteVilkår;
+        return builder.build();
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {

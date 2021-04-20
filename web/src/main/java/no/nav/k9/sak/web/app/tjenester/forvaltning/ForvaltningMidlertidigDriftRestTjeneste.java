@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
@@ -27,10 +28,13 @@ import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,10 +42,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
-
-import org.jetbrains.annotations.NotNull;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,6 +57,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -63,11 +67,16 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
+import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
@@ -94,6 +103,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private ProsessTaskRepository prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
+    private EntityManager entityManager;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -104,13 +115,17 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    TpsTjeneste tpsTjeneste,
                                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                    FagsakTjeneste fagsakTjeneste,
-                                                   ProsessTaskRepository prosessTaskRepository) {
+                                                   ProsessTaskRepository prosessTaskRepository,
+                                                   MottatteDokumentRepository mottatteDokumentRepository,
+                                                   EntityManager entityManager) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -137,6 +152,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
 
         Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.FRISINN, aktørId, null, null, fom, tom);
+
+        loggForvaltningTjeneste(fagsak, "/frisinn/opprett-manuell-frisinn/", "kjører manuell frisinn søknad");
 
         FrisinnSøknad søknad = FrisinnSøknad.builder()
             .språk(Språk.NORSK_BOKMÅL)
@@ -174,6 +191,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         int idx = 0;
         for (var s : saknumre) {
             var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(s), false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + s));
+            loggForvaltningTjeneste(fagsak, "/manuell-revurdering", "kjører manuell revurdering/tilbakehopp");
+
             var taskData = new ProsessTaskData(OpprettManuellRevurderingTask.TASKTYPE);
             taskData.setSaksnummer(fagsak.getSaksnummer().getVerdi());
             taskData.setNesteKjøringEtter(LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS)); // sprer utover hvert 1/2 sek.
@@ -182,6 +201,46 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             idx++;
         }
 
+    }
+
+    @POST
+    @Path("/marker-ugyldig")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Markerer et mottatt dokument som ugyldig", summary = ("Markerer angitt dokument som ugyldig"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response markerMottattDokumentUgyldig(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                                                 @NotNull @FormParam("journalpost") @Parameter(description = "journalpost", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "20")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostDto,
+                                                 @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
+
+        var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
+        var fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+
+        if (!fagsakOpt.isPresent()) {
+            return Response.status(Status.BAD_REQUEST.getStatusCode(), "Fant ikke fagsak for angitt saksnummer").build();
+        }
+        var fagsak = fagsakOpt.get();
+        loggForvaltningTjeneste(fagsak, "/marker-ugyldig", begrunnelse.getTekst());
+
+        var dokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsak.getId(), List.of(journalpostDto.getJournalpostId()));
+        if (dokumenter.size() > 1) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Fant flere dokumenter for angitt saksnummer/journalpost - " + dokumenter.size()).build();
+        }
+        if (dokumenter.isEmpty()) {
+            return Response.status(Status.NOT_FOUND.getStatusCode(), "Fant ingen dokumenter for angitt saksnummer/journalpost").build();
+        }
+
+        mottatteDokumentRepository.oppdaterStatus(dokumenter, DokumentStatus.UGYLDIG);
+
+        return Response.ok().build();
+
+    }
+
+    private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
+        /*
+         * logger at tjenesten er kalt (er en forvaltnings tjeneste)
+         */
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), tjeneste, begrunnelse));
+        entityManager.flush();
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {

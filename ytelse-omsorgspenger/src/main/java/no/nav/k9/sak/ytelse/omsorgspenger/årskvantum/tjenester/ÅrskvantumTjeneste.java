@@ -21,6 +21,7 @@ import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -50,7 +51,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
-import no.nav.k9.felles.util.Tuple;
 
 @ApplicationScoped
 @Default
@@ -114,14 +114,13 @@ public class ÅrskvantumTjeneste {
 
     private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {
 
-        var grunnlag = grunnlagRepository.hentOppgittFravær(ref.getBehandlingId());
+        var oppgittFravær = grunnlagRepository.hentAlleFraværPerioder(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
 
         VilkårType vilkårType = VilkårType.OPPTJENINGSVILKÅRET;
         var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), vilkårType);
         var fagsakFravær = trekkUtFraværTjeneste.fraværFraKravDokumenterPåFagsakMedSøknadsfristVurdering(behandling);
-        var oppgittFravær = grunnlag.getPerioder();
         var relevantePerioder = utledPerioder(vilkårsperioder, fagsakFravær, oppgittFravær);
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
