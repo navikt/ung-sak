@@ -104,6 +104,9 @@ public class BehandlingDtoTjenesteImplTest {
         if (dtoLink.getRel().equals("tilgjengelige-vedtaksbrev")) {
             return true;
         }
+        if (dtoLink.getRel().equals("informasjonsbehov-vedtaksbrev")) {
+            return true;
+        }
         if (dtoLink.getRel().equals("dokumentdata-lagre")) {
             return true;
         }
