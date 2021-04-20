@@ -29,7 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
@@ -54,13 +54,13 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private OmsorgspengerOpptjeningForBeregningTjeneste tjeneste;
     private BehandlingReferanse ref;
     private AktørId aktørId;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjeneste;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningTjeneste;
 
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        oppgittOpptjeningTjeneste = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
+        oppgittOpptjeningTjeneste = Mockito.mock(OppgittOpptjeningFilterProvider.class);
 
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);

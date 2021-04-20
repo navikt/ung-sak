@@ -38,8 +38,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjeneste;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -52,7 +52,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     private OpptjeningRepository opptjeningRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private VirksomhetTjeneste virksomhetTjeneste;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     AksjonspunktutlederForVurderOppgittOpptjening() {
         // CDI
@@ -62,17 +62,17 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     public AksjonspunktutlederForVurderOppgittOpptjening(OpptjeningRepository opptjeningRepository,
                                                          InntektArbeidYtelseTjeneste iayTjeneste,
                                                          VirksomhetTjeneste virksomhetTjeneste,
-                                                         OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
+                                                         OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningRepository = opptjeningRepository;
         this.iayTjeneste = iayTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
-        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }
 
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
 
         Long behandlingId = param.getBehandlingId();
-        var søktePerioderProvider = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(behandlingId);
+        var søktePerioderProvider = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
 
         var iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElse(null);
         var fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
@@ -211,8 +211,8 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     }
 
     boolean harSøkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayg, LocalDate skjæringstidspunkt) {
-        OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(ref.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(ref.getBehandlingId(), iayg, skjæringstidspunkt);
+        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), iayg, skjæringstidspunkt);
         return oppgittOpptjening.map(o -> !o.getEgenNæring().isEmpty()).orElse(false);
     }
 
@@ -220,8 +220,8 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         if (opptjeningPeriode == null) {
             return false;
         }
-        OppgittOpptjeningTjeneste oppgittOpptjeningTjeneste = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(iayg.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningTjeneste.hentOppgittOpptjening(behandlingId, iayg, skjæringstidspunkt).orElse(null);
+        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(iayg.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(behandlingId, iayg, skjæringstidspunkt).orElse(null);
 
         return harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA &&
             manglerFerdiglignetNæringsinntekt(aktørId, oppgittOpptjening, iayg, opptjeningPeriode) == JA;

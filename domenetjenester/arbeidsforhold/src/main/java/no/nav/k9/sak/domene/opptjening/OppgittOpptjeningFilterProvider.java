@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.opptjening;
 
-import java.util.Objects;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -12,25 +10,24 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 @ApplicationScoped
-public class OppgittOpptjeningTjenesteProvider {
-    private Instance<OppgittOpptjeningTjeneste> søktePerioderProvidere;
+public class OppgittOpptjeningFilterProvider {
+    private Instance<OppgittOpptjeningFilter> oppgittOpptjeningFiltere;
     private BehandlingRepository behandlingRepository;
 
-    protected OppgittOpptjeningTjenesteProvider() {
+    protected OppgittOpptjeningFilterProvider() {
         // for proxy
     }
 
     @Inject
-    public OppgittOpptjeningTjenesteProvider(@Any Instance<OppgittOpptjeningTjeneste> søktePerioderProvidere, BehandlingRepository behandlingRepository) {
-        this.søktePerioderProvidere = søktePerioderProvidere;
+    public OppgittOpptjeningFilterProvider(@Any Instance<OppgittOpptjeningFilter> oppgittOpptjeningFiltere, BehandlingRepository behandlingRepository) {
+        this.oppgittOpptjeningFiltere = oppgittOpptjeningFiltere;
         this.behandlingRepository = behandlingRepository;
     }
 
-    public OppgittOpptjeningTjeneste finnSøktePerioderProvider(long behandlingId) {
-        Objects.requireNonNull(behandlingId);
+    public OppgittOpptjeningFilter finnOpptjeningFilter(long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(søktePerioderProvidere, ytelseType)
+        return FagsakYtelseTypeRef.Lookup.find(oppgittOpptjeningFiltere, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke støtte for ytelseType:" + ytelseType));
     }
 }

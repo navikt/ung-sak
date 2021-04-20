@@ -19,76 +19,77 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjeneste;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
-public class OMPOppgittOpptjeningTjeneste implements OppgittOpptjeningTjeneste {
+public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private VilkårTjeneste vilkårTjeneste;
+    private BehandlingRepository behandlingRepository;
 
-    private OMPOppgittOpptjeningTjeneste() {
+    private OMPOppgittOpptjeningFilter() {
         // For CDI
     }
 
     @Inject
-    public OMPOppgittOpptjeningTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                        @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    public OMPOppgittOpptjeningFilter(OmsorgspengerGrunnlagRepository grunnlagRepository,
+                                      VilkårTjeneste vilkårTjeneste,
+                                      BehandlingRepository behandlingRepository) {
         this.grunnlagRepository = grunnlagRepository;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.vilkårTjeneste = vilkårTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
-        Objects.requireNonNull(behandlingId);
-        Map<JournalpostId, LocalDateTimeline<Void>> søktFraværTidslinjePerJp = beregnFraværTidslinje(behandlingId);
-        var vilkårsperiode = finnVilkårsperiode(behandlingId, stp);
+        var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
-        // Søknadens journalpost refererer oppgitt opptjening OG søkte fraværsperioder
-        // Første journalpost hvor fraværsperioder matcher vilkårsperiode blir returnert
-        return iayGrunnlag.getOppgittOpptjeningAggregat()
-            // TODO: Funksjonell avklaring. Fremste usikkerhet om dette blir riktig, er når bruker søker om samme periode én gang til ("korrigering")
-            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger).orElse(List.of())
-            .stream()
-            .sorted(Comparator.comparing(OppgittOpptjening::getInnsendingstidspunkt))
-            .filter(oppgittOpptjening -> matcherVilkårsperiode(oppgittOpptjening, vilkårsperiode, søktFraværTidslinjePerJp))
+        var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
+        var vilkårsperiode = finnVilkårsperiode(ref, stp);
+
+        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
+    }
+
+    private Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad) {
+        Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje = beregnJournalpostAktivTidslinje(fraværPerioderFraSøknad);
+        List<OppgittOpptjening> oppgittOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat().map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger).orElse(List.of());
+
+        return oppgittOpptjeninger.stream()
+            .sorted(Comparator.comparing(OppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
+            .filter(oppgittOpptjening -> matcherVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
             .findFirst();
     }
 
-    private DatoIntervallEntitet finnVilkårsperiode(Long behandlingId, LocalDate stp) {
-        return perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.OPPTJENINGSVILKÅRET).stream()
-            .filter(it -> it.getFomDato().equals(stp))
+    private DatoIntervallEntitet finnVilkårsperiode(BehandlingReferanse ref, LocalDate stp) {
+        var skalIgnorereAvslåttePerioder = true;
+        return vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
+            .stream()
+            .filter(di -> di.getFomDato().equals(stp))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Utviklerfeil: Skjæringstidspunkt må ha matchende vilkårsperiode for opptjeningsvilkåret"));
     }
 
-    private Map<JournalpostId, LocalDateTimeline<Void>> beregnFraværTidslinje(Long behandlingId) {
-        var oppgittFraværPerioder = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
-            .map(OppgittFravær::getPerioder)
-            .orElse(Set.of());
-        var fraværPerioderPerJp = oppgittFraværPerioder.stream()
-            .filter(fp -> Objects.nonNull(fp.getJournalpostId()))
+    private Map<JournalpostId, LocalDateTimeline<Void>> beregnJournalpostAktivTidslinje(Set<OppgittFraværPeriode> oppgittFraværPerioder) {
+        var journalpostPerioder = oppgittFraværPerioder.stream()
             .collect(Collectors.groupingBy(OppgittFraværPeriode::getJournalpostId, Collectors.toSet()));
-        var fraværTidslinjePerJp = fraværPerioderPerJp.entrySet().stream()
-            .map(e -> {
-                Set<OppgittFraværPeriode> fraværPerioderForJp = e.getValue();
-                LocalDateTimeline<Void> tidslinjeForJp = slåSammenPerioder(fraværPerioderForJp);
-                return Map.entry(e.getKey(), tidslinjeForJp);
-            })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return fraværTidslinjePerJp;
+
+        var jornalpostTidslinjer = journalpostPerioder.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> slåSammenPerioder(e.getValue())));
+        return jornalpostTidslinjer;
     }
 
     private boolean matcherVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
@@ -98,9 +99,9 @@ public class OMPOppgittOpptjeningTjeneste implements OppgittOpptjeningTjeneste {
         return !overlappendeFraværsperioder.isEmpty();
     }
 
-    private NavigableSet<LocalDateInterval> finnOverlappendePerioder(DatoIntervallEntitet datoIntervall, LocalDateTimeline<Void> tidslinje) {
+    private NavigableSet<LocalDateInterval> finnOverlappendePerioder(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<Void> tidslinje) {
         return tidslinje.getLocalDateIntervals().stream()
-            .map(it -> it.overlap(new LocalDateInterval(datoIntervall.getFomDato(), datoIntervall.getTomDato())))
+            .map(di -> di.overlap(new LocalDateInterval(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato())))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .collect(Collectors.toCollection(TreeSet::new));

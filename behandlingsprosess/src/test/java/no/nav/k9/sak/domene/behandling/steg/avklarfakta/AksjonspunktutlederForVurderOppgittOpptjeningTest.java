@@ -42,7 +42,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
@@ -60,7 +60,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
     private Skjæringstidspunkt skjæringstidspunkt ;
     private InntektArbeidYtelseTjeneste iayTjeneste ;
     private VirksomhetTjeneste virksomhetTjeneste ;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     @Spy
     private AksjonspunktutlederForVurderOppgittOpptjening utleder ;
@@ -73,9 +73,9 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
-        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
+        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
         utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
-            repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste, oppgittOpptjeningTjenesteProvider);
+            repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
 
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();

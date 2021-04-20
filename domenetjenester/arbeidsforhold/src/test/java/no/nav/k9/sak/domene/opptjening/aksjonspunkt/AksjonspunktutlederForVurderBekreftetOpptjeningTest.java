@@ -41,7 +41,7 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -66,7 +66,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutleder;
     private FagsakRepository fagsakRepository ;
     private BehandlingRepository behandlingRepository ;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     @BeforeEach
     public void setUp() {
@@ -75,9 +75,9 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         fagsakRepository = repositoryProvider.getFagsakRepository();
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
+        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
 
-        aksjonspunktutleder = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningTjenesteProvider);
+        aksjonspunktutleder = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningFilterProvider);
 
     }
 

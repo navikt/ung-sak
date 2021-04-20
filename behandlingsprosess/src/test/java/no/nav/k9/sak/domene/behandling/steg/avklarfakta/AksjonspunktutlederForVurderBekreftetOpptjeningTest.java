@@ -38,7 +38,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderBekreftetOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
@@ -59,7 +59,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private Skjæringstidspunkt skjæringstidspunkt ;
     private LocalDate stp;
     private OpptjeningRepository opptjeningRepository;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     @Spy
     private AksjonspunktutlederForVurderBekreftetOpptjening utleder ;
@@ -73,11 +73,11 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
         stp = skjæringstidspunkt.getUtledetSkjæringstidspunkt();
 
-        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
+        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
 
         utleder = new AksjonspunktutlederForVurderBekreftetOpptjening(
             repositoryProvider.getOpptjeningRepository(),
-            iayTjeneste, oppgittOpptjeningTjenesteProvider);
+            iayTjeneste, oppgittOpptjeningFilterProvider);
 
         initMocks(this);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();

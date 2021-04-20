@@ -25,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -40,7 +40,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
     private OppgaveTjeneste oppgaveTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     VurderUtlandSteg() {
         // for CDI proxy
@@ -51,12 +51,12 @@ public class VurderUtlandSteg implements BehandlingSteg {
                             OppgaveTjeneste oppgaveTjeneste,
                             InntektArbeidYtelseTjeneste iayTjeneste,
                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                            OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
+                            OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
         // Vurder automatisk merking av opptjening utland
         for (DatoIntervallEntitet vilkårPeriode : vilkårPerioder) {
-            var stp = vilkårPeriode.getTomDato();
+            var stp = vilkårPeriode.getFomDato();
             if (!behandling.harAksjonspunktMedType(MANUELL_MARKERING_AV_UTLAND_SAKSTYPE) && harOppgittUtenlandskInntekt(kontekst.getBehandlingId(), stp)) {
                 opprettOppgaveForInnhentingAvDokumentasjon(behandling);
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AUTOMATISK_MARKERING_AV_UTENLANDSSAK)));
@@ -80,7 +80,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
         if (iayGrunnlag == null) {
             return false;
         }
-        return oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(behandlingId).hentOppgittOpptjening(behandlingId, iayGrunnlag, stp)
+        return oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId).hentOppgittOpptjening(behandlingId, iayGrunnlag, stp)
             .map(oppgittOpptjening -> oppgittOpptjening.getOppgittArbeidsforhold()
                 .stream()
                 .anyMatch(OppgittArbeidsforhold::erUtenlandskInntekt))

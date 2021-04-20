@@ -11,7 +11,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-public class DefaultOppgittOpptjeningTjeneste implements OppgittOpptjeningTjeneste {
+public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {

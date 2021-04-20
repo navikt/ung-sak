@@ -48,7 +48,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningTjenesteProvider;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
@@ -78,7 +78,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     private OpptjeningRepository opptjeningRepository;
     private AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederForVurderOpptjening;
     private VilkårResultatRepository vilkårResultatRepository;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening;
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
     private InternArbeidsforholdRef ARBEIDSFORHOLD_ID;
@@ -94,11 +94,11 @@ public class OpptjeningsperioderTjenesteImplTest {
         virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
         fagsakRepository = new FagsakRepository(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        oppgittOpptjeningTjenesteProvider = Mockito.mock(OppgittOpptjeningTjenesteProvider.class);
-        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningTjenesteProvider);
+        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
+        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening( repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningTjenesteProvider);
-        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningTjenesteProvider);
+        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening( repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningFilterProvider);
+        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider);
         ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
         AKTØRID = AktørId.dummy();
 

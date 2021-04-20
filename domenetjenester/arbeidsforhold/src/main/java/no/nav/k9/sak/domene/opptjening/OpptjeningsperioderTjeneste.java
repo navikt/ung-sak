@@ -55,7 +55,7 @@ public class OpptjeningsperioderTjeneste {
     private OpptjeningAktivitetVurdering vurderForSaksbehandling;
     private OpptjeningAktivitetVurdering vurderForVilkår;
     private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
-    private OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     OpptjeningsperioderTjeneste() {
         // CDI
@@ -65,10 +65,10 @@ public class OpptjeningsperioderTjeneste {
     public OpptjeningsperioderTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        OpptjeningRepository opptjeningRepository,
                                        AksjonspunktutlederForVurderOppgittOpptjening vurderOppgittOpptjening,
-                                       AksjonspunktutlederForVurderBekreftetOpptjening vurderBekreftetOpptjening, OppgittOpptjeningTjenesteProvider oppgittOpptjeningTjenesteProvider) {
+                                       AksjonspunktutlederForVurderBekreftetOpptjening vurderBekreftetOpptjening, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = opptjeningRepository;
-        this.oppgittOpptjeningTjenesteProvider = oppgittOpptjeningTjenesteProvider;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.vurderForSaksbehandling = new OpptjeningAktivitetVurderingAksjonspunkt(vurderOppgittOpptjening, vurderBekreftetOpptjening);
         this.vurderForVilkår = new OpptjeningAktivitetVurderingVilkår(vurderOppgittOpptjening, vurderBekreftetOpptjening);
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
@@ -113,7 +113,7 @@ public class OpptjeningsperioderTjeneste {
             mapYrkesaktivitet(ref, perioder, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjening.getOpptjeningPeriode(), inntektsmeldinger);
         }
 
-        var optOppgittOpptjening = oppgittOpptjeningTjenesteProvider.finnSøktePerioderProvider(ref.getBehandlingId())
+        var optOppgittOpptjening = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId())
             .hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt);
         if (optOppgittOpptjening.isPresent()) {
             // map
