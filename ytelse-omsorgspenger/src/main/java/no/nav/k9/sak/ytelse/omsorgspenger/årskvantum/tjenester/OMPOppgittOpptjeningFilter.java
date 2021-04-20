@@ -18,6 +18,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -40,6 +41,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
+    private Boolean lansert;
 
     private OMPOppgittOpptjeningFilter() {
         // For CDI
@@ -48,14 +50,20 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Inject
     public OMPOppgittOpptjeningFilter(OmsorgspengerGrunnlagRepository grunnlagRepository,
                                       VilkårTjeneste vilkårTjeneste,
-                                      BehandlingRepository behandlingRepository) {
+                                      BehandlingRepository behandlingRepository,
+                                      @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.grunnlagRepository = grunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.lansert = lansert;
     }
 
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
+        if (!lansert) {
+            return iayGrunnlag.getOppgittOpptjening();
+        }
+
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
         var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());

@@ -9,6 +9,7 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
@@ -23,10 +24,13 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 public class LagreOppgittOpptjening {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private Boolean lansert;
 
     @Inject
-    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste) {
+    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste,
+                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.iayTjeneste = iayTjeneste;
+        this.lansert = lansert;
     }
 
 
@@ -51,7 +55,11 @@ public class LagreOppgittOpptjening {
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
         if (builder.build().harOpptjening()) {
-            iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
+            if (!lansert) {
+                iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
+            } else {
+                iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
+            }
         }
     }
 
