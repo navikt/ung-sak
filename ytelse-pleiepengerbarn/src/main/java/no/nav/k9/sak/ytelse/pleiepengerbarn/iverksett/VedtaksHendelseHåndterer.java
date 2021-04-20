@@ -38,7 +38,7 @@ public class VedtaksHendelseHåndterer {
 
     void handleMessage(String key, String payload) {
         log.debug("Mottatt ytelse-vedtatt hendelse med key='{}', payload={}", key, payload);
-        ProsessTaskData taskData = new ProsessTaskData(VurderRevurderingAndreSøknaderTask.TASKTYPE);
+        ProsessTaskData taskData = new ProsessTaskData(VurderRevurderingAndreSøknaderTask.TASKNAME);
 
         VedtakHendelse vh;
         try {

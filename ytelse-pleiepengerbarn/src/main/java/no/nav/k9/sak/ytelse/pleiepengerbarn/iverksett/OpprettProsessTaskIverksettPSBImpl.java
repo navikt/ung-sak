@@ -29,7 +29,7 @@ public class OpprettProsessTaskIverksettPSBImpl extends OpprettProsessTaskIverks
 
     @Override
     public void opprettYtelsesSpesifikkeTasks(Behandling behandling) {
-        var taskData = new ProsessTaskData(VurderRevurderingAndreSøknaderTask.TASKTYPE);
+        var taskData = new ProsessTaskData(VurderRevurderingAndreSøknaderTask.TASKNAME);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         fagsakProsessTaskRepository.lagreNyGruppe(taskData);
     }
