@@ -43,7 +43,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private BehandlingRepository behandlingRepository;
     private Boolean lansert;
 
-    private OMPOppgittOpptjeningFilter() {
+    OMPOppgittOpptjeningFilter() {
         // For CDI
     }
 
@@ -72,7 +72,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
     }
 
-    private Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad) {
+    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad) {
         Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje = beregnJournalpostAktivTidslinje(fraværPerioderFraSøknad);
         List<OppgittOpptjening> oppgittOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat().map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger).orElse(List.of());
 
@@ -96,7 +96,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .collect(Collectors.groupingBy(OppgittFraværPeriode::getJournalpostId, Collectors.toSet()));
 
         var jornalpostTidslinjer = journalpostPerioder.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> slåSammenPerioder(e.getValue())));
+            .collect(Collectors.toMap(e -> e.getKey(), e -> slåSammenPerioder(e.getValue())));
         return jornalpostTidslinjer;
     }
 
