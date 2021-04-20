@@ -13,7 +13,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
@@ -72,6 +71,8 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 var origBehandling = sisteVedtak.get();
                 var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
+            } else {
+                throw new IllegalStateException("Prøvde revurdering av sak, men fant ingen behandling revurdere");
             }
         } else {
             log.info("Fant åpen behandling, kjører diff for å flytte prosessen tilbake");
