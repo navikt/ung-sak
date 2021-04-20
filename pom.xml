@@ -28,9 +28,8 @@
     </modules>
 
     <properties>
-        <java.version>11</java.version> <!--Brukes av jenkins -->
-        <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN
-            -Duser.timezone='Europe/Oslo'</argLine> <!-- default argLine for surefire-plugin -->
+        <java.version>16</java.version> <!--Brukes av jenkins -->
+        <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
         <revision>3.1.0</revision>
         <sha1></sha1>
