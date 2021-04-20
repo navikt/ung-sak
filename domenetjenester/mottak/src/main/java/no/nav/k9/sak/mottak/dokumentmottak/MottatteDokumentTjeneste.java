@@ -8,7 +8,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -18,11 +23,11 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @Dependent
 public class MottatteDokumentTjeneste {
+
+    private static final Logger logger = LoggerFactory.getLogger(MottatteDokumentTjeneste.class);
 
     private final InntektsmeldingParser inntektsmeldingParser = new InntektsmeldingParser();
 
@@ -85,7 +90,12 @@ public class MottatteDokumentTjeneste {
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
-        MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);
+        DokumentStatus nyStatus = DokumentStatus.MOTTATT;
+        if (dokument.getStatus() == DokumentStatus.UGYLDIG) {
+            logger.info("Mottok ugyldig dokument med jounalpostId={} på fagsak={}", dokument.getJournalpostId().getVerdi(), dokument.getFagsakId());
+            nyStatus = DokumentStatus.UGYLDIG;
+        }
+        MottattDokument mottattDokument = mottatteDokumentRepository.lagre(dokument, nyStatus);
         return mottattDokument.getId();
     }
 

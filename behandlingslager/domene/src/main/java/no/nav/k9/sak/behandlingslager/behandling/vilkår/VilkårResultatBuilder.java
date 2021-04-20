@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
@@ -157,5 +160,38 @@ public class VilkårResultatBuilder {
             this.fullstendigTidslinje = null;
         }
         return this;
+    }
+
+    public void slettPerioder(VilkårType vilkårType, Collection<DatoIntervallEntitet> perioder) {
+
+        List<LocalDateSegment<Boolean>> segmenter = perioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE)).collect(Collectors.toList());
+        LocalDateTimeline<Boolean> slettTimeline = new LocalDateTimeline<>(segmenter);
+
+        slettPerioder(vilkårType, slettTimeline);
+    }
+
+    private void slettPerioder(VilkårType vilkårType, LocalDateTimeline<Boolean> slettTimeline) {
+        var vilkåropt = kladd.getVilkår(vilkårType);
+        if (vilkåropt.isEmpty()) {
+            return;
+        }
+        var vilkår = vilkåropt.get();
+        var eksisterendeTimeline = kladd.getVilkårTimeline(vilkårType);
+        if (eksisterendeTimeline.isEmpty()) {
+            return;
+        }
+
+        var nyTimeline = eksisterendeTimeline.disjoint(slettTimeline, (iv, s1, s2) -> {
+            var nyVilkårPeriode = new VilkårPeriodeBuilder(s1.getValue()).medPeriode(iv.getFomDato(), iv.getTomDato()).build();
+            return new LocalDateSegment<>(iv, nyVilkårPeriode);
+        });
+
+        var vilkårPerioder = nyTimeline.toSegments().stream().map(s -> s.getValue()).collect(Collectors.toList());
+        vilkår.setPerioder(vilkårPerioder);
+    }
+
+    public void slettVilkårPerioder(VilkårType vilkårType, DatoIntervallEntitet periode) {
+        var slettTimeline = new LocalDateTimeline<>(new LocalDateInterval(periode.getFomDato(), periode.getTomDato()), Boolean.TRUE);
+        slettPerioder(vilkårType, slettTimeline);
     }
 }

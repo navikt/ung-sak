@@ -3,16 +3,13 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 
@@ -33,20 +30,20 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
+import no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.mottak.inntektsmelding.DefaultKompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInntektsmeldingerRelevantForBeregning;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -62,15 +59,17 @@ public class KompletthetsjekkerTest {
     private KompletthetssjekkerTestUtil testUtil;
 
     @Mock
-    private DokumentArkivTjeneste dokumentArkivTjeneste;
-    @Mock
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     @Mock
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjenesteMock;
     @Mock
-    private DokumentBehandlingTjeneste dokumentBehandlingTjenesteMock;
-    @Mock
     private InntektsmeldingRegisterTjeneste inntektsmeldingArkivTjeneste;
+    @Mock
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    @Mock
+    private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
+    @Mock
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Mock
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
@@ -78,7 +77,7 @@ public class KompletthetsjekkerTest {
     private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
     private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
     private KompletthetsjekkerFelles kompletthetsjekkerFelles;
-    private PsbKompletthetsjekker psbKompletthetsjekker;
+    private PSBKompletthetsjekker psbKompletthetsjekker;
     private Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(STARTDATO).build();
     private EntityManager entityManager;
 
@@ -90,17 +89,17 @@ public class KompletthetsjekkerTest {
         testUtil = new KompletthetssjekkerTestUtil(repositoryProvider);
 
         when(skjæringstidspunktTjeneste.getSkjæringstidspunkter(Mockito.anyLong())).thenReturn(skjæringstidspunkt);
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(any(), anyBoolean())).thenReturn(new HashMap<>());
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean())).thenReturn(new HashMap<>());
+        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(any(), anyBoolean(), any())).thenReturn(new HashMap<>());
+        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean(), any())).thenReturn(new HashMap<>());
 
         kompletthetssjekkerSøknad = new KompletthetssjekkerSøknad(søknadRepository, Period.parse("P4W"));
         kompletthetssjekkerInntektsmelding = new DefaultKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
-        psbKompletthetsjekker = new PsbKompletthetsjekker(
+        psbKompletthetsjekker = new PSBKompletthetsjekker(
             kompletthetssjekkerSøknad,
-            new UnitTestLookupInstanceImpl<>(kompletthetssjekkerInntektsmelding),
             inntektsmeldingTjeneste,
+            new KompletthetForBeregningTjeneste(perioderTilVurderingTjeneste, new PSBInntektsmeldingerRelevantForBeregning(), arbeidsforholdTjeneste, inntektArbeidYtelseTjeneste),
             kompletthetsjekkerFelles,
             søknadRepository);
     }
@@ -113,6 +112,7 @@ public class KompletthetsjekkerTest {
     public void skal_finne_at_kompletthet_er_oppfylt() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
+        when(perioderTilVurderingTjeneste.utled(any(), any())).thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STARTDATO, STARTDATO.plusWeeks(2)))));
 
         // Act
         KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderForsendelseKomplett(lagRef(behandling));
@@ -123,53 +123,10 @@ public class KompletthetsjekkerTest {
     }
 
     @Test
-    public void skal_etterlyse_mer_enn_3ukerfør() {
-        // Arrange
-        LocalDate stp = LocalDate.now().plusDays(2).plusWeeks(3);
-        Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
-        mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, LocalDate.now().minusWeeks(1));
-        when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
-
-        // Act
-        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
-
-        // Assert
-        assertThat(kompletthetResultat.erOppfylt()).isFalse();
-        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any());
-
-        // Act 2
-        stp = LocalDate.now().plusWeeks(3);
-        KompletthetResultat kompletthetResultat2 = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, stp));
-
-        // Assert
-        assertThat(kompletthetResultat2.erOppfylt()).isFalse();
-        assertThat(kompletthetResultat2.getVentefrist().toLocalDate()).isEqualTo(stp);
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(2)).bestillDokument(any(), any());
-    }
-
-    @Test
-    public void skal_sende_brev_når_inntektsmelding_mangler() {
-        // Arrange
-        Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
-        mockManglendeInntektsmeldingGrunnlag();
-        testUtil.byggOgLagreFørstegangsSøknadMedMottattdato(behandling, LocalDate.now().minusWeeks(1));
-        when(inntektsmeldingTjeneste.hentInntektsmeldinger(any(), any())).thenReturn(Collections.emptyList());
-
-        // Act
-        KompletthetResultat kompletthetResultat = psbKompletthetsjekker.vurderEtterlysningInntektsmelding(lagRef(behandling, STARTDATO));
-
-        // Assert
-        assertThat(kompletthetResultat.erOppfylt()).isFalse();
-        assertThat(kompletthetResultat.getVentefrist().toLocalDate()).isEqualTo(LocalDate.now().plusWeeks(3));
-        verify(dokumentBestillerApplikasjonTjenesteMock, times(1)).bestillDokument(any(), any());
-    }
-
-    @Test
     public void skal_finne_at_kompletthet_er_oppfylt_når_vedlegg_til_søknad_finnes_i_joark() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
+        when(perioderTilVurderingTjeneste.utled(any(), any())).thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STARTDATO, STARTDATO.plusWeeks(2)))));
 
         opprettSøknad(behandling);
 
@@ -186,20 +143,9 @@ public class KompletthetsjekkerTest {
         return BehandlingReferanse.fra(behandling, stp);
     }
 
-    private BehandlingReferanse lagRef(Behandling behandling, LocalDate stpDate) {
-        var stp = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(stpDate).build();
-        return BehandlingReferanse.fra(behandling, stp);
-    }
-
     private void opprettSøknad(Behandling behandling) {
         SøknadEntitet hentSøknad = søknadRepository.hentSøknad(behandling);
         SøknadEntitet søknad = new SøknadEntitet.Builder(hentSøknad).build();
         søknadRepository.lagreOgFlush(behandling, søknad);
-    }
-
-    private void mockManglendeInntektsmeldingGrunnlag() {
-        HashMap<Arbeidsgiver, Set<InternArbeidsforholdRef>> manglendeInntektsmeldinger = new HashMap<>();
-        manglendeInntektsmeldinger.put(Arbeidsgiver.virksomhet("1"), new HashSet<>());
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean())).thenReturn(manglendeInntektsmeldinger);
     }
 }

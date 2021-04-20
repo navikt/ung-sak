@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class OMPVurderSøknadsfristTjenesteTest {
 
-    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, new InntektsmeldingSøktePerioderMapper(), null, true, LocalDate.of(2021, 1, 1));
+    private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, new InntektsmeldingSøktePerioderMapper(), null, new VurderSøknadsfrist(true, LocalDate.of(2021, 1, 1)));
 
     @Test
     void skal_godkjenne_9_måneder_søknadsfrist_for_covid19_utvidet_frist() {
@@ -32,7 +33,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
-        var oppgittFraværPeriode = new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7));
+        var oppgittFraværPeriode = new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT);
         var map = Map.of(søknad,
             List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode)));
 
@@ -56,7 +57,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
         var map = Map.of(søknad,
-            List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7)))));
+            List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT))));
 
         var søknadSetMap = tjeneste.vurderSøknadsfrist(map);
 
@@ -78,7 +79,7 @@ public class OMPVurderSøknadsfristTjenesteTest {
         LocalDate startDato = LocalDate.now().withYear(2020).withMonth(1).withDayOfMonth(1);
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
         var virksomhet = Arbeidsgiver.virksomhet("000000000");
-        var oppgittFraværPeriode = new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7));
+        var oppgittFraværPeriode = new OppgittFraværPeriode(startDato, startDato.plusMonths(12), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, Duration.ofHours(7), FraværÅrsak.UDEFINERT);
         var søktePerioder = List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(startDato, startDato.plusMonths(12)), UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, oppgittFraværPeriode));
         var map = Map.of(søknad, søktePerioder);
 

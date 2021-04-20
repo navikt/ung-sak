@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk.OmsorgspengerRammevedtakTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak.OmsorgspengerRammevedtakTjeneste;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 

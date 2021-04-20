@@ -262,7 +262,7 @@ public class Fagsak extends BaseEntitet {
         throw new IllegalStateException("Skal aldri kunne slette fagsak. [id=" + id + ", status=" + getFagsakStatus() + ", type=" + ytelseType + "]");
     }
 
-    public void setPeriode(LocalDate fom, LocalDate tom) {
+    void setPeriode(LocalDate fom, LocalDate tom) {
         this.periode = DatoIntervallEntitet
             .fraOgMedTilOgMed(fom == null ? Tid.TIDENES_BEGYNNELSE : fom, tom == null ? Tid.TIDENES_ENDE : tom)
             .toRange();

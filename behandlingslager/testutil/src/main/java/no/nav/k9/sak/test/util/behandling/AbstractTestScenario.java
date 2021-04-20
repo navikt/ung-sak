@@ -74,12 +74,15 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -112,7 +115,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingStegType startSteg;
 
     private Map<AksjonspunktDefinisjon, BehandlingStegType> aksjonspunktDefinisjoner = new HashMap<>();
-    private Map<VilkårType, Utfall> vilkårTyper = new HashMap<>();
+    private List<VilkårData> vilkår = new ArrayList<>();
     private List<MedlemskapPerioderEntitet> medlemskapPerioder = new ArrayList<>();
     private Long fagsakId = nyId();
     private LocalDate behandlingstidFrist;
@@ -257,7 +260,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandlingVedtakRepository;
     }
 
-    public BehandlingVedtak mockBehandlingVedtak() {
+    private BehandlingVedtak mockBehandlingVedtak() {
         if (behandlingVedtak == null) {
             behandlingVedtak = Mockito.mock(BehandlingVedtak.class);
         }
@@ -675,7 +678,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
-        fagsak.setPeriode(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
+        FagsakTestUtil.oppdaterPeriode(fagsak, periode);
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }
@@ -683,10 +687,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
-        vilkårTyper.forEach((vilkårType, vilkårUtfallType) -> {
-            inngangsvilkårBuilder.leggTil(new VilkårBuilder(vilkårType).leggTil(new VilkårPeriodeBuilder()
-                .medPeriode(LocalDate.now().minusMonths(3), LocalDate.now())
-                .medUtfall(vilkårUtfallType)));
+        vilkår.forEach(v -> {
+            inngangsvilkårBuilder.leggTil(new VilkårBuilder(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
+                .medPeriode(DatoIntervallEntitet.fra(v.getPeriode()))
+                .medUtfall(v.getUtfall())));
         });
 
         final var build = inngangsvilkårBuilder.build();
@@ -803,7 +807,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     @SuppressWarnings("unchecked")
     public S leggTilVilkår(VilkårType vilkårType, Utfall utfall) {
-        vilkårTyper.put(vilkårType, utfall);
+        return this.leggTilVilkår(vilkårType, utfall, new Periode(LocalDate.now().minusMonths(3), LocalDate.now()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public S leggTilVilkår(VilkårType vilkårType, Utfall utfall, Periode periode) {
+        vilkår.add(new VilkårData(vilkårType, utfall, periode));
         return (S) this;
     }
 
@@ -878,6 +887,32 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.behandlingÅrsakType = behandlingÅrsakType;
         this.manueltOpprettet = manueltOpprettet;
         return (S) this;
+    }
+
+    static class VilkårData {
+        private Periode periode;
+        private Utfall utfall;
+        private VilkårType vilkårType;
+
+        VilkårData(VilkårType vilkårType, Utfall utfall, Periode periode) {
+            super();
+            this.periode = periode;
+            this.utfall = utfall;
+            this.vilkårType = vilkårType;
+        }
+
+        Periode getPeriode() {
+            return periode;
+        }
+
+        Utfall getUtfall() {
+            return utfall;
+        }
+
+        VilkårType getVilkårType() {
+            return vilkårType;
+        }
+
     }
 
     private final class MockPersonopplysningRepository extends PersonopplysningRepository {

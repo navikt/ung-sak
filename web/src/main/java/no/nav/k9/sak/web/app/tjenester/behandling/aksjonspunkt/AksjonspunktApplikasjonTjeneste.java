@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
@@ -112,7 +113,7 @@ public class AksjonspunktApplikasjonTjeneste {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
         setAnsvarligSaksbehandler(bekreftedeAksjonspunktDtoer, behandling);
 
-        spoolTilbakeTilTidligsteAksjonspunkt(bekreftedeAksjonspunktDtoer, kontekst);
+        spoolTilbakeTilTidligsteAksjonspunkt(behandling, bekreftedeAksjonspunktDtoer, kontekst);
 
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
 
@@ -142,7 +143,7 @@ public class AksjonspunktApplikasjonTjeneste {
         return SubjectHandler.getSubjectHandler().getUid();
     }
 
-    private void spoolTilbakeTilTidligsteAksjonspunkt(Collection<? extends AksjonspunktKode> aksjonspunktDtoer,
+    private void spoolTilbakeTilTidligsteAksjonspunkt(Behandling behandling, Collection<? extends AksjonspunktKode> aksjonspunktDtoer,
                                                       BehandlingskontrollKontekst kontekst) {
         // NB: Første løsning på tilbakeføring ved endring i GUI (når aksjonspunkter tilhørende eldre enn aktivt steg
         // sendes inn spoles prosessen
@@ -152,6 +153,15 @@ public class AksjonspunktApplikasjonTjeneste {
         List<String> bekreftedeApKoder = aksjonspunktDtoer.stream()
             .map(AksjonspunktKode::getKode)
             .collect(toList());
+
+        // Valider at aksjonspunktene eksisterer på behandlingen
+        var invalidAksjonspunkt = bekreftedeApKoder.stream()
+            .filter(it -> behandling.getAksjonspunktFor(it).isEmpty())
+            .collect(Collectors.toSet());
+
+        if (!invalidAksjonspunkt.isEmpty()) {
+            throw new IllegalStateException("Prøver å løse aksjonspunkter som ikke finnes på behandlingen. Har ikke '" + invalidAksjonspunkt + "'");
+        }
 
         behandlingskontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, bekreftedeApKoder);
     }
@@ -245,6 +255,8 @@ public class AksjonspunktApplikasjonTjeneste {
 
             @SuppressWarnings("rawtypes")
             Overstyringshåndterer overstyringshåndterer = finnOverstyringshåndterer(dto);
+            var aksjonspunktDefinisjon = overstyringshåndterer.aksjonspunktForInstans();
+            opprettAksjonspunktForOverstyring(kontekst, behandling, aksjonspunktDefinisjon);
             OppdateringResultat oppdateringResultat = overstyringshåndterer.håndterOverstyring(dto, behandling, kontekst);
             overhoppResultat.leggTil(oppdateringResultat);
 
@@ -252,7 +264,7 @@ public class AksjonspunktApplikasjonTjeneste {
         });
 
         // Tilbakestill gjeldende steg før fremføring
-        spoolTilbakeTilTidligsteAksjonspunkt(overstyrteAksjonspunkter, kontekst);
+        spoolTilbakeTilTidligsteAksjonspunkt(behandling, overstyrteAksjonspunkter, kontekst);
 
         // legg til overstyring aksjonspunkt (normalt vil være utført) og historikk
         overstyrteAksjonspunkter.forEach(dto -> {
@@ -260,7 +272,7 @@ public class AksjonspunktApplikasjonTjeneste {
             Overstyringshåndterer overstyringshåndterer = finnOverstyringshåndterer(dto);
             overstyringshåndterer.håndterAksjonspunktForOverstyringPrecondition(dto, behandling);
             var aksjonspunktDefinisjon = overstyringshåndterer.aksjonspunktForInstans();
-            var aksjonspunktBegrunnelse = opprettAksjonspunktForOverstyring(kontekst, behandling, dto, aksjonspunktDefinisjon);
+            var aksjonspunktBegrunnelse = utførAksjonspunktForOverstyring(kontekst, behandling, dto, aksjonspunktDefinisjon);
             boolean endretBegrunnelse = begrunnelseErEndret(aksjonspunktBegrunnelse, dto.getBegrunnelse());
             overstyringshåndterer.håndterAksjonspunktForOverstyringHistorikk(dto, behandling, endretBegrunnelse);
         });
@@ -271,9 +283,19 @@ public class AksjonspunktApplikasjonTjeneste {
         return overhoppResultat;
     }
 
-    private String opprettAksjonspunktForOverstyring(BehandlingskontrollKontekst kontekst, Behandling behandling, OverstyringAksjonspunkt dto, AksjonspunktDefinisjon apDef) {
+    private void opprettAksjonspunktForOverstyring(BehandlingskontrollKontekst kontekst, Behandling behandling, AksjonspunktDefinisjon apDef) {
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(apDef);
         Aksjonspunkt aksjonspunkt = eksisterendeAksjonspunkt.orElseGet(() -> behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(apDef)).get(0));
+
+        if (aksjonspunkt.erAvbrutt()) {
+            // Må reåpne avbrutte før de kan settes til utført (kunne ha vært én operasjon i aksjonspunktRepository)
+            behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, List.of(aksjonspunkt), false);
+        }
+    }
+
+    private String utførAksjonspunktForOverstyring(BehandlingskontrollKontekst kontekst, Behandling behandling, OverstyringAksjonspunkt dto, AksjonspunktDefinisjon apDef) {
+        Optional<Aksjonspunkt> eksisterendeAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(apDef);
+        Aksjonspunkt aksjonspunkt = eksisterendeAksjonspunkt.orElseThrow();
         String begrunnelse = aksjonspunkt.getBegrunnelse();
 
         if (aksjonspunkt.erAvbrutt()) {
@@ -469,6 +491,6 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private boolean begrunnelseErEndret(String gammelBegrunnelse, String nyBegrunnelse) {
-        return !Objects.equals(gammelBegrunnelse, nyBegrunnelse);
+        return gammelBegrunnelse != null && !Objects.equals(gammelBegrunnelse, nyBegrunnelse);
     }
 }

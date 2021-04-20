@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -20,8 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.db.Repository;
+import no.nav.k9.sak.db.util.Repository;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

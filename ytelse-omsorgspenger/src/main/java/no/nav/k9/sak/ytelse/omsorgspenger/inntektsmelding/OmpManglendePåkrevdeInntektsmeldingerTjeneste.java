@@ -18,12 +18,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.ArbeidsforholdMedÅrsak;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
@@ -46,16 +46,16 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
     private static final Logger logger = LoggerFactory.getLogger(OmpManglendePåkrevdeInntektsmeldingerTjeneste.class);
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BehandlingRepository behandlingRepository;
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
 
+    private static final Environment ENV = Environment.current();
+    private final boolean devLoggingPotensieltSensitivt = !ENV.isProd();
+
     @Inject
-    public OmpManglendePåkrevdeInntektsmeldingerTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                         BehandlingRepository behandlingRepository,
+    public OmpManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
                                                          @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                          TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
@@ -87,24 +87,40 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(behandling.getAktørId()));
 
-        var arbeidsgiverArbeidsforholdMap = yrkesaktivitetFilter.getYrkesaktiviteter()
+        var yrkArbeidsgiverArbeidsforhold = yrkesaktivitetFilter.getYrkesaktiviteter()
             .stream()
             .filter(Yrkesaktivitet::erArbeidsforhold)
             .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,
                 flatMapping(im -> Stream.of(im.getArbeidsforholdRef()), Collectors.toSet())));
 
-        for (ArbeidsgiverArbeidsforhold arbeidsgiverArbeidsforhold : arbeidsforholdSøktOmFravær) {
-            var arbeidsgiver = arbeidsgiverArbeidsforhold.getArbeidsgiver();
-            var arbeidsforhold = arbeidsgiverArbeidsforholdMap.getOrDefault(arbeidsgiver, Set.of());
-            var arbeidsforholdet = arbeidsgiverArbeidsforhold.getArbeidsforhold();
-            if (arbeidsforhold.stream().noneMatch(arbeidsforholdet::gjelderFor)
-                && IkkeTattStillingTil.vurder(arbeidsgiver, arbeidsforholdet, grunnlag)) {
-                var arbeidsforholdRefs = Set.of(arbeidsforholdet);
-                if (rapportertInntektFraArbeidsgiver(fagsakPeriode, arbeidsgiver, inntektFilter, yrkesaktivitetFilter)) {
-                    LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, arbeidsgiver, arbeidsforholdRefs);
-                    logger.info("Inntektsmelding med inntekt uten kjent arbeidsforhold: arbeidsforholdRef={}", arbeidsforholdRefs);
+        for (ArbeidsgiverArbeidsforhold imArbeidsgiverArbeidsforhold : arbeidsforholdSøktOmFravær) {
+            var imArbeidsgiver = imArbeidsgiverArbeidsforhold.getArbeidsgiver();
+            var yrkArbeidsforhold = yrkArbeidsgiverArbeidsforhold.getOrDefault(imArbeidsgiver, Set.of());
+            var imArbeidsforhold = imArbeidsgiverArbeidsforhold.getArbeidsforhold();
+            if (yrkArbeidsforhold.stream().noneMatch(imArbeidsforhold::gjelderFor)) {
+                if (IkkeTattStillingTil.vurder(imArbeidsgiver, imArbeidsforhold, grunnlag)) {
+                    var imArbeidsforholdRefs = Set.of(imArbeidsforhold);
+                    if (rapportertInntektFraArbeidsgiver(fagsakPeriode, imArbeidsgiver, inntektFilter, yrkesaktivitetFilter)) {
+                        LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, imArbeidsgiver, imArbeidsforholdRefs);
+                        logger.info("Inntektsmelding med inntekt uten kjent arbeidsforhold: arbeidsforholdRef={}", imArbeidsforholdRefs);
+                    } else {
+                        logger.info("Inntektsmelding uten kjent arbeidsforhold & ingen rapportert inntekt: arbeidsforholdRef={}", imArbeidsforholdRefs);
+                    }
                 } else {
-                    logger.info("Inntektsmelding uten kjent arbeidsforhold & ingen rapportert inntekt: arbeidsforholdRef={}", arbeidsforholdRefs);
+                    if (devLoggingPotensieltSensitivt) {
+                        if (yrkArbeidsforhold.isEmpty()) {
+                            logger.warn("Inntektsmelding arbeidsgiver (med fravær) matcher ingen arbeidsgivere fra yrkesaktivitet: im [{}, {}], yrk {}",
+                                imArbeidsgiver, imArbeidsforhold, yrkArbeidsgiverArbeidsforhold);
+                        } else {
+                            logger.warn("Inntektsmelding vurderer ikke (er ikke spesifikt, eller har ingen overstyring). im [{}, {}], yrk {}",
+                                imArbeidsgiver, imArbeidsforhold, yrkArbeidsgiverArbeidsforhold);
+                        }
+                    }
+                }
+            } else {
+                if (devLoggingPotensieltSensitivt) {
+                    logger.info("Inntektsmelding matchet yrkesaktivitet(er): im [{}, {}], yrk {}",
+                        imArbeidsgiver, imArbeidsforhold, yrkArbeidsforhold.stream().filter(imArbeidsforhold::gjelderFor).collect(Collectors.toList()));
                 }
             }
         }

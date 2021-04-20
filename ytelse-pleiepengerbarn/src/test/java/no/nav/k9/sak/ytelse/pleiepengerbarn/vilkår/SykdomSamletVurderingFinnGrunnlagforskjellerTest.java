@@ -66,6 +66,39 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         assertThat(interval.getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
         assertThat(interval.getTomDato()).isEqualTo(LocalDate.of(2021, 1, 15));
     }
+    
+    @Test
+    public void gammeltGrunnlagHarFlereVurderingerForSammePeriode() {
+        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(
+            vurderingVersjonMock(
+                SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
+                Resultat.IKKE_OPPFYLT,
+                0L,
+                new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))
+            ),
+            vurderingVersjonMock(
+                SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
+                Resultat.OPPFYLT,
+                1L,
+                new Periode(LocalDate.of(2021, 1, 10), LocalDate.of(2021, 1, 15))
+            )
+        );
+
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+            SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
+            Resultat.OPPFYLT,
+            new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+
+
+        LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
+
+        Assertions.assertTrue(timeline.isContinuous());
+        LocalDateInterval interval = timeline.getLocalDateIntervals().first();
+        assertThat(interval.getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
+        assertThat(interval.getTomDato()).isEqualTo(LocalDate.of(2021, 1, 9));
+    }
 
     @Test
     public void nyttGrunnlagOverstyrerDelerAvGammel() {
@@ -251,7 +284,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
     }
 
     private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, Periode... perioder) {
+        return vurderingVersjonMock(type, resultat, 0L, perioder);
+    }
+    
+    private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, long rangering, Periode... perioder) {
         var vurdering = new SykdomVurdering(type, Collections.emptyList(), "", LocalDateTime.now());
+        vurdering.setRangering(rangering);
 
         SykdomVurderingVersjon vurderingVersjon = new SykdomVurderingVersjon(
             vurdering,

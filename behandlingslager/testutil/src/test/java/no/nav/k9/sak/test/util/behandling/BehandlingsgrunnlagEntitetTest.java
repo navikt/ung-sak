@@ -45,7 +45,7 @@ import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.db.Repository;
+import no.nav.k9.sak.db.util.Repository;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

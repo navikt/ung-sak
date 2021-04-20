@@ -22,6 +22,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOversikt;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOversiktElement;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
@@ -32,22 +33,22 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 
 public class SykdomDokumentOversiktMapper {
 
-    public SykdomDokumentOversikt map(String behandlingUuid, Collection<SykdomDokument> dokumenter) {
+    public SykdomDokumentOversikt map(AktørId aktørId, String behandlingUuid, Collection<SykdomDokument> dokumenter) {
         final List<SykdomDokumentOversiktElement> elementer = dokumenter
             .stream()
             .map(d -> {
                 return new SykdomDokumentOversiktElement(
                         "" + d.getId(),
-                        "1", // TODO: Sett riktig verdi.
+                        d.getVersjon().toString(),
                         d.getType(),
-                        false,  // TODO: Sette riktig verdi.
+                        !aktørId.equals(d.getPerson().getAktørId()),
                         d.getDatert(),
                         d.getMottattDato(),
                         d.getMottattTidspunkt(),
                         d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
                         Arrays.asList(
                             linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
-                            linkForEndreDokument(behandlingUuid, "" + d.getId(), "1") // TODO: Sett riktig verdi på versjon.
+                            linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
                         )
                     );
             })
@@ -126,16 +127,16 @@ public class SykdomDokumentOversiktMapper {
                 new SykdomInnleggelseDto(behandling.getUuid().toString()))));
     }
 
-    public List<SykdomDokumentDto> mapSykdomsdokumenter(UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
+    public List<SykdomDokumentDto> mapSykdomsdokumenter(AktørId aktørId, UUID behandlingUuid, List<SykdomDokument> dokumenter, Set<Long> ids) {
         return dokumenter.stream()
                 .filter(d -> d.getType().isRelevantForSykdom() || ids.contains(d.getId()))
                 .map(d -> new SykdomDokumentDto(
                     "" + d.getId(),
                     d.getType(),
                     ids.contains(d.getId()),
-                    true, // TODO: AnnenPartErKilde
+                    !aktørId.equals(d.getPerson().getAktørId()),
                     d.getDatert(),
-                    true, // TODO: Må finne ut om dokumentet er fremhevet (nytt dokument i behandlingen.
+                    behandlingUuid.equals(d.getBehandlingUuid()),
                     Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))
                 )).collect(Collectors.toList());
     }

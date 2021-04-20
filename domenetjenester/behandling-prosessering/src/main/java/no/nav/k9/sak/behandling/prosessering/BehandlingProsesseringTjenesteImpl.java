@@ -37,10 +37,10 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformas
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
-import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.DiffOgReposisjonerTask;
 import no.nav.k9.sak.domene.registerinnhenting.task.InnhentIAYIAbakusTask;
@@ -145,15 +145,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
         if (skalHenteInnRegisterData(behandling)) {
-            leggTilInnhentRegisterdataTasks(behandling, gruppe);
-            var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
-            diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            try {
-                diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId())));
-            } catch (IOException e) {
-                throw new RuntimeException("Feil ved serialisering av snapshot", e);
-            }
-            gruppe.addNesteSekvensiell(diffOgReposisjoner);
+            log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
+        } else {
+            log.info("Sjekker om det har tilkommet nye inntektsmeldinger og annet for behandling: {}", behandling.getId());
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
         }
         ProsessTaskData fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
@@ -222,10 +218,10 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         if (skalHenteInnRegisterData(behandling)) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, fagsakId, behandlingId, gruppe);
+            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
         } else {
             log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
-            leggTilTaskForDiffOgReposisjoner(behandling, fagsakId, behandlingId, gruppe);
+            leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
         }
 
         var fortsettBehandlingTask = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
@@ -241,16 +237,16 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     }
 
-    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
+    private void leggTilTasksForInnhentRegisterdataPåNytt(Behandling behandling, ProsessTaskGruppe gruppe) {
         leggTilInnhentRegisterdataTasks(behandling, gruppe);
-        leggTilTaskForDiffOgReposisjoner(behandling, fagsakId, behandlingId, gruppe);
+        leggTilTaskForDiffOgReposisjoner(behandling, gruppe);
     }
 
-    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
+    private void leggTilTaskForDiffOgReposisjoner(Behandling behandling, ProsessTaskGruppe gruppe) {
         var diffOgReposisjoner = new ProsessTaskData(DiffOgReposisjonerTask.TASKTYPE);
-        diffOgReposisjoner.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
+        diffOgReposisjoner.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         try {
-            var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
+            var snapshotFørInnhenting = endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
             diffOgReposisjoner.setPayload(JsonObjectMapper.getJson(snapshotFørInnhenting));
         } catch (IOException e) {
             throw new RuntimeException("Feil ved serialisering av snapshot", e);
@@ -341,7 +337,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var pågår = fagsakProsessTaskRepository.sjekkStatusProsessTasks(behandling.getFagsakId(), behandling.getId(), null);
         Optional<ProsessTaskData> firstMatch = pågår.stream().filter(p -> tasktyper.contains(p.getTaskType())).findFirst();
         if (firstMatch.isPresent()) {
-            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(firstMatch.get()).toException();
+            var t = firstMatch.get();
+            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(t.getId(), t.getTaskType(), t.getStatus()).toException();
         }
     }
 

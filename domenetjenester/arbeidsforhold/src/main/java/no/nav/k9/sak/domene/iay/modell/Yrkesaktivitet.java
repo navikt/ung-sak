@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -20,6 +23,8 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
 public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
+
+    private static final Logger log = LoggerFactory.getLogger(Yrkesaktivitet.class);
 
     @ChangeTracked
     private Set<AktivitetsAvtale> aktivitetsAvtale = new LinkedHashSet<>();
@@ -99,9 +104,7 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     }
 
     /**
-     * Unik identifikator for arbeidsforholdet til aktøren i bedriften. Selve nøkkelen er ikke unik, men er unik for arbeidstaker hos
-     * arbeidsgiver.
-     * <p>
+     * Unik identifikator for arbeidsforholdet til aktøren i bedriften.
      * NB! Vil kun forekomme i aktiviteter som er hentet inn fra aa-reg
      *
      * @return {@code ArbeidsforholdRef.ref(null)} hvis ikke tilstede
@@ -140,6 +143,9 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     }
 
     void leggTilPermisjon(Permisjon permisjon) {
+        if (permisjon == null) {
+            return;
+        }
         this.permisjon.add(permisjon);
         permisjon.setYrkesaktivitet(this);
     }
@@ -157,29 +163,46 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
 
     /**
      * Gir stillingsprosent hvis det finnes for den gitte dagen
-     * Kaster feil hvis det blir gitt overlappene stillingsprosent
      *
-     * @param dato {@link LocalDate}
+     * @param forespurtDato {@link LocalDate}
      * @return Stillingsprosent {@link Stillingsprosent}
      */
-    public Optional<Stillingsprosent> getStillingsprosentFor(LocalDate dato) {
-        List<AktivitetsAvtale> avtaler = getAlleAktivitetsAvtaler()
+    public Optional<Stillingsprosent> getStillingsprosentFor(LocalDate forespurtDato) {
+        var besteKandidat = finnNærmesteAvtale(forespurtDato);
+        return besteKandidat.map(AktivitetsAvtale::getProsentsats);
+    }
+
+    private Optional<AktivitetsAvtale> finnNærmesteAvtale(LocalDate forespurtDato) {
+        LinkedList<AktivitetsAvtale> avtaler = getAlleAktivitetsAvtaler()
             .stream()
             .filter(a -> !a.erAnsettelsesPeriode())
-            .filter(a -> a.getPeriode().inkluderer(dato))
-            .collect(Collectors.toList());
+            .filter(a -> a.getPeriode().inkluderer(forespurtDato))
+            .sorted(AktivitetsAvtale.COMPARATOR)
+            .collect(Collectors.toCollection(LinkedList::new));
 
         if (avtaler.isEmpty()) {
             return Optional.empty();
         }
+        var besteKandidat = avtaler.getLast();
+
         if (avtaler.size() > 1) {
-            throw new IllegalStateException("Fant [" + avtaler.size() + "] overlappende aktivitetsavtaler for dato [" + dato + "], " + this.toString() + ", aktivitetsavtaler=" + avtaler);
+            // kan skje når periodene er overlappende som følge av at Aareg/A-ordningen har gjenbrukt id på arbeidsforhold for endringer
+            // plukker da siste avtale med lønnsendringsdato før forespurt dato (som ikke er ansettelsesavtale, og har overlappende periode)
+            for (var av : avtaler) {
+                if (av.getSisteLønnsendringsdato() != null && av.getSisteLønnsendringsdato().isBefore(forespurtDato)) {
+                    besteKandidat = av;
+                }
+            }
+            log.warn("Fant [{}] overlappende aktivitetsavtaler for dato [{}], {}, aktivitetsavtaler={}. Valgt idx={}", avtaler.size(), forespurtDato, this, avtaler, avtaler.indexOf(besteKandidat));
         }
-        return Optional.ofNullable(avtaler.get(0).getProsentsats());
+        return Optional.of(besteKandidat);
     }
 
-    void leggTilAktivitetsAvtale(AktivitetsAvtale aktivitetsAvtale) {
-        this.aktivitetsAvtale.add(aktivitetsAvtale);
+    void leggTilAktivitetsAvtale(AktivitetsAvtale avtale) {
+        if (avtale == null) {
+            return;
+        }
+        this.aktivitetsAvtale.add(avtale);
     }
 
     /**
@@ -258,4 +281,5 @@ public class Yrkesaktivitet implements IndexKey, Comparable<Yrkesaktivitet> {
     public int compareTo(Yrkesaktivitet o) {
         return this.getIndexKey().compareTo(o.getIndexKey());
     }
+
 }

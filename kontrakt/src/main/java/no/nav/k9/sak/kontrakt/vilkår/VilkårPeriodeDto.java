@@ -119,4 +119,18 @@ public class VilkårPeriodeDto {
     public void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + "<periode=" + periode
+            + ", vilkarStatus=" + vilkarStatus
+            + (avslagKode == null ? "" : ", avslagKode=" + avslagKode)
+            + (begrunnelse == null ? "" : ", begrunnelse=" + begrunnelse)
+            + (input == null ? "" : ", input=" + input)
+            + (evaluering == null ? "" : ", evaluering=" + evaluering)
+            + (merknadParametere == null ? "" : ", merknadParametere=" + merknadParametere)
+            + ">";
+    }
+
 }

@@ -35,6 +35,7 @@ import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
@@ -89,6 +90,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningBeregningRestTjeneste.class);
+        classes.add(DiagnostikkRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 

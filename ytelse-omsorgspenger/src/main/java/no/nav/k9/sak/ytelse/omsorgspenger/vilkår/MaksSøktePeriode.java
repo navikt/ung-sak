@@ -19,11 +19,11 @@ class MaksSøktePeriode implements VilkårsPeriodiseringsFunksjon {
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = uttakRepository.hentOppgittFraværHvisEksisterer(behandlingId);
-        if (søknadsperioder.isEmpty()) {
+        var maksPeriode = uttakRepository.hentMaksPeriode(behandlingId);
+        if (maksPeriode.isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
-            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(søknadsperioder.get().getMaksPeriode())));
+            return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(maksPeriode.get())));
         }
     }
 }

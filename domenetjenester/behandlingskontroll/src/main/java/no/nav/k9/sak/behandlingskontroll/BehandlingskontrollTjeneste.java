@@ -117,7 +117,7 @@ public interface BehandlingskontrollTjeneste {
 
     Optional<BehandlingStegType> nesteSteg(Behandling behandling, BehandlingStegType behandlingStegType);
 
-    boolean inneholderSteg(Behandling behandling, BehandlingStegType registrerSøknad);
+    boolean inneholderSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, BehandlingStegType behandlingStegType);
 
     /**
      * Lagrer og håndterer avbrutte aksjonspunkt

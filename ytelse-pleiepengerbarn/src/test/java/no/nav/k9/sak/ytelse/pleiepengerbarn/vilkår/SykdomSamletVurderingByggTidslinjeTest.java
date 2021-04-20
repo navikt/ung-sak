@@ -5,12 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 class SykdomSamletVurderingByggTidslinjeTest {
 
@@ -115,8 +119,9 @@ class SykdomSamletVurderingByggTidslinjeTest {
 
 
 
-    public SykdomVurdering dummyVurdering(SykdomVurderingType type) {
-        return new SykdomVurdering(type, Collections.emptyList(), "test", LocalDateTime.now());
+    public SykdomVurderingVersjon dummyVurdering(SykdomVurderingType type) {
+        final SykdomVurdering sykdomVurdering = new SykdomVurdering(type, Collections.emptyList(), "test", LocalDateTime.now());
+        return new SykdomVurderingVersjon(sykdomVurdering, "Lorem ipsum", Resultat.OPPFYLT, 0L, "test",  LocalDateTime.now(), UUID.randomUUID(), "abs", null, null, List.of(), List.of());
     }
 
     public SykdomInnleggelser dummyInnleggelser() {

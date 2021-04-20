@@ -21,7 +21,6 @@ class PleiepengerBarnKontrollerFaktaUtledereTjeneste extends KontrollerFaktaUtle
     @Override
     protected AksjonspunktUtlederHolder leggTilFellesutledere(BehandlingReferanse ref) {
         var utlederHolder = super.leggTilFellesutledere(ref);        
-        utlederHolder.leggTil(AksjonspunktutlederForMedisinskvilkår.class);
         return utlederHolder;
     }
 

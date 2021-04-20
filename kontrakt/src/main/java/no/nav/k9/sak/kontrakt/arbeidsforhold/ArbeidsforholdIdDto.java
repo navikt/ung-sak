@@ -44,10 +44,10 @@ public class ArbeidsforholdIdDto {
 
     @Override
     public String toString() {
-        return "ArbeidsforholdIdDto{" +
+        return ArbeidsforholdIdDto.class.getSimpleName() + "<" +
             "internArbeidsforholdId=" + internArbeidsforholdId +
             ", eksternArbeidsforholdId='" + eksternArbeidsforholdId + '\'' +
-            '}';
+            '>';
     }
 
     @Override

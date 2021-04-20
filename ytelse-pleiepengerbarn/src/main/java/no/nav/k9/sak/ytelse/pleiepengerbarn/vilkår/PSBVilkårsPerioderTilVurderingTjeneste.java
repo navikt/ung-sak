@@ -2,9 +2,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -30,10 +30,8 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
@@ -51,7 +49,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SykdomVurderingService sykdomVurderingService;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -61,17 +59,18 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
                                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                                   VilkårResultatRepository vilkårResultatRepository,
-                                                  BehandlingRepository behandlingRepository, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                                  BehandlingRepository behandlingRepository, SykdomVurderingService sykdomVurderingService) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.sykdomVurderingService = sykdomVurderingService;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
         søktePerioder = new SøktePerioder(søknadsperiodeRepository);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
+        vilkårsPeriodisering.put(VilkårType.OMSORGEN_FOR, maksSøktePeriode);
     }
 
     @Override
@@ -102,35 +101,21 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkårPeriodeSet;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        AktørId pleietrengende = behandlingRepository.hentBehandling(referanse.getBehandlingUuid()).getFagsak().getPleietrengendeAktørId();
+        final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
+        final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
-        final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(referanse.getSaksnummer(), referanse.getBehandlingUuid());
-        LocalDateTimeline<SykdomSamletVurdering> forrigeBehandlingTidslinje;
+        final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
+        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
 
-        if (forrigeGrunnlagBehandling.isPresent()) {
-            final SykdomGrunnlag forrigeGrunnlag = forrigeGrunnlagBehandling.get().getGrunnlag();
-            forrigeBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
-        } else {
-            forrigeBehandlingTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
-        }
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
+                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder).getDiffPerioder();
 
-        var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
+        final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
-        SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, SykdomUtils.toPeriodeList(perioder));
-        LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
-
-        LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeBehandlingTidslinje, nyBehandlingTidslinje);
-
-        LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerSidenForrigeBehandling, vurderingsperioderTimeline);
-
-        LocalDateTimeline<Boolean> søktePerioderTimeline = SykdomUtils.toLocalDateTimeline(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
-        LocalDateTimeline<Boolean> beholdKunSøktePerioder = utvidedePerioder.intersection(søktePerioderTimeline);
-
-        return new TreeSet<>(beholdKunSøktePerioder.stream()
+        return new TreeSet<>(utvidedePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
             .collect(Collectors.toList()));
     }

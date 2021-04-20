@@ -84,8 +84,11 @@ public class PersoninfoAdapter {
     public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
+        } else if (personIdent.erNorskIdent()) {
+            return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
+        } else {
+            throw new IllegalArgumentException("Forventet norsk ident (fnr/dnr)");
         }
-        return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
     }
 
     private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {

@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -68,6 +69,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
         var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(referanse.getFagsakId())
             .stream()
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
             .filter(it -> Brevkode.PLEIEPENGER_BARN_SOKNAD.equals(it.getType()))
             .collect(Collectors.toSet());
 
@@ -80,6 +82,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .map(SøknadsperiodeGrunnlag::getOppgitteSøknadsperioder)
             .map(SøknadsperioderHolder::getPerioder)
             .flatMap(Collection::stream)
+            .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .map(it -> new SøknadsPeriodeDokumenter(it.getJournalpostId(), it.getPerioder()))
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, dokument));
 

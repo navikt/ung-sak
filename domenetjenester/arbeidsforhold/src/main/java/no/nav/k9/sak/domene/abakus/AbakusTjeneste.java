@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -49,6 +51,7 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -64,7 +67,7 @@ public class AbakusTjeneste {
     private final ObjectReader inntektsmeldingerReader = iayMapper.readerFor(InntektsmeldingerDto.class);
     private final ObjectReader refusjonskravDatoerReader = iayMapper.readerFor(RefusjonskravDatoerDto.class);
     private URI innhentRegisterdata;
-    private OidcRestClient oidcRestClient;
+    private CloseableHttpClient restClient;
     private URI abakusEndpoint;
     private URI callbackUrl;
     private URI endpointArbeidsforholdIPeriode;
@@ -86,7 +89,18 @@ public class AbakusTjeneste {
     public AbakusTjeneste(OidcRestClient oidcRestClient,
                           @KonfigVerdi(value = "fpabakus.url") URI endpoint,
                           @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
-        this.oidcRestClient = oidcRestClient;
+        this(endpoint, callbackUrl);
+        this.restClient = oidcRestClient;
+    }
+
+    public AbakusTjeneste(SystemUserOidcRestClient oidcRestClient,
+                          URI endpoint,
+                          URI callbackUrl) {
+        this(endpoint, callbackUrl);
+        this.restClient = oidcRestClient;
+    }
+
+    private AbakusTjeneste(URI endpoint, URI callbackUrl) {
         this.abakusEndpoint = endpoint;
         this.callbackUrl = callbackUrl;
 
@@ -101,7 +115,6 @@ public class AbakusTjeneste {
         this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/async");
         this.endpointInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/hentAlle");
         this.endpointRefusjonskravdatoer = toUri("/api/iay/inntektsmeldinger/v1/hentRefusjonskravDatoer");
-
     }
 
     private URI toUri(String relativeUri) {
@@ -182,7 +195,7 @@ public class AbakusTjeneste {
             httpKall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         }
 
-        try (var httpResponse = oidcRestClient.execute(httpKall)) {
+        try (var httpResponse = restClient.execute(httpKall)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode == HttpStatus.SC_OK || responseCode == HttpStatus.SC_CREATED) {
                 return responseHandler.handleResponse(httpResponse);
@@ -205,8 +218,10 @@ public class AbakusTjeneste {
                     throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // rethrow
         } catch (RuntimeException re) {
-            throw new IllegalStateException("Feil ved henting av data fra abakus: endpoint=" + httpKall.getURI() + (json != null ? ", input=" + json : ""), re);
+            throw new IllegalStateException("Feil ved henting av data fra abakus: endpoint=" + httpKall.getURI() + (json != null ? ", input=" + json.replaceAll("\\d{8,}", "x") : ""), re);
         }
     }
 
@@ -219,7 +234,7 @@ public class AbakusTjeneste {
         httpPut.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre overstyrte [{}] (behandlingUUID={}, iayGrunnlagReferanse={}) i Abakus", httpPut.getURI(), koblingReferanse, grunnlagReferanse);
-        try (var httpResponse = oidcRestClient.execute(httpPut)) {
+        try (var httpResponse = restClient.execute(httpPut)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -247,7 +262,7 @@ public class AbakusTjeneste {
         httpPut.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre IAY grunnlag (behandlingUUID={}, iayGrunnlagReferanse={}) i Abakus", koblngReferanse, grunnlagReferanse);
-        try (var httpResponse = oidcRestClient.execute(httpPut)) {
+        try (var httpResponse = restClient.execute(httpPut)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -273,7 +288,7 @@ public class AbakusTjeneste {
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre mottatte inntektsmeldinger (behandlingUUID={}) i Abakus", referanse);
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -299,7 +314,7 @@ public class AbakusTjeneste {
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre oppgitt opptjening (behandlingUUID={}) i Abakus", behandlingRef);
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -322,7 +337,7 @@ public class AbakusTjeneste {
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Kopierer grunnlag fra (behandlingUUID={}) til (behandlingUUID={}) i Abakus", request.getGammelReferanse(), request.getNyReferanse());
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());
@@ -353,7 +368,7 @@ public class AbakusTjeneste {
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre overstyrt oppgitt opptjening (behandlingUUID={}) i Abakus", behandlingRef);
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (responseCode != HttpStatus.SC_OK) {
                 String responseBody = EntityUtils.toString(httpResponse.getEntity());

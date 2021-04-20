@@ -61,6 +61,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE = "5033";
     public static final String VURDERE_DOKUMENT_FØR_VEDTAK_KODE = "5034";
+    public static final String VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE = "5040";
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE = "5038";
     public static final String FORDEL_BEREGNINGSGRUNNLAG_KODE = "5046";
@@ -93,11 +94,14 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
 
+    public static final String AVKLAR_OMSORGEN_FOR_KODE_V2 = "9020";
+
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
-    public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
+    public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
 
     // OMS
+    public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
     public static final String VURDER_ÅRSKVANTUM_DOK = "9004";
     public static final String VURDER_OMS_UTVIDET_RETT = "9013";

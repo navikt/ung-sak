@@ -1,7 +1,6 @@
 package no.nav.k9.sak.kompletthet;
 
 import java.util.List;
-
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;

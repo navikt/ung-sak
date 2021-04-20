@@ -2,13 +2,19 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -20,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -28,6 +35,8 @@ import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.OmsorgenForVilkårGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmodell.RelasjonsRolle;
 
 @BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
 @BehandlingTypeRef
@@ -61,20 +70,57 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
 
-        final var vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, perioder);
+        final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
+        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
 
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
-        final var oppdaterteVilkår = oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårene);
+        if (harAksjonspunkt(samletOmsorgenForTidslinje)) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
+        }
 
+        final List<VilkårData> vilkårData = omsorgenForTjeneste.vurderPerioder(kontekst, samletOmsorgenForTidslinje);
+
+        final Vilkårene oppdaterteVilkår = oppdaterVilkårene(kontekst, vilkårData);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private Vilkårene oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, Vilkårene vilkårene) {
-        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+    private boolean harAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
+        for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
+            final OmsorgenForVilkårGrunnlag grunnlag = s.getValue();
+            if (grunnlag.getErOmsorgsPerson() == null && (
+                    grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
+                    || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
+                    || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        final var vilkårBuilder = builder.hentBuilderFor(vilkårData.getVilkårType());
+    private DatoIntervallEntitet bestemPeriodeTilVurdering(final NavigableSet<DatoIntervallEntitet> perioder) {
+        final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
+        final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
+        final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
+        return periodeTilVurdering;
+    }
+
+    private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
+        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        final VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
+            .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
+        final VilkårBuilder vilkårBuilder = builder.hentBuilderFor(VILKÅRET);
+
+        for (VilkårData data : vilkårData) {
+            oppdaterBehandlingMedVilkårresultat(data, vilkårBuilder);
+        }
+
+        builder.leggTil(vilkårBuilder);
+        return builder.build();
+    }
+
+    private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
         final var periode = vilkårData.getPeriode();
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
             .medUtfall(vilkårData.getUtfallType())
@@ -83,10 +129,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             .medRegelInput(vilkårData.getRegelInput())
             .medAvslagsårsak(vilkårData.getAvslagsårsak())
             .medMerknad(vilkårData.getVilkårUtfallMerknad()));
-
-        builder.leggTil(vilkårBuilder);
-
-        return builder.build();
     }
 
     @Override

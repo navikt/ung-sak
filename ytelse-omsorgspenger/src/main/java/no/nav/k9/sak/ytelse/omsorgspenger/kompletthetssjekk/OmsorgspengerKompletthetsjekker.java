@@ -68,7 +68,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
         // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
-        List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref);
+        List<ManglendeVedlegg> manglendeInntektsmeldinger = getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
         if (!manglendeInntektsmeldinger.isEmpty()) {
             LOGGER.info("Behandling {} er ikke komplett - IM fra {} arbeidsgivere.", ref.getBehandlingId(), manglendeInntektsmeldinger.size(), manglendeInntektsmeldinger.size()); // NOSONAR //$NON-NLS-1$
             Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(ref);
@@ -87,7 +87,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
         List<ManglendeVedlegg> manglendeVedlegg = new ArrayList<>();
-        manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref));
+        manglendeVedlegg.addAll(getKompletthetsjekkerInntektsmelding(ref).utledManglendeInntektsmeldingerFraGrunnlag(ref, ref.getUtledetSkjæringstidspunkt()));
         return manglendeVedlegg;
     }
 

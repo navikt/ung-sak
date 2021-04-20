@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -15,7 +16,6 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
@@ -31,8 +31,8 @@ class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
         return utledPeriode(behandlingId, List.of());
     }
 
-    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(OppgittFravær søknadsperioder, List<OppgittFraværPeriode> fraværPåSak) {
-        var nullTimerTidslinje = opprettTidslinjeFraPerioder(søknadsperioder.getPerioder(), it -> Duration.ZERO.equals(it.getFraværPerDag()));
+    NavigableSet<DatoIntervallEntitet> utledPeriodeFraSøknadsPerioder(Set<OppgittFraværPeriode> søknadsperioder, List<OppgittFraværPeriode> fraværPåSak) {
+        var nullTimerTidslinje = opprettTidslinjeFraPerioder(søknadsperioder, it -> Duration.ZERO.equals(it.getFraværPerDag()));
         var fagsakTidslinjeIkkeNull = opprettTidslinjeFraPerioder(fraværPåSak, it -> !Duration.ZERO.equals(it.getFraværPerDag()));
 
         nullTimerTidslinje = nullTimerTidslinje.disjoint(fagsakTidslinjeIkkeNull);
@@ -60,12 +60,12 @@ class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, List<OppgittFraværPeriode> fraværPåSak) {
-        var søknadsperioder = grunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
+        var søknadsperioder = grunnlagRepository.hentAlleFraværPerioder(behandlingId);
 
         if (søknadsperioder.isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
-            return utledPeriodeFraSøknadsPerioder(søknadsperioder.get(), fraværPåSak);
+            return utledPeriodeFraSøknadsPerioder(søknadsperioder, fraværPåSak);
         }
     }
 }

@@ -65,7 +65,7 @@ class LagreSøknad {
             .medErEndringssøknad(false) // støtter ikke endringssønader p.t.
             .medSøknadsdato(mottattDato)
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
@@ -99,7 +99,7 @@ class LagreSøknad {
 
     private Språkkode getSpraakValg(Språk spraak) {
         if (spraak != null) {
-            return Språkkode.fraKode(spraak.dto.toUpperCase());
+            return Språkkode.fraKode(spraak.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }

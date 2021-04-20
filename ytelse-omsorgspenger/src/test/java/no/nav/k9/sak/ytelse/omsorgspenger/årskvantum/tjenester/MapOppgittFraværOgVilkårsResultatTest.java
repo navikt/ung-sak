@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -116,8 +117,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var vilkårene = vilkårResultatBuilder.build();
 
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
 
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
@@ -143,8 +144,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var vilkårene = vilkårResultatBuilder.build();
 
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
 
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
@@ -191,8 +192,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt();
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
@@ -229,8 +230,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt();
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
@@ -272,8 +273,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt();
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
@@ -315,8 +316,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt();
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
@@ -364,7 +365,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
-        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(1), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), Duration.ofHours(2)));
+        var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(1), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, InternArbeidsforholdRef.nullRef(), Duration.ofHours(2), FraværÅrsak.UDEFINERT));
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt();
         var iayBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var aktørArbeidBuilder = iayBuilder.getAktørArbeidBuilder(dummy);
@@ -402,7 +403,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
         var oppgittFravær = new OppgittFravær(
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null));
+            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
         var åpenPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), Tid.TIDENES_ENDE);
         var egenNæringBuilder = OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
@@ -436,7 +437,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var vilkårene = vilkårResultatBuilder.build();
 
         var oppgittFravær = new OppgittFravær(
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null));
+            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
         var frilans = OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny();
         var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
@@ -496,8 +497,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("000000000");
         var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
-        var oppgittFravær1 = new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(8), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null);
-        var oppgittFravær2 = new OppgittFraværPeriode(LocalDate.now().minusDays(7), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null);
+        var oppgittFravær1 = new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(8), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null, FraværÅrsak.UDEFINERT);
+        var oppgittFravær2 = new OppgittFraværPeriode(LocalDate.now().minusDays(7), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, arbeidsforholdRef, null, FraværÅrsak.UDEFINERT);
 
         var søktePerioder = new HashSet<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode>();
         int i = 0;

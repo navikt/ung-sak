@@ -12,6 +12,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -43,6 +45,7 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
@@ -59,7 +62,7 @@ public class KalkulusRestKlient {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
 
-    private OidcRestClient oidcRestClient;
+    private CloseableHttpClient restClient;
     private URI kalkulusEndpoint;
     private URI startEndpoint;
     private URI fortsettEndpoint;
@@ -75,9 +78,19 @@ public class KalkulusRestKlient {
     }
 
     @Inject
-    public KalkulusRestKlient(OidcRestClient oidcRestClient,
-                                @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
-        this.oidcRestClient = oidcRestClient;
+    public KalkulusRestKlient(OidcRestClient restClient,
+                              @KonfigVerdi(value = "ftkalkulus.url") URI endpoint) {
+        this(endpoint);
+        this.restClient = restClient;
+    }
+
+    public KalkulusRestKlient(SystemUserOidcRestClient restClient,
+                              URI endpoint) {
+        this(endpoint);
+        this.restClient = restClient;
+    }
+
+    private KalkulusRestKlient(URI endpoint) {
         this.kalkulusEndpoint = endpoint;
         this.startEndpoint = toUri("/api/kalkulus/v1/start/bolk");
         this.fortsettEndpoint = toUri("/api/kalkulus/v1/fortsett/bolk");
@@ -86,7 +99,6 @@ public class KalkulusRestKlient {
         this.beregningsgrunnlagListeDtoEndpoint = toUri("/api/kalkulus/v1/beregningsgrunnlagListe");
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
-
     }
 
     public List<TilstandResponse> startBeregning(StartBeregningListeRequest request) {
@@ -162,7 +174,7 @@ public class KalkulusRestKlient {
         try {
             return utførOgHent(endpoint, json, new ObjectReaderResponseHandler<>(endpoint, reader));
         } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -170,14 +182,14 @@ public class KalkulusRestKlient {
         try {
             utfør(endpoint, json);
         } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(e.getMessage()).toException();
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
     private void utfør(URI endpoint, String json) throws IOException {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (!isOk(responseCode)) {
                 if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
@@ -188,9 +200,11 @@ public class KalkulusRestKlient {
                         + " endpoint=" + httpPost.getURI()
                         + ", HTTP status=" + httpResponse.getStatusLine()
                         + ". HTTP Errormessage=" + responseBody;
-                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(endpoint, feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // rethrow
         } catch (RuntimeException re) {
             log.warn("Feil ved henting av data. uri=" + endpoint, re);
             throw re;
@@ -201,7 +215,7 @@ public class KalkulusRestKlient {
         var httpPost = new HttpPost(endpoint); // NOSONAR håndterer i responseHandler
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
-        try (var httpResponse = oidcRestClient.execute(httpPost)) {
+        try (var httpResponse = restClient.execute(httpPost)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {
                 return responseHandler.handleResponse(httpResponse);
@@ -221,11 +235,13 @@ public class KalkulusRestKlient {
                     + ", HTTP status=" + httpResponse.getStatusLine()
                     + ". HTTP Errormessage=" + responseBody;
                 if (responseCode == HttpStatus.SC_BAD_REQUEST) {
-                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilKallTilKalkulus(endpoint, feilmelding).toException();
                 } else {
-                    throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(feilmelding).toException();
+                    throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, feilmelding).toException();
                 }
             }
+        } catch (VLException e) {
+            throw e; // retrhow
         } catch (RuntimeException re) {
             log.warn("Feil ved henting av data. uri=" + endpoint, re);
             throw re;
@@ -249,11 +265,11 @@ public class KalkulusRestKlient {
     interface RestTjenesteFeil extends DeklarerteFeil {
         KalkulusRestKlient.RestTjenesteFeil FEIL = FeilFactory.create(KalkulusRestKlient.RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.ERROR)
-        Feil feilVedKallTilKalkulus(String feilmelding);
+        @TekniskFeil(feilkode = "F-FT-K-1000001", feilmelding = "Feil ved kall til Kalkulus [%s]: %s", logLevel = LogLevel.ERROR)
+        Feil feilVedKallTilKalkulus(URI endpoint, String feilmelding);
 
-        @TekniskFeil(feilkode = "F-FT-K-1000002", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilKalkulus(String feilmelding);
+        @TekniskFeil(feilkode = "F-FT-K-1000002", feilmelding = "Feil ved kall til Kalkulus [%s]: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilKalkulus(URI endpoint, String feilmelding);
 
         @TekniskFeil(feilkode = "F-FT-K-1000003", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);

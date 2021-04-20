@@ -23,7 +23,7 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
 /**
- * Erstattes av PSBSøknadDokumentmottaker
+ * Erstattes av DokumentmottakerPleiepengerSyktBarnSøknad
  */
 @Deprecated(forRemoval = true)
 @Dependent
@@ -76,7 +76,7 @@ class SøknadDokumentmottaker {
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(journalpostId,
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             søknad.getMottattDato().toLocalDateTime());
 

@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.repo;
 
-import java.time.Duration;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -23,7 +21,6 @@ import org.hibernate.annotations.Immutable;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "OmsorgspengerFravær")
 @Table(name = "OMP_OPPGITT_FRAVAER")
@@ -64,33 +61,6 @@ public class OppgittFravær extends BaseEntitet {
 
     public Set<OppgittFraværPeriode> getPerioder() {
         return perioder;
-    }
-
-    public DatoIntervallEntitet getMaksPeriode() {
-        var perioder = getPerioder();
-        var fom = perioder.stream()
-            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
-            .map(OppgittFraværPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getFomDato)
-            .min(LocalDate::compareTo);
-        var tom = perioder.stream()
-            .filter(it -> !Duration.ZERO.equals(it.getFraværPerDag()))
-            .map(OppgittFraværPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo);
-
-        if (tom.isEmpty() && fom.isEmpty()) {
-            fom = perioder.stream()
-                .map(OppgittFraværPeriode::getPeriode)
-                .map(DatoIntervallEntitet::getFomDato)
-                .min(LocalDate::compareTo);
-            tom = perioder.stream()
-                .map(OppgittFraværPeriode::getPeriode)
-                .map(DatoIntervallEntitet::getTomDato)
-                .max(LocalDate::compareTo);
-        }
-
-        return DatoIntervallEntitet.fraOgMedTilOgMed(fom.orElseThrow(), tom.orElseThrow());
     }
 
     @Override

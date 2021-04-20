@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.time.LocalDateTime;
@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -41,8 +43,6 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BehandlingAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -70,7 +70,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
             @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = BehandlingAksjonspunktDto.class)), mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt på CSV format", content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAksjonspunkter(@QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) SaksnummerDto saksnummerDto,
                                       @Context Request request) { // NOSONAR
@@ -108,7 +108,7 @@ public class ForvaltningAksjonspunktSammendragRestTjeneste {
     @Operation(description = "Hent aksjonspunter for saker", tags = "aksjonspunkt", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer behandlinger med aksjonspunkt opprettet innenfor angitt periode på CSV format", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAksjonspunkterSammendrag(@QueryParam("opprettetPeriode") @Parameter(description = "Tidsrom for opprettelse. Format YYYY-MM-DD/YYYY-MM-DD.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @NotNull Periode opprettetPeriode,
                                                 @QueryParam("medUtforte") @Parameter(description = "Valgfritt å inkludere utførte aksjonspunkt. Default er false.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) boolean medUtforte,

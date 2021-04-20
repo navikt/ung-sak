@@ -85,6 +85,6 @@ public class SykdomGrunnlagBehandling {
     }
     
     public boolean isFørsteGrunnlagPåBehandling() {
-        return versjon != 0;
+        return versjon == 0;
     }
 }

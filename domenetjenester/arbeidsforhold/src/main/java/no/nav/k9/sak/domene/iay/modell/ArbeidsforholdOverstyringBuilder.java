@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
@@ -67,6 +68,11 @@ public class ArbeidsforholdOverstyringBuilder {
 
     public ArbeidsforholdOverstyringBuilder leggTilOverstyrtPeriode(LocalDate fom, LocalDate tom){
         kladd.leggTilOverstyrtPeriode(fom, tom);
+        return this;
+    }
+
+    public ArbeidsforholdOverstyringBuilder leggTilOverstyrtPeriode(DatoIntervallEntitet periode) {
+        kladd.leggTilOverstyrtPeriode(periode.getFomDato(), periode.getTomDato());
         return this;
     }
 

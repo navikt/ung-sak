@@ -44,4 +44,8 @@ class WrappedVilkårPeriode {
             vilkårPeriode.getBegrunnelse());
     }
 
+    @Override
+    public String toString() {
+        return vilkårPeriode.toString();
+    }
 }

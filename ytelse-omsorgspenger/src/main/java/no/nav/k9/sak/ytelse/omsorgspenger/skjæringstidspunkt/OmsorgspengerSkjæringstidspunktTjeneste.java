@@ -83,17 +83,16 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
     }
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
-        var søknadsperioder = omsorgspengerGrunnlagRepository.hentOppgittFraværHvisEksisterer(behandlingId);
+        var søknadsperioder = omsorgspengerGrunnlagRepository.hentAlleFraværPerioder(behandlingId);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
 
-        if (søknadsperioder.isPresent()) {
-            var oppgittFordeling = søknadsperioder.get();
-            var førstePeriode = oppgittFordeling.getPerioder()
+        if (!søknadsperioder.isEmpty()) {
+            var førstePeriode = søknadsperioder
                 .stream()
                 .map(OppgittFraværPeriode::getPeriode)
                 .min(DatoIntervallEntitet::compareTo);
 
-            var førsteDagIUttaket = oppgittFordeling.getPerioder()
+            var førsteDagIUttaket = søknadsperioder
                 .stream()
                 .map(OppgittFraværPeriode::getPeriode)
                 .map(DatoIntervallEntitet::getFomDato)

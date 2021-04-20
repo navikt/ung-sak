@@ -4,7 +4,7 @@ import javax.persistence.AttributeConverter;
 
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 
-class SykdomResultatTypeConverter implements AttributeConverter<Resultat, String> {
+public class SykdomResultatTypeConverter implements AttributeConverter<Resultat, String> {
     @Override
     public String convertToDatabaseColumn(Resultat resultat) {
         return resultat.getKode();

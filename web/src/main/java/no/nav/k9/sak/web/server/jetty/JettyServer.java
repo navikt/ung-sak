@@ -219,11 +219,14 @@ public class JettyServer {
         webAppContext.setBaseResource(createResourceCollection());
         webAppContext.setContextPath(appKonfigurasjon.getContextPath());
         webAppContext.setConfigurations(CONFIGURATIONS);
+
+        webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
+
         /*
          * lar jetty scanne flere jars for web resources (eks. WebFilter/WebListener annotations),
          * men bare de som matchr pattern for raskere oppstart
          */
-        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*jersey-.*.jar$|^.*k9-felles-sikkerhet.*.jar$");
+        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern", "^.*jersey-.*.jar$|^.*-sikkerhet.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
 
         updateMetaData(webAppContext.getMetaData());

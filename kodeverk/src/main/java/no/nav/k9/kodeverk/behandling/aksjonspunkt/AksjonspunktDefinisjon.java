@@ -96,6 +96,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktKodeDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere dokument før vedtak",
         BehandlingStatus.UTREDES,
         BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
+    VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK(
+        AksjonspunktKodeDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere overlappende ytelse før vedtak",
+        BehandlingStatus.UTREDES,
+        BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, EnumSet.of(OMP, PSB)),
     FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS(
         AksjonspunktKodeDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE, AksjonspunktType.MANUELL,
         "Fastsette beregningsgrunnlag for arbeidstaker/frilanser skjønnsmessig", BehandlingStatus.UTREDES,
@@ -177,6 +181,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
         AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, EnumSet.of(OMP, PSB)),
+    AVKLAR_KOMPLETT_NOK_FOR_BEREGNING(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE,
+        AksjonspunktType.MANUELL, "Avklar om inntektsmeldinger kreves for å kunne beregne", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING, VurderingspunktType.UT,
+        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, ENTRINN, TILBAKE, null, EnumSet.of(PSB)),
 
     // Gruppe : 60xx
 
@@ -272,7 +279,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
-            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+    VURDER_OMSORGEN_FOR_V2(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE_V2,
+            AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
+            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
     VURDER_ÅRSKVANTUM_KVOTE(AksjonspunktKodeDefinisjon.VURDER_ÅRSKVANTUM_KVOTE,
         AksjonspunktType.MANUELL, "Årskvantum", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, ENTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),

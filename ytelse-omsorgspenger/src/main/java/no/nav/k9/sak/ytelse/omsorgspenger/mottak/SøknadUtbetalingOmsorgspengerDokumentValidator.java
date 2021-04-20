@@ -92,7 +92,7 @@ public class SøknadUtbetalingOmsorgspengerDokumentValidator implements Dokument
         if (!feil.isEmpty()) {
             // kaster DokumentValideringException pga håndtering i SaksbehandlingDokumentmottakTjeneste
             throw valideringsfeil(feil.stream()
-                .map(f -> "kode=" + f.feilkode + " for " + f.felt + ": " + f.feilmelding)
+                .map(f -> "kode=" + f.getFeilkode() + " for " + f.getFelt() + ": " + f.getFeilmelding())
                 .reduce((a, b) -> a + "; " + b).orElseThrow());
         }
     }

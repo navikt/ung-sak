@@ -1,0 +1,226 @@
+package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
+import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kompletthet.KompletthetResultat;
+import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
+import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
+
+@ApplicationScoped
+@BehandlingTypeRef
+@FagsakYtelseTypeRef("PSB")
+public class PSBKompletthetsjekker implements Kompletthetsjekker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PSBKompletthetsjekker.class);
+
+    private static final Integer TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER = 3;
+    private static final Integer VENTEFRIST_ETTER_MOTATT_DATO_UKER = 1;
+    private static final Integer VENTEFRIST_ETTER_ETTERLYSNING_UKER = 3;
+
+    private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste;
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
+    private KompletthetsjekkerFelles fellesUtil;
+    private SøknadRepository søknadRepository;
+
+    PSBKompletthetsjekker() {
+        // CDI
+    }
+
+    @Inject
+    public PSBKompletthetsjekker(KompletthetssjekkerSøknad kompletthetssjekkerSøknad,
+                                 InntektsmeldingTjeneste inntektsmeldingTjeneste,
+                                 KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                 KompletthetsjekkerFelles fellesUtil,
+                                 SøknadRepository søknadRepository) {
+        this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
+        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+        this.fellesUtil = fellesUtil;
+        this.søknadRepository = søknadRepository;
+    }
+
+    @Override
+    public KompletthetResultat vurderSøknadMottattForTidlig(BehandlingReferanse ref) {
+        Optional<LocalDateTime> forTidligFrist = kompletthetssjekkerSøknad.erSøknadMottattForTidlig(ref);
+        return forTidligFrist.map(localDateTime -> KompletthetResultat.ikkeOppfylt(localDateTime, Venteårsak.FOR_TIDLIG_SOKNAD)).orElseGet(KompletthetResultat::oppfylt);
+    }
+
+    @Override
+    public KompletthetResultat vurderForsendelseKomplett(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+        if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
+            return KompletthetResultat.oppfylt();
+        }
+        // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
+        // hendelser)
+        // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
+        var ventefrister = new ArrayList<LocalDateTime>();
+        var result = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraRegister(ref);
+        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : result.entrySet()) {
+            var manglendeInntektsmeldinger = entry.getValue()
+                .stream()
+                .filter(it -> DokumentTypeId.INNTEKTSMELDING.equals(it.getDokumentType()))
+                .collect(Collectors.toList());
+
+            if (!manglendeInntektsmeldinger.isEmpty()) {
+                loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
+                Optional<LocalDateTime> ventefristManglendeIM = finnVentefristTilManglendeInntektsmelding(entry.getKey());
+                ventefristManglendeIM.ifPresent(ventefrister::add);
+            }
+        }
+        return utledKompletthetResultat(ventefrister);
+    }
+
+    private KompletthetResultat utledKompletthetResultat(List<LocalDateTime> ventefrister) {
+
+        if (ventefrister.isEmpty()) {
+            return KompletthetResultat.oppfylt();
+        }
+
+        var kompletthetResultat = ventefrister.stream()
+            .filter(it -> it.isAfter(LocalDateTime.now()))
+            .min(LocalDateTime::compareTo)
+            .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
+            .orElse(KompletthetResultat.fristUtløpt());
+
+        return kompletthetResultat;
+    }
+
+    private void loggManglendeInntektsmeldinger(Long behandlingId, @SuppressWarnings("unused") List<ManglendeVedlegg> manglendeInntektsmeldinger) {
+        LOGGER.info("Behandling {} er ikke komplett - mangler IM fra arbeidsgivere", behandlingId); // NOSONAR //$NON-NLS-1$
+    }
+
+    @Override
+    public boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref) {
+        return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref)
+            .values()
+            .stream()
+            .allMatch(List::isEmpty);
+    }
+
+    @Override
+    public List<ManglendeVedlegg> utledAlleManglendeVedleggForForsendelse(BehandlingReferanse ref) {
+        return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref)
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+    }
+
+    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggForPerioder(BehandlingReferanse ref) {
+        return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
+    }
+
+    DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
+        return utledRelevantPeriode(tidslinje, periode, true);
+    }
+
+    private DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode, boolean justerStart) {
+        DatoIntervallEntitet orginalRelevantPeriode = periode;
+        if (justerStart) {
+            orginalRelevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4));
+        }
+
+        if (tidslinje.isEmpty()) {
+            return orginalRelevantPeriode;
+        }
+        var intersection = tidslinje.intersection(new LocalDateInterval(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4)));
+        var relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(intersection.getMinLocalDate().minusWeeks(4), intersection.getMaxLocalDate().plusWeeks(4));
+
+        if (orginalRelevantPeriode.equals(relevantPeriode)) {
+            return relevantPeriode;
+        }
+
+        return utledRelevantPeriode(tidslinje, relevantPeriode, false);
+    }
+
+    @Override
+    public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
+        return inntektsmeldingTjeneste
+            .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
+            .stream()
+            .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver().getIdentifikator(), true))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+
+        var result = new ArrayList<LocalDateTime>();
+        // Kalles fra KOARB (flere ganger) som setter autopunkt 7030 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
+        // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
+        var utledet = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
+        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : utledet.entrySet()) {
+            var manglendeInntektsmeldinger = entry.getValue();
+            if (!manglendeInntektsmeldinger.isEmpty()) {
+                loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
+                sendEtterlysningForManglendeInntektsmeldinger(ref, manglendeInntektsmeldinger);
+                finnVentefristForEtterlysning(ref, entry.getKey().getFomDato()).ifPresent(result::add);
+            }
+        }
+
+        return result.stream()
+            .min(LocalDateTime::compareTo)
+            .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
+            .orElse(KompletthetResultat.oppfylt()); // Konvensjon for å sikre framdrift i prosessen
+    }
+
+    private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
+        var arbeidsgiverIdenterSomSkalMottaEtterlysning = manglendeInntektsmeldinger.stream()
+            .filter(a -> !a.getBrukerHarSagtAtIkkeKommer())
+            .map(ManglendeVedlegg::getArbeidsgiver);
+
+        arbeidsgiverIdenterSomSkalMottaEtterlysning.forEach(a -> {
+                var idType = (OrganisasjonsNummerValidator.erGyldig(a) || OrgNummer.erKunstig(a)) ? IdType.ORGNR : IdType.AKTØRID;
+                fellesUtil.sendBrev(ref.getBehandlingId(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK, new Mottaker(a, idType));
+            }
+        );
+    }
+
+    private Optional<LocalDateTime> finnVentefristTilManglendeInntektsmelding(DatoIntervallEntitet key) {
+        Objects.requireNonNull(key);
+        final LocalDate muligFrist = key.getFomDato().minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER);
+        return fellesUtil.finnVentefrist(muligFrist);
+    }
+
+    private Optional<LocalDateTime> finnVentefristForEtterlysning(BehandlingReferanse ref, LocalDate permisjonsstart) {
+        Long behandlingId = ref.getBehandlingId();
+        final LocalDate muligFrist = LocalDate.now().isBefore(permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER)) ? LocalDate.now()
+            : permisjonsstart.minusWeeks(TIDLIGST_VENTEFRIST_FØR_UTTAKSDATO_UKER);
+        final Optional<LocalDate> annenMuligFrist = søknadRepository.hentSøknadHvisEksisterer(behandlingId).map(s -> s.getMottattDato().plusWeeks(VENTEFRIST_ETTER_MOTATT_DATO_UKER));
+        final LocalDate ønsketFrist = annenMuligFrist.filter(muligFrist::isBefore).orElse(muligFrist);
+        return fellesUtil.finnVentefrist(ønsketFrist.plusWeeks(VENTEFRIST_ETTER_ETTERLYSNING_UKER));
+    }
+}

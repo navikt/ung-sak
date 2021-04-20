@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -56,29 +54,22 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class KompletthetskontrollerTest {
 
+    private static Kompletthetsjekker kompletthetsjekker;
     @Inject
     private BehandlingRepositoryProvider repositoryProvider;
-
     @Mock
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
     @Mock
     private DokumentmottakerFelles dokumentmottakerFelles;
-
     @Mock
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
-
     @Mock
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-
     @Mock
     private ProsessTaskRepository prosessTaskRepository;
-
     private Kompletthetskontroller kompletthetskontroller;
     private Behandling behandling;
     private MottattDokument mottattDokument;
-
-    private static Kompletthetsjekker kompletthetsjekker;
 
     @BeforeEach
     public void oppsett() {
@@ -180,6 +171,7 @@ public class KompletthetskontrollerTest {
         LocalDateTime frist = LocalDateTime.now().minusSeconds(30);
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
+        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
 
         // Act
         mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
@@ -198,7 +190,7 @@ public class KompletthetskontrollerTest {
         when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.oppfylt());
         when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK));
         when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
-
+        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
         mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
 
         // Act

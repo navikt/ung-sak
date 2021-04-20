@@ -55,7 +55,7 @@ public class DefaultManglendePåkrevdeInntektsmeldingerTjeneste implements Ytels
         boolean erIkkeEndringssøknad = !erEndringssøknad;
 
         final Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> manglendeInntektsmeldinger = inntektsmeldingTjeneste
-            .utledManglendeInntektsmeldingerFraGrunnlagForVurdering(behandlingReferanse, erEndringssøknad);
+            .utledManglendeInntektsmeldingerFraGrunnlagForVurdering(behandlingReferanse, erEndringssøknad, behandlingReferanse.getUtledetSkjæringstidspunkt());
         if (erIkkeEndringssøknad) {
             for (Map.Entry<Arbeidsgiver, Set<InternArbeidsforholdRef>> entry : manglendeInntektsmeldinger.entrySet()) {
                 LeggTilResultat.leggTil(result, AksjonspunktÅrsak.MANGLENDE_INNTEKTSMELDING, entry.getKey(), entry.getValue());

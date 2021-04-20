@@ -9,7 +9,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.uttak.AvklarÅrskvantumDokDto;
-import no.nav.k9.sak.kontrakt.uttak.AvklarÅrskvantumDto;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 import javax.enterprise.context.ApplicationScoped;

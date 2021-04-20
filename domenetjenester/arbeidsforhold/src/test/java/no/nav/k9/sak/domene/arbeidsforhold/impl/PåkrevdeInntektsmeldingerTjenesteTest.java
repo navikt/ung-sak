@@ -70,10 +70,10 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         InternArbeidsforholdRef ref = InternArbeidsforholdRef.nyRef();
 
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsforhold = Map.of(virksomhet, Set.of(ref));
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
+        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean(), any())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling, LocalDate.now())));
 
         // Assert
         assertThat(result).isEmpty();
@@ -93,10 +93,10 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         InternArbeidsforholdRef ref2 = InternArbeidsforholdRef.nyRef();
 
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsforhold = Map.of(virksomhet, Set.of(ref1, ref2));
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
+        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean(), any())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling, LocalDate.now())));
 
         // Assert
         assertMap(result, virksomhet, ref1, ref2);
@@ -116,10 +116,10 @@ public class PåkrevdeInntektsmeldingerTjenesteTest {
         InternArbeidsforholdRef ref2 = InternArbeidsforholdRef.nyRef();
 
         Map<Arbeidsgiver, Set<InternArbeidsforholdRef>> arbeidsforhold = Map.of(person, Set.of(ref1, ref2));
-        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean())).thenReturn(arbeidsforhold);
+        when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlagForVurdering(any(), anyBoolean(), any())).thenReturn(arbeidsforhold);
 
         // Act
-        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling)));
+        var result = påkrevdeInntektsmeldingerTjeneste.leggTilArbeidsforholdHvorPåkrevdeInntektsmeldingMangler(new InntektsmeldingVurderingInput(BehandlingReferanse.fra(behandling, LocalDate.now())));
 
         // Assert
         assertMap(result, person, ref1, ref2);

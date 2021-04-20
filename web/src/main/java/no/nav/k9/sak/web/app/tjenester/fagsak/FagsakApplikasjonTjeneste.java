@@ -2,14 +2,19 @@ package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
@@ -19,12 +24,12 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
+import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 public class FagsakApplikasjonTjeneste {
@@ -39,7 +44,7 @@ public class FagsakApplikasjonTjeneste {
     private Predicate<String> predikatErFnr = søkestreng -> søkestreng.matches("\\d{11}");
 
     protected FagsakApplikasjonTjeneste() {
-        //CDI runner
+        //
     }
 
     @Inject
@@ -50,6 +55,11 @@ public class FagsakApplikasjonTjeneste {
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.personinfoAdapter = personinfoAdapter;
+    }
+
+    public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
+        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
+        return fagsak.map(Fagsak::getAktørId).flatMap(personinfoAdapter::hentBrukerBasisForAktør);
     }
 
     public Optional<AsyncPollingStatus> sjekkProsessTaskPågår(Saksnummer saksnummer, String gruppe) {
@@ -65,21 +75,93 @@ public class FagsakApplikasjonTjeneste {
 
     }
 
+    /**
+     * Finner matchende fagsaker for ytelse+bruker+periode .
+     * Hvis pleietrengende/relatertAnnenPart oppgis matches disse også. Merk dersom fagsak har pleietrengende/relatertAnnenPart OG det ikke
+     * oppgis som input, vil ikke fagsaken matche.
+     * Dette er lagt på som begrensning, slik at all tilgangskontroll håndteres før søker utføres (caller må kjenne til alle personer han ønsker
+     * å søke etter).
+     */
+    public List<FagsakInfoDto> matchFagsaker(FagsakYtelseType ytelseType,
+                                             PersonIdent bruker,
+                                             Periode periode,
+                                             List<PersonIdent> pleietrengendeIdenter,
+                                             List<PersonIdent> relatertAnnenPartIdenter) {
+        var fom = periode == null ? null : periode.getFom();
+        var tom = periode == null ? null : periode.getTom();
+
+        AktørId brukerAktørId = finnAktørId(bruker);
+
+        var fagsaker = fagsakRespository.finnFagsakRelatertTil(ytelseType, brukerAktørId, null, null, fom, tom);
+        if (fagsaker.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        class MatchIdenter {
+            private final Map<AktørId, PersonIdent> mapPleietrengende;
+            private final Map<AktørId, PersonIdent> mapRelatertAnnenPart;
+            {
+                this.mapPleietrengende = new LinkedHashMap<>();
+                this.mapRelatertAnnenPart = new LinkedHashMap<>();
+                if (pleietrengendeIdenter != null) {
+                    pleietrengendeIdenter.forEach(id -> leggTil(mapPleietrengende, id));
+                }
+                if (relatertAnnenPartIdenter != null) {
+                    relatertAnnenPartIdenter.forEach(id -> leggTil(mapRelatertAnnenPart, id));
+                }
+            }
+
+            private void leggTil(Map<AktørId, PersonIdent> map, PersonIdent ident) {
+                if (ident.erAktørId()) {
+                    map.put(new AktørId(ident.getAktørId()), ident);
+                } else if (ident.erNorskIdent()) {
+                    AktørId aktørId = finnAktørId(ident);
+                    map.put(aktørId, ident);
+                }
+            }
+
+            boolean matcher(Fagsak f) {
+                boolean match = true;
+                if (f.getPleietrengendeAktørId() != null) {
+                    match &= mapPleietrengende.containsKey(f.getPleietrengendeAktørId());
+                }
+                if (match && f.getRelatertPersonAktørId() != null) {
+                    match &= mapRelatertAnnenPart.containsKey(f.getRelatertPersonAktørId());
+                }
+                return match;
+            }
+
+            PersonIdent getPleietrengende(AktørId aktørId) {
+                return mapPleietrengende.get(aktørId);
+            }
+
+            PersonIdent getRelatertAnnenPart(AktørId aktørId) {
+                return mapRelatertAnnenPart.get(aktørId);
+            }
+
+        }
+        var identMap = new MatchIdenter();
+        return fagsaker.stream().filter(f -> identMap.matcher(f))
+            .map(f -> {
+                return new FagsakInfoDto(f.getSaksnummer(),
+                    f.getYtelseType(),
+                    f.getStatus(),
+                    new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
+                    bruker,
+                    identMap.getPleietrengende(f.getPleietrengendeAktørId()),
+                    identMap.getRelatertAnnenPart(f.getRelatertPersonAktørId()),
+                    f.getSkalTilInfotrygd());
+            })
+            .collect(Collectors.toList());
+
+    }
+
     public FagsakSamlingForBruker hentSaker(String søkestreng) {
         if (predikatErFnr.test(søkestreng)) {
             return hentSakerForFnr(new PersonIdent(søkestreng));
         } else {
             return hentFagsakForSaksnummer(new Saksnummer(søkestreng));
         }
-    }
-
-    private FagsakSamlingForBruker hentSakerForFnr(PersonIdent fnr) {
-        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr);
-        if (!funnetNavBruker.isPresent()) {
-            return FagsakSamlingForBruker.emptyView();
-        }
-        List<Fagsak> fagsaker = fagsakRespository.hentForBruker(funnetNavBruker.get().getAktørId());
-        return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
     }
 
     /** Returnerer samling med kun en fagsak. */
@@ -99,6 +181,15 @@ public class FagsakApplikasjonTjeneste {
         return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
     }
 
+    private FagsakSamlingForBruker hentSakerForFnr(PersonIdent fnr) {
+        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr);
+        if (!funnetNavBruker.isPresent()) {
+            return FagsakSamlingForBruker.emptyView();
+        }
+        List<Fagsak> fagsaker = fagsakRespository.hentForBruker(funnetNavBruker.get().getAktørId());
+        return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
+    }
+
     private FagsakSamlingForBruker tilFagsakView(List<Fagsak> fagsaker, Map<Long, Integer> antallBarnPerFagsak, Personinfo personinfo) {
         FagsakSamlingForBruker view = new FagsakSamlingForBruker(personinfo);
         // FIXME K9 relevante data
@@ -114,9 +205,12 @@ public class FagsakApplikasjonTjeneste {
         return antallBarnPerFagsak;
     }
 
-    public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
-        return fagsak.map(Fagsak::getAktørId).flatMap(personinfoAdapter::hentBrukerBasisForAktør);
+    private AktørId finnAktørId(PersonIdent bruker) {
+        if (bruker == null)
+            return null;
+        return bruker.erAktørId()
+            ? new AktørId(bruker.getAktørId())
+            : personinfoAdapter.hentAktørIdForPersonIdent(bruker).orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for bruker"));
     }
 
 }

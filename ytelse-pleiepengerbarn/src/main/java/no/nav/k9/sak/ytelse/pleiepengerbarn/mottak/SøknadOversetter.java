@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -19,8 +20,11 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
@@ -28,9 +32,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepo
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.k9.søknad.ytelse.psb.v1.Omsorg;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @Dependent
 class SøknadOversetter {
@@ -42,6 +47,7 @@ class SøknadOversetter {
     private UttakRepository uttakRepository;
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
+    private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -52,7 +58,8 @@ class SøknadOversetter {
                      SøknadsperiodeRepository søknadsperiodeRepository,
                      UttakRepository uttakRepository,
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                     TpsTjeneste tpsTjeneste) {
+                     TpsTjeneste tpsTjeneste,
+                     OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -60,6 +67,7 @@ class SøknadOversetter {
         this.uttakRepository = uttakRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
+        this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -84,7 +92,7 @@ class SøknadOversetter {
             .medMottattDato(mottattDato)
             .medErEndringssøknad(false) // TODO: Håndtere endringssøknad. "false" betyr at vi krever IMer.
             .medJournalpostId(journalpostId)
-            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().id)
+            .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSøknadsdato(maksSøknadsperiode.getFraOgMed())
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
@@ -108,7 +116,15 @@ class SøknadOversetter {
 
         lagreUttakOgPerioder(søknad, journalpostId, behandlingId, fagsakId);
 
-        // TODO etter18feb: Omsorg
+        lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
+    }
+
+    private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
+        final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
+                DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
+                omsorg.getRelasjonTilBarnet(),
+                omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "");
+        omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
     }
 
     private void lagreUttakOgPerioder(Søknad soknad, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
@@ -128,9 +144,9 @@ class SøknadOversetter {
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {
-        final var norskIdentitetsnummer = barn.norskIdentitetsnummer;
+        final var norskIdentitetsnummer = barn.getPersonIdent();
         if (norskIdentitetsnummer != null) {
-            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.verdi)).orElseThrow();
+            final var aktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(norskIdentitetsnummer.getVerdi())).orElseThrow();
             fagsakRepository.oppdaterPleietrengende(fagsakId, aktørId);
         } else {
             throw new IllegalArgumentException();
@@ -150,7 +166,7 @@ class SøknadOversetter {
                 // TODO: "tidligereOpphold" må fjernes fra database og domeneobjekter. Ved bruk må skjæringstidspunkt spesifikt oppgis.
                 // boolean tidligereOpphold = opphold.getPeriode().getFom().isBefore(mottattDato);
                 oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(opphold.getLand().landkode))
+                    .medLand(finnLandkode(opphold.getLand().getLandkode()))
                     .medPeriode(
                         Objects.requireNonNull(periode.getFraOgMed()),
                         Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
@@ -163,7 +179,7 @@ class SøknadOversetter {
 
     private Språkkode getSpraakValg(Språk spraak) {
         if (spraak != null) {
-            return Språkkode.fraKode(spraak.dto.toUpperCase());
+            return Språkkode.fraKode(spraak.getKode().toUpperCase());
         }
         return Språkkode.UDEFINERT;
     }

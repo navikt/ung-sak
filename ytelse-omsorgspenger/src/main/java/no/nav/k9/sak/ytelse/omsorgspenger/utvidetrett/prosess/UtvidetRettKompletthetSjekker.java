@@ -10,11 +10,17 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.historikk.HistorikkAktør;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -30,14 +36,18 @@ public class UtvidetRettKompletthetSjekker implements Kompletthetsjekker {
     private SøknadRepository søknadRepository;
 
     private Period frist = Period.parse("P2W");
+    private HistorikkRepository historikkRepository;
 
     UtvidetRettKompletthetSjekker() {
         // for proxy
     }
 
     @Inject
-    public UtvidetRettKompletthetSjekker(DokumentVedleggHåndterer dokumentVedleggHåndterer, SøknadRepository søknadRepository) {
+    public UtvidetRettKompletthetSjekker(DokumentVedleggHåndterer dokumentVedleggHåndterer,
+                                         HistorikkRepository historikkRepository,
+                                         SøknadRepository søknadRepository) {
         this.dokumentVedleggHåndterer = dokumentVedleggHåndterer;
+        this.historikkRepository = historikkRepository;
         this.søknadRepository = søknadRepository;
     }
 
@@ -56,8 +66,22 @@ public class UtvidetRettKompletthetSjekker implements Kompletthetsjekker {
             var fristTid = søknad.getMottattDato().plus(frist).atStartOfDay();
 
             if (fristTid.isBefore(LocalDateTime.now())) {
-                log.warn("Frist for søknad mottatt {} utløpt {}, mangler vedlegg/dokumentasjon. Venter 1 dag til", søknad.getMottattDato(), fristTid);
-                return KompletthetResultat.ikkeOppfylt(LocalDateTime.now().plusDays(1), Venteårsak.AVV_DOK);
+                /*
+                 * TODO: klarer foreløpig ikke oppdage om vedlegg er mottatt på annen journalpost, ikke journalført, eller ført på annen sak.
+                 * Overlater derfor til saksbehandler å vurdere som del av utvidet rett.
+                 */
+                log.warn("Frist for vedlegg til søknad mottatt {} utløpt {}, mangler vedlegg/dokumentasjon.", søknad.getMottattDato(), fristTid);
+                var historikk = new Historikkinnslag();
+                historikk.setBehandlingId(ref.getBehandlingId());
+                historikk.setType(HistorikkinnslagType.BEH_GJEN);
+                historikk.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+                var historiebygger = new HistorikkInnslagTekstBuilder()
+                    .medHendelse(HistorikkinnslagType.BEH_GJEN)
+                    .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_UTVIDETRETT)
+                    .medBegrunnelse("Frist for kompletthetsjekk utløpt - forventede vedlegg må manuelt vurderes som del av vilkår for utvidet rett");
+                historiebygger.build(historikk);
+                historikkRepository.lagre(historikk);
+                return KompletthetResultat.oppfylt(); // kjører videre et historikkinnslag i stedet.
             } else {
                 return KompletthetResultat.ikkeOppfylt(fristTid, Venteårsak.AVV_DOK);
             }

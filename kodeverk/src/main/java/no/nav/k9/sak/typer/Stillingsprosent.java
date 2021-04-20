@@ -73,7 +73,7 @@ public class Stillingsprosent implements IndexKey {
             return false;
         }
         Stillingsprosent other = (Stillingsprosent) obj;
-        return Objects.equals(skalertVerdi(), other.skalertVerdi());
+        return skalertVerdi().compareTo(other.skalertVerdi()) == 0;
     }
 
     @Override

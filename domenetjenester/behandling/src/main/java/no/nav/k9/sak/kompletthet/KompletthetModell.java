@@ -56,6 +56,7 @@ public class KompletthetModell {
      **/
     // Rangering 1: Tidligste steg (dvs. autopunkt ville blitt eksekvert tidligst i behandlingsstegene)
     public List<AksjonspunktDefinisjon> rangerKompletthetsfunksjonerKnyttetTilAutopunkt(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+
         Comparator<AksjonspunktDefinisjon> stegRekkefølge = (apDef1, apDef2) -> behandlingskontrollTjeneste.sammenlignRekkefølge(ytelseType, behandlingType, apDef1.getBehandlingSteg(),
             apDef2.getBehandlingSteg());
         // Rangering 2: Autopunkt som kjøres igjen ved gjenopptakelse blir eksekvert FØR ikke-gjenopptagende i samme behandlingssteg
@@ -63,6 +64,7 @@ public class KompletthetModell {
         Comparator<AksjonspunktDefinisjon> tilbakehoppRekkefølge = (apDef1, apDef2) -> Boolean.compare(apDef1.tilbakehoppVedGjenopptakelse(), apDef2.tilbakehoppVedGjenopptakelse());
 
         return KOMPLETTHETSFUNKSJONER.keySet().stream()
+            .filter(apDef -> behandlingskontrollTjeneste.inneholderSteg(ytelseType, behandlingType, apDef.getBehandlingSteg()))
             .sorted(stegRekkefølge
                 .thenComparing(tilbakehoppRekkefølge.reversed()))
             .collect(toList());

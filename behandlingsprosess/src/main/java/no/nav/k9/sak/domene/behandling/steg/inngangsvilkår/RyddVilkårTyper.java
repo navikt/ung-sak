@@ -34,10 +34,10 @@ public class RyddVilkårTyper {
     }
 
     public void ryddVedTilbakeføring() {
-        nullstillVedtaksresultat();
+        nullstillBehandlingResultat();
     }
 
-    private void nullstillVedtaksresultat() {
+    private void nullstillBehandlingResultat() {
         if (Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
             return;
         }

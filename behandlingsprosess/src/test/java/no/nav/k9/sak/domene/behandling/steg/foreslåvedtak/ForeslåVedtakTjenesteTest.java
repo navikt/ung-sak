@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -38,13 +40,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.dokument.bestill.DokumentBehandlingTjeneste;
+import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -73,7 +74,7 @@ public class ForeslåVedtakTjenesteTest {
     private OppgaveTjeneste oppgaveTjeneste;
 
     @Mock
-    private DokumentBehandlingTjeneste dokumentBehandlingTjeneste;
+    private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
 
     @Spy
     private HistorikkRepository historikkRepository;
@@ -97,9 +98,10 @@ public class ForeslåVedtakTjenesteTest {
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
         when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
+        when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any())).thenReturn(Map.of());
 
-        SjekkMotEksisterendeOppgaverTjeneste sjekkMotEksisterendeOppgaverTjeneste = new SjekkMotEksisterendeOppgaverTjeneste(historikkRepository, oppgaveTjeneste);
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotEksisterendeOppgaverTjeneste, foreslåVedtakManueltUtledere);
+        SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotAndreYtelserTjeneste, foreslåVedtakManueltUtledere);
     }
 
     @Test

@@ -18,11 +18,14 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -36,15 +39,20 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private SøknadRepository søknadRepository;
 
     AvklarUtvidetRett() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter, VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
+    AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter,
+                      VilkårResultatRepository vilkårResultatRepository,
+                      SøknadRepository søknadRepository,
+                      BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.søknadRepository = søknadRepository;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -55,43 +63,60 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var fagsak = behandling.getFagsak();
 
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        var vilkårBuilder = param.getVilkårResultatBuilder();
+        var vilkårResultatBuilder = param.getVilkårResultatBuilder();
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
         var periode = dto.getPeriode();
-        if (periode == null) {
-            // overskriver hele
-            var vilkårene = vilkårResultatRepository.hent(behandlingId);
-            var timeline = vilkårene.getVilkårTimeline(vilkårType);
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+
+        var timeline = vilkårene.getVilkårTimeline(vilkårType);
+        boolean erAvslag = dto.getAvslagsårsak() != null;
+        if (erAvslag || erÅpenPeriode(periode)) {
+            // overskriver hele vilkårperioden
+            // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
+            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
+            vilkårResultatBuilder.leggTil(vilkårBuilder);
         } else {
+            var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
+            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, DatoIntervallEntitet.fraOgMed(søknadsperiode.getFomDato()));
+
+            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
+            vilkårResultatBuilder.leggTil(vilkårBuilder);
         }
+
+
         return OppdateringResultat.utenOveropp();
     }
 
+    private boolean erÅpenPeriode(Periode periode) {
+        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
+    }
+
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
-        Objects.requireNonNull(angittPeriode);
         if (FagsakYtelseType.OMSORGSPENGER_KS == fagsak.getYtelseType()) {
             throw new UnsupportedOperationException("Kan ikke angi periode for ytelseType=" + fagsak.getYtelseType());
         }
-        var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
+        if (Objects.requireNonNull(angittPeriode).isOpenStart()) {
+            throw new IllegalArgumentException("Angitt periode kan ikke ha åpen start. angitt=" + angittPeriode);
+        }
+
+        var fagsakPeriode = fagsak.getPeriode().toLocalDateInterval();
         if (!fagsakPeriode.contains(angittPeriode)) {
             throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
         }
         return angittPeriode;
-
     }
 
-    private void oppdaterUtfallOgLagre(VilkårResultatBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
-        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+    private void oppdaterUtfallOgLagre(VilkårBuilder builder, Utfall utfallType, LocalDate fom, LocalDate tom, Avslagsårsak avslagsårsak) {
         Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? defaultAvslagsårsak : avslagsårsak) : null;
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+        builder.leggTil(builder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
             .medAvslagsårsak(settAvslagsårsak));
-        builder.leggTil(vilkårBuilder);
+
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {

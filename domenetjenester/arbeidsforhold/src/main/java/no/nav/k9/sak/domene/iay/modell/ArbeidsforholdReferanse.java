@@ -72,10 +72,10 @@ public class ArbeidsforholdReferanse extends BaseEntitet implements IndexKey, Tr
 
     @Override
     public String toString() {
-        return "ArbeidsforholdReferanseEntitet{" +
+        return getClass().getSimpleName() + "<" +
             "arbeidsgiver=" + arbeidsgiver +
             ", internReferanse=" + internReferanse +
             ", eksternReferanse=" + eksternReferanse +
-            '}';
+            '>';
     }
 }

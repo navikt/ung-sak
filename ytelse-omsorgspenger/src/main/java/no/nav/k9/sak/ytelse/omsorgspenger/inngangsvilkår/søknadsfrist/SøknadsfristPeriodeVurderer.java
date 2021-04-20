@@ -6,8 +6,9 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
-public interface SøknadsfristPeriodeVurderer<T> {
+public interface SøknadsfristPeriodeVurderer<T extends SøktPeriodeData> {
 
     LocalDateTimeline<VurdertSøktPeriode<T>> vurderPeriode(KravDokument søknadsDokument, LocalDateTimeline<SøktPeriode<T>> søktPeriode);
 

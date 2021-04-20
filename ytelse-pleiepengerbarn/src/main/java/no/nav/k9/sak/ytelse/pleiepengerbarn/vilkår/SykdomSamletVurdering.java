@@ -10,17 +10,18 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 public class SykdomSamletVurdering {
-    private SykdomVurdering ktp;
-    private SykdomVurdering toOp;
+    private SykdomVurderingVersjon ktp;
+    private SykdomVurderingVersjon toOp;
     private SykdomInnleggelser innleggelser;
 
     public SykdomSamletVurdering() {
     }
 
-    public SykdomSamletVurdering(SykdomVurdering ktp, SykdomVurdering toOp, SykdomInnleggelser innleggelser) {
+    public SykdomSamletVurdering(SykdomVurderingVersjon ktp, SykdomVurderingVersjon toOp, SykdomInnleggelser innleggelser) {
         this.ktp = ktp;
         this.toOp = toOp;
         this.innleggelser = innleggelser;
@@ -48,21 +49,18 @@ public class SykdomSamletVurdering {
     public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(SykdomGrunnlag grunnlag) {
         final Collection<LocalDateSegment<SykdomSamletVurdering>> segments = new ArrayList<>();
 
-        grunnlag.getVurderinger().forEach(v -> {
-            SykdomVurderingType type = v.getSykdomVurdering().getType();
-            v.getPerioder().forEach(p -> {
-                SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
-                if (type == SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE) {
-                    samletVurdering.setKtp(v.getSykdomVurdering());
-                } else if (type == SykdomVurderingType.TO_OMSORGSPERSONER) {
-                    samletVurdering.setToOp(v.getSykdomVurdering());
-                } else {
-                    throw new IllegalArgumentException("Ukjent vurderingstype");
-                }
-                segments.add(new LocalDateSegment<>(p.getFom(), p.getTom(), samletVurdering));
-            });
+        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
+            SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
+            samletVurdering.setKtp(s.getValue());
+            segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
-
+        
+        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
+            SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
+            samletVurdering.setToOp(s.getValue());
+            segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
+        });
+        
         if (grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
                 SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
@@ -96,22 +94,22 @@ public class SykdomSamletVurdering {
                     return new LocalDateSegment<>(localDateInterval, true);
                 }
 
-                SykdomVurdering toOp1 = left.getValue().getToOp();
-                SykdomVurdering toOp2 = right.getValue().getToOp();
+                SykdomVurderingVersjon toOp1 = left.getValue().getToOp();
+                SykdomVurderingVersjon toOp2 = right.getValue().getToOp();
                 if (toOp1 == null && toOp2 != null || toOp1 != null && toOp2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (toOp1 != null && toOp2 != null) {
-                    if (toOp1.getSisteVersjon().getResultat() != toOp2.getSisteVersjon().getResultat()) {
+                    if (toOp1.getResultat() != toOp2.getResultat()) {
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
 
-                SykdomVurdering ktp1 = left.getValue().getKtp();
-                SykdomVurdering ktp2 = right.getValue().getKtp();
+                SykdomVurderingVersjon ktp1 = left.getValue().getKtp();
+                SykdomVurderingVersjon ktp2 = right.getValue().getKtp();
                 if (ktp1 == null && ktp2 != null || ktp1 != null && ktp2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (ktp1 != null && ktp2 != null) {
-                    if (ktp1.getSisteVersjon().getResultat() != ktp2.getSisteVersjon().getResultat()) {
+                    if (ktp1.getResultat() != ktp2.getResultat()) {
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
@@ -120,19 +118,19 @@ public class SykdomSamletVurdering {
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
     }
 
-    public SykdomVurdering getKtp() {
+    public SykdomVurderingVersjon getKtp() {
         return ktp;
     }
 
-    public void setKtp(SykdomVurdering ktp) {
+    public void setKtp(SykdomVurderingVersjon ktp) {
         this.ktp = ktp;
     }
 
-    public SykdomVurdering getToOp() {
+    public SykdomVurderingVersjon getToOp() {
         return toOp;
     }
 
-    public void setToOp(SykdomVurdering toOp) {
+    public void setToOp(SykdomVurderingVersjon toOp) {
         this.toOp = toOp;
     }
 

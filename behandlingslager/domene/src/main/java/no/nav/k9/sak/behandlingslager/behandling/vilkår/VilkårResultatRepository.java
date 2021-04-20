@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.vilkår;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -163,5 +164,29 @@ public class VilkårResultatRepository {
 
         return List.copyOf(dtoer);
 
+    }
+
+    public void tilbakestillPerioder(Long behandlingId, VilkårType vilkårType, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> vilkårsPeriode) {
+        Optional<Vilkårene> vilkårResultatOpt = this.hentHvisEksisterer(behandlingId);
+        if (vilkårResultatOpt.isEmpty()) {
+            return;
+        }
+        Vilkårene vilkårene = vilkårResultatOpt.get();
+        Optional<Vilkår> vilkårOpt = vilkårene.getVilkårene().stream()
+            .filter(v -> v.getVilkårType().equals(vilkårType))
+            .findFirst();
+        if (vilkårOpt.isEmpty()) {
+            return;
+        }
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType)
+            .medKantIKantVurderer(kantIKantVurderer);
+        for (var periode : vilkårsPeriode) {
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(Utfall.IKKE_VURDERT));
+        }
+
+        builder.leggTil(vilkårBuilder);
+        var nyttResultat = builder.build();
+        this.lagre(behandlingId, nyttResultat);
     }
 }

@@ -29,9 +29,6 @@ public class KompletthetsjekkerFelles {
      * Disse konstantene ligger hardkodet (og ikke i KonfigVerdi), da endring i en eller flere av disse vil
      * sannsynnlig kreve kodeendring
      */
-    public static final Integer VENTEFRIST_FRAM_I_TID_FRA_MOTATT_DATO_UKER = 3;
-    public static final Integer VENTEFRIST_FOR_MANGLENDE_SØKNAD = 4;
-
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private BehandlingRepository behandlingRepository;
 
@@ -56,10 +53,6 @@ public class KompletthetsjekkerFelles {
             return Optional.of(ventefrist);
         }
         return Optional.empty();
-    }
-
-    public LocalDateTime finnVentefristTilManglendeSøknad() {
-        return LocalDateTime.now().plusWeeks(VENTEFRIST_FOR_MANGLENDE_SØKNAD);
     }
 
     public void sendBrev(Long behandlingId, DokumentMalType dokumentMalType, Mottaker mottaker) {
