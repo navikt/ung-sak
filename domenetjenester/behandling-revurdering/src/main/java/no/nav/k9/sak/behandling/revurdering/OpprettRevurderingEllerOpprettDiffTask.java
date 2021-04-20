@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.prosessering.task;
+package no.nav.k9.sak.behandling.revurdering;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -6,31 +6,19 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
-import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
-import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -45,6 +33,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
 
     OpprettRevurderingEllerOpprettDiffTask() {
@@ -56,10 +45,12 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   BehandlingRepository behandlingRepository,
                                                   BehandlingLåsRepository behandlingLåsRepository,
                                                   FagsakLåsRepository fagsakLåsRepository,
+                                                  BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
     }
 
@@ -70,11 +61,22 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         logContext(fagsak);
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
-
         if (behandlinger.isEmpty()) {
-            // TODO: Opprett behandling
+            var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            // TODO: Trekk ut fra property slik at denne kan brukes til andre ting
+            final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
 
+            final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
+            if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
+                log.info("Oppretter revurdering");
+                var origBehandling = sisteVedtak.get();
+                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
+            } else {
+                throw new IllegalStateException("Prøvde revurdering av sak, men fant ingen behandling revurdere");
+            }
         } else {
+            log.info("Fant åpen behandling, kjører diff for å flytte prosessen tilbake");
             var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         }
