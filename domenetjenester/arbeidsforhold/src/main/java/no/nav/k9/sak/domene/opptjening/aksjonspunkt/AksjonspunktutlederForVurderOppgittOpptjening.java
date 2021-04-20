@@ -72,7 +72,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
     public List<AksjonspunktResultat> utledAksjonspunkterFor(AksjonspunktUtlederInput param) {
 
         Long behandlingId = param.getBehandlingId();
-        var søktePerioderProvider = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
+        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
 
         var iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElse(null);
         var fastsattOpptjeningOptional = opptjeningRepository.finnOpptjening(behandlingId);
@@ -83,7 +83,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         var opptjeningPerioder = fastsattOpptjeningOptional.get().getOpptjeningPerioder();
 
         for (Opptjening opptjening : opptjeningPerioder) {
-            var oppgittOpptjening = søktePerioderProvider.hentOppgittOpptjening(behandlingId, iayGrunnlag, opptjening.getSkjæringstidspunkt())
+            var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(behandlingId, iayGrunnlag, opptjening.getSkjæringstidspunkt())
                 .orElse(null);
             if (harBrukerOppgittPerioderMed(oppgittOpptjening, opptjening.getOpptjeningPeriode(), annenOpptjening()) == JA) {
                 logger.info("Utleder AP 5051 fra oppgitt opptjening");

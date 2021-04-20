@@ -1,6 +1,9 @@
 package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.math.BigDecimal;
@@ -42,6 +45,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -61,6 +65,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
     private InntektArbeidYtelseTjeneste iayTjeneste ;
     private VirksomhetTjeneste virksomhetTjeneste ;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
+    private OppgittOpptjeningFilter oppgittOpptjeningFilter;
 
     @Spy
     private AksjonspunktutlederForVurderOppgittOpptjening utleder ;
@@ -74,6 +79,8 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
         oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
+        oppgittOpptjeningFilter = Mockito.mock(OppgittOpptjeningFilter.class);
+        when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(anyLong())).thenReturn(oppgittOpptjeningFilter);
         utleder = new AksjonspunktutlederForVurderOppgittOpptjening(
             repositoryProvider.getOpptjeningRepository(), iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
 
@@ -266,6 +273,10 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgittOpptjeningBuilder);
 
         lagreOpptjeningsPeriode(behandling, tilOgMed);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+
         return behandling;
     }
 
@@ -312,6 +323,10 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
 
 
         lagreOpptjeningsPeriode(behandling, tilOgMed);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+
         return behandling;
     }
 
@@ -331,6 +346,10 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         iayTjeneste.lagreOppgittOpptjening(behandling.getId(), oppgittOpptjeningBuilder);
 
         lagreOpptjeningsPeriode(behandling, tilOgMed);
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+
         return behandling;
     }
 

@@ -1,6 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +32,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -54,13 +58,16 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private OmsorgspengerOpptjeningForBeregningTjeneste tjeneste;
     private BehandlingReferanse ref;
     private AktørId aktørId;
-    private OppgittOpptjeningFilterProvider oppgittOpptjeningTjeneste;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
+    private OppgittOpptjeningFilter oppgittOpptjeningFilter;
 
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        oppgittOpptjeningTjeneste = Mockito.mock(OppgittOpptjeningFilterProvider.class);
+        oppgittOpptjeningFilter = Mockito.mock(OppgittOpptjeningFilter.class);
+        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
+        when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(anyLong())).thenReturn(oppgittOpptjeningFilter);
 
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);
@@ -68,12 +75,13 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
         ref = BehandlingReferanse.fra(behandling);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
-        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)), oppgittOpptjeningTjeneste);
+        tjeneste = new OmsorgspengerOpptjeningForBeregningTjeneste(new UnitTestLookupInstanceImpl<>(new OpptjeningsperioderUtenOverstyringTjeneste(opptjeningRepository)), oppgittOpptjeningFilterProvider);
     }
 
     @Test
     public void skal_mappe_arbeid_for_skjæringtidspunkt_etter_første_uttaksdag() {
         InntektArbeidYtelseGrunnlag iay = lagIAYForArbeidSomSlutterOgStarterRundtFørsteUttaksdag();
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iay.getOppgittOpptjening());
         OpptjeningAktiviteter opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)))
             .get();
         List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();
