@@ -17,24 +17,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
-import no.nav.k9.aarskvantum.kontrakter.Barn;
-import no.nav.k9.aarskvantum.kontrakter.BarnType;
-import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -263,7 +249,8 @@ public class ÅrskvantumTjeneste {
                 true,
                 kreverRefusjon,
                 utledUtfallIngangsvilkår(wrappedOppgittFraværPeriode),
-                wrappedOppgittFraværPeriode.getInnsendingstidspunkt());
+                wrappedOppgittFraværPeriode.getInnsendingstidspunkt(),
+                utledFraværÅrsak(fraværPeriode));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
@@ -272,6 +259,19 @@ public class ÅrskvantumTjeneste {
     private Utfall utledUtfallIngangsvilkår(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
         var erAvslåttInngangsvilkår = wrappedOppgittFraværPeriode.getErAvslåttInngangsvilkår();
         return erAvslåttInngangsvilkår != null && erAvslåttInngangsvilkår ? Utfall.AVSLÅTT : Utfall.INNVILGET;
+    }
+
+    private FraværÅrsak utledFraværÅrsak(OppgittFraværPeriode periode) {
+        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.ORDINÆRT_FRAVÆR.equals(periode.getFraværÅrsak())) {
+            return FraværÅrsak.ORDINÆRT_FRAVÆR;
+        }
+        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.SMITTEVERNHENSYN.equals(periode.getFraværÅrsak())) {
+            return FraværÅrsak.SMITTEVERNHENSYN;
+        }
+        if (no.nav.k9.kodeverk.uttak.FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE.equals(periode.getFraværÅrsak())) {
+            return FraværÅrsak.STENGT_SKOLE_ELLER_BARNEHAGE;
+        }
+        return FraværÅrsak.UDEFINERT;
     }
 
     private ArbeidsforholdStatus utledArbeidsforholdStatus(WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode) {
