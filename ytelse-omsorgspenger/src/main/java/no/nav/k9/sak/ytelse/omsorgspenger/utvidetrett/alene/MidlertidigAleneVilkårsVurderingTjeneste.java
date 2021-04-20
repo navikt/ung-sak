@@ -44,7 +44,7 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var søknadsperiode = utledPeriode(behandling);
         var omsorgperiode = DatoIntervallEntitet.fraOgMed(søknadsperiode.getFomDato()); // lar denne perioden stå åpen for omsorg

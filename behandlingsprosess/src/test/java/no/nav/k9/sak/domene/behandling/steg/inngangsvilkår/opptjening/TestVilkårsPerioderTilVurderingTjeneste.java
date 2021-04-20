@@ -22,11 +22,11 @@ public class TestVilkårsPerioderTilVurderingTjeneste implements VilkårsPeriode
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
-        return utled(behandlingId).getOrDefault(vilkårType, new TreeSet<>());
+        return utledRådataTilUtledningAvVilkårsperioder(behandlingId).getOrDefault(vilkårType, new TreeSet<>());
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         return Map.of(VilkårType.MEDLEMSKAPSVILKÅRET, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusYears(3)))));
     }
 

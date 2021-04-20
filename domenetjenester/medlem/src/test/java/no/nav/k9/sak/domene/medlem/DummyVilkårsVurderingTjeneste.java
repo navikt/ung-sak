@@ -25,7 +25,7 @@ public class DummyVilkårsVurderingTjeneste implements VilkårsPerioderTilVurder
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         return Map.of(VilkårType.MEDLEMSKAPSVILKÅRET, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusYears(3)))));
     }
 

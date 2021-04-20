@@ -45,7 +45,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste implements Vi
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         final var vilkårPeriodeSet = new HashMap<VilkårType, NavigableSet<DatoIntervallEntitet>>();
         UtledeteVilkår utledeteVilkår = getVilkårUtleder().utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
