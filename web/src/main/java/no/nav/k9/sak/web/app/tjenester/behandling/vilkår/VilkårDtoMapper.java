@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -65,13 +64,7 @@ class VilkårDtoMapper {
         }
         for (DatoIntervallEntitet aktuellVilkårsperiode : aktuelleVilkårsperioder) {
             if (aktuellVilkårsperiode.overlapper(vilkårPeriode.getPeriode())) {
-                String feilmelding = "Delvis treff på vilkårsperiodesammenligning (forventet kun hele treff). VilkårTyp=" + vilkårType + " VilkårPeriode " + vilkårPeriode.getPeriode() + " overlapper delvis periode fra " + aktuelleVilkårsperioder;
-                if (Environment.current().isProd()) {
-                    //unngår hard validering i prod før funksjonalitet har vært testet og verifisert
-                    logger.warn(feilmelding);
-                } else {
-                    throw new IllegalStateException(feilmelding);
-                }
+                logger.warn("Delvis treff på vilkårsperiodesammenligning (forventer kun hele treff, bortsett fra for rammevedtak). VilkårTyp=" + vilkårType + " VilkårPeriode " + vilkårPeriode.getPeriode() + " overlapper delvis periode fra " + aktuelleVilkårsperioder);
             }
         }
         return false;
