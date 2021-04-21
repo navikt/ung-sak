@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface OppgittOpptjeningFilter {
 
@@ -12,4 +13,7 @@ public interface OppgittOpptjeningFilter {
         return iayGrunnlag.getOppgittOpptjening();
     }
 
+    default Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+        return iayGrunnlag.getOppgittOpptjening();
+    }
 }

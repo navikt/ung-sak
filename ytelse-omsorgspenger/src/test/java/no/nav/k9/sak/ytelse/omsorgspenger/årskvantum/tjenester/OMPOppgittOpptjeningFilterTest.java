@@ -28,7 +28,7 @@ public class OMPOppgittOpptjeningFilterTest {
     Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
 
     @Test
-    public void skal_hente_matchende_oppgitte_opptjening_for_vilkårperiode() {
+    public void skal_hente_matchende_oppgitte_opptjening_for_stp() {
         // Arrange
         var fraværFom = LocalDate.now();
         var fraværTom = LocalDate.now().plusDays(10);
@@ -52,7 +52,7 @@ public class OMPOppgittOpptjeningFilterTest {
     }
 
     @Test
-    public void skal_rangere_oppgitt_opptjening_basert_på_innsendingstidspunkt() {
+    public void skal_hente_første_mottatte_matchende_oppgitte_opptjening_for_stp() {
         // Arrange
         var fraværFom = LocalDate.now();
         var fraværTom = LocalDate.now().plusDays(10);
@@ -60,17 +60,55 @@ public class OMPOppgittOpptjeningFilterTest {
         var innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
         var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
 
-        var oppgittFraværPerioder = Set.of(new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE,
-            arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
+        var oppgittFraværPerioder = Set.of(
+            new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR),
+            new OppgittFraværPeriode(jpId2, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR)
+        );
 
         OppgittOpptjeningBuilder oppgittOpptjeningBuilder1 = lagOppgittOpptjeningBuilder(innsendingstidspunkt1, jpId1);
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder2 = lagOppgittOpptjeningBuilder(innsendingstidspunkt1, jpId2);
+        OppgittOpptjeningBuilder oppgittOpptjeningBuilder2 = lagOppgittOpptjeningBuilder(innsendingstidspunkt2, jpId2);
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
             .build();
 
         // Act
         var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId1);
+    }
+
+    @Test
+    public void skal_hente_første_mottatte_matchende_oppgitte_opptjening_for_vilkårsperiode() {
+        // Arrange
+        var fraværFom1 = LocalDate.now();
+        var fraværTom1 = LocalDate.now().plusDays(10);
+        var fraværFom2 = LocalDate.now().plusDays(20);
+        var fraværTom2 = LocalDate.now().plusDays(30);
+        // Maks vilkårsperiode overlapper begge fraværsperioder
+        var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
+
+        var innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
+        var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
+
+        var oppgittFraværPerioder = Set.of(
+            new OppgittFraværPeriode(jpId1, fraværFom1, fraværTom1, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR),
+            new OppgittFraværPeriode(jpId2, fraværFom2, fraværTom2, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR)
+        );
+
+        OppgittOpptjeningBuilder oppgittOpptjeningBuilder1 = lagOppgittOpptjeningBuilder(innsendingstidspunkt1, jpId1);
+        OppgittOpptjeningBuilder oppgittOpptjeningBuilder2 = lagOppgittOpptjeningBuilder(innsendingstidspunkt2, jpId2);
+        var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
+            .build();
+
+        // Act
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, oppgittFraværPerioder);
 
         // Assert
         assertThat(resultat).isPresent();

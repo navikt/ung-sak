@@ -275,7 +275,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         lagreOpptjeningsPeriode(behandling, tilOgMed);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iayGrunnlag.getOppgittOpptjening());
 
         return behandling;
     }
@@ -325,7 +325,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         lagreOpptjeningsPeriode(behandling, tilOgMed);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iayGrunnlag.getOppgittOpptjening());
 
         return behandling;
     }
@@ -348,7 +348,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjeningTest {
         lagreOpptjeningsPeriode(behandling, tilOgMed);
 
         var iayGrunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
-        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iayGrunnlag.getOppgittOpptjening());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iayGrunnlag.getOppgittOpptjening());
 
         return behandling;
     }

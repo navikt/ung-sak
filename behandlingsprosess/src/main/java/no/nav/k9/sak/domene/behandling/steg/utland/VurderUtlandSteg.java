@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.behandling.steg.utland;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -66,8 +65,7 @@ public class VurderUtlandSteg implements BehandlingSteg {
 
         // Vurder automatisk merking av opptjening utland
         for (DatoIntervallEntitet vilkårPeriode : vilkårPerioder) {
-            var stp = vilkårPeriode.getFomDato();
-            if (!behandling.harAksjonspunktMedType(MANUELL_MARKERING_AV_UTLAND_SAKSTYPE) && harOppgittUtenlandskInntekt(kontekst.getBehandlingId(), stp)) {
+            if (!behandling.harAksjonspunktMedType(MANUELL_MARKERING_AV_UTLAND_SAKSTYPE) && harOppgittUtenlandskInntekt(kontekst.getBehandlingId(), vilkårPeriode)) {
                 opprettOppgaveForInnhentingAvDokumentasjon(behandling);
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AUTOMATISK_MARKERING_AV_UTENLANDSSAK)));
             }
@@ -75,12 +73,12 @@ public class VurderUtlandSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harOppgittUtenlandskInntekt(Long behandlingId, LocalDate stp) {
+    private boolean harOppgittUtenlandskInntekt(Long behandlingId, DatoIntervallEntitet vilkårPeriode) {
         var iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId).orElse(null);
         if (iayGrunnlag == null) {
             return false;
         }
-        return oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId).hentOppgittOpptjening(behandlingId, iayGrunnlag, stp)
+        return oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId).hentOppgittOpptjening(behandlingId, iayGrunnlag, vilkårPeriode)
             .map(oppgittOpptjening -> oppgittOpptjening.getOppgittArbeidsforhold()
                 .stream()
                 .anyMatch(OppgittArbeidsforhold::erUtenlandskInntekt))

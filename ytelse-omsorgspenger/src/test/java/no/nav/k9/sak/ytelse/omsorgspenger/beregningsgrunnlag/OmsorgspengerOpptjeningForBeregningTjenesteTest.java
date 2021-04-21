@@ -81,7 +81,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     @Test
     public void skal_mappe_arbeid_for_skjæringtidspunkt_etter_første_uttaksdag() {
         InntektArbeidYtelseGrunnlag iay = lagIAYForArbeidSomSlutterOgStarterRundtFørsteUttaksdag();
-        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any())).thenReturn(iay.getOppgittOpptjening());
+        when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iay.getOppgittOpptjening());
         OpptjeningAktiviteter opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)))
             .get();
         List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();

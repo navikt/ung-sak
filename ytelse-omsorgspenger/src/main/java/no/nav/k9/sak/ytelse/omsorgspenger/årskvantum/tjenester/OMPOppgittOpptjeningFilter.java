@@ -58,16 +58,32 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         this.lansert = lansert;
     }
 
+    /**
+     * Henter først mottatte oppgitte opptjening for skjæringstidspunktet til opptjeningsvilkåret
+     */
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         if (!lansert) {
             return iayGrunnlag.getOppgittOpptjening();
-        }
+        }       
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
         var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
+
+        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
+    }
+
+    /**
+     * Henter først mottatte oppgitte opptjening hvor dens korrespondende kravperioder overlapper angitt vilkårsperiode
+     */
+    @Override
+    public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+        if (!lansert) {
+            return iayGrunnlag.getOppgittOpptjening();
+        }
+        var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
     }
@@ -78,7 +94,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
         return oppgittOpptjeninger.stream()
             .sorted(Comparator.comparing(OppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
-            .filter(oppgittOpptjening -> matcherVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
+            .filter(oppgittOpptjening -> overlapperVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
             .findFirst();
     }
 
@@ -100,7 +116,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return jornalpostTidslinjer;
     }
 
-    private boolean matcherVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
+    private boolean overlapperVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
         Objects.requireNonNull(opptjening.getJournalpostId());
         var fraværTidslinje = fraværTidslinjePerJp.getOrDefault(opptjening.getJournalpostId(), new LocalDateTimeline<>(List.of()));
         var overlappendeFraværsperioder = finnOverlappendePerioder(vilkårsperiode, fraværTidslinje);
