@@ -54,7 +54,7 @@ class MapOppgittOpptjening {
         var dto = new SøknadsperiodeOgOppgittOpptjeningV2Dto();
 
         OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste = Lookup.find(this.opptjeningForBeregningTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
-        // TODO ESPEN: BRUKES BARE FOR FRISINN, BØR FLYTTES TIL YTELSESSPESIFIKK MODUL
+        // Denne mapperen brukes bare av Frisinn. Stp er ikke i bruk for tjenesten nedenfor
         LocalDate stp = null;
         var ref = BehandlingReferanse.fra(behandling);
         Optional<OppgittOpptjening> oppgittOpptjeningOpt = opptjeningForBeregningTjeneste.finnOppgittOpptjening(ref, inntektArbeidYtelseGrunnlag, stp);
