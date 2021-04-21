@@ -29,8 +29,8 @@ class SakInntektsmeldinger {
         if (eksternReferanse == null || data.isEmpty()) {
             return Set.of();
         }
-        var key = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.grunnlagEksternReferanse.equals(eksternReferanse)).findAny().orElseThrow();
-        var orignInntektsmeldinger = data.get(key);
+        var key = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId) && it.grunnlagEksternReferanse.equals(eksternReferanse)).findAny();
+        var orignInntektsmeldinger = key.map(it -> data.get(it)).orElse(Set.of());
         var relevanteKeys = data.keySet()
             .stream()
             .filter(it -> Objects.equals(it.behandlingId, behandlingId) && !it.grunnlagEksternReferanse.equals(eksternReferanse))
