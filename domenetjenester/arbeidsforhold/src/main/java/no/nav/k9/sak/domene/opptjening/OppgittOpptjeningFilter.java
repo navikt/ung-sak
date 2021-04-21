@@ -8,6 +8,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 
 public interface OppgittOpptjeningFilter {
 
-    Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp);
+    default Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
+        return iayGrunnlag.getOppgittOpptjening();
+    }
 
 }
