@@ -44,7 +44,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var periode = utledPeriode(behandling);
         var perioder = new TreeSet<>(Set.of(periode));

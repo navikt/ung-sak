@@ -32,7 +32,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         }
 
         @Override
-        public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+        public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
             return null;
         }
 
