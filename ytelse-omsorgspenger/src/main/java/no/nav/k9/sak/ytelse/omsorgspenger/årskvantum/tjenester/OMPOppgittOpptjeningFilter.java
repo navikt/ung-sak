@@ -19,6 +19,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -28,6 +29,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
+import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
@@ -41,6 +44,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private Boolean lansert;
 
     OMPOppgittOpptjeningFilter() {
@@ -51,10 +55,12 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     public OMPOppgittOpptjeningFilter(OmsorgspengerGrunnlagRepository grunnlagRepository,
                                       VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
+                                      MottatteDokumentRepository mottatteDokumentRepository,
                                       @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.grunnlagRepository = grunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.lansert = lansert;
     }
 
@@ -65,14 +71,30 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         if (!lansert) {
             return iayGrunnlag.getOppgittOpptjening();
-        }       
+        }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
-        var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
+        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref);
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
+    }
+
+    private Set<OppgittFraværPeriode> hentFraværPerioderFraSøknad(BehandlingReferanse ref) {
+        var gyldigeJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(ref.getFagsakId())
+            .stream()
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .filter(it -> it.getBehandlingId() != null)
+            .map(MottattDokument::getJournalpostId)
+            .collect(Collectors.toSet());
+
+        return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId())
+            .map(OppgittFravær::getPerioder)
+            .orElse(Set.of())
+            .stream()
+            .filter(fraværPeriode -> gyldigeJournalposter.contains(fraværPeriode.getJournalpostId()))
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -83,7 +105,9 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         if (!lansert) {
             return iayGrunnlag.getOppgittOpptjening();
         }
-        var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
+
+        var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
+        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
     }

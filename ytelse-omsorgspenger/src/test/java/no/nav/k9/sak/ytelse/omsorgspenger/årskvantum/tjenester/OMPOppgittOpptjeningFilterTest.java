@@ -58,7 +58,7 @@ public class OMPOppgittOpptjeningFilterTest {
         var fraværTom = LocalDate.now().plusDays(10);
         var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
         var innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
-        var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
+        var innsendingstidspunkt2 = LocalDate.now().minusDays(1).atStartOfDay(); // Siste kravperiode kommer først
 
         var oppgittFraværPerioder = Set.of(
             new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
@@ -78,7 +78,7 @@ public class OMPOppgittOpptjeningFilterTest {
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId1);
+        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId2);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class OMPOppgittOpptjeningFilterTest {
         var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
 
         var innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
-        var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
+        var innsendingstidspunkt2 = LocalDate.now().minusDays(1).atStartOfDay(); // Siste kravperiode kommer først
 
         var oppgittFraværPerioder = Set.of(
             new OppgittFraværPeriode(jpId1, fraværFom1, fraværTom1, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
@@ -112,7 +112,7 @@ public class OMPOppgittOpptjeningFilterTest {
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId1);
+        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId2);
     }
 
     private OppgittOpptjeningBuilder lagOppgittOpptjeningBuilder(LocalDateTime innsendingstidspunkt, JournalpostId journalpostId) {
