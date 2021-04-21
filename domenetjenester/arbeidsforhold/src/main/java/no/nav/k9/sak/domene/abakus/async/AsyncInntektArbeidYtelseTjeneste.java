@@ -85,7 +85,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
             enkeltTask.setCallIdFraEksisterende();
             enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktør.getIdent());
             enkeltTask.setSaksnummer(saksnummer.getVerdi());
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.LAGRE_OVERSTYRT, opptjeningType.name());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.OPPTJENINGSTYPE, opptjeningType.name());
 
             var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
