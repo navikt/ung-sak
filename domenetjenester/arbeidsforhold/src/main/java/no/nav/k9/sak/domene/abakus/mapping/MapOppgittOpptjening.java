@@ -21,6 +21,7 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningerDto;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
@@ -71,6 +73,10 @@ class MapOppgittOpptjening {
         return MapTilDto.map(oppgittOpptjening);
     }
 
+    OppgittOpptjeningerDto mapTilDto(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+        return MapTilDto.map(oppgitteOpptjeninger);
+    }
+
     OppgittOpptjeningBuilder mapFraDto(OppgittOpptjeningDto oppgittOpptjening) {
         return MapFraDto.map(oppgittOpptjening);
     }
@@ -79,6 +85,14 @@ class MapOppgittOpptjening {
 
         private MapTilDto() {
             // Skjul
+        }
+
+        private static OppgittOpptjeningerDto map(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+            return new OppgittOpptjeningerDto().medOppgitteOpptjeninger(
+                oppgitteOpptjeninger.getOppgitteOpptjeninger().stream()
+                    .map(MapTilDto::map)
+                    .collect(Collectors.toList())
+            );
         }
 
         private static OppgittOpptjeningDto map(OppgittOpptjening oppgittOpptjening) {
