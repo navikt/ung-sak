@@ -406,7 +406,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.1-20200331052216-6a56f0c</version>
+                <version>2.1.4</version>
             </dependency>
 
             <dependency>
