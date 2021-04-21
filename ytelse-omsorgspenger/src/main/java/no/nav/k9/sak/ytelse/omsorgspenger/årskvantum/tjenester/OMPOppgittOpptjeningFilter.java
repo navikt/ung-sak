@@ -67,7 +67,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
         var fraværPerioderFraSøknad = grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId).map(OppgittFravær::getPerioder).orElse(Set.of());
-        var vilkårsperiode = finnVilkårsperiode(ref, stp);
+        var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
     }
@@ -82,7 +82,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .findFirst();
     }
 
-    private DatoIntervallEntitet finnVilkårsperiode(BehandlingReferanse ref, LocalDate stp) {
+    private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
         var skalIgnorereAvslåttePerioder = true;
         return vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
             .stream()
