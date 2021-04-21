@@ -123,7 +123,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     }
 
     private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
-        var skalIgnorereAvslåttePerioder = true;
+        var skalIgnorereAvslåttePerioder = false;
         return vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
             .stream()
             .filter(di -> di.getFomDato().equals(stp))
