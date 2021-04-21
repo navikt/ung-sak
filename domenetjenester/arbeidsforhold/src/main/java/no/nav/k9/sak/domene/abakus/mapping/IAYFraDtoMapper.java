@@ -1,12 +1,14 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.time.ZoneId;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningerDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -15,7 +17,9 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
 
-/** Merk denne mapper alltid hele aggregat tilbake til nye instanser av IAY Aggregat. (i motsetning til tilsvarende implementasjon i ABakus som mapper til eksisterende instans). */
+/**
+ * Merk denne mapper alltid hele aggregat tilbake til nye instanser av IAY Aggregat. (i motsetning til tilsvarende implementasjon i ABakus som mapper til eksisterende instans).
+ */
 public class IAYFraDtoMapper {
 
     private AktørId aktørId;
@@ -49,7 +53,7 @@ public class IAYFraDtoMapper {
     // brukes kun til migrering av data (dytter inn IAYG)
     private void mapRegisterDataTilMigrering(InntektArbeidYtelseGrunnlagDto dto, InntektArbeidYtelseGrunnlagBuilder builder) {
         var register = dto.getRegister();
-        if(register==null) return;
+        if (register == null) return;
 
         var tidspunkt = register.getOpprettetTidspunkt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
 
@@ -77,14 +81,18 @@ public class IAYFraDtoMapper {
 
         builder.medOverstyrtOppgittOpptjening(overstyrtOppgittOpptjening);
         builder.medOppgittOpptjening(oppgittOpptjening);
-        // TODO Tore: Skriv om DTO i abakus til å bruke aggregat, ikke map av journalposter
-        builder.medOppgittOpptjeningAggregat(Optional.ofNullable(dto.getOppgittOpptjeningPrDokument())
-            .map(it -> it.values().stream()
-                .map(this::mapOppgttOpptjening)
-                .collect(Collectors.toList()))
-            .orElse(List.of()));
+        builder.medOppgittOpptjeningAggregat(mapOppgitteOpptjeninger(dto.getOppgitteOpptjeninger()));
         builder.setInntektsmeldinger(inntektsmeldinger);
         builder.medInformasjon(arbeidsforholdInformasjon);
+    }
+
+    private Collection<OppgittOpptjeningBuilder> mapOppgitteOpptjeninger(OppgittOpptjeningerDto oppgitteOpptjeninger) {
+        if (oppgitteOpptjeninger == null) {
+            return Collections.emptyList();
+        }
+        return oppgitteOpptjeninger.getOppgitteOpptjeninger().stream()
+            .map(this::mapOppgttOpptjening)
+            .collect(Collectors.toList());
     }
 
     public OppgittOpptjeningBuilder mapOppgttOpptjening(OppgittOpptjeningDto oppgittOpptjening) {
