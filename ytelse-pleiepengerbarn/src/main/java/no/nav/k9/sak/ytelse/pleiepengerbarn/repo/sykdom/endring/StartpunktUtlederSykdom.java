@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
@@ -34,7 +35,7 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
     @Inject
     StartpunktUtlederSykdom(SykdomGrunnlagRepository sykdomGrunnlagRepository,
                             SykdomVurderingService sykdomVurderingService,
-                            @FagsakYtelseTypeRef("PSB") VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                            @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingService = sykdomVurderingService;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
