@@ -21,12 +21,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
 import no.nav.k9.aarskvantum.kontrakter.BarnType;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
