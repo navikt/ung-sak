@@ -220,7 +220,7 @@ public class AksjonspunktutlederForVurderOppgittOpptjening {
         if (opptjeningPeriode == null) {
             return false;
         }
-        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(iayg.getBehandlingId());
+        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
         var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(behandlingId, iayg, skjæringstidspunkt).orElse(null);
 
         return harBrukerOppgittÅVæreSelvstendigNæringsdrivende(oppgittOpptjening, opptjeningPeriode) == JA &&

@@ -219,7 +219,7 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
     }
 
     public VurderingsStatus vurderFrilans(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, Yrkesaktivitet overstyrtAktivitet, LocalDate skjæringstidspunkt) {
-        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(iayGrunnlag.getBehandlingId());
+        OppgittOpptjeningFilter oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
         var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), iayGrunnlag, skjæringstidspunkt);
 
         // Avklart med funksjonell at når frilans arbeidsforhold er oppgitt i søknad, så er det automatisk godkjent som opptjeningsaktivitet
