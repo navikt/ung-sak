@@ -21,7 +21,7 @@ import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
-import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -46,16 +46,17 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     public OppdateringResultat oppdater(AvklarOpptjeningsvilkårDto dto, AksjonspunktOppdaterParameter param) {
         var builder = param.getVilkårResultatBuilder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
-        for (AvklarOpptjeningsvilkåretDto avklarOpptjeningsvilkåretDto : dto.getPerioder()) {
-            Utfall nyttUtfall = avklarOpptjeningsvilkåretDto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-
+        for (VilkårPeriodeVurderingDto vilkårPeriodeVurdering : dto.getVilkårPeriodeVurderinger()) {
+            Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriodeVurdering.getPeriode().getFom(),
+                vilkårPeriodeVurdering.getPeriode().getTom());
             lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
+
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
             }
-            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder);
+            oppdaterUtfallOgLagre(nyttUtfall, periode.getFomDato(), periode.getTomDato(), vilkårBuilder);
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
