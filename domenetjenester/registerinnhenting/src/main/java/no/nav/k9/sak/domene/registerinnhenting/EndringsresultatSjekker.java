@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
@@ -98,6 +99,8 @@ public class EndringsresultatSjekker {
         } else {
             log.info("Fant ingen søknadsdokument endringssjekker for ytelse {}", behandling.getFagsakYtelseType());
         }
+        var utvidetBehandlingsgrunnlagTjeneste = DiffUtvidetBehandlingsgrunnlagTjeneste.finnTjeneste(behandling.getFagsakYtelseType());
+        utvidetBehandlingsgrunnlagTjeneste.ifPresent(diffUtvidetBehandlingsgrunnlagTjeneste -> diffUtvidetBehandlingsgrunnlagTjeneste.leggTilSnapshot(BehandlingReferanse.fra(behandling), snapshot));
 
         return snapshot;
     }
@@ -140,6 +143,9 @@ public class EndringsresultatSjekker {
         var søknadDokumentTjeneste = SøknadDokumentTjeneste.finnTjeneste(søknadsDokumentTjenester, behandling.getFagsakYtelseType());
         søknadDokumentTjeneste.ifPresent(dokumentTjeneste -> idDiff.hentDelresultat(dokumentTjeneste.getGrunnlagsKlasse())
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> dokumentTjeneste.diffResultat(idEndring, kunSporedeEndringer))));
+
+        var utvidetBehandlingsgrunnlagTjeneste = DiffUtvidetBehandlingsgrunnlagTjeneste.finnTjeneste(behandling.getFagsakYtelseType());
+        utvidetBehandlingsgrunnlagTjeneste.ifPresent(diffUtvidetBehandlingsgrunnlagTjeneste -> diffUtvidetBehandlingsgrunnlagTjeneste.leggTilDiffResultat(BehandlingReferanse.fra(behandling), sporedeEndringerDiff));
 
         return sporedeEndringerDiff;
     }

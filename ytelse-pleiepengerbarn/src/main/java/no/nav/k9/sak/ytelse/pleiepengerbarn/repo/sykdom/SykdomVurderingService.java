@@ -5,7 +5,6 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toLoc
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils.toPeriodeList;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -19,9 +18,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -192,12 +188,6 @@ public class SykdomVurderingService {
                 );
     }
 
-    private List<Periode> finnNyeSøknadsperioder(NavigableSet<DatoIntervallEntitet> søknadsperioder, LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder) {
-        return toPeriodeList(
-                    kunPerioderSomIkkeFinnesI(toLocalDateTimeline(søknadsperioder), saksnummerForPerioder)
-               );
-    }
-
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeGrunnlag(
             final Saksnummer saksnummer,
             final UUID behandlingUuid,
@@ -205,7 +195,7 @@ public class SykdomVurderingService {
         final Optional<SykdomGrunnlagBehandling> grunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid);
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, List.of());
 
-        return sammenlignGrunnlag(grunnlagBehandling, utledetGrunnlag);
+        return sammenlignGrunnlag(grunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag), utledetGrunnlag);
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(
@@ -216,20 +206,20 @@ public class SykdomVurderingService {
         final Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, nyeVurderingsperioder);
 
-        return sammenlignGrunnlag(forrigeGrunnlagBehandling, utledetGrunnlag);
+        return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag), utledetGrunnlag);
     }
 
-    private SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<SykdomGrunnlagBehandling> forrigeGrunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<SykdomGrunnlag> forrigeGrunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
 
-    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<SykdomGrunnlagBehandling> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
 
         if (grunnlagBehandling.isPresent()) {
-            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get().getGrunnlag();
+            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get();
             grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
         } else {
             grunnlagBehandlingTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
@@ -243,10 +233,10 @@ public class SykdomVurderingService {
         return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
     }
 
-    private boolean sammenlignDiagnosekoder(Optional<SykdomGrunnlagBehandling> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
+    private boolean sammenlignDiagnosekoder(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
         List<String> forrigeDiagnosekoder;
         if (grunnlagBehandling.isPresent()) {
-            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get().getGrunnlag();
+            final SykdomGrunnlag forrigeGrunnlag = grunnlagBehandling.get();
             forrigeDiagnosekoder = forrigeGrunnlag.getSammenlignbarDiagnoseliste();
         } else {
             forrigeDiagnosekoder = Collections.emptyList();
@@ -254,27 +244,6 @@ public class SykdomVurderingService {
         final List<String> nyeDiagnosekoder = utledetGrunnlag.getSammenlignbarDiagnoseliste();
 
         return !forrigeDiagnosekoder.equals(nyeDiagnosekoder);
-    }
-
-    private static LocalDateTimeline<Set<Saksnummer>> saksnummertidslinjeeMedNyePerioder(LocalDateTimeline<Set<Saksnummer>> saksnummerForPerioder, NavigableSet<DatoIntervallEntitet> nyeSøknadsperioder, Saksnummer saksnummer) {
-        final LocalDateTimeline<Set<Saksnummer>> nyTidslinje = new LocalDateTimeline<Set<Saksnummer>>(nyeSøknadsperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Collections.singleton(saksnummer))).collect(Collectors.toList()));
-        return saksnummerForPerioder.union(nyTidslinje, new LocalDateSegmentCombinator<Set<Saksnummer>, Set<Saksnummer>, Set<Saksnummer>>() {
-            @Override
-            public LocalDateSegment<Set<Saksnummer>> combine(LocalDateInterval datoInterval,
-                    LocalDateSegment<Set<Saksnummer>> datoSegment,
-                    LocalDateSegment<Set<Saksnummer>> datoSegment2) {
-                if (datoSegment == null) {
-                    return new LocalDateSegment<Set<Saksnummer>>(datoInterval, datoSegment2.getValue());
-                }
-                if (datoSegment2 == null) {
-                    return new LocalDateSegment<Set<Saksnummer>>(datoInterval, datoSegment.getValue());
-                }
-
-                final Set<Saksnummer> saksnumre = new HashSet<>(datoSegment.getValue());
-                saksnumre.addAll(datoSegment2.getValue());
-                return new LocalDateSegment<Set<Saksnummer>>(datoInterval, saksnumre);
-            }
-        });
     }
 
     public static class SykdomVurderingerOgPerioder {
