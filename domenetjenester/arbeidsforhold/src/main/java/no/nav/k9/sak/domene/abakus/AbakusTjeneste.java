@@ -110,8 +110,7 @@ public class AbakusTjeneste {
         this.endpointOverstyring = toUri("/api/iay/grunnlag/v1/overstyrt");
         this.endpointMottaInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/motta");
         this.endpointMottaOppgittOpptjening = toUri("/api/iay/oppgitt/v1/motta");
-        // TODO Tore: Endre endepunkt til ..oppgitt/v2/motta
-        this.endpointMottaOppgittOpptjeningV2 = toUri("/api/iay/oppgitt/v1/motta-v2");
+        this.endpointMottaOppgittOpptjeningV2 = toUri("/api/iay/oppgitt/v2/motta");
         this.endpointOverstyrtOppgittOpptjening = toUri("/api/iay/oppgitt/v1/overstyr");
         this.endpointGrunnlagSnapshot = toUri("/api/iay/grunnlag/v1/snapshot");
         this.endpointKopierGrunnlag = toUri("/api/iay/grunnlag/v1/kopier");
