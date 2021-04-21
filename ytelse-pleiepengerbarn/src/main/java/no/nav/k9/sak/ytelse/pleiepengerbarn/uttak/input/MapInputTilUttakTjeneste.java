@@ -163,8 +163,8 @@ public class MapInputTilUttakTjeneste {
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         //TODO: fyll beredskap og nattevåksperioder med data fra aksjonspunkt når det er ferdig
-        final Set<LukketPeriode> beredskapsperioder = new HashSet<>();
-        final Set<LukketPeriode> nattevåksperioder = new HashSet<>();
+        final Map<LukketPeriode, Utfall> beredskapsperioder = new HashMap<>();
+        final Map<LukketPeriode, Utfall> nattevåksperioder = new HashMap<>();
 
         return new Uttaksgrunnlag(
             barn,
