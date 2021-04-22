@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
 import static no.nav.k9.sak.domene.arbeidsforhold.YtelseTestHelper.opprettInntektArbeidYtelseAggregatForYrkesaktivitet;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -42,6 +43,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
@@ -54,51 +56,47 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
+class OpptjeningInntektArbeidYtelseTjenesteImplTest {
 
     public static final String NAV_ORG_NUMMER = "889640782";
+    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
+    private AktørId AKTØRID = AktørId.dummy();
+    private LocalDate skjæringstidspunkt = LocalDate.now();
 
     @Inject
     private EntityManager entityManager;
 
-    private LocalDate skjæringstidspunkt ;
-    private IAYRepositoryProvider repositoryProvider ;
-    private BehandlingRepository behandlingRepository ;
-    private FagsakRepository fagsakRepository ;
-    private InntektArbeidYtelseTjeneste iayTjeneste ;
-    private OpptjeningRepository opptjeningRepository ;
-    private VilkårResultatRepository vilkårResultatRepository ;
-    private VirksomhetTjeneste virksomhetTjeneste ;
-    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
-    private AksjonspunktutlederForVurderOppgittOpptjening apoOpptjening ;
-    private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening ;
-    private OpptjeningsperioderTjeneste asdf ;
-    private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste ;
-    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID ;
-    private AktørId AKTØRID ;
+    private IAYRepositoryProvider repositoryProvider;
+    private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
+    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    private OpptjeningRepository opptjeningRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
+    private AksjonspunktutlederForVurderOppgittOpptjening apoOpptjening;
+    private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
+    private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
 
     @BeforeEach
     public void setup() {
-        skjæringstidspunkt = LocalDate.now();
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         fagsakRepository = new FagsakRepository(entityManager);
-        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
-        oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
         apoOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
         apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(opptjeningRepository, iayTjeneste, oppgittOpptjeningFilterProvider);
-        asdf = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), apoOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider);
-        opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), asdf);
-        ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
-        AKTØRID = AktørId.dummy();
+        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), apoOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider);
+        opptjeningTjeneste = new OpptjeningInntektArbeidYtelseTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), opptjeningsperioderTjeneste);
+
+        when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(anyLong())).thenReturn(new OppgittOpptjeningFilter() {
+        });
     }
 
     @Test
-    public void skal_vurdere_oppgitt_periode_for_egen_næring_som_ferdig_vurdert_godkjent() {
-
+    void skal_vurdere_oppgitt_periode_for_egen_næring_som_ferdig_vurdert_godkjent() {
 
 
         // Arrange
@@ -139,7 +137,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     }
 
     @Test
-    public void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode_for_vilkår_godkjent() {
+    void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode_for_vilkår_godkjent() {
         // Arrange
         final Behandling behandling = opprettBehandling();
         var sisteLønnsendringsdato = skjæringstidspunkt;
@@ -168,7 +166,7 @@ public class OpptjeningInntektArbeidYtelseTjenesteImplTest {
     }
 
     @Test
-    public void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode_for_vilkår_underkjent() {
+    void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode_for_vilkår_underkjent() {
         // Arrange
         LocalDate iDag = LocalDate.now();
         final Behandling behandling = opprettBehandling();

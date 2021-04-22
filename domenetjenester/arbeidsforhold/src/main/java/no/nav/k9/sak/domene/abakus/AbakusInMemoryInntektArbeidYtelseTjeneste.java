@@ -4,6 +4,7 @@ import java.lang.StackWalker.StackFrame;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -256,7 +257,23 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
 
     @Override
     public void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjening) {
-        // TODO TORE?
+        if (oppgittOpptjening == null) {
+            return;
+        }
+        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
+
+        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
+
+        List<OppgittOpptjening> alleredeLagret = inntektArbeidAggregat
+            .flatMap(InntektArbeidYtelseGrunnlag::getOppgittOpptjeningAggregat)
+            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+            .orElse(Collections.emptyList());
+
+        List<OppgittOpptjening> oppdatertOpptjening = new ArrayList<>();
+        oppdatertOpptjening.addAll(alleredeLagret);
+        oppdatertOpptjening.add(oppgittOpptjening.build());
+        iayGrunnlag.medOppgitteOpptjeninger(oppdatertOpptjening);
+        lagreOgFlush(behandlingId, iayGrunnlag.build());
     }
 
     @Override

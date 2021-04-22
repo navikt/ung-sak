@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -88,7 +87,7 @@ public class IAYFraDtoMapper {
 
     private Collection<OppgittOpptjeningBuilder> mapOppgitteOpptjeninger(OppgittOpptjeningerDto oppgitteOpptjeninger) {
         if (oppgitteOpptjeninger == null) {
-            return Collections.emptyList();
+            return null;
         }
         return oppgitteOpptjeninger.getOppgitteOpptjeninger().stream()
             .map(this::mapOppgttOpptjening)
