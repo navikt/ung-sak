@@ -32,7 +32,7 @@ public class AvklarOpptjeningsvilkårDto extends BekreftetAksjonspunktDto {
 
     @Valid
     @Size(max = 100)
-    @JsonProperty(value = "vilkårPerioder", required = true)
+    @JsonProperty(value = "opptjeningPerioder", required = true)
     private List<Periode> opptjeningPerioder;
 
     public AvklarOpptjeningsvilkårDto() {
