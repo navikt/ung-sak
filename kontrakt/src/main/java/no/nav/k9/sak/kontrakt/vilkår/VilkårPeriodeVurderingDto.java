@@ -33,13 +33,19 @@ public class VilkårPeriodeVurderingDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String avslagskode;
 
+    @JsonProperty(value = "innvilgelseMerknadKode")
+    @Size(min = 4, max = 5)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
+    private String innvilgelseMerknadKode;
+
     public VilkårPeriodeVurderingDto() {
     }
 
-    public VilkårPeriodeVurderingDto(Periode periode, boolean erVilkarOk, String avslagskode) {
+    public VilkårPeriodeVurderingDto(Periode periode, boolean erVilkarOk, String avslagskode, String innvilgelseMerknadKode) {
         this.periode = periode;
         this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;
+        this.innvilgelseMerknadKode = innvilgelseMerknadKode;
     }
 
     public Periode getPeriode() {
@@ -52,5 +58,9 @@ public class VilkårPeriodeVurderingDto {
 
     public String getAvslagskode() {
         return avslagskode;
+    }
+
+    public String getInnvilgelseMerknadKode() {
+        return innvilgelseMerknadKode;
     }
 }
