@@ -4,15 +4,10 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.apache.kafka.common.serialization.Serdes;
-
-import no.nav.familie.topic.Topic;
-import no.nav.foreldrepenger.abakus.felles.kafka.ApplicationIdUtil;
-import no.nav.foreldrepenger.abakus.felles.kafka.Topic;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.vedtak.konfig.KonfigVerdi;
 
 @Dependent
-class VedtakStreamKafkaProperties {
+class TriggeRevurderingEtterVedtakStreamKafkaProperties {
 
     private final String bootstrapServers;
     private final String schemaRegistryUrl;
@@ -25,17 +20,17 @@ class VedtakStreamKafkaProperties {
 
     @SuppressWarnings("resource")
     @Inject
-    VedtakStreamKafkaProperties(@KonfigVerdi("kafka.bootstrap.servers") String bootstrapServers,
-                                @KonfigVerdi("kafka.schema.registry.url") String schemaRegistryUrl,
-                                @KonfigVerdi("kafka.fattevedtak.topic") String topicName,
-                                @KonfigVerdi("systembruker.username") String username,
-                                @KonfigVerdi("systembruker.password") String password,
-                                @KonfigVerdi(value = "javax.net.ssl.trustStore", required = false) String trustStorePath,
-                                @KonfigVerdi(value = "javax.net.ssl.trustStorePassword", required = false) String trustStorePassword) {
+    TriggeRevurderingEtterVedtakStreamKafkaProperties(@KonfigVerdi("kafka.bootstrap.servers") String bootstrapServers,
+                                                      @KonfigVerdi("kafka.schema.registry.url") String schemaRegistryUrl,
+                                                      @KonfigVerdi("kafka.vedtakhendelse.topic") String topicName,
+                                                      @KonfigVerdi("systembruker.username") String username,
+                                                      @KonfigVerdi("systembruker.password") String password,
+                                                      @KonfigVerdi(value = "javax.net.ssl.trustStore", required = false) String trustStorePath,
+                                                      @KonfigVerdi(value = "javax.net.ssl.trustStorePassword", required = false) String trustStorePassword) {
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
         this.topic = new Topic(topicName, Serdes.String(), Serdes.String());
-        this.applicationId = ApplicationIdUtil.get();
+        this.applicationId = topicName + ".psb.revurdering";
         this.bootstrapServers = bootstrapServers;
         this.schemaRegistryUrl = schemaRegistryUrl;
         this.username = username;

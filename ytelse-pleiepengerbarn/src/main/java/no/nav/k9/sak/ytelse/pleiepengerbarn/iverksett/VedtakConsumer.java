@@ -34,7 +34,7 @@ public class VedtakConsumer implements AppServiceHandler {
     }
 
     @Inject
-    public VedtakConsumer(VedtaksHendelseHåndterer vedtaksHendelseHåndterer, VedtakStreamKafkaProperties streamKafkaProperties) {
+    public VedtakConsumer(VedtaksHendelseHåndterer vedtaksHendelseHåndterer, TriggeRevurderingEtterVedtakStreamKafkaProperties streamKafkaProperties) {
         this.topic = streamKafkaProperties.getTopic();
 
         Properties props = setupProperties(streamKafkaProperties);
@@ -65,7 +65,7 @@ public class VedtakConsumer implements AppServiceHandler {
         });
     }
 
-    private Properties setupProperties(VedtakStreamKafkaProperties streamProperties) {
+    private Properties setupProperties(TriggeRevurderingEtterVedtakStreamKafkaProperties streamProperties) {
         Properties props = new Properties();
 
         log.info("Consuming topic='{}' with applicationId='{}'", streamProperties.getTopic(), streamProperties.getApplicationId());
