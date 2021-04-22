@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningerDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -85,7 +85,7 @@ public class IAYFraDtoMapper {
         builder.medInformasjon(arbeidsforholdInformasjon);
     }
 
-    private Collection<OppgittOpptjeningBuilder> mapOppgitteOpptjeninger(OppgittOpptjeningerDto oppgitteOpptjeninger) {
+    private Collection<OppgittOpptjeningBuilder> mapOppgitteOpptjeninger(OppgitteOpptjeningerDto oppgitteOpptjeninger) {
         if (oppgitteOpptjeninger == null) {
             return null;
         }

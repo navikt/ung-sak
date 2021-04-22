@@ -21,7 +21,7 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningerDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -73,7 +73,7 @@ class MapOppgittOpptjening {
         return MapTilDto.map(oppgittOpptjening);
     }
 
-    OppgittOpptjeningerDto mapTilDto(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+    OppgitteOpptjeningerDto mapTilDto(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
         return MapTilDto.map(oppgitteOpptjeninger);
     }
 
@@ -87,8 +87,8 @@ class MapOppgittOpptjening {
             // Skjul
         }
 
-        private static OppgittOpptjeningerDto map(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
-            return new OppgittOpptjeningerDto().medOppgitteOpptjeninger(
+        private static OppgitteOpptjeningerDto map(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+            return new OppgitteOpptjeningerDto().medOppgitteOpptjeninger(
                 oppgitteOpptjeninger.getOppgitteOpptjeninger().stream()
                     .map(MapTilDto::map)
                     .collect(Collectors.toList())
