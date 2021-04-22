@@ -26,7 +26,7 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
-// .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
@@ -48,7 +48,7 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, YTELSE_TYPE);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
-// .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)

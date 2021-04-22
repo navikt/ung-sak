@@ -159,7 +159,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()

@@ -90,7 +90,9 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             Set.of(),
             input.getBehandlingUUID(),
-            input.getAndrePartersSaksnummer().isEmpty() ? AnnenPart.ALENE : AnnenPart.MED_ANDRE);
+            input.getAndrePartersSaksnummer().isEmpty() ? AnnenPart.ALENE : AnnenPart.MED_ANDRE,
+            null,
+            null);
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {

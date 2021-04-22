@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -24,26 +24,26 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.DokumentVedleggHåndterer;
 
 @FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
 @BehandlingTypeRef
 @ApplicationScoped
-public class UtvidetRettKompletthetSjekker implements Kompletthetsjekker {
+public class KroniskSykKompletthetSjekker implements Kompletthetsjekker {
 
-    private static final Logger log = LoggerFactory.getLogger(UtvidetRettKompletthetSjekker.class);
+    private static final Logger log = LoggerFactory.getLogger(KroniskSykKompletthetSjekker.class);
     private DokumentVedleggHåndterer dokumentVedleggHåndterer;
     private SøknadRepository søknadRepository;
 
     private Period frist = Period.parse("P2W");
     private HistorikkRepository historikkRepository;
 
-    UtvidetRettKompletthetSjekker() {
+    KroniskSykKompletthetSjekker() {
         // for proxy
     }
 
     @Inject
-    public UtvidetRettKompletthetSjekker(DokumentVedleggHåndterer dokumentVedleggHåndterer,
+    public KroniskSykKompletthetSjekker(DokumentVedleggHåndterer dokumentVedleggHåndterer,
                                          HistorikkRepository historikkRepository,
                                          SøknadRepository søknadRepository) {
         this.dokumentVedleggHåndterer = dokumentVedleggHåndterer;
