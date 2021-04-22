@@ -11,7 +11,6 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -22,8 +21,7 @@ import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
-import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
-import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto.MidlertidigInaktiv;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -48,26 +46,25 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     public OppdateringResultat oppdater(AvklarOpptjeningsvilkårDto dto, AksjonspunktOppdaterParameter param) {
         var builder = param.getVilkårResultatBuilder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
-        for (AvklarOpptjeningsvilkåretDto avklarOpptjeningsvilkåretDto : dto.getPerioder()) {
-            Utfall nyttUtfall = avklarOpptjeningsvilkåretDto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-
+        for (VilkårPeriodeVurderingDto vilkårPeriodeVurdering : dto.getVilkårPeriodeVurderinger()) {
+            Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(vilkårPeriodeVurdering.getPeriode().getFom(),
+                vilkårPeriodeVurdering.getPeriode().getTom());
             lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
+
                 sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
             }
-            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder, avklarOpptjeningsvilkåretDto.getMidlertidigInaktiv());
+            oppdaterUtfallOgLagre(nyttUtfall, periode.getFomDato(), periode.getTomDato(), vilkårBuilder);
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder, MidlertidigInaktiv midlertidigInaktiv) {
+    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder) {
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfall(utfallType)
-            .medMerknad(MidlertidigInaktiv.TYPE_A.equals(midlertidigInaktiv) ? VilkårUtfallMerknad.VM_7847_A : null)
-            .medMerknad(MidlertidigInaktiv.TYPE_B.equals(midlertidigInaktiv) ? VilkårUtfallMerknad.VM_7847_B : null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
