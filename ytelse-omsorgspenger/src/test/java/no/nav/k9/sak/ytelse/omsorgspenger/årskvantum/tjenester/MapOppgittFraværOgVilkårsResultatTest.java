@@ -37,7 +37,6 @@ import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
-import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -46,12 +45,12 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-public class MapOppgittFraværOgVilkårsResultatTest {
+class MapOppgittFraværOgVilkårsResultatTest {
 
     private final DatoIntervallEntitet boundry = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3), LocalDate.now().plusMonths(9));
 
     @Test
-    public void skal_ta_hensyn_til_avslåtte_vilkår() {
+    void skal_ta_hensyn_til_avslåtte_vilkår() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder().medUtfall(Utfall.IKKE_OPPFYLT).medPeriode(LocalDate.now().minusDays(10), LocalDate.now())));
@@ -68,8 +67,8 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(2);
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         }
@@ -85,7 +84,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
     }
 
     @Test
-    public void skal_ta_hensyn_til_flere_avslåtte_vilkår() {
+    void skal_ta_hensyn_til_flere_avslåtte_vilkår() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder
             .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
@@ -104,15 +103,15 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(2);
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_overlapp_flere_arbeidsgivere() {
+    void skal_ta_hensyn_overlapp_flere_arbeidsgivere() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder
             .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
@@ -134,12 +133,12 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(fraværPerioder.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(1);
         assertThat(fraværPerioder.stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         assertThat(fraværPerioder1).hasSize(1);
-        assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+        assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
         assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
     }
 
     @Test
-    public void skal_ta_hensyn_overlapp_flere_aktivitettyper() {
+    void skal_ta_hensyn_overlapp_flere_aktivitettyper() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder
             .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
@@ -161,12 +160,12 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(fraværPerioder.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(1);
         assertThat(fraværPerioder.stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         assertThat(fraværPerioder1).hasSize(1);
-        assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+        assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
         assertThat(fraværPerioder1.stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
     }
 
     @Test
-    public void skal_ta_hensyn_til_overlapp_i_søkte_perioder() {
+    void skal_ta_hensyn_til_overlapp_i_søkte_perioder() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder
             .leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
@@ -190,7 +189,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
     }
 
     @Test
-    public void skal_ta_hensyn_til_avslått_arbeidsforhold() {
+    void skal_ta_hensyn_til_avslått_arbeidsforhold() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -219,16 +218,16 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(2);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_permisjon() {
+    void skal_ta_hensyn_til_permisjon() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -262,16 +261,16 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(2);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_permisjon_under_100_prosent() {
+    void skal_ta_hensyn_til_permisjon_under_100_prosent() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -305,16 +304,16 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_avslått_arbeidsforhold_med_flere_ansettelsesperioder() {
+    void skal_ta_hensyn_til_avslått_arbeidsforhold_med_flere_ansettelsesperioder() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -354,16 +353,16 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(2);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_delvis_fravær() {
+    void skal_ta_hensyn_til_delvis_fravær() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -391,16 +390,16 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(2);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_selvstendig_næringsdrivende() {
+    void skal_ta_hensyn_til_selvstendig_næringsdrivende() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -418,24 +417,24 @@ public class MapOppgittFraværOgVilkårsResultatTest {
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.NÆRING)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
-        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMed(AbstractLocalDateInterval.TIDENES_ENDE), List.of(aktivitetPeriodeSN));
+        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()), List.of(aktivitetPeriodeSN));
 
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlagTomt, opptjeningAktivitetPerioder, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AKTIVT.equals(it.getArbeidStatus()))).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         }
     }
 
     @Test
-    public void skal_ta_hensyn_til_frilans() {
+    void skal_ta_hensyn_til_frilans() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
 
@@ -451,24 +450,24 @@ public class MapOppgittFraværOgVilkårsResultatTest {
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.FRILANS)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
-        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMed(AbstractLocalDateInterval.TIDENES_ENDE), List.of(aktivitetPeriodeFL));
+        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()), List.of(aktivitetPeriodeFL));
 
         var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlagTomt, opptjeningAktivitetPerioder, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AKTIVT.equals(it.getArbeidStatus()))).hasSize(1);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(1);
         }
     }
 
     @Test
-    public void skal_filtrere_bort_perioder_utenfor_fagsaksinterval() {
+    void skal_filtrere_bort_perioder_utenfor_fagsaksinterval() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder().medUtfall(Utfall.IKKE_OPPFYLT).medPeriode(LocalDate.now().minusDays(10), LocalDate.now())));
@@ -483,17 +482,17 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
-            assertThat(entries.getValue()).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(0);
+            assertThat(entries.getValue()).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).isEmpty();
         }
     }
 
     @Test
-    public void skal_ikke_slå_sammen_ved_forskjellig_innsendingstidspunkt() {
+    void skal_ikke_slå_sammen_ved_forskjellig_innsendingstidspunkt() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder()
@@ -521,10 +520,10 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
             assertThat(entries.getValue()).hasSize(2);
             assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() != null).filter(WrappedOppgittFraværPeriode::getErAvslåttInngangsvilkår)).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).hasSize(0);
-            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErIPermisjon() != null).filter(WrappedOppgittFraværPeriode::getErIPermisjon)).isEmpty();
+            assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.AVSLUTTET.equals(it.getArbeidStatus()))).isEmpty();
             assertThat(entries.getValue().stream().filter(it -> it.getArbeidStatus() != null).filter(it -> ArbeidStatus.IKKE_EKSISTERENDE.equals(it.getArbeidStatus()))).hasSize(2);
-            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).hasSize(0);
+            assertThat(entries.getValue().stream().filter(it -> it.getErAvslåttInngangsvilkår() == null)).isEmpty();
         }
     }
 }
