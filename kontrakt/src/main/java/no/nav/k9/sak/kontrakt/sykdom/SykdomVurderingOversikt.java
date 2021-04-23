@@ -31,6 +31,11 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
+    
+    @JsonProperty(value = "resterendeValgfrieVurderingsperioder")
+    @Size(max = 1000)
+    @Valid
+    private List<Periode> resterendeValgfrieVurderingsperioder = new ArrayList<>();
 
     @JsonProperty(value = "søknadsperioderTilBehandling")
     @Size(max = 1000)
@@ -65,11 +70,13 @@ public class SykdomVurderingOversikt {
     public SykdomVurderingOversikt(
             List<SykdomVurderingOversiktElement> vurderingselementer,
             List<Periode> resterendeVurderingsperioder,
+            List<Periode> resterendeValgfrieVurderingsperioder,
             List<Periode> søknadsperioderTilBehandling,
             List<Periode> perioderSomKanVurderes,
             List<ResourceLink> links) {
         this.vurderingselementer = vurderingselementer;
         this.resterendeVurderingsperioder = resterendeVurderingsperioder;
+        this.resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder;
         this.søknadsperioderTilBehandling = søknadsperioderTilBehandling;
         this.perioderSomKanVurderes = perioderSomKanVurderes;
         this.links = links;
@@ -86,6 +93,10 @@ public class SykdomVurderingOversikt {
 
     public List<Periode> getResterendeVurderingsperioder() {
         return resterendeVurderingsperioder;
+    }
+    
+    public List<Periode> getResterendeValgfrieVurderingsperioder() {
+        return resterendeValgfrieVurderingsperioder;
     }
 
     public List<Periode> getSøknadsperioderTilBehandling() {

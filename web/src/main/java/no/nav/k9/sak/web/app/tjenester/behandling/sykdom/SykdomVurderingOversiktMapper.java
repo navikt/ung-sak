@@ -39,6 +39,7 @@ public class SykdomVurderingOversiktMapper {
         return new SykdomVurderingOversikt(
                 elements,
                 sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+                sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
                 sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
                 sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
                 Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
