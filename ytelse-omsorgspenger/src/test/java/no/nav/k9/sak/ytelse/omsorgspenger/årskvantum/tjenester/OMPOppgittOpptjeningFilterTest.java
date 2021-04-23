@@ -5,15 +5,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -42,9 +45,10 @@ public class OMPOppgittOpptjeningFilterTest {
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder))
             .build();
+        var gyldigeDokumenter = Map.of(jpId1, byggDokument(innsendingstidspunkt, jpId1));
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder, gyldigeDokumenter);
 
         // Assert
         var forventet = iayGrunnlag.getOppgittOpptjeningAggregat().get().getOppgitteOpptjeninger().get(0);
@@ -72,9 +76,13 @@ public class OMPOppgittOpptjeningFilterTest {
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
             .build();
+        var gyldigeDokumenter = Map.of(
+            jpId1, byggDokument(innsendingstidspunkt1, jpId1),
+            jpId2, byggDokument(innsendingstidspunkt2, jpId2)
+        );
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder, gyldigeDokumenter);
 
         // Assert
         assertThat(resultat).isPresent();
@@ -106,9 +114,13 @@ public class OMPOppgittOpptjeningFilterTest {
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
             .build();
+        var gyldigeDokumenter = Map.of(
+            jpId1, byggDokument(innsendingstidspunkt1, jpId1),
+            jpId2, byggDokument(innsendingstidspunkt2, jpId2)
+        );
 
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, oppgittFraværPerioder);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, oppgittFraværPerioder, gyldigeDokumenter);
 
         // Assert
         assertThat(resultat).isPresent();
@@ -120,6 +132,16 @@ public class OMPOppgittOpptjeningFilterTest {
             .medJournalpostId(journalpostId)
             .medInnsendingstidspunkt(innsendingstidspunkt);
         return oppgittOpptjeningBuilder;
+    }
+
+    private MottattDokument byggDokument(LocalDateTime innsendingstidspunkt, JournalpostId jp) {
+        return new MottattDokument.Builder()
+            .medJournalPostId(jp)
+            .medType(Brevkode.INNTEKTKOMP_FRILANS)
+            .medInnsendingstidspunkt(innsendingstidspunkt)
+            .medFagsakId(1L)
+            .medBehandlingId(1L)
+            .build();
     }
 
 }

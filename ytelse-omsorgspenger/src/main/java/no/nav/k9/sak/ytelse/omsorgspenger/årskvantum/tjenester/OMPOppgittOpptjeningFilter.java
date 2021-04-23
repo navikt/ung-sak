@@ -75,25 +75,19 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
-        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref);
+        var gyldigeJournalposter = hentGyldigeDokumenter(ref);
+        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref, gyldigeJournalposter);
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
 
-        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
+        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad, gyldigeJournalposter);
     }
 
-    private Set<OppgittFraværPeriode> hentFraværPerioderFraSøknad(BehandlingReferanse ref) {
-        var gyldigeJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(ref.getFagsakId())
-            .stream()
-            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
-            .filter(it -> it.getBehandlingId() != null)
-            .map(MottattDokument::getJournalpostId)
-            .collect(Collectors.toSet());
-
+    private Set<OppgittFraværPeriode> hentFraværPerioderFraSøknad(BehandlingReferanse ref, Map<JournalpostId, MottattDokument> gyldigeJournalposter) {
         return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId())
             .map(OppgittFravær::getPerioder)
             .orElse(Set.of())
             .stream()
-            .filter(fraværPeriode -> gyldigeJournalposter.contains(fraværPeriode.getJournalpostId()))
+            .filter(fraværPeriode -> gyldigeJournalposter.containsKey(fraværPeriode.getJournalpostId()))
             .collect(Collectors.toSet());
     }
 
@@ -107,20 +101,42 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref);
 
-        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad);
+        var gyldigeJournalposter = hentGyldigeDokumenter(ref);
+        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref, hentGyldigeDokumenter(ref));
+
+        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad, gyldigeJournalposter);
     }
 
-    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad) {
+    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad, Map<JournalpostId, MottattDokument> gyldigeJournalposter) {
         Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje = beregnJournalpostAktivTidslinje(fraværPerioderFraSøknad);
-        List<OppgittOpptjening> oppgittOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat().map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger).orElse(List.of());
+        List<WrappedOppgittOpptjening> oppgittOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat()
+            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+            .orElse(List.of())
+            .stream()
+            .filter(fraværPeriode -> gyldigeJournalposter.containsKey(fraværPeriode.getJournalpostId()))
+            .map(oppgittOpptjening -> {
+                var mottattDokument = gyldigeJournalposter.get(oppgittOpptjening.getJournalpostId());
+                return new WrappedOppgittOpptjening(mottattDokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), oppgittOpptjening);
+            })
+            .collect(Collectors.toList());
 
         return oppgittOpptjeninger.stream()
-            .sorted(Comparator.comparing(OppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
+            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
             .filter(oppgittOpptjening -> overlapperVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
+            .map(WrappedOppgittOpptjening::getRaw)
             .findFirst();
     }
+
+    private Map<JournalpostId, MottattDokument> hentGyldigeDokumenter(BehandlingReferanse ref) {
+        var gyldigeJournalposter = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(ref.getFagsakId())
+            .stream()
+            .filter(it -> DokumentStatus.GYLDIG.equals(it.getStatus()))
+            .filter(it -> it.getBehandlingId() != null)
+            .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
+        return gyldigeJournalposter;
+    }
+
 
     private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
         var skalIgnorereAvslåttePerioder = false;
@@ -140,7 +156,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return jornalpostTidslinjer;
     }
 
-    private boolean overlapperVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
+    private boolean overlapperVilkårsperiode(WrappedOppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
         Objects.requireNonNull(opptjening.getJournalpostId());
         var fraværTidslinje = fraværTidslinjePerJp.getOrDefault(opptjening.getJournalpostId(), new LocalDateTimeline<>(List.of()));
         var overlappendeFraværsperioder = finnOverlappendePerioder(vilkårsperiode, fraværTidslinje);
