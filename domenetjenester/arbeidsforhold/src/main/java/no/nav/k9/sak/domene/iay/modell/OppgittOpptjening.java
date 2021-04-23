@@ -160,6 +160,7 @@ public class OppgittOpptjening {
         this.journalpostId = journalpostId;
     }
 
+    // Obs: Ønsker du å bruke denne, eller tidspunkt på {@link MottattDokument#getInnsendingstidspunkt}?
     public LocalDateTime getInnsendingstidspunkt() {
         return innsendingstidspunkt;
     }

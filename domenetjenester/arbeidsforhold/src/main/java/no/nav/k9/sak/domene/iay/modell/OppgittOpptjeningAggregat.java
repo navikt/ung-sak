@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.iay.modell;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,9 +34,7 @@ public class OppgittOpptjeningAggregat {
     }
 
     public List<OppgittOpptjening> getOppgitteOpptjeninger() {
-        return oppgitteOpptjeninger.stream()
-            .sorted(Comparator.comparing(OppgittOpptjening::getInnsendingstidspunkt))
-            .collect(Collectors.toUnmodifiableList());
+        return oppgitteOpptjeninger;
     }
 
     public void leggTil(OppgittOpptjening oppgittOpptjening) {
