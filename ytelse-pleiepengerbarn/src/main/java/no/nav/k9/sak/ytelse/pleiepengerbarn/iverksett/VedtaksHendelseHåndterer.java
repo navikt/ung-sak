@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -32,8 +33,9 @@ public class VedtaksHendelseHåndterer {
     }
 
     @Inject
-    public VedtaksHendelseHåndterer(ProsessTaskRepository taskRepository) {
+    public VedtaksHendelseHåndterer(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
         this.taskRepository = taskRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     void handleMessage(String key, String payload) {
@@ -47,9 +49,11 @@ public class VedtaksHendelseHåndterer {
             throw new IllegalStateException();  //FIXME: exceptiontype for parsing?
         }
 
-        Behandling behandling = behandlingRepository.hentBehandling(vh.getBehandlingId());
-        taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        if (vh.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+            Behandling behandling = behandlingRepository.hentBehandling(vh.getBehandlingId());
+            taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
-        taskRepository.lagre(taskData);
+            taskRepository.lagre(taskData);
+        }
     }
 }

@@ -36,30 +36,27 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 @ProsessTask(VurderRevurderingAndreSøknaderTask.TASKNAME)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
-    private BehandlingRepository behandlingRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomVurderingService sykdomVurderingService;
-    private FagsakTjeneste fagsakTjeneste;
-    private Behandlingsoppretter behandlingsoppretter;
-    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
-    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private final BehandlingRepository behandlingRepository;
+    private final SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private final SykdomVurderingRepository sykdomVurderingRepository;
+    private final SykdomVurderingService sykdomVurderingService;
+    private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
 
 
     public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
 
     @Inject
-    public VurderRevurderingAndreSøknaderTask(BehandlingRepository behandlingRepository, SykdomGrunnlagRepository sykdomGrunnlagRepository, SykdomVurderingRepository sykdomVurderingRepository, SykdomVurderingService sykdomVurderingService, FagsakTjeneste fagsakTjeneste, Behandlingsoppretter behandlingsoppretter, BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste, ProsessTaskRepository prosessTaskRepository, FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+    public VurderRevurderingAndreSøknaderTask(
+            BehandlingRepository behandlingRepository,
+            SykdomGrunnlagRepository sykdomGrunnlagRepository,
+            SykdomVurderingRepository sykdomVurderingRepository,
+            SykdomVurderingService sykdomVurderingService,
+            FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomVurderingService = sykdomVurderingService;
-        this.fagsakTjeneste = fagsakTjeneste;
-        this.behandlingsoppretter = behandlingsoppretter;
-        this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
-        this.prosessTaskRepository = prosessTaskRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
