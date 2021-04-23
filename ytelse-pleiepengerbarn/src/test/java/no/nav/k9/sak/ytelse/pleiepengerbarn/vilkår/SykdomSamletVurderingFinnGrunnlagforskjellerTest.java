@@ -66,7 +66,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         assertThat(interval.getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
         assertThat(interval.getTomDato()).isEqualTo(LocalDate.of(2021, 1, 15));
     }
-    
+
     @Test
     public void gammeltGrunnlagHarFlereVurderingerForSammePeriode() {
         List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(
@@ -286,7 +286,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
     private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, Periode... perioder) {
         return vurderingVersjonMock(type, resultat, 0L, perioder);
     }
-    
+
     private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, long rangering, Periode... perioder) {
         var vurdering = new SykdomVurdering(type, Collections.emptyList(), "", LocalDateTime.now());
         vurdering.setRangering(rangering);

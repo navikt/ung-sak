@@ -54,13 +54,13 @@ public class SykdomSamletVurdering {
             samletVurdering.setKtp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
-        
+
         SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setToOp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
-        
+
         if (grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
                 SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
