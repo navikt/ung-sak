@@ -32,6 +32,7 @@ import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Stillingsprosent;
@@ -49,8 +50,8 @@ public class MapOppgittFraværOgVilkårsResultat {
 
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje = opprettFraværsTidslinje(fagsakPeriode, fraværsPerioder);
         Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> arbeidsforholdOgPermitertTidslinje = opprettPermitertTidslinje(filter);
-        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> egenNæringTidslinje = opprettEgenNæringTidslinje(opptjeningAktivitetPerioder);
-        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> oppgittFrilansTidslinje = opprettOppgittFrilansTidslinje(opptjeningAktivitetPerioder);
+        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> egenNæringTidslinje = opprettEgenNæringTidslinje(opptjeningAktivitetPerioder, ref.getAktørId());
+        Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> oppgittFrilansTidslinje = opprettOppgittFrilansTidslinje(opptjeningAktivitetPerioder, ref.getAktørId());
 
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, arbeidsforholdOgPermitertTidslinje);
         fraværsTidslinje = kombinerFraværOgArbeidsforholdsTidslinjer(fraværsTidslinje, egenNæringTidslinje);
@@ -106,10 +107,10 @@ public class MapOppgittFraværOgVilkårsResultat {
         return result;
     }
 
-    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettEgenNæringTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder) {
+    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettEgenNæringTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder, AktørId aktørId) {
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         opptjeningAktivitetPerioder.forEach((di, opptjeningPerioder) -> {
-            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, opptjeningPerioder);
+            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, opptjeningPerioder, aktørId);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
                 LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder);
@@ -119,18 +120,18 @@ public class MapOppgittFraværOgVilkårsResultat {
         return result;
     }
 
-    private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, UttakArbeidType uttakArbeidType, List<OpptjeningAktivitetPeriode> opptjeningPerioder) {
+    private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, UttakArbeidType uttakArbeidType, List<OpptjeningAktivitetPeriode> opptjeningPerioder, AktørId aktørId) {
         var perioderPerAktivitet = opptjeningPerioder.stream()
             .filter(akt -> akt.getOpptjeningAktivitetType().equals(opptjeningAktivitetType))
             .filter(akt -> List.of(VurderingsStatus.GODKJENT, VurderingsStatus.FERDIG_VURDERT_GODKJENT).contains(akt.getVurderingsStatus()))
-            .collect(Collectors.groupingBy(aktivitetPeriode -> tilAktivitet(aktivitetPeriode, uttakArbeidType)));
+            .collect(Collectors.groupingBy(aktivitetPeriode -> tilAktivitet(aktivitetPeriode, uttakArbeidType, aktørId)));
         return perioderPerAktivitet;
     }
 
-    private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType) {
+    private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType, AktørId aktørId) {
         var arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
             ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
-            : null;
+            : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
         return new Aktivitet(uttakArbeidType, arbeidsgiver, InternArbeidsforholdRef.nullRef());
     }
 
@@ -147,10 +148,10 @@ public class MapOppgittFraværOgVilkårsResultat {
         return aktivAktivitetTidslinje;
     }
 
-    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettOppgittFrilansTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder) {
+    private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> opprettOppgittFrilansTidslinje(NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder, AktørId aktørId) {
         var result = new HashMap<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>>();
         opptjeningAktivitetPerioder.forEach((di, opptjeningPerioder) -> {
-            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, UttakArbeidType.FRILANSER, opptjeningPerioder);
+            Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, UttakArbeidType.FRILANSER, opptjeningPerioder, null);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
                 LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder);
