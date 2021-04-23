@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 @ApplicationScoped
 @ProsessTask(OpprettRevurderingEllerOpprettDiffTask.TASKNAME)
 // gruppeSekvens = false for å kunne hoppe tilbake ved feilende fortsettBehandling task
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     public static final String TASKNAME = "behandlingskontroll.opprettRevurderingEllerDiff";

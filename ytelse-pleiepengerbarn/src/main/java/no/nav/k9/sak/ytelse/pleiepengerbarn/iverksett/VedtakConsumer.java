@@ -34,7 +34,7 @@ public class VedtakConsumer implements AppServiceHandler {
     }
 
     @Inject
-    public VedtakConsumer(VedtaksHendelseHåndterer vedtaksHendelseHåndterer, TriggeRevurderingEtterVedtakStreamKafkaProperties streamKafkaProperties) {
+    public VedtakConsumer(PSBVedtaksHendelseHåndterer psbVedtaksHendelseHåndterer, TriggeRevurderingEtterVedtakStreamKafkaProperties streamKafkaProperties) {
         this.topic = streamKafkaProperties.getTopic();
 
         Properties props = setupProperties(streamKafkaProperties);
@@ -43,7 +43,7 @@ public class VedtakConsumer implements AppServiceHandler {
 
         Consumed<String, String> stringStringConsumed = Consumed.with(Topology.AutoOffsetReset.EARLIEST);
         builder.stream(this.topic, stringStringConsumed)
-            .foreach(vedtaksHendelseHåndterer::handleMessage);
+            .foreach(psbVedtaksHendelseHåndterer::handleMessage);
 
         final Topology topology = builder.build();
         stream = new KafkaStreams(topology, props);
@@ -110,10 +110,9 @@ public class VedtakConsumer implements AppServiceHandler {
         return stream.state();
     }
 
-//    @Override TODO: Nødvendig?
-//    public boolean isAlive() {
-//        return stream != null && stream.state().isRunningOrRebalancing();
-//    }
+    public boolean isAlive() {
+        return stream != null && stream.state().isRunningOrRebalancing();
+    }
 
     public String getTopic() {
         return topic;

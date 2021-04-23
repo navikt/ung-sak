@@ -16,24 +16,24 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 
 
 @ApplicationScoped
 @ActivateRequestContext
 @Transactional
-public class VedtaksHendelseHåndterer {
+public class PSBVedtaksHendelseHåndterer {
 
-    private static final Logger log = LoggerFactory.getLogger(VedtaksHendelseHåndterer.class);
-    private static final ObjectMapper OM = new ObjectMapper();
+    private static final Logger log = LoggerFactory.getLogger(PSBVedtaksHendelseHåndterer.class);
     private ProsessTaskRepository taskRepository;
     private BehandlingRepository behandlingRepository;
 
-    public VedtaksHendelseHåndterer() {
+    public PSBVedtaksHendelseHåndterer() {
     }
 
     @Inject
-    public VedtaksHendelseHåndterer(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
+    public PSBVedtaksHendelseHåndterer(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
         this.taskRepository = taskRepository;
         this.behandlingRepository = behandlingRepository;
     }
@@ -42,12 +42,7 @@ public class VedtaksHendelseHåndterer {
         log.debug("Mottatt ytelse-vedtatt hendelse med key='{}', payload={}", key, payload);
         ProsessTaskData taskData = new ProsessTaskData(VurderRevurderingAndreSøknaderTask.TASKNAME);
 
-        VedtakHendelse vh;
-        try {
-            vh = OM.readValue(payload, VedtakHendelse.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException();  //FIXME: exceptiontype for parsing?
-        }
+        VedtakHendelse vh = JsonObjectMapper.fromJson(payload, VedtakHendelse.class);
 
         if (vh.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
             Behandling behandling = behandlingRepository.hentBehandling(vh.getBehandlingId());

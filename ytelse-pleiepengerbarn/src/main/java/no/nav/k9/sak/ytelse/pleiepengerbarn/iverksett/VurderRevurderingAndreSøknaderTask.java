@@ -1,30 +1,19 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
-import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
-import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-
-import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
@@ -34,17 +23,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @ApplicationScoped
 @ProsessTask(VurderRevurderingAndreSøknaderTask.TASKNAME)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
-    private final BehandlingRepository behandlingRepository;
-    private final SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private final SykdomVurderingRepository sykdomVurderingRepository;
-    private final SykdomVurderingService sykdomVurderingService;
-    private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
-
-
+    private BehandlingRepository behandlingRepository;
+    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private SykdomVurderingRepository sykdomVurderingRepository;
+    private SykdomVurderingService sykdomVurderingService;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
+
+    VurderRevurderingAndreSøknaderTask() {
+    }
 
     @Inject
     public VurderRevurderingAndreSøknaderTask(

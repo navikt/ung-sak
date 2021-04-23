@@ -20,8 +20,8 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
 
     @SuppressWarnings("resource")
     @Inject
-    TriggeRevurderingEtterVedtakStreamKafkaProperties(@KonfigVerdi("kafka.bootstrap.servers") String bootstrapServers,
-                                                      @KonfigVerdi("kafka.schema.registry.url") String schemaRegistryUrl,
+    TriggeRevurderingEtterVedtakStreamKafkaProperties(@KonfigVerdi("bootstrap.servers") String bootstrapServers,
+                                                      @KonfigVerdi("schema.registry.url") String schemaRegistryUrl,
                                                       @KonfigVerdi("kafka.vedtakhendelse.topic") String topicName,
                                                       @KonfigVerdi("systembruker.username") String username,
                                                       @KonfigVerdi("systembruker.password") String password,
