@@ -6,11 +6,13 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -20,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -31,8 +33,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeB
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -57,7 +62,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         BehandlingReferanse behandlingReferanse = opprettRef(AktørId.dummy());
         var perioder1 = mapTilWrappedPeriode(oppgittFravær);
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, perioder1);
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, boundry, perioder1);
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -93,7 +98,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, null),
             new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.ARBEIDSTAKER, null));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -120,7 +125,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
             new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000001"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(2);
         var fraværPerioder = perioder.get(new Aktivitet(UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef()));
@@ -147,7 +152,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(20), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT),
             new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.UDEFINERT));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(2);
         var fraværPerioder = perioder.get(new Aktivitet(UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet("000000000"), InternArbeidsforholdRef.nullRef()));
@@ -174,7 +179,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var oppgittFravær = new OppgittFravær(new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, null),
             new OppgittFraværPeriode(LocalDate.now().minusDays(30), LocalDate.now().minusDays(10), UttakArbeidType.ARBEIDSTAKER, null));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(AktørId.dummy()), new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -209,7 +214,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         iayGrunnlag.medData(iayBuilder);
 
         var build = iayGrunnlag.build();
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -252,7 +257,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         iayGrunnlag.medData(iayBuilder);
 
         var build = iayGrunnlag.build();
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -295,7 +300,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         iayGrunnlag.medData(iayBuilder);
 
         var build = iayGrunnlag.build();
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -344,7 +349,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         iayGrunnlag.medData(iayBuilder);
 
         var build = iayGrunnlag.build();
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -381,7 +386,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         iayGrunnlag.medData(iayBuilder);
 
         var build = iayGrunnlag.build();
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), build, Collections.emptyNavigableMap(), vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -400,22 +405,22 @@ public class MapOppgittFraværOgVilkårsResultatTest {
         var dummy = AktørId.dummy();
 
         var vilkårene = vilkårResultatBuilder.build();
+        var iayGrunnlagTomt = InntektArbeidYtelseGrunnlagBuilder.nytt().build();
 
         var arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
         var oppgittFravær = new OppgittFravær(
             new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
-        var åpenPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), Tid.TIDENES_ENDE);
-        var egenNæringBuilder = OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
-            .medVirksomhet(arbeidsgiver.getOrgnr())
-            .medPeriode(åpenPeriode);
-        var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
-            .leggTilEgneNæringer(List.of(egenNæringBuilder));
-        var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
-            .medOppgittOpptjening(oppgittOpptjeningBuilder)
+        var aktivitetPeriodeSN = OpptjeningAktivitetPeriode.Builder.ny()
+            .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), arbeidsgiver.getArbeidsgiverOrgnr(), null))
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
+            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medOpptjeningAktivitetType(OpptjeningAktivitetType.NÆRING)
             .build();
+        var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
+        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMed(AbstractLocalDateInterval.TIDENES_ENDE), List.of(aktivitetPeriodeSN));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlag, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlagTomt, opptjeningAktivitetPerioder, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -438,15 +443,17 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         var oppgittFravær = new OppgittFravær(
             new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now(), UttakArbeidType.FRILANSER, null, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
-
-        var frilans = OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny();
-        var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
-            .leggTilFrilansOpplysninger(frilans.build());
-        var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
-            .medOppgittOpptjening(oppgittOpptjeningBuilder)
+        var iayGrunnlagTomt = InntektArbeidYtelseGrunnlagBuilder.nytt().build();
+        var aktivitetPeriodeFL = OpptjeningAktivitetPeriode.Builder.ny()
+            .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), null, dummy.getAktørId()))
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
+            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medOpptjeningAktivitetType(OpptjeningAktivitetType.FRILANS)
             .build();
+        var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
+        opptjeningAktivitetPerioder.put(DatoIntervallEntitet.fraOgMed(AbstractLocalDateInterval.TIDENES_ENDE), List.of(aktivitetPeriodeFL));
 
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlag, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(opprettRef(dummy), iayGrunnlagTomt, opptjeningAktivitetPerioder, vilkårene, boundry, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -472,7 +479,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         BehandlingReferanse behandlingReferanse = opprettRef(AktørId.dummy());
         var fagsakInterval = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().plusMonths(3), LocalDate.now().plusMonths(9));
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, fagsakInterval, mapTilWrappedPeriode(oppgittFravær));
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, fagsakInterval, mapTilWrappedPeriode(oppgittFravær));
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {
@@ -508,7 +515,7 @@ public class MapOppgittFraværOgVilkårsResultatTest {
 
         BehandlingReferanse behandlingReferanse = opprettRef(AktørId.dummy());
         var fagsakInterval = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3), LocalDate.now().plusMonths(9));
-        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), vilkårene, fagsakInterval, søktePerioder);
+        var perioder = new MapOppgittFraværOgVilkårsResultat().utledPerioderMedUtfall(behandlingReferanse, new InntektArbeidYtelseGrunnlag(UUID.randomUUID(), LocalDateTime.now()), Collections.emptyNavigableMap(), vilkårene, fagsakInterval, søktePerioder);
 
         assertThat(perioder).hasSize(1);
         for (Map.Entry<Aktivitet, List<WrappedOppgittFraværPeriode>> entries : perioder.entrySet()) {

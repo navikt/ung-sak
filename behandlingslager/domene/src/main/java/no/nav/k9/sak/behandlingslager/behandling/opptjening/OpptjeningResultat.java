@@ -28,7 +28,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @Table(name = "RS_OPPTJENING")
 @DynamicInsert
 @DynamicUpdate
-public class OpptjeningResultat extends BaseEntitet {
+public class  OpptjeningResultat extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_RS_OPPTJENING")

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
@@ -47,6 +48,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
@@ -57,48 +60,43 @@ import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class OpptjeningsperioderTjenesteImplTest {
+class OpptjeningsperioderTjenesteImplTest {
 
     private static final String ORG_NUMMER = "974760673";
+    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
+    private AktørId AKTØRID = AktørId.dummy();
+    private LocalDate skjæringstidspunkt = LocalDate.now();
 
     @Inject
     private EntityManager entityManager;
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private LocalDate skjæringstidspunkt;
+    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
     private IAYRepositoryProvider repositoryProvider;
     private BehandlingRepository behandlingRepository;
-    private VirksomhetTjeneste virksomhetTjeneste;
+    private VirksomhetTjeneste virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
     private FagsakRepository fagsakRepository;
     private OpptjeningRepository opptjeningRepository;
     private AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederForVurderOpptjening;
     private VilkårResultatRepository vilkårResultatRepository;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
     private AksjonspunktutlederForVurderBekreftetOpptjening apbOpptjening;
     private OpptjeningsperioderTjeneste forSaksbehandlingTjeneste;
-    private InternArbeidsforholdRef ARBEIDSFORHOLD_ID;
-    private AktørId AKTØRID;
 
     @BeforeEach
-    public void setUp() throws Exception {
-
-        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        skjæringstidspunkt = LocalDate.now();
+    public void setUp() {
         repositoryProvider = new IAYRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        virksomhetTjeneste = Mockito.mock(VirksomhetTjeneste.class);
         fagsakRepository = new FagsakRepository(entityManager);
         opptjeningRepository = repositoryProvider.getOpptjeningRepository();
-        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste);
+        aksjonspunktutlederForVurderOpptjening = new AksjonspunktutlederForVurderOppgittOpptjening(opptjeningRepository, iayTjeneste, virksomhetTjeneste, oppgittOpptjeningFilterProvider);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening( repositoryProvider.getOpptjeningRepository(), iayTjeneste);
-        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening);
-        ARBEIDSFORHOLD_ID = InternArbeidsforholdRef.nyRef();
-        AKTØRID = AktørId.dummy();
-
+        apbOpptjening = new AksjonspunktutlederForVurderBekreftetOpptjening(repositoryProvider.getOpptjeningRepository(), iayTjeneste, oppgittOpptjeningFilterProvider);
+        forSaksbehandlingTjeneste = new OpptjeningsperioderTjeneste(iayTjeneste, repositoryProvider.getOpptjeningRepository(), aksjonspunktutlederForVurderOpptjening, apbOpptjening, oppgittOpptjeningFilterProvider);
+        when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(Mockito.anyLong())).thenReturn(new OppgittOpptjeningFilter() {
+        });
 
         Virksomhet virksomhet = new Virksomhet.Builder().medOrgnr(ORG_NUMMER)
             .medOppstart(LocalDate.now())
@@ -109,7 +107,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode() {
+    void skal_sammenstille_grunnlag_og_overstyrt_deretter_utlede_opptjening_aktivitet_periode() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
 
@@ -153,7 +151,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_sammenstille_grunnlag_og_utlede_opptjening_aktivitet_periode() {
+    void skal_sammenstille_grunnlag_og_utlede_opptjening_aktivitet_periode() {
         // Arrange
         Behandling behandling = opprettBehandling(skjæringstidspunkt);
 
@@ -191,7 +189,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_utlede_om_en_periode_er_blitt_endret() {
+    void skal_utlede_om_en_periode_er_blitt_endret() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
 
@@ -219,7 +217,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_returnere_oat_frilans_ved_bekreftet_frilans() {
+    void skal_returnere_oat_frilans_ved_bekreftet_frilans() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
         var arbeidsgiver = Arbeidsgiver.virksomhet(ORG_NUMMER);
@@ -261,7 +259,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_sette_manuelt_behandlet_ved_underkjent_frilans() {
+    void skal_sette_manuelt_behandlet_ved_underkjent_frilans() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
 
@@ -309,9 +307,8 @@ public class OpptjeningsperioderTjenesteImplTest {
         assertThat(frilansPeriode.erManueltBehandlet()).isTrue();
     }
 
-
     @Test
-    public void skal_returnere_oat_frilans_ved_bekreftet_frilans_for_vilkår() {
+    void skal_returnere_oat_frilans_ved_bekreftet_frilans_for_vilkår() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
 
@@ -354,7 +351,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_returnere_en_periode_med_fiktivt_bekreftet_arbeidsforhold() {
+    void skal_returnere_en_periode_med_fiktivt_bekreftet_arbeidsforhold() {
         // Arrange
         var behandling = opprettBehandling(skjæringstidspunkt);
         var opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
@@ -377,7 +374,7 @@ public class OpptjeningsperioderTjenesteImplTest {
     }
 
     @Test
-    public void skal_kunne_bygge_opptjeninsperiode_basert_på_arbeidsforhold_lagt_til_avsaksbehandler() {
+    void skal_kunne_bygge_opptjeninsperiode_basert_på_arbeidsforhold_lagt_til_avsaksbehandler() {
         var behandling = opprettBehandling(skjæringstidspunkt);
         var opptjening = opptjeningRepository.lagreOpptjeningsperiode(behandling, LocalDate.now().minusMonths(10), LocalDate.now().minusDays(1), false);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);

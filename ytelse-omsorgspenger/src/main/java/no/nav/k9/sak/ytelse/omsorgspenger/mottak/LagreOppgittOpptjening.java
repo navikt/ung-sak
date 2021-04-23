@@ -1,8 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -10,13 +9,13 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.søknad.felles.opptjening.Organisasjonsnummer;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -25,21 +24,19 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 public class LagreOppgittOpptjening {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private BehandlingRepository behandlingRepository;
+    private Boolean lansert;
 
     @Inject
-    LagreOppgittOpptjening(BehandlingRepository behandlingRepository,
-                           InntektArbeidYtelseTjeneste iayTjeneste) {
-        this.behandlingRepository = behandlingRepository;
+    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste,
+                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.iayTjeneste = iayTjeneste;
+        this.lansert = lansert;
     }
 
 
-    public void lagreOpptjening(Behandling behandling, ZonedDateTime tidspunkt, OmsorgspengerUtbetaling søknad) {
-
+    public void lagreOpptjening(Behandling behandling, OmsorgspengerUtbetaling søknad, MottattDokument dokument) {
         Long behandlingId = behandling.getId();
-        var builder = initOpptjeningBuilder(behandling, tidspunkt);
-
+        var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
@@ -54,21 +51,18 @@ public class LagreOppgittOpptjening {
         if (søknad.getAktivitet().getArbeidstaker() != null) {
             // TODO: Lagring av utenlands arbeidsforhold
         }
+        builder.leggTilJournalpostId(dokument.getJournalpostId());
+        builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
         if (builder.build().harOpptjening()) {
-            iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
+            if (!lansert) {
+                iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
+            } else {
+                iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
+            }
         }
     }
 
-
-    private OppgittOpptjeningBuilder initOpptjeningBuilder(Behandling behandling, ZonedDateTime tidspunkt) {
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandling.getId());
-        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getOppgittOpptjening().isPresent()) {
-            // TODO: Støtte flere søknader på med oppgitt opptjening på samme behandling
-            throw new UnsupportedOperationException("Omsorgspenger støtter ikke flere søknader på samme behandling");
-        }
-        return OppgittOpptjeningBuilder.ny(UUID.randomUUID(), tidspunkt.toLocalDateTime());
-    }
 
     private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
         if (sn.getPerioder().size() != 1) {

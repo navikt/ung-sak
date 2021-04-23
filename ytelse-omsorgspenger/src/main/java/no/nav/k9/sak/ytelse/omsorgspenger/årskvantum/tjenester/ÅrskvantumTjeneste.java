@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
@@ -17,10 +18,25 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 
-import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
+import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
+import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnType;
+import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
+import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.Utfall;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -36,6 +52,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
+import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
@@ -67,6 +85,7 @@ public class ÅrskvantumTjeneste {
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -80,7 +99,8 @@ public class ÅrskvantumTjeneste {
                               ÅrskvantumRestKlient årskvantumRestKlient,
                               TpsTjeneste tpsTjeneste,
                               @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                              TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
+                              TrekkUtFraværTjeneste trekkUtFraværTjeneste,
+                              OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -89,6 +109,7 @@ public class ÅrskvantumTjeneste {
         this.tpsTjeneste = tpsTjeneste;
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.opptjeningTjeneste = opptjeningTjeneste;
     }
 
     public void deaktiverUttakForBehandling(UUID behandlingUuid) {
@@ -125,7 +146,8 @@ public class ÅrskvantumTjeneste {
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var sakInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-        var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, relevantePerioder, behandling);
+        var opptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(ref, vilkårsperioder);
+        var fraværPerioder = mapUttaksPerioder(ref, vilkårene, inntektArbeidYtelseGrunnlag, sakInntektsmeldinger, opptjeningAktiveter, relevantePerioder, behandling);
 
         if (fraværPerioder.isEmpty()) {
             // kan ikke være empty når vi sender årskvantum
@@ -213,11 +235,11 @@ public class ÅrskvantumTjeneste {
                                                   Vilkårene vilkårene,
                                                   InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                   Set<Inntektsmelding> sakInntektsmeldinger,
-                                                  Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
+                                                  NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktiveter, Set<no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode> perioder,
                                                   Behandling behandling) {
         var fraværPerioder = new ArrayList<FraværPeriode>();
         var fagsakPeriode = behandling.getFagsak().getPeriode();
-        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, vilkårene, fagsakPeriode, perioder)
+        var fraværsPerioderMedUtfallOgPerArbeidsgiver = mapOppgittFraværOgVilkårsResultat.utledPerioderMedUtfall(ref, iayGrunnlag, opptjeningAktiveter, vilkårene, fagsakPeriode, perioder)
             .values()
             .stream()
             .flatMap(Collection::stream)

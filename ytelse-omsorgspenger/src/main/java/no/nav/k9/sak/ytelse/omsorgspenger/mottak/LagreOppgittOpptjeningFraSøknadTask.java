@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -81,7 +80,8 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
         }
 
         Søknad sisteMottatteSøknad = søknadParser.parseSøknad(sistMottatteDokument);
-        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, ZonedDateTime.now(), sisteMottatteSøknad.getYtelse());
+
+        lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, sisteMottatteSøknad.getYtelse(), sistMottatteDokument);
     }
 
 }

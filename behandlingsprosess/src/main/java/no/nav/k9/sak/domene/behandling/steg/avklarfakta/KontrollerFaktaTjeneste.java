@@ -87,7 +87,7 @@ public class KontrollerFaktaTjeneste implements KontrollerFaktaAksjonspunktUtled
             .distinct() // Unngå samme aksjonspunkt flere multipliser
             .collect(toList());
     }
-    
+
     private KontrollerFaktaUtledere findUtlederTjeneste(BehandlingReferanse ref) {
         return BehandlingTypeRef.Lookup.find(KontrollerFaktaUtledere.class, utlederTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType())
             .orElseThrow(() -> new UnsupportedOperationException("KontrollerFaktaUtledere ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));

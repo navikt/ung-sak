@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.abakus;
 
+import static no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste.OpptjeningType;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -250,12 +252,17 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     @Override
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, false);
+        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.NORMAL);
+    }
+
+    @Override
+    public void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
+        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.NORMAL_AGGREGAT);
     }
 
     @Override
     public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, true);
+        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.OVERSTYRT);
     }
 
     // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task

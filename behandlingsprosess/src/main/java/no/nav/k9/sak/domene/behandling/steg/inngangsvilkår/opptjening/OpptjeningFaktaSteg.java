@@ -82,13 +82,19 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktResultat> resultatOppgitt = aksjonspunktutlederOppgitt.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
-        if (!resultatOppgitt.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatOppgitt);
-        }
+        for (DatoIntervallEntitet vilkårsperiode : perioderTilVurdering) {
+            var stp = vilkårsperiode.getFomDato();
+            List<AksjonspunktResultat> resultatOppgitt = aksjonspunktutlederOppgitt.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
+            if (!resultatOppgitt.isEmpty()) {
+                return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatOppgitt);
+            }
 
-        List<AksjonspunktResultat> resultatRegister = aksjonspunktutlederBekreftet.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatRegister);
+            List<AksjonspunktResultat> resultatRegister = aksjonspunktutlederBekreftet.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
+            if (!resultatRegister.isEmpty()) {
+                return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatOppgitt);
+            }
+        }
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private List<DatoIntervallEntitet> perioderTilVurdering(Long behandlingId) {
