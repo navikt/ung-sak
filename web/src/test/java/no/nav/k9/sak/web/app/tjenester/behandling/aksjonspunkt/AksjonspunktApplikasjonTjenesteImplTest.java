@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -16,12 +17,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -30,12 +31,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.kontrakt.søknad.AvklarSaksopplysningerDto;
+import no.nav.k9.sak.kontrakt.medlem.AvklarFortsattMedlemskapDto;
+import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -66,9 +67,9 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_aksjonspunkt_til_utført_og_lagre_behandling() {
         // Arrange
-        var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
+        var behandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
 
-        var dto = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", PersonstatusType.BOSA, true);
+        var dto = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), behandling.getId());
@@ -100,10 +101,10 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_totrinn_når_revurdering_ap_medfører_endring_i_grunnlag() {
         // Arrange
-        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
+        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
         aksjonspunktRepository.setTilUtført(førstegangsbehandling.getAksjonspunkter().iterator().next(), BEGRUNNELSE);
-        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        AvklarSaksopplysningerDto dto = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.UTVA, true);
+        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var dto = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto), revurdering.getId());
@@ -117,12 +118,12 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_totrinn_når_revurdering_ap_har_endring_i_begrunnelse() {
         // Arrange
-        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
+        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
-        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE + "2", PersonstatusType.BOSA, true);
+        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());
@@ -136,12 +137,12 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
     @Test
     public void skal_sette_totrinn_når_revurdering_ap_verken_har_endring_i_grunnlag_eller_begrunnelse_men_et_bekreftet_ap_i_førstegangsbehandling() {
         // Arrange
-        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto1 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
+        Behandling førstegangsbehandling = opprettFørstegangsbehandlingMedAksjonspunkt(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var dto1 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto1), førstegangsbehandling.getId());
 
-        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.AVKLAR_FAKTA_FOR_PERSONSTATUS);
-        var dto2 = new AvklarSaksopplysningerDto(BEGRUNNELSE, PersonstatusType.BOSA, true);
+        Behandling revurdering = opprettRevurderingsbehandlingMedAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        var dto2 = new AvklarOpptjeningsvilkårDto(List.of(), BEGRUNNELSE);
 
         // Act
         aksjonspunktApplikasjonTjeneste.bekreftAksjonspunkter(singletonList(dto2), revurdering.getId());

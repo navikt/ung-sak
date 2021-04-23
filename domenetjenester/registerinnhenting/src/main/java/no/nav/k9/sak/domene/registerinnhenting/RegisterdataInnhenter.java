@@ -169,23 +169,27 @@ public class RegisterdataInnhenter {
     }
 
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
-        final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
+        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
-            final var aktørId = pleietrengende.get();
-            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            var aktørId = pleietrengende.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
             }
         }
     }
 
     private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
-        final var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
+        var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
         if (relatertPerson.isPresent()) {
-            final var aktørId = relatertPerson.get();
-            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            var aktørId = relatertPerson.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for relatert person aktørid");
             }
         }
     }

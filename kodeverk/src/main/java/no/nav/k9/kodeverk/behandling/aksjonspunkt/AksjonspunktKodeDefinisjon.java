@@ -19,7 +19,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
 
-    public static final String AVKLAR_FAKTA_FOR_PERSONSTATUS_KODE = "5022";
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
     public static final String AVKLAR_OM_ER_BOSATT_KODE = "5020";
