@@ -1,14 +1,25 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
-import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
-
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 
 @Entity(name = "SykdomGrunnlag")
 @Table(name = "SYKDOM_GRUNNLAG")
@@ -82,7 +93,7 @@ public class SykdomGrunnlag {
         return Collections.unmodifiableList(søktePerioder);
     }
 
-    public UUID getSykdomGrunnlagUUID() {
+    public UUID getReferanse() {
         return sykdomGrunnlagUUID;
     }
 
@@ -112,7 +123,7 @@ public class SykdomGrunnlag {
 
     public List<String> getSammenlignbarDiagnoseliste() {
         if (diagnosekoder != null) {
-            return getDiagnosekoder().getDiagnosekoder().stream().map(d -> d.getDiagnosekode()).sorted().collect(Collectors.toList());
+            return getDiagnosekoder().getDiagnosekoder().stream().map(SykdomDiagnosekode::getDiagnosekode).sorted().collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
@@ -140,5 +151,9 @@ public class SykdomGrunnlag {
 
     public List<SykdomRevurderingPeriode> getRevurderingPerioder() {
         return revurderingPerioder;
+    }
+
+    Long getId() {
+        return id;
     }
 }
