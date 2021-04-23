@@ -111,7 +111,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
         return arbeidIPeriode.stream()
-            .anyMatch(it -> harFravær(it.getPerioder()) && utledIdentifikator(it).equals(at.getArbeidsgiver()));
+            .anyMatch(it -> harFravær(it.getPerioder()) && utledIdentifikator(it).equals(at.getArbeidsgiver())) || arbeidIPeriode.stream()
+            .noneMatch(it -> utledIdentifikator(it).equals(at.getArbeidsgiver()));
     }
 
     private String utledIdentifikator(Arbeid it) {
