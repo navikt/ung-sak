@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -227,9 +228,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER_KODE, AksjonspunktType.AUTOPUNKT, "Venter på opptjeningsopplysninger",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
             SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, TILBAKE, "P2W", EnumSet.of(OMP, PSB)),
-    VENT_PÅ_SCANNING(AksjonspunktKodeDefinisjon.VENT_PÅ_SCANNING_KODE,
-            AksjonspunktType.AUTOPUNKT, "Venter på scanning", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_INNSYN, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN,
-            TILBAKE, "P3D", EnumSet.of(OMP, PSB)),
     VENT_PGA_FOR_TIDLIG_SØKNAD(AksjonspunktKodeDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT, "Satt på vent pga for tidlig søknad",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, EnumSet.of(OMP, PSB)),
     AUTO_VENT_KOMPLETT_OPPDATERING(AksjonspunktKodeDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på oppdatering som passerer kompletthetssjekk",
@@ -300,8 +298,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     static final String KODEVERK = "AKSJONSPUNKT_DEF";
 
-    /** Liste av utgåtte aksjonspunkt. Ikke gjenbruk. */
-    private static final Map<String, String> UTGÅTT = Map.of("5022", "AVKLAR_FAKTA_FOR_PERSONSTATUS");
+    /** Liste av utgåtte aksjonspunkt. Ikke gjenbruk samme kode. */
+    private static final Map<String, String> UTGÅTT = Map.of(
+        "5022", "AVKLAR_FAKTA_FOR_PERSONSTATUS",
+        "7007", "VENT_PÅ_SCANNING");
 
     private static final Map<String, AksjonspunktDefinisjon> KODER = new LinkedHashMap<>();
 
@@ -311,11 +311,20 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                 throw new IllegalArgumentException("Duplikat : " + v);
             }
         }
+        // valider ingen unmapped koder
+        var sjekkKodeBrukMap = new TreeMap<>(AksjonspunktKodeDefinisjon.KODER);
 
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat : " + v.kode + ", mulig utgått?");
             }
+            if (v.kode != null) {
+                sjekkKodeBrukMap.remove(v.kode);
+            }
+        }
+
+        if (!sjekkKodeBrukMap.isEmpty()) {
+            System.out.printf("Ubrukt sjekk: Har koder definert i %s som ikke er i bruk i %s: %s\n", AksjonspunktKodeDefinisjon.class, AksjonspunktDefinisjon.class, sjekkKodeBrukMap);
         }
     }
 
@@ -480,6 +489,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     }
 
     public static void main(String[] args) {
+
         var sb = new StringBuilder(100 * 1000);
 
         sb.append("kode,type,ytelse,navn,defaultTotrinn,behandlingSteg\n");
@@ -606,4 +616,5 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     public String toString() {
         return super.toString() + "('" + getKode() + "')";
     }
+
 }

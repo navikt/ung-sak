@@ -40,8 +40,6 @@ import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 @ApplicationScoped
 public class PersonBasisTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PersonBasisTjeneste.class);
-
     private PdlKlient pdlKlient;
     private boolean isProd = Environment.current().isProd();
 

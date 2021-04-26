@@ -51,7 +51,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
     @JsonCreator
     public PersonIdent(@NotNull @Size(max = 20) @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String ident) {
         Objects.requireNonNull(ident, "ident kan ikke være null");
-        this.ident = ident;
+        this.ident = ident.trim();
     }
 
     /**
@@ -62,16 +62,17 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
             return false;
         }
         String s = str.trim();
-        return s.length() == FNR_LENGDE && !isFdatNummer(getPersonnummer(s)) && validerFnrStruktur(s);
+        return s.length() == FNR_LENGDE && !isFdatPersonNummer(getPersonnummer(s)) && validerFnrStruktur(s);
     }
 
+    /** Trekker ut 5 siste siffer fra nummer, gitt at det er FNR. */
     private static String getPersonnummer(String str) {
         return (str == null || str.length() < PERSONNR_LENGDE)
             ? null
-            : str.substring(str.length() - PERSONNR_LENGDE, str.length());
+            : (str.length() > FNR_LENGDE ? null : str.substring(str.length() - PERSONNR_LENGDE, str.length()));
     }
 
-    private static boolean isFdatNummer(String personnummer) {
+    private static boolean isFdatPersonNummer(String personnummer) {
         return personnummer != null && personnummer.length() == PERSONNR_LENGDE && personnummer.startsWith("0000");
     }
 
@@ -161,7 +162,7 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
      * Hvorvidt dette er et Fdat Nummer (dvs. gjelder person uten tildelt fødselsnummer).
      */
     public boolean erFdatNummer() {
-        return isFdatNummer(getPersonnummer(ident));
+        return isFdatPersonNummer(getPersonnummer(ident));
     }
 
 }

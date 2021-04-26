@@ -33,7 +33,6 @@ public class PersoninfoAdapter {
         this.tilknytningTjeneste = tilknytningTjeneste;
     }
 
-    // TODO Alle kall direkte til tpsAdapter kan rutes til denne metoden
     public Personinfo hentPersoninfo(AktørId aktørId) {
         return hentKjerneinformasjon(aktørId);
     }
@@ -42,7 +41,7 @@ public class PersoninfoAdapter {
         Optional<AktørId> aktørId = hentAktørIdForPersonIdent(personIdent);
 
         if (aktørId.isPresent()) {
-            return hentKjerneinformasjonForBarn(aktørId.get(), personIdent);
+            return hentKjerneinformasjonFor(aktørId.get(), personIdent);
         } else {
             return Optional.empty();
         }
@@ -62,19 +61,19 @@ public class PersoninfoAdapter {
         }
         Optional<AktørId> optAktørId = hentAktørIdForPersonIdent(personIdent);
         if (optAktørId.isPresent()) {
-            return hentKjerneinformasjonForBarn(optAktørId.get(), personIdent);
+            return hentKjerneinformasjonFor(optAktørId.get(), personIdent);
         }
         return Optional.empty();
     }
 
     public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = hentFnr(aktørId);
-        return personIdent.map(pi -> personBasisTjeneste.hentPersoninfoArbeidsgiver(aktørId, pi));
+        var pi = hentFnr(aktørId);
+        return Optional.ofNullable(personBasisTjeneste.hentPersoninfoArbeidsgiver(aktørId, pi));
     }
 
     public Optional<PersoninfoBasis> hentBrukerBasisForAktør(AktørId aktørId) {
-        Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(personIdent -> personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent));
+        var personIdent = hentFnr(aktørId);
+        return Optional.ofNullable(personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent));
     }
 
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
@@ -84,6 +83,8 @@ public class PersoninfoAdapter {
     public Optional<AktørId> hentAktørIdForPersonIdent(PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
+        } else if (personIdent.erAktørId()) {
+            return Optional.of(new AktørId(personIdent.getAktørId()));
         } else if (personIdent.erNorskIdent()) {
             return aktørTjeneste.hentAktørIdForPersonIdent(personIdent);
         } else {
@@ -91,7 +92,7 @@ public class PersoninfoAdapter {
         }
     }
 
-    private Optional<Personinfo> hentKjerneinformasjonForBarn(AktørId aktørId, PersonIdent personIdent) {
+    private Optional<Personinfo> hentKjerneinformasjonFor(AktørId aktørId, PersonIdent personIdent) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
@@ -99,16 +100,16 @@ public class PersoninfoAdapter {
     }
 
     public Personinfo hentKjerneinformasjon(AktørId aktørId) {
-        Optional<PersonIdent> personIdent = hentIdentForAktørId(aktørId);
-        return personIdent.map(ident -> hentKjerneinformasjon(aktørId, ident)).orElse(null);
+        var personIdent = hentFnr(aktørId);
+        return hentKjerneinformasjon(aktørId, personIdent);
     }
 
     private Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
         return personinfoTjeneste.hentKjerneinformasjon(aktørId, personIdent);
     }
 
-    private Optional<PersonIdent> hentFnr(AktørId aktørId) {
-        return hentIdentForAktørId(aktørId);
+    private PersonIdent hentFnr(AktørId aktørId) {
+        return hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke FNR for angitt aktørId"));
     }
 
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {

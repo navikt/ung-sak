@@ -1,5 +1,12 @@
 package no.nav.k9.kodeverk.behandling.aksjonspunkt;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 
 public class AksjonspunktKodeDefinisjon {
@@ -55,7 +62,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VEDTAK_UTEN_TOTRINNSKONTROLL_KODE = "5018";
 
-    public static final String VENT_PÅ_SCANNING_KODE = "7007";
     public static final String VENT_PGA_FOR_TIDLIG_SØKNAD_KODE = "7008";
 
     public static final String VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE = "5033";
@@ -114,7 +120,34 @@ public class AksjonspunktKodeDefinisjon {
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
 
-    // Andre koder
+    static final Map<String, String> KODER;
+
+    static {
+        // lag liste av alle koder definert, brukes til konsistensjsekk mot AksjonspunktDefinisjon i tilfelle ubrukte/utgåtte koder.
+        var cls = AksjonspunktKodeDefinisjon.class;
+        var map = new TreeMap<String, String>();
+        Arrays.asList(cls.getDeclaredFields()).stream()
+            .filter(f -> Modifier.isPublic(f.getModifiers()) && f.getType() == String.class && Modifier.isStatic(f.getModifiers()))
+            .filter(f -> getValue(f) != null)
+            .forEach(f -> {
+                var kode = getValue(f);
+                // sjekker duplikat kode definisjon
+                if (map.putIfAbsent(kode, f.getName()) != null) {
+                    throw new IllegalStateException("Duplikat kode for : " + kode);
+                }
+            });
+        KODER = Collections.unmodifiableMap(map);
+    }
+
+    private static String getValue(Field f) {
+        try {
+            return (String) f.get(AksjonspunktKodeDefinisjon.class);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** Andre koder, brukes til definisjon av {@link AksjonspunktDefinisjon}. */
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;
     public static final VilkårType UTEN_VILKÅR = null;
     public static final String UTEN_FRIST = null;
@@ -122,5 +155,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final boolean ENTRINN = false;
     public static final boolean TILBAKE = true;
     public static final boolean FORBLI = false;
+
+    public static void main(String[] args) {
+        KODER.entrySet().stream().forEach(e -> System.out.println(e));
+    }
 
 }
