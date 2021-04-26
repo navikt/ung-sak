@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
@@ -24,26 +25,22 @@ public class VedtaksHendelseHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(VedtaksHendelseHåndterer.class);
     private ProsessTaskRepository taskRepository;
-    private BehandlingRepository behandlingRepository;
 
     public VedtaksHendelseHåndterer() {
     }
 
     @Inject
-    public VedtaksHendelseHåndterer(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
+    public VedtaksHendelseHåndterer(ProsessTaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.behandlingRepository = behandlingRepository;
     }
 
     void handleMessage(String key, String payload) {
         log.debug("Mottatt ytelse-vedtatt hendelse med key='{}', payload={}", key, payload);
-        VedtakHendelse vh = JsonObjectMapper.fromJson(payload, VedtakHendelse.class);
+        var vh = JsonObjectMapper.fromJson(payload, Ytelse.class);
 
-        if (vh.getFagsakYtelseType().equals(FagsakYtelseType.PSB)) {
+        if (FagsakYtelseType.PSB.equals(FagsakYtelseType.fromString(vh.getType().getKode()))) {
             ProsessTaskData taskData = new ProsessTaskData(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME);
             taskData.setPayload(payload);
-            Behandling behandling = behandlingRepository.hentBehandling(vh.getBehandlingId());
-            taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
             taskRepository.lagre(taskData);
         }
