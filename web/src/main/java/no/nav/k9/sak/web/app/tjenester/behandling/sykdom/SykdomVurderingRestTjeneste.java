@@ -222,8 +222,8 @@ public class SykdomVurderingRestTjeneste {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
         
-        if (sykdomVurderingOppdatering.getTilknyttedeDokumenter().isEmpty() && sykdomVurderingOppdatering.getResultat() == Resultat.OPPFYLT) {
-            throw new IllegalStateException("En vurdering som er \"OPPFYLT\" må minimum ha ett dokument tilknyttet.");
+        if (sykdomVurderingOppdatering.getTilknyttedeDokumenter().isEmpty()) {
+            throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
@@ -268,8 +268,8 @@ public class SykdomVurderingRestTjeneste {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
         
-        if (sykdomVurderingOpprettelse.getTilknyttedeDokumenter().isEmpty() && sykdomVurderingOpprettelse.getResultat() == Resultat.OPPFYLT) {
-            throw new IllegalStateException("En vurdering som er \"OPPFYLT\" må minimum ha ett dokument tilknyttet.");
+        if (sykdomVurderingOpprettelse.getTilknyttedeDokumenter().isEmpty()) {
+            throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
