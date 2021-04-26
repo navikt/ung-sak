@@ -48,13 +48,7 @@ public class VedtakFattetEventObserver {
         final Optional<Behandling> optBehandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
         if (optBehandling.isPresent()) {
             final Behandling behandling = optBehandling.get();
-            if (behandling.erYtelseBehandling()) {
-                final VedtakResultatType resultatType = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
-                    .map(BehandlingVedtak::getVedtakResultatType)
-                    .orElse(VedtakResultatType.AVSLAG);
-
-                return Set.of(VedtakResultatType.INNVILGET, VedtakResultatType.DELVIS_INNVILGET, VedtakResultatType.OPPHØR).contains(resultatType);
-            }
+            return behandling.erYtelseBehandling();
         }
         return false;
     }

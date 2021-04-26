@@ -7,7 +7,7 @@ import javax.servlet.annotation.WebListener;
 
 import no.nav.k9.sak.domene.risikoklassifisering.konsument.RisikoklassifiseringConsumer;
 import no.nav.k9.sak.historikk.kafka.HistorikkConsumer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.VedtakConsumer;
+import no.nav.k9.sak.hendelse.vedtak.VedtakConsumer;
 
 /**
  * Triggers start of Kafka consumere

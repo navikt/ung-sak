@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
+package no.nav.k9.sak.hendelse.vedtak;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -34,16 +34,16 @@ public class VedtakConsumer implements AppServiceHandler {
     }
 
     @Inject
-    public VedtakConsumer(PSBVedtaksHendelseHåndterer psbVedtaksHendelseHåndterer, TriggeRevurderingEtterVedtakStreamKafkaProperties streamKafkaProperties) {
+    public VedtakConsumer(VedtaksHendelseHåndterer vedtaksHendelseHåndterer, TriggeRevurderingEtterVedtakStreamKafkaProperties streamKafkaProperties) {
         this.topic = streamKafkaProperties.getTopic();
 
         Properties props = setupProperties(streamKafkaProperties);
 
         final StreamsBuilder builder = new StreamsBuilder();
 
-        Consumed<String, String> stringStringConsumed = Consumed.with(Topology.AutoOffsetReset.EARLIEST);
+        Consumed<String, String> stringStringConsumed = Consumed.with(Topology.AutoOffsetReset.LATEST); // TODO: Endre til NONE etter prodsetting
         builder.stream(this.topic, stringStringConsumed)
-            .foreach(psbVedtaksHendelseHåndterer::handleMessage);
+            .foreach(vedtaksHendelseHåndterer::handleMessage);
 
         final Topology topology = builder.build();
         stream = new KafkaStreams(topology, props);

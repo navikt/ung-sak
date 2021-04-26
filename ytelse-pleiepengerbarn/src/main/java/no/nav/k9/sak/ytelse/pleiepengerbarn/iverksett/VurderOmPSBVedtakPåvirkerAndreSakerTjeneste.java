@@ -1,19 +1,18 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
+import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
@@ -22,27 +21,24 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepositor
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @ApplicationScoped
-@ProsessTask(VurderRevurderingAndreSøknaderTask.TASKNAME)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
+@FagsakYtelseTypeRef("PSB")
+public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVedtakPåvirkerSakerTjeneste {
+
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomVurderingService sykdomVurderingService;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
-    public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
-
-    VurderRevurderingAndreSøknaderTask() {
+    VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
 
     @Inject
-    public VurderRevurderingAndreSøknaderTask(
-            BehandlingRepository behandlingRepository,
-            SykdomGrunnlagRepository sykdomGrunnlagRepository,
-            SykdomVurderingRepository sykdomVurderingRepository,
-            SykdomVurderingService sykdomVurderingService,
-            FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+    public VurderOmPSBVedtakPåvirkerAndreSakerTjeneste(BehandlingRepository behandlingRepository,
+                                                       SykdomGrunnlagRepository sykdomGrunnlagRepository,
+                                                       SykdomVurderingRepository sykdomVurderingRepository,
+                                                       SykdomVurderingService sykdomVurderingService,
+                                                       FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
@@ -51,29 +47,30 @@ public class VurderRevurderingAndreSøknaderTask implements ProsessTaskHandler {
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-        Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
+    public List<Saksnummer> utledSakerSomErKanVærePåvirket(VedtakHendelse vedtakHendelse) {
+        var behandlingId = vedtakHendelse.getBehandlingId();
         Behandling vedtattBehandling = behandlingRepository.hentBehandling(behandlingId);
-        SykdomGrunnlagBehandling vedtattSykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(vedtattBehandling.getUuid()).get();
+        SykdomGrunnlagBehandling vedtattSykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(vedtattBehandling.getUuid()).orElseThrow();
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
         List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende);
 
+        var result = new ArrayList<Saksnummer>();
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
             if (!kandidatsaksnummer.equals(vedtattSykdomGrunnlagBehandling.getSaksnummer())) {
-                SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer).map(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid)).get().get();
+                SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer)
+                    .flatMap(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid))
+                    .orElseThrow();
 
                 final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
                     kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, List.of()).getDiffPerioder();
 
                 if (!endringerISøktePerioder.isEmpty()) {
-                    ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
-                    Behandling tilRevurdering = behandlingRepository.hentBehandling(kandidatSykdomBehandling.getBehandlingUuid());
-                    tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
-
-                    fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+                    result.add(kandidatsaksnummer);
                 }
             }
         }
+
+        return result;
     }
 }
