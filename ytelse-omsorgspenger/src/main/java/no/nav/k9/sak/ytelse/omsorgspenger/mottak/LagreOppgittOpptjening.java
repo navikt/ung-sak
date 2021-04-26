@@ -95,6 +95,8 @@ public class LagreOppgittOpptjening {
         builder.medRegnskapsførerNavn(info.getRegnskapsførerNavn());
         builder.medRegnskapsførerTlf(info.getRegnskapsførerTlf());
         builder.medVarigEndring(info.getErVarigEndring());
+        builder.medEndringDato(info.getEndringDato());
+        builder.medBegrunnelse(info.getEndringBegrunnelse());
         builder.medNyoppstartet(info.getErNyoppstartet());
         // TODO Map ny i arbeidslivet
         return builder;
