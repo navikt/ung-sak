@@ -136,7 +136,7 @@ public class MapOppgittFraværOgVilkårsResultat {
                 ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
                 : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
         } else if (aktørId != null) {
-            // Egen næring
+            // Egen næring uten orgnr
             arbeidsgiver = Arbeidsgiver.fra(aktørId);
         } else {
             // Frilans
