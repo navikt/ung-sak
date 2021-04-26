@@ -25,13 +25,13 @@ public class OmsorgenForOverstyringshåndterer extends InngangsvilkårOverstyrin
     public OmsorgenForOverstyringshåndterer(HistorikkTjenesteAdapter historikkAdapter,
                                             InngangsvilkårTjeneste inngangsvilkårTjeneste) {
         super(historikkAdapter,
-            AksjonspunktDefinisjon.OVERSTYRING_AV_MEDISINSKESVILKÅRET_UNDER_18,
+            AksjonspunktDefinisjon.OVERSTYRING_AV_OMSORGEN_FOR,
             VilkårType.OMSORGEN_FOR,
             inngangsvilkårTjeneste);
     }
 
     @Override
     protected void lagHistorikkInnslag(Behandling behandling, OverstyringMedisinskevilkåretDto dto) {
-        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), dto.getErVilkarOk(), SkjermlenkeType.PUNKT_FOR_MEDISINSK);
+        lagHistorikkInnslagForOverstyrtVilkår(dto.getBegrunnelse(), dto.getErVilkarOk(), SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR);
     }
 }

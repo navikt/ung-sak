@@ -23,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
@@ -59,7 +60,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef("PSB") VilkårUtleder vilkårUtleder,
                                                   SøknadsperiodeRepository søknadsperiodeRepository,
                                                   VilkårResultatRepository vilkårResultatRepository,
-                                                  BehandlingRepository behandlingRepository, SykdomVurderingService sykdomVurderingService) {
+                                                  BehandlingRepository behandlingRepository,
+                                                  SykdomVurderingService sykdomVurderingService,
+                                                  BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
@@ -71,6 +74,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
         vilkårsPeriodisering.put(VilkårType.OMSORGEN_FOR, maksSøktePeriode);
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository));
+        vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository));
     }
 
     @Override
