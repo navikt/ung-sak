@@ -129,12 +129,17 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType, AktørId aktørId) {
-        if (aktivitetPeriode.getOpptjeningsnøkkel() == null){
-            return new Aktivitet(uttakArbeidType, null, InternArbeidsforholdRef.nullRef());
+        Arbeidsgiver arbeidsgiver;
+
+        if (aktivitetPeriode.getOpptjeningsnøkkel() != null) {
+            arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
+                ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
+                : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
+        } else if (aktørId != null) {
+            arbeidsgiver = Arbeidsgiver.fra(aktørId);
+        } else {
+            arbeidsgiver = null;
         }
-        var arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
-            ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
-            : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
         return new Aktivitet(uttakArbeidType, arbeidsgiver, InternArbeidsforholdRef.nullRef());
     }
 
