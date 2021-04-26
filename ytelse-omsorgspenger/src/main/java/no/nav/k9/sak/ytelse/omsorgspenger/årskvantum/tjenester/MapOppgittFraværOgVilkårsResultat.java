@@ -113,8 +113,10 @@ public class MapOppgittFraværOgVilkårsResultat {
             Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, opptjeningPerioder, aktørId);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
-                LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
-                result.put(aktivitet, aktivAktivitetTidslinje.compress());
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinje = result.getOrDefault(aktivitet, new LocalDateTimeline<>(List.of()));
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNyPeriode = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
+                tidslinje = tidslinje.combine(tidslinjeNyPeriode, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                result.put(aktivitet, tidslinje.compress());
             }));
         });
         return result;
@@ -164,8 +166,10 @@ public class MapOppgittFraværOgVilkårsResultat {
             Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, UttakArbeidType.FRILANSER, opptjeningPerioder, null);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
-                LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
-                result.put(aktivitet, aktivAktivitetTidslinje.compress());
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinje = result.getOrDefault(aktivitet, new LocalDateTimeline<>(List.of()));
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNyPeriode = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
+                tidslinje = tidslinje.combine(tidslinjeNyPeriode, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                result.put(aktivitet, tidslinje.compress());
             }));
         });
         return result;
