@@ -14,7 +14,18 @@ import java.util.stream.Collectors;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.type.Periode;
 
-public class FraværPeriodeSammenslåer {
+/**
+ * Søknaden om Utbetaling av omsorgspenger inneholder data som er suboptimalt representert for k9-sak.
+ * Dette bør på sikt forbedres i søknadsdialogen, slik at denne klassen kan fjernes.
+ *
+ * Denne klassen gjør 2 manipuleringer av det som kommer fra søknadsdialogen før det behandles videre:
+ * 1. fjerner lørdager og søndager fra søkt periode (kan medføre at det blir flere perioder). Bakgrunn er at bruker ikke
+ *    kan få tilkent noe på lørdager/søndager for denne ytelsen; og at det er enkleste løsning å filtrere her.
+ * 2. slår sammen intilliggende perioder som har samme innhold, slik at de kan behandles og vises under ett. *
+ *
+ *  TODO forbedre innsending fra søknadsdialogen, og fjerne denne klassen
+ */
+public class OmsorspengerFraværPeriodeSammenslåer {
     public static List<FraværPeriode> fjernHelgOgSlåSammen(List<FraværPeriode> søknadsperioder) {
         List<FraværPeriode> fraværsPerioderUtenHelgdager = fjernHelg(søknadsperioder);
         var sorterteSøknadsperioderUtenHelgdager = fraværsPerioderUtenHelgdager.stream().sorted().collect(Collectors.toList());
