@@ -24,6 +24,7 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -59,7 +60,6 @@ import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.Ytelsesspesifi
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {
@@ -174,6 +174,7 @@ public class RegisterdataInnhenter {
             var aktørId = pleietrengende.get();
             var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
+                log.info("Fant personinfo for angitt pleietrengende fra fagsak");
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
             } else {
                 throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
@@ -187,6 +188,7 @@ public class RegisterdataInnhenter {
             var aktørId = relatertPerson.get();
             var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
+                log.info("Fant personinfo for angitt relatert person fra fagsak");
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
             } else {
                 throw new IllegalStateException("Finner ikke personinfo i PDL for relatert person aktørid");
@@ -349,12 +351,15 @@ public class RegisterdataInnhenter {
                 f.getRelasjonsrolle().equals(RelasjonsRolleType.SAMBOER))
             .collect(Collectors.toList());
         for (Familierelasjon familierelasjon : familierelasjoner) {
-            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(familierelasjon.getPersonIdent());
+            var ident = familierelasjon.getPersonIdent();
+            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(ident);
             if (ektefelleInfo.isPresent()) {
                 final Personinfo personinfo = ektefelleInfo.get();
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
                 mapRelasjon(søkerPersonInfo, personinfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
                 mapRelasjon(personinfo, søkerPersonInfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
+            } else {
+                log.warn("Fant ikke personinfo for familierelasjon: {}", familierelasjon.getRelasjonsrolle());
             }
         }
     }
