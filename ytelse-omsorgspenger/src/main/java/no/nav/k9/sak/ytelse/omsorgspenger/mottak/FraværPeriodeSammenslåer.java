@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
-import no.nav.k9.søknad.felles.fravær.FraværPeriode;
-import no.nav.k9.søknad.felles.type.Periode;
+import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -11,12 +11,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.time.DayOfWeek.SATURDAY;
-import static java.time.DayOfWeek.SUNDAY;
+import no.nav.k9.søknad.felles.fravær.FraværPeriode;
+import no.nav.k9.søknad.felles.type.Periode;
 
 public class FraværPeriodeSammenslåer {
-    public static List<FraværPeriode> slåSammen(List<FraværPeriode> søknadsperioder) {
+    public static List<FraværPeriode> fjernHelgOgSlåSammen(List<FraværPeriode> søknadsperioder) {
+        List<FraværPeriode> fraværsPerioderUtenHelgdager = fjernHelg(søknadsperioder);
+        var sorterteSøknadsperioderUtenHelgdager = fraværsPerioderUtenHelgdager.stream().sorted().collect(Collectors.toList());
+        return slåSammenIntilliggendePerioder(sorterteSøknadsperioderUtenHelgdager);
+    }
 
+    private static List<FraværPeriode> fjernHelg(List<FraværPeriode> søknadsperioder) {
         var fraværsPerioderUtenHelgdager = new ArrayList<FraværPeriode>();
         for (FraværPeriode fp : søknadsperioder) {
             var perioderMinusHelgdager = fjernHelgdager(fp.getPeriode());
@@ -24,9 +29,10 @@ public class FraværPeriodeSammenslåer {
                 fraværsPerioderUtenHelgdager.add(new FraværPeriode(periode, fp.getDuration(), fp.getÅrsak(), fp.getAktivitetFravær()));
             }
         }
+        return fraværsPerioderUtenHelgdager;
+    }
 
-        var sorterteSøknadsperioderUtenHelgdager = fraværsPerioderUtenHelgdager.stream().sorted().collect(Collectors.toList());
-
+    private static List<FraværPeriode> slåSammenIntilliggendePerioder(List<FraværPeriode> sorterteSøknadsperioderUtenHelgdager) {
         var sammenslåttePerioder = new LinkedList<FraværPeriode>();
 
         for (FraværPeriode søknadPeriode : sorterteSøknadsperioderUtenHelgdager) {

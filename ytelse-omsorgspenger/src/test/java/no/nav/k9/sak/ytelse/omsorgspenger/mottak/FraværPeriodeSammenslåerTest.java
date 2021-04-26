@@ -29,7 +29,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp3 = new FraværPeriode(ons, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2, fp3));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2, fp3));
         assertThat(resultat).hasSize(1);
         FraværPeriode sammenslåttPeriode = resultat.get(0);
         assertThat(sammenslåttPeriode.getPeriode()).isEqualTo(new Periode(mandag, mandag.plusDays(2)));
@@ -43,7 +43,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp2 = new FraværPeriode(ons, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
     }
 
@@ -52,7 +52,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
     }
 
@@ -61,7 +61,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.SMITTEVERNHENSYN, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
     }
 
@@ -70,7 +70,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp1 = new FraværPeriode(mån, Duration.ofHours(4), FraværÅrsak.SMITTEVERNHENSYN, List.of(AktivitetFravær.FRILANSER));
         FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2));
         assertThat(resultat).containsOnly(fp1, fp2);
     }
 
@@ -80,7 +80,7 @@ class FraværPeriodeSammenslåerTest {
         FraværPeriode fp2 = new FraværPeriode(tis, Duration.ofHours(1), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
         FraværPeriode fp3 = new FraværPeriode(lør, Duration.ofHours(4), FraværÅrsak.ORDINÆRT_FRAVÆR, List.of(AktivitetFravær.FRILANSER, AktivitetFravær.SELVSTENDIG_VIRKSOMHET));
 
-        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.slåSammen(Arrays.asList(fp1, fp2, fp3));
+        List<FraværPeriode> resultat = FraværPeriodeSammenslåer.fjernHelgOgSlåSammen(Arrays.asList(fp1, fp2, fp3));
         assertThat(resultat).containsOnly(fp1, fp2);
     }
 
