@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask;
-import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
@@ -59,13 +58,12 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
         task.doTask(prosessTaskData);
 
         ArgumentCaptor<ProsessTaskData> prosessTaskDataCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptor.capture());
+        verify(prosessTaskRepository, times(1)).lagre(prosessTaskDataCaptor.capture());
         var nyeProsesstasker = prosessTaskDataCaptor.getAllValues();
 
         assertThat(nyeProsesstasker.stream().map(ProsessTaskData::getTaskType))
             .containsExactlyInAnyOrder(
-                PublisereHistoriskeVedtakHendelserTask.TASKTYPE,
-                PubliserVedtakHendelseTask.TASKTYPE
+                PublisereHistoriskeVedtakHendelserTask.TASKTYPE
             );
     }
 

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
+package no.nav.k9.sak.hendelse.vedtak;
 
 import java.util.Objects;
 

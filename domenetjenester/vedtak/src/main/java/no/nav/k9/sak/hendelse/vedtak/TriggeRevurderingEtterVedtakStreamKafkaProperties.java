@@ -1,8 +1,9 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
+package no.nav.k9.sak.hendelse.vedtak;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
@@ -13,7 +14,7 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
     private final String schemaRegistryUrl;
     private final String username;
     private final String password;
-    private final Topic topic;
+    private final Topic<String, String> topic;
     private final String applicationId;
     private final String trustStorePath;
     private final String trustStorePassword;
@@ -29,7 +30,7 @@ class TriggeRevurderingEtterVedtakStreamKafkaProperties {
                                                       @KonfigVerdi(value = "javax.net.ssl.trustStorePassword", required = false) String trustStorePassword) {
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
-        this.topic = new Topic(topicName, Serdes.String(), Serdes.String());
+        this.topic = new Topic<>(topicName, Serdes.String(), Serdes.String());
         this.applicationId = topicName + ".psb.revurdering";
         this.bootstrapServers = bootstrapServers;
         this.schemaRegistryUrl = schemaRegistryUrl;

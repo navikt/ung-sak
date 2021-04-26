@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -40,8 +39,6 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
 
         vedtakSomSkalPubliseres.ifPresent((vedtak) -> {
             behandlingLåsRepository.taLås(vedtak.getBehandlingId());
-            opprettTaskForPubliseringAvVedtak(vedtak.getBehandlingId());
-
             opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask();
         });
     }
@@ -49,12 +46,6 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
     private void opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask() {
         final ProsessTaskData taskData = new ProsessTaskData(TASKTYPE);
         taskData.setNesteKjøringEtter(LocalDateTime.now().plus(100, ChronoUnit.MILLIS));
-        prosessTaskRepository.lagre(taskData);
-    }
-
-    private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
-        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
-        taskData.setProperty("behandlingId", behandlingId.toString());
         prosessTaskRepository.lagre(taskData);
     }
 }
