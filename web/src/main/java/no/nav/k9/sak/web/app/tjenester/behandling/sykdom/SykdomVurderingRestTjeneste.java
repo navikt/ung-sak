@@ -35,6 +35,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringDto;
@@ -220,6 +221,10 @@ public class SykdomVurderingRestTjeneste {
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
         }
+        
+        if (sykdomVurderingOppdatering.getTilknyttedeDokumenter().isEmpty()) {
+            throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
+        }
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final SykdomVurdering sykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
@@ -261,6 +266,10 @@ public class SykdomVurderingRestTjeneste {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(sykdomVurderingOpprettelse.getBehandlingUuid()).orElseThrow();
         if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
             throw new IllegalStateException("Behandlingen er ikke åpen for endringer.");
+        }
+        
+        if (sykdomVurderingOpprettelse.getTilknyttedeDokumenter().isEmpty()) {
+            throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
