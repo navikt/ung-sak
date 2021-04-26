@@ -3,6 +3,7 @@ package no.nav.k9.sak.hendelse.vedtak;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
@@ -19,5 +20,5 @@ public interface VurderOmVedtakPåvirkerSakerTjeneste {
         return FagsakYtelseTypeRef.Lookup.find(VurderOmVedtakPåvirkerSakerTjeneste.class, ytelseType);
     }
 
-    List<Saksnummer> utledSakerSomErKanVærePåvirket(VedtakHendelse vedtakHendelse);
+    List<Saksnummer> utledSakerSomErKanVærePåvirket(Ytelse vedtakHendelse);
 }

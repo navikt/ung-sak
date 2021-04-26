@@ -1,23 +1,21 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -45,9 +43,10 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), VedtakHendelse.class);
+        var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
+        var fagsakYtelseType = FagsakYtelseType.fromString(vedtakHendelse.getType().getKode());
 
-        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(vedtakHendelse.getFagsakYtelseType());
+        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(fagsakYtelseType);
         if (vurderOmVedtakPåvirkerSakerTjeneste.isEmpty()) {
             return;
         }
