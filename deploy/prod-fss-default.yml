@@ -103,6 +103,8 @@ spec:
       value: privat-k9-risk-utfor-p
     - name: KAFKA_KONTROLL_RESULTAT_TOPIC
       value: privat-k9-kontroll-resultat-p
+    - name: KAFKA_VEDTAKHENDELSE_TOPIC
+      value: privat-k9-vedtakhendelse
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL

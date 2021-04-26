@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposito
 import no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -58,11 +59,12 @@ public class PublisereHistoriskeVedtakHendelserTaskTest {
         task.doTask(prosessTaskData);
 
         ArgumentCaptor<ProsessTaskData> prosessTaskDataCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskRepository, times(1)).lagre(prosessTaskDataCaptor.capture());
+        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptor.capture());
         var nyeProsesstasker = prosessTaskDataCaptor.getAllValues();
 
         assertThat(nyeProsesstasker.stream().map(ProsessTaskData::getTaskType))
             .containsExactlyInAnyOrder(
+                PubliserVedtakHendelseTask.TASKTYPE,
                 PublisereHistoriskeVedtakHendelserTask.TASKTYPE
             );
     }

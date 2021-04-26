@@ -36,6 +36,8 @@ public class VedtakFattetEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
+            opprettTaskForPubliseringAvVedtak(event.getBehandlingId());
+
             if (erBehandlingAvRettTypeForAbakus(event.getBehandlingId())) {
                 opprettTaskForPubliseringAvVedtakMedYtelse(event.getBehandlingId());
             }
@@ -53,6 +55,13 @@ public class VedtakFattetEventObserver {
 
     private void opprettTaskForPubliseringAvVedtakMedYtelse(Long behandlingId) {
         final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtattYtelseHendelseTask.TASKTYPE);
+        taskData.setProperty("behandlingId", behandlingId.toString());
+        taskData.setCallIdFraEksisterende();
+        taskRepository.lagre(taskData);
+    }
+
+    private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
+        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
         taskData.setProperty("behandlingId", behandlingId.toString());
         taskData.setCallIdFraEksisterende();
         taskRepository.lagre(taskData);
