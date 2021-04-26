@@ -104,6 +104,10 @@ public class SykdomVurderingMapper {
                 alleDokumenter.stream().filter(d -> oppdatering.getTilknyttedeDokumenter().contains("" + d.getId())).collect(Collectors.toList()),
                 oppdatering.getPerioder()
         );
+        
+        if (oppdatering.getTilknyttedeDokumenter().size() != versjon.getDokumenter().size()) {
+            throw new IllegalStateException("Feil ved mapping: Klarte ikke å finne et av dokumentene saksbehandler har referert til.");
+        }
 
         return versjon;
     }
@@ -127,6 +131,10 @@ public class SykdomVurderingMapper {
                 opprettelse.getPerioder()
         );
         sykdomVurdering.addVersjon(versjon);
+        
+        if (opprettelse.getTilknyttedeDokumenter().size() != versjon.getDokumenter().size()) {
+            throw new IllegalStateException("Feil ved mapping: Klarte ikke å finne et av dokumentene saksbehandler har referert til.");
+        }
 
         return sykdomVurdering;
     }
