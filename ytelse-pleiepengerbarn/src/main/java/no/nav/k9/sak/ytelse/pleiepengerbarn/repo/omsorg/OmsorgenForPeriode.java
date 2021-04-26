@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
+import no.nav.k9.søknad.ytelse.psb.v1.Omsorg.BarnRelasjon;
 
 @Entity(name = "OmsorgenForPeriode")
 @Table(name = "OMSORGEN_FOR_PERIODE")
@@ -39,7 +40,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
 
     @ChangeTracked
     @Column(name = "relasjon", nullable = false)
-    private String relasjon;
+    private BarnRelasjon relasjon;
 
     @ChangeTracked
     @Column(name = "relasjonsbeskrivelse")
@@ -48,11 +49,11 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     @ChangeTracked
     @Column(name = "begrunnelse")
     private String begrunnelse;
-    
+
     @Column(name = "resultat", nullable = false)
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
-    
+
     @ManyToOne
     @JoinColumn(name = "omsorgen_for_id", nullable = false, updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
@@ -61,11 +62,11 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    
+
     OmsorgenForPeriode() {
     }
 
-    public OmsorgenForPeriode(DatoIntervallEntitet periode, String relasjon, String relasjonsbeskrivelse,
+    public OmsorgenForPeriode(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse,
             String begrunnelse, Resultat resultat) {
         this.periode = periode;
         this.relasjon = relasjon;
@@ -77,11 +78,11 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode) {
         this(omsorgenForPeriode.periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
     }
-    
+
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode) {
         this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
     }
-    
+
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode, OmsorgenForSaksbehandlervurdering vurdering) {
         this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, vurdering.getBegrunnelse(), vurdering.getResultat());
     }
@@ -94,7 +95,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     public String getIndexKey() {
         return IndexKeyComposer.createKey(periode);
     }
-    
+
     void setOmsorgenFor(OmsorgenFor omsorgenFor) {
         this.omsorgenFor = omsorgenFor;
     }
@@ -107,7 +108,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
         return id;
     }
 
-    public String getRelasjon() {
+    public BarnRelasjon getRelasjon() {
         return relasjon;
     }
 
@@ -172,8 +173,8 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
             return false;
         return true;
     }
-    
-    public static final OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, String relasjon, String relasjonsbeskrivelse) {
+
+    public static final OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse) {
     	return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT);
 
     }
