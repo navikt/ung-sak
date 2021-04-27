@@ -131,12 +131,22 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
     @Override
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling) {
-        return lagOppdaterFortsettTasksForPolling(behandling, skalHenteInnRegisterData(behandling));
+        boolean innhentRegisterdata = skalHenteInnRegisterData(behandling);
+        if (innhentRegisterdata) {
+            log.info("Innhenter registerdata på nytt, grunnlg er utdatert");
+        }
+        return doOppfriskingTaskOgFortsattBehandling(behandling, innhentRegisterdata);
     }
 
     @Override
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent) {
+        if (forceInnhent) {
+            log.warn("Innhenter registerdata på nytt (force), selv om data er hentet tidligere i dag");
+        }
+        return doOppfriskingTaskOgFortsattBehandling(behandling, forceInnhent);
+    }
 
+    private ProsessTaskGruppe doOppfriskingTaskOgFortsattBehandling(Behandling behandling, boolean innhentRegisterdataFørst) {
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler feil: Kan ikke oppdater behandling med nye data når er allerede i iverksettelse/avsluttet. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
@@ -149,7 +159,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskData registerdataOppdatererTask = new ProsessTaskData(OppfriskingAvBehandlingTask.TASKTYPE);
         registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
-        if (forceInnhent) {
+        if (innhentRegisterdataFørst) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
             leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
         } else {
