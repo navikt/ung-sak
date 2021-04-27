@@ -51,7 +51,7 @@ public class VedtaksbrevHåndterer {
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
         }
-        if (aksjonspunktDefinisjon.getDefaultTotrinnBehandling()) {
+        if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
             opprettAksjonspunktForFatterVedtak(builder);
         }
