@@ -123,7 +123,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .collect(Collectors.toList());
 
         return oppgittOpptjeninger.stream()
-            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
+            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt, Comparator.reverseOrder()))
             .filter(oppgittOpptjening -> overlapperVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
             .map(WrappedOppgittOpptjening::getRaw)
             .findFirst();
