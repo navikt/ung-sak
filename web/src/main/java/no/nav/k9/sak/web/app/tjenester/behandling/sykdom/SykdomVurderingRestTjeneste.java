@@ -231,6 +231,8 @@ public class SykdomVurderingRestTjeneste {
         if (sykdomVurderingOppdatering.getTilknyttedeDokumenter().isEmpty()) {
             throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
+        
+        sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final SykdomVurdering sykdomVurdering = sykdomVurderingRepository.hentVurdering(behandling.getFagsak().getPleietrengendeAktørId(), Long.parseLong(sykdomVurderingOppdatering.getId())).orElseThrow();
@@ -245,6 +247,17 @@ public class SykdomVurderingRestTjeneste {
 
         return toSykdomVurderingEndringResultatDto(endringer);
     }
+
+    private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
+        final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
+        final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> pleietrengendesFødselsdato.plusYears(18).isBefore(p.getFom()));
+        final boolean vurdering18år = perioder.stream().anyMatch(p -> !pleietrengendesFødselsdato.plusYears(18).isBefore(p.getTom()));
+        
+        if (vurderingUnder18år && vurdering18år) {
+            throw new IllegalStateException("En sykdomsvurdering kan ikke gjelde både før og etter at barnet har fylt 18 år. For å kunne lagre må vurderingen splittes i to.");
+        }
+    }
+
 
     private Sporingsinformasjon lagSporingsinformasjon(final Behandling behandling) {
         final SykdomPerson endretForPerson = sykdomVurderingRepository.hentEllerLagrePerson(behandling.getAktørId());
@@ -277,6 +290,8 @@ public class SykdomVurderingRestTjeneste {
         if (sykdomVurderingOpprettelse.getTilknyttedeDokumenter().isEmpty()) {
             throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
+        
+        sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
