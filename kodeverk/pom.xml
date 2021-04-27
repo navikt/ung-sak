@@ -72,7 +72,7 @@
                     <source>${kontrakt.java.version}</source>
                     <target>${kontrakt.java.version}</target>
                     <encoding>UTF-8</encoding>
-                    <release>${konrakt.java.version}</release>
+                    <release>${kontrakt.java.version}</release>
                 <parameters>true</parameters>
                 </configuration>
             </plugin>
