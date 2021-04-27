@@ -48,11 +48,8 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         var vedtakHendelse = JsonObjectMapper.fromJson(prosessTaskData.getPayloadAsString(), Ytelse.class);
         var fagsakYtelseType = FagsakYtelseType.fromString(vedtakHendelse.getType().getKode());
 
-        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(fagsakYtelseType);
-        if (vurderOmVedtakPåvirkerSakerTjeneste.isEmpty()) {
-            return;
-        }
-        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.get().utledSakerSomErKanVærePåvirket(vedtakHendelse);
+        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjeneste(fagsakYtelseType);
+        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerSomErKanVærePåvirket(vedtakHendelse);
 
         log.info("Fant følgende saker '{}' som skal revurderes som følge av vedtak.", kandidaterTilRevurdering);
 

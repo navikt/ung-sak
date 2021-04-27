@@ -6,7 +6,6 @@ import java.util.Optional;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 import no.nav.k9.sak.typer.Saksnummer;
 
 public interface VurderOmVedtakPåvirkerSakerTjeneste {
