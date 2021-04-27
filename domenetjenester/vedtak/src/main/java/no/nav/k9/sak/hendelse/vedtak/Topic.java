@@ -4,8 +4,6 @@ import java.util.Objects;
 
 import org.apache.kafka.common.serialization.Serde;
 
-import no.nav.familie.topic.Environment;
-
 public class Topic<K, V> {
 
     private final String topic;

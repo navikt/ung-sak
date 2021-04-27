@@ -7,9 +7,6 @@ import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
