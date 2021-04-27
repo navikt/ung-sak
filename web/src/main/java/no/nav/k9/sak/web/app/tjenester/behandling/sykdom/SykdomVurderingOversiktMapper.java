@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.sykdom;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder) {
+    public SykdomVurderingOversikt map(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato) {
         final List<SykdomVurderingOversiktElement>  elements = tilSykdomVurderingOversiktElement(
                 behandlingUuid, saksnummer, sykdomVurderingerOgPerioder
             )
@@ -36,12 +37,17 @@ public class SykdomVurderingOversiktMapper {
             .map(ds -> ds.getValue())
             .collect(Collectors.toList());
 
+        final boolean harPerioderDerPleietrengendeErOver18år = sykdomVurderingerOgPerioder.getPerioderSomKanVurderes().stream()
+                .anyMatch(p -> !pleietrengendesFødselsdato.plusYears(18).isAfter(p.getTom()));
+        
         return new SykdomVurderingOversikt(
                 elements,
                 sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
                 sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
                 sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
                 sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
+                pleietrengendesFødselsdato,
+                harPerioderDerPleietrengendeErOver18år,
                 Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
                 );
     }
