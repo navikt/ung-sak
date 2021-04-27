@@ -248,14 +248,14 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @POST
     @Path("/innhent-registerdata")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Operation(description = "Innhent registerdata på nytt", summary = ("Innhent registerdata på nytt"), tags = "forvaltning", responses = {
+    @Operation(description = "Innhent registerdata på nytt", summary = ("Innhent registerdata på nytt"), tags = "forvaltning"/*, responses = {
             @ApiResponse(responseCode = "202", description = "Innhenter registerdata på nytt (asynkront)."),
             @ApiResponse(responseCode = "400", description = "Feil i input (eks. ukjent saksnummer), eller ingen åpne behandlinger for fagsak"),
             @ApiResponse(responseCode = "409", description = "Kan ikke innhente registerdata nå, kan skyldes feilede tasks eller tilstand i prosess"),
             @ApiResponse(responseCode = "501", description = "Ikke implementert funksjonalitet, eks. mer enn en åpen behandling for fagsak")
 
-    })
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    }*/)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
     public Response innhentRegisterdataPåNytt(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
                                               @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
 
