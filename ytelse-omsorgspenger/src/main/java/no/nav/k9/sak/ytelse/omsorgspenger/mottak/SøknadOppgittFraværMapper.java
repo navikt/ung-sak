@@ -56,7 +56,7 @@ class SøknadOppgittFraværMapper {
         var frilanser = opptj.getFrilanser();
 
         Set<OppgittFraværPeriode> oppgittFraværPerioder = new LinkedHashSet<>();
-        for (FraværPeriode fp : FraværPeriodeSammenslåer.slåSammen(søknadsinnhold.getFraværsperioder())) {
+        for (FraværPeriode fp : OmsorspengerFraværPeriodeSammenslåer.fjernHelgOgSlåSammen(søknadsinnhold.getFraværsperioder())) {
             LocalDate fom = fp.getPeriode().getFraOgMed();
             LocalDate tom = fp.getPeriode().getTilOgMed();
             Duration varighet = fp.getDuration();
