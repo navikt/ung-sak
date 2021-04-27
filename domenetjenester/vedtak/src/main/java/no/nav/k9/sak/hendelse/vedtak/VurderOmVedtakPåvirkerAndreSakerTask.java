@@ -1,9 +1,10 @@
 package no.nav.k9.sak.hendelse.vedtak;
 
-import java.util.List;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -24,6 +25,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
+    private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
 
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
@@ -50,9 +52,11 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         if (vurderOmVedtakPåvirkerSakerTjeneste.isEmpty()) {
             return;
         }
-        List<Saksnummer> alleSaksnummer = vurderOmVedtakPåvirkerSakerTjeneste.get().utledSakerSomErKanVærePåvirket(vedtakHendelse);
+        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.get().utledSakerSomErKanVærePåvirket(vedtakHendelse);
 
-        for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
+        log.info("Fant følgende saker '{}' som skal revurderes som følge av vedtak.", kandidaterTilRevurdering);
+
+        for (Saksnummer kandidatsaksnummer : kandidaterTilRevurdering) {
             ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
             var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
