@@ -67,6 +67,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        logContext(behandling);
 
         var søknad = søknadRepository.hentSøknad(behandling);
         var samletVilkårsresultat = vilkårTjeneste.samletVilkårsresultat(behandlingId);

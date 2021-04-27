@@ -106,11 +106,11 @@ public class SjekkProsessering {
         }
 
         // henter alltid registeropplysninger og kjører alltid prosess
-        return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
+        return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, false));
     }
 
-    public boolean opprettTaskForOppfrisking(Behandling behandling, boolean force) {
-        if (!force && !skalInnhenteRegisteropplysningerPåNytt(behandling)) {
+    public boolean opprettTaskForOppfrisking(Behandling behandling, boolean forceInnhent) {
+        if (!forceInnhent && !skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return false;
         }
 
@@ -118,7 +118,7 @@ public class SjekkProsessering {
             return false;
         }
 
-        final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling);
+        final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, forceInnhent);
         prosessTaskRepository.lagre(oppfriskTaskData);
         return true;
     }
@@ -137,8 +137,8 @@ public class SjekkProsessering {
      *
      * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
-        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling);
+    String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean forceInnhent) {
+        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling, forceInnhent);
         String gruppeNavn = asynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);
         return gruppeNavn;

@@ -72,15 +72,15 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
             Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
             behandlingOptional.ifPresent((behandling) -> {
-                    final BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
-                    if (!vedtak.getErPublisert()) {
-                        BehandlingProsessTask.logContext(behandling);
-                        String payload = generatePayload(behandling, vedtak);
-                        producer.sendJson(payload);
-                        vedtak.setErPublisert();
-                    }
+                logContext(behandling);
+                BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
+                if (!vedtak.getErPublisert()) {
+                    BehandlingProsessTask.logContext(behandling);
+                    String payload = generatePayload(behandling, vedtak);
+                    producer.sendJson(payload);
+                    vedtak.setErPublisert();
                 }
-            );
+            });
         }
     }
 
@@ -99,7 +99,6 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
         return JacksonJsonConfig.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
     }
-
 
     private VedtakHendelse genererVedtakHendelse(Behandling behandling, BehandlingVedtak vedtak) {
         final VedtakHendelse vedtakHendelse = new VedtakHendelse();
