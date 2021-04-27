@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface FormidlingDokumentdataKlient {
 
-    public void slettAllData(UUID behandlingUUID);
+    void ryddVedTilbakehopp(UUID behandlingUUID);
 }

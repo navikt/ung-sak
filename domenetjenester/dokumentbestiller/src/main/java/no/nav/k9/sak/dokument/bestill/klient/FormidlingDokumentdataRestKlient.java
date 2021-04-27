@@ -35,9 +35,9 @@ public class FormidlingDokumentdataRestKlient implements FormidlingDokumentdataK
     }
 
     @Override
-    public void slettAllData(UUID behandlingUUID) {
+    public void ryddVedTilbakehopp(UUID behandlingUUID) {
         try {
-            var uri = URI.create(endpoint.toString() + "/api/" + behandlingUUID.toString());
+            var uri = URI.create(endpoint.toString() + "/api/saksprosess/ryddVedTilbakehopp?behandlingUuid=" + behandlingUUID.toString());
             restKlient.post(uri, Collections.emptyMap());
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilVedSlettingAvDokumentdata(e.getMessage(), e).toException();
@@ -56,7 +56,7 @@ public class FormidlingDokumentdataRestKlient implements FormidlingDokumentdataK
     interface RestTjenesteFeil extends DeklarerteFeil {
         RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "K9SAK-DD-1000001", feilmelding = "Feil ved kall til K9-FORMIDLING-DOKUMENTDATA: Kunne ikke slette dokumentdata: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9SAK-DD-1000001", feilmelding = "Feil ved kall til K9-FORMIDLING-DOKUMENTDATA: Kunne ikke rydde i dokumentdata: %s", logLevel = LogLevel.WARN)
         Feil feilVedSlettingAvDokumentdata(String feilmelding, Throwable t);
     }
 }

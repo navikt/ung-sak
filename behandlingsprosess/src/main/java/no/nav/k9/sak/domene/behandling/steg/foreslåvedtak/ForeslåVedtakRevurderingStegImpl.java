@@ -105,7 +105,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!BehandlingStegType.FORESLÅ_VEDTAK.equals(tilSteg)) {
-            formidlingDokumentdataTjeneste.slettAllData(kontekst.getBehandlingId());
+            formidlingDokumentdataTjeneste.ryddVedTilbakehopp(kontekst.getBehandlingId());
         }
     }
 }

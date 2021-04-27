@@ -53,6 +53,6 @@ public class ForeslåVedtakStegImplTest {
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT, BehandlingStegType.FATTE_VEDTAK);
 
         // Assert
-        verify(formidlingDokumentdataKlient).slettAllData(eq(behandling.getId()));
+        verify(formidlingDokumentdataKlient).ryddVedTilbakehopp(eq(behandling.getId()));
     }
 }
