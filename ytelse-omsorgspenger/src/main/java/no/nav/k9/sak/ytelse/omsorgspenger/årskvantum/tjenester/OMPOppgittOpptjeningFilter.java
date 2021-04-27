@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -33,18 +35,18 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
+import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.SøknadPerioderTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
 public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
-    private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private SøknadPerioderTjeneste søknadPerioderTjeneste;
     private Boolean lansert;
 
     OMPOppgittOpptjeningFilter() {
@@ -56,11 +58,12 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
                                       VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
                                       MottatteDokumentRepository mottatteDokumentRepository,
+                                      SøknadPerioderTjeneste søknadPerioderTjeneste,
                                       @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
-        this.grunnlagRepository = grunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.søknadPerioderTjeneste = søknadPerioderTjeneste;
         this.lansert = lansert;
     }
 
@@ -76,18 +79,17 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
 
         var gyldigeJournalposter = hentGyldigeDokumenter(ref);
-        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref, gyldigeJournalposter);
+        var fraværPerioderFraSøknad = hentSøknadsperioderPåFagsak(ref);
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad, gyldigeJournalposter);
     }
 
-    private Set<OppgittFraværPeriode> hentFraværPerioderFraSøknad(BehandlingReferanse ref, Map<JournalpostId, MottattDokument> gyldigeJournalposter) {
-        return grunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(ref.getBehandlingId())
-            .map(OppgittFravær::getPerioder)
-            .orElse(Set.of())
+    private Set<OppgittFraværPeriode> hentSøknadsperioderPåFagsak(BehandlingReferanse ref) {
+        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(ref).values()
             .stream()
-            .filter(fraværPeriode -> gyldigeJournalposter.containsKey(fraværPeriode.getJournalpostId()))
+            .flatMap(Collection::stream)
+            .map(it -> it.getRaw())
             .collect(Collectors.toSet());
     }
 
@@ -101,9 +103,8 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-
         var gyldigeJournalposter = hentGyldigeDokumenter(ref);
-        var fraværPerioderFraSøknad = hentFraværPerioderFraSøknad(ref, hentGyldigeDokumenter(ref));
+        var fraværPerioderFraSøknad = hentSøknadsperioderPåFagsak(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad, gyldigeJournalposter);
     }
@@ -122,7 +123,7 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .collect(Collectors.toList());
 
         return oppgittOpptjeninger.stream()
-            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt)) // TODO: Avklare funksjonelt om dette er ønsket sortering
+            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt, Comparator.reverseOrder()))
             .filter(oppgittOpptjening -> overlapperVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
             .map(WrappedOppgittOpptjening::getRaw)
             .findFirst();
@@ -140,11 +141,21 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
         var skalIgnorereAvslåttePerioder = false;
-        return vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
+        var periodeTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
             .stream()
             .filter(di -> di.getFomDato().equals(stp))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Utviklerfeil: Skjæringstidspunkt må ha matchende vilkårsperiode for opptjeningsvilkåret"));
+            .findFirst();
+        if (periodeTilVurdering.isPresent()) {
+            return periodeTilVurdering.get();
+        }
+
+        // Ingen match for stp mot perioder under vurdering -> må da forvente at den matcher vilkårsperiode som er ferdigvurdert
+        var vilkår = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
+        var periodeFerdigvurdert = vilkår.finnPeriodeForSkjæringstidspunkt(stp);
+        if (periodeFerdigvurdert.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT)) {
+            throw new IllegalStateException("Forventer at vilkårsperiode som matchet opptjening var ferdigvurdert");
+        }
+        return periodeFerdigvurdert.getPeriode();
     }
 
     private Map<JournalpostId, LocalDateTimeline<Void>> beregnJournalpostAktivTidslinje(Set<OppgittFraværPeriode> oppgittFraværPerioder) {

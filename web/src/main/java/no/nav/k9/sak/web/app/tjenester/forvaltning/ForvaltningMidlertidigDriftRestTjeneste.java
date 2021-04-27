@@ -56,6 +56,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -64,6 +65,7 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.FeilDto;
@@ -75,6 +77,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.OpprettManuellRevurderingTask;
+import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -105,6 +108,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private EntityManager entityManager;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private BehandlingRepository behandlingRepository;
+
+    private SjekkProsessering sjekkProsessering;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -117,6 +123,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    FagsakTjeneste fagsakTjeneste,
                                                    ProsessTaskRepository prosessTaskRepository,
                                                    MottatteDokumentRepository mottatteDokumentRepository,
+                                                   BehandlingRepository behandlingRepository,
+                                                   SjekkProsessering sjekkProsessering,
                                                    EntityManager entityManager) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
@@ -125,6 +133,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.sjekkProsessering = sjekkProsessering;
         this.entityManager = entityManager;
     }
 
@@ -207,7 +217,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Path("/marker-ugyldig")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Markerer et mottatt dokument som ugyldig", summary = ("Markerer angitt dokument som ugyldig"), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
     public Response markerMottattDokumentUgyldig(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
                                                  @NotNull @FormParam("journalpost") @Parameter(description = "journalpost", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "20")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostDto,
                                                  @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
@@ -232,6 +242,46 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         mottatteDokumentRepository.oppdaterStatus(dokumenter, DokumentStatus.UGYLDIG);
 
         return Response.ok().build();
+
+    }
+
+    @POST
+    @Path("/innhent-registerdata")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Innhent registerdata på nytt", summary = ("Innhent registerdata på nytt"), tags = "forvaltning"/*, responses = {
+            @ApiResponse(responseCode = "202", description = "Innhenter registerdata på nytt (asynkront)."),
+            @ApiResponse(responseCode = "400", description = "Feil i input (eks. ukjent saksnummer), eller ingen åpne behandlinger for fagsak"),
+            @ApiResponse(responseCode = "409", description = "Kan ikke innhente registerdata nå, kan skyldes feilede tasks eller tilstand i prosess"),
+            @ApiResponse(responseCode = "501", description = "Ikke implementert funksjonalitet, eks. mer enn en åpen behandling for fagsak")
+
+    }*/)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response innhentRegisterdataPåNytt(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                                              @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
+
+        var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
+        var fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+
+        if (!fagsakOpt.isPresent()) {
+            return Response.status(Status.BAD_REQUEST.getStatusCode(), "Fant ikke fagsak for angitt saksnummer").build();
+        }
+        var fagsak = fagsakOpt.get();
+        loggForvaltningTjeneste(fagsak, "/innhent-registerdata", begrunnelse.getTekst());
+
+        var åpneBehandlinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
+
+        if (åpneBehandlinger.isEmpty()) {
+            return Response.status(Status.BAD_REQUEST).build();
+        } else if (åpneBehandlinger.size() > 1) {
+            return Response.status(Status.NOT_IMPLEMENTED).entity("Støtter kun oppfrisking av en åpen behandling").build();
+        }
+
+        var behandling = åpneBehandlinger.get(0);
+        if (sjekkProsessering.opprettTaskForOppfrisking(behandling)) {
+            return Response.status(Status.ACCEPTED).build();
+        } else {
+            return Response.status(Status.CONFLICT).entity("Kan ikke innhente registeropplysninger nå - kan være feilede tasks eller prosesstilstand").build();
+        }
 
     }
 

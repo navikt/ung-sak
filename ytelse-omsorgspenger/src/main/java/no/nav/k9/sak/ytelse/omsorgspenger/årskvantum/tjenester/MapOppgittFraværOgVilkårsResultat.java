@@ -113,8 +113,10 @@ public class MapOppgittFraværOgVilkårsResultat {
             Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.NÆRING, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, opptjeningPerioder, aktørId);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
-                LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
-                result.put(aktivitet, aktivAktivitetTidslinje.compress());
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinje = result.getOrDefault(aktivitet, new LocalDateTimeline<>(List.of()));
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNyPeriode = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
+                tidslinje = tidslinje.combine(tidslinjeNyPeriode, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                result.put(aktivitet, tidslinje.compress());
             }));
         });
         return result;
@@ -129,12 +131,19 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType, AktørId aktørId) {
-        if (aktivitetPeriode.getOpptjeningsnøkkel() == null){
-            return new Aktivitet(uttakArbeidType, null, InternArbeidsforholdRef.nullRef());
+        Arbeidsgiver arbeidsgiver;
+
+        if (aktivitetPeriode.getOpptjeningsnøkkel() != null) {
+            arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
+                ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
+                : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
+        } else if (aktørId != null) {
+            // Egen næring uten orgnr
+            arbeidsgiver = Arbeidsgiver.fra(aktørId);
+        } else {
+            // Frilans
+            arbeidsgiver = null;
         }
-        var arbeidsgiver = aktivitetPeriode.getOpptjeningsnøkkel().harType(Opptjeningsnøkkel.Type.ORG_NUMMER)
-            ? Arbeidsgiver.virksomhet(aktivitetPeriode.getOpptjeningsnøkkel().getVerdi())
-            : aktørId != null ? Arbeidsgiver.fra(aktørId) : null;
         return new Aktivitet(uttakArbeidType, arbeidsgiver, InternArbeidsforholdRef.nullRef());
     }
 
@@ -157,8 +166,10 @@ public class MapOppgittFraværOgVilkårsResultat {
             Map<Aktivitet, List<OpptjeningAktivitetPeriode>> perioderPerAktivitet = finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType.FRILANS, UttakArbeidType.FRILANSER, opptjeningPerioder, null);
 
             perioderPerAktivitet.forEach(((aktivitet, aktivitetPerioder) -> {
-                LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
-                result.put(aktivitet, aktivAktivitetTidslinje.compress());
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinje = result.getOrDefault(aktivitet, new LocalDateTimeline<>(List.of()));
+                LocalDateTimeline<WrappedOppgittFraværPeriode> tidslinjeNyPeriode = byggOpptjeningAktivitetTidslinje(aktivitetPerioder, vilkårperiode);
+                tidslinje = tidslinje.combine(tidslinjeNyPeriode, this::mergePeriode, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                result.put(aktivitet, tidslinje.compress());
             }));
         });
         return result;

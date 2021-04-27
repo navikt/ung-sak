@@ -12,10 +12,7 @@ import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 
 
 @ApplicationScoped
@@ -26,7 +23,7 @@ public class VedtaksHendelseHåndterer {
     private static final Logger log = LoggerFactory.getLogger(VedtaksHendelseHåndterer.class);
     private ProsessTaskRepository taskRepository;
 
-    public VedtaksHendelseHåndterer() {
+    VedtaksHendelseHåndterer() {
     }
 
     @Inject
@@ -37,12 +34,17 @@ public class VedtaksHendelseHåndterer {
     void handleMessage(String key, String payload) {
         log.debug("Mottatt ytelse-vedtatt hendelse med key='{}', payload={}", key, payload);
         var vh = JsonObjectMapper.fromJson(payload, Ytelse.class);
+        var fagsakYtelseType = FagsakYtelseType.fromString(vh.getType().getKode());
 
-        if (FagsakYtelseType.PSB.equals(FagsakYtelseType.fromString(vh.getType().getKode()))) {
-            ProsessTaskData taskData = new ProsessTaskData(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME);
-            taskData.setPayload(payload);
-
-            taskRepository.lagre(taskData);
+        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(fagsakYtelseType);
+        if (vurderOmVedtakPåvirkerSakerTjeneste.isEmpty()) {
+            return;
         }
+        log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}', sjekker behovet for revurdering", fagsakYtelseType);
+
+        ProsessTaskData taskData = new ProsessTaskData(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME);
+        taskData.setPayload(payload);
+
+        taskRepository.lagre(taskData);
     }
 }

@@ -29,6 +29,8 @@
 
     <properties>
         <java.version>16</java.version> <!--Brukes av jenkins -->
+        <kontrakt.java.version>15</kontrakt.java.version>
+        
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
         <revision>3.1.0</revision>
