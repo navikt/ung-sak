@@ -291,7 +291,7 @@ public class SykdomVurderingRestTjeneste {
             throw new IllegalStateException("En vurdering må minimum ha ett dokument tilknyttet.");
         }
         
-        sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOppdatering.getPerioder());
+        sikreAtOppdateringIkkeKrysser18årsdag(behandling, sykdomVurderingOpprettelse.getPerioder());
 
         final var sporingsinformasjon = lagSporingsinformasjon(behandling);
         final List<SykdomDokument> alleDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
