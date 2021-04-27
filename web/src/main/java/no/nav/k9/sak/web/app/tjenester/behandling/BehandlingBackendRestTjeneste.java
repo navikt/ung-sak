@@ -112,7 +112,7 @@ public class BehandlingBackendRestTjeneste {
             var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid);
             if (behandling.erStatusFerdigbehandlet()) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
-            } else if (!sjekkProsessering.opprettTaskForOppfrisking(behandling)) {
+            } else if (!sjekkProsessering.opprettTaskForOppfrisking(behandling, false)) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
             } else {
                 var taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);

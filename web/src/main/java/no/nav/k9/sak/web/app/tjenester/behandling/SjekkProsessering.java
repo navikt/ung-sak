@@ -109,8 +109,8 @@ public class SjekkProsessering {
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
 
-    public boolean opprettTaskForOppfrisking(Behandling behandling) {
-        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
+    public boolean opprettTaskForOppfrisking(Behandling behandling, boolean force) {
+        if (!force && !skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return false;
         }
 
