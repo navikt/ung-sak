@@ -130,6 +130,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     @Override
+    public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling) {
+        return lagOppdaterFortsettTasksForPolling(behandling, skalHenteInnRegisterData(behandling));
+    }
+
+    @Override
     public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent) {
 
         if (behandling.erSaksbehandlingAvsluttet()) {
@@ -144,7 +149,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskData registerdataOppdatererTask = new ProsessTaskData(OppfriskingAvBehandlingTask.TASKTYPE);
         registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(registerdataOppdatererTask);
-        if (forceInnhent || skalHenteInnRegisterData(behandling)) {
+        if (forceInnhent) {
             log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
             leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe);
         } else {

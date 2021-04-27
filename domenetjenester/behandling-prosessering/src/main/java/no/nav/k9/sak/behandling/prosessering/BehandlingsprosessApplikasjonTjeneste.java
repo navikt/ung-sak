@@ -72,7 +72,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
      */
     public String asynkRegisteroppdateringKjørProsess(Behandling behandling) {
         behandlingProsesseringTjeneste.tvingInnhentingRegisteropplysninger(behandling);
-        return asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, false);
+        return asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling);
     }
 
     /**
@@ -89,8 +89,8 @@ public class BehandlingsprosessApplikasjonTjeneste {
      *
      * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    private String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean forceInnhent) {
-        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling, forceInnhent);
+    private String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
+        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling);
         String gruppeNavn = prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);
         return gruppeNavn;
@@ -103,7 +103,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
      */
     public Optional<String> gjenopptaBehandling(Behandling behandling) {
         opprettHistorikkinnslagForManueltGjenopptakelse(behandling, HistorikkinnslagType.BEH_MAN_GJEN);
-        return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, false));
+        return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
 
     public Behandling hentBehandling(Long behandlingsId) {

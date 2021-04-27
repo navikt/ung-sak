@@ -41,6 +41,9 @@ public interface BehandlingProsesseringTjeneste {
     // Spole prosessen basert på diff. Til bruk ved grunnlagsendringer utenom register (søknad)
     void reposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatDiff grunnlagDiff);
 
+    /** Innhenter registerdata hvis utdatert. */
+    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling);
+
     /** Returnerer tasks for oppdatering/fortsett for bruk med BehandlingskontrollAsynkTjeneste. Blir ikke lagret her */
     ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent);
 
@@ -55,4 +58,5 @@ public interface BehandlingProsesseringTjeneste {
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 
     void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Set<String> set);
+
 }
