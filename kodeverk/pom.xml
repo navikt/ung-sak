@@ -65,6 +65,17 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${kontrakt.java.version}</source>
+					<target>${kontrakt.java.version}</target>
+					<encoding>UTF-8</encoding>
+					<release>${konrakt.java.version}</release>
+				<parameters>true</parameters>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
