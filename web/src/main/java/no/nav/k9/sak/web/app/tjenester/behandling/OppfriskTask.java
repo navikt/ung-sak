@@ -19,6 +19,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class OppfriskTask extends BehandlingProsessTask {
 
+    private static final String PROPERTY_FORCE = "force.innhent";
+
     private static final Logger log = LoggerFactory.getLogger(OppfriskTask.class);
 
     public static final String TASKTYPE = "behandling.oppfrisk";
@@ -41,15 +43,18 @@ public class OppfriskTask extends BehandlingProsessTask {
     public void prosesser(ProsessTaskData prosessTaskData) {
         try {
             var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
-            sjekkProsessering.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling);
+            logContext(behandling);
+            var forceInnhent = Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_FORCE));
+            sjekkProsessering.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, forceInnhent);
         } catch (RuntimeException e) {
             log.info("Uventet feil ved oppfrisking av behandling.", e);
         }
     }
 
 
-    public static final ProsessTaskData create(Behandling behandling) {
+    public static final ProsessTaskData create(Behandling behandling, boolean force) {
         final ProsessTaskData taskData = new ProsessTaskData(OppfriskTask.TASKTYPE);
+        taskData.setProperty(PROPERTY_FORCE, Boolean.toString(force));
         taskData.setCallIdFraEksisterende();
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         return taskData;

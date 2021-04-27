@@ -42,7 +42,7 @@ public interface BehandlingProsesseringTjeneste {
     void reposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatDiff grunnlagDiff);
 
     /** Returnerer tasks for oppdatering/fortsett for bruk med BehandlingskontrollAsynkTjeneste. Blir ikke lagret her */
-    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling);
+    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent);
 
     // Til bruk for å kjøre behandlingsprosessen videre. Lagrer tasks. Returnerer gruppe-handle
     String opprettTasksForFortsettBehandling(Behandling behandling);
