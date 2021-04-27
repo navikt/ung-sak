@@ -50,16 +50,11 @@ public class VedtaksbrevHåndterer {
 
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             settFritekstBrev(param.getBehandlingId(), dto.getOverskrift(), dto.getFritekstBrev());
-            boolean erForeslåVedtakAksjonspunkt = AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon);
-            if (!erForeslåVedtakAksjonspunkt) {
-                behandling.getÅpentAksjonspunktMedDefinisjonOptional(aksjonspunktDefinisjon)
-                    .ifPresent(ap -> builder.medAvbruttAksjonspunkt());
-                registerForeslåVedtakAksjonspunkt(behandling, builder);
-            }
         }
-
-        opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
-        opprettAksjonspunktForFatterVedtak(builder);
+        if (aksjonspunktDefinisjon.getDefaultTotrinnBehandling()) {
+            opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
+            opprettAksjonspunktForFatterVedtak(builder);
+        }
         opprettHistorikkinnslag(behandling);
     }
 
@@ -99,13 +94,6 @@ public class VedtaksbrevHåndterer {
     private boolean skalNullstilleFritekstfelt(Behandling behandling, VedtakVarsel behandlingsresultat) {
         return !behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()
             && behandlingsresultat.getAvslagarsakFritekst() != null;
-    }
-
-    private void registerForeslåVedtakAksjonspunkt(Behandling behandling, OppdateringResultat.Builder builder) {
-        AksjonspunktDefinisjon foreslaVedtak = AksjonspunktDefinisjon.FORESLÅ_VEDTAK;
-        AksjonspunktStatus target = behandling.getAksjonspunktMedDefinisjonOptional(foreslaVedtak)
-            .map(ap -> AksjonspunktStatus.AVBRUTT.equals(ap.getStatus()) ? AksjonspunktStatus.OPPRETTET : ap.getStatus()).orElse(AksjonspunktStatus.UTFØRT);
-        builder.medEkstraAksjonspunktResultat(foreslaVedtak, target);
     }
 
     private void opprettHistorikkinnslag(Behandling behandling) {
