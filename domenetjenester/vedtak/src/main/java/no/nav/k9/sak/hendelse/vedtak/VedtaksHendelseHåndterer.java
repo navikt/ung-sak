@@ -40,7 +40,7 @@ public class VedtaksHendelseHåndterer {
         if (vurderOmVedtakPåvirkerSakerTjeneste.isEmpty()) {
             return;
         }
-        log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}', sjekker behovet for revurdering", fagsakYtelseType);
+        log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}' saksnummer='{}', sjekker behovet for revurdering", fagsakYtelseType, vh.getSaksnummer());
 
         ProsessTaskData taskData = new ProsessTaskData(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME);
         taskData.setPayload(payload);

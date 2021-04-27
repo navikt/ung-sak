@@ -51,7 +51,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjeneste(fagsakYtelseType);
         var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste.utledSakerSomErKanVærePåvirket(vedtakHendelse);
 
-        log.info("Fant følgende saker '{}' som skal revurderes som følge av vedtak.", kandidaterTilRevurdering);
+        log.info("Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.", fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);
 
         for (Saksnummer kandidatsaksnummer : kandidaterTilRevurdering) {
             ProsessTaskData tilRevurderingTaskData = new ProsessTaskData(OpprettRevurderingEllerOpprettDiffTask.TASKNAME);
