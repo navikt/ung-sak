@@ -148,13 +148,12 @@ public class PersonInformasjonEntitet extends BaseEntitet {
         this.personopplysninger.removeIf(e -> e.getAktørId().equals(aktørId));
     }
 
-    void fjernPersonrelasjon(PersonRelasjonEntitet relasjon) {
-        relasjoner.removeIf(e -> e.equals(relasjon));
-    }
-
     /**
      * Rydder bort alt unntatt personopplysninger
+     *
+     * @deprecated bør håndteres i ctor
      */
+    @Deprecated(forRemoval = true)
     void tilbakestill() {
         this.adresser.clear();
         this.personstatuser.clear();
