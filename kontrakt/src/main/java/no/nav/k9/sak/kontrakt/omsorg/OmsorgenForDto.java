@@ -12,8 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.Periode;
 
-import no.nav.k9.søknad.ytelse.psb.v1.Omsorg.BarnRelasjon;
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -24,7 +22,6 @@ public class OmsorgenForDto {
     @Valid
     private Periode periode;
 
-    // TODO Omsorg: Endre til enum.
     @JsonProperty(value = "relasjon")
     @Valid
     private BarnRelasjon relasjon;

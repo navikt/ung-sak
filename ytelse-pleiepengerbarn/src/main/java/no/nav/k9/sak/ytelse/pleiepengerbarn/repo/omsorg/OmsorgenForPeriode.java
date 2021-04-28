@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
-import no.nav.k9.søknad.ytelse.psb.v1.Omsorg.BarnRelasjon;
+import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 
 @Entity(name = "OmsorgenForPeriode")
 @Table(name = "OMSORGEN_FOR_PERIODE")
@@ -40,6 +40,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
 
     @ChangeTracked
     @Column(name = "relasjon", nullable = false)
+    @Convert(converter = OmsorgRelasjonTypeConverter.class)
     private BarnRelasjon relasjon;
 
     @ChangeTracked
@@ -63,7 +64,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     private long versjon;
 
 
-    OmsorgenForPeriode() {
+    public OmsorgenForPeriode() {
     }
 
     public OmsorgenForPeriode(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse,

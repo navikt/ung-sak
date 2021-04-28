@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
@@ -120,9 +121,9 @@ class SøknadOversetter {
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
         final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
-                DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
-                omsorg.getRelasjonTilBarnet(),
-                omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "");
+            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
+            BarnRelasjon.of(omsorg.getRelasjonTilBarnet().getRolle()),
+            omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "");
         omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
     }
 
