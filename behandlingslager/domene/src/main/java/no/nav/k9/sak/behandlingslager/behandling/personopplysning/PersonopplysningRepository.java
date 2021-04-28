@@ -10,12 +10,13 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
 
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 /**
  * Dette er et Repository for håndtering av alle persistente endringer i en Personopplysning graf.
@@ -38,6 +39,7 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 public class PersonopplysningRepository {
 
     private EntityManager entityManager;
+    private BehandlingRepository behandlingRepository;
 
     protected PersonopplysningRepository() {
         // CDI
@@ -46,6 +48,7 @@ public class PersonopplysningRepository {
     @Inject
     public PersonopplysningRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
+        this.behandlingRepository = new BehandlingRepository(entityManager);
     }
 
     /**
@@ -152,20 +155,44 @@ public class PersonopplysningRepository {
     }
 
 
-    public void lagre(Long behandlingId, PersonInformasjonBuilder builder) {
-        Objects.requireNonNull(behandlingId, "behandling"); // NOSONAR //$NON-NLS-1$
-        Objects.requireNonNull(builder, "søknadAnnenPartBuilder"); // NOSONAR //$NON-NLS-1$
+    public void lagre(Long behandlingId, PersonInformasjonBuilder personInformasjonBuilder) {
+        validerHarFasteAktører(behandlingId, personInformasjonBuilder);
 
         final PersonopplysningGrunnlagBuilder nyttGrunnlag = getGrunnlagBuilderFor(behandlingId);
 
-        if (builder.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
-            nyttGrunnlag.medRegistrertVersjon(builder);
+
+        if (personInformasjonBuilder.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
+            nyttGrunnlag.medRegistrertVersjon(personInformasjonBuilder);
         }
-        if (builder.getType().equals(PersonopplysningVersjonType.OVERSTYRT)) {
-            nyttGrunnlag.medOverstyrtVersjon(builder);
+        if (personInformasjonBuilder.getType().equals(PersonopplysningVersjonType.OVERSTYRT)) {
+            nyttGrunnlag.medOverstyrtVersjon(personInformasjonBuilder);
         }
 
         lagreOgFlush(behandlingId, nyttGrunnlag);
+    }
+
+    private void validerHarFasteAktører(Long behandlingId, PersonInformasjonBuilder personInformasjonBuilder) {
+        Objects.requireNonNull(behandlingId);
+        Objects.requireNonNull(personInformasjonBuilder);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        if (!personInformasjonBuilder.harAktørId(behandling.getAktørId())) {
+            throw new IllegalStateException("Mangler personinfo for brukers aktørId");
+        }
+
+        var pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
+        if (pleietrengendeAktørId != null) {
+            if (!personInformasjonBuilder.harAktørId(pleietrengendeAktørId)) {
+                throw new IllegalStateException("Mangler personinfo for angitt pleietrengende aktørId");
+            }
+        }
+
+        var relatertAnnenPerson = behandling.getFagsak().getRelatertPersonAktørId();
+        if (relatertAnnenPerson != null) {
+            if (!personInformasjonBuilder.harAktørId(relatertAnnenPerson)) {
+                throw new IllegalStateException("Mangler personinfo for angitt relatert annen part aktørId");
+            }
+        }
     }
 
     private PersonopplysningGrunnlagBuilder getGrunnlagBuilderFor(Long behandlingId) {
