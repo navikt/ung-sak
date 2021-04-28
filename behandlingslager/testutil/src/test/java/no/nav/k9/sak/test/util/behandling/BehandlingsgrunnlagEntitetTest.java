@@ -98,83 +98,16 @@ public class BehandlingsgrunnlagEntitetTest {
         assertThat(søknad.getSøknadsdato()).isEqualTo(søknadsdato);
     }
 
-    private void lagreBehandling(Behandling behandling) {
-        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, lås);
-    }
-
-    private PersonopplysningGrunnlagEntitet hentSøkerPersonopplysninger(Long behandlingId) {
-        return personopplysningRepository.hentPersonopplysninger(behandlingId);
-    }
-
     @Test
-    public void skal_innsette_bekrefet_forelder() {
-        LocalDate dødsdato = LocalDate.now();
-        LocalDate fødselsdato = dødsdato.minusYears(50);
-        AktørId forelder = AktørId.dummy();
-
-        Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
-        Behandling behandling = behandlingBuilder.build();
-        lagreBehandling(behandling);
-        repository.flushAndClear();
-
-        // Arrange 1. Legge til forelder 1
-        Long behandlingId = behandling.getId();
-        PersonInformasjonBuilder informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandlingId);
-        informasjonBuilder
-            .leggTil(
-                informasjonBuilder.getPersonopplysningBuilder(forelder)
-                    .medNavn("Forelder 1")
-                    .medKjønn(NavBrukerKjønn.MANN)
-                    .medFødselsdato(fødselsdato)
-                    .medDødsdato(dødsdato)
-                    .medSivilstand(SivilstandType.UGIFT)
-                    .medRegion(Region.NORDEN))
-            .leggTil(
-                informasjonBuilder
-                    .getPersonstatusBuilder(forelder, DatoIntervallEntitet.fraOgMed(fødselsdato)).medPersonstatus(PersonstatusType.BOSA))
-            .leggTil(informasjonBuilder
-                .getStatsborgerskapBuilder(forelder, DatoIntervallEntitet.fraOgMed(fødselsdato), Landkoder.NOR, Region.NORDEN))
-            .leggTil(informasjonBuilder
-                .getAdresseBuilder(forelder, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
-                .medAdresselinje1("Utlandsadresse")
-                .medLand("Sverige"))
-            .leggTil(informasjonBuilder
-                .getAdresseBuilder(forelder, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.BOSTEDSADRESSE)
-                .medAdresselinje1("Testadresse")
-                .medLand("NOR").medPostnummer("0051"));
-
-        personopplysningRepository.lagre(behandlingId, informasjonBuilder);
-
-        // Assert 1: Forelder 1 er lagret
-        @SuppressWarnings("unused")
-        Behandling opphentet1 = repository.hent(Behandling.class, behandlingId);
-
-        PersonopplysningGrunnlagEntitet personopplysninger = hentSøkerPersonopplysninger(behandlingId);
-        PersonInformasjonEntitet personInformasjon = personopplysninger.getGjeldendeVersjon();
-        assertThat(personopplysninger).isNotNull();
-        assertThat(personopplysninger).isNotNull();
-
-        assertThat(personInformasjon.getPersonopplysninger()).hasSize(1);
-        assertThat(personInformasjon.getAdresser()).hasSize(2);
-        assertThat(personInformasjon.getRelasjoner()).isEmpty();
-        assertThat(personInformasjon.getPersonstatus()).hasSize(1);
-        assertThat(personInformasjon.getStatsborgerskap()).hasSize(1);
-
-        assertThat(personInformasjon.getPersonopplysninger().stream()
-            .filter(e -> e.getAktørId().equals(forelder)).findFirst().get().getAktørId()).isEqualTo(forelder);
-    }
-
-    @Test
-    public void skal_kunne_lagre_statsborgerskap_til_en_bekrefet_forelder() {
+    public void skal_kunne_lagre_personinfo_på_bruker() {
         LocalDate dødsdatoForelder1 = LocalDate.now();
-
-        AktørId aktørId = AktørId.dummy();
-
+    
+        AktørId aktørId = fagsak.getAktørId();
+    
         Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = behandlingBuilder.build();
         lagreBehandling(behandling);
-
+    
         Long behandlingId = behandling.getId();
         PersonInformasjonBuilder informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandlingId);
         LocalDate fødselsdato = dødsdatoForelder1.minusYears(40);
@@ -198,28 +131,28 @@ public class BehandlingsgrunnlagEntitetTest {
                 .medLand("Sverige").medPostnummer("1234"))
             .leggTil(informasjonBuilder
                 .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), Landkoder.NOR, Region.NORDEN));
-
+    
         personopplysningRepository.lagre(behandlingId, informasjonBuilder);
         repository.flushAndClear();
-
+    
         // Assert 1: Forelder 1 er lagret
         @SuppressWarnings("unused")
         Behandling opphentet = repository.hent(Behandling.class, behandlingId);
         PersonopplysningGrunnlagEntitet personopplysninger = hentSøkerPersonopplysninger(behandlingId);
         assertThat(personopplysninger).isNotNull();
-
+    
         PersonInformasjonEntitet personInformasjon = personopplysninger.getGjeldendeVersjon();
         assertThat(personInformasjon.getPersonopplysninger()).hasSize(1);
         assertThat(personInformasjon.getAdresser()).hasSize(2);
         assertThat(personInformasjon.getRelasjoner()).isEmpty();
         assertThat(personInformasjon.getPersonstatus()).hasSize(1);
         assertThat(personInformasjon.getStatsborgerskap()).hasSize(1);
-
+    
         assertThat(personInformasjon.getPersonstatus().get(0).getPersonstatus()).isEqualTo(PersonstatusType.BOSA);
-
+    
         StatsborgerskapEntitet statsborgerskap = personInformasjon.getStatsborgerskap().get(0);
         assertThat(statsborgerskap.getStatsborgerskap()).isEqualTo(Landkoder.NOR);
-
+    
         // Assert på de øvrige attributter
         PersonopplysningEntitet personopplysning = personInformasjon.getPersonopplysninger().get(0);
         assertThat(personopplysning.getDødsdato()).isEqualTo(dødsdatoForelder1);
@@ -232,9 +165,9 @@ public class BehandlingsgrunnlagEntitetTest {
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusDays(100);
         LocalDate beslutningsdato = LocalDate.now().minusDays(10);
-
+    
         MedlemskapRepository medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-
+    
         MedlemskapPerioderEntitet medlemskapPerioder1 = new MedlemskapPerioderBuilder()
             .medPeriode(fom, tom)
             .medMedlemskapType(MedlemskapType.FORELOPIG)
@@ -242,7 +175,7 @@ public class BehandlingsgrunnlagEntitetTest {
             .medKildeType(MedlemskapKildeType.FS22)
             .medBeslutningsdato(beslutningsdato)
             .build();
-
+    
         MedlemskapPerioderEntitet medlemskapPerioder2 = new MedlemskapPerioderBuilder()
             .medPeriode(fom, tom)
             .medMedlemskapType(MedlemskapType.ENDELIG)
@@ -250,20 +183,29 @@ public class BehandlingsgrunnlagEntitetTest {
             .medKildeType(MedlemskapKildeType.AVGSYS)
             .medBeslutningsdato(beslutningsdato)
             .build();
-
+    
         Behandling.Builder behandlingBuilder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = behandlingBuilder.build();
-
+    
         // Act
         lagreBehandling(behandling);
         repository.flushAndClear();
-
+    
         Long behandlingId = behandling.getId();
         medlemskapRepository.lagreMedlemskapRegisterOpplysninger(behandlingId, List.of(medlemskapPerioder1, medlemskapPerioder2));
-
+    
         // Assert
         Set<MedlemskapPerioderEntitet> medlemskapPerioders = medlemskapRepository.hentMedlemskap(behandlingId).get().getRegistrertMedlemskapPerioder();
         assertThat(medlemskapPerioders).hasSize(2);
         assertThat(medlemskapPerioders).containsExactlyInAnyOrder(medlemskapPerioder1, medlemskapPerioder2);
+    }
+
+    private void lagreBehandling(Behandling behandling) {
+        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
+        behandlingRepository.lagre(behandling, lås);
+    }
+
+    private PersonopplysningGrunnlagEntitet hentSøkerPersonopplysninger(Long behandlingId) {
+        return personopplysningRepository.hentPersonopplysninger(behandlingId);
     }
 }
