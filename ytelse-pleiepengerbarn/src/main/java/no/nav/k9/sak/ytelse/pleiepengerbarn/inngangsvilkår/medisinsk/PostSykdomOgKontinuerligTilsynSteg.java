@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -30,7 +31,6 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
-    public static final VilkårType VILKÅRET = VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -59,12 +59,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     }
 
     VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering, NavigableSet<DatoIntervallEntitet> medlemskapsPerioderTilVurdering) {
-        var innvilgetePerioder = vilkårene.getVilkår(VILKÅRET).orElseThrow()
-            .getPerioder()
-            .stream()
-            .filter(it -> sykdomsPerioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
-            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
-            .collect(Collectors.toSet());
+        var innvilgetePerioder = finnInnvilgedePerioder(vilkårene, sykdomsPerioderTilVurdering);
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
@@ -74,6 +69,16 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, sykdomsPerioderTilVurdering);
 
         return resultatBuilder;
+    }
+
+    private Set<VilkårPeriode> finnInnvilgedePerioder(Vilkårene vilkårene,
+            NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering) {
+        var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow().getPerioder().stream();
+        var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow().getPerioder().stream();
+        return Stream.concat(s1, s2)
+            .filter(it -> sykdomsPerioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+            .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
+            .collect(Collectors.toSet());
     }
 
     private void justerPeriodeForOpptjeningOgBeregning(Set<VilkårPeriode> innvilgetePerioder, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering) {
