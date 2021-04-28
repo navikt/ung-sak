@@ -118,6 +118,8 @@ public class PersonInformasjonBuilder {
                 nyeRelasjoner.stream().map(e -> e.getTilAktørId()))
                 .collect(Collectors.toSet()));
 
+            finnPersonerFjernet.remove(søkerAktørId); // skal alltid være med
+
             // fjerner bare dersom er i listen av relasjoner som ikke fins lenger.
             finnPersonerFjernet.forEach(id -> {
                 log.info("Fjerner person {}..... - relasjon eksisterer ikke lenger", id.getAktørId().substring(0, 3));
