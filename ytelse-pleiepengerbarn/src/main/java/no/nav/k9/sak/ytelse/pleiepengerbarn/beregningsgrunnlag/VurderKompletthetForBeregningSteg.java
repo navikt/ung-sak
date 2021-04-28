@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -79,10 +80,16 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         }
 
         var kompletthetsVurderinger = kompletthetsjekker.utledAlleManglendeVedleggForPerioder(ref);
-
-        var erKomplett = kompletthetsVurderinger.entrySet()
+        var relevanteKompletthetsvurderinger = kompletthetsVurderinger.entrySet()
             .stream()
             .filter(it -> perioderTilVurdering.contains(it.getKey()))
+            .collect(Collectors.toList());
+
+        if (relevanteKompletthetsvurderinger.stream().allMatch(it -> it.getValue().isEmpty())) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
+        var erKomplett = relevanteKompletthetsvurderinger.stream()
             .filter(it -> !it.getValue().isEmpty())
             .allMatch(it -> erPeriodeKomplettBasertPåArbeid(uttakGrunnlag, vurderteSøknadsperioder, it));
 
