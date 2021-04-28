@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -71,8 +72,8 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                     .flatMap(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid))
                     .orElseThrow();
                 var vurderingsperioder = utledVurderingsperiode(kandidatSykdomBehandling);
-                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
-                    kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder).getDiffPerioder();
+                var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder);
+                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
 
                 if (!endringerISøktePerioder.isEmpty()) {
                     result.add(kandidatsaksnummer);
