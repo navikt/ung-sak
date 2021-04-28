@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -117,29 +116,29 @@ public class SykdomVurderingService {
     public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final LocalDateTimeline<SykdomVurderingVersjon> vurderinger = hentVurderinger(sykdomVurderingType, behandling);
         final LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = sykdomVurderingRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
-        
+
         final var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
         final var perioderTilVurderingUnder18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         final var perioderTilVurdering18 = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
-        
+
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = union(perioderTilVurderingUnder18, perioderTilVurdering18);
         final List<Periode> nyeSøknadsperioder = Collections.emptyList(); // TODO;nyeSøknadsperioder
-        final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());       
+        final List<Periode> alleSøknadsperioder = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
         final List<Periode> innleggelsesperioder = hentInnleggelsesperioder(behandling);
-        
+
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(perioderTilVurdering, vurderinger);
         if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
             alleResterendeVurderingsperioder = LocalDateTimeline.EMPTY_TIMELINE;
         }
-        
+
         alleResterendeVurderingsperioder = kunPerioderSomIkkeFinnesI(alleResterendeVurderingsperioder, toLocalDateTimeline(innleggelsesperioder));
-        
+
         final List<Periode> resterendeVurderingsperioder;
         final List<Periode> resterendeValgfrieVurderingsperioder;
         if (sykdomVurderingType == SykdomVurderingType.TO_OMSORGSPERSONER) {
             // Kun vurder perioder for TO_OMSORGSPERSONER hvis det ligger en KTP-vurdering i bunn:
             alleResterendeVurderingsperioder = alleResterendeVurderingsperioder.intersection(toLocalDateTimeline(hentKontinuerligTilsynOgPleiePerioder(behandling)));
-            
+
             final LocalDateTimeline<?> flereOmsorgspersoner = harAndreSakerEnn(behandling.getFagsak().getSaksnummer(), behandledeSøknadsperioder);
             final LocalDateTimeline<Boolean> resterendeVurderingsperioderTidslinje = alleResterendeVurderingsperioder.intersection(flereOmsorgspersoner);
             resterendeVurderingsperioder = toPeriodeList(
@@ -163,7 +162,7 @@ public class SykdomVurderingService {
                 innleggelsesperioder
             );
     }
-    
+
     private static <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2)  {
         final var resultat = new TreeSet<>(s1);
         resultat.addAll(s2);
@@ -288,7 +287,7 @@ public class SykdomVurderingService {
             this.saksnummerForPerioder = saksnummerForPerioder;
             this.søknadsperioder = søknadsperioder;
             this.resterendeVurderingsperioder = resterendeVurderingsperioder;
-            this.resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder; 
+            this.resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder;
             this.nyeSøknadsperioder = nyeSøknadsperioder;
             this.innleggelsesperioder = innleggelsesperioder;
         }
@@ -309,7 +308,7 @@ public class SykdomVurderingService {
         public List<Periode> getResterendeVurderingsperioder() {
             return Collections.unmodifiableList(resterendeVurderingsperioder);
         }
-        
+
         public List<Periode> getResterendeValgfrieVurderingsperioder() {
             return Collections.unmodifiableList(resterendeValgfrieVurderingsperioder);
         }
