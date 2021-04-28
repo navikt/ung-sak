@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,7 +14,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -48,8 +46,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
+import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
@@ -137,10 +135,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
-        var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
+        var utenlandsopphold = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getUtenlandsopphold();
 
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
-        lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
+        lagreMedlemskapinfo(behandlingId, utenlandsopphold, søknad.getMottattDato().toLocalDate());
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søknad.getSøker());
     }
 
@@ -193,20 +191,17 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         }
     }
 
-    private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
+    private void lagreMedlemskapinfo(Long behandlingId, Utenlandsopphold utenlandsopphold, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
-        // TODO: Hva skal vi ha som "oppholdNå"? Er dette relevant for k9 eller bruker vi en annen tolkning for medlemskap?
-        // TODO kontrakt har utenlandsopphold, skal dette benyttes?
-        if (bosteder != null) {
-            bosteder.getPerioder().forEach((periode, opphold) -> {
-                oppgittTilknytningBuilder
-                    .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                        .medLand(finnLandkode(opphold.getLand().getLandkode()))
-                        .medPeriode(
-                            Objects.requireNonNull(periode.getFraOgMed()),
-                            Objects.requireNonNullElse(periode.getTilOgMed(), Tid.TIDENES_ENDE))
-                        .build());
+        if (utenlandsopphold != null) {
+            utenlandsopphold.getPerioder().forEach((periode, periodeInfo) -> {
+                var tidligereOpphold = periode.getFraOgMed().isBefore(forsendelseMottatt);
+                oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
+                    .medLand(finnLandkode(periodeInfo.getLand().getLandkode()))
+                    .medPeriode(periode.getFraOgMed(), periode.getTilOgMed())
+                    .erTidligereOpphold(tidligereOpphold)
+                    .build());
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
