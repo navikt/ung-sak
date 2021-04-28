@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -11,6 +10,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
@@ -88,15 +88,19 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
         return personinfo.getFødselsdato();
     }
     
+    @SuppressWarnings("unchecked")
     private LocalDateTimeline<Boolean> tilTidslinje(Set<Søknadsperioder> perioder) {
-        return new LocalDateTimeline<Boolean>(
-                perioder.stream()
-                    .map(Søknadsperioder::getPerioder)
-                    .flatMap(Collection::stream)
-                    .map(Søknadsperiode::getPeriode)
-                    .map(d -> new LocalDateSegment<Boolean>(d.getFomDato(), d.getTomDato(), Boolean.TRUE))
-                    .collect(Collectors.toList())
-            );
+        return perioder.stream()
+                .map(Søknadsperioder::getPerioder)
+                .map(p -> new LocalDateTimeline<Boolean>(
+                        p.stream()
+                        .map(Søknadsperiode::getPeriode)
+                        .map(d -> new LocalDateSegment<Boolean>(d.getFomDato(), d.getTomDato(), Boolean.TRUE))
+                        .collect(Collectors.toList())
+                    )
+                )
+                .reduce((a, b) -> a.union(b, StandardCombinators::coalesceLeftHandSide))
+                .orElse(LocalDateTimeline.EMPTY_TIMELINE);
     }
     
     private TreeSet<DatoIntervallEntitet> tilNavigableSet(LocalDateTimeline<Boolean> resultat) {
