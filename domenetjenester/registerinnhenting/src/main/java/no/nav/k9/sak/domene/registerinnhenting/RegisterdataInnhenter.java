@@ -175,11 +175,19 @@ public class RegisterdataInnhenter {
             var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
                 log.info("Fant personinfo for angitt pleietrengende fra fagsak");
+                if (harAktør(informasjonBuilder, personinfo)) {
+                    log.info("har allerede mappet pleietrengende");
+                    return;
+                }
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
             } else {
                 throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
             }
         }
+    }
+
+    private boolean harAktør(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
+        return informasjonBuilder.harAktørId(personinfo.getAktørId());
     }
 
     private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
@@ -296,7 +304,7 @@ public class RegisterdataInnhenter {
     }
 
     private void mapInfoTilEntitet(Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, boolean lagreIHistoriskeTabeller) {
-        if (informasjonBuilder.harAktørId(personinfo.getAktørId())) {
+        if (harAktør(informasjonBuilder, personinfo)) {
             return;
         }
 

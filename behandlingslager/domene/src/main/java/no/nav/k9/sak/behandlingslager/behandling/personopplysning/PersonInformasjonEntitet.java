@@ -262,6 +262,8 @@ public class PersonInformasjonEntitet extends BaseEntitet {
     }
 
     PersonInformasjonBuilder.RelasjonBuilder getRelasjonBuilderForAktørId(AktørId fraAktør, AktørId tilAktør, RelasjonsRolleType rolle) {
+        Objects.requireNonNull(fraAktør);
+        Objects.requireNonNull(tilAktør);
         final Optional<PersonRelasjonEntitet> eksisterende = relasjoner.stream()
                 .filter(it -> it.getAktørId().equals(fraAktør) && it.getTilAktørId().equals(tilAktør) && it.getRelasjonsrolle().equals(rolle))
                 .findAny();
@@ -269,6 +271,8 @@ public class PersonInformasjonEntitet extends BaseEntitet {
     }
 
     PersonInformasjonBuilder.AdresseBuilder getAdresseBuilderForAktørId(AktørId aktørId, AdresseType type, DatoIntervallEntitet periode) {
+        Objects.requireNonNull(aktørId);
+        Objects.requireNonNull(type);
         final Optional<PersonAdresseEntitet> eksisterende = adresser.stream()
                 .filter(it -> it.getAktørId().equals(aktørId) && it.getAdresseType().equals(type) && erSannsynligvisSammePeriode(it.getPeriode(), periode))
                 .findAny();
@@ -281,6 +285,7 @@ public class PersonInformasjonEntitet extends BaseEntitet {
     }
 
     PersonInformasjonBuilder.StatsborgerskapBuilder getStatsborgerskapBuilderForAktørId(AktørId aktørId, Landkoder landkode, DatoIntervallEntitet periode, Region region) {
+        Objects.requireNonNull(aktørId);
         final Optional<StatsborgerskapEntitet> eksisterende = statsborgerskap.stream()
                 .filter(it -> it.getAktørId().equals(aktørId) && it.getStatsborgerskap().equals(landkode) && erSannsynligvisSammePeriode(it.getPeriode(), periode))
                 .findAny();
@@ -288,6 +293,7 @@ public class PersonInformasjonEntitet extends BaseEntitet {
     }
 
     PersonInformasjonBuilder.PersonstatusBuilder getPersonstatusBuilderForAktørId(AktørId aktørId, DatoIntervallEntitet periode) {
+        Objects.requireNonNull(aktørId);
         final Optional<PersonstatusEntitet> eksisterende = personstatuser.stream()
                 .filter(it -> it.getAktørId().equals(aktørId) && erSannsynligvisSammePeriode(it.getPeriode(), periode))
                 .findAny();

@@ -1,10 +1,15 @@
 package no.nav.k9.sak.behandlingslager.behandling.personopplysning;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -18,14 +23,21 @@ import no.nav.k9.sak.typer.AktørId;
 
 public class PersonInformasjonBuilder {
 
+    private static final Logger log = LoggerFactory.getLogger(PersonInformasjonBuilder.class);
+
     private final PersonInformasjonEntitet kladd;
     private final PersonopplysningVersjonType type;
     private final boolean gjelderOppdatering;
 
     private AktørId søkerAktørId;
 
+    private List<PersonRelasjonEntitet> opprinneligRelasjoner;
+
     private PersonInformasjonBuilder(PersonInformasjonEntitet personInfoAggregatEntitet, PersonopplysningVersjonType type, boolean gjelderOppdatering) {
         this.kladd = personInfoAggregatEntitet;
+
+        this.opprinneligRelasjoner = List.copyOf(kladd.getRelasjoner());
+
         this.type = type;
         this.gjelderOppdatering = gjelderOppdatering;
     }
@@ -82,23 +94,35 @@ public class PersonInformasjonBuilder {
     }
 
     public PersonInformasjonEntitet build() {
-        ryddBortGamlePersonopplysninger();
+        ryddBortGamlePersonopplysningerForRelasjonerSomErFjernet();
         return kladd;
     }
 
-    private void ryddBortGamlePersonopplysninger() {
+    /*
+     * TODO: kan vi unngå dette ved å droppe #oppdater? Dvs alltid lage ny kladd (evt. med overstyringer). Har uansett en diff algoritme før
+     * oppretting av nytt aggregat i PersonopplysningRepository.
+     */
+    private void ryddBortGamlePersonopplysningerForRelasjonerSomErFjernet() {
         if (gjelderOppdatering() && søkerAktørId != null) {
-            Set<AktørId> aktørerIRelasjoner = kladd.getRelasjoner().stream().map(e -> e.getAktørId()).collect(Collectors.toSet());
-            aktørerIRelasjoner.addAll(kladd.getRelasjoner().stream().map(e -> e.getTilAktørId()).collect(Collectors.toSet()));
+            var gamleRelasjoner = opprinneligRelasjoner;
+            var nyeRelasjoner = kladd.getRelasjoner();
 
-            Set<AktørId> personer = kladd.getPersonopplysninger()
-                .stream()
-                .filter(e -> !søkerAktørId.equals(e.getAktørId()))
-                .map(HarAktørId::getAktørId).collect(Collectors.toSet());
-            personer.forEach(e -> {
-                if (!aktørerIRelasjoner.contains(e)) {
-                    kladd.fjernPersonopplysning(e);
-                }
+            // slå sammen aktører fra gamle relasjoner
+            var finnPersonerFjernet = Stream.concat(
+                gamleRelasjoner.stream().map(e -> e.getAktørId()),
+                gamleRelasjoner.stream().map(e -> e.getTilAktørId()))
+                .collect(Collectors.toSet());
+
+            // trekk fra de vi fortsatt har relasjon til i kladd
+            finnPersonerFjernet.removeAll(Stream.concat(
+                nyeRelasjoner.stream().map(e -> e.getAktørId()),
+                nyeRelasjoner.stream().map(e -> e.getTilAktørId()))
+                .collect(Collectors.toSet()));
+
+            // fjerner bare dersom er i listen av relasjoner som ikke fins lenger.
+            finnPersonerFjernet.forEach(id -> {
+                log.info("Fjerner person {}..... - relasjon eksisterer ikke lenger", id.getAktørId().substring(0, 3));
+                kladd.fjernPersonopplysning(id);
             });
         }
     }
