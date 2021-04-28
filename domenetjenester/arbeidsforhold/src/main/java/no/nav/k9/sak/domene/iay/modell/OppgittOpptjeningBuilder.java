@@ -277,6 +277,10 @@ public class OppgittOpptjeningBuilder {
             return new OppgittArbeidsforholdBuilder(new OppgittArbeidsforhold());
         }
 
+        public static OppgittArbeidsforholdBuilder fraEksisterende(OppgittArbeidsforhold kopierFra) {
+            return new OppgittArbeidsforholdBuilder(new OppgittArbeidsforhold(kopierFra));
+        }
+
         public OppgittArbeidsforholdBuilder medPeriode(DatoIntervallEntitet periode) {
             this.entitet.setPeriode(periode);
             return this;

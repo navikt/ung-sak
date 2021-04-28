@@ -28,7 +28,8 @@ public class OMPOppgittOpptjeningFilterTest {
 
     JournalpostId jpId1 = new JournalpostId("1");
     JournalpostId jpId2 = new JournalpostId("2");
-    Arbeidsgiver arbeidsgiver = Arbeidsgiver.virksomhet("123123123");
+    Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("123123123");
+    Arbeidsgiver arbeidsgiver2 = Arbeidsgiver.virksomhet("234234234");
 
     @Test
     public void skal_hente_matchende_oppgitte_opptjening_for_stp() {
@@ -39,11 +40,11 @@ public class OMPOppgittOpptjeningFilterTest {
         var innsendingstidspunkt = LocalDate.now().atStartOfDay();
 
         var oppgittFraværPerioder = Set.of(new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE,
-            arbeidsgiver, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
+            arbeidsgiver1, InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR));
 
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder = lagOppgittOpptjeningBuilder(innsendingstidspunkt, jpId1);
+        OppgittOpptjeningBuilder opptjeningBuilder = lagOpptjeningBuilderSN(innsendingstidspunkt, jpId1, arbeidsgiver1);
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
-            .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder))
+            .medOppgittOpptjeningAggregat(List.of(opptjeningBuilder))
             .build();
         var gyldigeDokumenter = Map.of(jpId1, byggDokument(innsendingstidspunkt, jpId1));
 
@@ -51,12 +52,12 @@ public class OMPOppgittOpptjeningFilterTest {
         var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, oppgittFraværPerioder, gyldigeDokumenter);
 
         // Assert
-        var forventet = iayGrunnlag.getOppgittOpptjeningAggregat().get().getOppgitteOpptjeninger().get(0);
-        assertThat(resultat).hasValue(forventet);
+        assertThat(resultat).isNotEmpty();
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver1.getOrgnr());
     }
 
     @Test
-    public void skal_hente_første_mottatte_matchende_oppgitte_opptjening_for_stp() {
+    public void skal_hente_siste_mottatte_matchende_oppgitte_opptjening_for_stp() {
         // Arrange
         var fraværFom = LocalDate.now();
         var fraværTom = LocalDate.now().plusDays(10);
@@ -65,16 +66,16 @@ public class OMPOppgittOpptjeningFilterTest {
         var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
 
         var oppgittFraværPerioder = Set.of(
-            new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+            new OppgittFraværPeriode(jpId1, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver1,
                 InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR),
-            new OppgittFraværPeriode(jpId2, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+            new OppgittFraværPeriode(jpId2, fraværFom, fraværTom, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver2,
                 InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR)
         );
 
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder1 = lagOppgittOpptjeningBuilder(innsendingstidspunkt1, jpId1);
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder2 = lagOppgittOpptjeningBuilder(innsendingstidspunkt2, jpId2);
+        OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(innsendingstidspunkt1, jpId1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(innsendingstidspunkt2, jpId2, arbeidsgiver2);
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
-            .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
+            .medOppgittOpptjeningAggregat(List.of(opptjeningBuilder1, opptjeningBuilder2))
             .build();
         var gyldigeDokumenter = Map.of(
             jpId1, byggDokument(innsendingstidspunkt1, jpId1),
@@ -86,11 +87,11 @@ public class OMPOppgittOpptjeningFilterTest {
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId2);
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver2.getOrgnr());
     }
 
     @Test
-    public void skal_hente_første_mottatte_matchende_oppgitte_opptjening_for_vilkårsperiode() {
+    public void skal_hente_siste_mottatte_matchende_oppgitte_opptjening_for_vilkårsperiode() {
         // Arrange
         var fraværFom1 = LocalDate.now();
         var fraværTom1 = LocalDate.now().plusDays(10);
@@ -103,16 +104,16 @@ public class OMPOppgittOpptjeningFilterTest {
         var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
 
         var oppgittFraværPerioder = Set.of(
-            new OppgittFraværPeriode(jpId1, fraværFom1, fraværTom1, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+            new OppgittFraværPeriode(jpId1, fraværFom1, fraværTom1, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver1,
                 InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR),
-            new OppgittFraværPeriode(jpId2, fraværFom2, fraværTom2, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver,
+            new OppgittFraværPeriode(jpId2, fraværFom2, fraværTom2, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver2,
                 InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR)
         );
 
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder1 = lagOppgittOpptjeningBuilder(innsendingstidspunkt1, jpId1);
-        OppgittOpptjeningBuilder oppgittOpptjeningBuilder2 = lagOppgittOpptjeningBuilder(innsendingstidspunkt2, jpId2);
+        OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(innsendingstidspunkt1, jpId1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(innsendingstidspunkt2, jpId2, arbeidsgiver2);
         var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
-            .medOppgittOpptjeningAggregat(List.of(oppgittOpptjeningBuilder1, oppgittOpptjeningBuilder2))
+            .medOppgittOpptjeningAggregat(List.of(opptjeningBuilder1, opptjeningBuilder2))
             .build();
         var gyldigeDokumenter = Map.of(
             jpId1, byggDokument(innsendingstidspunkt1, jpId1),
@@ -124,13 +125,66 @@ public class OMPOppgittOpptjeningFilterTest {
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getJournalpostId()).isEqualTo(jpId2);
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver2.getOrgnr());
     }
 
-    private OppgittOpptjeningBuilder lagOppgittOpptjeningBuilder(LocalDateTime innsendingstidspunkt, JournalpostId journalpostId) {
+    @Test
+    public void skal_sammenstille_oppgitt_opptjening_fra_flere_journalposter() {
+        // Arrange
+        var fraværFom1 = LocalDate.now();
+        var fraværTom1 = LocalDate.now().plusDays(10);
+        var fraværFom2 = LocalDate.now().plusDays(20);
+        var fraværTom2 = LocalDate.now().plusDays(30);
+        // Maks vilkårsperiode overlapper begge fraværsperioder
+        var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
+
+        var innsendingstidspunkt1 = LocalDate.now().atStartOfDay();
+        var innsendingstidspunkt2 = LocalDate.now().plusDays(1).atStartOfDay();
+
+        var oppgittFraværPerioder = Set.of(
+            new OppgittFraværPeriode(jpId1, fraværFom1, fraværTom1, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE, arbeidsgiver1,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR),
+            new OppgittFraværPeriode(jpId2, fraværFom2, fraværTom2, UttakArbeidType.FRILANSER, arbeidsgiver2,
+                InternArbeidsforholdRef.nullRef(), null, FraværÅrsak.ORDINÆRT_FRAVÆR)
+        );
+
+        OppgittOpptjeningBuilder opptjeningBuilderSN = lagOpptjeningBuilderSN(innsendingstidspunkt1, jpId1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilderFL = lagOpptjeningBuilderFL(innsendingstidspunkt2, jpId2, true);
+        var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
+            .medOppgittOpptjeningAggregat(List.of(opptjeningBuilderSN, opptjeningBuilderFL))
+            .build();
+        var gyldigeDokumenter = Map.of(
+            jpId1, byggDokument(innsendingstidspunkt1, jpId1),
+            jpId2, byggDokument(innsendingstidspunkt2, jpId2)
+        );
+
+        // Act
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, oppgittFraværPerioder, gyldigeDokumenter);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver1.getOrgnr());
+        assertThat(resultat.get().getFrilans().get().getErNyoppstartet()).isTrue();
+    }
+
+    private OppgittOpptjeningBuilder lagOpptjeningBuilderSN(LocalDateTime innsendingstidspunkt, JournalpostId journalpostId, Arbeidsgiver arbeidsgiver) {
         var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
             .medJournalpostId(journalpostId)
             .medInnsendingstidspunkt(innsendingstidspunkt);
+        var egenNæringBuilder = OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
+            .medVirksomhet(arbeidsgiver.getOrgnr());
+        oppgittOpptjeningBuilder.leggTilEgneNæringer(List.of(egenNæringBuilder));
+
+        return oppgittOpptjeningBuilder;
+    }
+
+    private OppgittOpptjeningBuilder lagOpptjeningBuilderFL(LocalDateTime innsendingstidspunkt, JournalpostId journalpostId, boolean erNyoppstartet) {
+        var oppgittOpptjeningBuilder = OppgittOpptjeningBuilder.ny()
+            .medJournalpostId(journalpostId)
+            .medInnsendingstidspunkt(innsendingstidspunkt);
+        var oppgittFrilans = OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny().medErNyoppstartet(erNyoppstartet).build();
+        oppgittOpptjeningBuilder.leggTilFrilansOpplysninger(oppgittFrilans);
+
         return oppgittOpptjeningBuilder;
     }
 
