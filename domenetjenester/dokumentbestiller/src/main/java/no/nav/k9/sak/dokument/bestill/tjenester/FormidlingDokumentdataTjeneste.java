@@ -24,7 +24,7 @@ public class FormidlingDokumentdataTjeneste {
         this.formidlingDokumentdataKlient = formidlingDokumentdataKlient;
     }
 
-    public void slettAllData(Long behandlingId) {
-        formidlingDokumentdataKlient.slettAllData(behandlingRepository.hentBehandling(behandlingId).getUuid());
+    public void ryddVedTilbakehopp(Long behandlingId) {
+        formidlingDokumentdataKlient.ryddVedTilbakehopp(behandlingRepository.hentBehandling(behandlingId).getUuid());
     }
 }
