@@ -26,7 +26,7 @@ public enum BarnRelasjon {
                 return relasjon;
             }
         }
-        return  BarnRelasjon.ANNET;
+        throw new IllegalArgumentException("Ukjent rolle: " + rolle);
 
     }
 
