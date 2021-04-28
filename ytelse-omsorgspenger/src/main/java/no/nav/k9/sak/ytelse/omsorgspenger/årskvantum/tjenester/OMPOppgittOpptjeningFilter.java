@@ -36,7 +36,6 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.SøknadPerioderTjeneste;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @ApplicationScoped
@@ -54,11 +53,11 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     }
 
     @Inject
-    public OMPOppgittOpptjeningFilter(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                      VilkårTjeneste vilkårTjeneste,
+    public OMPOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
                                       BehandlingRepository behandlingRepository,
                                       MottatteDokumentRepository mottatteDokumentRepository,
                                       SøknadPerioderTjeneste søknadPerioderTjeneste,
+                                      OppgittOpptjeningMapper oppgittOpptjeningMapper,
                                       @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -68,7 +67,9 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     }
 
     /**
-     * Henter først mottatte oppgitte opptjening for skjæringstidspunktet til opptjeningsvilkåret
+     * Henter sist mottatte oppgitte opptjening per aktivitetskategori (SN, FL, AT) hvis respektive journalpost matcher
+     * fraværsperiode som overlapper opptjeningvilkårets vilkårsperiode
+     * Stp brukes for å finne vilkårsperidoe
      */
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
@@ -85,16 +86,9 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, fraværPerioderFraSøknad, gyldigeJournalposter);
     }
 
-    private Set<OppgittFraværPeriode> hentSøknadsperioderPåFagsak(BehandlingReferanse ref) {
-        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(ref).values()
-            .stream()
-            .flatMap(Collection::stream)
-            .map(it -> it.getRaw())
-            .collect(Collectors.toSet());
-    }
-
     /**
-     * Henter først mottatte oppgitte opptjening hvor dens korrespondende kravperioder overlapper angitt vilkårsperiode
+     * Henter sist mottatte oppgitte opptjening per aktivitetskategori (SN, FL, AT) hvis respektive journalpost matcher
+     * fraværsperiode som overlapper opptjeningvilkårets vilkårsperiode
      */
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
@@ -111,22 +105,15 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Set<OppgittFraværPeriode> fraværPerioderFraSøknad, Map<JournalpostId, MottattDokument> gyldigeJournalposter) {
         Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje = beregnJournalpostAktivTidslinje(fraværPerioderFraSøknad);
-        List<WrappedOppgittOpptjening> oppgittOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat()
-            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
-            .orElse(List.of())
-            .stream()
-            .filter(fraværPeriode -> gyldigeJournalposter.containsKey(fraværPeriode.getJournalpostId()))
-            .map(oppgittOpptjening -> {
-                var mottattDokument = gyldigeJournalposter.get(oppgittOpptjening.getJournalpostId());
-                return new WrappedOppgittOpptjening(mottattDokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), oppgittOpptjening);
-            })
-            .collect(Collectors.toList());
+        List<WrappedOppgittOpptjening> oppgitteOpptjeninger = sorterOpptjeningerMotJournalpost(iayGrunnlag, gyldigeJournalposter);
 
-        return oppgittOpptjeninger.stream()
-            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt, Comparator.reverseOrder()))
-            .filter(oppgittOpptjening -> overlapperVilkårsperiode(oppgittOpptjening, vilkårsperiode, journalpostAktivTidslinje))
-            .map(WrappedOppgittOpptjening::getRaw)
-            .findFirst();
+        List<OppgittOpptjening> overlappendeOpptjeninger = hentOverlappendeOpptjeninger(vilkårsperiode, journalpostAktivTidslinje, oppgitteOpptjeninger);
+        if (overlappendeOpptjeninger.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var oppgittOpptjening = OppgittOpptjeningMapper.sammenstillOppgittOpptjening(overlappendeOpptjeninger);
+        return Optional.of(oppgittOpptjening);
     }
 
     private Map<JournalpostId, MottattDokument> hentGyldigeDokumenter(BehandlingReferanse ref) {
@@ -136,6 +123,22 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .filter(it -> it.getBehandlingId() != null)
             .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
         return gyldigeJournalposter;
+    }
+
+    private Set<OppgittFraværPeriode> hentSøknadsperioderPåFagsak(BehandlingReferanse ref) {
+        return søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(ref).values()
+            .stream()
+            .flatMap(Collection::stream)
+            .map(it -> it.getRaw())
+            .collect(Collectors.toSet());
+    }
+
+    private List<OppgittOpptjening> hentOverlappendeOpptjeninger(DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje, List<WrappedOppgittOpptjening> oppgittOpptjeninger) {
+        var overlappendeOpptjeninger = oppgittOpptjeninger.stream()
+            .filter(opptj -> overlapperVilkårsperiode(opptj, vilkårsperiode, journalpostAktivTidslinje))
+            .map(WrappedOppgittOpptjening::getRaw)
+            .collect(Collectors.toList());
+        return overlappendeOpptjeninger;
     }
 
 
@@ -165,6 +168,23 @@ public class OMPOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var jornalpostTidslinjer = journalpostPerioder.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey(), e -> slåSammenPerioder(e.getValue())));
         return jornalpostTidslinjer;
+    }
+
+    private List<WrappedOppgittOpptjening> sorterOpptjeningerMotJournalpost(InntektArbeidYtelseGrunnlag iay, Map<JournalpostId, MottattDokument> gyldigeJournalposter) {
+        var oppgitteOpptjeninger = iay.getOppgittOpptjeningAggregat()
+            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+            .orElse(List.of());
+
+        var oppgitteOpptjeningerSortert = oppgitteOpptjeninger
+            .stream()
+            .filter(opptjening -> gyldigeJournalposter.containsKey(opptjening.getJournalpostId()))
+            .map(opptjening -> {
+                var mottattDokument = gyldigeJournalposter.get(opptjening.getJournalpostId());
+                return new WrappedOppgittOpptjening(mottattDokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), opptjening);
+            })
+            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt, Comparator.reverseOrder()))
+            .collect(Collectors.toList());
+        return oppgitteOpptjeningerSortert;
     }
 
     private boolean overlapperVilkårsperiode(WrappedOppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
