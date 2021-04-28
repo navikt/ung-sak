@@ -141,7 +141,38 @@ public class SykdomVurderingRepository {
     }
 
     public List<SykdomVurderingVersjon> hentVurderingMedVersjonerForBehandling(UUID behandlingUuid, Long vurderingId) {
-        throw new UnsupportedOperationException("Ikke implementert ennå.");
+        final TypedQuery<SykdomVurderingVersjon> q = entityManager.createQuery(
+                "SELECT vv " +
+                "From SykdomGrunnlagBehandling as sgb " +
+                    "inner join sgb.grunnlag as sg " +
+                    "inner join sg.vurderinger as vv " +
+                    "inner join vv.sykdomVurdering as v " +
+                "where sgb.behandlingUuid = :behandlingUuid " +
+                    "and v.id = :vurderingId " +
+                    "and sgb.versjon = " +
+                        "( select max(sgb2.versjon) " +
+                        "From SykdomGrunnlagBehandling as sgb2 " +
+                        "where sgb2.behandlingUuid = sgb.behandlingUuid )"
+                , SykdomVurderingVersjon.class);
+            q.setParameter("vurderingId", vurderingId);
+            q.setParameter("behandlingUuid", behandlingUuid);
+        final var versjonBruktIGrunnlagOpt = q.getResultList().stream().findFirst();
+        if (versjonBruktIGrunnlagOpt.isEmpty()) {
+            return List.of();
+        }
+        final var versjonBruktIGrunnlag = versjonBruktIGrunnlagOpt.get();
+        
+        final TypedQuery<SykdomVurdering> q2 = entityManager.createQuery(
+                "SELECT v " +
+                "From SykdomVurdering as v " +
+                "where v.id = :vurderingId"
+                , SykdomVurdering.class);
+            q2.setParameter("vurderingId", vurderingId);
+        final var sykdomVurdering = q2.getResultList().stream().findFirst().get();
+        
+        return sykdomVurdering.getSykdomVurderingVersjoner().stream()
+                .filter(vv -> vv.getVersjon() <= versjonBruktIGrunnlag.getVersjon())
+                .collect(Collectors.toList());
     }
 
     public Collection<SykdomVurderingVersjon> hentBehandlingVurderingerFor(SykdomVurderingType sykdomVurderingType, UUID behandlingUuid) {
