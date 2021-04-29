@@ -193,7 +193,7 @@ public class IAYDtoMapperRoundtripTest {
                             .medOppgittFravær(List.of(new FraværDto(periode, Duration.ofHours(3))))
                             .medUtsettelsePerioder(List.of(new UtsettelsePeriodeDto(periode, UtsettelseÅrsakType.FERIE))))))
             .medOppgittOpptjening(
-                new OppgittOpptjeningDto(uuid, offTidspunkt)
+                new OppgittOpptjeningDto(null, null, uuid, offTidspunkt)
                     .medArbeidsforhold(List.of(
                         new OppgittArbeidsforholdDto(periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
                             .medErUtenlandskInntekt(true)

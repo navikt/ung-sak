@@ -75,7 +75,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
             Optional<Behandling> behandlingOptional = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
             if (behandlingOptional.isPresent()) {
                 var behandling = behandlingOptional.get();
-                BehandlingProsessTask.logContext(behandling);
+                logContext(behandling);
 
                 if (!erFagsakYtelseBasert(behandling)) {
                     // ingenting å publisere her

@@ -82,7 +82,7 @@ public class IAYTilDtoMapper {
 
         // OPPGITT OPPTJENING
         grunnlag.getOppgittOpptjening().ifPresent(oo -> dto.medOppgittOpptjening(new MapOppgittOpptjening().mapTilDto(oo)));
-
+        grunnlag.getOppgittOpptjeningAggregat().ifPresent( oa -> dto.medOppgittOpptjeninger(new MapOppgittOpptjening().mapTilDto(oa)));
         return dto;
     }
 

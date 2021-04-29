@@ -33,10 +33,13 @@ public class InntektArbeidYtelseGrunnlag {
     private OppgittOpptjening oppgittOpptjening;
 
     @ChangeTracked
+    private OppgittOpptjeningAggregat oppgittOpptjeningAggregat;
+
+    @ChangeTracked
     private OppgittOpptjening overstyrtOppgittOpptjening;
 
     @ChangeTracked
-    private InntektsmeldingAggregat inntektsmeldinger;
+    private InntektsmeldingAggregat inntektsmeldingAggregat;
 
     @ChangeTracked
     private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
@@ -54,6 +57,7 @@ public class InntektArbeidYtelseGrunnlag {
 
         // NB! skal ikke lage ny versjon av oppgitt opptjening eller andre underlag! Lenker bare inn på ferskt grunnlag
         grunnlag.getOppgittOpptjening().ifPresent(this::setOppgittOpptjening);
+        grunnlag.getOppgittOpptjeningAggregat().ifPresent(this::setOppgittOpptjeningAggregat);
         grunnlag.getOverstyrtOppgittOpptjening().ifPresent(this::setOverstyrtOppgittOpptjening);
         grunnlag.getRegisterVersjon().ifPresent(this::setRegister);
         grunnlag.getSaksbehandletVersjon().ifPresent(this::setSaksbehandlet);
@@ -112,11 +116,19 @@ public class InntektArbeidYtelseGrunnlag {
      * Returnerer aggregat som holder alle inntektsmeldingene som benyttes i behandlingen.
      */
     public Optional<InntektsmeldingAggregat> getInntektsmeldinger() {
-        return Optional.ofNullable(inntektsmeldinger);
+        return Optional.ofNullable(inntektsmeldingAggregat);
     }
 
     void setInntektsmeldinger(InntektsmeldingAggregat inntektsmeldingAggregat) {
-        this.inntektsmeldinger = inntektsmeldingAggregat;
+        this.inntektsmeldingAggregat = inntektsmeldingAggregat;
+    }
+
+    public Optional<OppgittOpptjeningAggregat> getOppgittOpptjeningAggregat() {
+        return Optional.ofNullable(oppgittOpptjeningAggregat);
+    }
+
+    public void setOppgittOpptjeningAggregat(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
+        this.oppgittOpptjeningAggregat = oppgittOpptjeningAggregat;
     }
 
     /**
@@ -242,7 +254,7 @@ public class InntektArbeidYtelseGrunnlag {
     }
 
     void taHensynTilBetraktninger() {
-        Optional.ofNullable(inntektsmeldinger).ifPresent(it -> it.taHensynTilBetraktninger(this.arbeidsforholdInformasjon));
+        Optional.ofNullable(inntektsmeldingAggregat).ifPresent(it -> it.taHensynTilBetraktninger(this.arbeidsforholdInformasjon));
     }
 
     @Override
@@ -253,13 +265,14 @@ public class InntektArbeidYtelseGrunnlag {
             return false;
         InntektArbeidYtelseGrunnlag that = (InntektArbeidYtelseGrunnlag) o;
         return aktiv == that.aktiv &&
+            Objects.equals(oppgittOpptjeningAggregat, that.oppgittOpptjeningAggregat) &&
             Objects.equals(register, that.register) &&
             Objects.equals(saksbehandlet, that.saksbehandlet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(register, saksbehandlet);
+        return Objects.hash(oppgittOpptjeningAggregat, register, saksbehandlet);
     }
 
     public void fjernSaksbehandlet() {

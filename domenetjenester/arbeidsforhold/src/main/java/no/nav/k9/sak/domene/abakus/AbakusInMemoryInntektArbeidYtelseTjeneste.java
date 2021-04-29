@@ -4,6 +4,7 @@ import java.lang.StackWalker.StackFrame;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -21,6 +22,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Alternative;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -36,6 +38,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
@@ -43,7 +46,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.felles.util.Tuple;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). Brukes under forflytting til Abakus til å erstatte tester som går mot
@@ -123,6 +125,9 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
                         break;
                     case OPPGITT_OPPTJENING:
                         builder.medOppgittOpptjening(OppgittOpptjeningBuilder.nyFraEksisterende(orig.getOppgittOpptjening().orElse(null), UUID.randomUUID(), LocalDateTime.now()));
+                        break;
+                    case OPPGITT_OPPTJENING_V2:
+                        builder.medOppgitteOpptjeninger(orig.getOppgittOpptjeningAggregat().map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger).orElse(List.of()));
                         break;
                     case OVERSTYRT_OPPGITT_OPPTJENING:
                         builder.medOverstyrtOppgittOpptjening(OppgittOpptjeningBuilder.nyFraEksisterende(orig.getOverstyrtOppgittOpptjening().orElse(null), UUID.randomUUID(), LocalDateTime.now()));
@@ -247,6 +252,27 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
         iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
 
+        lagreOgFlush(behandlingId, iayGrunnlag.build());
+    }
+
+    @Override
+    public void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjening) {
+        if (oppgittOpptjening == null) {
+            return;
+        }
+        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
+
+        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
+
+        List<OppgittOpptjening> alleredeLagret = inntektArbeidAggregat
+            .flatMap(InntektArbeidYtelseGrunnlag::getOppgittOpptjeningAggregat)
+            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
+            .orElse(Collections.emptyList());
+
+        List<OppgittOpptjening> oppdatertOpptjening = new ArrayList<>();
+        oppdatertOpptjening.addAll(alleredeLagret);
+        oppdatertOpptjening.add(oppgittOpptjening.build());
+        iayGrunnlag.medOppgitteOpptjeninger(oppdatertOpptjening);
         lagreOgFlush(behandlingId, iayGrunnlag.build());
     }
 

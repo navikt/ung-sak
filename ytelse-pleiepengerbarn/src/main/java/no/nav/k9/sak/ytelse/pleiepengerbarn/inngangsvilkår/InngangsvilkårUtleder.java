@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
+import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_18_ÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDLEMSKAPSVILKÅRET;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OMSORGEN_FOR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.OPPTJENINGSPERIODEVILKÅR;
@@ -29,6 +30,7 @@ public class InngangsvilkårUtleder implements VilkårUtleder {
         OMSORGEN_FOR,
         ALDERSVILKÅR,
         MEDISINSKEVILKÅR_UNDER_18_ÅR,
+        MEDISINSKEVILKÅR_18_ÅR,
         MEDLEMSKAPSVILKÅRET,
         OPPTJENINGSPERIODEVILKÅR,
         OPPTJENINGSVILKÅRET,

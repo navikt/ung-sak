@@ -1,16 +1,16 @@
 package no.nav.k9.sak.domene.iay.modell;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.felles.util.Tuple;
 
 public class InntektArbeidYtelseGrunnlagBuilder {
 
@@ -51,6 +51,10 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         kladd.setInntektsmeldinger(inntektsmeldinger);
     }
 
+    public void setOppgitteOpptjeninger(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
+        kladd.setOppgittOpptjeningAggregat(oppgittOpptjeningAggregat);
+    }
+
     public ArbeidsforholdInformasjon getInformasjon() {
         var informasjon = kladd.getArbeidsforholdInformasjon();
 
@@ -79,7 +83,26 @@ public class InntektArbeidYtelseGrunnlagBuilder {
             if (kladd.getOppgittOpptjening().isPresent()) {
                 throw new IllegalStateException("Utviklerfeil: Er ikke lov å endre oppgitt opptjening!");
             }
+            if (kladd.getOppgittOpptjeningAggregat().isPresent()) {
+                throw new IllegalStateException("Utviklerfeil: Kan ikke bruke ny versjon av iay med flere oppgitte opptjeninger " +
+                    "sammen med gammel versjon for enkeltopptjening!");
+            }
             kladd.setOppgittOpptjening(builder.build());
+        }
+        return this;
+    }
+
+    public InntektArbeidYtelseGrunnlagBuilder medOppgittOpptjeningAggregat(Collection<OppgittOpptjeningBuilder> buildere) {
+        if (buildere != null) {
+            if (kladd.getOppgittOpptjeningAggregat().isPresent()) {
+                throw new IllegalStateException("Utviklerfeil: Er ikke lov å endre aggregat for oppgitt opptjening!");
+            }
+            if (kladd.getOppgittOpptjening().isPresent()) {
+                throw new IllegalStateException("Utviklerfeil: Kan ikke bruke gammel versjon av iay med én oppgitt opptjening " +
+                    "sammen med ny versjon med flere oppgitte opptjeninger på samme behandling!");
+            }
+            var oppgitteOpptjeninger = buildere.stream().map(OppgittOpptjeningBuilder::build).collect(Collectors.toSet());
+            kladd.setOppgittOpptjeningAggregat(new OppgittOpptjeningAggregat(oppgitteOpptjeninger));
         }
         return this;
     }
@@ -148,7 +171,8 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return this;
     }
 
-    public InntektArbeidYtelseGrunnlagBuilder medInntektsmeldinger(Inntektsmelding... inntektsmeldinger) {
-        return medInntektsmeldinger(Arrays.asList(inntektsmeldinger));
+    public InntektArbeidYtelseGrunnlagBuilder medOppgitteOpptjeninger(List<OppgittOpptjening> oppgitteOpptjeninger) {
+        setOppgitteOpptjeninger(new OppgittOpptjeningAggregat(oppgitteOpptjeninger));
+        return this;
     }
 }

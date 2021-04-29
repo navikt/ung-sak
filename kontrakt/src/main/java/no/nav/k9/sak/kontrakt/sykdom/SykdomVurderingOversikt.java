@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.sykdom;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,11 @@ public class SykdomVurderingOversikt {
     @Size(max = 1000)
     @Valid
     private List<Periode> resterendeVurderingsperioder = new ArrayList<>();
+    
+    @JsonProperty(value = "resterendeValgfrieVurderingsperioder")
+    @Size(max = 1000)
+    @Valid
+    private List<Periode> resterendeValgfrieVurderingsperioder = new ArrayList<>();
 
     @JsonProperty(value = "søknadsperioderTilBehandling")
     @Size(max = 1000)
@@ -45,6 +51,14 @@ public class SykdomVurderingOversikt {
     @Valid
     private List<Periode> perioderSomKanVurderes = new ArrayList<>();
 
+    @JsonProperty(value = "pleietrengendesFødselsdato", required = true)
+    @Valid
+    private LocalDate pleietrengendesFødselsdato;
+    
+    @JsonProperty(value = "harPerioderDerPleietrengendeErOver18år")
+    @Valid
+    private boolean harPerioderDerPleietrengendeErOver18år;
+    
     /*
     // Om den siste versjonen har blitt besluttet iverksatt eller ikke.
     @JsonProperty(value = "besluttetIverksatt")
@@ -65,13 +79,19 @@ public class SykdomVurderingOversikt {
     public SykdomVurderingOversikt(
             List<SykdomVurderingOversiktElement> vurderingselementer,
             List<Periode> resterendeVurderingsperioder,
+            List<Periode> resterendeValgfrieVurderingsperioder,
             List<Periode> søknadsperioderTilBehandling,
             List<Periode> perioderSomKanVurderes,
+            LocalDate pleietrengendesFødselsdato,
+            boolean harPerioderDerPleietrengendeErOver18år,
             List<ResourceLink> links) {
         this.vurderingselementer = vurderingselementer;
         this.resterendeVurderingsperioder = resterendeVurderingsperioder;
+        this.resterendeValgfrieVurderingsperioder = resterendeValgfrieVurderingsperioder;
         this.søknadsperioderTilBehandling = søknadsperioderTilBehandling;
         this.perioderSomKanVurderes = perioderSomKanVurderes;
+        this.pleietrengendesFødselsdato = pleietrengendesFødselsdato;
+        this.harPerioderDerPleietrengendeErOver18år = harPerioderDerPleietrengendeErOver18år;
         this.links = links;
     }
 
@@ -87,6 +107,10 @@ public class SykdomVurderingOversikt {
     public List<Periode> getResterendeVurderingsperioder() {
         return resterendeVurderingsperioder;
     }
+    
+    public List<Periode> getResterendeValgfrieVurderingsperioder() {
+        return resterendeValgfrieVurderingsperioder;
+    }
 
     public List<Periode> getSøknadsperioderTilBehandling() {
         return søknadsperioderTilBehandling;
@@ -95,5 +119,12 @@ public class SykdomVurderingOversikt {
     public List<Periode> getPerioderSomKanVurderes() {
         return perioderSomKanVurderes;
     }
+    
+    public LocalDate getPleietrengendesFødselsdato() {
+        return pleietrengendesFødselsdato;
+    }
 
+    public boolean isHarPerioderDerPleietrengendeErOver18år() {
+        return harPerioderDerPleietrengendeErOver18år;
+    }
 }

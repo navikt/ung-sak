@@ -142,7 +142,7 @@ public class ForeslåVedtakRevurderingStegImplTest {
         // Assert
         revurdering = behandlingRepository.hentBehandling(revurdering.getId());
         assertThat(revurdering.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.IKKE_FASTSATT);
-        verify(formidlingDokumentdataTjeneste).slettAllData(eq(revurdering.getId()));
+        verify(formidlingDokumentdataTjeneste).ryddVedTilbakehopp(eq(revurdering.getId()));
     }
 
     private Beregningsgrunnlag buildBeregningsgrunnlag(Long bruttoPerÅr) {

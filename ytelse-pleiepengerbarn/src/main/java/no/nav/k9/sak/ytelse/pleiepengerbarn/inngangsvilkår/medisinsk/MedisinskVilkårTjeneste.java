@@ -19,13 +19,13 @@ public class MedisinskVilkårTjeneste {
 
     }
 
-    public VilkårData vurderPerioder(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+    public VilkårData vurderPerioder(VilkårType vilkåret, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(kontekst.getBehandlingId(), periodeTilVurdering, sykdomGrunnlagBehandling);
         MedisinskVilkårResultat resultat = new MedisinskVilkårResultat();
 
         final var evaluation = new Medisinskvilkår().evaluer(grunnlag, resultat);
 
-        final var vilkårData = utfallOversetter.oversett(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, evaluation, grunnlag, periodeTilVurdering);
+        final var vilkårData = utfallOversetter.oversett(vilkåret, evaluation, grunnlag, periodeTilVurdering);
         vilkårData.setEkstraVilkårresultat(resultat);
         return vilkårData;
     }

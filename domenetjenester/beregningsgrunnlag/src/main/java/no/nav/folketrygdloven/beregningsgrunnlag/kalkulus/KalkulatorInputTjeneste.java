@@ -53,11 +53,11 @@ public class KalkulatorInputTjeneste {
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
 
-        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, tjeneste.finnOppgittOpptjening(iayGrunnlag).orElse(null), imTjeneste);
+        var oppgittOpptjening = tjeneste.finnOppgittOpptjening(referanse, iayGrunnlag, stp).orElse(null);
+        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, oppgittOpptjening, imTjeneste);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
         if (opptjeningAktiviteter.isEmpty()) {
-            OppgittOpptjening oppgittOpptjening = iayGrunnlag.getOppgittOpptjening().orElse(null);
             throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", bgReferanse=" + bgReferanse + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 

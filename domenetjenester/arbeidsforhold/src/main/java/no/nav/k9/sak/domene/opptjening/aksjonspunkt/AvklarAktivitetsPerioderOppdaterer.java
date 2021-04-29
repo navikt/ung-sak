@@ -12,6 +12,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -43,7 +44,6 @@ import no.nav.k9.sak.kontrakt.opptjening.BekreftOpptjeningPeriodeDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarAktivitetsPerioderHolderDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -112,7 +112,7 @@ public class AvklarAktivitetsPerioderOppdaterer implements AksjonspunktOppdatere
 
         AktørId aktørId = param.getAktørId();
         new BekreftOpptjeningPeriodeAksjonspunkt(inntektArbeidYtelseTjeneste, vurderOppgittOpptjening)
-            .oppdater(behandlingId, aktørId, bekreftOpptjeningPerioder, opptjening.getOpptjeningPeriode());
+            .oppdater(behandlingId, aktørId, bekreftOpptjeningPerioder, opptjening.getOpptjeningPeriode(), opptjening.getSkjæringstidspunkt());
 
         return erDetGjortEndringer(dto, behandlingId, overstyringer, opptjening);
     }

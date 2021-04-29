@@ -17,8 +17,10 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
@@ -31,13 +33,12 @@ public class SykdomGrunnlagRepository {
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
 
-
     SykdomGrunnlagRepository() {
         // CDI
     }
 
     @Inject
-    public SykdomGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository,  SykdomDokumentRepository sykdomDokumentRepository) {
+    public SykdomGrunnlagRepository(EntityManager entityManager, SykdomVurderingRepository sykdomVurderingRepository, SykdomDokumentRepository sykdomDokumentRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
         this.sykdomDokumentRepository = Objects.requireNonNull(sykdomDokumentRepository, "sykdomDokumentRepository");
@@ -101,27 +102,54 @@ public class SykdomGrunnlagRepository {
         final LocalDateTimeline<SykdomVurderingVersjon> ktpVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, pleietrengende);
         final LocalDateTimeline<SykdomVurderingVersjon> tooVurderinger = sykdomVurderingRepository.getSisteVurderingstidslinjeFor(SykdomVurderingType.TO_OMSORGSPERSONER, pleietrengende);
 
-        final List<SykdomVurderingVersjon> vurderinger = new ArrayList<>(ktpVurderinger.stream().map(s -> s.getValue()).distinct().collect(Collectors.toList()));
-        vurderinger.addAll(tooVurderinger.stream().map(s -> s.getValue()).distinct().collect(Collectors.toList()));
+        final List<SykdomVurderingVersjon> vurderinger = ktpVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toCollection(ArrayList::new));
+        vurderinger.addAll(tooVurderinger.stream().map(LocalDateSegment::getValue).distinct().collect(Collectors.toList()));
         return vurderinger;
     }
 
     private LocalDateTimeline<Boolean> hentSøktePerioderFraForrigeBehandling(
-            final Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
+        final Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
         final LocalDateTimeline<Boolean> gamleSøktePerioder = grunnlagFraForrigeBehandling.map(sgb -> new LocalDateTimeline<Boolean>(
-                    sgb.getGrunnlag().getSøktePerioder().stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).collect(Collectors.toList())
-                )).orElse(new LocalDateTimeline<Boolean>(Collections.emptyList()));
+            sgb.getGrunnlag().getSøktePerioder().stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).collect(Collectors.toList())
+        )).orElse(new LocalDateTimeline<Boolean>(Collections.emptyList()));
         return gamleSøktePerioder;
     }
 
     public Optional<SykdomGrunnlagBehandling> hentGrunnlagFraForrigeBehandling(Saksnummer saksnummer, UUID behandlingUuid) {
         return hentSisteBehandlingMedUnntakAv(saksnummer, behandlingUuid)
-                .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).get());
+            .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).orElseThrow());
+    }
+
+    public EndringsresultatSnapshot finnAktivGrunnlagId(UUID behandlingUuid) {
+        var funnetId = hentGrunnlagForBehandling(behandlingUuid)
+            .map(SykdomGrunnlagBehandling::getGrunnlag)
+            .map(SykdomGrunnlag::getReferanse);
+
+        return funnetId
+            .map(id -> EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, id))
+            .orElse(EndringsresultatSnapshot.utenSnapshot(SykdomGrunnlag.class));
+    }
+
+    public Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {
+        final TypedQuery<UUID> q = entityManager.createQuery(
+            "Select sgb.behandlingUuid "
+                + "From SykdomGrunnlagBehandling as sgb "
+                + "Where sgb.saksnummer = :saksnummer "
+                + "  And sgb.behandlingsnummer = ( "
+                + "    Select max(sgb2.behandlingsnummer) "
+                + "    From SykdomGrunnlagBehandling as sgb2 "
+                + "    Where sgb2.saksnummer = :saksnummer "
+                + "  ) "
+            , UUID.class);
+
+        q.setParameter("saksnummer", saksnummer);
+
+        return q.getResultList().stream().findFirst();
     }
 
     Optional<UUID> hentSisteBehandlingMedUnntakAv(Saksnummer saksnummer, UUID behandlingUuid) {
         final TypedQuery<UUID> q = entityManager.createQuery(
-                "Select sgb.behandlingUuid "
+            "Select sgb.behandlingUuid "
                 + "From SykdomGrunnlagBehandling as sgb "
                 + "Where sgb.saksnummer = :saksnummer "
                 + "  And sgb.behandlingsnummer = ( "
@@ -131,7 +159,7 @@ public class SykdomGrunnlagRepository {
                 + "      And sgb2.behandlingUuid <> :behandlingUuid "
                 + "  ) "
                 + "  And sgb.behandlingUuid <> :behandlingUuid"
-                , UUID.class);
+            , UUID.class);
 
         q.setParameter("saksnummer", saksnummer);
         q.setParameter("behandlingUuid", behandlingUuid);
@@ -139,9 +167,9 @@ public class SykdomGrunnlagRepository {
         return q.getResultList().stream().findFirst();
     }
 
-    Optional<SykdomGrunnlagBehandling> hentGrunnlagForBehandling(UUID behandlingUuid) {
+    public Optional<SykdomGrunnlagBehandling> hentGrunnlagForBehandling(UUID behandlingUuid) {
         final TypedQuery<SykdomGrunnlagBehandling> q = entityManager.createQuery(
-                "SELECT sgb "
+            "SELECT sgb "
                 + "FROM SykdomGrunnlagBehandling as sgb "
                 + "where sgb.behandlingUuid = :behandlingUuid "
                 + "  and sgb.versjon = ( "
@@ -149,9 +177,21 @@ public class SykdomGrunnlagRepository {
                 + "    From SykdomGrunnlagBehandling as sgb2 "
                 + "    where sgb2.behandlingUuid = sgb.behandlingUuid "
                 + "  )"
-                , SykdomGrunnlagBehandling.class);
+            , SykdomGrunnlagBehandling.class);
 
         q.setParameter("behandlingUuid", behandlingUuid);
+
+        return q.getResultList().stream().findFirst();
+    }
+
+    public Optional<SykdomGrunnlag> hentGrunnlagForId(UUID grunnlagReferanse) {
+        Objects.requireNonNull(grunnlagReferanse);
+        final TypedQuery<SykdomGrunnlag> q = entityManager.createQuery(
+            "SELECT sg "
+                + "FROM SykdomGrunnlag as sg "
+                + "WHERE sg.id = :id", SykdomGrunnlag.class);
+
+        q.setParameter("id", grunnlagReferanse);
 
         return q.getResultList().stream().findFirst();
     }

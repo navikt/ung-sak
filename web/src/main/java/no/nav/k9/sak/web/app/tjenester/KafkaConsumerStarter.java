@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebListener;
 
 import no.nav.k9.sak.domene.risikoklassifisering.konsument.RisikoklassifiseringConsumer;
 import no.nav.k9.sak.historikk.kafka.HistorikkConsumer;
+import no.nav.k9.sak.hendelse.vedtak.VedtakConsumer;
 
 /**
  * Triggers start of Kafka consumere
@@ -22,6 +23,9 @@ public class KafkaConsumerStarter implements ServletContextListener {
     @Inject // NOSONAR
     private RisikoklassifiseringConsumer risikoklassifiseringConsumer; // NOSONAR
 
+    @Inject
+    private VedtakConsumer vedtakConsumer;
+
     public KafkaConsumerStarter() { // NOSONAR
         // For CDI
     }
@@ -31,11 +35,13 @@ public class KafkaConsumerStarter implements ServletContextListener {
         // FIXME K9 : avgjør om vi beholder denne for å skape lineage av historikk på tvers av tjenester
         // historikkConsumer.start();
         // risikoklassifiseringConsumer.start();
+        vedtakConsumer.start();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // historikkConsumer.stop();
         // risikoklassifiseringConsumer.stop();
+        vedtakConsumer.stop();
     }
 }

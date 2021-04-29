@@ -98,6 +98,11 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
+     * (async) Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
+     */
+    void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
+
+    /**
      * (async) Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
      */
     void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);

@@ -37,13 +37,16 @@ public class PersonInformasjonBuilderTest {
 
         PersonInformasjonBuilder oppdater = PersonInformasjonBuilder.oppdater(Optional.of(informasjon), PersonopplysningVersjonType.REGISTRERT);
 
-        assertThat(oppdater.build().getPersonopplysninger()).hasSize(3);
-        assertThat(oppdater.build().getRelasjoner()).hasSize(2);
+        PersonInformasjonEntitet ny = oppdater.build();
+        assertThat(ny.getPersonopplysninger()).hasSize(3);
+        assertThat(ny.getRelasjoner()).hasSize(2);
 
         oppdater.tilbakestill(søker);
+        PersonInformasjonEntitet ny2 = oppdater.build();
+        assertThat(ny2.getPersonopplysninger()).hasSize(1);
+        assertThat(ny2.getRelasjoner()).isEmpty();
 
-        assertThat(oppdater.build().getPersonopplysninger().stream().map(HarAktørId::getAktørId)).containsExactly(søker);
-        assertThat(oppdater.build().getRelasjoner()).isEmpty();
+        assertThat(ny2.getPersonopplysninger().stream().map(HarAktørId::getAktørId)).containsExactly(søker);
 
     }
 

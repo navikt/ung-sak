@@ -32,7 +32,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         }
 
         @Override
-        public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId) {
+        public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
             return null;
         }
 
@@ -66,6 +66,9 @@ class PostSykdomOgKontinuerligTilsynStegTest {
                 .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder);
 
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        builder.leggTil(vilkårBuilder18år);
+        
         var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
@@ -73,12 +76,55 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         assertThat(oppdaterteVilkår).isNotNull();
 
         for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
-            if (!VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
-                assertThat(vilkår.getPerioder()).hasSize(1);
-                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(oppfyltPeriode);
-            } else {
+            if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
                 assertThat(vilkår.getPerioder()).hasSize(2);
                 assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode, avslåttPeriode);
+            } else if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).isEmpty();
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(oppfyltPeriode);
+            }
+        }
+    }
+    
+    @Test
+    void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk_med_18årsvurdering() {
+        var builder = Vilkårene.builder();
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        var oppfyltPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(28), LocalDate.now());
+        var avslåttPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(32), LocalDate.now().minusDays(29));
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(avslåttPeriode.getFomDato(), oppfyltPeriode.getTomDato());
+        var perioderTilVurdering = List.of(periodeTilVurdering);
+
+        builder.leggTilIkkeVurderteVilkår(perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            VilkårType.MEDLEMSKAPSVILKÅRET,
+            VilkårType.OPPTJENINGSPERIODEVILKÅR,
+            VilkårType.OPPTJENINGSVILKÅRET);
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode)
+            .medUtfall(Utfall.OPPFYLT))
+            .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
+                .medUtfall(Utfall.IKKE_OPPFYLT));
+        builder.leggTil(vilkårBuilder);
+
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        builder.leggTil(vilkårBuilder18år);
+        
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+
+        var oppdaterteVilkår = resultatBuilder.build();
+
+        assertThat(oppdaterteVilkår).isNotNull();
+
+        for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
+            if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).hasSize(2);
+                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode, avslåttPeriode);
+            } else if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).isEmpty();
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(oppfyltPeriode);
             }
         }
     }
@@ -100,6 +146,9 @@ class PostSykdomOgKontinuerligTilsynStegTest {
                 .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder);
 
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        builder.leggTil(vilkårBuilder18år);
+        
         var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
@@ -107,12 +156,14 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         assertThat(oppdaterteVilkår).isNotNull();
 
         for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
-            if (!VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
-                assertThat(vilkår.getPerioder()).hasSize(1);
-                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
-            } else {
+            if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
                 assertThat(vilkår.getPerioder()).hasSize(1);
                 assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(avslåttPeriode);
+            } else if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).isEmpty();    
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
             }
         }
     }
@@ -134,6 +185,9 @@ class PostSykdomOgKontinuerligTilsynStegTest {
                 .medUtfall(Utfall.OPPFYLT));
         builder.leggTil(vilkårBuilder);
 
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        builder.leggTil(vilkårBuilder18år);
+        
         var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
@@ -141,12 +195,14 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         assertThat(oppdaterteVilkår).isNotNull();
 
         for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
-            if (!VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
-                assertThat(vilkår.getPerioder()).hasSize(1);
-                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
-            } else {
+            if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
                 assertThat(vilkår.getPerioder()).hasSize(1);
                 assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode);
+            } else if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).isEmpty();
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
             }
         }
     }

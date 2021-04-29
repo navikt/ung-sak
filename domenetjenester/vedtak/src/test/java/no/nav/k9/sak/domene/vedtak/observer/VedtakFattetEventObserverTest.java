@@ -81,9 +81,9 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository).lagre(prosessDataCaptor.capture());
+        verify(prosessTaskRepository, times(2)).lagre(prosessDataCaptor.capture());
         assertThat(prosessDataCaptor.getAllValues().stream().map(ProsessTaskData::getTaskType))
-            .containsExactly(PubliserVedtakHendelseTask.TASKTYPE);
+            .containsExactly(PubliserVedtakHendelseTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {

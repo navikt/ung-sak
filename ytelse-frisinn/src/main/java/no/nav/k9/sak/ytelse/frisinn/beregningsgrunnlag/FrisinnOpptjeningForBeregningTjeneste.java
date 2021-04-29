@@ -70,7 +70,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     }
 
     @Override
-    public Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    public Optional<OppgittOpptjening> finnOppgittOpptjening(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         OppgittOpptjeningFilter oppgittOpptjeningFilter = new OppgittOpptjeningFilter(iayGrunnlag.getOppgittOpptjening(), iayGrunnlag.getOverstyrtOppgittOpptjening());
         return Optional.ofNullable(oppgittOpptjeningFilter.getOppgittOpptjeningFrisinn());
     }
@@ -79,7 +79,7 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
                                                                                                              InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                                                                              LocalDate stp, LocalDate fomDato) {
 
-        Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(iayGrunnlag);
+        Optional<OppgittOpptjening> oppgittOpptjening = finnOppgittOpptjening(behandlingReferanse, iayGrunnlag, stp);
         OpptjeningsperioderUtenOverstyringTjeneste opptjeningsperioderTjeneste = FagsakYtelseTypeRef.Lookup.find(OpptjeningsperioderUtenOverstyringTjeneste.class,
             opptjeningsperioderTjenesteInstanser,
             behandlingReferanse.getFagsakYtelseType())

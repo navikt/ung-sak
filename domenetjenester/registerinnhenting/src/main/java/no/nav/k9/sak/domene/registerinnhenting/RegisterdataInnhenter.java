@@ -24,6 +24,7 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -59,7 +60,6 @@ import no.nav.k9.sak.domene.registerinnhenting.personopplysninger.Ytelsesspesifi
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {
@@ -169,23 +169,37 @@ public class RegisterdataInnhenter {
     }
 
     private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
-        final var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
+        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
         if (pleietrengende.isPresent()) {
-            final var aktørId = pleietrengende.get();
-            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            var aktørId = pleietrengende.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
+                log.info("Fant personinfo for angitt pleietrengende fra fagsak");
+                if (harAktør(informasjonBuilder, personinfo)) {
+                    log.info("har allerede mappet pleietrengende");
+                    return;
+                }
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
             }
         }
     }
 
+    private boolean harAktør(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
+        return informasjonBuilder.harAktørId(personinfo.getAktørId());
+    }
+
     private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
-        final var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
+        var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
         if (relatertPerson.isPresent()) {
-            final var aktørId = relatertPerson.get();
-            final var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+            var aktørId = relatertPerson.get();
+            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
             if (personinfo != null) {
+                log.info("Fant personinfo for angitt relatert person fra fagsak");
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
+            } else {
+                throw new IllegalStateException("Finner ikke personinfo i PDL for relatert person aktørid");
             }
         }
     }
@@ -290,7 +304,7 @@ public class RegisterdataInnhenter {
     }
 
     private void mapInfoTilEntitet(Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, boolean lagreIHistoriskeTabeller) {
-        if (informasjonBuilder.harAktørId(personinfo.getAktørId())) {
+        if (harAktør(informasjonBuilder, personinfo)) {
             return;
         }
 
@@ -345,12 +359,15 @@ public class RegisterdataInnhenter {
                 f.getRelasjonsrolle().equals(RelasjonsRolleType.SAMBOER))
             .collect(Collectors.toList());
         for (Familierelasjon familierelasjon : familierelasjoner) {
-            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(familierelasjon.getPersonIdent());
+            var ident = familierelasjon.getPersonIdent();
+            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(ident);
             if (ektefelleInfo.isPresent()) {
                 final Personinfo personinfo = ektefelleInfo.get();
                 mapTilPersonopplysning(personinfo, informasjonBuilder, false, true, behandling);
                 mapRelasjon(søkerPersonInfo, personinfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
                 mapRelasjon(personinfo, søkerPersonInfo, Collections.singletonList(familierelasjon.getRelasjonsrolle()), informasjonBuilder);
+            } else {
+                log.warn("Fant ikke personinfo for familierelasjon: {}", familierelasjon.getRelasjonsrolle());
             }
         }
     }

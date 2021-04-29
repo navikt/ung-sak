@@ -253,7 +253,7 @@ public class VilkårTjeneste {
         }
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var tjeneste = getVilkårsPerioderTilVurderingTjeneste(behandling);
-        List<DatoIntervallEntitet> allePerioder = tjeneste.utled(behandlingId).values().stream().flatMap(v -> v.stream()).sorted().collect(Collectors.toList());
+        List<DatoIntervallEntitet> allePerioder = tjeneste.utledRådataTilUtledningAvVilkårsperioder(behandlingId).values().stream().flatMap(v -> v.stream()).sorted().collect(Collectors.toList());
 
         if (allePerioder.isEmpty()) {
             return LocalDateTimeline.EMPTY_TIMELINE;

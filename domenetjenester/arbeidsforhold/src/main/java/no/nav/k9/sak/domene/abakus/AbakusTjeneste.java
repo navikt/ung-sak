@@ -75,6 +75,7 @@ public class AbakusTjeneste {
     private URI endpointOverstyring;
     private URI endpointMottaInntektsmeldinger;
     private URI endpointMottaOppgittOpptjening;
+    private URI endpointMottaOppgittOpptjeningV2;
     private URI endpointOverstyrtOppgittOpptjening;
     private URI endpointKopierGrunnlag;
     private URI endpointGrunnlagSnapshot;
@@ -109,6 +110,7 @@ public class AbakusTjeneste {
         this.endpointOverstyring = toUri("/api/iay/grunnlag/v1/overstyrt");
         this.endpointMottaInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/motta");
         this.endpointMottaOppgittOpptjening = toUri("/api/iay/oppgitt/v1/motta");
+        this.endpointMottaOppgittOpptjeningV2 = toUri("/api/iay/oppgitt/v2/motta");
         this.endpointOverstyrtOppgittOpptjening = toUri("/api/iay/oppgitt/v1/overstyr");
         this.endpointGrunnlagSnapshot = toUri("/api/iay/grunnlag/v1/snapshot");
         this.endpointKopierGrunnlag = toUri("/api/iay/grunnlag/v1/kopier");
@@ -306,11 +308,16 @@ public class AbakusTjeneste {
 
     public void lagreOppgittOpptjening(OppgittOpptjeningMottattRequest request) throws IOException {
         var json = iayJsonWriter.writeValueAsString(request);
-        lagreOppgittOpptjening(request.getKoblingReferanse(), json);
+        lagreOppgittOpptjening(request.getKoblingReferanse(), json, endpointMottaOppgittOpptjening);
     }
 
-    public void lagreOppgittOpptjening(UUID behandlingRef, String json) throws IOException {
-        HttpPost httpPost = new HttpPost(endpointMottaOppgittOpptjening);
+    public void lagreOppgittOpptjeningV2(OppgittOpptjeningMottattRequest request) throws IOException {
+        var json = iayJsonWriter.writeValueAsString(request);
+        lagreOppgittOpptjening(request.getKoblingReferanse(), json, endpointMottaOppgittOpptjeningV2);
+    }
+
+    public void lagreOppgittOpptjening(UUID behandlingRef, String json, URI endpoint) throws IOException {
+        HttpPost httpPost = new HttpPost(endpoint);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
         log.info("Lagre oppgitt opptjening (behandlingUUID={}) i Abakus", behandlingRef);

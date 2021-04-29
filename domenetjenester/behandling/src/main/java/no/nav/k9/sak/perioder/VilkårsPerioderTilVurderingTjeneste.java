@@ -37,7 +37,7 @@ public interface VilkårsPerioderTilVurderingTjeneste {
         return new TreeSet<>();
     }
 
-    Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utled(Long behandlingId);
+    Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);
 
     int maksMellomliggendePeriodeAvstand();
 

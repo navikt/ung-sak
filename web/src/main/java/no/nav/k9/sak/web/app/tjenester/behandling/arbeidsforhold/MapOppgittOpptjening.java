@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.Lookup;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -53,7 +54,10 @@ class MapOppgittOpptjening {
         var dto = new SøknadsperiodeOgOppgittOpptjeningV2Dto();
 
         OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste = Lookup.find(this.opptjeningForBeregningTjeneste, behandling.getFagsakYtelseType()).orElseThrow();
-        Optional<OppgittOpptjening> oppgittOpptjeningOpt = opptjeningForBeregningTjeneste.finnOppgittOpptjening(inntektArbeidYtelseGrunnlag);
+        // Denne mapperen brukes bare av Frisinn. Stp er ikke i bruk for tjenesten nedenfor
+        LocalDate stp = null;
+        var ref = BehandlingReferanse.fra(behandling);
+        Optional<OppgittOpptjening> oppgittOpptjeningOpt = opptjeningForBeregningTjeneste.finnOppgittOpptjening(ref, inntektArbeidYtelseGrunnlag, stp);
 
         if (oppgittOpptjeningOpt.isEmpty()) {
             return dto;
@@ -151,7 +155,7 @@ class MapOppgittOpptjening {
         }
         return dto;
     }
-    
+
     private PeriodeMedSNOgFLDto map(PeriodeDto måned, OppgittOpptjeningDto dto, UttakAktivitet fastsattUttak) {
         var resultatDto = new PeriodeMedSNOgFLDto();
         resultatDto.setMåned(måned);

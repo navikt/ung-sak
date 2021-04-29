@@ -1,13 +1,17 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import no.nav.abakus.iaygrunnlag.JournalpostId;
 import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.Landkode;
@@ -17,6 +21,7 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
@@ -24,6 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilansoppdrag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
@@ -67,6 +73,10 @@ class MapOppgittOpptjening {
         return MapTilDto.map(oppgittOpptjening);
     }
 
+    OppgitteOpptjeningerDto mapTilDto(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+        return MapTilDto.map(oppgitteOpptjeninger);
+    }
+
     OppgittOpptjeningBuilder mapFraDto(OppgittOpptjeningDto oppgittOpptjening) {
         return MapFraDto.map(oppgittOpptjening);
     }
@@ -77,13 +87,28 @@ class MapOppgittOpptjening {
             // Skjul
         }
 
+        private static OppgitteOpptjeningerDto map(OppgittOpptjeningAggregat oppgitteOpptjeninger) {
+            return new OppgitteOpptjeningerDto().medOppgitteOpptjeninger(
+                oppgitteOpptjeninger.getOppgitteOpptjeninger().stream()
+                    .map(MapTilDto::map)
+                    .collect(Collectors.toList())
+            );
+        }
+
         private static OppgittOpptjeningDto map(OppgittOpptjening oppgittOpptjening) {
             if (oppgittOpptjening == null)
                 return null;
             if (!oppgittOpptjening.harOpptjening())
                 return null;
 
-            var dto = new OppgittOpptjeningDto(oppgittOpptjening.getEksternReferanse(), oppgittOpptjening.getOpprettetTidspunkt());
+            JournalpostId journalpostId = oppgittOpptjening.getJournalpostId() != null
+                ? new JournalpostId(oppgittOpptjening.getJournalpostId().getVerdi())
+                : null;
+            OffsetDateTime innsendtTid = oppgittOpptjening.getInnsendingstidspunkt() != null
+                ? oppgittOpptjening.getInnsendingstidspunkt().atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                : null;
+            OffsetDateTime opprettetTid = oppgittOpptjening.getOpprettetTidspunkt().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+            var dto = new OppgittOpptjeningDto(journalpostId, innsendtTid, oppgittOpptjening.getEksternReferanse(), opprettetTid);
 
             dto.medArbeidsforhold(oppgittOpptjening.getOppgittArbeidsforhold().stream().map(MapTilDto::mapArbeidsforhold).sorted(COMP_OPPGITT_ARBEIDSFORHOLD)
                 .collect(Collectors.toList()));
@@ -93,7 +118,6 @@ class MapOppgittOpptjening {
                 oppgittOpptjening.getAnnenAktivitet().stream().map(MapTilDto::mapAnnenAktivitet).sorted(COMP_ANNEN_AKTIVITET).collect(Collectors.toList()));
 
             oppgittOpptjening.getFrilans().ifPresent(f -> dto.medFrilans(mapFrilans(f)));
-
             return dto;
         }
 
@@ -223,6 +247,8 @@ class MapOppgittOpptjening {
 
             var oppgittOpptjeningEksternReferanse = UUID.fromString(dto.getEksternReferanse().getReferanse());
             var builder = OppgittOpptjeningBuilder.ny(oppgittOpptjeningEksternReferanse, dto.getOpprettetTidspunkt());
+            Optional.ofNullable(dto.getJournalpostId()).ifPresent(jp -> builder.medJournalpostId(new no.nav.k9.sak.typer.JournalpostId(jp.getId())));
+            Optional.ofNullable(dto.getInnsendingstidspunkt()).ifPresent(tidspunkt -> builder.medInnsendingstidspunkt(tidspunkt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
 
             var annenAktivitet = mapEach(dto.getAnnenAktivitet(), MapFraDto::mapAnnenAktivitet);
             annenAktivitet.forEach(builder::leggTilAnnenAktivitet);
