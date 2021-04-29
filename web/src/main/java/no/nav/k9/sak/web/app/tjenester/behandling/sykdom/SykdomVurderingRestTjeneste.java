@@ -249,8 +249,9 @@ public class SykdomVurderingRestTjeneste {
 
     private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
         final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
-        final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> pleietrengendesFødselsdato.plusYears(18).isBefore(p.getFom()));
-        final boolean vurdering18år = perioder.stream().anyMatch(p -> !pleietrengendesFødselsdato.plusYears(18).isBefore(p.getTom()));
+        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(18);
+        final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> p.getFom().isBefore(blir18år));
+        final boolean vurdering18år = perioder.stream().anyMatch(p -> p.getTom().isAfter(blir18år) || p.getTom().isEqual(blir18år));
         
         if (vurderingUnder18år && vurdering18år) {
             throw new IllegalStateException("En sykdomsvurdering kan ikke gjelde både før og etter at barnet har fylt 18 år. For å kunne lagre må vurderingen splittes i to.");
