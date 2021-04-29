@@ -28,14 +28,17 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
     }
 
     private DatoIntervallEntitet(LocalDate fomDato, LocalDate tomDato) {
+        if (fomDato == null && tomDato == null) {
+            throw new IllegalArgumentException("Hverken fom (fra og med) dato, eller tom (til og med) dato er satt.");
+        }
         if (fomDato == null) {
-            throw new IllegalArgumentException("Fra og med dato må være satt.");
+            throw new IllegalArgumentException("Fra og med dato må være satt. tom=" + tomDato);
         }
         if (tomDato == null) {
-            throw new IllegalArgumentException("Til og med dato må være satt.");
+            throw new IllegalArgumentException("Til og med dato må være satt. fom=" + fomDato);
         }
         if (tomDato.isBefore(fomDato)) {
-            throw new IllegalArgumentException("Til og med dato før fra og med dato.");
+            throw new IllegalArgumentException("Til og med dato før fra og med dato. Fikk [" + fomDato + "," + tomDato + "]");
         }
         this.fomDato = fomDato;
         this.tomDato = tomDato;
