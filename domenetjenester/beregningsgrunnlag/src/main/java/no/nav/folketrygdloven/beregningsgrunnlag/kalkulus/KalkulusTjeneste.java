@@ -383,10 +383,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .map(entry -> {
                 UUID bgReferanse = entry.getKey();
                 var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue());
-
                 var vilkårsMerknad = opptjeningsvilkår.finnPeriodeForSkjæringstidspunkt(vilkårPeriode.getSkjæringstidspunkt()).getMerknad();
-                var vilkårsPeriodeDatoIntervall = vilkårPeriode.getPeriode();
-                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriodeDatoIntervall);
+                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
                     kalkulatorInputTjeneste.byggDto(
                         behandlingReferanse,
@@ -394,7 +392,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                         iayGrunnlag,
                         sakInntektsmeldinger,
                         ytelsesGrunnlag,
-                        vilkårsPeriodeDatoIntervall,
+                        vilkårPeriode.getPeriode(),
                         vilkårsMerknad));
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
