@@ -23,6 +23,8 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
@@ -373,14 +375,16 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger,
                                                                   Map<UUID, LocalDate> referanseSkjæringstidspunktMap) {
         Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        Vilkår opptjeningsvilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
         return referanseSkjæringstidspunktMap.entrySet()
             .stream()
             .sorted(Map.Entry.comparingByValue())
             .map(entry -> {
                 UUID bgReferanse = entry.getKey();
-                var vilkårsPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue()).getPeriode();
-                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriode);
+                var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue());
+                var vilkårsMerknad = opptjeningsvilkår.finnPeriodeForSkjæringstidspunkt(vilkårPeriode.getSkjæringstidspunkt()).getMerknad();
+                var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
                     kalkulatorInputTjeneste.byggDto(
                         behandlingReferanse,
@@ -388,7 +392,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                         iayGrunnlag,
                         sakInntektsmeldinger,
                         ytelsesGrunnlag,
-                        vilkårsPeriode));
+                        vilkårPeriode.getPeriode(),
+                        vilkårsMerknad));
             }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 

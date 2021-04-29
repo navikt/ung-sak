@@ -49,7 +49,7 @@ public class ForvaltningBeregningRestTjeneste {
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-    
+
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     private BeregningsgrunnlagYtelseKalkulator forvaltningBeregning;
@@ -91,7 +91,7 @@ public class ForvaltningBeregningRestTjeneste {
             .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode()))
             .map(vilkårsperiode -> {
                 var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-                var kalkulatorInput = forvaltningBeregning.getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, null, iayGrunnlag, sakInntektsmeldinger, ytelseGrunnlag, vilkårsperiode);
+                var kalkulatorInput = forvaltningBeregning.getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, null, iayGrunnlag, sakInntektsmeldinger, ytelseGrunnlag, vilkårsperiode, null);
                 return new KalkulatorInputPrVilkårperiodeDto(vilkårsperiode, kalkulatorInput);
             })
             .collect(Collectors.toList());

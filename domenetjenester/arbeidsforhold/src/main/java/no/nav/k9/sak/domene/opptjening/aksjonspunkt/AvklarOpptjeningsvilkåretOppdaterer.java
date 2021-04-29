@@ -1,16 +1,21 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -21,7 +26,8 @@ import no.nav.k9.sak.domene.opptjening.Opptjeningsfeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkårDto;
-import no.nav.k9.sak.kontrakt.opptjening.AvklarOpptjeningsvilkåretDto;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
+import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOpptjeningsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -46,28 +52,48 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
     public OppdateringResultat oppdater(AvklarOpptjeningsvilkårDto dto, AksjonspunktOppdaterParameter param) {
         var builder = param.getVilkårResultatBuilder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
-        for (AvklarOpptjeningsvilkåretDto avklarOpptjeningsvilkåretDto : dto.getPerioder()) {
-            Utfall nyttUtfall = avklarOpptjeningsvilkåretDto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
 
+        List<Tuple<VilkårPeriodeVurderingDto, Periode>> perioder = sammenkoblePerioder(dto);
+
+        for (Tuple<VilkårPeriodeVurderingDto, Periode> periode : perioder) {
+            var vilkårPeriodeVurdering = periode.getElement1();
+            var opptjeningPeriode = periode.getElement2();
+
+            Utfall nyttUtfall = vilkårPeriodeVurdering.isErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
             if (nyttUtfall.equals(Utfall.OPPFYLT)) {
-                var periode = DatoIntervallEntitet.fraOgMedTilOgMed(avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom());
-                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), periode);
+                sjekkOmVilkåretKanSettesTilOppfylt(param.getBehandlingId(), opptjeningPeriode);
             }
-            oppdaterUtfallOgLagre(nyttUtfall, avklarOpptjeningsvilkåretDto.getOpptjeningFom(), avklarOpptjeningsvilkåretDto.getOpptjeningTom(), vilkårBuilder);
+            oppdaterUtfallOgLagre(nyttUtfall, vilkårPeriodeVurdering, vilkårBuilder);
         }
         builder.leggTil(vilkårBuilder);
         return OppdateringResultat.utenOveropp();
     }
 
-    private void oppdaterUtfallOgLagre(Utfall utfallType, LocalDate fom, LocalDate tom, VilkårBuilder vilkårBuilder) {
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+    // TODO: Bedre løsning på sikt at endepunkt opptjening-v2 kobler sammen vilkårsperioder med opptjeningsperioder.
+    //  Her kobler man heller aksjonspunktet man får i retur
+    private List<Tuple<VilkårPeriodeVurderingDto, Periode>> sammenkoblePerioder(AvklarOpptjeningsvilkårDto dto) {
+        var vilkårPeriodeVurderinger = dto.getVilkårPeriodeVurderinger();
+        var opptjeningPerioder = dto.getOpptjeningPerioder();
+
+        validerKonsistens(vilkårPeriodeVurderinger, opptjeningPerioder);
+
+        var sammenkobledePerioder = IntStream.range(0, vilkårPeriodeVurderinger.size())
+            .mapToObj(i -> new Tuple<>(vilkårPeriodeVurderinger.get(i), opptjeningPerioder.get(i)))
+            .collect(Collectors.toList());
+        return sammenkobledePerioder;
+    }
+
+    private void oppdaterUtfallOgLagre(Utfall utfallType, VilkårPeriodeVurderingDto vilkårPeriode, VilkårBuilder vilkårBuilder) {
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode().getFom(), vilkårPeriode.getPeriode().getTom())
             .medUtfall(utfallType)
+            .medMerknad(utfallType.equals(Utfall.OPPFYLT) ? VilkårUtfallMerknad.fraKode(vilkårPeriode.getInnvilgelseMerknadKode()): null)
             .medAvslagsårsak(!utfallType.equals(Utfall.OPPFYLT) ? Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING : null));
     }
 
-    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, DatoIntervallEntitet periode) {
+    private void sjekkOmVilkåretKanSettesTilOppfylt(Long behandlingId, Periode opptjeningPeriode) {
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
         var opptjening = opptjeningRepository.finnOpptjening(behandlingId).flatMap(it -> it.finnOpptjening(periode));
         if (opptjening.isPresent()) {
             long antall = opptjening.get().getOpptjeningAktivitet().stream()
@@ -87,5 +113,28 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
             .medSkjermlenke(SkjermlenkeType.PUNKT_FOR_OPPTJENING);
+    }
+
+    private void validerKonsistens(List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger, List<Periode> opptjeningPerioder) {
+        if (vilkårPeriodeVurderinger.size() != opptjeningPerioder.size()) {
+            throw new IllegalArgumentException("Antall vilkårsperioder, " + vilkårPeriodeVurderinger.size()
+                + ", matcher ikke antall korresponderende opptjeningsperioder, " + opptjeningPerioder.size());
+        }
+
+        var sortertVp = vilkårPeriodeVurderinger.stream()
+            .sorted(Comparator.comparing(VilkårPeriodeVurderingDto::getPeriode))
+            .collect(Collectors.toList())
+            .equals(vilkårPeriodeVurderinger);
+        if (!sortertVp) {
+            throw new IllegalArgumentException("Vilkårsperioder er ikke sortert etter periode");
+        }
+
+        var sortertOp = opptjeningPerioder.stream()
+            .sorted()
+            .collect(Collectors.toList())
+            .equals(opptjeningPerioder);
+        if (!sortertOp) {
+            throw new IllegalArgumentException("Opptjeningsperioder er ikke sortert etter periode");
+        }
     }
 }

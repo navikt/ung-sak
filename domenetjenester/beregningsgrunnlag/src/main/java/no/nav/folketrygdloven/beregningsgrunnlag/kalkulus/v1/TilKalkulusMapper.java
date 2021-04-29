@@ -46,13 +46,8 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
+import no.nav.folketrygdloven.kalkulus.opptjening.v1.*;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -272,15 +267,32 @@ public class TilKalkulusMapper {
             permisjoner);
     }
 
-    public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter) {
-        return new OpptjeningAktiviteterDto(opptjeningAktiviteter.getOpptjeningPerioder().stream().map(opptjeningPeriode -> new OpptjeningPeriodeDto(
-            OpptjeningAktivitetType.fraKode(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
-            new Periode(opptjeningPeriode.getPeriode().getFom(), opptjeningPeriode.getPeriode().getTom()),
-            mapTilDto(opptjeningPeriode),
-            opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null
-                ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse())
-                : null))
-            .collect(Collectors.toList()));
+    public static OpptjeningAktiviteterDto mapTilDto(OpptjeningAktiviteter opptjeningAktiviteter, VilkårUtfallMerknad vilkårsMerknad) {
+        return new OpptjeningAktiviteterDto(opptjeningAktiviteter.getOpptjeningPerioder()
+            .stream()
+            .map(opptjeningPeriode -> new OpptjeningPeriodeDto(
+                OpptjeningAktivitetType.fraKode(opptjeningPeriode.getOpptjeningAktivitetType().getKode()),
+                new Periode(opptjeningPeriode.getPeriode().getFom(), opptjeningPeriode.getPeriode().getTom()),
+                mapTilDto(opptjeningPeriode),
+                opptjeningPeriode.getArbeidsforholdId() != null && opptjeningPeriode.getArbeidsforholdId().getReferanse() != null
+                    ? new InternArbeidsforholdRefDto(opptjeningPeriode.getArbeidsforholdId().getReferanse())
+                    : null))
+            .collect(Collectors.toList())
+            , finnMidlertidigInaktivType(vilkårsMerknad));
+    }
+
+    private static MidlertidigInaktivType finnMidlertidigInaktivType(VilkårUtfallMerknad vilkårsMerknad) {
+        if (vilkårsMerknad == null) {
+            return null;
+        }
+        switch (vilkårsMerknad) {
+            case VM_7847_A:
+                return MidlertidigInaktivType.A;
+            case VM_7847_B:
+                return MidlertidigInaktivType.B;
+            default:
+                return null;
+        }
     }
 
     private static PermisjonDto mapTilPermisjonDto(Permisjon permisjon) {

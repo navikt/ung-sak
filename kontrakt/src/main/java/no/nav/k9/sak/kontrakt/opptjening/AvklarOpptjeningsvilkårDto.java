@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.opptjening;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -21,24 +24,31 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_OPPTJENINGSVILKÅRET_KODE)
 public class AvklarOpptjeningsvilkårDto extends BekreftetAksjonspunktDto {
 
+    @JsonProperty(value = "vilkårPeriodeVurderinger")
+    @Size(max = 100)
+    @Valid
+    @NotNull
+    private List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger;
+
     @Valid
     @Size(max = 100)
-    @JsonProperty(value = "vilkårPerioder", required = true)
-    private List<AvklarOpptjeningsvilkåretDto> perioder;
+    @JsonProperty(value = "opptjeningPerioder", required = true)
+    private List<Periode> opptjeningPerioder;
 
     public AvklarOpptjeningsvilkårDto() {
     }
 
-    public AvklarOpptjeningsvilkårDto(List<AvklarOpptjeningsvilkåretDto> perioder, String begrunnelse) {
+    public AvklarOpptjeningsvilkårDto(List<VilkårPeriodeVurderingDto> vilkårPeriodeVurderinger, List<Periode> opptjeningPerioder, String begrunnelse) {
         super(begrunnelse);
-        this.perioder = perioder;
+        this.vilkårPeriodeVurderinger = vilkårPeriodeVurderinger;
+        this.opptjeningPerioder = opptjeningPerioder;
     }
 
-    public List<AvklarOpptjeningsvilkåretDto> getPerioder() {
-        return perioder;
+    public List<VilkårPeriodeVurderingDto> getVilkårPeriodeVurderinger() {
+        return vilkårPeriodeVurderinger;
     }
 
-    public void setPerioder(List<AvklarOpptjeningsvilkåretDto> perioder) {
-        this.perioder = perioder;
+    public List<Periode> getOpptjeningPerioder() {
+        return opptjeningPerioder;
     }
 }
