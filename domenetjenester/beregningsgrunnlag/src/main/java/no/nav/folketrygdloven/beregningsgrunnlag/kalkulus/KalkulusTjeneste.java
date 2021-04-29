@@ -23,6 +23,7 @@ import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 
@@ -374,6 +375,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger,
                                                                   Map<UUID, LocalDate> referanseSkjæringstidspunktMap) {
         Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+        Vilkår opptjeningsvilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
         return referanseSkjæringstidspunktMap.entrySet()
             .stream()
@@ -382,7 +384,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                 UUID bgReferanse = entry.getKey();
                 var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue());
 
-                var vilkårsMerknad = vilkårPeriode.getMerknad();
+                var vilkårsMerknad = opptjeningsvilkår.finnPeriodeForSkjæringstidspunkt(vilkårPeriode.getSkjæringstidspunkt()).getMerknad();
                 var vilkårsPeriodeDatoIntervall = vilkårPeriode.getPeriode();
                 var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsPeriodeDatoIntervall);
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
