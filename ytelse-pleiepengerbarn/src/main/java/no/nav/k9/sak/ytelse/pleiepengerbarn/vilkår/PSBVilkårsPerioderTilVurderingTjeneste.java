@@ -1,10 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -13,15 +15,18 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
@@ -85,16 +90,24 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var perioder = utledPeriode(behandlingId, vilkårType);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), perioder);
+            return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkårene.get(), perioder);
         }
         return utledPeriode(behandlingId, vilkårType);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
+        var perioderTilVurdering = new TreeSet<>(perioder);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
+            var berørtePerioder = utledUtvidetPeriode(behandling);
+            perioderTilVurdering.addAll(berørtePerioder);
+        }
+
         return vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getPeriode)
-            .filter(datoIntervallEntitet -> perioder.stream().anyMatch(datoIntervallEntitet::overlapper))
+            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(datoIntervallEntitet::overlapper))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -128,7 +141,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), ekstraPerioder);
+            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
         }
         return ekstraPerioder;
     }
@@ -153,9 +166,50 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
     }
 
+    private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(Behandling behandling) {
+        var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(behandling.getOriginalBehandlingId().orElseThrow()).getUuid();
+        var vedtattSykdomGrunnlagBehandling = sykdomVurderingService.hentGrunnlag(forrigeVedtatteBehandling);
+        var pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
+        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        var vurderingsperioder = utledVurderingsperiode(vilkårene);
+
+        var utledetGrunnlag = sykdomVurderingService.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), pleietrengende, vurderingsperioder);
+
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.sammenlignGrunnlag(Optional.of(vedtattSykdomGrunnlagBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+
+        return endringerISøktePerioder.toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {
+        return behandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)
+            && behandling.getOriginalBehandlingId().isPresent();
+    }
+
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
     }
 
+    private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {
+        var vurderingsperioder = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
+            .stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        vurderingsperioder.addAll(vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+            .map(Vilkår::getPerioder)
+            .orElse(List.of())
+            .stream()
+            .map(VilkårPeriode::getPeriode)
+            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toList()));
+
+        return vurderingsperioder;
+    }
 }
