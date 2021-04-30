@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformas
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -109,7 +110,7 @@ public class BehandlingsgrunnlagEntitetTest {
         lagreBehandling(behandling);
     
         Long behandlingId = behandling.getId();
-        PersonInformasjonBuilder informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandlingId);
+        PersonInformasjonBuilder informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         LocalDate fødselsdato = dødsdatoForelder1.minusYears(40);
         informasjonBuilder.leggTil(
             informasjonBuilder.getPersonopplysningBuilder(aktørId)

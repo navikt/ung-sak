@@ -1,14 +1,8 @@
 package no.nav.k9.sak.behandlingslager.behandling.personopplysning;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -22,39 +16,21 @@ import no.nav.k9.sak.typer.AktørId;
 
 public class PersonInformasjonBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(PersonInformasjonBuilder.class);
-
     private final PersonInformasjonEntitet kladd;
     private final PersonopplysningVersjonType type;
-    private final boolean gjelderOppdatering;
 
-    private AktørId søkerAktørId;
+    public PersonInformasjonBuilder(PersonopplysningVersjonType type) {
+        this(new PersonInformasjonEntitet(), type);
+    }
 
-    private List<PersonRelasjonEntitet> opprinneligRelasjoner;
-
-    private PersonInformasjonBuilder(PersonInformasjonEntitet personInfoAggregatEntitet, PersonopplysningVersjonType type, boolean gjelderOppdatering) {
-        this.kladd = personInfoAggregatEntitet;
-
-        this.opprinneligRelasjoner = List.copyOf(kladd.getRelasjoner());
-
-        this.type = type;
-        this.gjelderOppdatering = gjelderOppdatering;
+    /** for testing og inkrementell bygging (eks. overstyringer). */
+    public PersonInformasjonBuilder(PersonInformasjonEntitet kladd, PersonopplysningVersjonType type) {
+        this.kladd = new PersonInformasjonEntitet(Objects.requireNonNull(kladd)); // tar kopi av input
+        this.type = Objects.requireNonNull(type);
     }
 
     public boolean harAktørId(AktørId aktørId) {
         return kladd.harAktørId(aktørId);
-    }
-
-    private static PersonInformasjonBuilder nytt(PersonopplysningVersjonType type) {
-        return new PersonInformasjonBuilder(new PersonInformasjonEntitet(), type, false);
-    }
-
-    private static PersonInformasjonBuilder oppdater(PersonInformasjonEntitet personInformasjon, PersonopplysningVersjonType type) {
-        return new PersonInformasjonBuilder(new PersonInformasjonEntitet(personInformasjon), type, true);
-    }
-
-    public static PersonInformasjonBuilder oppdater(Optional<PersonInformasjonEntitet> aggregat, PersonopplysningVersjonType type) {
-        return aggregat.map(e -> oppdater(e, type)).orElseGet(() -> nytt(type));
     }
 
     public PersonInformasjonBuilder leggTil(AdresseBuilder builder) {
@@ -93,54 +69,7 @@ public class PersonInformasjonBuilder {
     }
 
     public PersonInformasjonEntitet build() {
-        ryddBortGamlePersonopplysningerForRelasjonerSomErFjernet();
-        return kladd;
-    }
-
-    /*
-     * TODO: kan vi unngå dette ved å droppe #oppdater? Dvs alltid lage ny kladd (evt. med overstyringer). Har uansett en diff algoritme før
-     * oppretting av nytt aggregat i PersonopplysningRepository.
-     */
-    private void ryddBortGamlePersonopplysningerForRelasjonerSomErFjernet() {
-        if (gjelderOppdatering() && søkerAktørId != null) {
-            var gamleRelasjoner = opprinneligRelasjoner;
-            var nyeRelasjoner = kladd.getRelasjoner();
-
-            // slå sammen aktører fra gamle relasjoner
-            var finnPersonerFjernet = Stream.concat(
-                gamleRelasjoner.stream().map(e -> e.getAktørId()),
-                gamleRelasjoner.stream().map(e -> e.getTilAktørId()))
-                .collect(Collectors.toSet());
-
-            // trekk fra de vi fortsatt har relasjon til i kladd
-            finnPersonerFjernet.removeAll(Stream.concat(
-                nyeRelasjoner.stream().map(e -> e.getAktørId()),
-                nyeRelasjoner.stream().map(e -> e.getTilAktørId()))
-                .collect(Collectors.toSet()));
-
-            finnPersonerFjernet.remove(søkerAktørId); // skal alltid være med
-
-            // fjerner bare dersom er i listen av relasjoner som ikke fins lenger.
-            finnPersonerFjernet.forEach(id -> {
-                log.info("Fjerner person {}..... - relasjon eksisterer ikke lenger", id.getAktørId().substring(0, 3));
-                kladd.fjernPersonopplysning(id);
-            });
-        }
-    }
-
-    /**
-     * @deprecated bør håndteres ved ctor ikke rydding på kladd.
-     */
-    @Deprecated(forRemoval = true)
-    public void tilbakestill(AktørId søkerAktørId) {
-        if (gjelderOppdatering()) {
-            this.søkerAktørId = søkerAktørId;
-            kladd.tilbakestill();
-        }
-    }
-
-    boolean gjelderOppdatering() {
-        return gjelderOppdatering;
+        return new PersonInformasjonEntitet(kladd);
     }
 
     public boolean harIkkeFåttPersonstatusHistorikk(AktørId aktørId) {

@@ -7,6 +7,7 @@ import java.util.Set;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -18,7 +19,7 @@ class AvklarSaksopplysningerAksjonspunkt {
     }
 
     void oppdater(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunkt adapter) {
-        PersonInformasjonBuilder builder = personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
+        PersonInformasjonBuilder builder = personopplysningRepository.opprettBuilderFraEksisterende(behandlingId, PersonopplysningVersjonType.OVERSTYRT);
 
         LocalDate fom = adapter.getPersonstatusTypeKode().get().getGyldigFom();
         LocalDate tom = adapter.getPersonstatusTypeKode().get().getGyldigTom();

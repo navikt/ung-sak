@@ -206,7 +206,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Long behandlingId = behandling.getId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);
 
-        PersonInformasjonBuilder personInformasjonBuilder = PersonInformasjonBuilder.oppdater(personopplysningGrunnlag.getRegisterVersjon(), PersonopplysningVersjonType.REGISTRERT);
+        PersonInformasjonBuilder personInformasjonBuilder = new PersonInformasjonBuilder(personopplysningGrunnlag.getRegisterVersjon().get(), PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.StatsborgerskapBuilder norgeFørsteÅr = personInformasjonBuilder.getStatsborgerskapBuilder(søkerAktørId, førsteÅr, Landkoder.NOR, Region.NORDEN);
         PersonInformasjonBuilder.StatsborgerskapBuilder spaniaAndreÅr = personInformasjonBuilder.getStatsborgerskapBuilder(søkerAktørId, andreÅr, Landkoder.ESP, Region.EOS);
         PersonInformasjonBuilder.StatsborgerskapBuilder norgeTredjeÅr = personInformasjonBuilder.getStatsborgerskapBuilder(søkerAktørId, tredjeÅr, Landkoder.NOR, Region.NORDEN);
@@ -236,7 +236,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Long behandlingId = behandling.getId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);
 
-        PersonInformasjonBuilder personInformasjonBuilder = PersonInformasjonBuilder.oppdater(personopplysningGrunnlag.getRegisterVersjon(), PersonopplysningVersjonType.REGISTRERT);
+        PersonInformasjonBuilder personInformasjonBuilder = new PersonInformasjonBuilder(personopplysningGrunnlag.getRegisterVersjon().get(), PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.PersonstatusBuilder førsteÅrBosa = personInformasjonBuilder.getPersonstatusBuilder(søkerAktørId, førsteÅr).medPersonstatus(PersonstatusType.BOSA);
         PersonInformasjonBuilder.PersonstatusBuilder andreÅrBosa = personInformasjonBuilder.getPersonstatusBuilder(søkerAktørId, andreÅr).medPersonstatus(PersonstatusType.UTVA);
         PersonInformasjonBuilder.PersonstatusBuilder tredjeÅrBosa = personInformasjonBuilder.getPersonstatusBuilder(søkerAktørId, tredjeÅr).medPersonstatus(PersonstatusType.DØD);
@@ -266,7 +266,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Long behandlingId = behandling.getId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);
 
-        PersonInformasjonBuilder personInformasjonBuilder = PersonInformasjonBuilder.oppdater(personopplysningGrunnlag.getRegisterVersjon(), PersonopplysningVersjonType.REGISTRERT);
+        PersonInformasjonBuilder personInformasjonBuilder = new PersonInformasjonBuilder(personopplysningGrunnlag.getRegisterVersjon().get(), PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.AdresseBuilder bostedFørsteÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, førsteÅr, AdresseType.BOSTEDSADRESSE);
         PersonInformasjonBuilder.AdresseBuilder utlandAndreÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, andreÅr, AdresseType.POSTADRESSE_UTLAND);
         PersonInformasjonBuilder.AdresseBuilder bostedTredjeÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, tredjeÅr, AdresseType.BOSTEDSADRESSE);
@@ -296,7 +296,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         Long behandlingId = behandling.getId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);
 
-        PersonInformasjonBuilder personInformasjonBuilder = PersonInformasjonBuilder.oppdater(personopplysningGrunnlag.getRegisterVersjon(), PersonopplysningVersjonType.REGISTRERT);
+        PersonInformasjonBuilder personInformasjonBuilder = new PersonInformasjonBuilder(personopplysningGrunnlag.getRegisterVersjon().get(), PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.AdresseBuilder bostedFørsteÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, førsteÅr, AdresseType.BOSTEDSADRESSE);
         PersonInformasjonBuilder.AdresseBuilder utlandAndreÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, andreÅr, AdresseType.POSTADRESSE_UTLAND);
         PersonInformasjonBuilder.AdresseBuilder bostedTredjeÅr = personInformasjonBuilder.getAdresseBuilder(søkerAktørId, tredjeÅr, AdresseType.BOSTEDSADRESSE);
