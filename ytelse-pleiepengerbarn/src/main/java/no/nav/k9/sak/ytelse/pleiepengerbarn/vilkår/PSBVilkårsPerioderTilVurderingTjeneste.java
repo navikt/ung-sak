@@ -118,13 +118,19 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.utledRelevanteEndringerSidenForrigeBehandling(
-                referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder).getDiffPerioder();
+            referanse.getSaksnummer(), referanse.getBehandlingUuid(), pleietrengende, nyeVurderingsperioder).getDiffPerioder();
 
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
-        return new TreeSet<>(utvidedePerioder.stream()
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
-            .collect(Collectors.toList()));
+        var ekstraPerioder = utvidedePerioder.stream()
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new));
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
+            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (vilkårene.isPresent()) {
+            return utledVilkårsPerioderFraPerioderTilVurdering(vilkårene.get(), ekstraPerioder);
+        }
+        return ekstraPerioder;
     }
 
     @Override

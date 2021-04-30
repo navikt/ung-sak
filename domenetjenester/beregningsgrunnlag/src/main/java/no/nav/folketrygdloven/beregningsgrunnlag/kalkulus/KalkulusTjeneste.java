@@ -375,6 +375,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                                                                   Collection<Inntektsmelding> sakInntektsmeldinger,
                                                                   Map<UUID, LocalDate> referanseSkjæringstidspunktMap) {
         Vilkår vilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+
         var opptjeningsvilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET);
         var mapper = getYtelsesspesifikkMapper(behandlingReferanse.getFagsakYtelseType());
         return referanseSkjæringstidspunktMap.entrySet()
@@ -383,10 +384,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .map(entry -> {
                 UUID bgReferanse = entry.getKey();
                 var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(entry.getValue());
+
                 VilkårUtfallMerknad vilkårsMerknad = null;
                 if (opptjeningsvilkår.isPresent()) {
                     vilkårsMerknad = opptjeningsvilkår.get().finnPeriodeForSkjæringstidspunkt(vilkårPeriode.getSkjæringstidspunkt()).getMerknad();
                 }
+
                 var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårPeriode.getPeriode());
                 return new AbstractMap.SimpleEntry<>(bgReferanse,
                     kalkulatorInputTjeneste.byggDto(
