@@ -61,6 +61,9 @@ public class SykdomVurderingService {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
     }
 
+    public SykdomGrunnlagBehandling hentGrunnlag(UUID behandlingUuid) {
+        return sykdomGrunnlagRepository.hentGrunnlagForBehandling(behandlingUuid).orElseThrow();
+    }
 
     public SykdomAksjonspunkt vurderAksjonspunkt(Behandling behandling) {
         // XXX: Denne er kastet sammen og bør trolig skrives enklere
@@ -230,6 +233,10 @@ public class SykdomVurderingService {
         final SykdomGrunnlag utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, nyeVurderingsperioder);
 
         return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(SykdomGrunnlagBehandling::getGrunnlag), utledetGrunnlag);
+    }
+
+    public SykdomGrunnlag utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengende, List<Periode> vurderingsperioder) {
+        return sykdomGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, vurderingsperioder);
     }
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<SykdomGrunnlag> forrigeGrunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
