@@ -2,7 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 
 import javax.persistence.AttributeConverter;
 
-import no.nav.k9.søknad.ytelse.psb.v1.Omsorg.BarnRelasjon;
+import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 
 public class OmsorgRelasjonTypeConverter implements AttributeConverter<BarnRelasjon, String>{
 
