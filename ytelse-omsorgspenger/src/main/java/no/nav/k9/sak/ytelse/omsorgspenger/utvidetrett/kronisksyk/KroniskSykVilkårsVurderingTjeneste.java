@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
@@ -24,6 +25,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
+    private PersoninfoAdapter personinfoAdapter;
 
     KroniskSykVilkårsVurderingTjeneste() {
         // for proxy
@@ -31,8 +33,10 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
 
     @Inject
     public KroniskSykVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
+                                              PersoninfoAdapter personinfoAdapter,
                                               SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
     }
 
@@ -56,9 +60,11 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {
         var fagsak = behandling.getFagsak();
         var søknad = søknadRepository.hentSøknad(behandling);
+        var personinfo = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId()).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
+
+        var maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // siste dag året fyller 18
         var søknadFom = søknad.getMottattDato();
-        var maksDato = fagsak.getPeriode().getTomDato(); // fram tom kalenderår v/18 år
-        return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksDato);
+        return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksdato);
     }
 
     @Override
