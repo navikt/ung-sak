@@ -98,7 +98,7 @@ public class PersonAdresseEndringIdentifisererTest {
 
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlagMotstattRekkefølge(List<PersonAdresseEntitet> personadresser) {
-        final PersonInformasjonBuilder builder1 = PersonInformasjonBuilder.oppdater(Optional.empty(), PersonopplysningVersjonType.REGISTRERT);
+        final PersonInformasjonBuilder builder1 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         builder1.leggTil(builder1.getPersonopplysningBuilder(AKTØRID));
         //Bygg opp identiske statsborgerskap, bare legg de inn i motsatt rekkefølge.
         new LinkedList<>(personadresser)
@@ -108,7 +108,7 @@ public class PersonAdresseEndringIdentifisererTest {
     }
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlag(List<String> postnummer) {
-        final PersonInformasjonBuilder builder1 = PersonInformasjonBuilder.oppdater(Optional.empty(), PersonopplysningVersjonType.REGISTRERT);
+        final PersonInformasjonBuilder builder1 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         builder1
             .leggTil(builder1.getPersonopplysningBuilder(AKTØRID));
         //Opprett adresser med forskjellig fra og med dato. Går 1 mnd tilbake for hver adresse. Endrer kun postnummer i denne testen

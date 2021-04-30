@@ -52,7 +52,7 @@ public class PersonopplysningRepository {
     }
 
     /**
-     * Kopierer grunnlag fra en tidligere behandling.  Endrer ikke aggregater, en skaper nye referanser til disse.
+     * Kopierer grunnlag fra en tidligere behandling. Endrer ikke aggregater, en skaper nye referanser til disse.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         Optional<PersonopplysningGrunnlagEntitet> eksisterendeGrunnlag = getAktivtGrunnlag(eksisterendeBehandlingId);
@@ -61,7 +61,6 @@ public class PersonopplysningRepository {
 
         lagreOgFlush(nyBehandlingId, builder);
     }
-
 
     public void kopierGrunnlagFraEksisterendeBehandlingForRevurdering(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         Optional<PersonopplysningGrunnlagEntitet> eksisterendeGrunnlag = getAktivtGrunnlag(eksisterendeBehandlingId);
@@ -77,16 +76,13 @@ public class PersonopplysningRepository {
         return new DiffEntity(traverser);
     }
 
-
     public PersonopplysningGrunnlagEntitet hentPersonopplysninger(Long behandlingId) {
         return getAktivtGrunnlag(behandlingId).orElse(null);
     }
 
-
     public DiffResult diffResultat(PersonopplysningGrunnlagEntitet grunnlag1, PersonopplysningGrunnlagEntitet grunnlag2, boolean onlyCheckTrackedFields) {
         return new RegisterdataDiffsjekker(onlyCheckTrackedFields).getDiffEntity().diff(grunnlag1, grunnlag2);
     }
-
 
     public Optional<PersonopplysningGrunnlagEntitet> hentPersonopplysningerHvisEksisterer(Long behandlingId) {
         Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR //$NON-NLS-1$
@@ -99,8 +95,8 @@ public class PersonopplysningRepository {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
             "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id AND pbg.aktiv = true", // NOSONAR //$NON-NLS-1$
             PersonopplysningGrunnlagEntitet.class)
-                .setHint(QueryHints.HINT_CACHE_MODE, "IGNORE")
-                .setParameter("behandling_id", behandlingId); // NOSONAR //$NON-NLS-1$
+            .setHint(QueryHints.HINT_CACHE_MODE, "IGNORE")
+            .setParameter("behandling_id", behandlingId); // NOSONAR //$NON-NLS-1$
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = HibernateVerktøy.hentUniktResultat(query);
 
@@ -154,12 +150,10 @@ public class PersonopplysningRepository {
         }
     }
 
-
     public void lagre(Long behandlingId, PersonInformasjonBuilder personInformasjonBuilder) {
         validerHarFasteAktører(behandlingId, personInformasjonBuilder);
 
         final PersonopplysningGrunnlagBuilder nyttGrunnlag = getGrunnlagBuilderFor(behandlingId);
-
 
         if (personInformasjonBuilder.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
             nyttGrunnlag.medRegistrertVersjon(personInformasjonBuilder);
@@ -200,17 +194,20 @@ public class PersonopplysningRepository {
         return PersonopplysningGrunnlagBuilder.oppdatere(aktivtGrunnlag);
     }
 
-    public PersonInformasjonBuilder opprettBuilderForRegisterdata(Long behandlingId) {
-        final Optional<PersonopplysningGrunnlagEntitet> aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
-        return PersonInformasjonBuilder.oppdater(aktivtGrunnlag.flatMap(PersonopplysningGrunnlagEntitet::getRegisterVersjon),
-            PersonopplysningVersjonType.REGISTRERT);
-    }
-
-
-    public PersonInformasjonBuilder opprettBuilderForOverstyring(Long behandlingId) {
-        final PersonopplysningGrunnlagEntitet aktivtGrunnlag = getAktivtGrunnlag(behandlingId).orElseThrow(IllegalStateException::new);
-        return PersonInformasjonBuilder.oppdater(aktivtGrunnlag.getOverstyrtVersjon(),
-            PersonopplysningVersjonType.OVERSTYRT);
+    /** Tar med tidligere overstyring når lager ny overstyrt versjon. */
+    public PersonInformasjonBuilder opprettBuilderFraEksisterende(Long behandlingId, PersonopplysningVersjonType type) {
+        var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
+        if (aktivtGrunnlag.isEmpty()) {
+            // tillater ikke overstyring hvis ikke har grunnlag fra før
+            if (type == PersonopplysningVersjonType.OVERSTYRT) {
+                throw new IllegalStateException("Forventer å ha grunnlag før forsøker å overstyre");
+            }
+            return new PersonInformasjonBuilder(type);
+        }
+        var eksisterende = type == PersonopplysningVersjonType.REGISTRERT
+            ? aktivtGrunnlag.get().getRegisterVersjon()
+            : aktivtGrunnlag.get().getOverstyrtVersjon();
+        return eksisterende.isEmpty() ? new PersonInformasjonBuilder(type) : new PersonInformasjonBuilder(eksisterende.get(), type);
     }
 
     private Optional<PersonopplysningGrunnlagEntitet> getInitiellVersjonAvPersonopplysningBehandlingsgrunnlag(
@@ -219,20 +216,18 @@ public class PersonopplysningRepository {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
             "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id order by pbg.opprettetTidspunkt, pbg.id", //$NON-NLS-1$
             PersonopplysningGrunnlagEntitet.class)
-                .setParameter("behandling_id", behandlingId) // NOSONAR
-                .setMaxResults(1);
+            .setParameter("behandling_id", behandlingId) // NOSONAR
+            .setMaxResults(1);
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = query.getResultStream().findFirst();
 
         return resultat;
     }
 
-
     public PersonopplysningGrunnlagEntitet hentFørsteVersjonAvPersonopplysninger(Long behandlingId) {
         Optional<PersonopplysningGrunnlagEntitet> optGrunnlag = getInitiellVersjonAvPersonopplysningBehandlingsgrunnlag(behandlingId);
         return optGrunnlag.orElse(null);
     }
-
 
     public PersonopplysningGrunnlagEntitet hentPersonopplysningerPåId(Long aggregatId) {
         Optional<PersonopplysningGrunnlagEntitet> optGrunnlag = getVersjonAvPersonopplysningBehandlingsgrunnlagPåId(
@@ -246,7 +241,7 @@ public class PersonopplysningRepository {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
             "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.id = :aggregatId", //$NON-NLS-1$
             PersonopplysningGrunnlagEntitet.class)
-                .setParameter("aggregatId", aggregatId); // NOSONAR //$NON-NLS-1$
+            .setParameter("aggregatId", aggregatId); // NOSONAR //$NON-NLS-1$
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = query.getResultStream().findFirst();
 

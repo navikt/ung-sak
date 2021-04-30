@@ -44,6 +44,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapPerioderEn
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -140,8 +141,7 @@ public class RegisterdataInnhenter {
     private PersonInformasjonBuilder byggPersonopplysningMedRelasjoner(Personinfo søkerPersonInfo,
                                                                        Behandling behandling) {
 
-        var informasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandling.getId());
-        informasjonBuilder.tilbakestill(behandling.getAktørId());
+        var informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
 
         // Historikk for søker
         var fagsakYtelseType = behandling.getFagsakYtelseType();

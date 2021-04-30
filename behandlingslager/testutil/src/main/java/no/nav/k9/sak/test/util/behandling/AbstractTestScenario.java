@@ -482,8 +482,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             personer.stream().filter(a -> a.getType().equals(PersonopplysningVersjonType.OVERSTYRT))
                 .findFirst().ifPresent(b -> {
                     if (personer.stream().noneMatch(c -> c.getType().equals(PersonopplysningVersjonType.REGISTRERT))) {
-                        // Sjekker om overstyring er ok, mao om registeropplysninger finnes
-                        personopplysningRepository.opprettBuilderForOverstyring(behandlingId);
+                        personopplysningRepository.opprettBuilderFraEksisterende(behandlingId, PersonopplysningVersjonType.OVERSTYRT);
                     }
                     lagrePersoninfo(behandling, b, personopplysningRepository);
                 });
@@ -518,11 +517,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private void lagreRegisterPersoninfo(Behandling behandling, PersonInformasjon personInformasjon, PersonopplysningRepository repository) {
-        lagrePersoninfo(behandling, repository.opprettBuilderForRegisterdata(behandling.getId()), personInformasjon, repository);
+        lagrePersoninfo(behandling, repository.opprettBuilderFraEksisterende(behandling.getId(), PersonopplysningVersjonType.REGISTRERT), personInformasjon, repository);
     }
 
     private void lagreOverstyrtPersoninfo(Behandling behandling, PersonInformasjon personInformasjon, PersonopplysningRepository repository) {
-        lagrePersoninfo(behandling, repository.opprettBuilderForOverstyring(behandling.getId()), personInformasjon, repository);
+        lagrePersoninfo(behandling, repository.opprettBuilderFraEksisterende(behandling.getId(), PersonopplysningVersjonType.OVERSTYRT), personInformasjon, repository);
     }
 
     private void lagrePersoninfo(Behandling behandling, PersonInformasjonBuilder personInformasjonBuilder, PersonInformasjon personInformasjon,
@@ -957,17 +956,16 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         @Override
-        public PersonInformasjonBuilder opprettBuilderForOverstyring(Long behandlingId) {
-            final Optional<PersonopplysningGrunnlagEntitet> grunnlag = Optional.ofNullable(personopplysningMap.getOrDefault(behandlingId, null));
-            return PersonInformasjonBuilder.oppdater(grunnlag.flatMap(PersonopplysningGrunnlagEntitet::getOverstyrtVersjon),
-                PersonopplysningVersjonType.OVERSTYRT);
-        }
-
-        @Override
-        public PersonInformasjonBuilder opprettBuilderForRegisterdata(Long behandlingId) {
-            final Optional<PersonopplysningGrunnlagEntitet> grunnlag = Optional.ofNullable(personopplysningMap.getOrDefault(behandlingId, null));
-            return PersonInformasjonBuilder.oppdater(grunnlag.flatMap(PersonopplysningGrunnlagEntitet::getRegisterVersjon),
-                PersonopplysningVersjonType.REGISTRERT);
+        public PersonInformasjonBuilder opprettBuilderFraEksisterende(Long behandlingId, PersonopplysningVersjonType type) {
+            final Optional<PersonopplysningGrunnlagEntitet> aktivtGrunnlag = Optional.ofNullable(personopplysningMap.getOrDefault(behandlingId, null));
+            if(aktivtGrunnlag.isEmpty()){
+                return new PersonInformasjonBuilder(type);
+            }
+            
+            var eksisterende = type == PersonopplysningVersjonType.REGISTRERT
+                ? aktivtGrunnlag.get().getRegisterVersjon()
+                : aktivtGrunnlag.get().getOverstyrtVersjon();
+            return eksisterende.isEmpty() ? new PersonInformasjonBuilder(type) : new PersonInformasjonBuilder(eksisterende.get(), type);
         }
 
         @Override

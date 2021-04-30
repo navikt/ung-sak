@@ -23,24 +23,24 @@ public class PersonopplysningGrunnlagBuilder {
     }
 
     public PersonopplysningGrunnlagBuilder medRegistrertVersjon(PersonInformasjonBuilder builder) {
-        if (builder.getType().equals(PersonopplysningVersjonType.REGISTRERT)
-                && kladd.getRegisterVersjon().isPresent() == builder.gjelderOppdatering()) {
-            kladd.setRegistrertePersonopplysninger(builder.build());
-        } else {
-            throw PersonopplysningFeil.FACTORY.måBasereSegPåEksisterendeVersjon().toException();
+        if (builder == null) {
+            return this;
         }
+        if (!builder.getType().equals(PersonopplysningVersjonType.REGISTRERT)) {
+            throw new IllegalArgumentException("Utvikler-feil: forventet register personinfo");
+        }
+        kladd.setRegistrertePersonopplysninger(builder.build());
         return this;
     }
 
     public PersonopplysningGrunnlagBuilder medOverstyrtVersjon(PersonInformasjonBuilder builder) {
         if (builder == null) {
-            kladd.setOverstyrtePersonopplysninger(null);
-        } else if (builder.getType().equals(PersonopplysningVersjonType.OVERSTYRT)
-                && kladd.getOverstyrtVersjon().isPresent() == builder.gjelderOppdatering()) {
-            kladd.setOverstyrtePersonopplysninger(builder.build());
-        } else {
-            throw PersonopplysningFeil.FACTORY.måBasereSegPåEksisterendeVersjon().toException();
+            return this;
         }
+        if (!builder.getType().equals(PersonopplysningVersjonType.OVERSTYRT)) {
+            throw new IllegalArgumentException("Utvikler-feil: forventet overstyrt personinfo");
+        }
+        kladd.setOverstyrtePersonopplysninger(builder.build());
         return this;
     }
 

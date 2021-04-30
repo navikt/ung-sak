@@ -144,23 +144,6 @@ public class PersonInformasjonEntitet extends BaseEntitet {
         this.personopplysninger.add(personopplysning);
     }
 
-    void fjernPersonopplysning(AktørId aktørId) {
-        this.personopplysninger.removeIf(e -> e.getAktørId().equals(aktørId));
-    }
-
-    /**
-     * Rydder bort alt unntatt personopplysninger
-     *
-     * @deprecated bør håndteres i ctor
-     */
-    @Deprecated(forRemoval = true)
-    void tilbakestill() {
-        this.adresser.clear();
-        this.personstatuser.clear();
-        this.relasjoner.clear();
-        this.statsborgerskap.clear();
-    }
-
     PersonInformasjonBuilder.PersonopplysningBuilder getPersonBuilderForAktørId(AktørId aktørId) {
         Objects.requireNonNull(aktørId, "aktørId");
         final Optional<PersonopplysningEntitet> eksisterendeAktør = personopplysninger.stream().filter(it -> it.getAktørId().equals(aktørId)).findFirst();

@@ -88,7 +88,7 @@ public class StatsborgerskapEndringIdentifisererTest {
     }
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlagMotstattRekkefølge(List<StatsborgerskapEntitet> statsborgerLand) {
-        final PersonInformasjonBuilder builder1 = PersonInformasjonBuilder.oppdater(Optional.empty(), PersonopplysningVersjonType.REGISTRERT);
+        final PersonInformasjonBuilder builder1 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         builder1.leggTil(builder1.getPersonopplysningBuilder(AKTØRID));
         //Bygg opp identiske statsborgerskap, bare legg de inn i motsatt rekkefølge.
         statsborgerLand.stream()
@@ -100,7 +100,7 @@ public class StatsborgerskapEndringIdentifisererTest {
 
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlag(List<LandOgRegion> statsborgerskap) {
-        final PersonInformasjonBuilder builder1 = PersonInformasjonBuilder.oppdater(Optional.empty(), PersonopplysningVersjonType.REGISTRERT);
+        final PersonInformasjonBuilder builder1 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         builder1
             .leggTil(builder1.getPersonopplysningBuilder(AKTØRID));
             IntStream.range(0, statsborgerskap.size())
