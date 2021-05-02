@@ -15,6 +15,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @ApplicationScoped
@@ -29,6 +30,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     public GrunnlagKopiererPleiepenger() {
@@ -42,6 +44,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
                                        SøknadsperiodeRepository søknadsperiodeRepository,
                                        UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                        OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
+                                       UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste) {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.uttakRepository = uttakRepository;
@@ -50,6 +53,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
     }
@@ -68,6 +72,7 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         pleiebehovResultatRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         beregningPerioderGrunnlagRepository.kopier(originalBehandlingId, nyBehandlingId, true);
         omsorgenForGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        unntakEtablertTilsynGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

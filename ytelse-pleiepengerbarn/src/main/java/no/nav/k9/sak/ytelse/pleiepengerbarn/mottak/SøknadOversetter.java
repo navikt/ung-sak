@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.*;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
@@ -48,6 +50,7 @@ class SøknadOversetter {
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -107,7 +110,7 @@ class SøknadOversetter {
 
         // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
 
-        // TODO etter18feb: Beredskap, nattevåk og tilsynsordning
+        lagreBeredskapOgNattevåk(søknad, journalpostId, behandlingId, fagsakId);
 
         // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
         lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
@@ -118,6 +121,54 @@ class SøknadOversetter {
 
         lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
     }
+
+    private void lagreBeredskapOgNattevåk(Søknad søknad, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
+        var ytelse = søknad.getYtelse();
+        if (ytelse instanceof PleiepengerSyktBarn) {
+            var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
+            var søkerPersonIdent = søknad.getSøker().getPersonIdent();
+            var pleietrengendeAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(pleietrengendePersonIdent.getVerdi())).orElseThrow();
+            var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
+
+            var grunnlag = hentEllerOpprettUnntakEtablertTilsynGrunnlag(behandlingId, pleietrengendeAktørId);
+
+            var pleiepengerSyktBarn = (PleiepengerSyktBarn) ytelse;
+            var unntakEtablertTilsynForPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengendeAktørId);
+            unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
+
+            var unntakEtablertTilsynBeredskap =
+                BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
+                    /* TODO */null,
+                    søknad.getMottattDato().toLocalDate(),
+                    søkerAktørId,
+                    pleiepengerSyktBarn.getBeredskap());
+            var unntakEtablertTilsynNattevåk =
+                BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
+                    /* TODO */null,
+                    søknad.getMottattDato().toLocalDate(),
+                    søkerAktørId,
+                    pleiepengerSyktBarn.getNattevåk());
+            var nyttGrunnlag = grunnlag.getUnntakEtablertTilsynForPleietrengende()
+                .medBeredskap(unntakEtablertTilsynBeredskap)
+                .medNattevåk(unntakEtablertTilsynNattevåk);
+            unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, nyttGrunnlag);
+        } else {
+            throw new IllegalStateException("Ytelse er ikke PleiepengerSyktBarn. Skal ikke skje.");
+        }
+    }
+
+
+    private UnntakEtablertTilsynGrunnlag hentEllerOpprettUnntakEtablertTilsynGrunnlag(Long behandlingId, AktørId pleietrengendeAktørId) {
+        var unntakEtablertTilsynGrunnlagOptional = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        if (unntakEtablertTilsynGrunnlagOptional.isPresent()) {
+            return unntakEtablertTilsynGrunnlagOptional.get();
+        }
+        var unntakEtablertTilsynGrunnlagPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengendeAktørId);
+        var grunnlag = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynGrunnlagPleietrengende);
+        unntakEtablertTilsynGrunnlagRepository.lagre(grunnlag);
+        return grunnlag;
+    }
+
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
         final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
