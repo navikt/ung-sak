@@ -56,12 +56,4 @@ public class ArbeidsgiverArbeidsforholdId {
     public int hashCode() {
         return Objects.hash(arbeidsgiver, arbeidsforhold);
     }
-
-    @Override
-    public String toString() {
-        return "ArbeidsgiverArbeidsforholdId{" +
-            "arbeidsgiver='" + arbeidsgiver + '\'' +
-            ", arbeidsforhold='" + arbeidsforhold + '\'' +
-            '}';
-    }
 }
