@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -84,9 +86,13 @@ public class KompletthetForBeregningTjeneste {
 
         var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
 
-        var tidslinje = new LocalDateTimeline<>(vilkårsPerioder.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()));
+        var tidslinje = new LocalDateTimeline<>(vilkårsPerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toList()));
 
-        var relevantePerioder = vilkårsPerioder.stream().map(it -> utledRelevantPeriode(tidslinje, it)).collect(Collectors.toSet());
+        var relevantePerioder = vilkårsPerioder.stream()
+            .map(it -> utledRelevantPeriode(tidslinje, it))
+            .collect(Collectors.toSet());
 
         // For alle relevanteperioder vurder kompletthet
         for (DatoIntervallEntitet periode : relevantePerioder) {
@@ -135,11 +141,11 @@ public class KompletthetForBeregningTjeneste {
         return result;
     }
 
-    private <V> void utledManglendeInntektsmeldingerPerDag(HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>> result,
-                                                           Set<Inntektsmelding> relevanteInntektsmeldinger,
-                                                           DatoIntervallEntitet periode,
-                                                           BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
-                                                           Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
+    private <V extends ArbeidsforholdRef> void utledManglendeInntektsmeldingerPerDag(HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>> result,
+                                                                                        Set<Inntektsmelding> relevanteInntektsmeldinger,
+                                                                                        DatoIntervallEntitet periode,
+                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
+                                                                                        Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             result.put(periode, List.of());
         } else {
@@ -160,9 +166,13 @@ public class KompletthetForBeregningTjeneste {
                 }
             }
 
-            var manglendeInntektsmeldinger = påkrevdeInntektsmeldinger.keySet()
+            var manglendeInntektsmeldinger = påkrevdeInntektsmeldinger.entrySet()
                 .stream()
-                .map(key -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, key.getIdentifikator()))
+                .map(entry -> entry.getValue()
+                    .stream()
+                    .map(it -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, entry.getKey().getIdentifikator(), it.getReferanse(), false))
+                    .collect(Collectors.toList()))
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
             result.put(periode, manglendeInntektsmeldinger);
         }

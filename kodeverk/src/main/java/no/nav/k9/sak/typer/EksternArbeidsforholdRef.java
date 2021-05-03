@@ -22,7 +22,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class EksternArbeidsforholdRef implements IndexKey, Serializable {
+public class EksternArbeidsforholdRef implements ArbeidsforholdRef, IndexKey, Serializable {
 
     /** Representerer alle arbeidsforhold for en arbeidsgiver. */
     private static final EksternArbeidsforholdRef NULL_OBJECT = new EksternArbeidsforholdRef(null);
@@ -53,6 +53,7 @@ public class EksternArbeidsforholdRef implements IndexKey, Serializable {
         return NULL_OBJECT;
     }
 
+    @Override
     public String getReferanse() {
         return referanse;
     }
