@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.kompletthet;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -13,10 +14,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ArbeidsgiverArbeidsforholdStatus {
 
     @NotNull
+    @Valid
     @JsonProperty(value = "arbeidsgiver")
     private ArbeidsgiverArbeidsforholdId arbeidsgiver;
 
     @NotNull
+    @Valid
     @JsonProperty(value = "status")
     private Status status;
 

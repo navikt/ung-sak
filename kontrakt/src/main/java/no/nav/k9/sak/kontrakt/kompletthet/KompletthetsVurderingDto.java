@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.kompletthet;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -17,6 +18,7 @@ public class KompletthetsVurderingDto {
 
     @Size
     @NotNull
+    @Valid
     @JsonProperty("tilstand")
     private List<KompletthetsTilstandPåPeriodeDto> kompletthetsTilstand;
 

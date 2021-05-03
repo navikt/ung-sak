@@ -2,6 +2,7 @@ package no.nav.k9.sak.kontrakt.kompletthet;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -19,11 +20,13 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 public class KompletthetsTilstandPåPeriodeDto {
 
     @NotNull
+    @Valid
     @JsonProperty("periode")
     private Periode periode;
 
     @NotNull
     @Size()
+    @Valid
     @JsonProperty("status")
     private List<ArbeidsgiverArbeidsforholdStatus> status;
 
