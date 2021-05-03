@@ -90,7 +90,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-        Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).vurderSøknadsfrist(ref);
+        Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
