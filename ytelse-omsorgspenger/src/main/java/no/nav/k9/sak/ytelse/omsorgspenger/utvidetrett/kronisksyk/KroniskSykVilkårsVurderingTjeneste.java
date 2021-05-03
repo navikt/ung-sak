@@ -2,11 +2,15 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -22,6 +26,8 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @BehandlingTypeRef
 @RequestScoped
 public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(KroniskSykVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
@@ -44,27 +50,32 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var periode = utledPeriode(behandling);
-        return new TreeSet<>(Set.of(periode));
+        return periode.map(p -> new TreeSet<>(Set.of(p))).orElseGet(() -> new TreeSet<>());
     }
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var periode = utledPeriode(behandling);
-        var perioder = new TreeSet<>(Set.of(periode));
+        var perioder = periode.map(p -> new TreeSet<>(Set.of(p))).orElseGet(() -> new TreeSet<>());
         return Map.of(
             VilkårType.UTVIDETRETT, perioder,
             VilkårType.OMSORGEN_FOR, perioder);
     }
 
-    private DatoIntervallEntitet utledPeriode(Behandling behandling) {
+    private Optional<DatoIntervallEntitet> utledPeriode(Behandling behandling) {
         var fagsak = behandling.getFagsak();
         var søknad = søknadRepository.hentSøknad(behandling);
         var personinfo = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId()).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
 
         var maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // siste dag året fyller 18
         var søknadFom = søknad.getMottattDato();
-        return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksdato);
+        if (maksdato.isAfter(søknadFom)) {
+            return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksdato));
+        } else {
+            log.warn("maksdato [{}] er før søknadsdato[{}], har ingen periode å vurdere", maksdato, søknadFom);
+            return null;
+        }
     }
 
     @Override

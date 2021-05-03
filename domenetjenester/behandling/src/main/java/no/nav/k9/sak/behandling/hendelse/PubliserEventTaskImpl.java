@@ -11,6 +11,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 
+/**
+ * Publiserer ulike prosesshendelser på kafka slik som aksjonspunkter funnet,, prosess stoppet, behandling lagt på vent, behandlende enhet
+ * endret. Disse konsumeres primært av oppgavebehandling (eks. K9-Los).
+ */
 @ApplicationScoped
 @ProsessTask(PubliserEventTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
