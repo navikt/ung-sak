@@ -37,26 +37,24 @@ import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
-/**
- * Beregningsgrunnlag knyttet til en behandling.
- */
 @ApplicationScoped
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 @Transactional
-public class KompletthetRestTjeneste {
+public class KompletthetForBeregningRestTjeneste {
 
-    static public final String PATH = "/behandling/psb/kompletthet";
+    static public final String PATH = "/behandling/kompletthet/beregning";
+    static public final String KOMPLETTHET_FOR_BEREGNING_PATH = PATH;
     private BehandlingRepository behandlingRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
-    public KompletthetRestTjeneste() {
+    public KompletthetForBeregningRestTjeneste() {
         // for resteasy
     }
 
     @Inject
-    public KompletthetRestTjeneste(BehandlingRepository behandlingRepository,
-                                   KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+    public KompletthetForBeregningRestTjeneste(BehandlingRepository behandlingRepository,
+                                               KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
