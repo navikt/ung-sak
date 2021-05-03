@@ -71,7 +71,6 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_OPPTJENINGSVILKÅR("VURDER_OPPTJ", "Vurder opptjeningsvilkåret", UTREDES),
     VURDER_TILBAKETREKK("VURDER_TILBAKETREKK", "Vurder tilbaketrekk", UTREDES),
     VURDER_UTLAND("VURDER_UTLAND", "Vurder utland (SED)", UTREDES),
-    VURDER_TILSYN("VURDER_TILSYN", "Vurder tilsyn", UTREDES),
     VURDER_UTTAK("VURDER_UTTAK", "Vurder uttaksvilkår", UTREDES),
     BEKREFT_UTTAK("BEKREFT_UTTAK", "Bekreft uttak", UTREDES),
     MANUELL_VILKÅRSVURDERING("MANUELL_VILKÅRSVURDERING", "Manuell vilkårsvurdering", UTREDES),

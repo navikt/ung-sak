@@ -47,7 +47,6 @@ public enum SkjermlenkeType implements Kodeverdi {
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     UDEFINERT("-", "Ikke definert"),
     UTLAND("UTLAND", "Endret utland"),
-    TILSYN("TILSYN", "Tilsyn"),
     UTTAK("UTTAK", "Uttak"),
     VEDTAK("VEDTAK", "Vedtak"),
     VURDER_FARESIGNALER("VURDER_FARESIGNALER", "Vurder faresignaler"),

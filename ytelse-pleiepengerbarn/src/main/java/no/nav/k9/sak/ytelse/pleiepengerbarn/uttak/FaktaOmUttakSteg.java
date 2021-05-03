@@ -2,12 +2,15 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+
+import java.util.ArrayList;
 
 @ApplicationScoped
 @BehandlingStegRef(kode = "KOFAKUT")
@@ -24,12 +27,32 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
 
-        // TODO (FC): åpne aksjonspunkter når følgende
-        // 1. sjekk mismatch mellom uttakaktiviteter og godkjente arbeidsforhold fra opptjening/kontroller arbeidsforhold (ta utgangspunkt i
-        // godkjent for beregningsgrunnlag?)
-        // 2. sjekk om flere arbeisforhold godkjent per arbeidsgiver
+        var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
+        if (søktOmNattevåk()) {
+            aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
+        }
+        if (søktOmBeredskap()) {
+            aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
+        }
+        if (aksjonspunkter.isEmpty()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
 
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+
     }
+
+    private boolean søktOmNattevåk() {
+        //TODO: implementert dette
+        return false;
+    }
+
+
+    private boolean søktOmBeredskap() {
+        //TODO: implementert dette
+        return false;
+    }
+
+
 
 }
