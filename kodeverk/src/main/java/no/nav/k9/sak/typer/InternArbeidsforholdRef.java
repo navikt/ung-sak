@@ -22,7 +22,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class InternArbeidsforholdRef implements IndexKey {
+public class InternArbeidsforholdRef implements ArbeidsforholdRef, IndexKey {
 
     /**
      * Instans som representerer alle arbeidsforhold (for en arbeidsgiver).
@@ -65,6 +65,7 @@ public class InternArbeidsforholdRef implements IndexKey {
         return ref(UUID.nameUUIDFromBytes(seed.getBytes(Charset.forName("UTF8"))).toString());
     }
 
+    @Override
     public String getReferanse() {
         return referanse == null ? null : referanse.toString();
     }
