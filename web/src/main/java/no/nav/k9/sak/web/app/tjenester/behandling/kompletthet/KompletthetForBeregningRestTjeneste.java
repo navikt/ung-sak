@@ -62,9 +62,9 @@ public class KompletthetForBeregningRestTjeneste {
     @GET
     @Operation(description = "Hent tilstand for kompletthet for behandling", summary = ("Returnerer beregningsgrunnlag for behandling."), tags = "kompletthet")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @Path(PATH)
+    @Path(KOMPLETTHET_FOR_BEREGNING_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public KompletthetsVurderingDto hentBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public KompletthetsVurderingDto utledStatusForKompletthet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse.fra(behandling));
 
