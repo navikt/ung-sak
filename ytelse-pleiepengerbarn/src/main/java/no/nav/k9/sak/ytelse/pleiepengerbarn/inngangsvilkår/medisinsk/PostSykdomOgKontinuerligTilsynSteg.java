@@ -128,10 +128,8 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             return false;
         }
         var relevantPeriode = finnRelevantPeriode(datoIntervallEntitet, innvilgetePerioder);
-        if (relevantPeriode != null) {
-            return datoIntervallEntitet.getFomDato() != relevantPeriode.getFomDato();
-        }
-        throw new IllegalStateException("Fant flere vilkårsperioder som overlapper.. " + relevantPeriode);
+
+        return datoIntervallEntitet.getFomDato() != relevantPeriode.getFomDato();
     }
 
     public DatoIntervallEntitet finnRelevantPeriode(DatoIntervallEntitet datoIntervallEntitet, Set<VilkårPeriode> innvilgetePerioder) {
@@ -164,6 +162,12 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         if (fom.isAfter(originFom)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
             vilkårBuilder = vilkårBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(originFom, fom.minusDays(1)));
+            resultatBuilder.leggTil(vilkårBuilder);
+        } else if (fom.isBefore(originFom)) {
+            var tom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
+            var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+            vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+                .medUtfall(Utfall.IKKE_VURDERT));
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }
