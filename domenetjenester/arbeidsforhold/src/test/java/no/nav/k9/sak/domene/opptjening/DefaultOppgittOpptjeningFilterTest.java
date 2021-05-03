@@ -1,7 +1,5 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
+package no.nav.k9.sak.domene.opptjening;
 
-import static no.nav.k9.kodeverk.uttak.UttakArbeidType.FRILANSER;
-import static no.nav.k9.kodeverk.uttak.UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -11,8 +9,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
@@ -21,13 +17,11 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
-public class OMPOppgittOpptjeningFilterTest {
+public class DefaultOppgittOpptjeningFilterTest {
 
-    private final OMPOppgittOpptjeningFilter opptjeningFilter = new OMPOppgittOpptjeningFilter();
+    private final DefaultOppgittOpptjeningFilter opptjeningFilter = new DefaultOppgittOpptjeningFilter();
 
     JournalpostId jpId1 = new JournalpostId("1");
     JournalpostId jpId2 = new JournalpostId("2");
@@ -48,8 +42,8 @@ public class OMPOppgittOpptjeningFilterTest {
         var fraværTom = LocalDate.now().plusDays(10);
         var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
 
-        var kravDokumenterMedFravær = Map.of(
-            kravdok1, List.of(byggSøktPeriode(kravdok1, arbeidsgiver1, fraværFom, fraværTom, SELVSTENDIG_NÆRINGSDRIVENDE)));
+        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)));
 
         OppgittOpptjeningBuilder opptjeningBuilder = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder));
@@ -69,9 +63,9 @@ public class OMPOppgittOpptjeningFilterTest {
         var fraværTom = LocalDate.now().plusDays(10);
         var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
 
-        var kravDokumenterMedFravær = Map.of(
-            kravdok1, List.of(byggSøktPeriode(kravdok1, arbeidsgiver1, fraværFom, fraværTom, SELVSTENDIG_NÆRINGSDRIVENDE)),
-            kravdok2, List.of(byggSøktPeriode(kravdok2, arbeidsgiver2, fraværFom, fraværTom, SELVSTENDIG_NÆRINGSDRIVENDE))
+        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom, fraværTom))
             );
 
         OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
@@ -96,9 +90,9 @@ public class OMPOppgittOpptjeningFilterTest {
         // Maks vilkårsperiode overlapper begge fraværsperioder
         var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
 
-        var kravDokumenterMedFravær = Map.of(
-            kravdok1, List.of(byggSøktPeriode(kravdok1, arbeidsgiver1, fraværFom1, fraværTom1, SELVSTENDIG_NÆRINGSDRIVENDE)),
-            kravdok2, List.of(byggSøktPeriode(kravdok2, arbeidsgiver2, fraværFom2, fraværTom2, SELVSTENDIG_NÆRINGSDRIVENDE))
+        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2))
         );
 
         OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
@@ -123,9 +117,9 @@ public class OMPOppgittOpptjeningFilterTest {
         // Maks vilkårsperiode overlapper begge fraværsperioder
         var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
 
-        var kravDokumenterMedFravær = Map.of(
-            kravdok1, List.of(byggSøktPeriode(kravdok1, arbeidsgiver1, fraværFom1, fraværTom1, SELVSTENDIG_NÆRINGSDRIVENDE)),
-            kravdok2, List.of(byggSøktPeriode(kravdok2, arbeidsgiver2, fraværFom2, fraværTom2, FRILANSER))
+        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2))
         );
 
         OppgittOpptjeningBuilder opptjeningBuilderSN = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
@@ -141,13 +135,9 @@ public class OMPOppgittOpptjeningFilterTest {
         assertThat(resultat.get().getFrilans().get().getErNyoppstartet()).isTrue();
     }
 
-    private SøktPeriode<OppgittFraværPeriode> byggSøktPeriode(KravDokument kravdok, Arbeidsgiver arbeidsgiver, LocalDate fom, LocalDate tom, UttakArbeidType arbeidType) {
-        var fraværÅrsakDummy = FraværÅrsak.ORDINÆRT_FRAVÆR;
-        var arbeidRefDummy = InternArbeidsforholdRef.nullRef();
-
-        var journalpostId = kravdok.getJournalpostId();
-        var søktPeriode = new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            new OppgittFraværPeriode(journalpostId, fom, tom, arbeidType, arbeidsgiver, arbeidRefDummy, null, fraværÅrsakDummy));
+    private SøktPeriode<Object> byggSøktPeriode(LocalDate fom, LocalDate tom) {
+        var dummyObjekt = new Object();
+        var søktPeriode = new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), dummyObjekt);
 
         return søktPeriode;
     }
