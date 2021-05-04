@@ -147,7 +147,7 @@ public class SøknadDtoTjeneste {
         dto.setDokumentType(mv.getDokumentType());
         if (mv.getDokumentType().equals(DokumentTypeId.INNTEKTSMELDING)) {
             dto.setArbeidsgiver(mapTilArbeidsgiverDto(mv.getArbeidsgiver()));
-            dto.setBrukerHarSagtAtIkkeKommer(mv.getBrukerHarSagtAtIkkeKommer());
+            dto.setBrukerHarSagtAtIkkeKommer(mv.getBrukerHarSagtAtIkkeKommer() != null ? mv.getBrukerHarSagtAtIkkeKommer() : false);
         }
         return dto;
     }
