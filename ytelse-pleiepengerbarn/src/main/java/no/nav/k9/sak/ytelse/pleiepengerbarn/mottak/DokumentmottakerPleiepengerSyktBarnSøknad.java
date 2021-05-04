@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,13 +8,17 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
@@ -29,6 +32,8 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
+    private ProsessTaskRepository prosessTaskRepository;
+    private BehandlingRepository behandlingRepository;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
         // for CDI proxy
@@ -38,11 +43,15 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     DokumentmottakerPleiepengerSyktBarnSøknad(MottatteDokumentRepository mottatteDokumentRepository,
                                               SøknadParser søknadParser,
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
-                                              SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer) {
+                                              SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
+                                              ProsessTaskRepository prosessTaskRepository,
+                                              BehandlingRepository behandlingRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
+        this.prosessTaskRepository = prosessTaskRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -61,11 +70,18 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     }
 
     /**
-     * Lagrer inntektsmeldinger til abakus fra mottatt dokument.
+     * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
      */
     private void lagreOppgittOpptjeningFraSøknader(Long behandlingId, Collection<MottattDokument> dokumenter) {
-        // TODO: Dette må faktisk opprette en task som sender til abakus hvor det også flippes status til gyldig før prodsetting
-        mottatteDokumentRepository.oppdaterStatus(new ArrayList<>(dokumenter), DokumentStatus.GYLDIG);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        AktørId aktørId = behandling.getAktørId();
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+
+        var enkeltTask = new ProsessTaskData(LagreOppgittOpptjeningFraSøknadTask.TASKTYPE);
+        enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
+        enkeltTask.setSaksnummer(saksnummer.getVerdi());
+        enkeltTask.setCallIdFraEksisterende();
+        prosessTaskRepository.lagre(enkeltTask);
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {

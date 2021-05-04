@@ -1,7 +1,8 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
+package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,10 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuild
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
+import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
-import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.k9.søknad.felles.type.Periode;
 
 @Dependent
 public class LagreOppgittOpptjening {
@@ -34,21 +37,20 @@ public class LagreOppgittOpptjening {
     }
 
 
-    public void lagreOpptjening(Behandling behandling, OmsorgspengerUtbetaling søknad, MottattDokument dokument) {
-        Long behandlingId = behandling.getId();
+    public void lagreOpptjening(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
-        if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
-            var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
+        if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
+            var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
                 .flatMap(sn -> this.mapEgenNæring(sn).stream())
                 .collect(Collectors.toList());
             builder.leggTilEgneNæringer(egenNæringBuilders);
         }
-        if (søknad.getAktivitet().getFrilanser() != null) {
+        if (opptjeningAktiviteter.getFrilanser() != null) {
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
-        if (søknad.getAktivitet().getArbeidstaker() != null) {
+        if (opptjeningAktiviteter.getArbeidstaker() != null) {
             // TODO: Lagring av utenlands arbeidsforhold
         }
         builder.leggTilJournalpostId(dokument.getJournalpostId());
@@ -56,29 +58,37 @@ public class LagreOppgittOpptjening {
 
         if (builder.build().harOpptjening()) {
             if (!lansert) {
-                iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
+                iayTjeneste.lagreOppgittOpptjening(behandling.getId(), builder);
             } else {
-                iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
+                iayTjeneste.lagreOppgittOpptjeningV2(behandling.getId(), builder);
             }
         }
     }
 
 
     private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
-        if (sn.getPerioder().size() != 1) {
-            throw new IllegalArgumentException("Må ha eksakt en periode. Størrelse var " + sn.getPerioder().size());
-        }
-        var entry = sn.getPerioder().entrySet().iterator().next();
-        var info = entry.getValue();
-        if (info.getVirksomhetstyper().isEmpty()) {
-            throw new IllegalArgumentException("Må ha minst en virksomhetstype.");
-        }
+        Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);
         var periode = entry.getKey();
+        var info = entry.getValue();
+        var virksomhetType = getVirksomhetType(info);
         var orgnummer = sn.getOrganisasjonsnummer();
-        // Mapper en egen næring pr virksomhetstype
-        return info.getVirksomhetstyper().stream()
-            .map(type -> this.mapNæringForVirksomhetType(periode, info, type, orgnummer))
-            .collect(Collectors.toList());
+
+        var egenNæringBuilder = mapNæringForVirksomhetType(periode, info, virksomhetType, orgnummer);
+        return List.of(egenNæringBuilder);
+    }
+
+    private Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> getSnPeriodeInfo(SelvstendigNæringsdrivende sn) {
+        if (sn.getPerioder().size() != 1) {
+            throw new IllegalArgumentException("Søknad må ha eksakt én SN-periode. Størrelse var " + sn.getPerioder().size());
+        }
+        return sn.getPerioder().entrySet().iterator().next();
+    }
+
+    private no.nav.k9.søknad.felles.type.VirksomhetType getVirksomhetType(SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo info) {
+        if (info.getVirksomhetstyper().size() != 1) {
+            throw new IllegalArgumentException("Søknad må ha eksakt én (hoved)virksomhet. Størrelse var " + info.getVirksomhetstyper().size());
+        }
+        return info.getVirksomhetstyper().get(0);
     }
 
     private EgenNæringBuilder mapNæringForVirksomhetType(no.nav.k9.søknad.felles.type.Periode periode,

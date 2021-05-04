@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.util.Comparator;
 import java.util.List;
@@ -24,7 +24,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
-import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
 /**
  * lagrer oppgitt opptjening fra søknad til abakus asynk i egen task.
@@ -36,9 +36,9 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
 
     private static final Logger log = LoggerFactory.getLogger(LagreOppgittOpptjeningFraSøknadTask.class);
 
-    static final String TASKTYPE = "lagre.oppgitt.opptjening.søknad.oms.til.abakus";
+    static final String TASKTYPE = "lagre.oppgitt.opptjening.søknad.psb.til.abakus";
 
-    static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
+    static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD);
 
     private final SøknadParser søknadParser = new SøknadParser();
     private LagreOppgittOpptjening lagreOppgittOpptjeningTjeneste;
@@ -66,7 +66,7 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
         //henter alle som er til BEHANDLER
         List<MottattDokument> ubehandledeDokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, BREVKODER_SØKNAD_OMS, true, DokumentStatus.BEHANDLER);
         if (ubehandledeDokumenter.isEmpty()) {
-            log.info("Fant ingen ubehandlede søknader om utbetaling av omsorgspenger nå - er allerede håndtert. Avbryter task");
+            log.info("Fant ingen ubehandlede søknader om utbetaling av pleiepenger nå - er allerede håndtert. Avbryter task");
             return;
         }
 
@@ -83,7 +83,7 @@ public class LagreOppgittOpptjeningFraSøknadTask extends UnderBehandlingProsess
         }
 
         Søknad sisteMottatteSøknad = søknadParser.parseSøknad(sistMottatteDokument);
-        OpptjeningAktivitet opptjeningAktiviteter = ((OmsorgspengerUtbetaling) sisteMottatteSøknad.getYtelse()).getAktivitet();
+        OpptjeningAktivitet opptjeningAktiviteter = ((PleiepengerSyktBarn) sisteMottatteSøknad.getYtelse()).getOpptjeningAktivitet();
         lagreOppgittOpptjeningTjeneste.lagreOpptjening(behandling, sistMottatteDokument, opptjeningAktiviteter);
     }
 
