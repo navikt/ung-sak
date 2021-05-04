@@ -18,6 +18,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -125,7 +126,6 @@ public class InnhentDokumentTjeneste {
             });
     }
 
-
     ProsessTaskData asynkVurderKompletthetForÅpenBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
         dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
         dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
@@ -146,11 +146,24 @@ public class InnhentDokumentTjeneste {
     }
 
     private void sjekkBehandlingKanLåses(Behandling behandling) {
-        var lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
-        if (lås == null) {
-            // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-            throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        int forsøk = 3;
+
+        BehandlingLås lås = null;
+        while (--forsøk >= 0) {
+            lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
+            if (lås != null) {
+                return; // OK - Fikk lås
+            }
+            try {
+                Thread.sleep(1 * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
+
+        // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
+        throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
     }
 
     private Dokumentmottaker getDokumentmottaker(Brevkode brevkode, Fagsak fagsak) {
