@@ -3,8 +3,10 @@ package no.nav.k9.sak.web.app.tjenester.behandling.kompletthet;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,6 +27,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -34,6 +37,7 @@ import no.nav.k9.sak.kontrakt.kompletthet.KompletthetsTilstandPåPeriodeDto;
 import no.nav.k9.sak.kontrakt.kompletthet.KompletthetsVurderingDto;
 import no.nav.k9.sak.kontrakt.kompletthet.Status;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
@@ -67,20 +71,28 @@ public class KompletthetForBeregningRestTjeneste {
     public KompletthetsVurderingDto utledStatusForKompletthet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse.fra(behandling));
+        var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
 
         var status = manglendeVedleggForPeriode.entrySet()
             .stream()
-            .map(it -> new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldinger(it)))
+            .map(it -> new KompletthetsTilstandPåPeriodeDto(new Periode(it.getKey().getFomDato(), it.getKey().getTomDato()), mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak)))
             .collect(Collectors.toList());
 
         return new KompletthetsVurderingDto(status);
     }
 
-    private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it) {
-        return it.getValue()
+    private List<ArbeidsgiverArbeidsforholdStatus> mapStatusPåInntektsmeldinger(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, Set<Inntektsmelding> unikeInntektsmeldingerForFagsak) {
+        var resultat = it.getValue()
             .stream()
-            .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver(), at.getArbeidsforholdId()), Status.MANGLER))
-            .collect(Collectors.toList());
+            .map(at -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(at.getArbeidsgiver(), at.getArbeidsforholdId()), Status.MANGLER, null))
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        resultat.addAll(kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldingerForPeriode(unikeInntektsmeldingerForFagsak, it.getKey())
+            .stream().map(im -> new ArbeidsgiverArbeidsforholdStatus(new ArbeidsgiverArbeidsforholdId(im.getArbeidsgiver().getIdentifikator(),
+                im.getEksternArbeidsforholdRef().map(EksternArbeidsforholdRef::getReferanse).orElse(null)), Status.MOTTATT, im.getJournalpostId()))
+            .collect(Collectors.toList()));
+
+        return resultat;
     }
 
 }
