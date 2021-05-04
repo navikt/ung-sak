@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,8 +47,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
-import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
@@ -135,10 +136,10 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
-        var utenlandsopphold = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getUtenlandsopphold();
+        var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
 
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
-        lagreMedlemskapinfo(behandlingId, utenlandsopphold, søknad.getMottattDato().toLocalDate());
+        lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søknad.getSøker());
     }
 
@@ -191,17 +192,18 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         }
     }
 
-    private void lagreMedlemskapinfo(Long behandlingId, Utenlandsopphold utenlandsopphold, LocalDate forsendelseMottatt) {
+    private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
-        if (utenlandsopphold != null) {
-            utenlandsopphold.getPerioder().forEach((periode, periodeInfo) -> {
-                var tidligereOpphold = periode.getFraOgMed().isBefore(forsendelseMottatt);
-                oppgittTilknytningBuilder.leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                    .medLand(finnLandkode(periodeInfo.getLand().getLandkode()))
-                    .medPeriode(periode.getFraOgMed(), periode.getTilOgMed())
-                    .erTidligereOpphold(tidligereOpphold)
-                    .build());
+        if (bosteder != null) {
+            bosteder.getPerioder().forEach((periode, opphold) -> {
+                oppgittTilknytningBuilder
+                    .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
+                        .medLand(finnLandkode(opphold.getLand().getLandkode()))
+                        .medPeriode(
+                            Objects.requireNonNull(periode.getFraOgMed()),
+                            Objects.requireNonNull(periode.getTilOgMed()))
+                        .build());
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());

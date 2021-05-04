@@ -30,7 +30,7 @@
     <properties>
         <java.version>16</java.version> <!--Brukes av jenkins -->
         <kontrakt.java.version>15</kontrakt.java.version>
-        
+
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
         <revision>3.1.0</revision>
@@ -42,7 +42,7 @@
         <felles.version>0.1.17</felles.version>
         <swagger.version>2.1.9</swagger.version>
         <fp-kontrakter.version>5.2.1</fp-kontrakter.version>
-        <k9format.version>5.1.35</k9format.version>
+        <k9format.version>5.1.37</k9format.version>
     </properties>
 
     <repositories>
