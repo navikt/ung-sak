@@ -68,17 +68,10 @@ class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
         try {
             OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
             switch (opptjeningType) {
-                case NORMAL:
-                    abakusTjeneste.lagreOppgittOpptjening(request);
-                    break;
-                case NORMAL_AGGREGAT:
-                    abakusTjeneste.lagreOppgittOpptjeningV2(request);
-                    break;
-                case OVERSTYRT:
-                    abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Støtter ikke opptjening type: " + opptjeningType);
+                case NORMAL -> abakusTjeneste.lagreOppgittOpptjening(request);
+                case NORMAL_AGGREGAT -> abakusTjeneste.lagreOppgittOpptjeningV2(request);
+                case OVERSTYRT -> abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+                default -> throw new UnsupportedOperationException("Støtter ikke opptjening type: " + opptjeningType);
             }
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Kunne ikke lagre abakus oppgitt opptjening [%s]", opptjeningType), e);
