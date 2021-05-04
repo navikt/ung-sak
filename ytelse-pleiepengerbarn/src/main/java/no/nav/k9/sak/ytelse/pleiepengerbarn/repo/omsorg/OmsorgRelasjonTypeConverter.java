@@ -8,7 +8,7 @@ public class OmsorgRelasjonTypeConverter implements AttributeConverter<BarnRelas
 
     @Override
     public String convertToDatabaseColumn(BarnRelasjon relasjon) {
-        return relasjon.getRolle() != null ? relasjon.getRolle() : null;
+        return relasjon != null ? relasjon.getRolle() : null;
     }
 
     @Override
