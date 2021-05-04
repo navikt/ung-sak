@@ -49,19 +49,22 @@ public class InngangsvilkårOversetter {
                 .collect(Collectors.toList());
         }
 
-        final var relevantKontinuerligTilsyn = toTidslinjeFor(grunnlag, SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
-                .stream()
-                .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
-                .map(v -> new PeriodeMedKontinuerligTilsyn(v.getFom(), v.getTom()))
-                .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
-                .collect(Collectors.toList());
+        final var tidslinjeKTP = toTidslinjeFor(grunnlag, SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE)
+            .filterValue(v -> v.getResultat() == Resultat.OPPFYLT);
+
+        final var relevantKontinuerligTilsyn = tidslinjeKTP
+            .stream()
+            .map(v -> new PeriodeMedKontinuerligTilsyn(v.getFom(), v.getTom()))
+            .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
+            .collect(Collectors.toList());
 
         final var relevantUtvidetBehov = toTidslinjeFor(grunnlag, SykdomVurderingType.TO_OMSORGSPERSONER)
-                .stream()
-                .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
-                .map(v -> new PeriodeMedUtvidetBehov(v.getFom(), v.getTom()))
-                .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
-                .collect(Collectors.toList());
+            .intersection(tidslinjeKTP)
+            .stream()
+            .filter(v -> v.getValue().getResultat() == Resultat.OPPFYLT)
+            .map(v -> new PeriodeMedUtvidetBehov(v.getFom(), v.getTom()))
+            .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
+            .collect(Collectors.toList());
 
         vilkårsGrunnlag.medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE) // TODO 18-feb
             .medDiagnoseKode(diagnosekode)
