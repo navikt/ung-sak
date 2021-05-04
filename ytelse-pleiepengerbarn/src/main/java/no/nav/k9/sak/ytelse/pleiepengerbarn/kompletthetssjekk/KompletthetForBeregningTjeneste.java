@@ -33,6 +33,7 @@ import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class KompletthetForBeregningTjeneste {
@@ -141,11 +142,21 @@ public class KompletthetForBeregningTjeneste {
         return result;
     }
 
+    public Set<Inntektsmelding> hentAlleUnikeInntektsmeldingerForFagsak(Saksnummer saksnummer) {
+        return iayTjeneste.hentUnikeInntektsmeldingerForSak(saksnummer);
+    }
+
+    public List<Inntektsmelding> utledRelevanteInntektsmeldingerForPeriode(Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
+        var relevanteInntektsmeldinger = utledRelevanteInntektsmeldinger(alleInntektsmeldingerPåSak, periode);
+
+        return inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(relevanteInntektsmeldinger, periode);
+    }
+
     private <V extends ArbeidsforholdRef> void utledManglendeInntektsmeldingerPerDag(HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>> result,
-                                                                                        Set<Inntektsmelding> relevanteInntektsmeldinger,
-                                                                                        DatoIntervallEntitet periode,
-                                                                                        BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
-                                                                                        Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
+                                                                                     Set<Inntektsmelding> relevanteInntektsmeldinger,
+                                                                                     DatoIntervallEntitet periode,
+                                                                                     BiFunction<Arbeidsgiver, InternArbeidsforholdRef, V> tilnternArbeidsforhold,
+                                                                                     Map<Arbeidsgiver, Set<V>> påkrevdeInntektsmeldinger) {
         if (påkrevdeInntektsmeldinger.isEmpty()) {
             result.put(periode, List.of());
         } else {
