@@ -145,10 +145,21 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     public DatoIntervallEntitet finnRelevantPeriode(DatoIntervallEntitet datoIntervallEntitet, Set<VilkårPeriode> innvilgetePerioder) {
         var relevantePerioder = innvilgetePerioder.stream()
-            .filter(it -> it.getPeriode().overlapper(datoIntervallEntitet))
+            .map(VilkårPeriode::getPeriode)
+            .filter(it -> it.overlapper(datoIntervallEntitet))
             .collect(Collectors.toSet());
-        if (relevantePerioder.size() == 1) {
-            return relevantePerioder.stream().findFirst().map(VilkårPeriode::getPeriode).orElseThrow();
+
+        var revidertePerioder = new LocalDateTimeline<>(relevantePerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toSet()))
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        if (revidertePerioder.size() == 1) {
+            return revidertePerioder.stream().findFirst().orElseThrow();
         } else {
             throw new IllegalStateException("Fant flere vilkårsperioder [" + relevantePerioder + "] som overlapper med [" + datoIntervallEntitet + "]");
         }
