@@ -4,12 +4,15 @@ import java.time.LocalDate;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -61,13 +64,21 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
     VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> medlemskapsPerioderTilVurdering) {
         var innvilgetePerioder = finnInnvilgedePerioder(vilkårene, perioderTilVurdering);
+        var revidertePerioder = new LocalDateTimeline<>(perioderTilVurdering.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toSet()))
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
         justerPeriodeForMedlemskap(innvilgetePerioder, resultatBuilder, medlemskapsPerioderTilVurdering);
-        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, perioderTilVurdering);
+        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, revidertePerioder);
 
         return resultatBuilder;
     }
@@ -139,7 +150,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         if (relevantePerioder.size() == 1) {
             return relevantePerioder.stream().findFirst().map(VilkårPeriode::getPeriode).orElseThrow();
         } else {
-            throw new IllegalStateException("Fant flere vilkårsperioder som overlapper.. " + relevantePerioder);
+            throw new IllegalStateException("Fant flere vilkårsperioder [" + relevantePerioder + "] som overlapper med [" + datoIntervallEntitet + "]");
         }
     }
 
