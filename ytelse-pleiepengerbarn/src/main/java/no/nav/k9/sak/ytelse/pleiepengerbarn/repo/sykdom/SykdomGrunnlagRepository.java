@@ -78,7 +78,7 @@ public class SykdomGrunnlagRepository {
     }
 
 
-    public SykdomGrunnlagBehandling opprettGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder) {
+    public SykdomGrunnlagBehandling opprettGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
         final Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
         final Optional<SykdomGrunnlagBehandling> forrigeVersjon = hentGrunnlagForBehandling(behandlingUuid);
 
