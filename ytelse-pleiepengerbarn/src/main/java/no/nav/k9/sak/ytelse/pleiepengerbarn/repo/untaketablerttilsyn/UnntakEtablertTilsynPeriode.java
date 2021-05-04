@@ -60,6 +60,9 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         this.periode = periode;
     }
 
+    public Long getId() {
+        return id;
+    }
 
     public UnntakEtablertTilsyn getUnntakEtablertTilsyn() {
         return unntakEtablertTilsyn;

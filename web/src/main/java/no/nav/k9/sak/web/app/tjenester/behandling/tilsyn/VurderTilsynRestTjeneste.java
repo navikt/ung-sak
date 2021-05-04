@@ -7,11 +7,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.tilsyn.EtablertTilsynNattevåkOgBeredskapDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -34,8 +38,20 @@ public class VurderTilsynRestTjeneste {
     private static final String NATTEVÅK_PATH = BASEPATH + "/nattevak";
     private static final String BEREDSKAP_PATH = BASEPATH + "/beredskap";
 
+
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
+    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private BehandlingRepository behandlingRepository;
+
     VurderTilsynRestTjeneste() {
         // for CDI proxy
+    }
+
+    @Inject
+    public VurderTilsynRestTjeneste(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
+                                    UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
+       this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
+       this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
     }
 
 
@@ -54,11 +70,14 @@ public class VurderTilsynRestTjeneste {
     public EtablertTilsynNattevåkOgBeredskapDto hentEtablertTilsyn(@NotNull @QueryParam(BehandlingUuidDto.NAME)
                                                 @Parameter(description = BehandlingUuidDto.DESC)
                                                 @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-                                                    BehandlingUuidDto behandlingUuid) {
-        //TODO: implementer dette
-        return null;
+                                                    BehandlingUuidDto behandlingUuidDto) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
+        var perioderFraSøknad = uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId());
+        var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
+        if (!perioderFraSøknad.isPresent()) {
+            return null;
+        }
+        return new EtablertTilsynNattevåkOgBeredskapMapper().tilDto(perioderFraSøknad.get(), unntakEtablertTilsynGrunnlag);
     }
-
-
 
 }
