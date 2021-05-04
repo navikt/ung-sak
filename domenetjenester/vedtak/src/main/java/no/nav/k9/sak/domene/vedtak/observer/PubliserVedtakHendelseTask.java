@@ -28,7 +28,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
 @ProsessTask(PubliserVedtakHendelseTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserVedtakhendelse";
