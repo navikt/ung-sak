@@ -16,7 +16,7 @@ public class ManglendeVedlegg {
     }
 
     public ManglendeVedlegg(DokumentTypeId dokumentType, String arbeidsgiver) {
-        this(dokumentType, arbeidsgiver, null, null);
+        this(dokumentType, arbeidsgiver, null, false);
     }
 
 
