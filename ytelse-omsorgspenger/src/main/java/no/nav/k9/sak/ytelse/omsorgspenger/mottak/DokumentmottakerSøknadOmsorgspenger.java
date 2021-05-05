@@ -2,10 +2,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,8 +31,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -47,7 +43,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -136,11 +131,12 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
         var behandlingId = behandling.getId();
         var søknadInnhold = (OmsorgspengerUtbetaling) søknad.getYtelse();
-        var bosteder = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getBosteder();
+        var søker = søknad.getSøker();
+        var forsendelseMottatt = søknad.getMottattDato().toLocalDate();
 
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
-        lagreMedlemskapinfo(behandlingId, bosteder, søknad.getMottattDato().toLocalDate());
-        lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søknad.getSøker());
+        lagreMedlemskapinfo(behandlingId, søknadInnhold, journalpostId, forsendelseMottatt, søker);
+        lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
     }
 
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
@@ -169,8 +165,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søktFraværFraTidligere = omsorgspengerGrunnlagRepository.hentOppgittFraværFraSøknadHvisEksisterer(behandlingId)
             .map(OppgittFravær::getPerioder)
             .orElse(Set.of());
-        Collection<ArbeidsforholdReferanse> arbeidsforhold = finnArbeidsforhold(behandlingId);
-        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId, arbeidsforhold);
+        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
         søktFravær.addAll(søktFraværFraTidligere);
         søktFravær.addAll(søktFraværFraSøknad);
 
@@ -182,23 +177,17 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
-    private Collection<ArbeidsforholdReferanse> finnArbeidsforhold(Long behandlingId) {
-        Optional<InntektArbeidYtelseGrunnlag> iayGrunnlag = iayTjeneste.finnGrunnlag(behandlingId);
-        if (iayGrunnlag.isPresent() && iayGrunnlag.get().getArbeidsforholdInformasjon().isPresent()) {
-            return iayGrunnlag.get().getArbeidsforholdInformasjon().get().getArbeidsforholdReferanser();
-        } else {
-            logger.warn("Har ikke arbeidsforholdsinformasjon for behandling={}", behandlingId);
-            return Collections.emptyList();
-        }
-    }
-
-    private void lagreMedlemskapinfo(Long behandlingId, Bosteder bosteder, LocalDate forsendelseMottatt) {
+    private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, LocalDate forsendelseMottatt, Søker søker) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
+        var bosteder = ytelse.getBosteder();
         if (bosteder != null) {
+            var førsteSøktaFraværsdag = finnFørsteSøkteFraværsdag(ytelse, journalpostId, søker);
             bosteder.getPerioder().forEach((periode, opphold) -> {
+                var tidligereOpphold = periode.getFraOgMed().isBefore(førsteSøktaFraværsdag);
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
+                        .erTidligereOpphold(tidligereOpphold)
                         .medLand(finnLandkode(opphold.getLand().getLandkode()))
                         .medPeriode(
                             Objects.requireNonNull(periode.getFraOgMed()),
@@ -207,6 +196,16 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
+    }
+
+    private LocalDate finnFørsteSøkteFraværsdag(OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, Søker søker) {
+        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
+        return søktFraværFraSøknad.stream()
+            .map(OppgittFraværPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
+            .sorted()
+            .findFirst()
+            .orElseThrow();
     }
 
     private Språkkode getSpråkValg(Språk språk) {
