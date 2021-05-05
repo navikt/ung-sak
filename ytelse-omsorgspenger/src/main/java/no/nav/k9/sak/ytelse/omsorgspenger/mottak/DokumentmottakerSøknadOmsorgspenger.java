@@ -7,7 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -62,8 +61,6 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private static final Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadOmsorgspenger.class);
-
-    private static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
 
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
@@ -120,7 +117,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
             // Søknadsinnhold som persisteres eksternt (abakus)
-            lagreOppgittOpptjeningFraSøknader(søknad, behandling, dokument);
+            lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
     }
 
@@ -128,20 +125,25 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
      */
-    private void lagreOppgittOpptjeningFraSøknader(Søknad søknad, Behandling behandling, MottattDokument dokument) {
+    private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
+            OpptjeningAktivitet opptjeningAktiviteter = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getAktivitet();
+            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
+            if (request.getOppgittOpptjening() == null) {
+                // Ingenting mer som skal lagres - dokument settes som ferdig
+                mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
+                return;
+            }
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            enkeltTask.setPayload(payload);
+
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, dokument.getType().getKode());
+
             enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
-
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, String.join(",", getBrevkoder()));
-
-            OpptjeningAktivitet opptjeningAktiviteter = ((OmsorgspengerUtbetaling) søknad.getYtelse()).getAktivitet();
-            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
-            enkeltTask.setPayload(payload);
 
             prosessTaskRepository.lagre(enkeltTask);
         } catch (IOException e) {
@@ -238,11 +240,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private Landkoder finnLandkode(String landKode) {
         return Landkoder.fraKode(landKode);
-    }
-
-
-    private List<String> getBrevkoder() {
-        return BREVKODER_SØKNAD_OMS.stream().map(Brevkode::getKode).collect(Collectors.toList());
     }
 
     @Override

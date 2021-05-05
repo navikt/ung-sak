@@ -1,11 +1,9 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -70,11 +68,11 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             lagreOppgittOpptjening(input, true);
         } else  {
             JournalpostId journalpostId = new JournalpostId(input.getPropertyValue(JOURNALPOST_ID));
-            List<Brevkode> brevkoder = getBrevkoder(input.getPropertyValue(BREVKODER));
+            Brevkode brevkode = Brevkode.fraKode(input.getPropertyValue(BREVKODER));
 
             //henter alle som er til BEHANDLER
             List<MottattDokument> ubehandledeDokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(),
-                brevkoder, true, DokumentStatus.BEHANDLER);
+                List.of(brevkode), true, DokumentStatus.BEHANDLER);
             if (ubehandledeDokumenter.isEmpty()) {
                 logger.info("Fant ingen ubehandlede søknader om utbetaling av omsorgspenger nå - er allerede håndtert. Avbryter task");
                 return;
@@ -89,14 +87,6 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             mottatteDokumentRepository.oppdaterStatus(List.of(førsteUbehandledeDokument), DokumentStatus.GYLDIG);
             // må gjøres til slutt siden vi har å gjøre med et ikke-tx grensesnitt til abakus
             lagreOppgittOpptjening(input, false);
-        }
-    }
-
-    private List<Brevkode> getBrevkoder(String brevkoderStr) {
-        if (brevkoderStr != null && !(brevkoderStr = brevkoderStr.trim()).isEmpty()) {
-            return Arrays.asList(brevkoderStr.split(",\\s*")).stream().map(Brevkode::fraKode).collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException("Ingen brevkoder oppgitt for dokument for oppgitt opptjening");
         }
     }
 

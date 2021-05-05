@@ -13,10 +13,8 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -30,16 +28,9 @@ import no.nav.k9.søknad.felles.type.Periode;
 @Dependent
 public class OppgittOpptjeningMapper {
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private Boolean lansert;
-
     @Inject
-    OppgittOpptjeningMapper(InntektArbeidYtelseTjeneste iayTjeneste,
-                            @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
-        this.iayTjeneste = iayTjeneste;
-        this.lansert = lansert;
+    OppgittOpptjeningMapper() {
     }
-
 
     public OppgittOpptjeningMottattRequest mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
 

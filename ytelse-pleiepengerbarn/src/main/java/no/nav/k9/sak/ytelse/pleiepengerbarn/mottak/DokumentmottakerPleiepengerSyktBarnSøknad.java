@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -70,27 +71,32 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
             // Søknadsinnhold som persisteres eksternt (abakus)
-            lagreOppgittOpptjeningFraSøknader(søknad, behandling, dokument);
+            lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
     }
 
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
      */
-    private void lagreOppgittOpptjeningFraSøknader(Søknad søknad, Behandling behandling, MottattDokument dokument) {
+    private void lagreOppgittOpptjeningFraSøknad(Søknad søknad, Behandling behandling, MottattDokument dokument) {
         try {
+            OpptjeningAktivitet opptjeningAktiviteter = ((PleiepengerSyktBarn) søknad.getYtelse()).getOpptjeningAktivitet();
+            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
+            if (request.getOppgittOpptjening() == null) {
+                // Ingenting mer som skal lagres - dokument settes som ferdig
+                mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
+                return;
+            }
             var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            enkeltTask.setPayload(payload);
+
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, dokument.getType().getKode());
+
             enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
-
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, Brevkode.SØKNAD_UTBETALING_OMS.getKode());
-
-            OpptjeningAktivitet opptjeningAktiviteter = ((PleiepengerSyktBarn) søknad.getYtelse()).getOpptjeningAktivitet();
-            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
-            enkeltTask.setPayload(payload);
 
             prosessTaskRepository.lagre(enkeltTask);
         } catch (IOException e) {
