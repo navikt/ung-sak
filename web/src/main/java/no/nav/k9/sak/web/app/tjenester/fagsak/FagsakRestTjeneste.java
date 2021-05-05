@@ -295,14 +295,28 @@ public class FagsakRestTjeneste {
             Optional.of(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
             Optional.of(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
 
-            Optional.ofNullable(m.getPleietrengendeIdenter()).stream().flatMap(List::stream).map(PersonIdent::getIdent)
+            Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
+                .flatMap(List::stream)
+                .filter(PersonIdent::erNorskIdent)
+                .map(PersonIdent::getIdent)
                 .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
-            Optional.ofNullable(m.getPleietrengendeIdenter()).stream().flatMap(List::stream).map(PersonIdent::getAktørId)
+
+            Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
+                .flatMap(List::stream)
+                .filter(PersonIdent::erAktørId)
+                .map(PersonIdent::getAktørId)
                 .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
 
-            Optional.ofNullable(m.getRelatertPersonIdenter()).stream().flatMap(List::stream).map(PersonIdent::getIdent)
+            Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
+                .flatMap(List::stream)
+                .filter(PersonIdent::erNorskIdent)
+                .map(PersonIdent::getIdent)
                 .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
-            Optional.ofNullable(m.getRelatertPersonIdenter()).stream().flatMap(List::stream).map(PersonIdent::getAktørId)
+
+            Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
+                .flatMap(List::stream)
+                .filter(PersonIdent::erAktørId)
+                .map(PersonIdent::getAktørId)
                 .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
 
             return abac;
