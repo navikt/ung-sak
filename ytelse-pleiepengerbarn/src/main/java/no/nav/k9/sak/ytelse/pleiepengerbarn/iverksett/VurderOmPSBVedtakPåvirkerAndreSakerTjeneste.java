@@ -60,14 +60,13 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     public List<Saksnummer> utledSakerSomErKanVærePåvirket(Ytelse vedtakHendelse) {
         var fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(vedtakHendelse.getSaksnummer())).orElseThrow();
         Behandling vedtattBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
-        SykdomGrunnlagBehandling vedtattSykdomGrunnlagBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(vedtattBehandling.getUuid()).orElseThrow();
 
         AktørId pleietrengende = vedtattBehandling.getFagsak().getPleietrengendeAktørId();
         List<Saksnummer> alleSaksnummer = sykdomVurderingRepository.hentAlleSaksnummer(pleietrengende);
 
         var result = new ArrayList<Saksnummer>();
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
-            if (!kandidatsaksnummer.equals(vedtattSykdomGrunnlagBehandling.getSaksnummer())) {
+            if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
                 SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer)
                     .flatMap(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid))
                     .orElseThrow();
