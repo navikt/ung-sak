@@ -34,7 +34,7 @@ public class MatchFagsak {
     @Valid
     private Periode periode;
 
-    @JsonProperty(value = "brukerIdent", required = false)
+    @JsonProperty(value = "bruker", required = false)
     @Valid
     private PersonIdent brukerIdent;
 
