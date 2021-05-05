@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = Include.NON_ABSENT, content = Include.NON_EMPTY)
@@ -36,10 +37,7 @@ public class VedtakHendelse {
     @JsonProperty("fagsakYtelseType")
     private FagsakYtelseType fagsakYtelseType;
 
-    @Pattern(
-        regexp = "^(-?[1-9]|[a-z0])[a-z0-9_:-]*$",
-        flags = {Pattern.Flag.CASE_INSENSITIVE}
-    )
+    @Pattern(regexp = "^(-?[1-9]|[a-z0])[a-z0-9_:-]*$", flags = { Pattern.Flag.CASE_INSENSITIVE })
     @JsonProperty("saksnummer")
     private String saksnummer;
 
@@ -68,6 +66,45 @@ public class VedtakHendelse {
     @Valid
     @JsonProperty("vedtattTidspunkt")
     private LocalDateTime vedtattTidspunkt;
+
+    /** @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner */
+    @Valid
+    @JsonProperty(value = "fagsakPeriode", required = false)
+    private Periode fagsakPeriode;
+
+    /** (Optional) AktørId for angitt pleietrengende (barn, eller nærstående). */
+    @Valid
+    @JsonProperty(value = "pleietrengendeAktørId")
+    private AktørId pleietrengendeAktørId;
+
+    /** (Optional) AktørId for angitt relatert annen part (eks. annen forelder. */
+    @Valid
+    @JsonProperty(value = "relatertPartAktørId", required = false)
+    private AktørId relatertPartAktørId;
+
+    public Periode getFagsakPeriode() {
+        return fagsakPeriode;
+    }
+
+    public void setFagsakPeriode(Periode fagsakPeriode) {
+        this.fagsakPeriode = fagsakPeriode;
+    }
+
+    public AktørId getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
+    }
+
+    public void setPleietrengendeAktørId(AktørId pleietrengendeAktørId) {
+        this.pleietrengendeAktørId = pleietrengendeAktørId;
+    }
+
+    public AktørId getRelatertPartAktørId() {
+        return relatertPartAktørId;
+    }
+
+    public void setRelatertPartAktørId(AktørId relatertPartAktørId) {
+        this.relatertPartAktørId = relatertPartAktørId;
+    }
 
     public AktørId getAktør() {
         return aktør;
@@ -155,8 +192,10 @@ public class VedtakHendelse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         VedtakHendelse that = (VedtakHendelse) o;
         return behandlingId.equals(that.behandlingId) &&
@@ -183,8 +222,7 @@ public class VedtakHendelse {
             aktør,
             vedtakResultatType,
             behandlingResultatType,
-            vedtattTidspunkt
-        );
+            vedtattTidspunkt);
     }
 
     @Override
