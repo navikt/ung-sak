@@ -88,7 +88,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             }
             mottatteDokumentRepository.oppdaterStatus(List.of(førsteUbehandledeDokument), DokumentStatus.GYLDIG);
             // må gjøres til slutt siden vi har å gjøre med et ikke-tx grensesnitt til abakus
-            lagreOppgittOpptjening(input, erFrisinn);
+            lagreOppgittOpptjening(input, false);
         }
     }
 
