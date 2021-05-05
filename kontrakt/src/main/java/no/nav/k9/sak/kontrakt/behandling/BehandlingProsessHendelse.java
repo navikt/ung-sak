@@ -57,7 +57,7 @@ public class BehandlingProsessHendelse {
 
     @NotNull
     @Size(max = 20)
-    @Pattern(regexp = "^(-?[1-9]|[a-z0])[a-z0-9_:-]*$", flags = { Pattern.Flag.CASE_INSENSITIVE })
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @JsonProperty(value = "saksnummer", required = true)
     private String saksnummer;
