@@ -182,9 +182,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medOppgittDato(forsendelseMottatt);
         var bosteder = ytelse.getBosteder();
         if (bosteder != null) {
-            var førsteSøktaFraværsdag = finnFørsteSøkteFraværsdag(ytelse, journalpostId, søker);
+            var førsteSøkteFraværsdag = finnFørsteSøkteFraværsdag(ytelse, journalpostId, søker);
             bosteder.getPerioder().forEach((periode, opphold) -> {
-                var tidligereOpphold = periode.getFraOgMed().isBefore(førsteSøktaFraværsdag);
+                var tidligereOpphold = periode.getFraOgMed().isBefore(førsteSøkteFraværsdag);
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
                         .erTidligereOpphold(tidligereOpphold)
