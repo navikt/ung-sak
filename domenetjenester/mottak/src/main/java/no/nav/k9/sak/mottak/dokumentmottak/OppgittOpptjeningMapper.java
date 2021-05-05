@@ -9,9 +9,13 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
@@ -24,20 +28,21 @@ import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 
 @Dependent
-public class LagreOppgittOpptjening {
+public class OppgittOpptjeningMapper {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Boolean lansert;
 
     @Inject
-    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste,
-                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
+    OppgittOpptjeningMapper(InntektArbeidYtelseTjeneste iayTjeneste,
+                            @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.iayTjeneste = iayTjeneste;
         this.lansert = lansert;
     }
 
 
-    public void lagreOpptjening(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
+    public OppgittOpptjeningMottattRequest mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
+
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
             var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
@@ -56,13 +61,7 @@ public class LagreOppgittOpptjening {
         builder.leggTilJournalpostId(dokument.getJournalpostId());
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
-        if (builder.build().harOpptjening()) {
-            if (!lansert) {
-                iayTjeneste.lagreOppgittOpptjening(behandling.getId(), builder);
-            } else {
-                iayTjeneste.lagreOppgittOpptjeningV2(behandling.getId(), builder);
-            }
-        }
+        return byggRequest(behandling, builder);
     }
 
 
@@ -110,5 +109,14 @@ public class LagreOppgittOpptjening {
         builder.medNyoppstartet(info.getErNyoppstartet());
         // TODO Map ny i arbeidslivet
         return builder;
+    }
+
+    public OppgittOpptjeningMottattRequest byggRequest(Behandling behandling, OppgittOpptjeningBuilder builder) {
+        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
+        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(builder);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
+        return request;
     }
 }

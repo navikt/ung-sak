@@ -1,10 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -12,15 +14,18 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
+import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
+import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
 @ApplicationScoped
@@ -33,7 +38,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
-    private BehandlingRepository behandlingRepository;
+    private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
     DokumentmottakerPleiepengerSyktBarnSøknad() {
         // for CDI proxy
@@ -45,13 +50,13 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                                               SøknadOversetter pleiepengerBarnSoknadOversetter,
                                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                                               ProsessTaskRepository prosessTaskRepository,
-                                              BehandlingRepository behandlingRepository) {
+                                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.pleiepengerBarnSoknadOversetter = pleiepengerBarnSoknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
-        this.behandlingRepository = behandlingRepository;
+        this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
     }
 
     @Override
@@ -64,24 +69,33 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
+            // Søknadsinnhold som persisteres eksternt (abakus)
+            lagreOppgittOpptjeningFraSøknader(søknad, behandling, dokument);
         }
-        // Søknadsinnhold som persisteres eksternt (abakus)
-        lagreOppgittOpptjeningFraSøknader(behandlingId, dokumenter);
     }
 
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
      */
-    private void lagreOppgittOpptjeningFraSøknader(Long behandlingId, Collection<MottattDokument> dokumenter) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        AktørId aktørId = behandling.getAktørId();
-        var saksnummer = behandling.getFagsak().getSaksnummer();
+    private void lagreOppgittOpptjeningFraSøknader(Søknad søknad, Behandling behandling, MottattDokument dokument) {
+        try {
+            var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+            enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
+            enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+            enkeltTask.setCallIdFraEksisterende();
 
-        var enkeltTask = new ProsessTaskData(LagreOppgittOpptjeningFraSøknadTask.TASKTYPE);
-        enkeltTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
-        enkeltTask.setSaksnummer(saksnummer.getVerdi());
-        enkeltTask.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(enkeltTask);
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, Brevkode.SØKNAD_UTBETALING_OMS.getKode());
+
+            OpptjeningAktivitet opptjeningAktiviteter = ((PleiepengerSyktBarn) søknad.getYtelse()).getOpptjeningAktivitet();
+            var request = oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, opptjeningAktiviteter);
+            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            enkeltTask.setPayload(payload);
+
+            prosessTaskRepository.lagre(enkeltTask);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
+        }
     }
 
     private void persister(Søknad søknad, Behandling behandling, JournalpostId journalpostId) {
