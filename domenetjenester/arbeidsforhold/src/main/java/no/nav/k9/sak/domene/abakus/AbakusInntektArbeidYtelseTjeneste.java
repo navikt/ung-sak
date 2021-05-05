@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.abakus;
 
-import static no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste.OpptjeningType;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -254,7 +252,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     @Override
     /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.NORMAL);
+        throw new UnsupportedOperationException("Ikke lenger i bruk, bruk heller AsyncAbakusLagreOpptjeningTask");
     }
 
     @Override
