@@ -109,7 +109,8 @@ public class AktørTjeneste {
 
         Predicate<IdentInformasjon> erØnsketIdentgruppe = identInformasjon -> identInformasjon.getGruppe().equals(IdentGruppe.FOLKEREGISTERIDENT);
 
-        var results = new TreeMap<AktørId, PersonIdent>(aktørIder.stream().collect(Collectors.toMap(v -> v, v -> null)));
+        TreeMap<AktørId, PersonIdent> results = aktørIder.stream()
+            .collect(Collectors.toMap(v -> v, v -> null, (v1, v2) -> v1, TreeMap::new));
 
         var map = pdlKlient.hentIdenterBolkResults(query, projection).stream()
             .filter(r -> r.getIdenter() != null && r.getIdenter().stream().anyMatch(erØnsketIdentgruppe))
