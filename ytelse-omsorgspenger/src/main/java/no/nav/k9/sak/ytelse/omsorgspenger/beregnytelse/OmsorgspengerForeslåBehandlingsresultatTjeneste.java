@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,15 +85,10 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         return skalAvslåsBasertPåAvslåtteUttaksperioder(ref);
     }
 
-    private boolean harSøknad(BehandlingReferanse ref) {
-        var kravDokumenter = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref).keySet();
-        return kravDokumenter.stream().anyMatch(dok -> KravDokumentType.SØKNAD == dok.getType());
-    }
-
     @Override
     protected boolean skalBehandlingenSettesTilDelvisAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         if (!harSøknad(ref)) {
-            //
+            //utnytter (foreløpig?) delvis-statusen kun når søknad fra bruker håndteres i behandlingen
             return false;
         }
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
@@ -102,38 +96,39 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
             //kan gjøre 'return false' istedet for exception her
         }
 
-        if (harMinstEnAvslåttAktuellVilkårsperiode(ref, vilkårene)) {
-            return true;
-        }
+        //sjekker mot både avslag på vilkår og mot tilkjent ytelse. Dette fordi det er mulig å få 0 fra beregning (til bruker)
+        //uten at noen vilkår er satt til avslått, og slike tilfeller teller også som avslag (delvis avslag når det gjelder kun enkelte perioder)
 
-        if (beregningGirMinstEnDagUtenTilkjentYtelseTilBruker(ref)) {
-            //dette er nødvendig å sjekke siden det er mulig å få 0 fra beregning (til bruker) uten at noen vilkår er satt til avslått
+        //slik sjekken er implementert mot tilkjent ytelse, vil noen rene innvilgelser identifiseres som delvis avslag,
+        //dette skjer når behandling inneholder kravperioder fra IM og søknad, og disse ikke overlapper fullstendig.
+        //det er OK for nå, konsekvensen er at det blir (unødvendig) manuelle brev også i disse tilfellene.
 
-            //dette gir falske positive når behandling inneholder kravperioder fra IM og søknad, og disse ikke overlapper fullstendig
-            //det er OK for nå, konsekvensen er at det blir (unødvendig) manuelle brev også i disse tilfellene.
-            return true;
-        }
-        return false;
+        return harMinstEnAvslåttAktuellVilkårsperiode(ref, vilkårene) || beregningGirMinstEnDagUtenTilkjentYtelseTilBruker(ref);
+    }
+
+    private boolean harSøknad(BehandlingReferanse ref) {
+        var kravDokumenter = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref).keySet();
+        return kravDokumenter.stream().anyMatch(dok -> KravDokumentType.SØKNAD == dok.getType());
     }
 
     private boolean harMinstEnAvslåttAktuellVilkårsperiode(BehandlingReferanse ref, Vilkårene vilkårene) {
-
-        // TODO WIP
-
         for (VilkårType vilkårtype : VilkårType.values()) {
             LocalDateTimeline<Void> aktuellVilkårsperiode = utledAktuellVilkårsperiode(ref, vilkårtype);
-            LocalDateTimeline<VilkårPeriode> vilkårresultat = vilkårene.getVilkårTimeline(vilkårtype);
-
-            if (harMinstEnAvslåttAktuellVilkårsperiode(ref, vilkårtype)) {
+            LocalDateTimeline<Void> avslåtteVilkår = avslått(vilkårene.getVilkårTimeline(vilkårtype));
+            if (aktuellVilkårsperiode.intersects(avslåtteVilkår)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean harMinstEnAvslåttAktuellVilkårsperiode(BehandlingReferanse ref, VilkårType vilkårtype) {
-        LocalDateTimeline<Void> aktuelleVilkårsperioder = utledAktuellVilkårsperiode(ref, vilkårtype);
-        return false;
+    private static LocalDateTimeline<Void> avslått(LocalDateTimeline<VilkårPeriode> vilkårresultat) {
+        return new LocalDateTimeline<>(
+            vilkårresultat.stream()
+                .filter(vr -> vr.getValue().getGjeldendeUtfall() == no.nav.k9.kodeverk.vilkår.Utfall.IKKE_OPPFYLT)
+                .map(vr -> new LocalDateSegment<Void>(vr.getFom(), vr.getTom(), null))
+                .collect(Collectors.toList())
+        );
     }
 
     private LocalDateTimeline<Void> utledAktuellVilkårsperiode(BehandlingReferanse ref, VilkårType vilkårtype) {
@@ -141,7 +136,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         return new LocalDateTimeline<>(
             aktuelleVilkårsperioder.stream()
                 .map(vp -> new LocalDateSegment<Void>(vp.getFomDato(), vp.getTomDato(), null))
-                .toList()
+                .collect(Collectors.toList())
         );
     }
 
@@ -152,7 +147,6 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         return !harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode;
     }
 
-    @NotNull
     private LocalDateTimeline<Void> lagTidslinjeAktuelleBeregningsvilkårPerioder(BehandlingReferanse ref) {
         NavigableSet<DatoIntervallEntitet> aktuellBeregningVilkårPerioder = vilkårsPerioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         return new LocalDateTimeline<>(
@@ -162,18 +156,6 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         );
     }
 
-    @NotNull
-    private LocalDateTimeline<Void> lagTidslinjeAktuelleVilkårPerioder(BehandlingReferanse ref) {
-
-        NavigableSet<DatoIntervallEntitet> aktuellBeregningVilkårPerioder = vilkårsPerioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        return new LocalDateTimeline<>(
-            aktuellBeregningVilkårPerioder.stream()
-                .map(vp -> new LocalDateSegment<Void>(vp.getFomDato(), vp.getTomDato(), null))
-                .collect(Collectors.toList())
-        );
-    }
-
-    @NotNull
     private LocalDateTimeline<Void> lagTidslinjeDerTilkjentYtelseTilBrukerFinnes(BehandlingReferanse ref) {
         List<BeregningsresultatPeriode> beregningsresultatPerioder = beregningsresultatRepository.hentEndeligBeregningsresultat(ref.getBehandlingId())
             .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList());
@@ -187,21 +169,15 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     }
 
     private boolean skalAvslåsBasertPåIngenTilkjentYtelseEtterBeregning(BehandlingReferanse ref) {
-        List<BeregningsresultatPeriode> beregningsresultatPerioder = beregningsresultatRepository.hentEndeligBeregningsresultat(ref.getBehandlingId())
-            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList());
+        LocalDateTimeline<Void> tidslinjeHarYtelseTilBruker = lagTidslinjeDerTilkjentYtelseTilBrukerFinnes(ref);
+        LocalDateTimeline<Void> tidslinjeAktuelleBeregningsvilkårPerioder = lagTidslinjeAktuelleBeregningsvilkårPerioder(ref);
 
-        NavigableSet<DatoIntervallEntitet> aktuelleBeregningVilkårPerioder = vilkårsPerioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        boolean ingenPerioderHarTilkjentYtelse = aktuelleBeregningVilkårPerioder.stream()
-            .noneMatch(vilkårsperiode -> periodeHarTilkjentYtelse(beregningsresultatPerioder, vilkårsperiode));
-        if (ingenPerioderHarTilkjentYtelse) {
+        boolean minstEnDagHarTilkjentYtelse = tidslinjeHarYtelseTilBruker.intersects(tidslinjeAktuelleBeregningsvilkårPerioder);
+        boolean harIngenTilkjentYtelseForAktuelleVilkårsperioder = !minstEnDagHarTilkjentYtelse;
+        if (harIngenTilkjentYtelseForAktuelleVilkårsperioder) {
             log.info("Avslår behandling {}. Ingen aktuell vilkårsperiode endte med tilkjent ytelse", ref.getBehandlingUuid());
         }
-        return ingenPerioderHarTilkjentYtelse;
-    }
-
-    private boolean periodeHarTilkjentYtelse(List<BeregningsresultatPeriode> beregningsresultatPerioder, DatoIntervallEntitet periode) {
-        return beregningsresultatPerioder.stream()
-            .anyMatch(brPeriode -> brPeriode.getPeriode().overlapper(periode) && brPeriode.getDagsats() > 0);
+        return harIngenTilkjentYtelseForAktuelleVilkårsperioder;
     }
 
     private boolean skalAvslåsBasertPåAvslåtteUttaksperioder(BehandlingReferanse ref) {
