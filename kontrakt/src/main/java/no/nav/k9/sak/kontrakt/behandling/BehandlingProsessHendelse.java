@@ -185,7 +185,6 @@ public class BehandlingProsessHendelse {
         this.saksnummer = kopierFra.saksnummer;
         this.aktørId = kopierFra.aktørId;
         this.eventTid = kopierFra.eventTid;
-        this.fagsystem = kopierFra.fagsystem;
         this.behandlingstidFrist = kopierFra.behandlingstidFrist;
         this.eventHendelse = kopierFra.eventHendelse;
         this.behandlingStatus = kopierFra.behandlingStatus;
