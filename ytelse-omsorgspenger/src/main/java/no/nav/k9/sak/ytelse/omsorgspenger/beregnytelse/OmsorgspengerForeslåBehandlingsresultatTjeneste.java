@@ -31,6 +31,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.vilkår.OMPVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @FagsakYtelseTypeRef("OMP")
@@ -57,7 +58,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
                                                            ÅrskvantumTjeneste årskvantumTjeneste,
                                                            @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> vurderSøknadsfristTjeneste,
                                                            @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder,
-                                                           @FagsakYtelseTypeRef("OMP") VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                           @FagsakYtelseTypeRef("OMP") OMPVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                            BeregningsresultatRepository beregningsresultatRepository) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.grunnlagRepository = grunnlagRepository;
