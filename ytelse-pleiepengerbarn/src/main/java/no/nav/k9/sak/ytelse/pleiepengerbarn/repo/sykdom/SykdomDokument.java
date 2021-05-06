@@ -45,10 +45,13 @@ public class SykdomDokument {
 
     @Column(name = "BEHANDLING_UUID")
     private UUID behandlingUuid;
-    
+
     @Column(name = "SAKSNUMMER")
     private Saksnummer saksnummer;
-    
+
+    @Column(name = "har_info_som_ikke_kan_punsjes")
+    private boolean harInfoSomIkkeKanPunsjes;
+
     @ManyToOne
     @JoinColumn(name = "PERSON_ID")
     private SykdomPerson person;
@@ -66,16 +69,17 @@ public class SykdomDokument {
     }
 
     public SykdomDokument(
-            JournalpostId journalpostId,
-            String dokumentInfoId,
-            SykdomDokumentInformasjon informasjon,
-            UUID behandlingUuid,
-            Saksnummer saksnummer,
-            SykdomPerson person,
-            String opprettetAv,
-            LocalDateTime opprettetTidspunkt) {
+        JournalpostId journalpostId,
+        String dokumentInfoId,
+        SykdomDokumentInformasjon informasjon,
+        UUID behandlingUuid,
+        Saksnummer saksnummer,
+        boolean harInfoSomIkkeKanPunsjes, SykdomPerson person,
+        String opprettetAv,
+        LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
         if (informasjon.getDokument() != null && informasjon.getDokument() != this) {
             throw new IllegalStateException("Potensiell krysskobling av dokumentInformasjon fra andre dokumenter!");
         }
@@ -122,15 +126,15 @@ public class SykdomDokument {
         }
         return informasjon.getVersjon();
     }
-    
+
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }
-    
+
     public Saksnummer getSaksnummer() {
         return saksnummer;
     }
-    
+
     public SykdomPerson getPerson() {
         return person;
     }
@@ -166,6 +170,10 @@ public class SykdomDokument {
 
     public SykdomDokumentInformasjon getInformasjon() {
         return informasjon;
+    }
+
+    public boolean isHarInfoSomIkkeKanPunsjes() {
+        return harInfoSomIkkeKanPunsjes;
     }
 
     public String getOpprettetAv() {

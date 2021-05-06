@@ -37,7 +37,7 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        final SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, false, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
@@ -47,7 +47,7 @@ class SykdomDokumentRepositoryTest {
         final AktørId annenPleietrengendeAktørId = new AktørId("annetBarn");
         assertThat(repo.hentDokument(dokumenter.get(0).getId(), annenPleietrengendeAktørId).isEmpty());
         final SykdomDokumentInformasjon informasjon2 = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, null, null, null, endretAv, nå);
+        final SykdomDokument dokument2 = new SykdomDokument(journalpostId, null, informasjon2, null, null, false, null, endretAv, nå);
         repo.lagre(dokument2, annenPleietrengendeAktørId);
 
         assertThat(repo.hentAlleDokumenterFor(pleietrengendeAktørId).size()).isEqualTo(1);
@@ -62,7 +62,7 @@ class SykdomDokumentRepositoryTest {
 
         final AktørId pleietrengendeAktørId = new AktørId("lala");
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, nå.toLocalDate(), nå, 0L, endretAv, nå);
-        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        SykdomDokument dokument = new SykdomDokument(journalpostId, null, informasjon, null, null, false, null, endretAv, nå);
         repo.lagre(dokument, pleietrengendeAktørId);
 
         final List<SykdomDokument> dokumenter = repo.hentAlleDokumenterFor(pleietrengendeAktørId);
