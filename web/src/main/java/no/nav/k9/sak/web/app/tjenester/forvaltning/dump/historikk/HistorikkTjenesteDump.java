@@ -13,8 +13,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef

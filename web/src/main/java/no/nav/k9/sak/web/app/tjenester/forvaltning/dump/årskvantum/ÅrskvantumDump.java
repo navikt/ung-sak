@@ -13,9 +13,9 @@ import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 
 @ApplicationScoped

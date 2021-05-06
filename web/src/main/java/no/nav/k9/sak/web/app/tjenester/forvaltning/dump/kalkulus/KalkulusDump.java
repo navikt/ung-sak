@@ -20,8 +20,8 @@ import no.nav.k9.felles.sikkerhet.loginmodule.ContainerLogin;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
 
 @ApplicationScoped
