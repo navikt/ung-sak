@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
@@ -27,7 +26,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.vilkår.OMPVilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
@@ -40,9 +43,9 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private ÅrskvantumTjeneste årskvantumTjeneste;
 
-    private OMPVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private BeregningsresultatRepository beregningsresultatRepository;
-    private Boolean lansert;
+    private VurderSøknadsfristTjeneste<OppgittFraværPeriode> vurderSøknadsfristTjeneste;
 
     OmsorgspengerForeslåBehandlingsresultatTjeneste() {
         // for proxy
@@ -53,16 +56,16 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
                                                            VedtakVarselRepository vedtakVarselRepository,
                                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
                                                            ÅrskvantumTjeneste årskvantumTjeneste,
+                                                           @FagsakYtelseTypeRef("OMP") VurderSøknadsfristTjeneste<OppgittFraværPeriode> vurderSøknadsfristTjeneste,
                                                            @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder,
                                                            @FagsakYtelseTypeRef("OMP") OMPVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                           BeregningsresultatRepository beregningsresultatRepository,
-                                                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
+                                                           BeregningsresultatRepository beregningsresultatRepository) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.grunnlagRepository = grunnlagRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
+        this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.beregningsresultatRepository = beregningsresultatRepository;
-        this.lansert = lansert;
     }
 
     @Override
@@ -72,10 +75,12 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
 
     @Override
     protected boolean skalAvslåsBasertPåAndreForhold(BehandlingReferanse ref) {
-        if (!lansert) {
-            return skalAvslåsBasertPåAvslåtteUttaksperioder(ref);
+        var kravDokumenter = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref).keySet();
+        var harSøknad = kravDokumenter.stream().anyMatch(dok -> KravDokumentType.SØKNAD == dok.getType());
+        if (harSøknad) {
+            return skalAvslåsBasertPåIngenTilkjentYtelseEtterBeregning(ref);
         }
-        return skalAvslåsBasertPåIngenTilkjentYtelseEtterBeregning(ref) || skalAvslåsBasertPåAvslåtteUttaksperioder(ref);
+        return skalAvslåsBasertPåAvslåtteUttaksperioder(ref);
     }
 
     private boolean skalAvslåsBasertPåIngenTilkjentYtelseEtterBeregning(BehandlingReferanse ref) {
