@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.sak.behandling.PubliserEventTask;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
@@ -97,19 +99,18 @@ public class BehandlingskontrollEventObserver {
         return taskData;
     }
 
-    private String getJson(BehandlingProsessEventDto produksjonstyringEventDto) throws IOException {
+    private String getJson(BehandlingProsessHendelse produksjonstyringEventDto) throws IOException {
         return JsonObjectMapper.getJson(produksjonstyringEventDto);
     }
 
-    private BehandlingProsessEventDto getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
+    private BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
-
+        var fagsak = behandling.getFagsak();
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
-        return BehandlingProsessEventDto.builder()
+        return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
             .medEventTid(LocalDateTime.now())
             .medFagsystem(Fagsystem.K9SAK)
-            .medBehandlingId(behandling.getId())
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
             .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
@@ -122,6 +123,9 @@ public class BehandlingskontrollEventObserver {
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
+            .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
+            .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
+            .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
             .build();
     }
 }
