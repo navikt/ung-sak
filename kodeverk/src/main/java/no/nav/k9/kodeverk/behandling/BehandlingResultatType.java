@@ -25,6 +25,7 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
     INNVILGET("INNVILGET", "Innvilget"),
+    DELVIS_AVSLÅTT("DELVIS_AVSLÅTT", "Delvis avslått"), //halvtomt glass.. viktigst er å kommunisere til brev og saksbehandler at noe er avslått
     AVSLÅTT("AVSLÅTT", "Avslått"),
     OPPHØR("OPPHØR", "Opphør"),
     HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket", true),
