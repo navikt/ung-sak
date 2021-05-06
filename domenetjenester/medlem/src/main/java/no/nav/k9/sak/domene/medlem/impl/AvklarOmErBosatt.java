@@ -115,17 +115,11 @@ public class AvklarOmErBosatt {
         final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet
             .orElseThrow(IllegalStateException::new);
 
-        int antallNei = 0;
         if (!oppgittTilknytning.isOppholdINorgeSistePeriode())
-            antallNei++;
-        if (!oppgittTilknytning.isOppholdNå())
-            antallNei++;
-        if (!oppgittTilknytning.isOppholdINorgeNestePeriode())
-            antallNei++;
-
-        if (antallNei >= 2) {
             return NEI;
-        }
+        if (!oppgittTilknytning.isOppholdINorgeNestePeriode())
+            return NEI;
+
         return JA;
     }
 
