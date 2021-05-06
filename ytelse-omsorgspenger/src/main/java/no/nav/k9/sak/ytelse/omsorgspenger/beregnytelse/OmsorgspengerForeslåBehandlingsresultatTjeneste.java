@@ -84,7 +84,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
 
         NavigableSet<DatoIntervallEntitet> aktuelleBeregningVilkårPerioder = vilkårsPerioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         boolean ingenPerioderHarTilkjentYtelse = aktuelleBeregningVilkårPerioder.stream()
-            .noneMatch(periode -> periodeHarTilkjentYtelse(beregningsresultatPerioder, periode));
+            .noneMatch(vilkårsperiode -> periodeHarTilkjentYtelse(beregningsresultatPerioder, vilkårsperiode));
         if (ingenPerioderHarTilkjentYtelse) {
             log.info("Avslår behandling {}. Ingen aktuell vilkårsperiode endte med tilkjent ytelse", ref.getBehandlingUuid());
         }
