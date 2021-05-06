@@ -8,10 +8,12 @@ import static java.util.stream.Stream.empty;
 import static no.nav.k9.felles.integrasjon.pdl.IdentGruppe.AKTORID;
 import static org.jboss.weld.util.collections.ImmutableList.of;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -92,6 +94,7 @@ public class AktørTjeneste {
         return personIdent;
     }
 
+    /** returnerer map av aktørId->personident (null dersom ikke funnet). */
     public Map<AktørId, PersonIdent> hentPersonIdentForAktørIder(Set<AktørId> aktørIder) {
         HentIdenterBolkQueryRequest query = new HentIdenterBolkQueryRequest();
         query.setIdenter(aktørIder.stream().map(AktørId::getId).collect(toList()));
@@ -106,11 +109,16 @@ public class AktørTjeneste {
 
         Predicate<IdentInformasjon> erØnsketIdentgruppe = identInformasjon -> identInformasjon.getGruppe().equals(IdentGruppe.FOLKEREGISTERIDENT);
 
-        return pdlKlient.hentIdenterBolkResults(query, projection).stream()
-            .filter(r -> r.getIdenter().stream().anyMatch(erØnsketIdentgruppe))
+        var results = new TreeMap<AktørId, PersonIdent>(aktørIder.stream().collect(Collectors.toMap(v -> v, v -> null)));
+
+        var map = pdlKlient.hentIdenterBolkResults(query, projection).stream()
+            .filter(r -> r.getIdenter() != null && r.getIdenter().stream().anyMatch(erØnsketIdentgruppe))
             .collect(Collectors.toMap(
                 r -> new AktørId(r.getIdenter().stream().filter(erØnsketIdentgruppe).findAny().get().getIdent()),
                 r -> new PersonIdent(r.getIdent())));
+
+        results.putAll(map);
+        return Collections.unmodifiableMap(results);
     }
 
     public Set<AktørId> hentAktørIdForPersonIdentSet(Set<PersonIdent> personIdentSet) {

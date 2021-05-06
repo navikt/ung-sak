@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,7 +49,8 @@ public class TmpAktørIdTask implements ProsessTaskHandler {
         } else {
             log.info("Fant {} aktørId å hente ident for, spør PDL", aktørIder.size());
             var mapIdenter = aktørTjeneste.hentPersonIdentForAktørIder(aktørIder);
-            log.info("Hentet {} identer", mapIdenter.size());
+
+            log.info("Hentet [{}] identer. Savner [{}]", mapIdenter.size(), mapIdenter.entrySet().stream().filter(e -> e.getValue() == null).count());
             aktørIdRepository.lagre(mapIdenter);
 
             // rescheduler
