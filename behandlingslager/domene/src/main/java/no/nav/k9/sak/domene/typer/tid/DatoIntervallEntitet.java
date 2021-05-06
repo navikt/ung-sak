@@ -131,4 +131,8 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         return new LocalDateInterval(fomDato, tomDato);
     }
 
+    public Periode tilPeriode() {
+        return new Periode(getFomDato(), getTomDato());
+    }
+
 }

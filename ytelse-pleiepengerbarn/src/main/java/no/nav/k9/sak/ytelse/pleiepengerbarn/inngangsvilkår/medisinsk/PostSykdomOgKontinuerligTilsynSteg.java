@@ -2,13 +2,17 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk;
 
 import java.time.LocalDate;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -58,25 +62,33 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering, NavigableSet<DatoIntervallEntitet> medlemskapsPerioderTilVurdering) {
-        var innvilgetePerioder = finnInnvilgedePerioder(vilkårene, sykdomsPerioderTilVurdering);
+    VilkårResultatBuilder justerVilkårsperioderEtterSykdom(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, NavigableSet<DatoIntervallEntitet> medlemskapsPerioderTilVurdering) {
+        var innvilgetePerioder = finnInnvilgedePerioder(vilkårene, perioderTilVurdering);
+        var revidertePerioder = new LocalDateTimeline<>(perioderTilVurdering.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toSet()))
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
         justerPeriodeForMedlemskap(innvilgetePerioder, resultatBuilder, medlemskapsPerioderTilVurdering);
-        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, sykdomsPerioderTilVurdering);
+        justerPeriodeForOpptjeningOgBeregning(innvilgetePerioder, resultatBuilder, revidertePerioder);
 
         return resultatBuilder;
     }
 
     private Set<VilkårPeriode> finnInnvilgedePerioder(Vilkårene vilkårene,
-            NavigableSet<DatoIntervallEntitet> sykdomsPerioderTilVurdering) {
+                                                      NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var s1 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR).orElseThrow().getPerioder().stream();
         var s2 = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_18_ÅR).orElseThrow().getPerioder().stream();
         return Stream.concat(s1, s2)
-            .filter(it -> sykdomsPerioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
+            .filter(it -> perioderTilVurdering.stream().anyMatch(at -> at.overlapper(it.getPeriode())))
             .filter(it -> Utfall.OPPFYLT.equals(it.getUtfall()))
             .collect(Collectors.toSet());
     }
@@ -88,13 +100,68 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
 
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-            for (DatoIntervallEntitet datoIntervallEntitet : sykdomsPerioderTilVurdering) {
-                vilkårBuilder = vilkårBuilder.tilbakestill(datoIntervallEntitet);
-            }
-            for (VilkårPeriode vilkårPeriode : innvilgetePerioder) {
-                vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vilkårPeriode.getPeriode()).medUtfall(Utfall.IKKE_VURDERT));
+            for (DatoIntervallEntitet periodeTilVurdering : sykdomsPerioderTilVurdering) {
+                if (harSkjæringstidspunktetBlittFlyttet(periodeTilVurdering, innvilgetePerioder)) {
+                    var relevantInnvilgetPeriode = finnRelevantPeriode(periodeTilVurdering, innvilgetePerioder);
+
+                    if (harSkjæringstidspunktetBlittFlyttetFremITid(periodeTilVurdering, relevantInnvilgetPeriode)) {
+                        var periodeSomSkalTilbakestilles = regnUtPeriodeSomSkalTilbakestilles(periodeTilVurdering, relevantInnvilgetPeriode);
+                        vilkårBuilder = vilkårBuilder.tilbakestill(periodeSomSkalTilbakestilles);
+                    }
+                    vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(relevantInnvilgetPeriode)
+                        .medPeriode(relevantInnvilgetPeriode)
+                        .medUtfall(Utfall.IKKE_VURDERT));
+                }
             }
             resultatBuilder.leggTil(vilkårBuilder);
+        }
+    }
+
+    private boolean harSkjæringstidspunktetBlittFlyttetFremITid(DatoIntervallEntitet periodeTilVurdering, DatoIntervallEntitet relevantInnvilgetPeriode) {
+        Objects.requireNonNull(periodeTilVurdering);
+        Objects.requireNonNull(relevantInnvilgetPeriode);
+
+        return periodeTilVurdering.getFomDato().isBefore(relevantInnvilgetPeriode.getFomDato());
+    }
+
+    private DatoIntervallEntitet regnUtPeriodeSomSkalTilbakestilles(DatoIntervallEntitet periodeTilVurdering, DatoIntervallEntitet relevantInnvilgetPeriode) {
+        var originFom = periodeTilVurdering.getFomDato();
+        var fom = relevantInnvilgetPeriode.getFomDato();
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(originFom, fom.minusDays(1));
+    }
+
+    private boolean harSkjæringstidspunktetBlittFlyttet(DatoIntervallEntitet datoIntervallEntitet, Set<VilkårPeriode> innvilgetePerioder) {
+        if (innvilgetePerioder.isEmpty()) {
+            return false;
+        }
+        if (innvilgetePerioder.stream().noneMatch(it -> it.getPeriode().overlapper(datoIntervallEntitet))) {
+            return false;
+        }
+        var relevantPeriode = finnRelevantPeriode(datoIntervallEntitet, innvilgetePerioder);
+
+        return datoIntervallEntitet.getFomDato() != relevantPeriode.getFomDato();
+    }
+
+    public DatoIntervallEntitet finnRelevantPeriode(DatoIntervallEntitet datoIntervallEntitet, Set<VilkårPeriode> innvilgetePerioder) {
+        var relevantePerioder = innvilgetePerioder.stream()
+            .map(VilkårPeriode::getPeriode)
+            .filter(it -> it.overlapper(datoIntervallEntitet))
+            .collect(Collectors.toSet());
+
+        var revidertePerioder = new LocalDateTimeline<>(relevantePerioder.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+            .collect(Collectors.toSet()))
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        if (revidertePerioder.size() == 1) {
+            return revidertePerioder.stream().findFirst().orElseThrow();
+        } else {
+            throw new IllegalStateException("Fant flere vilkårsperioder [" + relevantePerioder + "] som overlapper med [" + datoIntervallEntitet + "]");
         }
     }
 
@@ -115,11 +182,14 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         var fom = innvilgetePerioder.stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElseThrow();
 
         if (fom.isAfter(originFom)) {
-
-            var tom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
-
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
             vilkårBuilder = vilkårBuilder.tilbakestill(DatoIntervallEntitet.fraOgMedTilOgMed(originFom, fom.minusDays(1)));
+            resultatBuilder.leggTil(vilkårBuilder);
+        } else if (fom.isBefore(originFom)) {
+            var tom = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElseThrow();
+            var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
+            vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+                .medUtfall(Utfall.IKKE_VURDERT));
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }

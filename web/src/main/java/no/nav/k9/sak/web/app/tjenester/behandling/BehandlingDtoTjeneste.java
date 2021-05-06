@@ -64,6 +64,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYt
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.BeregningsgrunnlagRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
@@ -335,6 +336,7 @@ public class BehandlingDtoTjeneste {
             dto.leggTil(getFraMap(OpptjeningRestTjeneste.INNTEKT_PATH, "inntekt", uuidQueryParams));
 
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
+            dto.leggTil(getFraMap(KompletthetForBeregningRestTjeneste.KOMPLETTHET_FOR_BEREGNING_PATH, "kompletthet-beregning", uuidQueryParams));
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
             lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);

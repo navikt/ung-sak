@@ -28,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformas
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -106,8 +107,8 @@ public class BehandlingÅrsakTjenesteTest {
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlag(LocalDate dødsdato) {
         PersonopplysningRepository personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         Long behandlingId = behandling.getId();
-        final PersonInformasjonBuilder builder = personopplysningRepository.opprettBuilderForRegisterdata(behandlingId);
-        final PersonInformasjonBuilder.PersonopplysningBuilder personopplysningBuilder = builder.getPersonopplysningBuilder(behandling.getAktørId());
+        var builder = personopplysningRepository.opprettBuilderFraEksisterende(behandlingId, PersonopplysningVersjonType.REGISTRERT);
+        var personopplysningBuilder = builder.getPersonopplysningBuilder(behandling.getAktørId());
         personopplysningBuilder.medDødsdato(dødsdato);
         builder.leggTil(personopplysningBuilder);
         personopplysningRepository.lagre(behandlingId, builder);

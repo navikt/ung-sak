@@ -13,6 +13,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
@@ -61,10 +62,10 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         logContext(fagsak);
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
+        // TODO: Trekk ut fra property slik at denne kan brukes til andre ting
+        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-            // TODO: Trekk ut fra property slik at denne kan brukes til andre ting
-            final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
@@ -77,7 +78,13 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             }
         } else {
             log.info("Fant åpen behandling, kjører diff for å flytte prosessen tilbake");
-            var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
+            if (behandlinger.size() != 1) {
+                throw new IllegalStateException("Fant flere åpne behandlinger");
+            }
+            var behandling = behandlinger.get(0);
+            var behandlingLås = behandlingRepository.taSkriveLås(behandling);
+            BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
+            behandlingRepository.lagre(behandling, behandlingLås);
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         }
     }

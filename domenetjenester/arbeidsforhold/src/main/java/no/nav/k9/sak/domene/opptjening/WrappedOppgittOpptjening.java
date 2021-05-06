@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
+package no.nav.k9.sak.domene.opptjening;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

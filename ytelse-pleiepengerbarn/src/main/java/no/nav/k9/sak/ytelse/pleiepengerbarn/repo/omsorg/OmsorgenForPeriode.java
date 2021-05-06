@@ -39,7 +39,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     private DatoIntervallEntitet periode;
 
     @ChangeTracked
-    @Column(name = "relasjon", nullable = false)
+    @Column(name = "relasjon")
     @Convert(converter = OmsorgRelasjonTypeConverter.class)
     private BarnRelasjon relasjon;
 

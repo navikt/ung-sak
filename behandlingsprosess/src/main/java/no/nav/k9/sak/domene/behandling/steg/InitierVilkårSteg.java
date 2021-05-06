@@ -95,8 +95,8 @@ public class InitierVilkårSteg implements BehandlingSteg {
     }
 
     private void validerResultat(Vilkårene vilkårResultat, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {
-        var vilårene = vilkårResultat.getVilkårene().stream().map(Vilkår::getVilkårType).collect(Collectors.toSet());
-        if (!vilårene.containsAll(vilkårPeriodeMap.keySet())) {
+        var vilkårene = vilkårResultat.getVilkårene().stream().map(Vilkår::getVilkårType).collect(Collectors.toSet());
+        if (!vilkårene.containsAll(vilkårPeriodeMap.keySet())) {
             throw new IllegalStateException("Vilkårsresultat inneholder ikke alle forventede vilkårtyper: "
                 + vilkårPeriodeMap.keySet()
                 + ", vilkårResultat" + vilkårResultat);

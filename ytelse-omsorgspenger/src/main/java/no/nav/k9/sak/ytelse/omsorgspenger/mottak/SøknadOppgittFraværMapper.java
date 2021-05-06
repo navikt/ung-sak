@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,7 +15,6 @@ import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.uttak.FraværÅrsak;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -26,9 +24,9 @@ import no.nav.k9.søknad.felles.fravær.AktivitetFravær;
 import no.nav.k9.søknad.felles.fravær.FraværPeriode;
 import no.nav.k9.søknad.felles.opptjening.Arbeidstaker;
 import no.nav.k9.søknad.felles.opptjening.Frilanser;
-import no.nav.k9.søknad.felles.opptjening.Organisasjonsnummer;
 import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
+import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
 import no.nav.k9.søknad.felles.type.PersonIdent;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
@@ -48,7 +46,7 @@ class SøknadOppgittFraværMapper {
     }
 
 
-    Set<OppgittFraværPeriode> map(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId, Collection<ArbeidsforholdReferanse> arbeidsforhold) {
+    Set<OppgittFraværPeriode> map(OmsorgspengerUtbetaling søknadsinnhold, Søker søker, JournalpostId journalpostId) {
         var opptj = Objects.requireNonNull(søknadsinnhold.getAktivitet());
 
         var atAktiviteter = Optional.ofNullable(opptj.getArbeidstaker()).orElse(Collections.emptyList());

@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderUtenOverstyringTjeneste;
@@ -34,6 +35,7 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser;
+    private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -45,8 +47,9 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     }
 
     @Inject
-    public PsbOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser) {
+    public PsbOpptjeningForBeregningTjeneste(@Any Instance<OpptjeningsperioderUtenOverstyringTjeneste> opptjeningsperioderTjenesteInstanser, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningsperioderTjenesteInstanser = opptjeningsperioderTjenesteInstanser;
+        this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
     }
 
 
@@ -86,8 +89,8 @@ public class PsbOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     @Override
     public Optional<OppgittOpptjening> finnOppgittOpptjening(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
-        // TODO: Bør hentes som for OMP, men må da lagre på oppgittOpptjeningAggregat
-        return iayGrunnlag.getOverstyrtOppgittOpptjening().isPresent() ? iayGrunnlag.getOverstyrtOppgittOpptjening() : iayGrunnlag.getOppgittOpptjening();
+        var oppgittOpptjeningTjeneste = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(referanse.getBehandlingId());
+        return oppgittOpptjeningTjeneste.hentOppgittOpptjening(referanse.getBehandlingId(), iayGrunnlag, stp);
     }
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,

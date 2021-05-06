@@ -34,6 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertLøpendeMedle
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.VurdertMedlemskapPeriodeEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -94,7 +95,7 @@ public class VurderLøpendeMedlemskapStegTest {
         scenario.leggTilMedlemskapPeriode(periode);
 
         Behandling behandling = scenario.lagre(provider);
-        PersonInformasjonBuilder personInformasjonBuilder = personopplysningRepository.opprettBuilderForRegisterdata(behandling.getId());
+        PersonInformasjonBuilder personInformasjonBuilder = personopplysningRepository.opprettBuilderFraEksisterende(behandling.getId(), PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.PersonstatusBuilder personstatusBuilder = personInformasjonBuilder.getPersonstatusBuilder(scenario.getDefaultBrukerAktørId(),
             DatoIntervallEntitet.fraOgMed(ettÅrSiden));
         personstatusBuilder.medPersonstatus(PersonstatusType.BOSA);

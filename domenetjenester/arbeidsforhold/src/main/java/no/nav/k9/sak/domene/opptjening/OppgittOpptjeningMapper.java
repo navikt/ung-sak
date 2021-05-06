@@ -1,29 +1,24 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
+package no.nav.k9.sak.domene.opptjening;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
-
-import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
-import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
-import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
-import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 
-
-@Dependent
 class OppgittOpptjeningMapper {
-
-    /**
-     * Sammenstiller oppgitt opptjening per inntekttype fra alle oppgitte inntjeninger
-     * {@link OppgittEgenNæring} {@link OppgittFrilans} {@link OppgittArbeidsforhold} {@link OppgittAnnenAktivitet}
-     */
     static OppgittOpptjening sammenstillOppgittOpptjening(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger) {
-        // TODO: Lage buildermetoder med enklere api for å sammenstille oppgitte opptjeninger
         var builder = OppgittOpptjeningBuilder.ny();
 
+        leggTilEgneNæringer(overlappendeOppgitteOpptjeninger, builder);
+        leggTilFrilans(overlappendeOppgitteOpptjeninger, builder);
+        leggTilArbeidsforhold(overlappendeOppgitteOpptjeninger, builder);
+        leggTilAndreAktiviteter(overlappendeOppgitteOpptjeninger, builder);
+
+        return builder.build();
+    }
+
+    static private void leggTilEgneNæringer(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningSN = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getEgenNæring().isEmpty())
             .findFirst();
@@ -33,7 +28,9 @@ class OppgittOpptjeningMapper {
                 .collect(Collectors.toList());
             builder.leggTilEgneNæringer(buildersSN);
         });
+    }
 
+    static private void leggTilFrilans(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningFL = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> opptj.getFrilans().isPresent())
             .findFirst();
@@ -41,7 +38,9 @@ class OppgittOpptjeningMapper {
             var builderFL = opptj.getFrilans().map(fl -> OppgittOpptjeningBuilder.OppgittFrilansBuilder.fraEksisterende(fl));
             builderFL.ifPresent(b -> builder.leggTilFrilansOpplysninger(b.build()));
         });
+    }
 
+    static private void leggTilArbeidsforhold(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningAT = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getOppgittArbeidsforhold().isEmpty())
             .findFirst();
@@ -51,7 +50,9 @@ class OppgittOpptjeningMapper {
                 .collect(Collectors.toList());
             builder.leggTilOppgittArbeidsforhold(buildersAT);
         });
+    }
 
+    static private void leggTilAndreAktiviteter(List<OppgittOpptjening> overlappendeOppgitteOpptjeninger, OppgittOpptjeningBuilder builder) {
         var oppgittOpptjeningAnnet = overlappendeOppgitteOpptjeninger.stream()
             .filter(opptj -> !opptj.getAnnenAktivitet().isEmpty())
             .findFirst();
@@ -59,7 +60,5 @@ class OppgittOpptjeningMapper {
             var andreAktiviteter = opptj.getAnnenAktivitet();
             andreAktiviteter.forEach(aa -> builder.leggTilAnnenAktivitet(aa));
         });
-
-        return builder.build();
     }
 }

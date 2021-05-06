@@ -27,7 +27,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
 
     VurderOmsorgenForSteg() {
-        // CDI
+        //
     }
 
     @Inject

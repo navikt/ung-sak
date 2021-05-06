@@ -9,10 +9,12 @@ import static no.nav.k9.felles.integrasjon.pdl.IdentGruppe.AKTORID;
 import static org.jboss.weld.util.collections.ImmutableList.of;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -88,6 +90,27 @@ public class AktørTjeneste {
                 cacheIdentTilAktørId.put(i, aktørId); // OK her, men ikke over ettersom dette er gjeldende mapping
             }, () -> log.info("Uventet resultat fra PDL: Fant ikke person med oppgitt aktørId."));
         return personIdent;
+    }
+
+    public Map<AktørId, PersonIdent> hentPersonIdentForAktørIder(Set<AktørId> aktørIder) {
+        HentIdenterBolkQueryRequest query = new HentIdenterBolkQueryRequest();
+        query.setIdenter(aktørIder.stream().map(AktørId::getId).collect(toList()));
+        query.setGrupper(of(IdentGruppe.FOLKEREGISTERIDENT));
+
+        var projection = new HentIdenterBolkResultResponseProjection()
+            .ident()
+            .identer(new IdentInformasjonResponseProjection()
+                .ident()
+                .gruppe())
+            .code();
+
+        Predicate<IdentInformasjon> erØnsketIdentgruppe = identInformasjon -> identInformasjon.getGruppe().equals(IdentGruppe.FOLKEREGISTERIDENT);
+
+        return pdlKlient.hentIdenterBolkResults(query, projection).stream()
+            .filter(r -> r.getIdenter().stream().anyMatch(erØnsketIdentgruppe))
+            .collect(Collectors.toMap(
+                r -> new AktørId(r.getIdenter().stream().filter(erØnsketIdentgruppe).findAny().get().getIdent()),
+                r -> new PersonIdent(r.getIdent())));
     }
 
     public Set<AktørId> hentAktørIdForPersonIdentSet(Set<PersonIdent> personIdentSet) {

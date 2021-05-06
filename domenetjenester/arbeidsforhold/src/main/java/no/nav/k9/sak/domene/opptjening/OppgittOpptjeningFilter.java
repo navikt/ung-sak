@@ -16,4 +16,5 @@ public interface OppgittOpptjeningFilter {
     default Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
         return iayGrunnlag.getOppgittOpptjening();
     }
+
 }

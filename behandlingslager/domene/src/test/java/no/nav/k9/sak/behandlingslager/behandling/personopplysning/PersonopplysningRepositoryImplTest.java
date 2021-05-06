@@ -66,7 +66,7 @@ public class PersonopplysningRepositoryImplTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
         Long behandlingId = behandling.getId();
-        PersonInformasjonBuilder informasjonBuilder = repository.opprettBuilderForRegisterdata(behandlingId);
+        PersonInformasjonBuilder informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         PersonInformasjonBuilder.PersonopplysningBuilder personopplysningBuilder = informasjonBuilder.getPersonopplysningBuilder(personinfo.getAktørId());
         personopplysningBuilder.medNavn(personinfo.getNavn())
             .medFødselsdato(personinfo.getFødselsdato())
@@ -75,7 +75,7 @@ public class PersonopplysningRepositoryImplTest {
         informasjonBuilder.leggTil(personopplysningBuilder);
         repository.lagre(behandlingId, informasjonBuilder);
 
-        informasjonBuilder = repository.opprettBuilderForRegisterdata(behandlingId);
+        informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
         personopplysningBuilder = informasjonBuilder.getPersonopplysningBuilder(personinfo.getAktørId());
         personopplysningBuilder.medNavn(personinfo.getNavn())
             .medFødselsdato(personinfo.getFødselsdato())

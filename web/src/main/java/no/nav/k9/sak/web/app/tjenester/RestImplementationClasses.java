@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.aktør.AktørRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
@@ -16,9 +17,11 @@ import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.Beregningsg
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
@@ -30,7 +33,6 @@ import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjen
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
@@ -43,7 +45,6 @@ import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
-import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
 
 public class RestImplementationClasses {
 
@@ -58,6 +59,7 @@ public class RestImplementationClasses {
         classes.add(BeregningsgrunnlagRestTjeneste.class);
         classes.add(AksjonspunktRestTjeneste.class);
         classes.add(DokumentRestTjeneste.class);
+        classes.add(KompletthetForBeregningRestTjeneste.class);
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(OmsorgenForRestTjeneste.class);
