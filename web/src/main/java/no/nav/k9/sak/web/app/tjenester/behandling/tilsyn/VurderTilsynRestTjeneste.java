@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.tilsyn.EtablertTilsynNattevåkOgBeredskapDto;
@@ -42,6 +43,7 @@ public class VurderTilsynRestTjeneste {
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
+    private EtablertTilsynNattevåkOgBeredskapMapper etablertTilsynNattevåkOgBeredskapMapper;
 
     VurderTilsynRestTjeneste() {
         // for CDI proxy
@@ -49,11 +51,14 @@ public class VurderTilsynRestTjeneste {
 
     @Inject
     public VurderTilsynRestTjeneste(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
-                                    UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository) {
+                                    UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                    BehandlingRepository behandlingRepository,
+                                    EtablertTilsynNattevåkOgBeredskapMapper etablertTilsynNattevåkOgBeredskapMapper) {
        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
        this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+       this.behandlingRepository = behandlingRepository;
+       this.etablertTilsynNattevåkOgBeredskapMapper = etablertTilsynNattevåkOgBeredskapMapper;
     }
-
 
     @GET
     @Operation(description = "Hent etablert tilsyn perioder",
@@ -77,7 +82,8 @@ public class VurderTilsynRestTjeneste {
         if (!perioderFraSøknad.isPresent()) {
             return null;
         }
-        return new EtablertTilsynNattevåkOgBeredskapMapper().tilDto(perioderFraSøknad.get(), unntakEtablertTilsynGrunnlag);
+        var behandlingRef = BehandlingReferanse.fra(behandling);
+        return etablertTilsynNattevåkOgBeredskapMapper.tilDto(behandlingRef, perioderFraSøknad.get(), unntakEtablertTilsynGrunnlag);
     }
 
 }
