@@ -33,7 +33,9 @@ public class MedlemskapOppgittTilknytningEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MEDLEMSKAP_OPPG_TILKNYT")
     private Long id;
 
-    
+
+    /** @deprecated oppholdNå oppgis ikke lenger av bruker i søknaden */
+    @Deprecated
     @Column(name = "opphold_naa", nullable = false)
     private boolean oppholdNå;
 
@@ -62,12 +64,9 @@ public class MedlemskapOppgittTilknytningEntitet extends BaseEntitet {
     }
 
 
+    /** @deprecated oppholdNå oppgis ikke lenger av bruker i søknaden */
     public boolean isOppholdNå() {
         return oppholdNå;
-    }
-
-    void setOppholdNå(boolean oppholdNorgeNå) {
-        this.oppholdNå = oppholdNorgeNå;
     }
 
 
@@ -128,11 +127,6 @@ public class MedlemskapOppgittTilknytningEntitet extends BaseEntitet {
             } else {
                 mal = new MedlemskapOppgittTilknytningEntitet();
             }
-        }
-
-        public Builder medOppholdNå(boolean oppholdNorgeNå) {
-            mal.setOppholdNå(oppholdNorgeNå);
-            return this;
         }
 
         public Builder medOppgittDato(LocalDate oppgittDato) {
