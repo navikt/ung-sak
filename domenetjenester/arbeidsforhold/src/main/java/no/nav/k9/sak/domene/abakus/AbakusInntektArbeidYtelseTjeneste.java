@@ -1,7 +1,5 @@
 package no.nav.k9.sak.domene.abakus;
 
-import static no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste.OpptjeningType;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -30,6 +28,7 @@ import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest.GrunnlagVersjon;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
@@ -251,18 +250,28 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     @Override
+    /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.NORMAL);
-    }
-
-    @Override
-    public void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.NORMAL_AGGREGAT);
+        throw new UnsupportedOperationException("Ikke lenger i bruk, bruk heller AsyncAbakusLagreOpptjeningTask");
     }
 
     @Override
     public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        asyncIayTjeneste.lagreOppgittOpptjening(behandlingId, oppgittOpptjeningBuilder, OpptjeningType.OVERSTYRT);
+        if (oppgittOpptjeningBuilder == null) {
+            return;
+        }
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
+        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
+
+        try {
+            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
+        }
     }
 
     // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task

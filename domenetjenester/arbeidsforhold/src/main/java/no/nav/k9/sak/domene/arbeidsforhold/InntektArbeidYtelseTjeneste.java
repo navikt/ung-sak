@@ -93,17 +93,13 @@ public interface InntektArbeidYtelseTjeneste {
     void fjernSaksbehandletVersjon(Long behandlingId);
 
     /**
-     * (async) Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
+     * Lagre nytt grunnlag for Oppgitt Opptjening.
      */
+    /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
-     * (async) Lagre nytt grunnlag for Oppgitt Opptjening. Builder bør ikke gjenbrukes etter kall her.
-     */
-    void lagreOppgittOpptjeningV2(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
-
-    /**
-     * (async) Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
+     *  Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
      */
     void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
