@@ -66,7 +66,7 @@ public class UttrekkUtbetalingPerDag implements RapportGenerator {
                       where br.aktiv=true
                         AND f.ytelse_type= :ytelseType
                         AND b.behandling_status = 'AVSLU'
-                        AND bp.br_periode_fom >= :fom AND bp.br_periode_tom <= :tom
+                        AND bp.br_periode_fom <= :tom AND bp.br_periode_tom >= :fom
                         AND NOT EXISTS (
                           SELECT *
                           FROM Behandling b2
@@ -77,6 +77,7 @@ public class UttrekkUtbetalingPerDag implements RapportGenerator {
                         )
                     ) beregning
                   ) s
+                  where s.dag >= :fom and s.dag <= :tom
                   GROUP BY s.saksnummer, s.dag, s.kjoenn
                 ) t
                 GROUP by t.dag, t.kjoenn
@@ -86,7 +87,7 @@ public class UttrekkUtbetalingPerDag implements RapportGenerator {
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("ytelseType", ytelseType.getKode())
             .setParameter("fom", periode.getFomDato())
-            .setParameter("tom", periode.getTomDato());
+            .setParameter("tom", periode.getTomDato()); // tar alt overlappende
         String path = "utbetaling-per-dag.csv";
 
         @SuppressWarnings("unchecked")
