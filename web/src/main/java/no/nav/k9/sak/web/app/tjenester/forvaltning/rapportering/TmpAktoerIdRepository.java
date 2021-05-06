@@ -36,7 +36,7 @@ public class TmpAktoerIdRepository {
         var query = (TypedQuery<String>) entityManager.createNativeQuery(sql);
         query.setMaxResults(max);
 
-        return query.getResultStream().map(v -> new AktørId(v)).collect(Collectors.toList());
+        return query.getResultStream().filter(v -> v != null).map(v -> new AktørId(v)).collect(Collectors.toList());
 
     }
 
