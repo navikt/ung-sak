@@ -21,6 +21,8 @@ public class OppgittTilknytningDto {
     @JsonProperty(value = "oppholdNestePeriode")
     private boolean oppholdNestePeriode;
 
+    /** @deprecated oppholdNå oppgis ikke lenger av bruker i søknaden */
+    @Deprecated
     @JsonProperty(value = "oppholdNorgeNa")
     private boolean oppholdNorgeNa;
 

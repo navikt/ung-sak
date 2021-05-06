@@ -782,7 +782,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             .build();
         List<MedlemskapOppgittLandOppholdEntitet> oppholdNorge = List.of(oppholdNorgeNestePeriode, oppholdNorgeSistePeriode);
 
-        oppgittTilknytningBuilder.medOpphold(oppholdNorge).medOppholdNå(true).medOppgittDato(LocalDate.now());
+        oppgittTilknytningBuilder.medOpphold(oppholdNorge).medOppgittDato(LocalDate.now());
         return oppgittTilknytningBuilder;
     }
 
@@ -961,7 +961,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             if(aktivtGrunnlag.isEmpty()){
                 return new PersonInformasjonBuilder(type);
             }
-            
+
             var eksisterende = type == PersonopplysningVersjonType.REGISTRERT
                 ? aktivtGrunnlag.get().getRegisterVersjon()
                 : aktivtGrunnlag.get().getOverstyrtVersjon();

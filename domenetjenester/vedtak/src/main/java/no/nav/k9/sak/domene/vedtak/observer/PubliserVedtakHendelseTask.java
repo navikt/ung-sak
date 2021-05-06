@@ -101,7 +101,9 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
     }
 
     private VedtakHendelse genererVedtakHendelse(Behandling behandling, BehandlingVedtak vedtak) {
-        final VedtakHendelse vedtakHendelse = new VedtakHendelse();
+        var fagsak = behandling.getFagsak();
+
+        var vedtakHendelse = new VedtakHendelse();
         vedtakHendelse.setBehandlingId(behandling.getUuid());
         vedtakHendelse.setBehandlingType(behandling.getType());
         vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
@@ -112,6 +114,9 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
         vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
         vedtakHendelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
+        vedtakHendelse.setFagsakPeriode(fagsak.getPeriode().tilPeriode());
+        vedtakHendelse.setPleietrengendeAktørId(fagsak.getPleietrengendeAktørId());
+        vedtakHendelse.setRelatertPartAktørId(fagsak.getRelatertPersonAktørId());
         return vedtakHendelse;
     }
 }

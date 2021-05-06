@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
@@ -36,7 +37,6 @@ import no.nav.k9.sak.test.util.behandling.personopplysning.PersonAdresse;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.k9.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -144,18 +144,40 @@ public class AvklarOmErBosattTest {
     }
 
     @Test
-    public void skal_opprette_aksjonspunkt_dersom_minst_to_av_spørsmål_til_bruker_om_tilknytning_er_nei() {
+    public void skal_opprette_aksjonspunkt_dersom_bruker_oppgir_norge_siste_12_mnd_er_nei() {
         // Arrange
         LocalDate fødselsDato = LocalDate.now();
         MedlemskapOppgittLandOppholdEntitet oppholdUtlandForrigePeriode = new MedlemskapOppgittLandOppholdEntitet.Builder()
             .erTidligereOpphold(true)
             .medLand(Landkoder.BEL)
-            .medPeriode(LocalDate.now(), LocalDate.now().plusYears(1))
+            .medPeriode(LocalDate.now(), LocalDate.now().plusDays(1)) // periodens start/lengde påvirker ikke utledning
             .build();
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medDefaultOppgittTilknytning();
         leggTilSøker(scenario, AdresseType.BOSTEDSADRESSE, Landkoder.NOR);
-        scenario.medOppgittTilknytning().medOpphold(singletonList(oppholdUtlandForrigePeriode)).medOppholdNå(false);
+        scenario.medOppgittTilknytning().medOpphold(singletonList(oppholdUtlandForrigePeriode));
+        Behandling behandling = scenario.lagre(provider);
+
+        // Act
+        Optional<MedlemResultat> resultat = avklarOmErBosatt.utled(behandling, fødselsDato);
+
+        // Assert
+        assertThat(resultat).contains(AVKLAR_OM_ER_BOSATT);
+    }
+
+    @Test
+    public void skal_opprette_aksjonspunkt_dersom_bruker_oppgir_norge_neste_12_mnd_er_nei() {
+        // Arrange
+        LocalDate fødselsDato = LocalDate.now();
+        MedlemskapOppgittLandOppholdEntitet oppholdUtlandNestePeriode = new MedlemskapOppgittLandOppholdEntitet.Builder()
+            .erTidligereOpphold(false)
+            .medLand(Landkoder.BEL)
+            .medPeriode(LocalDate.now(), LocalDate.now().plusDays(1)) // periodens start/lengde påvirker ikke utledning
+            .build();
+        var scenario = TestScenarioBuilder.builderMedSøknad();
+        scenario.medDefaultOppgittTilknytning();
+        leggTilSøker(scenario, AdresseType.BOSTEDSADRESSE, Landkoder.NOR);
+        scenario.medOppgittTilknytning().medOpphold(singletonList(oppholdUtlandNestePeriode));
         Behandling behandling = scenario.lagre(provider);
 
         // Act

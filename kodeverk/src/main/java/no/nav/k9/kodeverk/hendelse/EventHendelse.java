@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse;
+package no.nav.k9.kodeverk.hendelse;
 
 public enum EventHendelse {
     AKSJONSPUNKT_OPPRETTET,

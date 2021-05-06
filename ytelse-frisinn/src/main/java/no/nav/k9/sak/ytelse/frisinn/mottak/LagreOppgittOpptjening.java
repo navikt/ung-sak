@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,14 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittFrilans;
@@ -25,6 +30,8 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsfo
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
+import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
@@ -35,6 +42,8 @@ class LagreOppgittOpptjening {
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingRepository behandlingRepository;
+    private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private ProsessTaskRepository prosessTaskRepository;
 
     LagreOppgittOpptjening() {
         // for proxy
@@ -42,9 +51,13 @@ class LagreOppgittOpptjening {
 
     @Inject
     LagreOppgittOpptjening(BehandlingRepository behandlingRepository,
-                           InntektArbeidYtelseTjeneste iayTjeneste) {
+                           InntektArbeidYtelseTjeneste iayTjeneste,
+                           OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                           ProsessTaskRepository prosessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
+        this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.prosessTaskRepository = prosessTaskRepository;
     }
 
     void lagreOpptjening(Behandling behandling, Inntekter inntekter, ZonedDateTime tidspunkt) {
@@ -95,7 +108,20 @@ class LagreOppgittOpptjening {
         }
 
         if (erNyeOpplysninger) {
-            iayTjeneste.lagreOppgittOpptjening(behandlingId, opptjeningBuilder);
+            try {
+                var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
+                enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
+                enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+                enkeltTask.setCallIdFraEksisterende();
+
+                var request = oppgittOpptjeningMapperTjeneste.byggRequest(behandling, opptjeningBuilder);
+                var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+                enkeltTask.setPayload(payload);
+
+                prosessTaskRepository.lagre(enkeltTask);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
+            }
         }
     }
 

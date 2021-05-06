@@ -1,84 +1,84 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
+package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
+import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
-import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
+import no.nav.k9.søknad.felles.type.Periode;
 
 @Dependent
-public class LagreOppgittOpptjening {
-
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private Boolean lansert;
+public class OppgittOpptjeningMapper {
 
     @Inject
-    LagreOppgittOpptjening(InntektArbeidYtelseTjeneste iayTjeneste,
-                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
-        this.iayTjeneste = iayTjeneste;
-        this.lansert = lansert;
+    OppgittOpptjeningMapper() {
     }
 
+    public OppgittOpptjeningMottattRequest mapRequest(Behandling behandling, MottattDokument dokument, OpptjeningAktivitet opptjeningAktiviteter) {
 
-    public void lagreOpptjening(Behandling behandling, OmsorgspengerUtbetaling søknad, MottattDokument dokument) {
-        Long behandlingId = behandling.getId();
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
-        if (søknad.getAktivitet().getSelvstendigNæringsdrivende() != null) {
-            var snAktiviteter = søknad.getAktivitet().getSelvstendigNæringsdrivende();
+        if (opptjeningAktiviteter.getSelvstendigNæringsdrivende() != null) {
+            var snAktiviteter = opptjeningAktiviteter.getSelvstendigNæringsdrivende();
             var egenNæringBuilders = snAktiviteter.stream()
                 .flatMap(sn -> this.mapEgenNæring(sn).stream())
                 .collect(Collectors.toList());
             builder.leggTilEgneNæringer(egenNæringBuilders);
         }
-        if (søknad.getAktivitet().getFrilanser() != null) {
+        if (opptjeningAktiviteter.getFrilanser() != null) {
             builder.leggTilFrilansOpplysninger(OppgittOpptjeningBuilder.OppgittFrilansBuilder.ny()
                 .build());
         }
-        if (søknad.getAktivitet().getArbeidstaker() != null) {
+        if (opptjeningAktiviteter.getArbeidstaker() != null) {
             // TODO: Lagring av utenlands arbeidsforhold
         }
         builder.leggTilJournalpostId(dokument.getJournalpostId());
         builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
 
-        if (builder.build().harOpptjening()) {
-            if (!lansert) {
-                iayTjeneste.lagreOppgittOpptjening(behandlingId, builder);
-            } else {
-                iayTjeneste.lagreOppgittOpptjeningV2(behandlingId, builder);
-            }
-        }
+        return byggRequest(behandling, builder);
     }
 
 
     private List<EgenNæringBuilder> mapEgenNæring(no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende sn) {
-        if (sn.getPerioder().size() != 1) {
-            throw new IllegalArgumentException("Må ha eksakt en periode. Størrelse var " + sn.getPerioder().size());
-        }
-        var entry = sn.getPerioder().entrySet().iterator().next();
-        var info = entry.getValue();
-        if (info.getVirksomhetstyper().isEmpty()) {
-            throw new IllegalArgumentException("Må ha minst en virksomhetstype.");
-        }
+        Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> entry = getSnPeriodeInfo(sn);
         var periode = entry.getKey();
+        var info = entry.getValue();
+        var virksomhetType = getVirksomhetType(info);
         var orgnummer = sn.getOrganisasjonsnummer();
-        // Mapper en egen næring pr virksomhetstype
-        return info.getVirksomhetstyper().stream()
-            .map(type -> this.mapNæringForVirksomhetType(periode, info, type, orgnummer))
-            .collect(Collectors.toList());
+
+        var egenNæringBuilder = mapNæringForVirksomhetType(periode, info, virksomhetType, orgnummer);
+        return List.of(egenNæringBuilder);
+    }
+
+    private Map.Entry<Periode, SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo> getSnPeriodeInfo(SelvstendigNæringsdrivende sn) {
+        if (sn.getPerioder().size() != 1) {
+            throw new IllegalArgumentException("Søknad må ha eksakt én SN-periode. Størrelse var " + sn.getPerioder().size());
+        }
+        return sn.getPerioder().entrySet().iterator().next();
+    }
+
+    private no.nav.k9.søknad.felles.type.VirksomhetType getVirksomhetType(SelvstendigNæringsdrivende.SelvstendigNæringsdrivendePeriodeInfo info) {
+        if (info.getVirksomhetstyper().size() != 1) {
+            throw new IllegalArgumentException("Søknad må ha eksakt én (hoved)virksomhet. Størrelse var " + info.getVirksomhetstyper().size());
+        }
+        return info.getVirksomhetstyper().get(0);
     }
 
     private EgenNæringBuilder mapNæringForVirksomhetType(no.nav.k9.søknad.felles.type.Periode periode,
@@ -100,5 +100,14 @@ public class LagreOppgittOpptjening {
         builder.medNyoppstartet(info.getErNyoppstartet());
         // TODO Map ny i arbeidslivet
         return builder;
+    }
+
+    public OppgittOpptjeningMottattRequest byggRequest(Behandling behandling, OppgittOpptjeningBuilder builder) {
+        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
+        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(builder);
+        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
+        return request;
     }
 }
