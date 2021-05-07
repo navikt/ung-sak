@@ -80,6 +80,9 @@ public class BehandlingVedtakTjeneste {
         if (BehandlingResultatType.INNVILGET.equals(behandlingResultatType)) {
             return VedtakResultatType.INNVILGET;
         }
+        if (BehandlingResultatType.DELVIS_INNVILGET.equals(behandlingResultatType)){
+            return VedtakResultatType.DELVIS_INNVILGET;
+        }
         if (BehandlingResultatType.INNVILGET_ENDRING.equals(behandlingResultatType)) {
             return VedtakResultatType.INNVILGET;
         }

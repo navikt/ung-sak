@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -131,19 +130,22 @@ public class VedtakTjeneste {
     }
 
     private VedtakResultatType utledVedtakResultatType(Behandling behandling, BehandlingResultatType resultatType) {
-        if (BehandlingResultatType.INGEN_ENDRING.equals(resultatType)) {
+        if (BehandlingResultatType.INGEN_ENDRING == resultatType) {
             Optional<Long> originalBehandlingOpt = behandling.getOriginalBehandlingId();
             if (originalBehandlingOpt.isPresent()) {
                 var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingOpt.get());
-                if (!Objects.equals(originalBehandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {
+                if (originalBehandling.getBehandlingResultatType() != BehandlingResultatType.IKKE_FASTSATT) {
                     return utledVedtakResultatType(originalBehandling);
                 }
             }
         }
+        if (BehandlingResultatType.DELVIS_INNVILGET == resultatType) {
+            return VedtakResultatType.DELVIS_INNVILGET;
+        }
         if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType)) {
             return VedtakResultatType.INNVILGET;
         }
-        if (BehandlingResultatType.OPPHØR.equals(resultatType)) {
+        if (BehandlingResultatType.OPPHØR == resultatType) {
             return VedtakResultatType.OPPHØR;
         }
         return VedtakResultatType.AVSLAG;
