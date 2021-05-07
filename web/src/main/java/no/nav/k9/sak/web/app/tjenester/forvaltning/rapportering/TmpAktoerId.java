@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
-import no.nav.k9.sak.kontrakt.hendelse.risikoklassifisering.AktoerId;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @Entity(name = "TmpAktoerId")
 @Table(name = "TMP_AKTOER_ID")
@@ -31,6 +31,11 @@ public class TmpAktoerId extends BaseEntitet {
 
     TmpAktoerId() {
         //
+    }
+
+    public TmpAktoerId(AktørId aktoerId, PersonIdent ident) {
+        this.aktoerId = aktoerId;
+        this.ident = ident == null ? null : ident.getIdent();
     }
 
     public TmpAktoerId(AktørId aktoerId, String ident) {

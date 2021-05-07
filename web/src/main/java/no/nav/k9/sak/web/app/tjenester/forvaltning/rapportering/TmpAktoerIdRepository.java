@@ -46,9 +46,8 @@ public class TmpAktoerIdRepository {
     }
 
     public void lagre(Map<AktørId, PersonIdent> mapIdenter) {
-        var entiteter = mapIdenter.entrySet().stream().map(e -> new TmpAktoerId(e.getKey(), e.getValue().getIdent())).collect(Collectors.toList());
-        for (var e : entiteter) {
-            entityManager.persist(e);
+        for (var e : mapIdenter.entrySet()) {
+            entityManager.persist(new TmpAktoerId(e.getKey(), e.getValue()));
         }
         entityManager.flush();
     }
