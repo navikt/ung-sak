@@ -12,6 +12,10 @@ public class MedisinskVilkårResultat {
 
     public MedisinskVilkårResultat() {
     }
+    
+    public MedisinskVilkårResultat(List<PleiePeriode> pleieperioder) {
+        this.pleieperioder = pleieperioder;
+    }
 
     public List<PleiePeriode> getPleieperioder() {
         return List.copyOf(pleieperioder);
