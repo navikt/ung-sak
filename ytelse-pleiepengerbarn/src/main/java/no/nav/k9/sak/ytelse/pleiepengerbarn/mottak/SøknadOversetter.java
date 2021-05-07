@@ -122,8 +122,8 @@ class SøknadOversetter {
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
         final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
             DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
-            BarnRelasjon.of(omsorg.getRelasjonTilBarnet() != null ? omsorg.getRelasjonTilBarnet().getRolle() : null),
-            omsorg.getBeskrivelseAvOmsorgsrollen() != null ? omsorg.getBeskrivelseAvOmsorgsrollen() : "");
+            BarnRelasjon.of(omsorg.getRelasjonTilBarnet().isPresent() ? omsorg.getRelasjonTilBarnet().get().getRolle() : null),
+            omsorg.getBeskrivelseAvOmsorgsrollen().isPresent() ? omsorg.getBeskrivelseAvOmsorgsrollen().get() : null);
         omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
     }
 
