@@ -128,7 +128,6 @@ public class AktørTjeneste {
             .collect(Collectors.groupingBy(HentIdenterBolkResult::getCode, Collectors.counting()));
 
         log.info("Forespurt [{}] identer, Hentet [{}] identer. Savner [{}]", aktørIder.size(), bolkResults.size(), feilende.size());
-        log.warn("Feilende hentIdenterBolk: {}", feilende);
 
         results.putAll(map);
         return Collections.unmodifiableMap(results);
