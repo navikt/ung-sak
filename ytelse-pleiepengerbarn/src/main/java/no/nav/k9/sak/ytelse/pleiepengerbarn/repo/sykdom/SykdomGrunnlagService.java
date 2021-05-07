@@ -7,19 +7,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -29,11 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
 @Dependent
 public class SykdomGrunnlagService {
 
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-
     private VilkårResultatRepository vilkårResultatRepository;
-    private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
 
 
@@ -42,12 +34,7 @@ public class SykdomGrunnlagService {
     }
 
     @Inject
-    public SykdomGrunnlagService(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-            SykdomVurderingRepository sykdomVurderingRepository, SykdomDokumentRepository sykdomDokumentRepository,
-            SykdomGrunnlagRepository sykdomGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider) {
-        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
-        this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+    public SykdomGrunnlagService(SykdomGrunnlagRepository sykdomGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
@@ -61,13 +48,8 @@ public class SykdomGrunnlagService {
         return resultat.harBlittEndret();
     }
     
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
-    }
-    
     @SuppressWarnings("unchecked")
-    private LocalDateTimeline<VilkårPeriode> hentOmsorgenForTidslinje(Long behandlingId) {
+    LocalDateTimeline<VilkårPeriode> hentOmsorgenForTidslinje(Long behandlingId) {
         final var vilkåreneOpt = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         return vilkåreneOpt.map(v -> v.getVilkårTimeline(VilkårType.OMSORGEN_FOR)).orElse(LocalDateTimeline.EMPTY_TIMELINE);
     }
@@ -107,6 +89,7 @@ public class SykdomGrunnlagService {
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
 
+    @SuppressWarnings("unchecked")
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<SykdomGrunnlag> grunnlagBehandling, SykdomGrunnlag utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
 
