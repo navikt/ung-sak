@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
+package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import java.util.Objects;
 
