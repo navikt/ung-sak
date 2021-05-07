@@ -87,13 +87,12 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
 
     @Override
     protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
+        if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
+            throw new IllegalArgumentException("Skal ikke sjekke delvis avslått når det allerede er avklart at riktig status er helt avslått");
+        }
         if (!harSøknad(ref)) {
             //utnytter (foreløpig?) delvis-statusen kun når søknad fra bruker håndteres i behandlingen
             return false;
-        }
-        if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
-            throw new IllegalArgumentException("Skal ikke sjekke delvis avslått når det allerede er avklart at riktig status er helt avslått");
-            //kan gjøre 'return false' istedet for exception her
         }
 
         //sjekker mot både avslag på vilkår og mot tilkjent ytelse. Dette fordi det er mulig å få 0 fra beregning (til bruker)
