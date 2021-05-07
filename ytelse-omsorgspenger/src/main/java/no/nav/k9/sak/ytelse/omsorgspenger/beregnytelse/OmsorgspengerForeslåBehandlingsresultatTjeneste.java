@@ -86,7 +86,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     }
 
     @Override
-    protected boolean skalBehandlingenSettesTilDelvisAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
         if (!harSøknad(ref)) {
             //utnytter (foreløpig?) delvis-statusen kun når søknad fra bruker håndteres i behandlingen
             return false;

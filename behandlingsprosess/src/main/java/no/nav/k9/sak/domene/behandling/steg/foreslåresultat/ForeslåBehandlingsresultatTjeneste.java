@@ -59,9 +59,9 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-        } else if (skalBehandlingenSettesTilDelvisAvslått(ref, vilkårene)) {
+        } else if (skalBehandlingenSettesTilDelvisInnvilget(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_INNVILGET);
-            log.info("Behandling {} delvis avslått/innvilget", ref.getBehandlingId());
+            log.info("Behandling {} delvis innvilget", ref.getBehandlingId());
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
             log.info("Behandling {} innvilget", ref.getBehandlingId());
@@ -75,7 +75,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    protected boolean skalBehandlingenSettesTilDelvisAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
         return false;
     }
 
