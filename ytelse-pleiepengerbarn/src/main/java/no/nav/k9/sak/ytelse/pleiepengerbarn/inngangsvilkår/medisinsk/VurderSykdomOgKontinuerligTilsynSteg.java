@@ -99,13 +99,13 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final var perioderUnder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR), vilkårene);
         final var perioder18årTidslinje = medOmsorgenFor(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR), vilkårene);
         
-        final var perioderUnder18år = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, true);
-        final var perioder18år = kunPerioderMedOmsorgenFor(perioder18årTidslinje, true);
+        final var perioderUnder18år = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.OPPFYLT);
+        final var perioder18år = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.OPPFYLT);
         final var perioderSamlet = union(perioderUnder18år, perioder18år);
         
-        final var perioderUnder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, false);
-        final var perioder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioder18årTidslinje, false);
-        final var perioderTilVurderingUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje.union(perioder18årTidslinje, StandardCombinators::coalesceLeftHandSide), false);
+        final var perioderUnder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje, Utfall.IKKE_OPPFYLT);
+        final var perioder18årUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioder18årTidslinje, Utfall.IKKE_OPPFYLT);
+        final var perioderTilVurderingUtenOmsorgenFor = kunPerioderMedOmsorgenFor(perioderUnder18årTidslinje.union(perioder18årTidslinje, StandardCombinators::coalesceLeftHandSide), Utfall.IKKE_OPPFYLT);
         // TODO: Fjern søknadsperioder: perioderTilVurderingUtenOmsorgenFor
        
         final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -127,20 +127,20 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private TreeSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Boolean> perioderUnder18årTidslinje, boolean resultat) {
+    private TreeSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
         return perioderUnder18årTidslinje.stream()
-                .filter(s -> resultat == s.getValue())
+                .filter(s -> utfall == s.getValue())
                 .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private LocalDateTimeline<Boolean> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
+    private LocalDateTimeline<Utfall> medOmsorgenFor(NavigableSet<DatoIntervallEntitet> perioder, Vilkårene vilkårene) {
         final LocalDateTimeline<Boolean> perioderTidslinje = SykdomUtils.toLocalDateTimeline(perioder);
         final LocalDateTimeline<VilkårPeriode> omsorgenForTidslinje = vilkårene.getVilkårTimeline(VilkårType.OMSORGEN_FOR);
-        return perioderTidslinje.combine(omsorgenForTidslinje, new LocalDateSegmentCombinator<Boolean, VilkårPeriode, Boolean>() {
+        return perioderTidslinje.combine(omsorgenForTidslinje, new LocalDateSegmentCombinator<Boolean, VilkårPeriode, Utfall>() {
             @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval, LocalDateSegment<Boolean> p, LocalDateSegment<VilkårPeriode> vp) {
-                return new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall() == Utfall.OPPFYLT);
+            public LocalDateSegment<Utfall> combine(LocalDateInterval datoInterval, LocalDateSegment<Boolean> p, LocalDateSegment<VilkårPeriode> vp) {
+                return new LocalDateSegment<>(datoInterval, vp.getValue().getUtfall());
             }
         }, JoinStyle.LEFT_JOIN).compress();
     }
