@@ -51,7 +51,7 @@ public class AktørTjeneste {
     private PdlKlient pdlKlient;
 
     AktørTjeneste() {
-        // CDI
+        //
     }
 
     @Inject
@@ -96,7 +96,7 @@ public class AktørTjeneste {
 
     /** returnerer map av aktørId->personident (null dersom ikke funnet). */
     public Map<AktørId, PersonIdent> hentPersonIdentForAktørIder(Set<AktørId> aktørIder) {
-        HentIdenterBolkQueryRequest query = new HentIdenterBolkQueryRequest();
+        var query = new HentIdenterBolkQueryRequest();
         query.setIdenter(aktørIder.stream().map(AktørId::getId).collect(toList()));
         query.setGrupper(of(IdentGruppe.FOLKEREGISTERIDENT));
 
@@ -109,8 +109,8 @@ public class AktørTjeneste {
 
         Predicate<IdentInformasjon> erØnsketIdentgruppe = identInformasjon -> identInformasjon.getGruppe().equals(IdentGruppe.FOLKEREGISTERIDENT);
 
-        TreeMap<AktørId, PersonIdent> results = aktørIder.stream()
-            .collect(Collectors.toMap(v -> v, v -> null, (v1, v2) -> v1, TreeMap::new));
+        var results = new TreeMap<AktørId, PersonIdent>();
+        aktørIder.stream().forEach(a -> results.put(a, null));
 
         var map = pdlKlient.hentIdenterBolkResults(query, projection).stream()
             .filter(r -> r.getIdenter() != null && r.getIdenter().stream().anyMatch(erØnsketIdentgruppe))
@@ -139,7 +139,7 @@ public class AktørTjeneste {
     }
 
     private Stream<Tuple<PersonIdent, AktørId>> hentBolkMedAktørId(List<PersonIdent> personIdents) {
-        HentIdenterBolkQueryRequest query = new HentIdenterBolkQueryRequest();
+        var query = new HentIdenterBolkQueryRequest();
         query.setIdenter(personIdents.stream().map(PersonIdent::getIdent).collect(toList()));
         query.setGrupper(of(IdentGruppe.AKTORID));
 
@@ -168,7 +168,7 @@ public class AktørTjeneste {
     }
 
     private Optional<IdentInformasjon> identerFor(String ident, IdentGruppe identGruppe) {
-        HentIdenterQueryRequest request = new HentIdenterQueryRequest();
+        var request = new HentIdenterQueryRequest();
         request.setIdent(ident);
         request.setGrupper(List.of(identGruppe));
         request.setHistorikk(Boolean.FALSE);
