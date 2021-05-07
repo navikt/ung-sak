@@ -73,34 +73,10 @@ public class RapporteringRestTjeneste {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Dumper en rapport av data", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "rapportering")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response dumpSak(@NotNull @FormParam("ytelseType") @Parameter(description = "ytelseType", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) YtelseTypeKode ytelseTypeKode,
+    public Response genererRapportForYtelse(@NotNull @FormParam("ytelseType") @Parameter(description = "ytelseType", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) YtelseTypeKode ytelseTypeKode,
                             @NotNull @FormParam("rapport") @Parameter(description = "rapport", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) RapportType rapportType,
                             @NotNull @FormParam("periode") @Parameter(description = "periode", required = true, example = "2020-01-01/2020-12-31") @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) Periode periode) {
 
-        class ZipOutput {
-            private void addToZip(ZipOutputStream zipOut, DumpOutput dump) {
-                var zipEntry = new ZipEntry(dump.getPath());
-                try {
-                    zipOut.putNextEntry(zipEntry);
-                    zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
-                    zipOut.closeEntry();
-                } catch (IOException e) {
-                    throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
-                }
-            }
-
-            StreamingOutput dump(List<DumpOutput> outputs) {
-                StreamingOutput streamingOutput = outputStream -> {
-                    try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                        outputs.forEach(dump -> addToZip(zipOut, dump));
-                    } finally {
-                        outputStream.flush();
-                        outputStream.close();
-                    }
-                };
-                return streamingOutput;
-            }
-        }
 
         FagsakYtelseType ytelseType = FagsakYtelseType.fraKode(ytelseTypeKode.name());
         rapportType.valider(ytelseType);

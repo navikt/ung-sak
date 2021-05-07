@@ -1,15 +1,10 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -23,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
@@ -45,34 +39,14 @@ public class DebugDumpsters {
     public StreamingOutput dumper(Fagsak fagsak) {
         var ytelseType = fagsak.getYtelseType();
         var saksnummer = fagsak.getSaksnummer();
-        StreamingOutput streamingOutput = outputStream -> {
-            try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                var dumpsters = findDumpsters(ytelseType);
-                List<DumpOutput> allDumps = dumpOutput(fagsak, dumpsters);
-                allDumps.forEach(dump -> addToZip(saksnummer, zipOut, dump));
-            } finally {
-                outputStream.flush();
-                outputStream.close();
-            }
-        };
+        var dumpsters = findDumpsters(ytelseType);
+        List<DumpOutput> allDumps = dumpOutput(fagsak, dumpsters);
 
-        return streamingOutput;
-
+        return new ZipOutput().dump(saksnummer, allDumps);
     }
 
     private List<Instance<DebugDumpFagsak>> findDumpsters(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType.getKode());
-    }
-
-    private void addToZip(Saksnummer saksnummer, ZipOutputStream zipOut, DumpOutput dump) {
-        var zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
-        try {
-            zipOut.putNextEntry(zipEntry);
-            zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
-            zipOut.closeEntry();
-        } catch (IOException e) {
-            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
-        }
     }
 
     private List<DumpOutput> dumpOutput(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
