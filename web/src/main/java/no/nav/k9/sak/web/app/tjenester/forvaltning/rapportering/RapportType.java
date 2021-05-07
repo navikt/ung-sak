@@ -2,6 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public enum RapportType {
@@ -10,6 +12,7 @@ public enum RapportType {
 
     ;
 
+    @JsonIgnore
     private Set<FagsakYtelseType> ytelseTyper;
 
     private RapportType(FagsakYtelseType... ytelseTyper) {
