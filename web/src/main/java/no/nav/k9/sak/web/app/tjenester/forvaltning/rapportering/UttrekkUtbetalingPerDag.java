@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -30,11 +29,6 @@ public class UttrekkUtbetalingPerDag implements RapportGenerator {
 
     @Override
     public List<DumpOutput> generer(FagsakYtelseType ytelseType, DatoIntervallEntitet periode) {
-        Set<FagsakYtelseType> forventet = Set.of(FagsakYtelseType.PSB, FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.FRISINN);
-        if (!forventet.contains(ytelseType)) {
-            throw new IllegalArgumentException("Støtter ikke dette uttrekket [" + RapportType.UTBETALING_PER_DAG + "] for ytelseType:" + ytelseType + ", tillater kun: " + forventet);
-        }
-
         String sql = """
                 SELECT cast(t.dag as date), t.kjoenn, round(SUM(t.utbetaling), 2) as utbetaling, round(SUM(t.dagsekvivalenter), 2) AS dagsekvivalenter, SUM(t.antalletUlikeKrav) AS antalletUlikeKrav, COUNT(*) AS fagsakDager
                 FROM (

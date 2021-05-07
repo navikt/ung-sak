@@ -102,8 +102,10 @@ public class RapporteringRestTjeneste {
             }
         }
 
-        var generators = RapportTypeRef.Lookup.list(RapportGenerator.class, rapportGenerators, rapportType);
         FagsakYtelseType ytelseType = FagsakYtelseType.fraKode(ytelseTypeKode.name());
+        rapportType.valider(ytelseType);
+
+        var generators = RapportTypeRef.Lookup.list(RapportGenerator.class, rapportGenerators, rapportType);
 
         List<DumpOutput> outputListe = new ArrayList<>();
         for (var generator : generators) {
