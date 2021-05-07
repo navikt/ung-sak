@@ -20,7 +20,7 @@ public class MedisinskVilkårTjeneste {
     }
 
     public VilkårData vurderPerioder(VilkårType vilkåret, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(kontekst.getBehandlingId(), periodeTilVurdering, sykdomGrunnlagBehandling);
+        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(vilkåret, kontekst.getBehandlingId(), periodeTilVurdering, sykdomGrunnlagBehandling);
         MedisinskVilkårResultat resultat = new MedisinskVilkårResultat();
 
         final var evaluation = new Medisinskvilkår().evaluer(grunnlag, resultat);
