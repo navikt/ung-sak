@@ -178,7 +178,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
         Optional<TransisjonIdentifikator> fremoverTransisjon = overhoppResultat.finnFremoverTransisjon();
         if (fremoverTransisjon.isPresent()) {
-            TransisjonIdentifikator riktigTransisjon = utledFremhoppTransisjon(kontekst, fremoverTransisjon.get());
+            TransisjonIdentifikator riktigTransisjon = utledFremhoppTransisjon(fremoverTransisjon.get());
             if (riktigTransisjon != null) {
                 behandlingskontrollTjeneste.fremoverTransisjon(riktigTransisjon, kontekst);
             }
@@ -218,30 +218,11 @@ public class AksjonspunktApplikasjonTjeneste {
         }
     }
 
-    private TransisjonIdentifikator utledFremhoppTransisjon(BehandlingskontrollKontekst kontekst, TransisjonIdentifikator transisjon) {
+    private TransisjonIdentifikator utledFremhoppTransisjon(TransisjonIdentifikator transisjon) {
         if (FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR.equals(transisjon)) {
-            Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            if (behandling.erRevurdering() && !harAvslåttForrigeBehandling(behandling)) {
-                // return FellesTransisjoner.FREMHOPP_TIL_UTTAKSPLAN; // NOSONAR
-            }
-            return FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT; // NOSONAR
+            return FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_BEHANDLINGSRESULTAT;
         }
         return transisjon;
-    }
-
-    private boolean harAvslåttForrigeBehandling(Behandling revurdering) {
-        Optional<Long> originalBehandlingOpt = revurdering.getOriginalBehandlingId();
-        if (originalBehandlingOpt.isPresent()) {
-            Behandling behandling = behandlingRepository.hentBehandling(originalBehandlingOpt.get());
-            // Dersom originalBehandling er et beslutningsvedtak må vi lete videre etter det faktiske resultatet for å kunne vurdere om forrige
-            // behandling var avslått
-            if (behandling.getBehandlingResultatType().isBehandlingsresultatIkkeEndret()) {
-                return harAvslåttForrigeBehandling(behandling);
-            } else {
-                return behandling.getBehandlingResultatType().isBehandlingsresultatAvslått();
-            }
-        }
-        return false;
     }
 
     @SuppressWarnings("unchecked")

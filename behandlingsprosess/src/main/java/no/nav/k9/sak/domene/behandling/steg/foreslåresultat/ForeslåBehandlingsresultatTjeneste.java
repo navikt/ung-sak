@@ -60,7 +60,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
         } else if (skalBehandlingenSettesTilDelvisAvslått(ref, vilkårene)) {
-            behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_AVSLÅTT);
+            behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_INNVILGET);
             log.info("Behandling {} delvis avslått/innvilget", ref.getBehandlingId());
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
