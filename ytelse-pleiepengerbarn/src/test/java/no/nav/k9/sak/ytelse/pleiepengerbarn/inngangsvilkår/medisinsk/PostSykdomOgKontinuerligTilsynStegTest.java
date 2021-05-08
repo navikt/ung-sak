@@ -130,7 +130,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
     }
 
     @Test
-    void skal_ikke_justere_på_periode_hvis_ikke_skjæringstidspunktet_er_flyttet() {
+    void skal_legge_tilbake_periode_hvis_sykdom_godkjent_igjen() {
         var builder = Vilkårene.builder();
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         var oppfyltPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(28), LocalDate.now().minusDays(20));
@@ -138,14 +138,12 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(oppfyltPeriode.getFomDato(), avslåttPeriode.getTomDato());
         var perioderTilVurdering = List.of(periodeTilVurdering);
 
-        builder.leggTilIkkeVurderteVilkår(perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+        builder.leggTilIkkeVurderteVilkår(List.of(oppfyltPeriode), VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
             VilkårType.MEDLEMSKAPSVILKÅRET,
             VilkårType.OPPTJENINGSPERIODEVILKÅR,
             VilkårType.OPPTJENINGSVILKÅRET);
-        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode)
-            .medUtfall(Utfall.OPPFYLT))
-            .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
-                .medUtfall(Utfall.IKKE_OPPFYLT));
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periodeTilVurdering)
+            .medUtfall(Utfall.OPPFYLT));
         builder.leggTil(vilkårBuilder);
 
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
@@ -159,8 +157,8 @@ class PostSykdomOgKontinuerligTilsynStegTest {
 
         for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
             if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
-                assertThat(vilkår.getPerioder()).hasSize(2);
-                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode, avslåttPeriode);
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(periodeTilVurdering);
             } else if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
                 assertThat(vilkår.getPerioder()).isEmpty();
             } else {
