@@ -13,12 +13,15 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
@@ -30,6 +33,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     private SykdomVurderingService sykdomVurderingService;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private PleiebehovResultatRepository resultatRepository;
     
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
@@ -37,11 +41,13 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
     
     @Inject
     public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingService sykdomVurderingService,
-            BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository) {
+            BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
+            PleiebehovResultatRepository resultatRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.sykdomVurderingService = sykdomVurderingService;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.resultatRepository = resultatRepository;
     }
 
     @Override
@@ -60,11 +66,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, param, behandling);
             oppdaterMedIkkeOppfylt(VilkårType.MEDISINSKEVILKÅR_18_ÅR, param, behandling);
-            return OppdateringResultat.utenTransisjon()
-                    .medFremoverHopp(FellesTransisjoner.FREMHOPP_VED_AVSLAG_VILKÅR)
-                    .medTotrinn()
-                    .build()
-                    ;
+            return OppdateringResultat.utenOveropp();
         }
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
@@ -86,6 +88,11 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                 .medUtfallManuell(Utfall.IKKE_OPPFYLT)
                 .medAvslagsårsak(Avslagsårsak.DOKUMENTASJON_IKKE_FRA_RETT_ORGAN));
             builder.leggTil(vilkårBuilder);
+            
+            final var nåværendeResultat = resultatRepository.hentHvisEksisterer(behandling.getId());
+            var resultatBuilder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
+            resultatBuilder.tilbakeStill(DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate()));
+            resultatRepository.lagreOgFlush(behandling.getId(), resultatBuilder);
         }
     }
     
