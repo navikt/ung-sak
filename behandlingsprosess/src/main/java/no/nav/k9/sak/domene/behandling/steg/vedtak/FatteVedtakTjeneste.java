@@ -29,9 +29,9 @@ public class FatteVedtakTjeneste {
     private static final Set<BehandlingResultatType> VEDTAKSTILSTANDER_REVURDERING = new HashSet<>(
         Arrays.asList(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.INNVILGET,
             BehandlingResultatType.OPPHØR, BehandlingResultatType.INNVILGET_ENDRING,
-            BehandlingResultatType.INGEN_ENDRING));
+            BehandlingResultatType.INGEN_ENDRING, BehandlingResultatType.DELVIS_INNVILGET));
     private static final Set<BehandlingResultatType> VEDTAKSTILSTANDER = new HashSet<>(
-        Arrays.asList(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.INNVILGET));
+        Arrays.asList(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.INNVILGET, BehandlingResultatType.DELVIS_INNVILGET));
 
     private VedtakTjeneste vedtakTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
