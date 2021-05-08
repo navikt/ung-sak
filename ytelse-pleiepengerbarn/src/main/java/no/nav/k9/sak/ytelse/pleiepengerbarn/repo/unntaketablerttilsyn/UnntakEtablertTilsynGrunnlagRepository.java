@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;

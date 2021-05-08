@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.Immutable;

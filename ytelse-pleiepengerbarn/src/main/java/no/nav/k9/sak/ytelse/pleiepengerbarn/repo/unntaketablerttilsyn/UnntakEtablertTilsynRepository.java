@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

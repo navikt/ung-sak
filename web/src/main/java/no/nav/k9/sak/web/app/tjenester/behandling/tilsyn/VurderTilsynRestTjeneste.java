@@ -12,7 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.tilsyn.EtablertTilsynNattevåkOgBeredskapDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 import javax.enterprise.context.ApplicationScoped;

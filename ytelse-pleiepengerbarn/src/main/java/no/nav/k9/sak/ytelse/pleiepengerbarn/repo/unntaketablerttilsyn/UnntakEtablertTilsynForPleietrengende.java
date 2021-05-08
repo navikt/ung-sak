@@ -1,15 +1,11 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Entity(name = "UnntakEtablertTilsynForPleietrengende")
 @Table(name = "UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")

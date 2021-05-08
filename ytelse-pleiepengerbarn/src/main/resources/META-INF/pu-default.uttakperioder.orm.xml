@@ -25,10 +25,10 @@
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning" />
 	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlag" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynForPleietrengende" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsyn" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynPeriode" />
-	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynBeskrivelse" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode" />
+	<entity class="no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynBeskrivelse" />
 
 </entity-mappings>

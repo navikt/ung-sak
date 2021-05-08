@@ -15,7 +15,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @ApplicationScoped

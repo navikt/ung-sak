@@ -11,8 +11,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 
 import java.util.ArrayList;
 

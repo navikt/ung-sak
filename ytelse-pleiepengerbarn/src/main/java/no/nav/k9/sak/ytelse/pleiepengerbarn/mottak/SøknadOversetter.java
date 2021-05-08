@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.enterprise.context.Dependent;
@@ -29,13 +30,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.untaketablerttilsyn.*;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
+import no.nav.k9.søknad.ytelse.psb.v1.Nattevåk;
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
@@ -137,14 +140,14 @@ class SøknadOversetter {
             unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
 
             var unntakEtablertTilsynBeredskap =
-                BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
-                    /* TODO */null,
+                tilUnntakEtablertTilsynForPleietrengende(
+                    grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
                     søknad.getMottattDato().toLocalDate(),
                     søkerAktørId,
                     pleiepengerSyktBarn.getBeredskap());
             var unntakEtablertTilsynNattevåk =
-                BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
-                    /* TODO */null,
+                tilUnntakEtablertTilsynForPleietrengende(
+                    grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk(),
                     søknad.getMottattDato().toLocalDate(),
                     søkerAktørId,
                     pleiepengerSyktBarn.getNattevåk());
@@ -156,6 +159,31 @@ class SøknadOversetter {
             throw new IllegalStateException("Ytelse er ikke PleiepengerSyktBarn. Skal ikke skje.");
         }
     }
+
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Beredskap beredskap) {
+        var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
+        beredskap.getPerioder().forEach( (key,value) ->
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+        );
+        var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
+        beredskap.getPerioderSomSkalSlettes().forEach( (key,value) ->
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+        );
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntakBeredskap, unntakSomSkalSlettes);
+    }
+
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Nattevåk nattevåk) {
+        var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
+        nattevåk.getPerioder().forEach( (key,value) ->
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+        );
+        var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
+        nattevåk.getPerioderSomSkalSlettes().forEach( (key,value) ->
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+        );
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntakNattevåk, unntakSomSkalSlettes);
+    }
+
 
 
     private UnntakEtablertTilsynGrunnlag hentEllerOpprettUnntakEtablertTilsynGrunnlag(Long behandlingId, AktørId pleietrengendeAktørId) {
