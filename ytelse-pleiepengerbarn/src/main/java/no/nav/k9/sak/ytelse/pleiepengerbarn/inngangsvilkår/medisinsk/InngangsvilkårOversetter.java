@@ -67,7 +67,9 @@ public class InngangsvilkårOversetter {
             .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
             .collect(Collectors.toList());
 
-        vilkårsGrunnlag.medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE) // TODO 18-feb
+        final DiagnoseKilde diagnoseKilde = grunnlag.getGodkjenteLegeerklæringer().isEmpty() ? DiagnoseKilde.ANNET : DiagnoseKilde.SYKHUSLEGE;
+        
+        vilkårsGrunnlag.medDiagnoseKilde(diagnoseKilde)
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)
             .medKontinuerligTilsyn(relevantKontinuerligTilsyn)
