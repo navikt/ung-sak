@@ -38,6 +38,8 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
 
+    @Column(name = "kilde_behandling_id", nullable = false, updatable = false, unique = true)
+    private Long kildeBehandlingId;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -89,6 +91,10 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return resultat;
     }
 
+    public Long getKildeBehandlingId() {
+        return kildeBehandlingId;
+    }
+
     public UnntakEtablertTilsynPeriode medPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
         return this;
@@ -104,17 +110,22 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return this;
     }
 
+    public UnntakEtablertTilsynPeriode medKildeBehandlingId(Long kildeBehandlingId) {
+        this.kildeBehandlingId = kildeBehandlingId;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnntakEtablertTilsynPeriode that = (UnntakEtablertTilsynPeriode) o;
-        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && begrunnelse.equals(that.begrunnelse) && resultat == that.resultat;
+        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && begrunnelse.equals(that.begrunnelse) && resultat == that.resultat && kildeBehandlingId.equals(that.kildeBehandlingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat);
+        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat, kildeBehandlingId);
     }
 
     @Override
@@ -124,6 +135,7 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
             ", periode=" + periode +
             ", resultat=" + resultat +
             ", versjon=" + versjon +
+            ", kildeBehandlingId=" + kildeBehandlingId +
             '}';
     }
 }

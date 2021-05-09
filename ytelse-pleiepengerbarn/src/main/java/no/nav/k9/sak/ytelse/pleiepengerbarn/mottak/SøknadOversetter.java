@@ -144,12 +144,14 @@ class SøknadOversetter {
                     grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
                     søknad.getMottattDato().toLocalDate(),
                     søkerAktørId,
+                    behandlingId,
                     pleiepengerSyktBarn.getBeredskap());
             var unntakEtablertTilsynNattevåk =
                 tilUnntakEtablertTilsynForPleietrengende(
                     grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk(),
                     søknad.getMottattDato().toLocalDate(),
                     søkerAktørId,
+                    behandlingId,
                     pleiepengerSyktBarn.getNattevåk());
             var nyttGrunnlag = grunnlag.getUnntakEtablertTilsynForPleietrengende()
                 .medBeredskap(unntakEtablertTilsynBeredskap)
@@ -160,7 +162,7 @@ class SøknadOversetter {
         }
     }
 
-    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Beredskap beredskap) {
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
         var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
         beredskap.getPerioder().forEach( (key,value) ->
             nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
@@ -169,10 +171,10 @@ class SøknadOversetter {
         beredskap.getPerioderSomSkalSlettes().forEach( (key,value) ->
             nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
         );
-        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntakBeredskap, unntakSomSkalSlettes);
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakBeredskap, unntakSomSkalSlettes);
     }
 
-    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Nattevåk nattevåk) {
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Nattevåk nattevåk) {
         var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
         nattevåk.getPerioder().forEach( (key,value) ->
             nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
@@ -181,10 +183,8 @@ class SøknadOversetter {
         nattevåk.getPerioderSomSkalSlettes().forEach( (key,value) ->
             nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
         );
-        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntakNattevåk, unntakSomSkalSlettes);
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakNattevåk, unntakSomSkalSlettes);
     }
-
-
 
     private UnntakEtablertTilsynGrunnlag hentEllerOpprettUnntakEtablertTilsynGrunnlag(Long behandlingId, AktørId pleietrengendeAktørId) {
         var unntakEtablertTilsynGrunnlagOptional = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);

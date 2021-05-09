@@ -4,7 +4,6 @@ create sequence if not exists SEQ_UNNTAK_ETABLERT_TILSYN increment by 50 minvalu
 create sequence if not exists SEQ_UNNTAK_ETABLERT_TILSYN_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE increment by 50 minvalue 1000000;
 
-
 create table if not exists UNNTAK_ETABLERT_TILSYN
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
@@ -36,10 +35,6 @@ create index IDX_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_1 ON UNNTAK_ETABLERT_TILS
 create index IDX_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_2 ON UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE (BEREDSKAP_ID);
 create index IDX_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_3 ON UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE (NATTEVAAK_ID);
 
-
-
-
-
 create table if not exists GR_UNNTAK_ETABLERT_TILSYN
 (
     ID                                          BIGINT                                 NOT NULL PRIMARY KEY,
@@ -60,9 +55,6 @@ create index IDX_GR_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_1 on GR_UNNTAK_ETABLER
 create index IDX_GR_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_2 on GR_UNNTAK_ETABLERT_TILSYN (UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_ID);
 
 
-
-
-
 create table if not exists UNNTAK_ETABLERT_TILSYN_PERIODE
 (
     ID                          BIGINT                                          NOT NULL PRIMARY KEY,
@@ -71,6 +63,7 @@ create table if not exists UNNTAK_ETABLERT_TILSYN_PERIODE
     TOM                         DATE                                            NOT NULL,
     BEGRUNNELSE                 VARCHAR(4000)                                   ,
     RESULTAT                    VARCHAR(20)                                     NOT NULL,
+    KILDE_BEHANDLING_ID         BIGINT                                          NOT NULL,
 
     VERSJON                     BIGINT       DEFAULT 0                          NOT NULL,
     OPPRETTET_AV                VARCHAR(20)  DEFAULT 'VL'                       NOT NULL,
@@ -90,6 +83,7 @@ create table UNNTAK_ETABLERT_TILSYN_BESKRIVELSE
     TEKST                       VARCHAR(4000)                                   ,
     MOTTATT_DATO                DATE                                            NOT NULL,
     SOEKER_AKTOER_ID            VARCHAR(50)                                     NOT NULL,
+    KILDE_BEHANDLING_ID         BIGINT                                          NOT NULL,
 
     VERSJON                     BIGINT       default 0                          NOT NULL,
     OPPRETTET_AV                VARCHAR(20)  default 'VL'                       NOT NULL,

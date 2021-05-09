@@ -39,6 +39,8 @@ public class UnntakEtablertTilsynOppdateringService {
             unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
             LocalDate.now(),
             søkersAktørId,
+            behandlingId,
+            dto.getVurderingstekst(),
             perioder,
             List.of());
 

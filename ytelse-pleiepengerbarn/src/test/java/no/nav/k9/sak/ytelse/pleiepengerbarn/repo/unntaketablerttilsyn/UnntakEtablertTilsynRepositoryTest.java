@@ -53,7 +53,8 @@ class UnntakEtablertTilsynRepositoryTest {
         var periode = new UnntakEtablertTilsynPeriode()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medBegrunnelse(begrunnelse)
-            .medResultat(resultat);
+            .medResultat(resultat)
+            .medKildeBehandlingId(123L);
         periode.setUnntakEtablertTilsyn(unntakEtablertTilsyn);
         return periode;
     }
@@ -64,7 +65,8 @@ class UnntakEtablertTilsynRepositoryTest {
             .medSøker(new AktørId(123L))
             .medMottattDato(LocalDate.now())
             .medPeriode(fom, tom)
-            .medTekst(tekst);
+            .medTekst(tekst)
+            .medKildeBehandlingId(123L);
     }
 
 

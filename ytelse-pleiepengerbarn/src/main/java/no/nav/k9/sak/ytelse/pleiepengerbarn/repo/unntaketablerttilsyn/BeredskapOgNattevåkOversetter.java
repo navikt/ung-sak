@@ -14,9 +14,9 @@ import java.util.List;
 public class BeredskapOgNattevåkOversetter {
 
 
-    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes) {
-        var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak);
-        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes);
+    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, String vurderingstekst, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes) {
+        var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, kildeBehandlingId, vurderingstekst);
 
         var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn();
         unntakEtablertTilsynForBeredskap.setBeskrivelser(beskrivelser);
@@ -25,7 +25,7 @@ public class BeredskapOgNattevåkOversetter {
         return unntakEtablertTilsynForBeredskap;
     }
 
-    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes) {
+    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, Long kildeBehandlingId, String vurderingstekst) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
         eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
             eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new Unntak(periode.getBegrunnelse(), periode.getResultat())))
@@ -44,10 +44,16 @@ public class BeredskapOgNattevåkOversetter {
                 .disjoint(new LocalDateTimeline<>(segementerSomSkalSlettes))
                 .crossJoin(new LocalDateTimeline<>(segmenterSomSkalLeggesTil));
 
-        return perioderTidslinje.toSegments().stream().map(segment -> new UnntakEtablertTilsynPeriode()).toList();
+        return perioderTidslinje.toSegments().stream().map(segment ->
+            new UnntakEtablertTilsynPeriode()
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
+                .medBegrunnelse(vurderingstekst)
+                .medKildeBehandlingId(kildeBehandlingId)
+                .medResultat(Resultat.IKKE_VURDERT)
+        ).toList();
     }
 
-    private static List<UnntakEtablertTilsynBeskrivelse> finnUnntakEtablertTilsynBeskrivelser(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, List<Unntaksperiode> nyeUnntak) {
+    private static List<UnntakEtablertTilsynBeskrivelse> finnUnntakEtablertTilsynBeskrivelser(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, List<Unntaksperiode> nyeUnntak, Long kildeBehandlingId) {
         var beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             beskrivelser.addAll(eksisterendeUnntakEtablertTilsyn.getBeskrivelser());
@@ -57,7 +63,8 @@ public class BeredskapOgNattevåkOversetter {
                 DatoIntervallEntitet.fraOgMedTilOgMed(nyttUnntak.fom(), nyttUnntak.tom()),
                 mottattDato,
                 nyttUnntak.tilleggsinformasjon(),
-                søkersAktørId))
+                søkersAktørId,
+                kildeBehandlingId))
         );
         return beskrivelser;
     }

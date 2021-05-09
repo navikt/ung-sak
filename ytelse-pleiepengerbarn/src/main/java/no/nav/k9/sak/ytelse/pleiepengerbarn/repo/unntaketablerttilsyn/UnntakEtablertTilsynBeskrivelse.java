@@ -42,15 +42,19 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "SOEKER_AKTOER_ID", unique = true, nullable = false, updatable = false)))
     private AktørId søker;
 
+    @Column(name = "kilde_behandling_id", nullable = false, updatable = false, unique = true)
+    private Long kildeBehandlingId;
+
     public UnntakEtablertTilsynBeskrivelse() {
         // Hibernate
     }
 
-    public UnntakEtablertTilsynBeskrivelse(DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker) {
+    public UnntakEtablertTilsynBeskrivelse(DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker, Long kildeBehandlingId) {
         this.periode = periode;
         this.mottattDato = mottattDato;
         this.tekst = tekst;
         this.søker = søker;
+        this.kildeBehandlingId = kildeBehandlingId;
     }
 
 
@@ -59,6 +63,7 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         this.mottattDato = beskrivelse.mottattDato;
         this.tekst = beskrivelse.tekst;
         this.søker = beskrivelse.søker;
+        this.kildeBehandlingId = beskrivelse.kildeBehandlingId;
     }
 
     public Long getId() {
@@ -83,6 +88,10 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
 
     public UnntakEtablertTilsyn getUnntakEtablertTilsyn() {
         return unntakEtablertTilsyn;
+    }
+
+    public Long getKildeBehandlingId() {
+        return kildeBehandlingId;
     }
 
     UnntakEtablertTilsynBeskrivelse medUnntakEtablertTilsyn(UnntakEtablertTilsyn unntakEtablertTilsyn) {
@@ -110,6 +119,11 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         return this;
     }
 
+    public UnntakEtablertTilsynBeskrivelse medKildeBehandlingId(Long kildeBehandlingId) {
+        this.kildeBehandlingId = kildeBehandlingId;
+        return this;
+    }
+
     @Override
     public String getIndexKey() {
         return IndexKeyComposer.createKey(mottattDato);
@@ -120,12 +134,12 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnntakEtablertTilsynBeskrivelse that = (UnntakEtablertTilsynBeskrivelse) o;
-        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && mottattDato.equals(that.mottattDato) && Objects.equals(tekst, that.tekst) && søker.equals(that.søker);
+        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && mottattDato.equals(that.mottattDato) && Objects.equals(tekst, that.tekst) && søker.equals(that.søker) && kildeBehandlingId.equals(that.kildeBehandlingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, unntakEtablertTilsyn, mottattDato, tekst, søker);
+        return Objects.hash(periode, unntakEtablertTilsyn, mottattDato, tekst, søker, kildeBehandlingId);
     }
 
 
@@ -136,6 +150,7 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
             ", periode=" + periode +
             ", mottattDato=" + mottattDato +
             ", søker=" + søker +
+            ", kildeBehandlingId=" + kildeBehandlingId +
             '}';
     }
 }
