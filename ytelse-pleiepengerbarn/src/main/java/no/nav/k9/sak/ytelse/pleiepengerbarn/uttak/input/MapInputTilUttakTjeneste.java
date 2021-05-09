@@ -192,9 +192,9 @@ public class MapInputTilUttakTjeneste {
     }
 
     private void evaluerDokumenter(Set<PerioderFraSøknad> perioderFraSøknader, Set<KravDokument> kravDokumenter) {
-        var relevanteKravdokumenter = kravDokumenter.stream().map(KravDokument::getJournalpostId).collect(Collectors.toSet());
+        var journalpostIds = perioderFraSøknader.stream().map(PerioderFraSøknad::getJournalpostId).collect(Collectors.toSet());
 
-        var journalpostIds = perioderFraSøknader.stream().map(PerioderFraSøknad::getJournalpostId).filter(relevanteKravdokumenter::contains).collect(Collectors.toSet());
+        var relevanteKravdokumenter = kravDokumenter.stream().map(KravDokument::getJournalpostId).filter(journalpostIds::contains).collect(Collectors.toSet());
 
         if (journalpostIds.size() != relevanteKravdokumenter.size()) {
             throw new IllegalStateException("Fant ikke alle dokumentene siden '" + journalpostIds + "' != '" + relevanteKravdokumenter + "'");
