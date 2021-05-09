@@ -91,12 +91,12 @@ public class Søknadsperioder extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Søknadsperioder that = (Søknadsperioder) o;
-        return Objects.equals(perioder, that.perioder);
+        return Objects.equals(journalpostId, that.journalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(perioder);
+        return Objects.hash(journalpostId);
     }
 
     @Override
