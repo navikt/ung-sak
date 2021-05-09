@@ -2,6 +2,7 @@ package no.nav.k9.sak.perioder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
@@ -21,4 +22,11 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
      * @return resultatet
      */
     Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<T>>> søknaderMedPerioder);
+
+    /**
+     * Henter ut kravdokumenter som har tilkommet i denne behandlingen
+     * @param referanse referansen til behandlingen
+     * @return kravdokumenter
+     */
+    Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse);
 }

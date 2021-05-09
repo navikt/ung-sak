@@ -2,6 +2,7 @@ package no.nav.k9.sak.perioder;
 
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.enterprise.inject.Instance;
@@ -43,6 +44,14 @@ public interface VilkårsPerioderTilVurderingTjeneste {
 
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
+    }
+
+    /**
+     * Definerer perioden(e) til behandling for brev
+     * @return vilkårene
+     */
+    default Set<VilkårType> definerendeVilkår() {
+        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 
     public static VilkårsPerioderTilVurderingTjeneste finnTjeneste(Instance<VilkårsPerioderTilVurderingTjeneste> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {

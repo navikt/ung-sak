@@ -43,6 +43,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjenest
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
@@ -67,6 +68,7 @@ public class RestImplementationClasses {
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
+        classes.add(PerioderTilBehandlingMedKildeRestTjeneste.class);
         classes.add(ÅrskvantumRestTjeneste.class);
         classes.add(RammevedtakRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);

@@ -35,7 +35,6 @@ import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -124,7 +123,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
-        final AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
 
         final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         final var vurderingsperioderTimeline = SykdomUtils.toLocalDateTimeline(perioder);
@@ -191,6 +189,11 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
+    }
+
+    @Override
+    public Set<VilkårType> definerendeVilkår() {
+        return Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR);
     }
 
     private List<Periode> utledVurderingsperiode(Vilkårene vilkårene) {

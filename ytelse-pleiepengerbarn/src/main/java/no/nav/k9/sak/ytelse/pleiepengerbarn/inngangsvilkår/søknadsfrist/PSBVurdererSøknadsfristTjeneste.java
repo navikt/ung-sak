@@ -131,6 +131,14 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
         return result;
     }
 
+    @Override
+    public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
+        return mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(), referanse.getBehandlingId(), List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD), false, DokumentStatus.GYLDIG)
+            .stream()
+            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD))
+            .collect(Collectors.toSet());
+    }
+
     private LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> utledAvslåttePerioderSomHarTidligereVærtInnvilget(HashMap<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> result,
                                                                                                                     KravDokument key,
                                                                                                                     LocalDateTimeline<VurdertSøktPeriode<Søknadsperiode>> vurdertTimeline) {

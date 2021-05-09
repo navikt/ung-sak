@@ -1,8 +1,11 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -10,6 +13,7 @@ import javax.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
@@ -47,10 +51,9 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
 
     @Override
     public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder = new HashMap<>();
 
         var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
-        søktePerioder.putAll(inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger));
+        Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søktePerioder = new HashMap<>(inntektsmeldingMapper.mapTilSøktePerioder(inntektsmeldinger));
         var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
         søktePerioder.putAll(søktePerioderFraSøknad);
 
@@ -60,6 +63,19 @@ public class OMPVurderSøknadsfristTjeneste implements VurderSøknadsfristTjenes
     @Override
     public Map<KravDokument, List<VurdertSøktPeriode<OppgittFraværPeriode>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> søknaderMedPerioder) {
         return vurderSøknadsfrist.vurderSøknadsfrist(søknaderMedPerioder);
+    }
+
+    @Override
+    public Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse) {
+        var inntektsmeldinger = inntektsmeldingerPerioderTjeneste.hentUtInntektsmeldingerRelevantForBehandling(referanse);
+        var kravDokumenter = inntektsmeldinger.stream()
+            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        var søktePerioderFraSøknad = søknadPerioderTjeneste.hentSøktePerioderMedKravdokumentPåFagsak(referanse);
+        kravDokumenter.addAll(søktePerioderFraSøknad.keySet());
+
+        return kravDokumenter;
     }
 
 }
