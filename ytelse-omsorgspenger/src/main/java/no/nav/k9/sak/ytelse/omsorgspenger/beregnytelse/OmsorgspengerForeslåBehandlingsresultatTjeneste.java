@@ -102,7 +102,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         //dette skjer når behandling inneholder kravperioder fra IM og søknad, og disse ikke overlapper fullstendig.
         //det er OK for nå, konsekvensen er at det blir (unødvendig) manuelle brev også i disse tilfellene.
 
-        return harMinstEnAvslåttAktuellVilkårsperiode(ref, vilkårene) || beregningGirMinstEnDagUtenTilkjentYtelseTilBruker(ref);
+        return harMinstEnAvslåttAktuellVilkårsperiode(ref, vilkårene) || beregningGirMinstEnUkedagUtenTilkjentYtelseTilBruker(ref);
     }
 
     private boolean harSøknad(BehandlingReferanse ref) {
@@ -140,14 +140,22 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         );
     }
 
-    private boolean beregningGirMinstEnDagUtenTilkjentYtelseTilBruker(BehandlingReferanse ref) {
+    private boolean beregningGirMinstEnUkedagUtenTilkjentYtelseTilBruker(BehandlingReferanse ref) {
         LocalDateTimeline<Void> tidslinjeHarYtelseTilBruker = lagTidslinjeDerTilkjentYtelseTilBrukerFinnes(ref);
         LocalDateTimeline<Void> tidslinjeVilkårsperioder = lagTidslinjeAktuelleBeregningsvilkårPerioder(ref);
-        boolean harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode = tidslinjeVilkårsperioder.disjoint(tidslinjeHarYtelseTilBruker).isEmpty();
-        if (!harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode) {
+        LocalDateTimeline<Void> tidslinjeTilkjentYtelseMangler = tidslinjeVilkårsperioder.disjoint(tidslinjeHarYtelseTilBruker);
+
+        boolean manglerTilkjentYtelseTilBrukerForEnUkedag = tidslinjeTilkjentYtelseMangler.stream()
+            .anyMatch(OmsorgspengerForeslåBehandlingsresultatTjeneste::inneholderUkedag);
+
+        if (manglerTilkjentYtelseTilBrukerForEnUkedag) {
             log.info("Delvis innvilget. Identifisert tilkjent ytelse 0 til bruker. Beregningsvilkårsperioder {}. Perioder med ytelse til bruker {}.", tidslinjeVilkårsperioder, tidslinjeHarYtelseTilBruker);
         }
-        return !harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode;
+        return manglerTilkjentYtelseTilBrukerForEnUkedag;
+    }
+
+    private static boolean inneholderUkedag(LocalDateSegment<?> segment) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()).antallArbeidsdager() > 0;
     }
 
     private LocalDateTimeline<Void> lagTidslinjeAktuelleBeregningsvilkårPerioder(BehandlingReferanse ref) {
