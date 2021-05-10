@@ -35,7 +35,7 @@ public class UtledStatusPåPerioderTjeneste {
 
         var tidslinje = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
-            .map(entry -> tilSegments(entry, ÅrsakTilVurdering.FØRSTEGANGSBEHANDLING))
+            .map(entry -> tilSegments(entry, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
             .collect(Collectors.toList());
 
@@ -96,7 +96,7 @@ public class UtledStatusPåPerioderTjeneste {
             årsaker.addAll(siste.getValue().getÅrsaker());
         }
 
-        if (årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSBEHANDLING)) {
+        if (årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
             årsaker = Set.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
         }
 
@@ -110,7 +110,7 @@ public class UtledStatusPåPerioderTjeneste {
         }
         if (siste != null && siste.getValue() != null && !siste.getValue().getÅrsaker().isEmpty()) {
             var sisteÅrsaker = siste.getValue().getÅrsaker();
-            if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSBEHANDLING) && siste.getValue().getÅrsaker().contains(ÅrsakTilVurdering.FØRSTEGANGSBEHANDLING)) {
+            if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING) && siste.getValue().getÅrsaker().contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
                 årsaker.add(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
             }
             årsaker.addAll(sisteÅrsaker);
