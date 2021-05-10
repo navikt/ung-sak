@@ -49,7 +49,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
-import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -157,9 +156,20 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         var søker = søknad.getSøker();
         var forsendelseMottatt = søknad.getMottattDato().toLocalDate();
 
+        validerStøttetVariant(søknadInnhold);
+
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
         lagreMedlemskapinfo(behandlingId, søknadInnhold, journalpostId, forsendelseMottatt, søker);
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
+    }
+
+    private void validerStøttetVariant(OmsorgspengerUtbetaling søknadInnhold) {
+        if (søknadInnhold.getFosterbarn() != null && !søknadInnhold.getFosterbarn().isEmpty()) {
+            throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Fosterbarn");
+        }
+        if (søknadInnhold.getFraværsperioder().stream().anyMatch(fp -> fp.getDuration() != null)) {
+            throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Delvis fravær");
+        }
     }
 
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerUtbetaling søknadInnhold) {
