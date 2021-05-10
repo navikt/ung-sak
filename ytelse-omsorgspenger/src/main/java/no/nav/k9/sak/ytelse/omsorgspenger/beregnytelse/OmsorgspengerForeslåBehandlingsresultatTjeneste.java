@@ -143,11 +143,19 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     private boolean beregningGirMinstEnDagUtenTilkjentYtelseTilBruker(BehandlingReferanse ref) {
         LocalDateTimeline<Void> tidslinjeHarYtelseTilBruker = lagTidslinjeDerTilkjentYtelseTilBrukerFinnes(ref);
         LocalDateTimeline<Void> tidslinjeVilkårsperioder = lagTidslinjeAktuelleBeregningsvilkårPerioder(ref);
-        boolean harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode = tidslinjeVilkårsperioder.disjoint(tidslinjeHarYtelseTilBruker).isEmpty();
-        if (!harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode) {
+        LocalDateTimeline<Void> tidslinjeTilkjentYtelseMangler = tidslinjeVilkårsperioder.disjoint(tidslinjeHarYtelseTilBruker);
+
+        boolean mangerTilkjentYtelseTilBrukerForEnUkedag = tidslinjeTilkjentYtelseMangler.stream()
+            .anyMatch(OmsorgspengerForeslåBehandlingsresultatTjeneste::inneholderUkedag);
+
+        if (mangerTilkjentYtelseTilBrukerForEnUkedag) {
             log.info("Delvis innvilget. Identifisert tilkjent ytelse 0 til bruker. Beregningsvilkårsperioder {}. Perioder med ytelse til bruker {}.", tidslinjeVilkårsperioder, tidslinjeHarYtelseTilBruker);
         }
-        return !harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode;
+        return mangerTilkjentYtelseTilBrukerForEnUkedag;
+    }
+
+    private static boolean inneholderUkedag(LocalDateSegment<?> segment) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()).antallArbeidsdager() > 0;
     }
 
     private LocalDateTimeline<Void> lagTidslinjeAktuelleBeregningsvilkårPerioder(BehandlingReferanse ref) {
