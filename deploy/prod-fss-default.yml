@@ -190,7 +190,7 @@ spec:
 
     # Feature-flag
     - name: MOTTAK_SOKNAD_UTBETALING_OMS
-      value: "false"
+      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: TOTRINN_TEMP_DEAKTIVERT
