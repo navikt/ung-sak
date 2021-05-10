@@ -99,7 +99,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var berørtePerioder = utledRevurderingPerioder(BehandlingReferanse.fra(behandling));
+            var berørtePerioder = utledUtvidetPeriode(BehandlingReferanse.fra(behandling));
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
@@ -166,6 +166,14 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+        var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+        if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
+            return utledUtvidetPeriode(referanse);
+        }
+        return new TreeSet<>();
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
         var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
         var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(forrigeVedtatteBehandling);
         var pleietrengende = referanse.getPleietrengendeAktørId();
