@@ -2,6 +2,8 @@ package no.nav.k9.sak.perioder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
@@ -21,4 +23,25 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
      * @return resultatet
      */
     Map<KravDokument, List<VurdertSøktPeriode<T>>> vurderSøknadsfrist(Map<KravDokument, List<SøktPeriode<T>>> søknaderMedPerioder);
+
+    /**
+     * Henter ut kravdokumenter som har tilkommet i denne behandlingen
+     * @param referanse referansen til behandlingen
+     * @return kravdokumenter
+     */
+    Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse);
+
+    /**
+     * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen
+     * @param referanse referansen til behandlingen
+     * @return kravdokumenter
+     */
+    public default Map<KravDokument, List<SøktPeriode<T>>> relevanteKravdokumentMedPeriodeForBehandling(BehandlingReferanse referanse) {
+        var kravDokumentListMap = hentPerioderTilVurdering(referanse);
+        var relevanteKrav = relevanteKravdokumentForBehandling(referanse);
+        return kravDokumentListMap.entrySet()
+            .stream()
+            .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 }
