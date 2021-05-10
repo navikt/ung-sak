@@ -99,7 +99,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var berørtePerioder = utledUtvidetPeriode(behandling);
+            var berørtePerioder = utledRevurderingPerioder(BehandlingReferanse.fra(behandling));
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
@@ -129,7 +129,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder)
-                .getDiffPerioder();
+            .getDiffPerioder();
 
         final LocalDateTimeline<Boolean> utvidedePerioder = SykdomUtils.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
 
@@ -164,14 +164,15 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(Behandling behandling) {
-        var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(behandling.getOriginalBehandlingId().orElseThrow()).getUuid();
+    @Override
+    public NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+        var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
         var vedtattSykdomGrunnlagBehandling = sykdomGrunnlagService.hentGrunnlag(forrigeVedtatteBehandling);
-        var pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        var pleietrengende = referanse.getPleietrengendeAktørId();
+        var vilkårene = vilkårResultatRepository.hent(referanse.getId());
         var vurderingsperioder = utledVurderingsperiode(vilkårene);
 
-        var utledetGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getId(), pleietrengende, vurderingsperioder);
+        var utledetGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
 
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(vedtattSykdomGrunnlagBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
 

@@ -14,7 +14,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum ÅrsakTilVurdering {
 
-    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE"), ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER"), FØRSTEGANGSBEHANDLING("FØRSTEGANGSBEHANDLING");
+    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE"),
+    ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER"),
+    REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART"),
+    FØRSTEGANGSBEHANDLING("FØRSTEGANGSBEHANDLING");
 
     private static final Map<String, ÅrsakTilVurdering> KODER = new LinkedHashMap<>();
 

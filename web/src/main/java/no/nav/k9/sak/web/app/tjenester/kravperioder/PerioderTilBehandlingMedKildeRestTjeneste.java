@@ -94,7 +94,9 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .flatMap(Collection::stream)
             .collect(Collectors.toCollection(TreeSet::new));
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
+        var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
+
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
 
         return statusForPerioderPåBehandling;
     }

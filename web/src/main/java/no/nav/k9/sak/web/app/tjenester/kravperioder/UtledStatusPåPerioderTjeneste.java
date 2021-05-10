@@ -27,7 +27,8 @@ public class UtledStatusPåPerioderTjeneste {
 
     public StatusForPerioderPåBehandling utled(Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode,
-                                               NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+                                               NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+                                               NavigableSet<DatoIntervallEntitet> revurderingPerioderFraAndreParter) {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
         var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
@@ -50,7 +51,12 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : endringFraBruker) {
             tidslinje = tidslinje.combine(linje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        tidslinje = tidslinje.compress();
+        var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
+            .map(entry -> new LocalDateSegment<>(entry.toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.REVURDERER_ENDRING_FRA_ANNEN_PART))))
+            .collect(Collectors.toList()));
+
+        tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .compress();
 
         var perioder = tidslinje.toSegments()
             .stream()
@@ -67,6 +73,18 @@ public class UtledStatusPåPerioderTjeneste {
             it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
             .collect(Collectors.toList());
 
+    }
+
+    private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
+        Set<ÅrsakTilVurdering> årsaker = new HashSet<>();
+        if (første != null && første.getValue() != null && !første.getValue().getÅrsaker().isEmpty()) {
+            årsaker.addAll(første.getValue().getÅrsaker());
+        }
+        if (siste != null && siste.getValue() != null && !siste.getValue().getÅrsaker().isEmpty()) {
+            årsaker.addAll(siste.getValue().getÅrsaker());
+        }
+
+        return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));
     }
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeSegmentsAndreDokumenter(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
