@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -59,7 +58,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
@@ -302,18 +300,19 @@ public class SykdomDokumentRestTjeneste {
 
 
     private void verifiserKanEndreType(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, SykdomDokumentInformasjon gmlInformasjon) {
-        if (gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS
-                && gmlInformasjon.getType() != sykdomDokumentEndringDto.getType()
-                && !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId())
-                && sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid())) {
+        final boolean varGodkjentLegeerklæring = gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS;
+        final boolean harBlittEndret = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        
+        if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
             throw new IllegalStateException("Det må minst være én godkjent legeerklæring på barnet når dette var tilfellet for en tidligere behandling.");
         }
     }
 
 
     private boolean harMinstEnAnnenGodkjentLegeerklæring(SykdomDokument sykdomDokument, final AktørId pleietrengende) {
-        return sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengende).stream()
-            .anyMatch(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS && d.getId() != sykdomDokument.getId());
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> d.getId() != sykdomDokument.getId());
     }
 
     /**
