@@ -115,6 +115,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
             LocalDateTimeline<Void> aktuellVilkårsperiode = utledAktuellVilkårsperiode(ref, vilkårtype);
             LocalDateTimeline<Void> avslåtteVilkår = avslått(vilkårene.getVilkårTimeline(vilkårtype));
             if (aktuellVilkårsperiode.intersects(avslåtteVilkår)) {
+                log.info("Delvis innvilget. Identifisert avslått vilkår {}. Vilkårsperioder {}. Avslåtte vilkår {}.", vilkårtype, aktuellVilkårsperiode, avslåtteVilkår);
                 return true;
             }
         }
@@ -143,6 +144,9 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
         LocalDateTimeline<Void> tidslinjeHarYtelseTilBruker = lagTidslinjeDerTilkjentYtelseTilBrukerFinnes(ref);
         LocalDateTimeline<Void> tidslinjeVilkårsperioder = lagTidslinjeAktuelleBeregningsvilkårPerioder(ref);
         boolean harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode = tidslinjeVilkårsperioder.disjoint(tidslinjeHarYtelseTilBruker).isEmpty();
+        if (!harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode) {
+            log.info("Delvis innvilget. Identifisert tilkjent ytelse 0 til bruker. Beregningsvilkårsperioder {}. Perioder med ytelse til bruker {}.", tidslinjeVilkårsperioder, tidslinjeHarYtelseTilBruker);
+        }
         return !harTilkjentYtelseForAlleDagerIAktuelleVilkårsperiode;
     }
 
