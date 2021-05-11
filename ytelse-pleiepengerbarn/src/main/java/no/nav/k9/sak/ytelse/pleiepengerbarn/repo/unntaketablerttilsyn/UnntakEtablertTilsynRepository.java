@@ -18,7 +18,7 @@ public class UnntakEtablertTilsynRepository {
     }
 
 
-    public UnntakEtablertTilsyn hent(Long id) {
+    UnntakEtablertTilsyn hent(Long id) {
         return entityManager.find(UnntakEtablertTilsyn.class, id);
     }
 

@@ -102,8 +102,6 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         return unntakEtablertTilsyn;
     }
 
-
-
     private UnntakEtablertTilsynPeriode periode(UnntakEtablertTilsyn unntakEtablertTilsyn, LocalDate fom, LocalDate tom, String begrunnelse, Resultat resultat) {
         var periode = new UnntakEtablertTilsynPeriode()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
