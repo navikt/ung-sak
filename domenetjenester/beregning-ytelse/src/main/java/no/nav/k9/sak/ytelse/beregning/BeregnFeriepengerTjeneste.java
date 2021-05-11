@@ -8,6 +8,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -18,27 +23,24 @@ import no.nav.k9.sak.ytelse.beregning.adapter.AktivitetStatusMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.LogLevel;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 
 public abstract class BeregnFeriepengerTjeneste {
 
     private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
     private int antallDagerFeriepenger;
     private boolean feriepengeopptjeningForHelg;
+    private boolean ubegrensedeDagerVedRefusjon;
 
     protected BeregnFeriepengerTjeneste() {
         //NOSONAR
     }
 
     public BeregnFeriepengerTjeneste(int antallDagerFeriepenger) {
-        this(antallDagerFeriepenger, false);
+        this(antallDagerFeriepenger, false, false);
     }
 
-    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg) {
+    public BeregnFeriepengerTjeneste(int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
+        this.ubegrensedeDagerVedRefusjon = ubegrensedeDagerVedRefusjon;
         if (antallDagerFeriepenger == 0) {
             throw new IllegalStateException("Injeksjon av antallDagerFeriepenger feilet. antallDagerFeriepenger kan ikke være 0.");
         }
@@ -48,7 +50,7 @@ public abstract class BeregnFeriepengerTjeneste {
 
     public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
 
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger, feriepengeopptjeningForHelg);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger, feriepengeopptjeningForHelg, ubegrensedeDagerVedRefusjon);
         String regelInput = toJson(regelModell);
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
@@ -68,7 +70,7 @@ public abstract class BeregnFeriepengerTjeneste {
 
     static void mapTilResultatFraRegelModell(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
 
-        if (regelModell.getFeriepengerPeriode() == null) {
+        if (regelModell.getFeriepengerPeriodeBruker() == null) {
             return;
         }
 

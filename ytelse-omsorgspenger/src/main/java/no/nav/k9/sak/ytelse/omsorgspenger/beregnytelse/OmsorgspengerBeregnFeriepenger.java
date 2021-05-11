@@ -9,9 +9,8 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 @ApplicationScoped
 public class OmsorgspengerBeregnFeriepenger extends BeregnFeriepengerTjeneste {
 
-    // FIXME K9 Hvordan håndterer vi dete for PSB.
-
     public OmsorgspengerBeregnFeriepenger() {
-        super(60, true);
+        //for grense, se https://www.nav.no/no/nav-og-samfunn/kontakt-nav/utbetalinger/snarveier/ferie-og-feriepenger#chapter-10
+        super(48, true, true);
     }
 }

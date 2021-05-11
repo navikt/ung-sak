@@ -28,25 +28,13 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
     public Specification<BeregningsresultatFeriepengerRegelModell> getSpecification() {
         Ruleset<BeregningsresultatFeriepengerRegelModell> rs = new Ruleset<>();
 
-        // FP_BR 8.7 Beregn feriepenger (Ett kalenderår)
-        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepengerEttÅr =
-            rs.beregningsRegel(BeregnFeriepengerEttÅr.ID, BeregnFeriepengerEttÅr.BESKRIVELSE, new BeregnFeriepengerEttÅr(), new BeregnetFeriepenger());
-
         // FP_BR 8.6 Beregn feriepenger (Flere kalenderår)
-        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepengerFlereÅr =
-            rs.beregningsRegel(BeregnFeriepengerFlereÅr.ID, BeregnFeriepengerFlereÅr.BESKRIVELSE, new BeregnFeriepengerFlereÅr(), new BeregnetFeriepenger());
-
-        // FP_BR 8.5 Går feriepengeperioden over flere kalenderår?
-        Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmFeriepengePeriodenGårOverFlereÅr =
-            rs.beregningHvisRegel(new SjekkOmFeriepengePeriodenGårOverFlereÅr(), beregnFeriepengerFlereÅr, beregnFeriepengerEttÅr);
-
-        //FP_BR 8.4 Har bruker uttak i feriepengeperiode?
-        Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmUttakIFeriepengePeriode =
-            rs.beregningHvisRegel(new SjekkBrukerHarOmUttakIFeriepengePeriode(), sjekkOmFeriepengePeriodenGårOverFlereÅr, new BeregnetFeriepenger());
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepenger =
+            rs.beregningsRegel(BeregnFeriepenger.ID, BeregnFeriepenger.BESKRIVELSE, new BeregnFeriepenger(), new BeregnetFeriepenger());
 
         //FP_BR 8.3 Finn brukers feriepengeperiode
         Specification<BeregningsresultatFeriepengerRegelModell> finnBrukersFeriepengePeriode =
-            rs.beregningsRegel(FinnBrukersFeriepengePeriode.ID, FinnBrukersFeriepengePeriode.BESKRIVELSE, new FinnBrukersFeriepengePeriode(), sjekkOmUttakIFeriepengePeriode);
+            rs.beregningsRegel(FinnFeriepengePerioder.ID, FinnFeriepengePerioder.BESKRIVELSE, new FinnFeriepengePerioder(), beregnFeriepenger);
 
         // FP_BR 8.2 Har bruker fått utbetalt ytelse i den totale stønadsperioden?
         Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmBrukerHarFåttUtbetaltYtelse =

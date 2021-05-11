@@ -5,35 +5,47 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
-class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
+class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
     public static final String ID = "FP_BR 8.3";
-    public static final String BESKRIVELSE = "Finner brukers feriepengeperiode.";
+    public static final String BESKRIVELSE = "Finner brukers og arbeidsgivers feriepengeperiode.";
 
-    FinnBrukersFeriepengePeriode() {
+    FinnFeriepengePerioder() {
         super(ID, BESKRIVELSE);
     }
 
     @Override
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
-        List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
-        LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(beregningsresultatPerioder);
-        LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
+        var regelmodellBuilder = BeregningsresultatFeriepengerRegelModell.builder(regelModell);
+        var regelsporingData = new LinkedHashMap<String, Object>();
+        {
+            LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(regelModell);
+            LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTomForBruker(regelModell, feriepengePeriodeFom);
+            regelmodellBuilder.medFeriepengerPeriode(feriepengePeriodeFom, feriepengePeriodeTom);
+            regelsporingData.put("FeriepengePeriode.bruker.fom", feriepengePeriodeFom);
+            regelsporingData.put("FeriepengePeriode.bruker.tom", feriepengePeriodeTom);
+        }
+        {
+            LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(regelModell);
+            LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTomVedRefusjon(regelModell, feriepengePeriodeFom);
+            regelmodellBuilder.medFeriepengerPeriodeRefusjon(feriepengePeriodeFom, feriepengePeriodeTom);
+            regelsporingData.put("FeriepengePeriode.refusjon.fom", feriepengePeriodeFom);
+            regelsporingData.put("FeriepengePeriode.refusjon.tom", feriepengePeriodeTom);
+        }
+        return beregnet(regelsporingData);
+    }
 
-        BeregningsresultatFeriepengerRegelModell.builder(regelModell)
-            .medFeriepengerPeriode(feriepengePeriodeFom, feriepengePeriodeTom);
+    private LocalDate finnFeriepengerPeriodeTomForBruker(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
+        return finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
+    }
 
-        // Regelsporing
-        Map<String, Object> resultater = new LinkedHashMap<>();
-        resultater.put("FeriepengePeriode.fom", feriepengePeriodeFom);
-        resultater.put("FeriepengePeriode.tom", feriepengePeriodeTom);
-        return beregnet(resultater);
+    private LocalDate finnFeriepengerPeriodeTomVedRefusjon(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
+        return regelModell.harUbegrensetFeriepengedagerVedRefusjon() ? finnSisteUttaksdag(regelModell) : finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
     }
 
     private LocalDate finnFeriepengerPeriodeTom(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
@@ -76,12 +88,20 @@ class FinnBrukersFeriepengePeriode extends LeafSpecification<BeregningsresultatF
         return dato.getDayOfWeek().getValue() > DayOfWeek.FRIDAY.getValue();
     }
 
+    private LocalDate finnFørsteUttaksdag(BeregningsresultatFeriepengerRegelModell regelModell) {
+        return finnFørsteUttaksdag(regelModell.getBeregningsresultatPerioder());
+    }
+
     private LocalDate finnFørsteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
         return beregningsresultatPerioder.stream()
             .filter(periode -> periode.getBeregningsresultatAndelList().stream().anyMatch(andel -> andel.getDagsats() > 0))
             .map(BeregningsresultatPeriode::getFom)
             .min(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Fant ingen perioder med utbetaling for bruker"));
+    }
+
+    private LocalDate finnSisteUttaksdag(BeregningsresultatFeriepengerRegelModell regelModell) {
+        return finnSisteUttaksdag(regelModell.getBeregningsresultatPerioder());
     }
 
     private LocalDate finnSisteUttaksdag(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
