@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class UnntakEtablertTilsynGrunnlagRepositoryTest {
@@ -24,29 +26,82 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
 
 
     @Test
-    void lagreOgHentIgjen() {
-
-        var beredskap = new UnntakEtablertTilsyn();
-        beredskap.setBeskrivelser(List.of(
-            beskrivelse(beredskap, "Please få litt beredskap.", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01"))
-        ));
-        beredskap.setPerioder(List.of(
-            periode(beredskap, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01"), "Det skal du få lille venn.", Resultat.OPPFYLT)
-        ));
-        uetRepo.lagre(beredskap);
+    void lagre_og_hent_igjen() {
+        var behandlingId = 123L;
+        var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
+        uetRepo.lagre(nyttBeredskap);
 
         var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
-        uetForPleietrengende.medBeredskap(beredskap);
+        uetForPleietrengende.medBeredskap(nyttBeredskap);
 
-        grunnlagRepo.lagre(123L, uetForPleietrengende);
+        grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
 
+        var grunnlag = grunnlagRepo.hent(behandlingId);
 
-        var grunnlag = grunnlagRepo.hent(123L);
-
-        System.out.println(grunnlag);
-
-
+        assertThat(grunnlag).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende()).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap()).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()).isNull();
+        var beredskap = grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap();
+        assertThat(beredskap.getBeskrivelser()).hasSize(1);
+        assertThat(beredskap.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01")));
+        assertThat(beredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
     }
+
+    @Test
+    void lagreOppdatereOgHentIgjen() {
+        var behandlingId = 123L;
+        var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
+        uetRepo.lagre(nyttBeredskap);
+
+        var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
+        uetForPleietrengende.medBeredskap(nyttBeredskap);
+
+        grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+        var grunnlag = grunnlagRepo.hent(behandlingId);
+
+        assertThat(grunnlag).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende()).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap()).isNotNull();
+        assertThat(grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()).isNull();
+        var beredskap = grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap();
+        assertThat(beredskap.getBeskrivelser()).hasSize(1);
+        assertThat(beredskap.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01")));
+        assertThat(beredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
+
+        var nattevåk = lagUnntakEtablertTilsyn("2020-03-01", "2020-04-01");
+        uetRepo.lagre(nattevåk);
+        uetForPleietrengende.medNattevåk(nattevåk);
+        grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+        var oppdatertGrunnlag = grunnlagRepo.hent(behandlingId);
+
+        assertThat(oppdatertGrunnlag).isNotNull();
+        assertThat(oppdatertGrunnlag.getUnntakEtablertTilsynForPleietrengende()).isNotNull();
+        assertThat(oppdatertGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap()).isNotNull();
+        assertThat(oppdatertGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()).isNotNull();
+        var oppdatertBeredskap = oppdatertGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap();
+        assertThat(oppdatertBeredskap.getBeskrivelser()).hasSize(1);
+        assertThat(oppdatertBeredskap.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01")));
+        assertThat(oppdatertBeredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
+        var nyNattevåk = oppdatertGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk();
+        assertThat(nyNattevåk.getBeskrivelser()).hasSize(1);
+        assertThat(nyNattevåk.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-03-01"), LocalDate.parse("2020-04-01")));
+        assertThat(nyNattevåk.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
+    }
+
+    private UnntakEtablertTilsyn lagUnntakEtablertTilsyn(String fom, String tom) {
+        var unntakEtablertTilsyn = new UnntakEtablertTilsyn();
+        unntakEtablertTilsyn.setBeskrivelser(List.of(
+            beskrivelse(unntakEtablertTilsyn, "Jeg søker.", LocalDate.parse(fom), LocalDate.parse(tom))
+        ));
+        unntakEtablertTilsyn.setPerioder(List.of(
+            periode(unntakEtablertTilsyn, LocalDate.parse(fom), LocalDate.parse(tom), "DU skal få.", Resultat.OPPFYLT)
+        ));
+        return unntakEtablertTilsyn;
+    }
+
 
 
     private UnntakEtablertTilsynPeriode periode(UnntakEtablertTilsyn unntakEtablertTilsyn, LocalDate fom, LocalDate tom, String begrunnelse, Resultat resultat) {
