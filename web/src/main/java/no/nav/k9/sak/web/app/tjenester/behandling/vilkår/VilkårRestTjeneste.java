@@ -5,6 +5,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,9 +34,11 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårDto;
@@ -58,6 +61,7 @@ public class VilkårRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private VilkårTjeneste vilkårTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
     public VilkårRestTjeneste() {
         // for CDI proxy
@@ -66,10 +70,12 @@ public class VilkårRestTjeneste {
     @Inject
     public VilkårRestTjeneste(BehandlingRepository behandlingRepository,
                               VilkårTjeneste vilkårTjeneste,
-                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                              BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     @GET
@@ -109,12 +115,18 @@ public class VilkårRestTjeneste {
 
     private Map<VilkårType, Set<DatoIntervallEntitet>> utledFaktiskeVilkårPerioder(Behandling behandling) {
         //TODO kan vurder å ha denne funksjonen i PeriodertTilVurderingTjeneste
-        var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
         Map<VilkårType, Set<DatoIntervallEntitet>> resultat = new EnumMap<>(VilkårType.class);
         for (VilkårType vilkårType : VilkårType.values()) {
-            resultat.put(vilkårType, perioderTilVurderingTjeneste.utled(behandling.getId(), vilkårType));
+            resultat.put(vilkårType, utledPeriodeTilVurdering(behandling, vilkårType));
         }
         return resultat;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledPeriodeTilVurdering(Behandling behandling, VilkårType vilkårType) {
+        if (vilkårType.equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)) {
+            return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling), true);
+        }
+        return getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), vilkårType);
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
