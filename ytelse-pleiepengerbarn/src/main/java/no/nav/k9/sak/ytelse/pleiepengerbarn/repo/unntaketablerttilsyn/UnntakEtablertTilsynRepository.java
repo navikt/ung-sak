@@ -8,7 +8,6 @@ import java.util.Objects;
 @Dependent
 public class UnntakEtablertTilsynRepository {
 
-
     private EntityManager entityManager;
 
     @Inject
@@ -16,17 +15,5 @@ public class UnntakEtablertTilsynRepository {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }
-
-
-    UnntakEtablertTilsyn hent(Long id) {
-        return entityManager.find(UnntakEtablertTilsyn.class, id);
-    }
-
-    public Long lagre(UnntakEtablertTilsyn unntakEtablertTilsyn) {
-        entityManager.persist(unntakEtablertTilsyn);
-        entityManager.flush();
-        return unntakEtablertTilsyn.getId();
-    }
-
 
 }

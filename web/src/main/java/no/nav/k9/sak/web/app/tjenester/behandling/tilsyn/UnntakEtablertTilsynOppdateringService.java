@@ -5,7 +5,6 @@ import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.Vurdering;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.BeredskapOgNattevåkOversetter;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.Unntaksperiode;
 
 import javax.enterprise.context.Dependent;
@@ -17,17 +16,14 @@ import java.util.List;
 public class UnntakEtablertTilsynOppdateringService {
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
-    private UnntakEtablertTilsynRepository unntakEtablertTilsynRepository;
 
     public UnntakEtablertTilsynOppdateringService() {
         // CDI
     }
 
     @Inject
-    public UnntakEtablertTilsynOppdateringService(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
-                                                  UnntakEtablertTilsynRepository unntakEtablertTilsynRepository) {
+    public UnntakEtablertTilsynOppdateringService(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
-        this.unntakEtablertTilsynRepository = unntakEtablertTilsynRepository;
     }
 
     public OppdateringResultat oppdater(Vurdering dto, Long behandlingId, AktørId søkersAktørId) {
@@ -44,7 +40,7 @@ public class UnntakEtablertTilsynOppdateringService {
             perioder,
             List.of());
 
-        unntakEtablertTilsynRepository.lagre(beredskap);
+        unntakEtablertTilsynGrunnlagRepository.lagre(beredskap);
         unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().medBeredskap(beredskap);
         unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynGrunnlag);
 

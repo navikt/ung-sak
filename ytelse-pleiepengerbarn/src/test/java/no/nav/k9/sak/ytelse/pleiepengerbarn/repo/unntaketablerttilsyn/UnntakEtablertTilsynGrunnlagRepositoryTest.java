@@ -21,15 +21,11 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     @Inject
     private UnntakEtablertTilsynGrunnlagRepository grunnlagRepo;
 
-    @Inject
-    private UnntakEtablertTilsynRepository uetRepo;
-
-
     @Test
     void lagre_og_hent_igjen() {
         var behandlingId = 123L;
         var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
-        uetRepo.lagre(nyttBeredskap);
+        grunnlagRepo.lagre(nyttBeredskap);
 
         var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
         uetForPleietrengende.medBeredskap(nyttBeredskap);
@@ -52,7 +48,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     void lagreOppdatereOgHentIgjen() {
         var behandlingId = 123L;
         var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
-        uetRepo.lagre(nyttBeredskap);
+        grunnlagRepo.lagre(nyttBeredskap);
 
         var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
         uetForPleietrengende.medBeredskap(nyttBeredskap);
@@ -71,7 +67,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(beredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
 
         var nattevåk = lagUnntakEtablertTilsyn("2020-03-01", "2020-04-01");
-        uetRepo.lagre(nattevåk);
+        grunnlagRepo.lagre(nattevåk);
         uetForPleietrengende.medNattevåk(nattevåk);
         grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
 
@@ -89,6 +85,32 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(nyNattevåk.getBeskrivelser()).hasSize(1);
         assertThat(nyNattevåk.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-03-01"), LocalDate.parse("2020-04-01")));
         assertThat(nyNattevåk.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
+    }
+
+    @Test
+    void lagreOgHentIgjen() {
+        var uet = new UnntakEtablertTilsyn();
+        uet.setPerioder(List.of(
+            periode(uet, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10"), "OK", Resultat.OPPFYLT)
+        ));
+        uet.setBeskrivelser(List.of(
+            beskrivelse(uet, "Har så lyst på litt beredskap", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10"))
+        ));
+
+        var id = grunnlagRepo.lagre(uet);
+
+        var uetFraDb = grunnlagRepo.hentUnntakEtablertTilsyn(id);
+
+        assertThat(uetFraDb).isNotNull();
+        assertThat(uetFraDb.getPerioder()).hasSize(1);
+        var periode = uetFraDb.getPerioder().get(0);
+        assertThat(periode.getResultat()).isEqualTo(Resultat.OPPFYLT);
+        assertThat(periode.getBegrunnelse()).isEqualTo("OK");
+        assertThat(periode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10")));
+        assertThat(uetFraDb.getBeskrivelser()).hasSize(1);
+        var beskrivelse = uetFraDb.getBeskrivelser().get(0);
+        assertThat(beskrivelse.getTekst()).isEqualTo("Har så lyst på litt beredskap");
+        assertThat(beskrivelse.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10")));
     }
 
     private UnntakEtablertTilsyn lagUnntakEtablertTilsyn(String fom, String tom) {

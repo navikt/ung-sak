@@ -42,6 +42,23 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
     }
 
+    UnntakEtablertTilsyn hentUnntakEtablertTilsyn(Long id) {
+        return entityManager.find(UnntakEtablertTilsyn.class, id);
+    }
+
+    public Long lagre(UnntakEtablertTilsyn unntakEtablertTilsyn) {
+        entityManager.persist(unntakEtablertTilsyn);
+        entityManager.flush();
+        return unntakEtablertTilsyn.getId();
+    }
+
+    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        Optional<UnntakEtablertTilsynGrunnlag> grunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
+        grunnlag.ifPresent(entitet -> {
+            lagre(nyBehandlingId, new UnntakEtablertTilsynForPleietrengende(entitet.getUnntakEtablertTilsynForPleietrengende()));
+        });
+    }
+
     private void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag) {
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
@@ -69,13 +86,6 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         query.setParameter("behandlingId", id);
 
         return HibernateVerktøy.hentUniktResultat(query);
-    }
-
-    public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
-        Optional<UnntakEtablertTilsynGrunnlag> grunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
-        grunnlag.ifPresent(entitet -> {
-            lagre(nyBehandlingId, new UnntakEtablertTilsynForPleietrengende(entitet.getUnntakEtablertTilsynForPleietrengende()));
-        });
     }
 
 }
