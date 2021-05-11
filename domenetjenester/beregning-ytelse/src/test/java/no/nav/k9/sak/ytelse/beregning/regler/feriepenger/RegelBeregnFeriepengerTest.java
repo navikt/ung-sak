@@ -245,7 +245,7 @@ public class RegelBeregnFeriepengerTest {
 
     @Test
     void skal_beregne_feriepenger_for_refusjon_når_det_er_valgt_men_begrenset_antall_dager_for_utbetaling_til_bruker() {
-        //bakgrunn: det finnes ikke noen hjemmel for å begrense opptjeningsdager ved refusjon. Tidligere praksis er å alltid utbetale.
+        //bakgrunn: det finnes ikke noen hjemmel for å begrense opptjeningsdager ved refusjon for omsorgspenger. Tidligere praksis er å alltid utbetale.
         LocalDate fom = LocalDate.of(2021, 1, 1);
         LocalDate tom = fom.plusDays(99);
         BeregningsresultatPeriode brPeriode = new BeregningsresultatPeriode(fom, tom);
@@ -279,6 +279,63 @@ public class RegelBeregnFeriepengerTest {
 
         assertThat(andelBruker.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1224)); //10.2 % av 200 kr * 60 dager (dager kappes)
         assertThat(andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2040)); //10.2 % av 200 kr * 100 dager
+    }
+
+    @Test
+    void skal_beregne_feriepenger_når_det_er_innvilget_utelukkende_refusjon() {
+        LocalDate fom = LocalDate.of(2021, 1, 1);
+        LocalDate tom = fom;
+        BeregningsresultatPeriode brPeriode = new BeregningsresultatPeriode(fom, tom);
+        byggAndelerForPeriode(brPeriode, 0, 1000, arbeidsforhold1);
+
+        BeregningsresultatFeriepengerRegelModell regelModell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medBeregningsresultatPerioder(List.of(brPeriode))
+            .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
+            .medAntallDagerFeriepenger(60)
+            .medFeriepengeopptjeningForHelg(true)
+            .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .build();
+
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
+        Evaluation evaluation = regel.evaluer(regelModell);
+        String sporing = EvaluationSerializer.asJson(evaluation);
+
+        assertThat(sporing).isNotNull();
+        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(fom);
+        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(tom);
+        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getFomDato()).isEqualTo(fom);
+        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getTomDato()).isEqualTo(tom);
+
+        List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
+        assertThat(perioder).hasSize(1);
+        List<BeregningsresultatAndel> brAndeler = perioder.get(0).getBeregningsresultatAndelList();
+        assertThat(brAndeler).hasSize(2);
+        BeregningsresultatAndel andelBruker = brAndeler.stream().filter(a -> a.erBrukerMottaker()).findFirst().orElseThrow();
+        BeregningsresultatAndel andelArbeidsgiver = brAndeler.stream().filter(a -> !a.erBrukerMottaker()).findFirst().orElseThrow();
+
+        assertThat(andelBruker.getBeregningsresultatFeriepengerPrÅrListe().isEmpty());
+        assertThat(andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1);
+        assertThat(andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(102)); //10.2 % av 1000 kr * 1 dag
+    }
+
+    @Test
+    void skal_beregne_feriepenger_når_beregningsresultat_er_tomt() {
+        BeregningsresultatFeriepengerRegelModell regelModell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medBeregningsresultatPerioder(Collections.emptyList())
+            .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
+            .medAntallDagerFeriepenger(60)
+            .medFeriepengeopptjeningForHelg(true)
+            .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .build();
+
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
+        Evaluation evaluation = regel.evaluer(regelModell);
+        String sporing = EvaluationSerializer.asJson(evaluation);
+
+        assertThat(sporing).isNotNull();
+        assertThat(regelModell.getFeriepengerPeriodeBruker()).isNull();
+        assertThat(regelModell.getFeriepengerPeriodeRefusjon()).isNull();
+        assertThat(regelModell.getBeregningsresultatPerioder()).isEmpty();
     }
 
     private void byggAndelerForPeriode(BeregningsresultatPeriode periode, int dagsats, int refusjon, Arbeidsforhold arbeidsforhold1) {

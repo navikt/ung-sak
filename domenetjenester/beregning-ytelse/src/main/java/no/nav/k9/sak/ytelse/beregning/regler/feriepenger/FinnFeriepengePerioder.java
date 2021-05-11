@@ -23,6 +23,7 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         var regelmodellBuilder = BeregningsresultatFeriepengerRegelModell.builder(regelModell);
         var regelsporingData = new LinkedHashMap<String, Object>();
+
         {
             LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(regelModell);
             LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTomForBruker(regelModell, feriepengePeriodeFom);
@@ -30,6 +31,7 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
             regelsporingData.put("FeriepengePeriode.bruker.fom", feriepengePeriodeFom);
             regelsporingData.put("FeriepengePeriode.bruker.tom", feriepengePeriodeTom);
         }
+
         {
             LocalDate feriepengePeriodeFom = finnFørsteUttaksdag(regelModell);
             LocalDate feriepengePeriodeTom = finnFeriepengerPeriodeTomVedRefusjon(regelModell, feriepengePeriodeFom);

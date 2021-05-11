@@ -70,7 +70,7 @@ public abstract class BeregnFeriepengerTjeneste {
 
     static void mapTilResultatFraRegelModell(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
 
-        if (regelModell.getFeriepengerPeriodeBruker() == null) {
+        if (regelModell.getFeriepengerPeriodeBruker() == null && regelModell.getFeriepengerPeriodeRefusjon() == null) {
             return;
         }
 
