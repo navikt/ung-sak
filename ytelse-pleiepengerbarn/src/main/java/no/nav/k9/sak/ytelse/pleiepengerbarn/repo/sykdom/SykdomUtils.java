@@ -35,6 +35,10 @@ public final class SykdomUtils {
     public static LocalDateTimeline<Boolean> toLocalDateTimeline(NavigableSet<DatoIntervallEntitet> datoer) {
         return new LocalDateTimeline<Boolean>(datoer.stream().map(p -> new LocalDateSegment<Boolean>(p.getFomDato(), p.getTomDato(), true)).collect(Collectors.toList())).compress();
     }
+    
+    public static <E> List<E> values(LocalDateTimeline<E> elements) {
+        return elements.compress().stream().map(ds -> ds.getValue()).collect(Collectors.toList());
+    }
 
     public static <T, U> LocalDateTimeline<T> kunPerioderSomIkkeFinnesI(LocalDateTimeline<T> perioder, LocalDateTimeline<U> perioderSomSkalTrekkesFra) {
         return perioder.combine(perioderSomSkalTrekkesFra, new LocalDateSegmentCombinator<T, U, T>() {
