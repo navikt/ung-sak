@@ -41,6 +41,8 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
             + " , bp.br_periode_tom"
             + " , ba.dagsats"
             + " , ba.inntektskategori"
+            + " , ba.stillingsprosent"
+            + " , ba.utbetalingsgrad"
             + " , ba.arbeidsforhold_type"
             + " , ba.bruker_er_mottaker"
             + " , ba.arbeidsgiver_aktor_id"
