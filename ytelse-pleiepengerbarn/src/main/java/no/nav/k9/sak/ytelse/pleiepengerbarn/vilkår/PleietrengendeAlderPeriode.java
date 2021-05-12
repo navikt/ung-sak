@@ -23,6 +23,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 
 public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjon {
+    
+    public static final int ALDER_FOR_STRENGERE_PSB_VURDERING = 18;
 
     private static final int MAKSÅR = 200;
     private SøknadsperiodeRepository søknadsperiodeRepository;
@@ -114,13 +116,13 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter) {
-        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, -MAKSÅR, 18);
+        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
     }
     
     public static final PleietrengendeAlderPeriode overEllerLik18(SøknadsperiodeRepository søknadsperiodeRepository,
             BasisPersonopplysningTjeneste personopplysningTjeneste,
             BehandlingRepository behandlingRepository,
             PersoninfoAdapter personinfoAdapter) {
-        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, 18, MAKSÅR);
+        return new PleietrengendeAlderPeriode(søknadsperiodeRepository, personopplysningTjeneste, behandlingRepository, personinfoAdapter, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
     }
 }

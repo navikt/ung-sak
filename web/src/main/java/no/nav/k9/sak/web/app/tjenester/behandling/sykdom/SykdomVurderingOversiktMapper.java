@@ -24,6 +24,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 public class SykdomVurderingOversiktMapper {
@@ -107,7 +108,7 @@ public class SykdomVurderingOversiktMapper {
     private boolean harPerioderDerPleietrengendeErOver18år(SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder,
             LocalDate pleietrengendesFødselsdato) {
         return sykdomVurderingerOgPerioder.getPerioderSomKanVurderes().stream()
-                .anyMatch(p -> !pleietrengendesFødselsdato.plusYears(18).isAfter(p.getTom()));
+                .anyMatch(p -> !pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING).isAfter(p.getTom()));
     }
 
     private ResourceLink linkForGetVurdering(String behandlingUuid, String sykdomVurderingId) {

@@ -35,6 +35,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 @Dependent
 public class SykdomVurderingService {
@@ -102,7 +103,7 @@ public class SykdomVurderingService {
                 .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
                 .collect(Collectors.toList()));
         final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
-        return innleggelsesperioderTidslinje.intersection(new LocalDateInterval(null, pleietrengendesFødselsdato.plusYears(18).minusDays(1))).compress();
+        return innleggelsesperioderTidslinje.intersection(new LocalDateInterval(null, pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING).minusDays(1))).compress();
     }
 
     private List<Periode> hentKontinuerligTilsynOgPleiePerioder(Behandling behandling) {
