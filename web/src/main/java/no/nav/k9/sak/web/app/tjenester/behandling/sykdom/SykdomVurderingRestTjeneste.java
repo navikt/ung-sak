@@ -253,7 +253,7 @@ public class SykdomVurderingRestTjeneste {
     }
 
     static boolean isPerioderInneholderFørOgEtter18år(List<Periode> perioder, final LocalDate pleietrengendesFødselsdato) {
-        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears((PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING);
+        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING);
         final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> p.getFom().isBefore(blir18år));
         final boolean vurdering18år = perioder.stream().anyMatch(p -> p.getTom().isAfter(blir18år) || p.getTom().isEqual(blir18år));
         boolean perioderInneholderFørOgEtter18år = vurderingUnder18år && vurdering18år;
