@@ -45,7 +45,7 @@ jobs:
             \connect k9sak_unit;
             create extension if not exists btree_gist;
           EOSQL
-      - uses: navikt/github-app-token-generator@v1
+      - uses: navikt/github-app-token-generator@v1.1
         id: get-token
         with:
           private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
