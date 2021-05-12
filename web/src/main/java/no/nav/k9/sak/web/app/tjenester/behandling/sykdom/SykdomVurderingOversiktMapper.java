@@ -95,10 +95,11 @@ public class SykdomVurderingOversiktMapper {
                 
                 final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
                 final int antallSomBrukerVurdering = s.size();
+                final boolean enAnnenSakEnnSaksnummerBrukerVurderingen = antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer));
                 
                 newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
                 newElement.setGjelderForSøker(s.contains(saksnummer));
-                newElement.setGjelderForSøker(antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer)));
+                newElement.setGjelderForAnnenPart(enAnnenSakEnnSaksnummerBrukerVurderingen);
                 
                 return new LocalDateSegment<>(datoInterval, newElement);
             }
