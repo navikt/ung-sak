@@ -35,7 +35,7 @@ jobs:
             \connect k9sak_unit;
             create extension if not exists btree_gist;
           EOSQL
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
