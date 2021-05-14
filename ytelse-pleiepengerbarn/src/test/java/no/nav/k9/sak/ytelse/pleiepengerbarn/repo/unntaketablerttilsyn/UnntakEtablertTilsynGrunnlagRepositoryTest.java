@@ -88,7 +88,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     }
 
     @Test
-    void lagreOgHentIgjen() {
+    void lagre_og_hente_unntak_etablert_tilsyn() {
         var uet = new UnntakEtablertTilsyn();
         uet.setPerioder(List.of(
             periode(uet, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10"), "OK", Resultat.OPPFYLT)
@@ -129,6 +129,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medBegrunnelse(begrunnelse)
             .medResultat(resultat)
+            .medAktørId(new AktørId(456L))
             .medKildeBehandlingId(123L);
         periode.setUnntakEtablertTilsyn(unntakEtablertTilsyn);
         return periode;
@@ -137,7 +138,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     private UnntakEtablertTilsynBeskrivelse beskrivelse(UnntakEtablertTilsyn unntakEtablertTilsyn, String tekst, LocalDate fom, LocalDate tom) {
         return new UnntakEtablertTilsynBeskrivelse()
             .medUnntakEtablertTilsyn(unntakEtablertTilsyn)
-            .medSøker(new AktørId(123L))
+            .medSøker(new AktørId(456L))
             .medMottattDato(LocalDate.now())
             .medPeriode(fom, tom)
             .medTekst(tekst)

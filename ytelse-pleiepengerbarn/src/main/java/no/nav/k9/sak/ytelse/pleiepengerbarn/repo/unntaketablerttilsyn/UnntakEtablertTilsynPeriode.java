@@ -6,6 +6,7 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomResultatTypeConverter;
 
 import javax.persistence.*;
@@ -38,7 +39,11 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
 
-    @Column(name = "kilde_behandling_id", nullable = false, updatable = false, unique = true)
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "SOEKER_AKTOER_ID", unique = true, nullable = false, updatable = false)))
+    private AktørId aktørId;
+
+    @Column(name = "kilde_behandling_id", nullable = false, updatable = false)
     private Long kildeBehandlingId;
 
     @Version
@@ -50,17 +55,14 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         // hibernate
     }
 
-    public UnntakEtablertTilsynPeriode(UnntakEtablertTilsynPeriode unntakEtablertTilsynPeriode) {
-        this.begrunnelse = unntakEtablertTilsynPeriode.begrunnelse;
-        this.resultat = unntakEtablertTilsynPeriode.resultat;
+    public UnntakEtablertTilsynPeriode(UnntakEtablertTilsynPeriode that) {
+        this.begrunnelse = that.begrunnelse;
+        this.resultat = that.resultat;
+        this.periode = that.periode;
+        this.kildeBehandlingId = that.kildeBehandlingId;
+        this.aktørId = that.aktørId;
     }
 
-    public UnntakEtablertTilsynPeriode(UnntakEtablertTilsynPeriode unntakEtablertTilsynPeriode, DatoIntervallEntitet periode) {
-        this.begrunnelse = unntakEtablertTilsynPeriode.begrunnelse;
-        this.resultat = unntakEtablertTilsynPeriode.resultat;
-        this.unntakEtablertTilsyn = unntakEtablertTilsynPeriode.unntakEtablertTilsyn;
-        this.periode = periode;
-    }
 
     public Long getId() {
         return id;
@@ -95,6 +97,10 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return kildeBehandlingId;
     }
 
+    public AktørId getAktørId() {
+        return aktørId;
+    }
+
     public UnntakEtablertTilsynPeriode medPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
         return this;
@@ -115,17 +121,22 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return this;
     }
 
+    public UnntakEtablertTilsynPeriode medAktørId(AktørId aktørId) {
+        this.aktørId = aktørId;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnntakEtablertTilsynPeriode that = (UnntakEtablertTilsynPeriode) o;
-        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && begrunnelse.equals(that.begrunnelse) && resultat == that.resultat && kildeBehandlingId.equals(that.kildeBehandlingId);
+        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && begrunnelse.equals(that.begrunnelse) && resultat == that.resultat && kildeBehandlingId.equals(that.kildeBehandlingId) && aktørId.equals(that.aktørId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat, kildeBehandlingId);
+        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat, kildeBehandlingId, aktørId);
     }
 
     @Override
@@ -136,6 +147,7 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
             ", resultat=" + resultat +
             ", versjon=" + versjon +
             ", kildeBehandlingId=" + kildeBehandlingId +
+            ", aktørId=" + aktørId +
             '}';
     }
 }

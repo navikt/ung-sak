@@ -7,10 +7,12 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.tilsyn.*;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
@@ -24,10 +26,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -35,6 +34,7 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
     public EtablertTilsynNattevåkOgBeredskapMapper(@FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
@@ -49,7 +49,11 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         var beredskap = unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap();
         var nattevåk = unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk();
 
-        return new EtablertTilsynNattevåkOgBeredskapDto(tilEtablertTilsyn(behandlingRef, uttaksPerioderGrunnlag), tilNattevåk(nattevåk), tilBeredskap(beredskap));
+        return new EtablertTilsynNattevåkOgBeredskapDto(
+            tilEtablertTilsyn(behandlingRef, uttaksPerioderGrunnlag),
+            tilNattevåk(nattevåk, behandlingRef.getAktørId()),
+            tilBeredskap(beredskap, behandlingRef.getAktørId())
+        );
     }
 
     private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef, UttaksPerioderGrunnlag uttaksPerioderGrunnlag) {
@@ -85,34 +89,42 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         return new ArrayList<>(timeline.toSegments());
     }
 
-    private NattevåkDto tilNattevåk(UnntakEtablertTilsyn nattevåk) {
-        return new NattevåkDto(tilBeskrivelser(nattevåk.getBeskrivelser()), tilVurderinger(nattevåk.getPerioder()));
-    }
-    private BeredskapDto tilBeredskap(UnntakEtablertTilsyn beredskap) {
-        return new BeredskapDto(tilBeskrivelser(beredskap.getBeskrivelser()), tilVurderinger(beredskap.getPerioder()));
+    private NattevåkDto tilNattevåk(UnntakEtablertTilsyn nattevåk, AktørId søkersAktørId) {
+        return new NattevåkDto(tilBeskrivelser(nattevåk.getBeskrivelser(), søkersAktørId), tilVurderinger(nattevåk.getPerioder(), søkersAktørId));
     }
 
-    private List<BeskrivelseDto> tilBeskrivelser(List<UnntakEtablertTilsynBeskrivelse> uetBeskrivelser) {
+    private BeredskapDto tilBeredskap(UnntakEtablertTilsyn beredskap, AktørId søkersAktørId) {
+        return new BeredskapDto(tilBeskrivelser(beredskap.getBeskrivelser(), søkersAktørId), tilVurderinger(beredskap.getPerioder(), søkersAktørId));
+    }
+
+    private List<BeskrivelseDto> tilBeskrivelser(List<UnntakEtablertTilsynBeskrivelse> uetBeskrivelser, AktørId søkersAktørId) {
         return uetBeskrivelser.stream().map(uetBeskrivelse ->
             new BeskrivelseDto(
                 new Periode(uetBeskrivelse.getPeriode().getFomDato(), uetBeskrivelse.getPeriode().getTomDato()),
                 uetBeskrivelse.getTekst(),
                 uetBeskrivelse.getMottattDato(),
-                Kilde.SØKER //TODO utled dette
+                tilKilde(søkersAktørId, uetBeskrivelse.getSøker())
             )
         ).toList();
     }
 
-    private List<VurderingDto> tilVurderinger(List<UnntakEtablertTilsynPeriode> uetPerioder) {
+    private List<VurderingDto> tilVurderinger(List<UnntakEtablertTilsynPeriode> uetPerioder, AktørId søkersAktørId) {
         return uetPerioder.stream().map(uetPeriode ->
             new VurderingDto(
                 uetPeriode.getId(),
                 new Periode(uetPeriode.getPeriode().getFomDato(), uetPeriode.getPeriode().getTomDato()),
                 uetPeriode.getBegrunnelse(),
                 uetPeriode.getResultat(),
-                Kilde.SØKER //TODO utled dette
+                tilKilde(søkersAktørId, uetPeriode.getAktørId())
             )
         ).toList();
+    }
+
+    private Kilde tilKilde(AktørId periodeAktørId, AktørId søkersAktørId) {
+        if (Objects.equals(periodeAktørId, søkersAktørId)) {
+            return Kilde.SØKER;
+        }
+        return Kilde.ANDRE;
     }
 
 }

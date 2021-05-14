@@ -63,6 +63,7 @@ create table if not exists UNNTAK_ETABLERT_TILSYN_PERIODE
     TOM                         DATE                                            NOT NULL,
     BEGRUNNELSE                 VARCHAR(4000)                                   ,
     RESULTAT                    VARCHAR(20)                                     NOT NULL,
+    SOEKER_AKTOER_ID            VARCHAR(50)                                     NOT NULL,
     KILDE_BEHANDLING_ID         BIGINT                                          NOT NULL,
 
     VERSJON                     BIGINT       DEFAULT 0                          NOT NULL,

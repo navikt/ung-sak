@@ -16,7 +16,7 @@ public class BeredskapOgNattevåkOversetter {
 
     public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, String vurderingstekst, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes) {
         var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
-        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, kildeBehandlingId, vurderingstekst);
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId, vurderingstekst);
 
         var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn();
         unntakEtablertTilsynForBeredskap.setBeskrivelser(beskrivelser);
@@ -25,7 +25,7 @@ public class BeredskapOgNattevåkOversetter {
         return unntakEtablertTilsynForBeredskap;
     }
 
-    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, Long kildeBehandlingId, String vurderingstekst) {
+    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId, String vurderingstekst) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
         eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
             eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new Unntak(periode.getBegrunnelse(), periode.getResultat())))
@@ -48,6 +48,7 @@ public class BeredskapOgNattevåkOversetter {
             new UnntakEtablertTilsynPeriode()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
                 .medBegrunnelse(vurderingstekst)
+                .medAktørId(aktørId)
                 .medKildeBehandlingId(kildeBehandlingId)
                 .medResultat(Resultat.IKKE_VURDERT)
         ).toList();
