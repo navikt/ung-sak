@@ -44,4 +44,19 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
             .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
+
+    /**
+     * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen og vurder status
+     * @param referanse referansen til behandlingen
+     * @return kravdokumenter
+     */
+    public default Map<KravDokument, List<VurdertSøktPeriode<T>>> relevanteVurderteKravdokumentMedPeriodeForBehandling(BehandlingReferanse referanse) {
+        var kravDokumentListMap = vurderSøknadsfrist(referanse);
+        var relevanteKrav = relevanteKravdokumentForBehandling(referanse);
+        return kravDokumentListMap.entrySet()
+            .stream()
+            .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 }

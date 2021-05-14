@@ -21,13 +21,14 @@ import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Periode;
 
 @Dependent
 public class UtledStatusPåPerioderTjeneste {
 
     public StatusForPerioderPåBehandling utled(Set<KravDokument> kravdokumenter,
-                                               Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode,
+                                               Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
                                                NavigableSet<DatoIntervallEntitet> revurderingPerioderFraAndreParter) {
 
@@ -74,7 +75,7 @@ public class UtledStatusPåPerioderTjeneste {
         return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
     }
 
-    private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<?>>>> relevanteDokumenterMedPeriode) {
+    private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> relevanteDokumenterMedPeriode) {
         return relevanteDokumenterMedPeriode.stream().map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
             it.getKey().getInnsendingsTidspunkt(),
             KravDokumentType.fraKode(it.getKey().getType().name()),
@@ -126,12 +127,12 @@ public class UtledStatusPåPerioderTjeneste {
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));
     }
 
-    private List<LocalDateSegment<ÅrsakerTilVurdering>> tilSegments(Map.Entry<KravDokument, List<SøktPeriode<?>>> entry, ÅrsakTilVurdering årsakTilVurdering) {
+    private List<LocalDateSegment<ÅrsakerTilVurdering>> tilSegments(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> entry, ÅrsakTilVurdering årsakTilVurdering) {
         return entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(årsakTilVurdering)))).collect(Collectors.toList());
     }
 
-    private Set<Map.Entry<KravDokument, List<SøktPeriode<?>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,
-                                                                                                                 Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode,
+    private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,
+                                                                                                                 Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                                                                                  NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return kravdokumenterMedPeriode.entrySet()
             .stream()
@@ -141,7 +142,7 @@ public class UtledStatusPåPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
-    private Set<Map.Entry<KravDokument, List<SøktPeriode<?>>>> utledKravdokumenterTilkommetIBehandlingen(Set<KravDokument> kravdokumenter, Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode) {
+    private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterTilkommetIBehandlingen(Set<KravDokument> kravdokumenter, Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode) {
         return kravdokumenterMedPeriode.entrySet()
             .stream()
             .filter(it -> kravdokumenter.stream()
