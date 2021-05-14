@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 public class FagsakApplikasjonTjeneste {
     private static FagsakProsessTaskFeil FEIL = FeilFactory.create(FagsakProsessTaskFeil.class);
 
-    private FagsakRepository fagsakRespository;
+    private FagsakRepository fagsakRepository;
 
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
@@ -51,20 +52,20 @@ public class FagsakApplikasjonTjeneste {
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                      TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter) {
-        this.fagsakRespository = repositoryProvider.getFagsakRepository();
+        this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.personinfoAdapter = personinfoAdapter;
     }
 
     public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
+        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         return fagsak.map(Fagsak::getAktørId).flatMap(personinfoAdapter::hentBrukerBasisForAktør);
     }
 
     public Optional<AsyncPollingStatus> sjekkProsessTaskPågår(Saksnummer saksnummer, String gruppe) {
 
-        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
+        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         if (fagsak.isPresent()) {
             Long fagsakId = fagsak.get().getId();
             Map<String, ProsessTaskData> nesteTask = prosesseringAsynkTjeneste.sjekkProsessTaskPågår(fagsakId, null, gruppe);
@@ -87,20 +88,12 @@ public class FagsakApplikasjonTjeneste {
                                              Periode periode,
                                              List<PersonIdent> pleietrengendeIdenter,
                                              List<PersonIdent> relatertAnnenPartIdenter) {
-        var fom = periode == null ? null : periode.getFom();
-        var tom = periode == null ? null : periode.getTom();
-
-        AktørId brukerAktørId = finnAktørId(bruker);
-
-        var fagsaker = fagsakRespository.finnFagsakRelatertTil(ytelseType, brukerAktørId, null, null, fom, tom);
-        if (fagsaker.isEmpty()) {
-            return Collections.emptyList();
-        }
 
         class MatchIdenter {
             private final Map<AktørId, PersonIdent> mapPleietrengende;
             private final Map<AktørId, PersonIdent> mapRelatertAnnenPart;
-            {
+
+            MatchIdenter(List<PersonIdent> pleietrengendeIdenter, List<PersonIdent> relatertAnnenPartIdenter) {
                 this.mapPleietrengende = new LinkedHashMap<>();
                 this.mapRelatertAnnenPart = new LinkedHashMap<>();
                 if (pleietrengendeIdenter != null) {
@@ -120,36 +113,35 @@ public class FagsakApplikasjonTjeneste {
                 }
             }
 
-            boolean matcher(Fagsak f) {
-                boolean match = true;
-                if (f.getPleietrengendeAktørId() != null) {
-                    match &= mapPleietrengende.containsKey(f.getPleietrengendeAktørId());
-                }
-                if (match && f.getRelatertPersonAktørId() != null) {
-                    match &= mapRelatertAnnenPart.containsKey(f.getRelatertPersonAktørId());
-                }
-                return match;
+            Map<AktørId, PersonIdent> getPleietrengende() {
+                return Collections.unmodifiableMap(mapPleietrengende);
             }
 
-            PersonIdent getPleietrengende(AktørId aktørId) {
-                return mapPleietrengende.get(aktørId);
-            }
-
-            PersonIdent getRelatertAnnenPart(AktørId aktørId) {
-                return mapRelatertAnnenPart.get(aktørId);
+            Map<AktørId, PersonIdent> getRelatertAnnenPart() {
+                return Collections.unmodifiableMap(mapRelatertAnnenPart);
             }
 
         }
-        var identMap = new MatchIdenter();
-        return fagsaker.stream().filter(f -> identMap.matcher(f))
+        var identMap = new MatchIdenter(pleietrengendeIdenter, relatertAnnenPartIdenter);
+
+        var fom = periode == null ? null : periode.getFom();
+        var tom = periode == null ? null : periode.getTom();
+
+        AktørId brukerAktørId = finnAktørId(bruker);
+
+        Set<AktørId> pleietrengendeAktørIder = identMap.getPleietrengende().keySet();
+        Set<AktørId> relatertAnnenPartAktørIder = identMap.getRelatertAnnenPart().keySet();
+
+        var fagsaker = fagsakRepository.finnFagsakRelatertTilEnAvAktører(ytelseType, brukerAktørId, pleietrengendeAktørIder, relatertAnnenPartAktørIder, fom, tom);
+        return fagsaker.stream()
             .map(f -> {
                 return new FagsakInfoDto(f.getSaksnummer(),
                     f.getYtelseType(),
                     f.getStatus(),
                     new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
                     bruker,
-                    identMap.getPleietrengende(f.getPleietrengendeAktørId()),
-                    identMap.getRelatertAnnenPart(f.getRelatertPersonAktørId()),
+                    identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
+                    identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
                     f.getSkalTilInfotrygd());
             })
             .collect(Collectors.toList());
@@ -166,7 +158,7 @@ public class FagsakApplikasjonTjeneste {
 
     /** Returnerer samling med kun en fagsak. */
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsak = fagsakRespository.hentSakGittSaksnummer(saksnummer);
+        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         if (!fagsak.isPresent()) {
             return FagsakSamlingForBruker.emptyView();
         }
@@ -186,7 +178,7 @@ public class FagsakApplikasjonTjeneste {
         if (!funnetNavBruker.isPresent()) {
             return FagsakSamlingForBruker.emptyView();
         }
-        List<Fagsak> fagsaker = fagsakRespository.hentForBruker(funnetNavBruker.get().getAktørId());
+        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId());
         return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
     }
 
