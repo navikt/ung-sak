@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -63,7 +64,14 @@ public class UtledStatusPåPerioderTjeneste {
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), it.getValue() != null ? it.getValue().getÅrsaker() : Set.of()))
             .collect(Collectors.toList());
 
-        return new StatusForPerioderPåBehandling(perioderTilVurdering.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()))
+            .compress()
+            .toSegments()
+            .stream()
+            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
     }
 
     private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<?>>>> relevanteDokumenterMedPeriode) {
