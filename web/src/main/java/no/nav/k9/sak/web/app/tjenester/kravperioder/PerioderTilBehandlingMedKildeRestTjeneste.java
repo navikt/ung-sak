@@ -39,6 +39,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
@@ -50,7 +51,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private Instance<VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>> søknadsfristTjenester;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
     }
@@ -58,7 +59,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+                                                     @Any Instance<VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>> søknadsfristTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
@@ -85,8 +86,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         var kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
 
-        @SuppressWarnings("unchecked")
-        Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
         var perioderTilVurdering = definerendeVilkår.stream()
@@ -96,12 +96,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
-
-        return statusForPerioderPåBehandling;
+        return statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
     }
 
-    private VurderSøknadsfristTjeneste finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
+    private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
