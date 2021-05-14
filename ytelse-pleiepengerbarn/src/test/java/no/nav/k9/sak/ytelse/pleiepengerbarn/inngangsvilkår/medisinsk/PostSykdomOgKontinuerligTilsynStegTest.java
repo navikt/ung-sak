@@ -69,7 +69,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -110,7 +110,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -149,7 +149,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -188,7 +188,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -227,7 +227,7 @@ class PostSykdomOgKontinuerligTilsynStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering), new TreeSet<>(perioderTilVurdering));
+        var resultatBuilder = steg.justerVilkårsperioderEtterSykdom(builder.build(), new TreeSet<>(perioderTilVurdering));
 
         var oppdaterteVilkår = resultatBuilder.build();
 
