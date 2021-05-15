@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,88 +43,82 @@ public class XacmlRequestBuilderTjenesteImplTest {
 
     @Test
     public void kallPdpMedSamlTokenNårIdTokenErSamlToken() throws Exception {
-        AbacIdToken idToken = AbacIdToken.withSamlToken("SAML");
-        XacmlResponseWrapper responseWrapper = createResponse("xacmlresponse.json");
-        ArgumentCaptor<XacmlRequestBuilder> captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
+        var idToken = AbacIdToken.withSamlToken("SAML");
+        var responseWrapper = createResponse("xacmlresponse.json");
+        var captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
 
         when(pdpConsumerMock.evaluate(captor.capture())).thenReturn(responseWrapper);
-        PdpRequest pdpRequest = lagPdpRequest();
+        var pdpRequest = lagPdpRequest();
         pdpRequest.put(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR, Collections.singleton("12345678900"));
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, idToken);
         pdpKlient.forespørTilgang(pdpRequest);
 
-        assertThat(captor.getValue().build().toString().contains(NavAbacCommonAttributter.ENVIRONMENT_FELLES_SAML_TOKEN)).isTrue();
+        assertThat(captor.getValue().build().toString()).contains(NavAbacCommonAttributter.ENVIRONMENT_FELLES_SAML_TOKEN);
     }
 
     @Test
     public void kallPdpUtenFnrResourceHvisPersonlisteErTom() throws Exception {
-        AbacIdToken idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
-        XacmlResponseWrapper responseWrapper = createResponse("xacmlresponse.json");
-        ArgumentCaptor<XacmlRequestBuilder> captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
+        var idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
+        var responseWrapper = createResponse("xacmlresponse.json");
+        var captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
 
         when(pdpConsumerMock.evaluate(captor.capture())).thenReturn(responseWrapper);
 
-        PdpRequest pdpRequest = lagPdpRequest();
+        var pdpRequest = lagPdpRequest();
         pdpRequest.put(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR, Collections.emptySet());
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, idToken);
         pdpKlient.forespørTilgang(pdpRequest);
 
-        assertThat(captor.getValue().build().toString().contains(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR)).isFalse();
+        assertThat(captor.getValue().build().toString()).doesNotContain(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR);
     }
 
     @Test
     public void kallPdpMedJwtTokenBodyNårIdTokenErJwtToken() throws Exception {
-        AbacIdToken idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
-        XacmlResponseWrapper responseWrapper = createResponse("xacmlresponse.json");
-        ArgumentCaptor<XacmlRequestBuilder> captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
+        var idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
+        var responseWrapper = createResponse("xacmlresponse.json");
+        var captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
 
         when(pdpConsumerMock.evaluate(captor.capture())).thenReturn(responseWrapper);
 
-        PdpRequest pdpRequest = lagPdpRequest();
+        var pdpRequest = lagPdpRequest();
         pdpRequest.put(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR, Collections.singleton("12345678900"));
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, idToken);
         pdpKlient.forespørTilgang(pdpRequest);
 
-        assertThat(captor.getValue().build().toString().contains(NavAbacCommonAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY)).isTrue();
+        assertThat(captor.getValue().build().toString()).contains(NavAbacCommonAttributter.ENVIRONMENT_FELLES_OIDC_TOKEN_BODY);
     }
 
     @Test
     public void kallPdpMedFlereAttributtSettNårPersonlisteStørreEnn1() throws Exception {
-        AbacIdToken idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
-        XacmlResponseWrapper responseWrapper = createResponse("xacml3response.json");
-        ArgumentCaptor<XacmlRequestBuilder> captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
+        var idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
+        var responseWrapper = createResponse("xacml3response.json");
+        var captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
 
         when(pdpConsumerMock.evaluate(captor.capture())).thenReturn(responseWrapper);
-        Set<String> personnr = new HashSet<>();
-        personnr.add("12345678900");
-        personnr.add("00987654321");
-        personnr.add("15151515151");
+        Set<String> personnr = Set.of("12345678900", "00987654321", "15151515151");
 
-        PdpRequest pdpRequest = lagPdpRequest();
+        var pdpRequest = lagPdpRequest();
         pdpRequest.put(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR, personnr);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, idToken);
         pdpKlient.forespørTilgang(pdpRequest);
 
         String xacmlRequestString = captor.getValue().build().toString();
 
-        assertThat(xacmlRequestString.contains("12345678900")).isTrue();
-        assertThat(xacmlRequestString.contains("00987654321")).isTrue();
-        assertThat(xacmlRequestString.contains("15151515151")).isTrue();
+        assertThat(xacmlRequestString).contains("12345678900");
+        assertThat(xacmlRequestString).contains("00987654321");
+        assertThat(xacmlRequestString).contains("15151515151");
     }
 
     @Test
     public void sporingsloggListeSkalHaSammeRekkefølgePåidenterSomXacmlRequest() throws Exception {
-        AbacIdToken idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
-        XacmlResponseWrapper responseWrapper = createResponse("xacml3response.json");
-        ArgumentCaptor<XacmlRequestBuilder> captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
+        var idToken = AbacIdToken.withOidcToken(JWT_TOKEN);
+        var responseWrapper = createResponse("xacml3response.json");
+        var captor = ArgumentCaptor.forClass(XacmlRequestBuilder.class);
 
         when(pdpConsumerMock.evaluate(captor.capture())).thenReturn(responseWrapper);
-        Set<String> personnr = new HashSet<>();
-        personnr.add("12345678900");
-        personnr.add("00987654321");
-        personnr.add("15151515151");
+        Set<String> personnr = Set.of("12345678900", "00987654321", "15151515151");
 
-        PdpRequest pdpRequest = lagPdpRequest();
+        var pdpRequest = lagPdpRequest();
         pdpRequest.put(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR, personnr);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, idToken);
         pdpKlient.forespørTilgang(pdpRequest);
@@ -136,12 +129,12 @@ public class XacmlRequestBuilderTjenesteImplTest {
         List<String> personer = pdpRequest.getListOfString(NavAbacCommonAttributter.RESOURCE_FELLES_PERSON_FNR);
 
         for (int i = 0; i < personer.size(); i++) {
-            assertThat(resourceArray.toString().contains(personer.get(i))).isTrue();
+            assertThat(resourceArray.toString()).contains(personer.get(i));
         }
     }
 
     private PdpRequest lagPdpRequest() {
-        PdpRequest request = new PdpRequest();
+        var request = new PdpRequest();
         request.put(NavAbacCommonAttributter.RESOURCE_FELLES_DOMENE, "omsorgspenger");
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, BeskyttetRessursActionAttributt.READ.getEksternKode());
         request.put(NavAbacCommonAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
@@ -149,7 +142,7 @@ public class XacmlRequestBuilderTjenesteImplTest {
     }
 
     private XacmlResponseWrapper createResponse(String jsonFile) throws Exception {
-        File file = new File(getClass().getClassLoader().getResource(jsonFile).getFile());
+        var file = new File(getClass().getClassLoader().getResource(jsonFile).getFile());
         return new XacmlResponseWrapper(Xacml10JsonProfile.createMapper().readValue(file, XacmlResponse.class));
     }
 }
