@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity(name = "UnntakEtablertTilsyn")
-@Table(name = "UNNTAK_ETABLERT_TILSYN")
+@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN")
 public class UnntakEtablertTilsyn extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNNTAK_ETABLERT_TILSYN")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_UNNTAK_ETABLERT_TILSYN")
     private Long id;
 
     @Immutable

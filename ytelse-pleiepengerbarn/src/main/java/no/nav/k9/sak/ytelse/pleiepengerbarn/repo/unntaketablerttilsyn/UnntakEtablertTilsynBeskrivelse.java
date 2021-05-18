@@ -11,11 +11,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynBeskrivelse")
-@Table(name = "UNNTAK_ETABLERT_TILSYN_BESKRIVELSE")
+@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE")
 public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements IndexKey {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE")
     private Long id;
 
     @Embedded
@@ -27,7 +27,7 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
 
 
     @ManyToOne
-    @JoinColumn(name = "UNNTAK_ETABLERT_TILSYN_ID", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "PSB_UNNTAK_ETABLERT_TILSYN_ID", nullable = false, updatable = false, unique = true)
     private UnntakEtablertTilsyn unntakEtablertTilsyn;
 
 

@@ -7,12 +7,12 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynGrunnlag")
-@Table(name = "GR_UNNTAK_ETABLERT_TILSYN")
+@Table(name = "PSB_GR_UNNTAK_ETABLERT_TILSYN")
 public class UnntakEtablertTilsynGrunnlag extends BaseEntitet {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_UNNTAK_ETABLERT_TILSYN")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_GR_UNNTAK_ETABLERT_TILSYN")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
@@ -21,7 +21,7 @@ public class UnntakEtablertTilsynGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_ID", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE_ID", nullable = false, updatable = false, unique = true)
     private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
 
 

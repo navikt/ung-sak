@@ -8,11 +8,11 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynForPleietrengende")
-@Table(name = "UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")
+@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")
 public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")
     private Long id;
 
     @Embedded

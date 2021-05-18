@@ -13,11 +13,11 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynPeriode")
-@Table(name = "UNNTAK_ETABLERT_TILSYN_PERIODE")
+@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_PERIODE")
 public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNNTAK_ETABLERT_TILSYN_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PSB_UNNTAK_ETABLERT_TILSYN_PERIODE")
     private Long id;
 
     @Embedded
@@ -28,7 +28,7 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     private DatoIntervallEntitet periode;
 
     @ManyToOne
-    @JoinColumn(name = "unntak_etablert_tilsyn_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "psb_unntak_etablert_tilsyn_id", nullable = false, updatable = false, unique = true)
     private UnntakEtablertTilsyn unntakEtablertTilsyn;
 
     @ChangeTracked
