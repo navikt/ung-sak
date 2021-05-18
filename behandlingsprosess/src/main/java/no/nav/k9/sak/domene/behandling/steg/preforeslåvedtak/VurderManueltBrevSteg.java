@@ -44,7 +44,11 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
         if (!lansert){
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+
+        //opprett task for å umiddelbart fortesette behandlingen etter at den settes på vent (se under)
         lagTaskForÅTaAvVent(kontekst);
+        //settes på vent for å tvinge avslutning av transaksjon
+        //slik at alle nødvendige data blir tilgjengelig for k9-formidling ved kall tilbake
         return BehandleStegResultat.settPåVent();
     }
 
