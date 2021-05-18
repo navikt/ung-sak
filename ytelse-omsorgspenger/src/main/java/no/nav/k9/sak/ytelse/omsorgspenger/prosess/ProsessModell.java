@@ -53,6 +53,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.VURDER_FARESIGNALER)
+            .medSteg(BehandlingStegType.VURDER_MANUELT_BREV)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
@@ -95,6 +96,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.HINDRE_TILBAKETREKK)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.VURDER_MANUELT_BREV)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

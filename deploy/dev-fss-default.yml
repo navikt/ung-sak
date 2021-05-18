@@ -188,6 +188,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: FORMIDLING_RETUR_MALTYPER
+      value: "true"
     - name: MOTTAK_SOKNAD_UTBETALING_OMS
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
