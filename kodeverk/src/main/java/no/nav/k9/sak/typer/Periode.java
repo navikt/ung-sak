@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -47,6 +48,7 @@ public class Periode implements Comparable<Periode> {
         validerOk();
     }
 
+    @JsonCreator
     public Periode(String iso8601) {
         verifiserKanVæreGyldigPeriode(iso8601);
         String[] split = iso8601.split("/");
