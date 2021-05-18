@@ -25,10 +25,6 @@ public class PleiebehovResultatRepository {
         this.entityManager = entityManager;
     }
 
-    public PleiebehovResultat hent(Long behandlingId) {
-        return hentHvisEksisterer(behandlingId).orElseThrow();
-    }
-
     public Optional<PleiebehovResultat> hentHvisEksisterer(Long behandlingId) {
         if (behandlingId == null) {
             return Optional.empty();

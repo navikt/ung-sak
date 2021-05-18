@@ -11,10 +11,10 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
@@ -26,7 +26,7 @@ public class InputParametere {
     private NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
     private Vilkårene vilkårene;
     private UttaksPerioderGrunnlag uttaksGrunnlag;
-    private PleiebehovResultat pleiebehovResultat;
+    private List<EtablertPleieperiode> pleiebehov;
     private Set<Inntektsmelding> sakInntektsmeldinger;
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
@@ -88,13 +88,13 @@ public class InputParametere {
         return uttaksGrunnlag;
     }
 
-    public InputParametere medPleiebehovResultat(PleiebehovResultat pleiebehovResultat) {
-        this.pleiebehovResultat = Objects.requireNonNull(pleiebehovResultat);
+    public InputParametere medPleiebehov(List<EtablertPleieperiode> pleiebeho) {
+        this.pleiebehov = Objects.requireNonNull(pleiebehov);
         return this;
     }
 
-    public PleiebehovResultat getPleiebehovResultat() {
-        return pleiebehovResultat;
+    public List<EtablertPleieperiode> getPleiebehov() {
+        return pleiebehov;
     }
 
     public InputParametere medInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger) {
