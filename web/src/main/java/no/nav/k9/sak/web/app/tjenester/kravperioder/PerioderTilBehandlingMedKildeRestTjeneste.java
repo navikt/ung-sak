@@ -4,8 +4,6 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -29,16 +27,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
-import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
@@ -48,9 +42,9 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 public class PerioderTilBehandlingMedKildeRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
     }
@@ -58,11 +52,11 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider) {
         this.behandlingRepository = behandlingRepository;
+        this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste();
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.søknadsfristTjenester = søknadsfristTjenester;
     }
 
     @GET
@@ -80,13 +74,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(ref);
+        var søknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref);
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
 
         var kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
 
         @SuppressWarnings("unchecked")
-        Map<KravDokument, List<SøktPeriode<?>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        var kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
         var perioderTilVurdering = definerendeVilkår.stream()
@@ -99,11 +93,5 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, revurderingPerioderFraAndreParter);
 
         return statusForPerioderPåBehandling;
-    }
-
-    private VurderSøknadsfristTjeneste finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
-        FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 }

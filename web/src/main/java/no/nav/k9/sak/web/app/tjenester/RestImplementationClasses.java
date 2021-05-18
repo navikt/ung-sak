@@ -28,6 +28,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -65,6 +66,7 @@ public class RestImplementationClasses {
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(OmsorgenForRestTjeneste.class);
+        classes.add(SøknadsfristRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
