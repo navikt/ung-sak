@@ -29,6 +29,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -48,11 +52,8 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.exception.TekniskException;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @Path("")
 @ApplicationScoped
@@ -61,6 +62,9 @@ public class DokumentRestTjeneste {
 
     public static final String DOKUMENTER_PATH = "/dokument/hent-dokumentliste";
     public static final String DOKUMENT_PATH = "/dokument/hent-dokument";
+    public static final String SAKSNUMMER_PARAM = "saksnummer";
+    public static final String JOURNALPOST_ID_PARAM = "journalpostId";
+    public static final String DOKUMENT_ID_PARAM = "dokumentId";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
@@ -118,7 +122,7 @@ public class DokumentRestTjeneste {
             Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger = finnInntektsmeldinger(fagsak, åpneBehandlinger);
 
             journalPostList.forEach(arkivJournalPost -> {
-                dokumentResultat.addAll(mapFraArkivJournalPost(arkivJournalPost, mottattedokumenter, inntektsmeldinger));
+                dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter, inntektsmeldinger));
             });
             dokumentResultat.sort(Comparator.comparing(DokumentDto::getTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
 
@@ -134,7 +138,7 @@ public class DokumentRestTjeneste {
         return !harInntektsmeldinger
             ? Collections.emptyMap()
             : inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(åpneBehandlinger).stream()
-                .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
+            .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
     }
 
     @GET
@@ -142,9 +146,9 @@ public class DokumentRestTjeneste {
     @Operation(description = "Søk etter dokument på JOARK-identifikatorene journalpostId og dokumentId", summary = ("Retunerer dokument som er tilknyttet saksnummer, journalpostId og dokumentId."), tags = "dokument")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentDokument(@SuppressWarnings("unused") @NotNull @QueryParam("saksnummer") @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
-                                 @NotNull @QueryParam("journalpostId") @Parameter(description = "Unik identifikator av journalposten (forsendelsenivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostId,
-                                 @NotNull @QueryParam("dokumentId") @Parameter(description = "Unik identifikator av DokumentInfo/Dokumentbeskrivelse (dokumentnivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) DokumentIdDto dokumentId) {
+    public Response hentDokument(@SuppressWarnings("unused") @NotNull @QueryParam(SAKSNUMMER_PARAM) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
+                                 @NotNull @QueryParam(JOURNALPOST_ID_PARAM) @Parameter(description = "Unik identifikator av journalposten (forsendelsenivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostId,
+                                 @NotNull @QueryParam(DOKUMENT_ID_PARAM) @Parameter(description = "Unik identifikator av DokumentInfo/Dokumentbeskrivelse (dokumentnivå)") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) DokumentIdDto dokumentId) {
         try {
             ResponseBuilder responseBuilder = Response.ok(
                 new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(journalpostId.getJournalpostId(), dokumentId.getDokumentId())));
@@ -158,24 +162,24 @@ public class DokumentRestTjeneste {
         }
     }
 
-    private List<DokumentDto> mapFraArkivJournalPost(ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteDokument,
+    private List<DokumentDto> mapFraArkivJournalPost(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteDokument,
                                                      Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger) {
         List<DokumentDto> dokumentForJP = new ArrayList<>();
         if (arkivJournalPost.getHovedDokument() != null) {
-            dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteDokument, inntektsMeldinger));
+            dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteDokument, inntektsMeldinger));
         }
         if (arkivJournalPost.getAndreDokument() != null) {
             arkivJournalPost.getAndreDokument().forEach(dok -> {
-                dokumentForJP.add(mapFraArkivDokument(arkivJournalPost, dok, mottatteDokument, inntektsMeldinger));
+                dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, dok, mottatteDokument, inntektsMeldinger));
             });
         }
         return dokumentForJP;
     }
 
-    private DokumentDto mapFraArkivDokument(ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
+    private DokumentDto mapFraArkivDokument(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
                                             Map<JournalpostId, List<MottattDokument>> mottatteDokument,
                                             Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger) {
-        var dto = new DokumentDto();
+        var dto = new DokumentDto(BehandlingDtoUtil.getApiPath(DokumentRestTjeneste.DOKUMENT_PATH + "?" + SAKSNUMMER_PARAM + "=" + saksnummer.getVerdi()));
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
         dto.setTittel(arkivDokument.getTittel());

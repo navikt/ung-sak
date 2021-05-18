@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -17,9 +19,17 @@ public class DokumentDto {
     private Kommunikasjonsretning kommunikasjonsretning;
     private LocalDateTime tidspunkt;
     private String tittel;
+    private String href;
+    @JsonIgnore
+    private String basePath;
 
-    public DokumentDto() {
+    public DokumentDto(String basePath) {
+        this.basePath = basePath + "&journalpostId=%s&dokumentId=%s";
         this.behandlinger = new ArrayList<>();
+    }
+
+    public String getHref() {
+        return href;
     }
 
     @Override
@@ -42,28 +52,58 @@ public class DokumentDto {
         return Collections.unmodifiableList(behandlinger);
     }
 
+    public void setBehandlinger(List<Long> behandlinger) {
+        this.behandlinger = List.copyOf(behandlinger);
+    }
+
     public String getDokumentId() {
         return dokumentId;
+    }
+
+    public void setDokumentId(String dokumentId) {
+        this.dokumentId = dokumentId;
+        genererLenke();
     }
 
     public String getGjelderFor() {
         return gjelderFor;
     }
 
+    public void setGjelderFor(String gjelderFor) {
+        this.gjelderFor = gjelderFor;
+    }
+
     public JournalpostId getJournalpostId() {
         return journalpostId;
+    }
+
+    public void setJournalpostId(JournalpostId journalpostId) {
+        this.journalpostId = journalpostId;
+        genererLenke();
     }
 
     public Kommunikasjonsretning getKommunikasjonsretning() {
         return kommunikasjonsretning;
     }
 
+    public void setKommunikasjonsretning(Kommunikasjonsretning kommunikasjonsretning) {
+        this.kommunikasjonsretning = kommunikasjonsretning;
+    }
+
     public LocalDateTime getTidspunkt() {
         return tidspunkt;
     }
 
+    public void setTidspunkt(LocalDateTime tidspunkt) {
+        this.tidspunkt = tidspunkt;
+    }
+
     public String getTittel() {
         return tittel;
+    }
+
+    public void setTittel(String tittel) {
+        this.tittel = tittel;
     }
 
     @Override
@@ -71,31 +111,9 @@ public class DokumentDto {
         return Objects.hash(journalpostId, dokumentId, behandlinger, tidspunkt, tidspunkt, tittel, kommunikasjonsretning, gjelderFor);
     }
 
-    public void setBehandlinger(List<Long> behandlinger) {
-        this.behandlinger = List.copyOf(behandlinger);
-    }
-
-    public void setDokumentId(String dokumentId) {
-        this.dokumentId = dokumentId;
-    }
-
-    public void setGjelderFor(String gjelderFor) {
-        this.gjelderFor = gjelderFor;
-    }
-
-    public void setJournalpostId(JournalpostId journalpostId) {
-        this.journalpostId = journalpostId;
-    }
-
-    public void setKommunikasjonsretning(Kommunikasjonsretning kommunikasjonsretning) {
-        this.kommunikasjonsretning = kommunikasjonsretning;
-    }
-
-    public void setTidspunkt(LocalDateTime tidspunkt) {
-        this.tidspunkt = tidspunkt;
-    }
-
-    public void setTittel(String tittel) {
-        this.tittel = tittel;
+    void genererLenke() {
+        if (journalpostId != null && journalpostId.getVerdi() != null && dokumentId != null) {
+            this.href = String.format(basePath, journalpostId.getVerdi(), dokumentId);
+        }
     }
 }
