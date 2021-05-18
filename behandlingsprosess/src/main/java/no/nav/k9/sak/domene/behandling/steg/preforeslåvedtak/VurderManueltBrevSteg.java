@@ -77,7 +77,8 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
     }
 
     private boolean trengerFritekstbrev(Void maltyper) {
-        return maltyper == null;
+        //TODO riktig utledning
+        return false;
     }
 
     private Void hentTilgjengeligeMaltyper(Long behandlingId) {
