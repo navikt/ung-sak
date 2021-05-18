@@ -287,38 +287,45 @@ public class FagsakRestTjeneste {
     }
 
     public static class MatchFagsakAttributter implements Function<Object, AbacDataAttributter> {
+        private static final StandardAbacAttributtType AKTØR_ID_TYPE = StandardAbacAttributtType.AKTØR_ID;
+        private static final StandardAbacAttributtType FNR_TYPE = StandardAbacAttributtType.FNR;
+
         @Override
         public AbacDataAttributter apply(Object obj) {
             var m = (MatchFagsak) obj;
             var abac = AbacDataAttributter.opprett();
 
-            Optional.of(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
-            Optional.of(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+            Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
+            Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
 
             Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
                 .flatMap(List::stream)
                 .map(PersonIdent::getIdent)
                 .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
+                .forEach(v -> abac.leggTil(FNR_TYPE, v));
 
             Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
                 .flatMap(List::stream)
                 .map(PersonIdent::getAktørId)
                 .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+                .forEach(v -> abac.leggTil(AKTØR_ID_TYPE, v));
 
             Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
                 .flatMap(List::stream)
                 .map(PersonIdent::getIdent)
                 .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(StandardAbacAttributtType.FNR, v));
+                .forEach(v -> abac.leggTil(FNR_TYPE, v));
 
             Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
                 .flatMap(List::stream)
                 .map(PersonIdent::getAktørId)
                 .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(StandardAbacAttributtType.AKTØR_ID, v));
+                .forEach(v -> abac.leggTil(AKTØR_ID_TYPE, v));
 
+            // må ha minst en aktørid
+            if (abac.getVerdier(FNR_TYPE).isEmpty() && abac.getVerdier(AKTØR_ID_TYPE).isEmpty()) {
+                throw new IllegalArgumentException("Må ha minst en aktørid eller fnr oppgitt");
+            }
             return abac;
         }
     }
