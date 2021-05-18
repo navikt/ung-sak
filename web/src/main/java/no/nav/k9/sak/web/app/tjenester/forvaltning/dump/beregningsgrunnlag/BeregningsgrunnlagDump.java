@@ -32,9 +32,9 @@ public class BeregningsgrunnlagDump implements DebugDumpFagsak {
     @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
         var sql = "select"
-            + " gr.behandling_id, bgp.ekstern_referanse, bgp.skjaeringstidspunkt "
+            + " gr.behandling_id, bgp.skjaeringstidspunkt, cast(bgp.ekstern_referanse as varchar) ekstern_referanse"
             + " from gr_beregningsgrunnlag gr "
-            + "   inner join bg_perioder bg on gr.bg_grunnlag_id= bg.id"
+            + "   inner join bg_perioder bg on gr.bg_grunnlag_id=bg.id"
             + "   inner join bg_periode bgp on bg.id = bgp.id"
             + "   inner join fagsak f on gr.id = f.id"
             + " where gr.aktiv=true and f.saksnummer=:saksnummer "
