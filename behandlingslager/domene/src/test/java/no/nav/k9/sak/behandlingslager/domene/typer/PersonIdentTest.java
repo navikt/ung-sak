@@ -36,4 +36,18 @@ public class PersonIdentTest {
         gyldig = PersonIdent.erGyldigFnr(foedselsnummer);
         assertThat(gyldig).isEqualTo(false);
     }
+
+    @Test
+    void test_personnr() throws Exception {
+        String fnr = "14028121459";
+        boolean gyldig = PersonIdent.erGyldigFnr(fnr);
+        assertThat(gyldig).isEqualTo(true);
+
+        PersonIdent personIdent = new PersonIdent(fnr);
+        assertThat(personIdent.erDnr()).isFalse();
+        assertThat(personIdent.erAktørId()).isFalse();
+        assertThat(personIdent.erNorskIdent()).isTrue();
+        assertThat(personIdent.erFdatNummer()).isFalse();
+        assertThat(personIdent.erFnr()).isTrue();
+    }
 }
