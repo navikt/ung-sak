@@ -21,6 +21,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PSBVilkårsPerioderTilVurderingTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 import javax.enterprise.context.Dependent;
@@ -37,7 +38,7 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    public EtablertTilsynNattevåkOgBeredskapMapper(@FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+    public EtablertTilsynNattevåkOgBeredskapMapper(@BehandlingTypeRef PSBVilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                    @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste) {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
