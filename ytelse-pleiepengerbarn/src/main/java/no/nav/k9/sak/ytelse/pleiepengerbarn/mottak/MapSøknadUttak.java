@@ -93,6 +93,7 @@ class MapSøknadUttak {
     }
 
     //TODO endre, Får ikke Frilanser som input
+    @SuppressWarnings("unused")
     private UttakAktivitetPeriode lagUttakAktivitetPeriode(Frilanser input) {
         if (input == null || input.getSluttdato() == null) {
             return null;

@@ -5,9 +5,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
@@ -22,7 +19,6 @@ import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
-    private static final Logger log = LoggerFactory.getLogger(UttakForeslåBehandlingsresultatTjeneste.class);
 
     private UttakRepository uttakRepository;
 

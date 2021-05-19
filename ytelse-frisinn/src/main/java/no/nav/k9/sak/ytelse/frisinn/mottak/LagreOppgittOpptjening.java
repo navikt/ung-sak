@@ -61,9 +61,6 @@ class LagreOppgittOpptjening {
     }
 
     void lagreOpptjening(Behandling behandling, Inntekter inntekter, ZonedDateTime tidspunkt) {
-
-        Long behandlingId = behandling.getId();
-
         OppgittOpptjeningBuilder opptjeningBuilder = initOpptjeningBuilder(behandling.getFagsakId(), tidspunkt);
 
         boolean erNyeOpplysninger = false;

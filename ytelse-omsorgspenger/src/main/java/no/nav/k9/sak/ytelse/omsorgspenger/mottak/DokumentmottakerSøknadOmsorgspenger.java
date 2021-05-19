@@ -12,9 +12,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -34,7 +31,6 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -59,14 +55,11 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
-    private static final Logger logger = LoggerFactory.getLogger(DokumentmottakerSøknadOmsorgspenger.class);
-
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private FagsakRepository fagsakRepository;
     private ProsessTaskRepository prosessTaskRepository;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
     private SøknadParser søknadParser;
@@ -85,7 +78,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
                                         BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
-                                        InntektArbeidYtelseTjeneste iayTjeneste, OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                                        OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
@@ -95,7 +88,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;
         this.prosessTaskRepository = prosessTaskRepository;
-        this.iayTjeneste = iayTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;

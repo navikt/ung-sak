@@ -57,7 +57,6 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
     private BehandlingRepositoryProvider repositoryProvider ;
     private InntektArbeidYtelseTjeneste iayTjeneste ;
     private Skjæringstidspunkt skjæringstidspunkt ;
-    private LocalDate stp;
     private OpptjeningRepository opptjeningRepository;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
 
@@ -71,7 +70,6 @@ public class AksjonspunktutlederForVurderBekreftetOpptjeningTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(LocalDate.now()).build();
-        stp = skjæringstidspunkt.getUtledetSkjæringstidspunkt();
 
         oppgittOpptjeningFilterProvider = Mockito.mock(OppgittOpptjeningFilterProvider.class);
 

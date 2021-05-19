@@ -1,33 +1,31 @@
 package no.nav.k9.sak.domene.vedtak.observer;
 
 import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
     private ProsessTaskRepository taskRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingVedtakRepository vedtakRepository;
 
     public VedtakFattetEventObserver() {
     }
 
     @Inject
-    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository, BehandlingVedtakRepository vedtakRepository) {
+    public VedtakFattetEventObserver(ProsessTaskRepository taskRepository, BehandlingRepository behandlingRepository) {
         this.taskRepository = taskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.vedtakRepository = vedtakRepository;
     }
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
