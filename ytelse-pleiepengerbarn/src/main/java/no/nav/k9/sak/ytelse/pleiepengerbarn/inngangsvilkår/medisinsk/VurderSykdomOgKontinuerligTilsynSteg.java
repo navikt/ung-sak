@@ -111,7 +111,8 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         final SykdomGrunnlagBehandling sykdomGrunnlagBehandling = opprettGrunnlag(perioderSamlet, perioderTilVurderingUtenOmsorgenFor, behandling);
 
-        if (trengerAksjonspunkt(kontekst, behandling, sykdomGrunnlagBehandling)) {
+        final boolean finnesKunPerioderMedManglendeOmsorgenFor = perioderSamlet.isEmpty() && !perioderTilVurderingUtenOmsorgenFor.isEmpty();
+        if (!finnesKunPerioderMedManglendeOmsorgenFor && trengerAksjonspunkt(kontekst, behandling, sykdomGrunnlagBehandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
         
