@@ -16,6 +16,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -42,7 +43,7 @@ public class DefaultOppgittOpptjeningFilterTest {
         var fraværTom = LocalDate.now().plusDays(10);
         var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
 
-        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)));
 
         OppgittOpptjeningBuilder opptjeningBuilder = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
@@ -63,7 +64,7 @@ public class DefaultOppgittOpptjeningFilterTest {
         var fraværTom = LocalDate.now().plusDays(10);
         var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
 
-        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)),
             kravdok2, List.of(byggSøktPeriode(fraværFom, fraværTom))
             );
@@ -90,7 +91,7 @@ public class DefaultOppgittOpptjeningFilterTest {
         // Maks vilkårsperiode overlapper begge fraværsperioder
         var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
 
-        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
             kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2))
         );
@@ -117,7 +118,7 @@ public class DefaultOppgittOpptjeningFilterTest {
         // Maks vilkårsperiode overlapper begge fraværsperioder
         var vilkårPeriodeMaks = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom1, fraværFom2);
 
-        Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær = Map.of(
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterMedFravær = Map.of(
             kravdok1, List.of(byggSøktPeriode(fraværFom1, fraværTom1)),
             kravdok2, List.of(byggSøktPeriode(fraværFom2, fraværTom2))
         );
@@ -135,9 +136,15 @@ public class DefaultOppgittOpptjeningFilterTest {
         assertThat(resultat.get().getFrilans().get().getErNyoppstartet()).isTrue();
     }
 
-    private SøktPeriode<Object> byggSøktPeriode(LocalDate fom, LocalDate tom) {
-        var dummyObjekt = new Object();
-        var søktPeriode = new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), dummyObjekt);
+    private SøktPeriode<SøktPeriodeData> byggSøktPeriode(LocalDate fom, LocalDate tom) {
+        var dummyObjekt = new SøktPeriodeData() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public String getPayload() {
+                return null;
+            }
+        };
+        var søktPeriode = new SøktPeriode<SøktPeriodeData>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), dummyObjekt);
 
         return søktPeriode;
     }
