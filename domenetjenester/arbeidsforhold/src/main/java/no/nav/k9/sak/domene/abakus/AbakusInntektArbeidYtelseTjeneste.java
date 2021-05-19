@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
@@ -354,14 +353,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
         try {
             return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-        }
-    }
-
-    private RefusjonskravDatoerDto hentRefusjonskravDatoer(InntektsmeldingerRequest request) {
-        try {
-            return abakusTjeneste.hentRefusjonskravDatoer(request);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }

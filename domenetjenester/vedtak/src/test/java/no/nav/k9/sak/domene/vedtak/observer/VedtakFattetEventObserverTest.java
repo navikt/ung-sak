@@ -55,7 +55,7 @@ public class VedtakFattetEventObserverTest {
 
     @BeforeEach
     public void setup() {
-        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, behandlingRepository, vedtakRepository);
+        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, behandlingRepository);
     }
 
     @Test

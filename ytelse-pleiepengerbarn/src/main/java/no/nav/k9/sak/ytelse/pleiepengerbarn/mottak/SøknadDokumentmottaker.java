@@ -11,7 +11,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
@@ -34,7 +33,6 @@ class SøknadDokumentmottaker {
     private Behandlingsoppretter behandlingsoppretter;
     private SøknadOversetter pleiepengerBarnSoknadOversetter;
     private FagsakTjeneste fagsakTjeneste;
-    private BehandlingRepository behandlingRepository;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
 
     SøknadDokumentmottaker() {
@@ -43,14 +41,12 @@ class SøknadDokumentmottaker {
 
     @Inject
     SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
-                           BehandlingRepository behandlingRepository,
                            SaksnummerRepository saksnummerRepository,
                            Behandlingsoppretter behandlingsoppretter,
                            SøknadOversetter pleiepengerBarnSoknadOversetter,
                            SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                            FagsakTjeneste fagsakTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
-        this.behandlingRepository = behandlingRepository;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;

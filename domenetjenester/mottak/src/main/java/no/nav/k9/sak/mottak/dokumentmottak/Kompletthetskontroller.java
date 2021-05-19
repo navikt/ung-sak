@@ -14,7 +14,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringsFeil;
@@ -41,7 +40,6 @@ public class Kompletthetskontroller {
     private KompletthetModell kompletthetModell;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
 
     public Kompletthetskontroller() {
         // For CDI proxy
@@ -51,12 +49,10 @@ public class Kompletthetskontroller {
     public Kompletthetskontroller(DokumentmottakerFelles dokumentmottakerFelles,
                                   KompletthetModell kompletthetModell,
                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                  ProsessTaskRepository prosessTaskRepository,
                                   SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.kompletthetModell = kompletthetModell;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.prosessTaskRepository = prosessTaskRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 

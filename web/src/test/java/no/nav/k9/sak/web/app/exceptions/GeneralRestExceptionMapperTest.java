@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.felles.exception.ManglerTilgangException;
@@ -19,15 +18,8 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.FeilType;
 
-@SuppressWarnings("resource")
 public class GeneralRestExceptionMapperTest {
 
-    private VLExceptionMapper generalRestExceptionMapper;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        generalRestExceptionMapper = new VLExceptionMapper();
-    }
 
     @Test
     public void skalMappeManglerTilgangFeil() {
@@ -43,7 +35,6 @@ public class GeneralRestExceptionMapperTest {
         assertThat(feilDto.getFeilmelding()).isEqualTo("ManglerTilgangFeilmeldingKode");
     }
 
-    @SuppressWarnings("cast")
     @Test
     public void skalMappeFunksjonellFeil() {
         Feil funksjonellFeil = TestFeil.FACTORY.funksjonellFeil();
