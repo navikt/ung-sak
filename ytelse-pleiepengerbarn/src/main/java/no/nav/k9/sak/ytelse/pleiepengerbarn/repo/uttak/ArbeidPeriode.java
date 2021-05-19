@@ -128,7 +128,12 @@ public class ArbeidPeriode extends BaseEntitet implements IndexKey {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ArbeidPeriode that = (ArbeidPeriode) o;
-        return Objects.equals(periode, that.periode) && aktivitetType == that.aktivitetType && Objects.equals(arbeidsgiver, that.arbeidsgiver) && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) && Objects.equals(faktiskArbeidTimerPerDag, that.faktiskArbeidTimerPerDag) && Objects.equals(jobberNormaltTimerPerDag, that.jobberNormaltTimerPerDag);
+        return Objects.equals(periode, that.periode)
+            && aktivitetType == that.aktivitetType
+            && Objects.equals(arbeidsgiver, that.arbeidsgiver)
+            && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef)
+            && Objects.equals(faktiskArbeidTimerPerDag, that.faktiskArbeidTimerPerDag)
+            && Objects.equals(jobberNormaltTimerPerDag, that.jobberNormaltTimerPerDag);
     }
 
     @Override
