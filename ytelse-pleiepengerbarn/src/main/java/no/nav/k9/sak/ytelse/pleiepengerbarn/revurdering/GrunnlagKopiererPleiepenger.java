@@ -24,7 +24,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
     private PersonopplysningRepository personopplysningRepository;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private MedlemskapRepository medlemskapRepository;
-    private UttakRepository uttakRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
@@ -44,7 +43,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
                                        OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste) {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
-        this.uttakRepository = uttakRepository;
         this.iayTjeneste = iayTjeneste;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -62,7 +60,6 @@ public class GrunnlagKopiererPleiepenger implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
-        uttakRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         søknadsperiodeRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         uttakPerioderGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         pleiebehovResultatRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
