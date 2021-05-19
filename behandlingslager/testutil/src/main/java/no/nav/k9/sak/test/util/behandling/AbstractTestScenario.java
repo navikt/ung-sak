@@ -804,7 +804,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return (S) this;
     }
 
-    @SuppressWarnings("unchecked")
     public S leggTilVilkår(VilkårType vilkårType, Utfall utfall) {
         return this.leggTilVilkår(vilkårType, utfall, new Periode(LocalDate.now().minusMonths(3), LocalDate.now()));
     }

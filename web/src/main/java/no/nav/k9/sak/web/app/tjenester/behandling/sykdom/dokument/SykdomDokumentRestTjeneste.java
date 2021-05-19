@@ -25,9 +25,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -68,8 +65,6 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Path(SykdomDokumentRestTjeneste.BASE_PATH)
 @Transactional
 public class SykdomDokumentRestTjeneste {
-
-    private static final Logger log = LoggerFactory.getLogger(SykdomDokumentRestTjeneste.class);
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";

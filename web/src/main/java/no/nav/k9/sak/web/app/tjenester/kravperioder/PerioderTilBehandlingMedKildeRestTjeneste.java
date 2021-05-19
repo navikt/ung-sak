@@ -79,7 +79,6 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         var kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
 
-        @SuppressWarnings("unchecked")
         var kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 

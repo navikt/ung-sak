@@ -137,7 +137,6 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     }
 
     private void leggTilUttak(Uttaksplan uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
-        @SuppressWarnings("unchecked")
         LocalDateTimeline<UttaksperiodeInfo> uttTimeline = getTimeline(uttaksplan);
         resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }
