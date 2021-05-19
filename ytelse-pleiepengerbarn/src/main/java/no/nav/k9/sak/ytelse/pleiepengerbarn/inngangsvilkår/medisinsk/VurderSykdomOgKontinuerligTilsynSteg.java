@@ -173,12 +173,10 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             NavigableSet<DatoIntervallEntitet> perioderMedAvslagGrunnetManglendeOmsorg) {
         
         var vilkårBuilder = builder.hentBuilderFor(vilkåret);
-        if (!perioder.isEmpty()) {       
-            for (DatoIntervallEntitet periode : perioder) {
-                final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, sykdomGrunnlagBehandling);
-                oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
-                oppdaterResultatStruktur(kontekst, periode, vilkårData);
-            }
+        for (DatoIntervallEntitet periode : perioder) {
+            final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(vilkåret, kontekst, periode, sykdomGrunnlagBehandling);
+            oppdaterBehandlingMedVilkårresultat(vilkårData, vilkårBuilder);
+            oppdaterResultatStruktur(kontekst, periode, vilkårData);
         }
         
         for (var periode : perioderMedAvslagGrunnetManglendeOmsorg) {
