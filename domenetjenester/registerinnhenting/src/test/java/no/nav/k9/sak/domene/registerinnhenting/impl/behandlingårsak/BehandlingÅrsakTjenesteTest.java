@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -24,7 +25,6 @@ import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -35,7 +35,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.BehandlingÅrsakTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

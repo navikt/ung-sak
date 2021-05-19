@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
