@@ -37,9 +37,9 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         entityManager.flush();
     }
 
-    public void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+    public UnntakEtablertTilsynGrunnlag lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
+        return lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
     }
 
     UnntakEtablertTilsyn hentUnntakEtablertTilsyn(Long id) {
@@ -59,23 +59,23 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         });
     }
 
-    private void lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag) {
+    private UnntakEtablertTilsynGrunnlag lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag) {
         if (eksisterendeGrunnlag.isPresent()) {
             // deaktiver eksisterende grunnlag
-
             final UnntakEtablertTilsynGrunnlag eksisterendeGrunnlagEntitet = eksisterendeGrunnlag.get();
             eksisterendeGrunnlagEntitet.setAktiv(false);
             entityManager.persist(eksisterendeGrunnlagEntitet);
             entityManager.flush();
         }
 
-        final UnntakEtablertTilsynGrunnlag grunnlagEntitet = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende);
+        var grunnlagEntitet = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende);
         if (unntakEtablertTilsynForPleietrengende != null) {
             entityManager.persist(unntakEtablertTilsynForPleietrengende);
         }
 
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
+        return grunnlagEntitet;
     }
 
     private Optional<UnntakEtablertTilsynGrunnlag> hentEksisterendeGrunnlag(Long id) {

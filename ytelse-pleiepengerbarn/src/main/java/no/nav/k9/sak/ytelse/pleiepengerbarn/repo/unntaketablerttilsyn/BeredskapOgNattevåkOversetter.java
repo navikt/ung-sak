@@ -27,9 +27,11 @@ public class BeredskapOgNattevåkOversetter {
 
     private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId, String vurderingstekst) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
-        eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
-            eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new Unntak(periode.getBegrunnelse(), periode.getResultat())))
-        );
+        if (eksisterendeUnntakEtablertTilsyn != null) {
+            eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
+                eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new Unntak(periode.getBegrunnelse(), periode.getResultat())))
+            );
+        }
 
         var segementerSomSkalSlettes = unntakSomSkalSlettes.stream().map(periode ->
             new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new Unntak("", Resultat.IKKE_OPPFYLT))

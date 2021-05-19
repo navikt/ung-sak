@@ -31,7 +31,7 @@ public class UnntakEtablertTilsynOppdateringService {
 
         var perioder = dto.getPerioder().stream().map(periode -> new Unntaksperiode(periode.getFom(), periode.getTom(), dto.getVurderingstekst())).toList();
 
-        var beredskap = BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
+        var unntakEtablertTilsyn = BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
             unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
             LocalDate.now(),
             søkersAktørId,
@@ -40,8 +40,8 @@ public class UnntakEtablertTilsynOppdateringService {
             perioder,
             List.of());
 
-        unntakEtablertTilsynGrunnlagRepository.lagre(beredskap);
-        unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().medBeredskap(beredskap);
+        unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsyn);
+        unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().medBeredskap(unntakEtablertTilsyn);
         unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynGrunnlag);
 
         return OppdateringResultat.utenOveropp();

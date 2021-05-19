@@ -65,7 +65,8 @@ class SøknadOversetter {
                      UttakRepository uttakRepository,
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                      TpsTjeneste tpsTjeneste,
-                     OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository) {
+                     OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
+                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -74,6 +75,7 @@ class SøknadOversetter {
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -153,6 +155,8 @@ class SøknadOversetter {
                     søkerAktørId,
                     behandlingId,
                     pleiepengerSyktBarn.getNattevåk());
+            unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynBeredskap);
+            unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynNattevåk);
             var nyttGrunnlag = grunnlag.getUnntakEtablertTilsynForPleietrengende()
                 .medBeredskap(unntakEtablertTilsynBeredskap)
                 .medNattevåk(unntakEtablertTilsynNattevåk);
@@ -193,7 +197,7 @@ class SøknadOversetter {
         }
         var unntakEtablertTilsynGrunnlagPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengendeAktørId);
         var grunnlag = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynGrunnlagPleietrengende);
-        unntakEtablertTilsynGrunnlagRepository.lagre(grunnlag);
+        unntakEtablertTilsynGrunnlagRepository.lagre( behandlingId, unntakEtablertTilsynGrunnlagPleietrengende);
         return grunnlag;
     }
 
