@@ -33,6 +33,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
@@ -43,7 +44,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private Instance<VurderSøknadsfristTjeneste<SøktPeriodeData>> søknadsfristTjenester;
     private Boolean lansert;
 
     DefaultOppgittOpptjeningFilter() {
@@ -53,7 +54,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Inject
     public DefaultOppgittOpptjeningFilter(VilkårTjeneste vilkårTjeneste,
                                           BehandlingRepository behandlingRepository,
-                                          @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
+                                          @Any Instance<VurderSøknadsfristTjeneste<SøktPeriodeData>> søknadsfristTjenester,
                                           @KonfigVerdi(value = "MOTTAK_SOKNAD_UTBETALING_OMS", defaultVerdi = "true") Boolean lansert) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -74,7 +75,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
-        Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
@@ -90,12 +91,12 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-        Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
+        Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
     }
 
-    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterMedFravær) {
+    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterMedFravær) {
         var journalpostAktivTidslinje = utledJournalpostAktivTidslinje(kravDokumenterMedFravær);
         List<OppgittOpptjening> oppgitteOpptjeninger = sorterOpptjeningerMotInnsendingstidspunkt(iayGrunnlag, kravDokumenterMedFravær);
 
@@ -135,12 +136,12 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return periodeFerdigvurdert.getPeriode();
     }
 
-    private Map<JournalpostId, LocalDateTimeline<Void>> utledJournalpostAktivTidslinje(Map<KravDokument, List<SøktPeriode<?>>> kravDokumenterPåFagsak) {
+    private Map<JournalpostId, LocalDateTimeline<Void>> utledJournalpostAktivTidslinje(Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravDokumenterPåFagsak) {
         return kravDokumenterPåFagsak.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().getJournalpostId(), e -> slåSammenPerioder(e.getValue())));
     }
 
-    private List<OppgittOpptjening> sorterOpptjeningerMotInnsendingstidspunkt(InntektArbeidYtelseGrunnlag iay, Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær) {
+    private List<OppgittOpptjening> sorterOpptjeningerMotInnsendingstidspunkt(InntektArbeidYtelseGrunnlag iay, Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokMedFravær) {
         var journalpostIdTilKravdok = kravdokMedFravær.keySet().stream()
             .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
 
@@ -176,7 +177,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private LocalDateTimeline<Void> slåSammenPerioder(List<SøktPeriode<?>> søktePerioder) {
+    private LocalDateTimeline<Void> slåSammenPerioder(List<SøktPeriode<SøktPeriodeData>> søktePerioder) {
         var fraværPerioder = søktePerioder.stream()
             .map(it -> new LocalDateSegment<Void>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), null))
             .collect(Collectors.toSet());
@@ -187,7 +188,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return tilkjentYtelseTimeline.compress();
     }
 
-    private VurderSøknadsfristTjeneste finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
+    private VurderSøknadsfristTjeneste<SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
