@@ -13,19 +13,19 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 
 @ApplicationScoped
 public class SøknadsfristTjenesteProvider {
-    private Instance<VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>> søknadsfristTjenester;
+    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
 
     public SøknadsfristTjenesteProvider() {
     }
 
     @Inject
-    public SøknadsfristTjenesteProvider(@Any Instance<VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>> søknadsfristTjenester) {
+    public SøknadsfristTjenesteProvider(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
         this.søknadsfristTjenester = søknadsfristTjenester;
     }
 
     public VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
+        return (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 }
