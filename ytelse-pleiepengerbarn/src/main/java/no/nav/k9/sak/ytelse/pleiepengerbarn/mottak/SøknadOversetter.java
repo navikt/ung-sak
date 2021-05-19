@@ -44,7 +44,6 @@ class SøknadOversetter {
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private MedlemskapRepository medlemskapRepository;
-    private UttakRepository uttakRepository;
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
@@ -64,7 +63,6 @@ class SøknadOversetter {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.uttakRepository = uttakRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
@@ -114,7 +112,7 @@ class SøknadOversetter {
 
         lagrePleietrengende(fagsakId, ytelse.getBarn());
 
-        lagreUttakOgPerioder(søknad, journalpostId, behandlingId, fagsakId);
+        lagreUttakOgPerioder(søknad, maksSøknadsperiode, journalpostId, behandlingId, fagsakId);
 
         lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
     }
@@ -127,20 +125,15 @@ class SøknadOversetter {
         omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
     }
 
-    private void lagreUttakOgPerioder(Søknad soknad, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
+    private void lagreUttakOgPerioder(Søknad soknad, Periode maksSøknadsperiode, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
         // TODO etter18feb: LovbestemtFerie
 
         // TODO 18feb: Arbeidstid
         // TODO etter18feb: UttakPeriodeInfo
-
-        var mapUttakGrunnlag = new MapSøknadUttak(soknad).getUttakGrunnlag(behandlingId);
-        uttakRepository.lagreOgFlushNyttGrunnlag(behandlingId, mapUttakGrunnlag);
-
         var perioderFraSøknad = new MapSøknadUttakPerioder(soknad, journalpostId).getPerioderFraSøknad();
         uttakPerioderGrunnlagRepository.lagre(behandlingId, perioderFraSøknad);
 
-        var maksPeriode = mapUttakGrunnlag.getOppgittSøknadsperioder().getMaksPeriode();
-        fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
+        fagsakRepository.utvidPeriode(fagsakId, maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed());
     }
 
     private void lagrePleietrengende(Long fagsakId, Barn barn) {
