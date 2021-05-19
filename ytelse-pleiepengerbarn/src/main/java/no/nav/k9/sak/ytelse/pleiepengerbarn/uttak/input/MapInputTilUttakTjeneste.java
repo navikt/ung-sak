@@ -33,7 +33,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -91,7 +91,7 @@ public class MapInputTilUttakTjeneste {
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
-        var pleiebehov = pleiebehovResultatRepository.hent(referanse.getBehandlingId());
+        var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
@@ -110,7 +110,7 @@ public class MapInputTilUttakTjeneste {
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
-            .medPleiebehovResultat(pleiebehov)
+            .medPleiebehov(pleiebehov.map(pb -> pb.getPleieperioder().getPerioder()).orElse(List.of()))
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
             .medVurderteSøknadsperioder(vurderteSøknadsperioder)
@@ -163,7 +163,7 @@ public class MapInputTilUttakTjeneste {
         // TODO: Se kommentarer/TODOs under denne:
         final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger());
 
-        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehovResultat());
+        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
         final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -217,9 +217,9 @@ public class MapInputTilUttakTjeneste {
         return new ArrayList<>(timeline.toSegments());
     }
 
-    private Map<LukketPeriode, Pleiebehov> toPleiebehov(PleiebehovResultat pleiebehov) {
+    private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.getPleieperioder().getPerioder().forEach(p -> {
+        pleiebehov.forEach(p -> {
             tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
         });
         return tilsynsbehov;
