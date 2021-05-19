@@ -88,7 +88,7 @@ public class InputParametere {
         return uttaksGrunnlag;
     }
 
-    public InputParametere medPleiebehov(List<EtablertPleieperiode> pleiebeho) {
+    public InputParametere medPleiebehov(List<EtablertPleieperiode> pleiebehov) {
         this.pleiebehov = Objects.requireNonNull(pleiebehov);
         return this;
     }
