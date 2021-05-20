@@ -189,6 +189,8 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: OMP_DELVIS_FRAVAER
+      value: "false"
     - name: FORMIDLING_RETUR_MALTYPER
       value: "false"
     - name: MOTTAK_SOKNAD_UTBETALING_OMS

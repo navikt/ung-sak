@@ -13,6 +13,7 @@ import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -25,7 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
@@ -68,6 +68,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
+    private Boolean lansertDelvisFravær;
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -76,13 +77,13 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
                                         OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
-                                        BehandlingRepository behandlingRepository,
                                         ProsessTaskRepository prosessTaskRepository,
                                         OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
-                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
+                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator,
+                                        @KonfigVerdi(value = "OMP_DELVIS_FRAVAER", defaultVerdi = "true") Boolean lansertDelvisFravær) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -93,6 +94,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.mapper = mapper;
         this.dokumentValidator = dokumentValidator;
+        this.lansertDelvisFravær = lansertDelvisFravær;
     }
 
     @Override
@@ -159,7 +161,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         if (søknadInnhold.getFosterbarn() != null && !søknadInnhold.getFosterbarn().isEmpty()) {
             throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Fosterbarn");
         }
-        if (søknadInnhold.getFraværsperioder().stream().anyMatch(fp -> fp.getDuration() != null)) {
+        if (!lansertDelvisFravær && søknadInnhold.getFraværsperioder().stream().anyMatch(fp -> fp.getDuration() != null)) {
             throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Delvis fravær");
         }
     }
