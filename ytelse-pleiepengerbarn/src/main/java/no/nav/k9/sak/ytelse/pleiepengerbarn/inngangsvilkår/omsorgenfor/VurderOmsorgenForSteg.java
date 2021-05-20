@@ -73,7 +73,8 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
 
-        if (harAksjonspunkt(samletOmsorgenForTidslinje)) {
+        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        if (skalHaAksjonspunktGrunnetManuellRevurdering(behandling) || harAksjonspunkt(samletOmsorgenForTidslinje)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         }
 
@@ -83,6 +84,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdaterteVilkår);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean skalHaAksjonspunktGrunnetManuellRevurdering(final Behandling behandling) {
+        return behandling.erManueltOpprettet() && behandling.getAksjonspunkter().stream().noneMatch(a -> a.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2);
     }
 
     private boolean harAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
