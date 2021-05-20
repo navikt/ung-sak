@@ -43,21 +43,22 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
     }
 
     private LocalDate finnFeriepengerPeriodeTomForBruker(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
-        return finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
+        UttakSjekk uttakFilter = regelModell.harUbegrensetFeriepengedagerVedRefusjon() ? UttakSjekk.SJEKK_KUN_ANDEL_BRUKER : UttakSjekk.DEFAULT;
+        return finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom, uttakFilter);
     }
 
     private LocalDate finnFeriepengerPeriodeTomVedRefusjon(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
-        return regelModell.harUbegrensetFeriepengedagerVedRefusjon() ? finnSisteUttaksdag(regelModell) : finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom);
+        return regelModell.harUbegrensetFeriepengedagerVedRefusjon() ? finnSisteUttaksdag(regelModell) : finnFeriepengerPeriodeTom(regelModell, feriepengePeriodeFom, UttakSjekk.DEFAULT);
     }
 
-    private LocalDate finnFeriepengerPeriodeTom(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom) {
+    private LocalDate finnFeriepengerPeriodeTom(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom, UttakSjekk uttakFilter) {
         List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
         int maksAntallDager = antallDagerFeriepenger(regelModell.getAntallDagerFeriepenger());
         LocalDate sisteUttaksdag = finnSisteUttaksdag(beregningsresultatPerioder);
         int antallDager = 0;
 
         for (LocalDate dato = feriepengePeriodeFom; !dato.isAfter(sisteUttaksdag); dato = dato.plusDays(1)) {
-            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, dato, regelModell.harFeriepengeopptjeningFoHelg());
+            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, dato, regelModell.harFeriepengeopptjeningFoHelg(), uttakFilter);
             antallDager += antallDagerSomLeggesTilFeriepengeperioden;
             if (antallDager == maksAntallDager) {
                 return dato;
@@ -73,16 +74,22 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
         return antallDagerFeriepenger;
     }
 
-    private int finnAntallDagerSomSkalLeggesTil(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato, boolean harFeriepengeopptjeningForHelg) {
+    private int finnAntallDagerSomSkalLeggesTil(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato, boolean harFeriepengeopptjeningForHelg, UttakSjekk uttakFilter) {
         if (erHelg(dato) && !harFeriepengeopptjeningForHelg) {
             return 0;
         }
-        return harUttak(beregningsresultatPerioder, dato) ? 1 : 0;
+        return harUttak(beregningsresultatPerioder, dato, uttakFilter) ? 1 : 0;
     }
 
-    private boolean harUttak(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato) {
+    private enum UttakSjekk {
+        SJEKK_KUN_ANDEL_BRUKER,
+        DEFAULT
+    }
+
+    private boolean harUttak(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato, UttakSjekk uttakFilter) {
         return beregningsresultatPerioder.stream().filter(p -> p.inneholder(dato))
             .flatMap(beregningsresultatPeriode -> beregningsresultatPeriode.getBeregningsresultatAndelList().stream())
+            .filter(andel -> uttakFilter == UttakSjekk.DEFAULT || andel.erBrukerMottaker())
             .anyMatch(andel -> andel.getDagsats() > 0);
     }
 
