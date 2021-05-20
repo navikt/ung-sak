@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -15,9 +16,11 @@ import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
@@ -47,6 +50,7 @@ public class SykdomsDokumentVedleggHåndterer {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
+            .kanal()
             .dokumenter(new DokumentInfoResponseProjection()
                 .dokumentInfoId()
                 .tittel()
@@ -75,10 +79,16 @@ public class SykdomsDokumentVedleggHåndterer {
             .toLocalDateTime();
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
+        boolean hoveddokument = true;
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
+            final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
+                    && journalpost.getKanal() == Kanal.NAV_NO
+                    && Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode().equals(dokumentInfo.getBrevkode());
+            final SykdomDokumentType type = erDigitalPleiepengerSyktBarnSøknad ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+            final LocalDate datert = erDigitalPleiepengerSyktBarnSøknad ? mottattDato.toLocalDate() : null;
             final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
-                SykdomDokumentType.UKLASSIFISERT,
-                null,
+                type,
+                datert,
                 mottattDato,
                 0L,
                 "VL",
@@ -93,6 +103,8 @@ public class SykdomsDokumentVedleggHåndterer {
                 "VL",
                 mottattidspunkt);
             sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
+            
+            hoveddokument = false;
         }
 
     }
