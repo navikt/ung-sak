@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.k9.sak.typer.Periode;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -20,6 +21,7 @@ public class BeskrivelseDto {
 
     @JsonProperty(value = "tekst")
     @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String tekst;
 

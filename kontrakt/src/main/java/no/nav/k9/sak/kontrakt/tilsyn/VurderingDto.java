@@ -7,6 +7,9 @@ import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.Periode;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -15,6 +18,8 @@ public class VurderingDto {
 
     @JsonProperty(value = "id")
     @Valid
+    @Min(0)
+    @Max(Long.MAX_VALUE)
     private Long id;
 
     @JsonProperty(value = "periode")
@@ -23,6 +28,7 @@ public class VurderingDto {
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String begrunnelse;
 
@@ -35,6 +41,7 @@ public class VurderingDto {
     private Kilde kilde;
 
     public VurderingDto(Long id, Periode periode, String begrunnelse, Resultat resultat, Kilde kilde) {
+        this.id = id;
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
