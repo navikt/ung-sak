@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.preforeslåvedtak;
+package no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -17,6 +18,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 
 @BehandlingStegRef(kode = "VURDER_MANUELT_BREV")
@@ -25,7 +28,9 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 @ApplicationScoped
 public class VurderManueltBrevSteg implements BehandlingSteg {
 
+    private BehandlingRepository behandlingRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private K9FormidlingKlient formidlingKlient;
     private Boolean lansert;
 
     VurderManueltBrevSteg() {
@@ -33,15 +38,19 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
     }
 
     @Inject
-    public VurderManueltBrevSteg(FagsakProsessTaskRepository fagsakProsessTaskRepository,
+    public VurderManueltBrevSteg(BehandlingRepository behandlingRepository,
+                                 FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                 K9FormidlingKlient formidlingKlient,
                                  @KonfigVerdi(value = "FORMIDLING_RETUR_MALTYPER", defaultVerdi = "true") Boolean lansert) {
+        this.behandlingRepository = behandlingRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.formidlingKlient = formidlingKlient;
         this.lansert = lansert;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!lansert){
+        if (!lansert) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -54,11 +63,27 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat gjenopptaSteg(BehandlingskontrollKontekst kontekst) {
-        if (!lansert){
+        if (!lansert) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        var maltyper = hentTilgjengeligeMaltyper(kontekst.getBehandlingId());
-        return utledAksjonspunkt(maltyper);
+
+        InformasjonsbehovListeDto informasjonsbehov = finnInformasjonsbehov(kontekst);
+        return utledAksjonspunkt(informasjonsbehov);
+    }
+
+    private InformasjonsbehovListeDto finnInformasjonsbehov(BehandlingskontrollKontekst kontekst) {
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        return formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
+    }
+
+    private BehandleStegResultat utledAksjonspunkt(InformasjonsbehovListeDto informasjonsbehov) {
+        return trengerManueltBrev(informasjonsbehov)
+            ? BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_MANUELT_BREV))
+            : BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean trengerManueltBrev(InformasjonsbehovListeDto informasjonsbehov) {
+        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
     }
 
     private void lagTaskForÅTaAvVent(BehandlingskontrollKontekst kontekst) {
@@ -74,19 +99,4 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(kontekst.getFagsakId(), kontekst.getBehandlingId(), gruppe);
     }
 
-    private BehandleStegResultat utledAksjonspunkt(Void maltyper) {
-        return trengerFritekstbrev(maltyper)
-            ? BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_MANUELT_BREV))
-            : BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private boolean trengerFritekstbrev(Void maltyper) {
-        //TODO riktig utledning
-        return false;
-    }
-
-    private Void hentTilgjengeligeMaltyper(Long behandlingId) {
-        //TODO kall på k9-formidling
-        return null;
-    }
 }
