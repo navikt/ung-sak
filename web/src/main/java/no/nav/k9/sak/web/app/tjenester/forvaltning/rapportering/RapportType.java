@@ -8,8 +8,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public enum RapportType {
 
-    UTBETALING_PER_DAG(FagsakYtelseType.PSB, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN)
-
+    UTBETALING_PER_DAG(FagsakYtelseType.PSB, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN),
+    UTBETALING_PER_BRUKER(FagsakYtelseType.PSB, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN)
     ;
 
     @JsonIgnore

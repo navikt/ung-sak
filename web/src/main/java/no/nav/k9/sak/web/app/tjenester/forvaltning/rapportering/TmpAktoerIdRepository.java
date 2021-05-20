@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 
@@ -16,10 +18,12 @@ import no.nav.k9.sak.typer.PersonIdent;
 public class TmpAktoerIdRepository {
 
     private EntityManager entityManager;
+    private ProsessTaskRepository prosessTaskRepository;
 
     @Inject
-    public TmpAktoerIdRepository(EntityManager entityManager) {
+    public TmpAktoerIdRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository) {
         this.entityManager = entityManager;
+        this.prosessTaskRepository = prosessTaskRepository;
     }
 
     public List<AktørId> finnManglendeMapping(int max) {
@@ -50,5 +54,14 @@ public class TmpAktoerIdRepository {
             entityManager.persist(new TmpAktoerId(e.getKey(), e.getValue()));
         }
         entityManager.flush();
+    }
+
+    public void resetAktørIdCache() {
+        entityManager.createNativeQuery("delete from TMP_AKTOER_ID");
+    }
+
+    public void startInnhenting() {
+        var cacheFnrTask = new ProsessTaskData(TmpAktørIdTask.TASKTYPE);
+        prosessTaskRepository.lagre(cacheFnrTask);
     }
 }
