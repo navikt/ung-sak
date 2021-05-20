@@ -282,6 +282,45 @@ public class RegelBeregnFeriepengerTest {
     }
 
     @Test
+    void skal_ikke_trekke_dager_fra_brukes_feriepengedagerkvote_for_dager_med_kun_refusjon_når_det_er_ubegrenset_for_arbeidsgiver() {
+        LocalDate fom1 = LocalDate.of(2021, 1, 1);
+        LocalDate tom1 = fom1.plusDays(99);
+        LocalDate fom2 = tom1.plusDays(1);
+        LocalDate tom2 = fom2.plusDays(50);
+        BeregningsresultatPeriode periodeKunRefusjon = new BeregningsresultatPeriode(fom1, tom1);
+        byggAndelerForPeriode(periodeKunRefusjon, 0, 200, arbeidsforhold1);
+        BeregningsresultatPeriode periodeKunBruker = new BeregningsresultatPeriode(fom2, tom2);
+        byggAndelerForPeriode(periodeKunBruker, 100, 0, arbeidsforhold1);
+
+        BeregningsresultatFeriepengerRegelModell regelModell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medBeregningsresultatPerioder(List.of(periodeKunRefusjon, periodeKunBruker))
+            .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
+            .medAntallDagerFeriepenger(48)
+            .medFeriepengeopptjeningForHelg(true)
+            .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .build();
+
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
+        Evaluation evaluation = regel.evaluer(regelModell);
+        String sporing = EvaluationSerializer.asJson(evaluation);
+
+        assertThat(sporing).isNotNull();
+        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isBetween(fom1, fom2); //alle dager i range vil være OK
+        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(fom2.plusDays(47));
+        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getFomDato()).isEqualTo(fom1);
+        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getTomDato()).isBetween(tom1, tom2); //alle dager i range vil være OK
+
+        List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
+        assertThat(perioder).hasSize(2);
+        BeregningsresultatPeriode periode2 = perioder.get(1);
+        List<BeregningsresultatAndel> brAndeler2 = periode2.getBeregningsresultatAndelList();
+        assertThat(brAndeler2).hasSize(1);
+        brAndeler2.forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1));
+        BeregningsresultatAndel andelBruker = brAndeler2.stream().filter(BeregningsresultatAndel::erBrukerMottaker).findFirst().orElseThrow();
+        assertThat(andelBruker.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("489.6")); //10.2 % av 100 kr * 48 dager (dager kappes)
+    }
+
+    @Test
     void skal_beregne_feriepenger_når_det_er_innvilget_utelukkende_refusjon() {
         LocalDate fom = LocalDate.of(2021, 1, 1);
         LocalDate tom = fom;
