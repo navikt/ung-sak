@@ -31,14 +31,11 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-@Path(VurderTilsynRestTjeneste.BASEPATH)
+@Path("")
 @Transactional
 public class VurderTilsynRestTjeneste {
 
-    static final String BASEPATH = "/behandling/tilsyn";
-    private static final String NATTEVÅK_PATH = BASEPATH + "/nattevak";
-    private static final String BEREDSKAP_PATH = BASEPATH + "/beredskap";
-
+    public static final String BASEPATH = "/behandling/tilsyn";
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
@@ -72,6 +69,7 @@ public class VurderTilsynRestTjeneste {
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    @Path((BASEPATH))
     public EtablertTilsynNattevåkOgBeredskapDto hentEtablertTilsyn(@NotNull @QueryParam(BehandlingUuidDto.NAME)
                                                 @Parameter(description = BehandlingUuidDto.DESC)
                                                 @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
