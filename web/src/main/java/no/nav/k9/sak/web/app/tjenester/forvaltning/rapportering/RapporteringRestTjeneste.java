@@ -35,6 +35,7 @@ import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
+import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 @Path(RapporteringRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -53,12 +54,16 @@ public class RapporteringRestTjeneste {
 
     private Instance<RapportGenerator> rapportGenerators;
 
+    private TmpAktoerIdRepository tmpAktoerIdRepository;
+
     RapporteringRestTjeneste() {
         // for proxy
     }
 
     @Inject
-    RapporteringRestTjeneste(@Any Instance<RapportGenerator> rapportGenerators) {
+    RapporteringRestTjeneste(TmpAktoerIdRepository tmpAktoerIdRepository,
+                             @Any Instance<RapportGenerator> rapportGenerators) {
+        this.tmpAktoerIdRepository = tmpAktoerIdRepository;
         this.rapportGenerators = rapportGenerators;
     }
 
@@ -68,9 +73,8 @@ public class RapporteringRestTjeneste {
     @Operation(description = "Dumper en rapport av data", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "rapportering")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response genererRapportForYtelse(@NotNull @FormParam("ytelseType") @Parameter(description = "ytelseType", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) YtelseTypeKode ytelseTypeKode,
-                            @NotNull @FormParam("rapport") @Parameter(description = "rapport", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) RapportType rapportType,
-                            @NotNull @FormParam("periode") @Parameter(description = "periode", required = true, example = "2020-01-01/2020-12-31") @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) Periode periode) {
-
+                                            @NotNull @FormParam("rapport") @Parameter(description = "rapport", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) RapportType rapportType,
+                                            @NotNull @FormParam("periode") @Parameter(description = "periode", required = true, example = "2020-01-01/2020-12-31") @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) Periode periode) {
 
         FagsakYtelseType ytelseType = FagsakYtelseType.fraKode(ytelseTypeKode.name());
         rapportType.valider(ytelseType);
@@ -91,6 +95,32 @@ public class RapporteringRestTjeneste {
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"%s-%s-%s.zip\"", rapportType.name(), ytelseType.getKode(), LocalDateTime.now().format(DT_FORMAT)))
             .build();
+
+    }
+
+    @POST
+    @Path("/innhent-fnr")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Cache fnr for aktørid for rapporteringsformål", summary = ("Cache fnr for aktørid for rapporteringsformålg"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    public Response innhentFnr(@NotNull @FormParam("restart") @Parameter(description = "restart innhenting", allowEmptyValue = false, required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Boolean restart) {
+        if (restart) {
+            tmpAktoerIdRepository.resetAktørIdCache();
+        }
+
+        tmpAktoerIdRepository.startInnhenting();
+        return Response.ok().build();
+
+    }
+
+    @POST
+    @Path("/dump-fnr")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Dump Cache fnr ", summary = ("Dump Cache fnr "), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    public Response dumpFnrCache() {
+        tmpAktoerIdRepository.resetAktørIdCache();
+        return Response.ok().build();
 
     }
 }

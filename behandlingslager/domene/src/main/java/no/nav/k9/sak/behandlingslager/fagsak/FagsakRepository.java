@@ -72,10 +72,12 @@ public class FagsakRepository {
 
     public List<Fagsak> hentForBruker(AktørId aktørId) {
         TypedQuery<Fagsak> query = entityManager
-            .createQuery("from Fagsak f "
-                + " where f.brukerAktørId=:aktørId"
-                + " and f.skalTilInfotrygd=:ikkestengt"
-                + " and f.ytelseType in (:ytelseTyper)",
+            .createQuery("""
+                    from Fagsak f
+                      where f.brukerAktørId=:aktørId
+                       and f.skalTilInfotrygd=:ikkestengt
+                       and f.ytelseType in (:ytelseTyper)
+                    """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
         query.setParameter("ikkestengt", false); // NOSONAR
@@ -147,16 +149,16 @@ public class FagsakRepository {
     public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         Query query;
 
-        String sqlString = "select f.* from Fagsak f"
-            + " where "
-            + "   f.bruker_aktoer_id = :brukerAktørId"
-            + "   and f.ytelse_type = :ytelseType"
-            + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true"
+        String sqlString = """
+                        select f.* from Fagsak f
+                          where f.bruker_aktoer_id = :brukerAktørId
+                             and f.ytelse_type = :ytelseType
+                             and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                """
             + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id = :pleietrengendeAktørId")
             + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id = :relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
-        query = entityManager.createNativeQuery(
-            sqlString,
-            Fagsak.class); // NOSONAR
+
+        query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
 
         if (pleietrengendeAktørId != null) {
             query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId.getId());
@@ -182,14 +184,15 @@ public class FagsakRepository {
     public List<Fagsak> finnFagsakRelatertTil(FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
         Query query;
 
-        query = entityManager.createNativeQuery(
-            "select f.* from Fagsak f"
-                + " where "
-                + "       coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')"
-                + "   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')"
-                + "   and f.ytelse_type = :ytelseType"
-                + "   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true",
-            Fagsak.class); // NOSONAR
+        String sql = """
+                select f.* from Fagsak f
+                 where coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')
+                   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')
+                   and f.ytelse_type = :ytelseType
+                   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                  """;
+
+        query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
 
         query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
         query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
