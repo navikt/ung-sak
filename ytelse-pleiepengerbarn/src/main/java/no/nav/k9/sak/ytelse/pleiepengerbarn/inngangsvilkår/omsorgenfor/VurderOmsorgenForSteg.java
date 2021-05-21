@@ -74,7 +74,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
 
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (skalHaAksjonspunktGrunnetManuellRevurdering(behandling) || harAksjonspunkt(samletOmsorgenForTidslinje)) {
+        if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         }
 
@@ -86,14 +86,16 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean skalHaAksjonspunktGrunnetManuellRevurdering(final Behandling behandling) {
-        return behandling.erManueltOpprettet() && behandling.getAksjonspunkter().stream().noneMatch(a -> a.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2);
+    private boolean skalHaAksjonspunktGrunnetManuellRevurdering(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, final Behandling behandling) {
+        return behandling.erManueltOpprettet()
+                && harAksjonspunkt(samletOmsorgenForTidslinje, false)
+                && behandling.getAksjonspunkter().stream().noneMatch(a -> a.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2);
     }
 
-    private boolean harAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
+    private boolean harAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNutt) {
         for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
             final OmsorgenForVilkårGrunnlag grunnlag = s.getValue();
-            if (grunnlag.getErOmsorgsPerson() == null && (
+            if ((grunnlag.getErOmsorgsPerson() == null || medAlleGamleVurderingerPåNutt) && (
                     grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {
