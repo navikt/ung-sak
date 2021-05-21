@@ -34,7 +34,7 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
                       f.bruker_aktoer_id,
                       a.ident,
                       a.ident_type,
-                      b.endret_tid as behandling_vedtatt_tid,
+                      replace(cast(b.endret_tid as varchar), ' ', 'T') behandling_vedtatt_tid,
                       bp.br_periode_fom as fom,
                       bp.br_periode_tom as tom,
                       ba.dagsats,
@@ -48,7 +48,7 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
                       ba.inntektskategori,
                       ba.aktivitet_status,
                       ba.arbeidsgiver_aktor_id as personlig_arbeidsgiver,
-                      ba.arbeidsforhold_intern_id
+                      cast(ba.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id
                 from br_resultat_behandling br
                       inner join br_beregningsresultat res on br.bg_beregningsresultat_fp_id=res.id
                       inner join behandling b on b.id=br.behandling_id
