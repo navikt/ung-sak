@@ -20,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -40,6 +41,7 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -144,40 +146,48 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
                 ut.getUtbetalingsgrader()
                         .stream()
-                        .filter(ug -> matchesAndel(a, ug.getArbeidsforhold()))
+                        .filter(ug -> matcherAndel(a, ug.getArbeidsforhold()))
                         .forEach(ug -> a.setUttak(List.of(new UttakDto(periode,  utfallType, ug.getUtbetalingsgrad()))));
             }
         });
         return null;
     }
 
-    private boolean matchesAndel(BeregningsresultatPeriodeAndelDto andel, Arbeidsforhold arbeidsforhold) {
-        // TODO: Blir dette riktig????
-        final boolean sammeArbeidsforhold = (
-            andel.getArbeidsforholdId() == null
-            || arbeidsforhold.getArbeidsforholdId() == null
-            || andel.getArbeidsforholdId().equals(arbeidsforhold.getArbeidsforholdId())
-        );
-
-        // TODO: Trenger vi å sjekke arbeidstype??
-
-        if (!sammeArbeidsforhold) {
-            return false;
-        }
-
-        if (andel.getArbeidsgiverOrgnr() != null) {
-            return andel.getArbeidsgiverOrgnr().getOrgNummer().equals(arbeidsforhold.getOrganisasjonsnummer());
+    private boolean matcherAndel(BeregningsresultatPeriodeAndelDto andel, Arbeidsforhold arbeidsforhold) {
+        if (andel.getArbeidsgiver() != null) {
+            return matcherArbeidsforhold(arbeidsforhold, andel)
+                && matcherAktitivetStatus(arbeidsforhold, andel);
         } else {
-            return andel.getAktørId().getId().equals(arbeidsforhold.getAktørId());
+            return matcherAktitivetStatus(arbeidsforhold, andel);
         }
     }
 
-    private UtfallType mapToUtfallType(Utfall utfall) {
-        switch (utfall) {
-        case OPPFYLT: return UtfallType.INNVILGET;
-        case IKKE_OPPFYLT: return UtfallType.AVSLÅTT;
-        default: throw new IllegalArgumentException("Ukjent utfall: " + utfall);
+    private boolean matcherArbeidsforhold(Arbeidsforhold arbeidsforhold, BeregningsresultatPeriodeAndelDto brukersAndel) {
+        var arbeidsgiver = brukersAndel.getArbeidsgiver();
+        var arbeidsforholdRef = InternArbeidsforholdRef.ref(brukersAndel.getArbeidsforholdId());
+        if (arbeidsgiver.getIdentifikator() != null && !OrganisasjonsNummerValidator.erGyldig(arbeidsgiver.getIdentifikator())) {
+            return arbeidsforhold.getAktørId() != null
+                && arbeidsgiver.getIdentifikator().equals(arbeidsforhold.getAktørId())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef);
+        } else if (arbeidsgiver.getIdentifikator() != null && OrganisasjonsNummerValidator.erGyldig(arbeidsgiver.getIdentifikator())) {
+            return Objects.equals(arbeidsgiver.getIdentifikator(), arbeidsforhold.getOrganisasjonsnummer())
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef)
+                && InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()).equals(arbeidsforholdRef);
         }
+        return false;
+    }
+
+    private boolean matcherAktitivetStatus(Arbeidsforhold it, BeregningsresultatPeriodeAndelDto brukersAndel) {
+        UttakArbeidType uttakArbeidType = UttakArbeidType.fraKode(it.getType());
+        return uttakArbeidType.matcher(brukersAndel.getAktivitetStatus());
+    }
+
+    private UtfallType mapToUtfallType(Utfall utfall) {
+        return switch (utfall) {
+            case OPPFYLT -> UtfallType.INNVILGET;
+            case IKKE_OPPFYLT -> UtfallType.AVSLÅTT;
+            default -> throw new IllegalArgumentException("Ukjent utfall: " + utfall);
+        };
     }
 
     private LocalDateTimeline<BeregningsresultatPeriodeDto> toTimeline(List<BeregningsresultatPeriodeDto> resultatDtoListe) {
