@@ -88,7 +88,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
 
     private boolean skalHaAksjonspunktGrunnetManuellRevurdering(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, final Behandling behandling) {
         return behandling.erManueltOpprettet()
-                && harAksjonspunkt(samletOmsorgenForTidslinje, false)
+                && harAksjonspunkt(samletOmsorgenForTidslinje, true)
                 && behandling.getAksjonspunkter().stream().noneMatch(a -> a.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2);
     }
 
