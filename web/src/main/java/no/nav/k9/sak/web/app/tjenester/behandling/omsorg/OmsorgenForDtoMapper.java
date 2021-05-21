@@ -119,30 +119,17 @@ class OmsorgenForDtoMapper {
         LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = omsorgenForTimeline.combine(tidslinjeTilVurdering, new LocalDateSegmentCombinator<OmsorgenForPeriode, Boolean, OmsorgenForDto>() {
             @Override
             public LocalDateSegment<OmsorgenForDto> combine(LocalDateInterval overlappendeIntervall, LocalDateSegment<OmsorgenForPeriode> eksisterendeOmsorgenForPeriode, LocalDateSegment<Boolean> periodeTilVurdering) {
-                if (eksisterendeOmsorgenForPeriode == null) {
-                    return null;
-                }
                 OmsorgenForPeriode p = eksisterendeOmsorgenForPeriode.getValue();
-                OmsorgenForDto omsorgenForDto;
-                if (periodeTilVurdering == null) {
-                    omsorgenForDto = new OmsorgenForDto(
-                        toPeriode(overlappendeIntervall),
-                        p.getBegrunnelse(),
-                        p.getRelasjon(),
-                        p.getRelasjonsbeskrivelse(),
-                        true,
-                        p.getResultat(),
-                        mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
-                } else {
-                    omsorgenForDto = new OmsorgenForDto(
-                        toPeriode(overlappendeIntervall),
-                        p.getBegrunnelse(),
-                        p.getRelasjon(),
-                        p.getRelasjonsbeskrivelse(),
-                        false,
-                        p.getResultat(),
-                        mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
-                }
+                final boolean readOnly = (periodeTilVurdering == null);
+                OmsorgenForDto omsorgenForDto = new OmsorgenForDto(
+                    toPeriode(overlappendeIntervall),
+                    p.getBegrunnelse(),
+                    p.getRelasjon(),
+                    p.getRelasjonsbeskrivelse(),
+                    readOnly,
+                    p.getResultat(),
+                    mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
+
                 return new LocalDateSegment<OmsorgenForDto>(overlappendeIntervall, omsorgenForDto);
             }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);

@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,10 +37,10 @@ class OmsorgenForDtoMapperTest {
         assertThat(omsorgenForDtos.size()).isEqualTo(2);
 
         assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 9)));
-        assertThat(omsorgenForDtos.get(0).getReadOnly()).isTrue();
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isTrue();
 
         assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
-        assertThat(omsorgenForDtos.get(1).getReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
     }
 
     @Test
@@ -58,13 +57,13 @@ class OmsorgenForDtoMapperTest {
         assertThat(omsorgenForDtos.size()).isEqualTo(3);
 
         assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)));
-        assertThat(omsorgenForDtos.get(0).getReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
 
         assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 6), LocalDate.of(2021, 2, 9)));
-        assertThat(omsorgenForDtos.get(1).getReadOnly()).isTrue();
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isTrue();
 
         assertThat(omsorgenForDtos.get(2).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20)));
-        assertThat(omsorgenForDtos.get(2).getReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(2).isReadOnly()).isFalse();
     }
 
     private OmsorgenForPeriode mockOmsorgenForPeriode(LocalDate fom, LocalDate tom) {
