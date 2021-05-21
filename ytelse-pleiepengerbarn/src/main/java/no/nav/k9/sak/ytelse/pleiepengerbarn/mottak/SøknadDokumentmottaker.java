@@ -80,8 +80,6 @@ class SøknadDokumentmottaker {
             søknadenInneholderInfomasjonSomIkkeKanPunsjes = true;
         }
 
-        ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj().get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes();
-
         sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             søknad.getMottattDato().toLocalDateTime(),
