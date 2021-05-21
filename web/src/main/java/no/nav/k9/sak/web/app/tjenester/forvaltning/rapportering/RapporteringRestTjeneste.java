@@ -102,7 +102,7 @@ public class RapporteringRestTjeneste {
     @Path("/innhent-fnr")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Cache fnr for aktørid for rapporteringsformål", summary = ("Cache fnr for aktørid for rapporteringsformålg"), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response innhentFnr(@NotNull @FormParam("restart") @Parameter(description = "restart innhenting", allowEmptyValue = false, required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Boolean restart) {
         if (restart) {
             tmpAktoerIdRepository.resetAktørIdCache();
@@ -117,7 +117,7 @@ public class RapporteringRestTjeneste {
     @Path("/dump-fnr")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Dump Cache fnr ", summary = ("Dump Cache fnr "), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response dumpFnrCache() {
         tmpAktoerIdRepository.resetAktørIdCache();
         return Response.ok().build();
