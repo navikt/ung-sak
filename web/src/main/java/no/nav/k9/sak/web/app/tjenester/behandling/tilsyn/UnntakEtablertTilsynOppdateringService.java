@@ -40,7 +40,6 @@ public class UnntakEtablertTilsynOppdateringService {
             perioder,
             List.of());
 
-        unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsyn);
         unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().medBeredskap(unntakEtablertTilsyn);
         unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynGrunnlag);
 

@@ -18,9 +18,7 @@ public class BeredskapOgNattevåkOversetter {
         var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
         var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId, vurderingstekst);
 
-        var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn();
-        unntakEtablertTilsynForBeredskap.setBeskrivelser(beskrivelser);
-        unntakEtablertTilsynForBeredskap.setPerioder(perioder);
+        var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn(perioder, beskrivelser);
 
         return unntakEtablertTilsynForBeredskap;
     }
@@ -63,6 +61,7 @@ public class BeredskapOgNattevåkOversetter {
         }
         nyeUnntak.forEach(nyttUnntak ->
             beskrivelser.add(new UnntakEtablertTilsynBeskrivelse(
+                eksisterendeUnntakEtablertTilsyn,
                 DatoIntervallEntitet.fraOgMedTilOgMed(nyttUnntak.fom(), nyttUnntak.tom()),
                 mottattDato,
                 nyttUnntak.tilleggsinformasjon(),

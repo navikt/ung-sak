@@ -25,12 +25,13 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     void lagre_og_hent_igjen() {
         var behandlingId = 123L;
         var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
-        grunnlagRepo.lagre(nyttBeredskap);
 
-        var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
-        uetForPleietrengende.medBeredskap(nyttBeredskap);
+        var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
 
         grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+        grunnlagRepo.entityManager.flush();
+        grunnlagRepo.entityManager.clear();
 
         var grunnlag = grunnlagRepo.hent(behandlingId);
 
@@ -45,15 +46,16 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
     }
 
     @Test
-    void lagreOppdatereOgHentIgjen() {
+    void lagre_oppdatere_og_hent_igjen() {
         var behandlingId = 123L;
         var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01");
-        grunnlagRepo.lagre(nyttBeredskap);
 
-        var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L));
-        uetForPleietrengende.medBeredskap(nyttBeredskap);
+        var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
 
         grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+        grunnlagRepo.entityManager.flush();
+        grunnlagRepo.entityManager.clear();
 
         var grunnlag = grunnlagRepo.hent(behandlingId);
 
@@ -67,9 +69,15 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(beredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
 
         var nattevåk = lagUnntakEtablertTilsyn("2020-03-01", "2020-04-01");
-        grunnlagRepo.lagre(nattevåk);
+
         uetForPleietrengende.medNattevåk(nattevåk);
-        grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+        grunnlagRepo.lagre(behandlingId, new UnntakEtablertTilsynForPleietrengende(
+            grunnlag.getUnntakEtablertTilsynForPleietrengende().getPleietrengendeAktørId(),
+            new UnntakEtablertTilsyn(grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap()),
+            nattevåk));
+
+        grunnlagRepo.entityManager.flush();
+        grunnlagRepo.entityManager.clear();
 
         var oppdatertGrunnlag = grunnlagRepo.hent(behandlingId);
 
@@ -87,57 +95,29 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(nyNattevåk.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
     }
 
-    @Test
-    void lagre_og_hente_unntak_etablert_tilsyn() {
-        var uet = new UnntakEtablertTilsyn();
-        uet.setPerioder(List.of(
-            periode(uet, LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10"), "OK", Resultat.OPPFYLT)
-        ));
-        uet.setBeskrivelser(List.of(
-            beskrivelse(uet, "Har så lyst på litt beredskap", LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10"))
-        ));
-
-        var id = grunnlagRepo.lagre(uet);
-
-        var uetFraDb = grunnlagRepo.hentUnntakEtablertTilsyn(id);
-
-        assertThat(uetFraDb).isNotNull();
-        assertThat(uetFraDb.getPerioder()).hasSize(1);
-        var periode = uetFraDb.getPerioder().get(0);
-        assertThat(periode.getResultat()).isEqualTo(Resultat.OPPFYLT);
-        assertThat(periode.getBegrunnelse()).isEqualTo("OK");
-        assertThat(periode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10")));
-        assertThat(uetFraDb.getBeskrivelser()).hasSize(1);
-        var beskrivelse = uetFraDb.getBeskrivelser().get(0);
-        assertThat(beskrivelse.getTekst()).isEqualTo("Har så lyst på litt beredskap");
-        assertThat(beskrivelse.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-10")));
-    }
-
     private UnntakEtablertTilsyn lagUnntakEtablertTilsyn(String fom, String tom) {
-        var unntakEtablertTilsyn = new UnntakEtablertTilsyn();
-        unntakEtablertTilsyn.setBeskrivelser(List.of(
-            beskrivelse(unntakEtablertTilsyn, "Jeg søker.", LocalDate.parse(fom), LocalDate.parse(tom))
-        ));
-        unntakEtablertTilsyn.setPerioder(List.of(
-            periode(unntakEtablertTilsyn, LocalDate.parse(fom), LocalDate.parse(tom), "DU skal få.", Resultat.OPPFYLT)
-        ));
+        var perioder = List.of(
+            periode(LocalDate.parse(fom), LocalDate.parse(tom), "DU skal få.", Resultat.OPPFYLT)
+        );
+        var beskrivelser = List.of(
+            beskrivelse("Jeg søker.", LocalDate.parse(fom), LocalDate.parse(tom))
+        );
+        var unntakEtablertTilsyn = new UnntakEtablertTilsyn(perioder, beskrivelser);
         return unntakEtablertTilsyn;
     }
 
-    private UnntakEtablertTilsynPeriode periode(UnntakEtablertTilsyn unntakEtablertTilsyn, LocalDate fom, LocalDate tom, String begrunnelse, Resultat resultat) {
+    private UnntakEtablertTilsynPeriode periode(LocalDate fom, LocalDate tom, String begrunnelse, Resultat resultat) {
         var periode = new UnntakEtablertTilsynPeriode()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
             .medBegrunnelse(begrunnelse)
             .medResultat(resultat)
             .medAktørId(new AktørId(456L))
             .medKildeBehandlingId(123L);
-        periode.setUnntakEtablertTilsyn(unntakEtablertTilsyn);
         return periode;
     }
 
-    private UnntakEtablertTilsynBeskrivelse beskrivelse(UnntakEtablertTilsyn unntakEtablertTilsyn, String tekst, LocalDate fom, LocalDate tom) {
+    private UnntakEtablertTilsynBeskrivelse beskrivelse(String tekst, LocalDate fom, LocalDate tom) {
         return new UnntakEtablertTilsynBeskrivelse()
-            .medUnntakEtablertTilsyn(unntakEtablertTilsyn)
             .medSøker(new AktørId(456L))
             .medMottattDato(LocalDate.now())
             .medPeriode(fom, tom)

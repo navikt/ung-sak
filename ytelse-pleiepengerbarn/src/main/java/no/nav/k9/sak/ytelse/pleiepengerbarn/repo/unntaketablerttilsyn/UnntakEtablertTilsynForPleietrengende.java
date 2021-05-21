@@ -2,13 +2,12 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.AktørId;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynForPleietrengende")
-@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE")
+@Table(name = "psb_unntak_etablert_tilsyn_pleietrengende")
 public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
 
     @Id
@@ -16,17 +15,15 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
     private Long id;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "PLEIETRENGENDE_AKTOER_ID", unique = true, nullable = false, updatable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId pleietrengendeAktørId;
 
-    @ManyToOne
-    @Immutable
-    @JoinColumn(name = "BEREDSKAP_ID", nullable = false, updatable = false, unique = true)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "beredskap_id", nullable = true, updatable = false, unique = true)
     private UnntakEtablertTilsyn beredskap;
 
-    @ManyToOne
-    @Immutable
-    @JoinColumn(name = "NATTEVAAK_ID", nullable = false, updatable = false, unique = true)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "nattevaak_id", nullable = true, updatable = false, unique = true)
     private UnntakEtablertTilsyn nattevåk;
 
     @Version
@@ -37,16 +34,24 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
         // hibernate
     }
 
-    public UnntakEtablertTilsynForPleietrengende(AktørId pleietrengendeAktørId) {
+    public UnntakEtablertTilsynForPleietrengende(AktørId pleietrengendeAktørId, UnntakEtablertTilsyn beredskap, UnntakEtablertTilsyn nattevåk) {
         this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.beredskap = beredskap;
+        this.nattevåk = nattevåk;
     }
 
     UnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
-        this(unntakEtablertTilsynForPleietrengende.pleietrengendeAktørId);
+        this(unntakEtablertTilsynForPleietrengende.pleietrengendeAktørId,
+            unntakEtablertTilsynForPleietrengende.getBeredskap(),
+            unntakEtablertTilsynForPleietrengende.getNattevåk());
     }
 
     public Long getId() {
         return id;
+    }
+
+    public AktørId getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
     }
 
     public UnntakEtablertTilsyn getBeredskap() {

@@ -12,7 +12,7 @@ import java.util.Optional;
 @Dependent
 public class UnntakEtablertTilsynGrunnlagRepository {
 
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Inject
     public UnntakEtablertTilsynGrunnlagRepository(EntityManager entityManager) {
@@ -42,16 +42,6 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         return lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
     }
 
-    UnntakEtablertTilsyn hentUnntakEtablertTilsyn(Long id) {
-        return entityManager.find(UnntakEtablertTilsyn.class, id);
-    }
-
-    public Long lagre(UnntakEtablertTilsyn unntakEtablertTilsyn) {
-        entityManager.persist(unntakEtablertTilsyn);
-        entityManager.flush();
-        return unntakEtablertTilsyn.getId();
-    }
-
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         Optional<UnntakEtablertTilsynGrunnlag> grunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         grunnlag.ifPresent(entitet -> {
@@ -69,21 +59,18 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         }
 
         var grunnlagEntitet = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende);
-        if (unntakEtablertTilsynForPleietrengende != null) {
-            entityManager.persist(unntakEtablertTilsynForPleietrengende);
-        }
 
         entityManager.persist(grunnlagEntitet);
         entityManager.flush();
         return grunnlagEntitet;
     }
 
-    private Optional<UnntakEtablertTilsynGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    private Optional<UnntakEtablertTilsynGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
         final TypedQuery<UnntakEtablertTilsynGrunnlag> query = entityManager.createQuery(
-            "FROM UnntakEtablertTilsynGrunnlag s " +
+            "SELECT s FROM UnntakEtablertTilsynGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId AND s.aktiv = true", UnntakEtablertTilsynGrunnlag.class);
 
-        query.setParameter("behandlingId", id);
+        query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }

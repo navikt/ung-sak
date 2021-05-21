@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynBeskrivelse")
-@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_BESKRIVELSE")
+@Table(name = "psb_unntak_etablert_tilsyn_beskrivelse")
 public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements IndexKey {
 
     @Id
@@ -20,26 +20,26 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "FOM", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "TOM", nullable = false))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
 
 
     @ManyToOne
-    @JoinColumn(name = "PSB_UNNTAK_ETABLERT_TILSYN_ID", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "psb_unntak_etablert_tilsyn_id", nullable = false, updatable = false, unique = true)
     private UnntakEtablertTilsyn unntakEtablertTilsyn;
 
 
-    @Column(name = "MOTTATT_DATO")
+    @Column(name = "mottatt_dato")
     private LocalDate mottattDato;
 
-    @Column(name = "TEKST")
+    @Column(name = "tekst")
     private String tekst;
 
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "SOEKER_AKTOER_ID", unique = true, nullable = false, updatable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "soeker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId søker;
 
     @Column(name = "kilde_behandling_id", nullable = false, updatable = false, unique = true)
@@ -49,16 +49,16 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         // Hibernate
     }
 
-    public UnntakEtablertTilsynBeskrivelse(DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker, Long kildeBehandlingId) {
+    public UnntakEtablertTilsynBeskrivelse(UnntakEtablertTilsyn unntakEtablertTilsyn, DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker, Long kildeBehandlingId) {
         this.periode = periode;
         this.mottattDato = mottattDato;
         this.tekst = tekst;
         this.søker = søker;
         this.kildeBehandlingId = kildeBehandlingId;
+        this.unntakEtablertTilsyn = unntakEtablertTilsyn;
     }
 
-
-    public UnntakEtablertTilsynBeskrivelse(UnntakEtablertTilsynBeskrivelse beskrivelse) {
+    UnntakEtablertTilsynBeskrivelse(UnntakEtablertTilsynBeskrivelse beskrivelse) {
         this.periode = beskrivelse.periode;
         this.mottattDato = beskrivelse.mottattDato;
         this.tekst = beskrivelse.tekst;
@@ -134,12 +134,12 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnntakEtablertTilsynBeskrivelse that = (UnntakEtablertTilsynBeskrivelse) o;
-        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && mottattDato.equals(that.mottattDato) && Objects.equals(tekst, that.tekst) && søker.equals(that.søker) && kildeBehandlingId.equals(that.kildeBehandlingId);
+        return periode.equals(that.periode) && mottattDato.equals(that.mottattDato) && Objects.equals(tekst, that.tekst) && søker.equals(that.søker) && kildeBehandlingId.equals(that.kildeBehandlingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, unntakEtablertTilsyn, mottattDato, tekst, søker, kildeBehandlingId);
+        return Objects.hash(periode, mottattDato, tekst, søker, kildeBehandlingId);
     }
 
 
@@ -152,5 +152,9 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
             ", søker=" + søker +
             ", kildeBehandlingId=" + kildeBehandlingId +
             '}';
+    }
+
+    void setUnntakEtablertTilsyn(UnntakEtablertTilsyn unntakEtablertTilsyn) {
+        this.unntakEtablertTilsyn = unntakEtablertTilsyn;
     }
 }

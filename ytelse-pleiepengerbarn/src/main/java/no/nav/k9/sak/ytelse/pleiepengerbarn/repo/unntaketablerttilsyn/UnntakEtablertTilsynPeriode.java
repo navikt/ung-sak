@@ -13,7 +13,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "UnntakEtablertTilsynPeriode")
-@Table(name = "PSB_UNNTAK_ETABLERT_TILSYN_PERIODE")
+@Table(name = "psb_unntak_etablert_tilsyn_periode")
 public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey  {
 
     @Id
@@ -40,7 +40,7 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     private Resultat resultat;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "SOEKER_AKTOER_ID", unique = true, nullable = false, updatable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "soeker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId aktørId;
 
     @Column(name = "kilde_behandling_id", nullable = false, updatable = false)
@@ -72,8 +72,9 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return unntakEtablertTilsyn;
     }
 
-    public void setUnntakEtablertTilsyn(UnntakEtablertTilsyn unntakEtablertTilsyn) {
+    public UnntakEtablertTilsynPeriode medUnntakEtablertTilsyn(UnntakEtablertTilsyn unntakEtablertTilsyn) {
         this.unntakEtablertTilsyn = unntakEtablertTilsyn;
+        return this;
     }
 
     @Override

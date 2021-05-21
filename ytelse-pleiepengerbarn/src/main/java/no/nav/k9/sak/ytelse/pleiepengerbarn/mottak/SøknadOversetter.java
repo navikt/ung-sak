@@ -115,7 +115,7 @@ class SøknadOversetter {
 
         // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
 
-        lagreBeredskapOgNattevåk(søknad, journalpostId, behandlingId, fagsakId);
+        lagreBeredskapOgNattevåk(søknad, behandlingId);
 
         // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
         lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
@@ -127,43 +127,43 @@ class SøknadOversetter {
         lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
     }
 
-    private void lagreBeredskapOgNattevåk(Søknad søknad, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {
-        var ytelse = søknad.getYtelse();
-        if (ytelse instanceof PleiepengerSyktBarn) {
-            var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
-            var søkerPersonIdent = søknad.getSøker().getPersonIdent();
-            var pleietrengendeAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(pleietrengendePersonIdent.getVerdi())).orElseThrow();
-            var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
+    private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
+        var ytelse = (PleiepengerSyktBarn) søknad.getYtelse();
 
-            var grunnlag = hentEllerOpprettUnntakEtablertTilsynGrunnlag(behandlingId, pleietrengendeAktørId);
+        var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
+        var søkerPersonIdent = søknad.getSøker().getPersonIdent();
+        var pleietrengendeAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(pleietrengendePersonIdent.getVerdi())).orElseThrow();
+        var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
 
-            var pleiepengerSyktBarn = (PleiepengerSyktBarn) ytelse;
-            var unntakEtablertTilsynForPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengendeAktørId);
-            unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        var eksisterendeBeredskap = eksisterendeGrunnlag.map(
+            it -> it.getUnntakEtablertTilsynForPleietrengende().getBeredskap()
+        ).orElse(null);
+        var eksisterendeNattevåk = eksisterendeGrunnlag.map(
+            it -> it.getUnntakEtablertTilsynForPleietrengende().getNattevåk()
+        ).orElse(null);
 
-            var unntakEtablertTilsynBeredskap =
-                tilUnntakEtablertTilsynForPleietrengende(
-                    grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
-                    søknad.getMottattDato().toLocalDate(),
-                    søkerAktørId,
-                    behandlingId,
-                    pleiepengerSyktBarn.getBeredskap());
-            var unntakEtablertTilsynNattevåk =
-                tilUnntakEtablertTilsynForPleietrengende(
-                    grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk(),
-                    søknad.getMottattDato().toLocalDate(),
-                    søkerAktørId,
-                    behandlingId,
-                    pleiepengerSyktBarn.getNattevåk());
-            unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynBeredskap);
-            unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynNattevåk);
-            var nyttGrunnlag = grunnlag.getUnntakEtablertTilsynForPleietrengende()
-                .medBeredskap(unntakEtablertTilsynBeredskap)
-                .medNattevåk(unntakEtablertTilsynNattevåk);
-            unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, nyttGrunnlag);
-        } else {
-            throw new IllegalStateException("Ytelse er ikke PleiepengerSyktBarn. Skal ikke skje.");
-        }
+        var unntakEtablertTilsynBeredskap =
+            tilUnntakEtablertTilsynForPleietrengende(
+                eksisterendeBeredskap,
+                søknad.getMottattDato().toLocalDate(),
+                søkerAktørId,
+                behandlingId,
+                ytelse.getBeredskap());
+        var unntakEtablertTilsynNattevåk =
+            tilUnntakEtablertTilsynForPleietrengende(
+                eksisterendeNattevåk,
+                søknad.getMottattDato().toLocalDate(),
+                søkerAktørId,
+                behandlingId,
+                ytelse.getNattevåk());
+
+        var unntakEtablertTilsynForPleietrengende = new UnntakEtablertTilsynForPleietrengende(
+            pleietrengendeAktørId,
+            unntakEtablertTilsynBeredskap,
+            unntakEtablertTilsynNattevåk
+        );
+        unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
     }
 
     private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
@@ -189,18 +189,6 @@ class SøknadOversetter {
         );
         return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakNattevåk, unntakSomSkalSlettes);
     }
-
-    private UnntakEtablertTilsynGrunnlag hentEllerOpprettUnntakEtablertTilsynGrunnlag(Long behandlingId, AktørId pleietrengendeAktørId) {
-        var unntakEtablertTilsynGrunnlagOptional = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
-        if (unntakEtablertTilsynGrunnlagOptional.isPresent()) {
-            return unntakEtablertTilsynGrunnlagOptional.get();
-        }
-        var unntakEtablertTilsynGrunnlagPleietrengende = new UnntakEtablertTilsynForPleietrengende(pleietrengendeAktørId);
-        var grunnlag = new UnntakEtablertTilsynGrunnlag(behandlingId, unntakEtablertTilsynGrunnlagPleietrengende);
-        unntakEtablertTilsynGrunnlagRepository.lagre( behandlingId, unntakEtablertTilsynGrunnlagPleietrengende);
-        return grunnlag;
-    }
-
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
         final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
