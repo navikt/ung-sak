@@ -21,7 +21,7 @@ public class K9FormidlingKlient {
     @Inject
     public K9FormidlingKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.formidling.url", defaultVerdi = "http://k9-formidling/k9/formidling") String urlK9Formidling) {
         this.restClient = restClient;
-        this.uriInformasjonsbehov = tilUri(urlK9Formidling, "/api/brev/informasjonsbehov");
+        this.uriInformasjonsbehov = tilUri(urlK9Formidling, "api/brev/informasjonsbehov");
     }
 
     private static URI tilUri(String baseUrl, String path) {
