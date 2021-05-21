@@ -68,19 +68,19 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
-                log.info("Oppretter revurdering");
                 var origBehandling = sisteVedtak.get();
                 var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
             } else {
                 throw new IllegalStateException("Prøvde revurdering av sak, men fant ingen behandling revurdere");
             }
         } else {
-            log.info("Fant åpen behandling, kjører diff for å flytte prosessen tilbake");
             if (behandlinger.size() != 1) {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
             var behandlingId = behandlinger.get(0);
+            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
