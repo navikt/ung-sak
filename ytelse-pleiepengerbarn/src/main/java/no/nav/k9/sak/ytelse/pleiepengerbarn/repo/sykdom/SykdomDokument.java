@@ -69,14 +69,15 @@ public class SykdomDokument {
     }
 
     public SykdomDokument(
-        JournalpostId journalpostId,
-        String dokumentInfoId,
-        SykdomDokumentInformasjon informasjon,
-        UUID behandlingUuid,
-        Saksnummer saksnummer,
-        boolean harInfoSomIkkeKanPunsjes, SykdomPerson person,
-        String opprettetAv,
-        LocalDateTime opprettetTidspunkt) {
+            JournalpostId journalpostId,
+            String dokumentInfoId,
+            SykdomDokumentInformasjon informasjon,
+            UUID behandlingUuid,
+            Saksnummer saksnummer,
+            boolean harInfoSomIkkeKanPunsjes,
+            SykdomPerson person,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");
         this.dokumentInfoId = dokumentInfoId;
         this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;

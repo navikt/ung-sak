@@ -19,6 +19,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.ytelse.psb.v1.InfoFraPunsj;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
@@ -73,7 +74,13 @@ class SøknadDokumentmottaker {
         Behandling behandling = tilknyttBehandling(saksnummer);
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        Boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes();
+        Optional<InfoFraPunsj> infoFraPunsj = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj();
+        boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = false;
+        if (infoFraPunsj.isPresent() && infoFraPunsj.get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes() != null) {
+            søknadenInneholderInfomasjonSomIkkeKanPunsjes = true;
+        }
+
+        ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj().get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes();
 
         sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),

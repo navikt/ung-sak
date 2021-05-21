@@ -19,7 +19,7 @@ public class SøknadParser {
         try {
             return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
         } catch (Exception e) {
-            throw new DokumentValideringException("Parsefeil i søknad om utbetaling av omsorgspenger", e);
+            throw new DokumentValideringException("Parsefeil i søknad", e);
         }
     }
 

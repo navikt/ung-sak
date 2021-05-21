@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.ytelse.psb.v1.InfoFraPunsj;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
@@ -109,7 +111,11 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        Boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes();
+        Optional<InfoFraPunsj> infoFraPunsj = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj();
+        boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = false;
+        if (infoFraPunsj.isPresent() && infoFraPunsj.get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes() != null) {
+            søknadenInneholderInfomasjonSomIkkeKanPunsjes = true;
+        }
 
         sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
             journalpostId,
