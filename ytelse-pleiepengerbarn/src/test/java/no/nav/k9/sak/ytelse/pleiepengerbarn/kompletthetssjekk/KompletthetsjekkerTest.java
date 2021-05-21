@@ -22,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.Skjæringstidspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -37,8 +36,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingRegisterTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
-import no.nav.k9.sak.mottak.inntektsmelding.DefaultKompletthetssjekkerInntektsmelding;
-import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -51,12 +48,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInntektsmeldin
 public class KompletthetsjekkerTest {
 
     private static final LocalDate STARTDATO = LocalDate.now().plusWeeks(1);
-    private static final String KODE_INNTEKTSMELDING = DokumentTypeId.INNTEKTSMELDING.getOffisiellKode();
 
     private BehandlingRepositoryProvider repositoryProvider;
     private SøknadRepository søknadRepository;
 
-    private KompletthetssjekkerTestUtil testUtil;
 
     @Mock
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
@@ -75,7 +70,6 @@ public class KompletthetsjekkerTest {
     private InntektsmeldingTjeneste inntektsmeldingTjeneste;
 
     private KompletthetssjekkerSøknad kompletthetssjekkerSøknad;
-    private KompletthetssjekkerInntektsmelding kompletthetssjekkerInntektsmelding;
     private KompletthetsjekkerFelles kompletthetsjekkerFelles;
     private PSBKompletthetsjekker psbKompletthetsjekker;
     private Skjæringstidspunkt skjæringstidspunkt = Skjæringstidspunkt.builder().medUtledetSkjæringstidspunkt(STARTDATO).build();
@@ -86,14 +80,12 @@ public class KompletthetsjekkerTest {
 
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         søknadRepository = repositoryProvider.getSøknadRepository();
-        testUtil = new KompletthetssjekkerTestUtil(repositoryProvider);
 
         when(skjæringstidspunktTjeneste.getSkjæringstidspunkter(Mockito.anyLong())).thenReturn(skjæringstidspunkt);
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraAAreg(any(), anyBoolean(), any())).thenReturn(new HashMap<>());
         when(inntektsmeldingArkivTjeneste.utledManglendeInntektsmeldingerFraGrunnlag(any(), anyBoolean(), any())).thenReturn(new HashMap<>());
 
         kompletthetssjekkerSøknad = new KompletthetssjekkerSøknad(søknadRepository, Period.parse("P4W"));
-        kompletthetssjekkerInntektsmelding = new DefaultKompletthetssjekkerInntektsmelding(inntektsmeldingArkivTjeneste);
         kompletthetsjekkerFelles = new KompletthetsjekkerFelles(repositoryProvider, dokumentBestillerApplikasjonTjenesteMock);
 
         psbKompletthetsjekker = new PSBKompletthetsjekker(

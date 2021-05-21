@@ -22,6 +22,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -44,16 +45,16 @@ public class SykdomGrunnlagRepository {
         this.sykdomDokumentRepository = Objects.requireNonNull(sykdomDokumentRepository, "sykdomDokumentRepository");
     }
 
-    public SykdomGrunnlag utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder) {
+    public SykdomGrunnlag utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
         final Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
 
-        return getSykdomGrunnlag(pleietrengendeAktørId, vurderingsperioder, grunnlagFraForrigeBehandling);
+        return utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
     }
 
-    private SykdomGrunnlag getSykdomGrunnlag(AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
+    private SykdomGrunnlag utledGrunnlag(AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes, Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling) {
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
-        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling);
+        final LocalDateTimeline<Boolean> søktePerioderFraForrigeBehandling = kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), toLocalDateTimeline(søknadsperioderSomSkalFjernes));
         final LocalDateTimeline<Boolean> vurderingsperioderTidslinje = toLocalDateTimeline(vurderingsperioder);
         final LocalDateTimeline<Boolean> søktePerioderTidslinje = søktePerioderFraForrigeBehandling.union(vurderingsperioderTidslinje, (interval, s1, s2) -> new LocalDateSegment<>(interval, true)).compress();
 
@@ -65,11 +66,16 @@ public class SykdomGrunnlagRepository {
         final SykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelseOrNull(pleietrengendeAktørId);
         final SykdomDiagnosekoder diagnosekoder = sykdomDokumentRepository.hentDiagnosekoderOrNull(pleietrengendeAktørId);
 
+        List<SykdomDokument> godkjenteLegeerklæringer = sykdomDokumentRepository.hentAlleDokumenterFor(pleietrengendeAktørId).stream()
+                .filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS)
+                .collect(Collectors.toList());
+        
         return new SykdomGrunnlag(
             UUID.randomUUID(),
             søktePerioder.stream().map(p -> new SykdomSøktPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
             revurderingsperioder.stream().map(p -> new SykdomRevurderingPeriode(p.getFom(), p.getTom())).collect(Collectors.toList()),
             vurderinger,
+            godkjenteLegeerklæringer,
             innleggelser,
             diagnosekoder,
             "VL",
@@ -78,13 +84,13 @@ public class SykdomGrunnlagRepository {
     }
 
 
-    public SykdomGrunnlagBehandling opprettGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder) {
+    public SykdomGrunnlagBehandling utledOgLagreGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId søkerAktørId, AktørId pleietrengendeAktørId, List<Periode> vurderingsperioder, List<Periode> søknadsperioderSomSkalFjernes) {
         final Optional<SykdomGrunnlagBehandling> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
         final Optional<SykdomGrunnlagBehandling> forrigeVersjon = hentGrunnlagForBehandling(behandlingUuid);
 
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
-        final SykdomGrunnlag grunnlag = getSykdomGrunnlag(pleietrengendeAktørId, vurderingsperioder, grunnlagFraForrigeBehandling);
+        final SykdomGrunnlag grunnlag = utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
 
         final SykdomPerson søker = sykdomVurderingRepository.hentEllerLagrePerson(søkerAktørId);
         final SykdomPerson pleietrengende = sykdomVurderingRepository.hentEllerLagrePerson(pleietrengendeAktørId);
@@ -128,6 +134,23 @@ public class SykdomGrunnlagRepository {
         return funnetId
             .map(id -> EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, id))
             .orElse(EndringsresultatSnapshot.utenSnapshot(SykdomGrunnlag.class));
+    }
+    
+    public boolean harHattGodkjentLegeerklæringMedUnntakAv(AktørId pleietrengende, UUID behandlingUuid) {
+        final TypedQuery<Long> q = entityManager.createQuery(
+                "select l.id "
+                + "from SykdomGrunnlagBehandling as sgb "
+                + "  inner join sgb.pleietrengende as p "
+                + "  inner join sgb.grunnlag as g "
+                + "  inner join g.godkjenteLegeerklæringer as l "
+                + "where p.aktørId = :aktørId "
+                + "  and sgb.behandlingUuid <> :behandlingUuid"
+                , Long.class);
+
+        q.setParameter("aktørId", pleietrengende);
+        q.setParameter("behandlingUuid", behandlingUuid);
+
+        return !q.getResultList().isEmpty();
     }
 
     public Optional<UUID> hentSisteBehandling(Saksnummer saksnummer) {

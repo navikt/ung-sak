@@ -27,6 +27,7 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
         return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
     }
 
+    @SuppressWarnings("unused")
     private boolean harSammeBosted(OmsorgenForVilkårGrunnlag grunnlag) {
         final var søkersAdresser = grunnlag.getSøkersAdresser();
         return grunnlag.getPleietrengendeAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));

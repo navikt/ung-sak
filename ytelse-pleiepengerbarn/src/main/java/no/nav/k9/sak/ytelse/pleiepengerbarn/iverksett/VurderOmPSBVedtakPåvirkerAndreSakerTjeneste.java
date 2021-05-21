@@ -24,8 +24,8 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("PSB")
@@ -36,7 +36,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private VilkårResultatRepository vilkårResultatRepository;
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomGrunnlagService sykdomGrunnlagService;
 
     VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -47,13 +47,13 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        VilkårResultatRepository vilkårResultatRepository,
                                                        SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                        SykdomVurderingRepository sykdomVurderingRepository,
-                                                       SykdomVurderingService sykdomVurderingService) {
+                                                       SykdomGrunnlagService sykdomGrunnlagService) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomGrunnlagService = sykdomGrunnlagService;
     }
 
     @Override
@@ -70,9 +70,11 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                 SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer)
                     .flatMap(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid))
                     .orElseThrow();
-                var vurderingsperioder = utledVurderingsperiode(kandidatSykdomBehandling);
-                var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder);
-                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomVurderingService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+                var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
+                var vurderingsperioder = utledVurderingsperiode(behandling);
+                var manglendeOmsorgenForPerioder = sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(behandling.getId());
+                var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
+                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
 
                 if (!endringerISøktePerioder.isEmpty()) {
                     result.add(kandidatsaksnummer);
@@ -83,8 +85,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         return result;
     }
 
-    private List<Periode> utledVurderingsperiode(SykdomGrunnlagBehandling kandidatSykdomBehandling) {
-        var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
+    private List<Periode> utledVurderingsperiode(Behandling behandling) {
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
         var vurderingsperioder = vilkårene.getVilkår(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR)
             .map(Vilkår::getPerioder)
@@ -104,4 +105,5 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
 
         return vurderingsperioder;
     }
+
 }

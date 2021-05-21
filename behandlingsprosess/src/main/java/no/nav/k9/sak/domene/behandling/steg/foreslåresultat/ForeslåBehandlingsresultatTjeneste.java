@@ -57,9 +57,11 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={} (før)", ref.getBehandlingId(), behandling.getBehandlingResultatType());
 
-
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+        } else if (skalBehandlingenSettesTilDelvisInnvilget(ref, vilkårene)) {
+            behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_INNVILGET);
+            log.info("Behandling {} delvis innvilget", ref.getBehandlingId());
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
             log.info("Behandling {} innvilget", ref.getBehandlingId());
@@ -73,7 +75,11 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    private boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
+        return false;
+    }
+
+    protected boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         var behandlingId = ref.getBehandlingId();
         Optional<VilkårType> førsteAvslåttVilkår = sjekkAllePerioderAvslåttForVilkår(vilkårene, behandlingId);
         if (førsteAvslåttVilkår.isPresent()) {
@@ -83,7 +89,9 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         return skalAvslåsBasertPåAndreForhold(ref);
     }
 
-    /** @return første vilkår som alle perioder er avslått for. */
+    /**
+     * @return første vilkår som alle perioder er avslått for.
+     */
     private Optional<VilkårType> sjekkAllePerioderAvslåttForVilkår(Vilkårene vilkårene, Long behandlingId) {
         var maksPeriode = getMaksPeriode(behandlingId);
 
@@ -100,11 +108,11 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     protected abstract DatoIntervallEntitet getMaksPeriode(Long behandlingId);
 
-    private boolean harIngenOppfylteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
+    protected boolean harIngenOppfylteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
         return timeline.filterValue(vp -> vp.getAvslagsårsak() == null && vp.getGjeldendeUtfall() == Utfall.OPPFYLT).isEmpty();
     }
 
-    private boolean harAvslåtteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
+    protected boolean harAvslåtteVilkårsPerioder(LocalDateTimeline<VilkårPeriode> timeline) {
         return !timeline.filterValue(vp -> vp.getAvslagsårsak() != null && vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT).isEmpty();
     }
 }

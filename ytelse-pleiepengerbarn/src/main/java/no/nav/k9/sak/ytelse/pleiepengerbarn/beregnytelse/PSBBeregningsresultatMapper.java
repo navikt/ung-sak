@@ -17,9 +17,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.uttak.UtfallType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -36,7 +36,6 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetalteP
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.UttakDto;
-import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -48,7 +47,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
-import no.nav.k9.felles.util.Tuple;
 
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
@@ -72,14 +70,6 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.uttakKlient = uttakKlient;
-    }
-
-    private static UttakArbeidsforhold toUttakArbeidsforhold(BeregningsresultatPeriodeAndelDto a) {
-        return new UttakArbeidsforhold(
-            a.getArbeidsgiverOrgnr() == null ? null : a.getArbeidsgiverOrgnr().getId(),
-            a.getAktørId(),
-            UttakArbeidType.mapFra(a.getAktivitetStatus()),
-            a.getArbeidsforholdId());
     }
 
     private static LocalDateSegment<UttaksperiodeInfo> toSegment(LukketPeriode periode, UttaksperiodeInfo value) {
@@ -137,7 +127,6 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
     }
 
     private void leggTilUttak(Uttaksplan uttaksplan, LocalDateTimeline<BeregningsresultatPeriodeDto> resultatTimeline) {
-        @SuppressWarnings("unchecked")
         LocalDateTimeline<UttaksperiodeInfo> uttTimeline = getTimeline(uttaksplan);
         resultatTimeline.combine(uttTimeline, this::kombinerMedUttak, JoinStyle.LEFT_JOIN);
     }

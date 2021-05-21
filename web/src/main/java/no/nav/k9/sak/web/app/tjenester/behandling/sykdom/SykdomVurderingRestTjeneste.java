@@ -32,10 +32,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomPeriodeMedEndringDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingDto;
@@ -58,10 +60,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -86,7 +86,6 @@ public class SykdomVurderingRestTjeneste {
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingService sykdomVurderingService;
-    private BasisPersonopplysningTjeneste personopplysningTjeneste;
 
 
     public SykdomVurderingRestTjeneste() {
@@ -95,12 +94,11 @@ public class SykdomVurderingRestTjeneste {
 
     @Inject
     public SykdomVurderingRestTjeneste(BehandlingRepository behandlingRepository, SykdomVurderingRepository sykdomVurderingRepository,
-            SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService, BasisPersonopplysningTjeneste personopplysningTjeneste) {
+            SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingService sykdomVurderingService) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingService = sykdomVurderingService;
-        this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
     @GET
@@ -123,7 +121,7 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForKontinuerligTilsynOgPleie(behandling);
-        final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
 
         return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
@@ -148,7 +146,7 @@ public class SykdomVurderingRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         final SykdomVurderingerOgPerioder sykdomUtlededePerioder = sykdomVurderingService.hentVurderingerForToOmsorgspersoner(behandling);
-        final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
         
         return sykdomVurderingOversiktMapper.map(behandling.getUuid(), behandling.getFagsak().getSaksnummer(), sykdomUtlededePerioder, pleietrengendesFødselsdato);
     }
@@ -248,14 +246,14 @@ public class SykdomVurderingRestTjeneste {
     }
 
     private void sikreAtOppdateringIkkeKrysser18årsdag(Behandling behandling, List<Periode> perioder) {
-        final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
+        final LocalDate pleietrengendesFødselsdato = sykdomVurderingService.finnPleietrengendesFødselsdato(behandling);
         if (isPerioderInneholderFørOgEtter18år(perioder, pleietrengendesFødselsdato)) {
             throw new IllegalStateException("En sykdomsvurdering kan ikke gjelde både før og etter at barnet har fylt 18 år. For å kunne lagre må vurderingen splittes i to.");
         }
     }
 
     static boolean isPerioderInneholderFørOgEtter18år(List<Periode> perioder, final LocalDate pleietrengendesFødselsdato) {
-        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(18);
+        final LocalDate blir18år = pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING);
         final boolean vurderingUnder18år = perioder.stream().anyMatch(p -> p.getFom().isBefore(blir18år));
         final boolean vurdering18år = perioder.stream().anyMatch(p -> p.getTom().isAfter(blir18år) || p.getTom().isEqual(blir18år));
         boolean perioderInneholderFørOgEtter18år = vurderingUnder18år && vurdering18år;
@@ -306,16 +304,6 @@ public class SykdomVurderingRestTjeneste {
         }
 
         return toSykdomVurderingEndringResultatDto(endringer);
-    }
-    
-    private LocalDate finnPleietrengendesFødselsdato(Behandling behandling) {
-        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(
-            behandling.getId(),
-            behandling.getFagsak().getAktørId(),
-            behandling.getFagsak().getPeriode().getFomDato()
-        );
-        var pleietrengendePersonopplysning = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
-        return pleietrengendePersonopplysning.getFødselsdato();
     }
 
     void fjernOverlappendePerioderFraOverskyggendeVurderinger(List<SykdomPeriodeMedEndring> endringer, Sporingsinformasjon sporing, LocalDateTime opprettetTidspunkt) {

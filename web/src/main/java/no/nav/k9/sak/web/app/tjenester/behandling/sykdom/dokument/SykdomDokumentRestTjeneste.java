@@ -25,9 +25,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,6 +36,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -50,12 +48,14 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOpprettelseDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentOversikt;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomInnleggelseDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekoder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -65,8 +65,6 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Path(SykdomDokumentRestTjeneste.BASE_PATH)
 @Transactional
 public class SykdomDokumentRestTjeneste {
-
-    private static final Logger log = LoggerFactory.getLogger(SykdomDokumentRestTjeneste.class);
 
     public static final String BASE_PATH = "/behandling/sykdom/dokument";
     private static final String DOKUMENT = "/";
@@ -87,6 +85,7 @@ public class SykdomDokumentRestTjeneste {
     private SykdomDokumentOversiktMapper sykdomDokumentOversiktMapper = new SykdomDokumentOversiktMapper();
     private SykdomDokumentRepository sykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
 
@@ -95,11 +94,12 @@ public class SykdomDokumentRestTjeneste {
 
 
     @Inject
-    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public SykdomDokumentRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SykdomVurderingRepository sykdomVurderingRepository, DokumentArkivTjeneste dokumentArkivTjeneste, SykdomGrunnlagRepository sykdomGrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
+        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
     }
 
     @GET
@@ -277,8 +277,9 @@ public class SykdomDokumentRestTjeneste {
         }
 
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
-
         SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
+        verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
+                
         dokument.setInformasjon(new SykdomDokumentInformasjon(
             dokument,
             sykdomDokumentEndringDto.getType(),
@@ -290,6 +291,23 @@ public class SykdomDokumentRestTjeneste {
             ));
 
         sykdomDokumentRepository.oppdater(dokument.getInformasjon());
+    }
+
+
+    private void verifiserKanEndreType(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, SykdomDokumentInformasjon gmlInformasjon) {
+        final boolean varGodkjentLegeerklæring = gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS;
+        final boolean harBlittEndret = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
+        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        
+        if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
+            throw new IllegalStateException("Det må minst være én godkjent legeerklæring på barnet når dette var tilfellet for en tidligere behandling.");
+        }
+    }
+
+
+    private boolean harMinstEnAnnenGodkjentLegeerklæring(SykdomDokument sykdomDokument, final AktørId pleietrengende) {
+        return sykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> d.getId() != sykdomDokument.getId());
     }
 
     /**

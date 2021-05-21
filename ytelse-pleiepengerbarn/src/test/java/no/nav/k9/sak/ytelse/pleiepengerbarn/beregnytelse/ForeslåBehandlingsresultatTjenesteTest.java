@@ -2,17 +2,17 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -21,10 +21,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -48,17 +49,14 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
-import no.nav.k9.sak.domene.uttak.repo.UttakAktivitetPeriode;
-import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.felles.util.Tuple;
 
 @CdiDbAwareTest
 public class ForeslåBehandlingsresultatTjenesteTest {
@@ -82,21 +80,34 @@ public class ForeslåBehandlingsresultatTjenesteTest {
     private ForeslåBehandlingsresultatTjeneste tjeneste;
 
     private MedlemTjeneste medlemTjeneste = mock(MedlemTjeneste.class);
-    private UttakRepository uttakRepository = mock(UttakRepository.class);
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
+        @Override
+        public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+            return new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)));
+        }
+
+        @Override
+        public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
+            return null;
+        }
+
+        @Override
+        public int maksMellomliggendePeriodeAvstand() {
+            return 0;
+        }
+    };
     private VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
     private EntityManager entityManager;
 
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        when(uttakRepository.hentOppgittUttak(anyLong()))
-            .thenReturn(new UttakAktivitet(Set.of(new UttakAktivitetPeriode(FOM, TOM, UttakArbeidType.ARBEIDSTAKER, Duration.ofHours(10), BigDecimal.valueOf(100L)))));
 
         when(medlemTjeneste.utledVilkårUtfall(any())).thenReturn(new Tuple<>(Utfall.OPPFYLT, Avslagsårsak.UDEFINERT));
         revurderingBehandlingsresultatutleder = Mockito.spy(new DefaultRevurderingBehandlingsresultatutleder());
         tjeneste = new UttakForeslåBehandlingsresultatTjeneste(repositoryProvider,
             vedtakVarselRepository,
-            uttakRepository,
+            vilkårsPerioderTilVurderingTjeneste,
             revurderingBehandlingsresultatutleder);
     }
 

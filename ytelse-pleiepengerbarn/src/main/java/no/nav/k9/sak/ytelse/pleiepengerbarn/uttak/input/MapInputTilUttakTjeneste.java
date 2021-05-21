@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -33,7 +35,7 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -91,7 +93,7 @@ public class MapInputTilUttakTjeneste {
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(referanse.getBehandlingId()).orElseThrow();
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
-        var pleiebehov = pleiebehovResultatRepository.hent(referanse.getBehandlingId());
+        var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
@@ -110,7 +112,7 @@ public class MapInputTilUttakTjeneste {
         var input = new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
-            .medPleiebehovResultat(pleiebehov)
+            .medPleiebehov(pleiebehov.map(pb -> pb.getPleieperioder().getPerioder()).orElse(List.of()))
             .medPerioderTilVurdering(perioderTilVurdering)
             .medUtvidetPerioderRevurdering(utvidetRevurderingPerioder)
             .medVurderteSøknadsperioder(vurderteSøknadsperioder)
@@ -163,7 +165,7 @@ public class MapInputTilUttakTjeneste {
         // TODO: Se kommentarer/TODOs under denne:
         final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger());
 
-        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehovResultat());
+        final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
         final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -217,9 +219,9 @@ public class MapInputTilUttakTjeneste {
         return new ArrayList<>(timeline.toSegments());
     }
 
-    private Map<LukketPeriode, Pleiebehov> toPleiebehov(PleiebehovResultat pleiebehov) {
+    private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
         final Map<LukketPeriode, Pleiebehov> tilsynsbehov = new HashMap<>();
-        pleiebehov.getPleieperioder().getPerioder().forEach(p -> {
+        pleiebehov.forEach(p -> {
             tilsynsbehov.put(toLukketPeriode(p.getPeriode()), mapToPleiebehov(p.getGrad()));
         });
         return tilsynsbehov;
@@ -230,17 +232,12 @@ public class MapInputTilUttakTjeneste {
     }
 
     private Pleiebehov mapToPleiebehov(Pleiegrad grad) {
-        switch (grad) {
-            case INGEN:
-                return Pleiebehov.PROSENT_0;
-            case KONTINUERLIG_TILSYN:
-                return Pleiebehov.PROSENT_100;
-            case UTVIDET_KONTINUERLIG_TILSYN:
-            case INNLEGGELSE:
-                return Pleiebehov.PROSENT_200;
-            default:
-                throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
-        }
+        return switch (grad) {
+            case INGEN -> Pleiebehov.PROSENT_0;
+            case KONTINUERLIG_TILSYN -> Pleiebehov.PROSENT_100;
+            case UTVIDET_KONTINUERLIG_TILSYN, INNLEGGELSE -> Pleiebehov.PROSENT_200;
+            default -> throw new IllegalStateException("Ukjent Pleiegrad: " + grad);
+        };
     }
 
     private HashMap<String, List<Vilkårsperiode>> toInngangsvilkår(Vilkårene vilkårene) {
@@ -251,11 +248,18 @@ public class MapInputTilUttakTjeneste {
             }
             final List<Vilkårsperiode> vilkårsperioder = v.getPerioder()
                 .stream()
-                .map(vp -> new Vilkårsperiode(new LukketPeriode(vp.getFom(), vp.getTom()), Utfall.valueOf(vp.getUtfall().getKode())))
+                .map(vp -> new Vilkårsperiode(new LukketPeriode(vp.getFom(), vp.getTom()), mapUtfall(v.getVilkårType(), vp)))
                 .collect(Collectors.toList());
             inngangsvilkår.put(v.getVilkårType().getKode(), vilkårsperioder);
         });
         return inngangsvilkår;
+    }
+
+    private Utfall mapUtfall(VilkårType vilkårType, VilkårPeriode vp) {
+        if (Arrays.stream(Utfall.values()).noneMatch(it -> it.name().equals(vp.getGjeldendeUtfall().getKode()))) {
+            throw new IllegalStateException("Vilkårsperiode med ikke supportert utfall '" + vp.getGjeldendeUtfall() + "', vilkår='" + vilkårType + "', periode='" + vp.getPeriode() + "'");
+        }
+        return Utfall.valueOf(vp.getGjeldendeUtfall().getKode());
     }
 
 }

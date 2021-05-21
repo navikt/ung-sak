@@ -6,14 +6,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 public class OppgittOpptjeningAggregat {
-
-    private static final Logger logger = LoggerFactory.getLogger(OppgittOpptjeningAggregat.class);
 
     @ChangeTracked
     private List<OppgittOpptjening> oppgitteOpptjeninger = new ArrayList<>();

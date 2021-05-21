@@ -86,7 +86,6 @@ public class KompletthetskontrollerTest {
         kompletthetskontroller = new Kompletthetskontroller(dokumentmottakerFelles,
             modell,
             behandlingProsesseringTjeneste,
-            prosessTaskRepository,
             skjæringstidspunktTjeneste);
 
         mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), null, Brevkode.INNTEKTSMELDING);

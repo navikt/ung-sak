@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -78,11 +79,11 @@ class MapSøknadUttakPerioder {
         return mappedPerioder;
     }
 
-    private List<ArbeidPeriode> mapArbeidstidInfo(ArbeidstidInfo frilanserArbeidstidInfo, UttakArbeidType arbeidType) {
-        if (frilanserArbeidstidInfo == null || frilanserArbeidstidInfo.getPerioder() == null) {
+    private List<ArbeidPeriode> mapArbeidstidInfo(Optional<ArbeidstidInfo> arbeidstidInfo, UttakArbeidType arbeidType) {
+        if (arbeidstidInfo.isEmpty()) {
             return List.of();
         }
-        return frilanserArbeidstidInfo
+        return arbeidstidInfo.get()
             .getPerioder()
             .entrySet()
             .stream()

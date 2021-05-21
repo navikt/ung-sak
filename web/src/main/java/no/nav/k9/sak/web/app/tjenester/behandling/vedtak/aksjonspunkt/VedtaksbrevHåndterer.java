@@ -1,8 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
+import java.util.Set;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -70,7 +73,8 @@ public class VedtaksbrevHåndterer {
 
     void oppdaterBegrunnelse(Behandling behandling, String begrunnelse) {
         vedtakVarselRepository.hentHvisEksisterer(behandling.getId()).ifPresent(behandlingsresultat -> {
-            if ((behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt() || begrunnelse != null)
+            if (kreverFritekstbrev(behandling.getBehandlingResultatType())
+                || begrunnelse != null
                 || skalNullstilleFritekstfelt(behandling, behandlingsresultat)) {
                 behandlingsresultat.setAvslagarsakFritekst(begrunnelse);
             }
@@ -92,7 +96,7 @@ public class VedtaksbrevHåndterer {
     }
 
     private boolean skalNullstilleFritekstfelt(Behandling behandling, VedtakVarsel behandlingsresultat) {
-        return !behandling.getBehandlingResultatType().isBehandlingsresultatAvslåttOrOpphørt()
+        return !kreverFritekstbrev(behandling.getBehandlingResultatType())
             && behandlingsresultat.getAvslagarsakFritekst() != null;
     }
 
@@ -115,4 +119,9 @@ public class VedtaksbrevHåndterer {
     protected String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
     }
+
+    private boolean kreverFritekstbrev(BehandlingResultatType behandlingResultatType) {
+        return Set.of(BehandlingResultatType.AVSLÅTT, BehandlingResultatType.OPPHØR, BehandlingResultatType.DELVIS_INNVILGET).contains(behandlingResultatType);
+    }
+
 }

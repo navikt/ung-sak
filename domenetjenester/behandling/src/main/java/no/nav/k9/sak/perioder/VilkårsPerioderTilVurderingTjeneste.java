@@ -2,6 +2,7 @@ package no.nav.k9.sak.perioder;
 
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.enterprise.inject.Instance;
@@ -17,6 +18,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public interface VilkårsPerioderTilVurderingTjeneste {
 
+    static VilkårsPerioderTilVurderingTjeneste finnTjeneste(Instance<VilkårsPerioderTilVurderingTjeneste> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, instances, ytelseType, behandlingType)
+            .orElseThrow(() -> new IllegalStateException("Har ikke tjeneste for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
+    }
+
     default NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(@SuppressWarnings("unused") Long behandlingId) {
         return new TreeSet<>();
     }
@@ -26,6 +32,10 @@ public interface VilkårsPerioderTilVurderingTjeneste {
     }
 
     NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
+
+    Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);
+
+    int maksMellomliggendePeriodeAvstand();
 
     /**
      * Utleder perioder som har trengs reberegnet pga revurdering i uttakssteget
@@ -37,16 +47,26 @@ public interface VilkårsPerioderTilVurderingTjeneste {
         return new TreeSet<>();
     }
 
-    Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);
-
-    int maksMellomliggendePeriodeAvstand();
+    /**
+     * Utleder perioder som skal revurders pga endring i annen sak på samme pleietrengende
+     *
+     * @param referanse behandlingen
+     * @return set med perioder
+     */
+    default NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+        return new TreeSet<>();
+    }
 
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
     }
 
-    public static VilkårsPerioderTilVurderingTjeneste finnTjeneste(Instance<VilkårsPerioderTilVurderingTjeneste> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, instances, ytelseType, behandlingType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke tjeneste for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType));
+    /**
+     * Definerer perioden(e) til behandling for brev
+     *
+     * @return vilkårene
+     */
+    default Set<VilkårType> definerendeVilkår() {
+        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 }

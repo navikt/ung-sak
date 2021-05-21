@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -61,7 +60,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         logContext(fagsak);
 
-        var behandlinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingType.REVURDERING);
+        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
         // TODO: Trekk ut fra property slik at denne kan brukes til andre ting
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
         if (behandlinger.isEmpty()) {
@@ -69,20 +68,21 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
-                log.info("Oppretter revurdering");
                 var origBehandling = sisteVedtak.get();
                 var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
             } else {
                 throw new IllegalStateException("Prøvde revurdering av sak, men fant ingen behandling revurdere");
             }
         } else {
-            log.info("Fant åpen behandling, kjører diff for å flytte prosessen tilbake");
             if (behandlinger.size() != 1) {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
-            var behandling = behandlinger.get(0);
-            var behandlingLås = behandlingRepository.taSkriveLås(behandling);
+            var behandlingId = behandlinger.get(0);
+            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
+            var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
+            var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);

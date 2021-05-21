@@ -60,7 +60,6 @@ public class EnhetsTjenesteTest {
 
     private static GeografiskTilknytning tilknytningNormal = new GeografiskTilknytning("0219", null);
     private static GeografiskTilknytning tilknytningKode6 = new GeografiskTilknytning("0219", Diskresjonskode.KODE6);
-    private static GeografiskTilknytning relatertKode6 = new GeografiskTilknytning(null, Diskresjonskode.KODE6);
 
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;

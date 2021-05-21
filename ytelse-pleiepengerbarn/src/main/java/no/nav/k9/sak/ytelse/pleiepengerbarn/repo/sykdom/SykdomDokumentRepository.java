@@ -15,6 +15,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 
 @Dependent
@@ -50,6 +51,10 @@ public class SykdomDokumentRepository {
             .stream()
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
+    }
+    
+    public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
+        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS).collect(Collectors.toList());
     }
 
     public Optional<SykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {

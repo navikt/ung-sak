@@ -9,9 +9,9 @@ import javax.persistence.Tuple;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 
 /** Logger tilgang til fagsak for diagnostikk dumps til en egen tabell, inkluderer logg som del av output. */
 @ApplicationScoped
@@ -52,7 +52,7 @@ public class DiagnostikkLoggDump implements DebugDumpFagsak {
             return List.of();
         }
 
-        return DebugDumpsters.dumpResultSetToCsv(path, results)
+        return CsvOutput.dumpResultSetToCsv(path, results)
             .map(v -> List.of(v)).orElse(List.of());
     }
 

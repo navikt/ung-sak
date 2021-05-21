@@ -48,7 +48,6 @@ public class TmpAktørIdTask implements ProsessTaskHandler {
         } else {
             log.info("Fant {} aktørId å hente ident for, spør PDL", aktørIder.size());
             var mapIdenter = aktørTjeneste.hentPersonIdentForAktørIder(aktørIder);
-            log.info("Hentet {} identer", mapIdenter.size());
             aktørIdRepository.lagre(mapIdenter);
 
             // rescheduler

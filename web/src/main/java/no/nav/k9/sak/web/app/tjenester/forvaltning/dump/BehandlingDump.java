@@ -19,6 +19,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -72,7 +74,7 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("status", Fagsak::getStatus);
         toCsv.put("opprettet_tid", Fagsak::getOpprettetTidspunkt);
         toCsv.put("endret_tid", Fagsak::getEndretTidspunkt);
-        return List.of(DebugDumpsters.dumpAsCsvSingleInput(true, fagsak, "fagsak.csv", toCsv));
+        return List.of(CsvOutput.dumpAsCsvSingleInput(true, fagsak, "fagsak.csv", toCsv));
     }
 
     private List<DumpOutput> dumpBehandlinger(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
@@ -109,7 +111,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
             toCsv.put("endret_tid", Behandling::getEndretTidspunkt);
 
-            resultat.add(DebugDumpsters.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
+            resultat.add(CsvOutput.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
 
             var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType.getKode());
             for (var inst : dumpstere) {

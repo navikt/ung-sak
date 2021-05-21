@@ -38,6 +38,10 @@ public class OmsorgenForDto {
     @Valid
     private String begrunnelse;
 
+    @JsonProperty(value = "readOnly")
+    @Valid
+    private boolean readOnly;
+
     @JsonProperty(value = "resultat")
     @Valid
     private Resultat resultat;
@@ -51,11 +55,12 @@ public class OmsorgenForDto {
 
     }
 
-    public OmsorgenForDto(Periode periode, String begrunnelse, BarnRelasjon relasjon, String relasjonsbeskrivelse, Resultat resultat, Resultat resultatEtterAutomatikk) {
+    public OmsorgenForDto(Periode periode, String begrunnelse, BarnRelasjon relasjon, String relasjonsbeskrivelse, boolean readOnly, Resultat resultat, Resultat resultatEtterAutomatikk) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.relasjon = relasjon;
         this.relasjonsbeskrivelse = relasjonsbeskrivelse;
+        this.readOnly = readOnly;
         this.resultat = resultat;
         this.resultatEtterAutomatikk = resultatEtterAutomatikk;
     }
@@ -75,6 +80,10 @@ public class OmsorgenForDto {
 
     public String getRelasjonsbeskrivelse() {
         return relasjonsbeskrivelse;
+    }
+
+    public Boolean isReadOnly() {
+        return readOnly;
     }
 
     public Resultat getResultat() {

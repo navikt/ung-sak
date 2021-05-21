@@ -14,8 +14,10 @@ public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
     private LocalDateInterval feriepengerPeriode;
+    private LocalDateInterval feriepengerPeriodeRefusjon;
     private int antallDagerFeriepenger;
     private boolean feriepengeopptjeningForHelg;
+    private boolean ubegrensetFeriepengedagerVedRefusjon;
 
 
     private BeregningsresultatFeriepengerRegelModell() {
@@ -30,8 +32,12 @@ public class BeregningsresultatFeriepengerRegelModell {
         return beregningsresultatPerioder;
     }
 
-    public LocalDateInterval getFeriepengerPeriode() {
+    public LocalDateInterval getFeriepengerPeriodeBruker() {
         return feriepengerPeriode;
+    }
+
+    public LocalDateInterval getFeriepengerPeriodeRefusjon() {
+        return feriepengerPeriodeRefusjon;
     }
 
     public int getAntallDagerFeriepenger() {
@@ -40,6 +46,10 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public boolean harFeriepengeopptjeningFoHelg() {
         return feriepengeopptjeningForHelg;
+    }
+
+    public boolean harUbegrensetFeriepengedagerVedRefusjon(){
+        return ubegrensetFeriepengedagerVedRefusjon;
     }
 
     public static Builder builder(BeregningsresultatFeriepengerRegelModell regelModell) {
@@ -76,18 +86,28 @@ public class BeregningsresultatFeriepengerRegelModell {
             return this;
         }
 
+        public Builder medFeriepengerPeriodeRefusjon(LocalDate feriepengePeriodeFom, LocalDate feriepengePeriodeTom) {
+            kladd.feriepengerPeriodeRefusjon = new LocalDateInterval(feriepengePeriodeFom, feriepengePeriodeTom);
+            return this;
+        }
+
         public Builder medAntallDagerFeriepenger(int antallDagerFeriepenger) {
             kladd.antallDagerFeriepenger = antallDagerFeriepenger;
             return this;
         }
 
-        public BeregningsresultatFeriepengerRegelModell build() {
-            return kladd;
+        public Builder medUbegrensetFeriepengedagerVedRefusjon(boolean ubegrensetFeriepengedagerVedRefusjon){
+            kladd.ubegrensetFeriepengedagerVedRefusjon = ubegrensetFeriepengedagerVedRefusjon;
+            return this;
         }
 
         public Builder medFeriepengeopptjeningForHelg(boolean feriepengeopptjeningForHelg) {
             kladd.feriepengeopptjeningForHelg = feriepengeopptjeningForHelg;
             return this;
+        }
+
+        public BeregningsresultatFeriepengerRegelModell build() {
+            return kladd;
         }
     }
 }

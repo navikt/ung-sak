@@ -25,7 +25,9 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     IKKE_FASTSATT("IKKE_FASTSATT", "Ikke fastsatt"),
     INNVILGET("INNVILGET", "Innvilget"),
+    DELVIS_INNVILGET("DELVIS_INNVILGET", "Delvis innvilget"),
     AVSLÅTT("AVSLÅTT", "Avslått"),
+    /** @deprecated OPPHØR brukes ikke lenger, om det er opphør (mot OS) beregnes i k9-oppdrag */
     OPPHØR("OPPHØR", "Opphør"),
     HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket", true),
     HENLAGT_FEILOPPRETTET("HENLAGT_FEILOPPRETTET", "Henlagt, søknaden er feilopprettet", true),
@@ -39,7 +41,7 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
     private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
-    private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, INNVILGET_ENDRING);
+    private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, DELVIS_INNVILGET, INNVILGET_ENDRING);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
@@ -53,7 +55,7 @@ public enum BehandlingResultatType implements Kodeverdi {
             }
         }
 
-        var henlagte = KODER.values().stream().filter( v -> v.erHenleggelse).collect(Collectors.toSet());
+        var henlagte = KODER.values().stream().filter(v -> v.erHenleggelse).collect(Collectors.toSet());
         ALLE_HENLEGGELSESKODER = EnumSet.copyOf(henlagte);
 
         var henlagtSøknad = EnumSet.copyOf(henlagte);
@@ -128,10 +130,6 @@ public enum BehandlingResultatType implements Kodeverdi {
         return KODEVERK;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
-
     public static Set<BehandlingResultatType> getAlleHenleggelseskoder() {
         return ALLE_HENLEGGELSESKODER;
     }
@@ -144,21 +142,12 @@ public enum BehandlingResultatType implements Kodeverdi {
         return INNVILGET_KODER;
     }
 
-    public boolean erHenlagt() {
-        return ALLE_HENLEGGELSESKODER.contains(this);
-    }
-
     public boolean isBehandlingHenlagt() {
         return BehandlingResultatType.getAlleHenleggelseskoder().contains(this);
     }
 
-    public boolean isBehandlingsresultatAvslåttOrOpphørt() {
-        return BehandlingResultatType.AVSLÅTT.equals(this)
-            || BehandlingResultatType.OPPHØR.equals(this);
-    }
-
-    public boolean isBehandlingsresultatAvslått() {
-        return BehandlingResultatType.AVSLÅTT.equals(this);
+    public boolean isBehandlingsresultatHenlagt() {
+        return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
 
     public boolean isBehandlingsresultatOpphørt() {
@@ -167,10 +156,6 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
-    }
-
-    public boolean isBehandlingsresultatHenlagt() {
-        return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
 
 }

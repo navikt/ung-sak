@@ -9,9 +9,9 @@ import javax.persistence.Tuple;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpsters;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpOutput;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP")
@@ -40,6 +40,8 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
             + " , bp.br_periode_tom"
             + " , ba.dagsats"
             + " , ba.inntektskategori"
+            + " , ba.stillingsprosent"
+            + " , ba.utbetalingsgrad"
             + " , ba.arbeidsforhold_type"
             + " , ba.bruker_er_mottaker"
             + " , ba.arbeidsgiver_aktor_id"
@@ -57,7 +59,7 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
             + "   inner join br_periode bp on bp.beregningsresultat_fp_id=res.id "
             + "   inner join br_andel ba on ba.br_periode_id=bp.id "
             + " where br.aktiv=true and f.saksnummer=:saksnummer "
-            + " order by b.behandling_id, bp.br_periode_fom";
+            + " order by br.behandling_id, bp.br_periode_fom";
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
@@ -70,7 +72,7 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
             return List.of();
         }
 
-        return DebugDumpsters.dumpResultSetToCsv(path, results)
+        return CsvOutput.dumpResultSetToCsv(path, results)
             .map(v -> List.of(v)).orElse(List.of());
     }
 

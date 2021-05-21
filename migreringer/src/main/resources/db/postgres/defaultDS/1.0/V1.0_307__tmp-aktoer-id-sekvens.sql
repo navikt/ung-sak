@@ -1,0 +1,1 @@
+create sequence if not exists SEQ_TMP_AKTOER_ID increment by 50 minvalue 1000000;

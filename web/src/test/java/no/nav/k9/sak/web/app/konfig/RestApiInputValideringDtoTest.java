@@ -44,6 +44,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -56,6 +58,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.jackson.IndexClasses;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class RestApiInputValideringDtoTest extends RestApiTester {
 
     public static Stream<Arguments> provideArguments() {
@@ -139,7 +142,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     private static boolean erKodeverk(Type... args) {
-        return Kodeverdi.class.isAssignableFrom((Class<?>) args[0]);
+        return Kodeverdi.class.isAssignableFrom((Class<?>) args[0]) || ((Class<?>) args[0]).isEnum();
     }
 
     private static Set<Class<?>> finnAlleDtoTyper() {
@@ -237,7 +240,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     private static boolean erKodeverk(Class<?> klasse) {
-        return Kodeverdi.class.isAssignableFrom(klasse);
+        return Kodeverdi.class.isAssignableFrom(klasse) || klasse.isEnum();
     }
 
     private static Set<Class<?>> genericTypes(Field field) {

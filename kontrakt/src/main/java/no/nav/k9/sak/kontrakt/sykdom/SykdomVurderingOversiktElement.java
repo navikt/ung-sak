@@ -70,17 +70,25 @@ public class SykdomVurderingOversiktElement {
     private List<ResourceLink> links = new ArrayList<>();
 
 
-    public SykdomVurderingOversiktElement(String id, Resultat resultat, Periode periode,
-            boolean gjelderForSøker, boolean gjelderForAnnenPart, boolean endretIDenneBehandlingen, boolean erInnleggelsesperiode, List<ResourceLink> links) {
+    public SykdomVurderingOversiktElement(String id, Resultat resultat, Periode periode, boolean endretIDenneBehandlingen, List<ResourceLink> links) {
         this.id = id;
         this.resultat = resultat;
         this.periode = periode;
-        this.gjelderForSøker = gjelderForSøker;
-        this.gjelderForAnnenPart = gjelderForAnnenPart;
         this.endretIDenneBehandlingen = endretIDenneBehandlingen;
-        this.erInnleggelsesperiode = erInnleggelsesperiode;
         this.links = new ArrayList<>(links);
     }
+    
+    public SykdomVurderingOversiktElement(SykdomVurderingOversiktElement element) {
+        this.id = element.id;
+        this.resultat = element.resultat;
+        this.periode = element.periode;
+        this.gjelderForSøker = element.gjelderForSøker;
+        this.gjelderForAnnenPart = element.gjelderForAnnenPart;
+        this.endretIDenneBehandlingen = element.endretIDenneBehandlingen;
+        this.erInnleggelsesperiode = element.erInnleggelsesperiode;
+        this.links = element.links;
+    }
+    
 
     public SykdomVurderingOversiktElement(){
 
@@ -97,13 +105,25 @@ public class SykdomVurderingOversiktElement {
     public Periode getPeriode() {
         return periode;
     }
+    
+    public void setPeriode(Periode periode) {
+        this.periode = periode;
+    }
 
     public boolean isGjelderForSøker() {
         return gjelderForSøker;
     }
+    
+    public void setGjelderForSøker(boolean gjelderForSøker) {
+        this.gjelderForSøker = gjelderForSøker;
+    }
 
     public boolean isGjelderForAnnenPart() {
         return gjelderForAnnenPart;
+    }
+    
+    public void setGjelderForAnnenPart(boolean gjelderForAnnenPart) {
+        this.gjelderForAnnenPart = gjelderForAnnenPart;
     }
     
     public boolean isEndretIDenneBehandlingen() {
@@ -112,6 +132,10 @@ public class SykdomVurderingOversiktElement {
     
     public boolean isErInnleggelsesperiode() {
         return erInnleggelsesperiode;
+    }
+    
+    public void setErInnleggelsesperiode(boolean erInnleggelsesperiode) {
+        this.erInnleggelsesperiode = erInnleggelsesperiode;
     }
     
     public List<ResourceLink> getLinks() {

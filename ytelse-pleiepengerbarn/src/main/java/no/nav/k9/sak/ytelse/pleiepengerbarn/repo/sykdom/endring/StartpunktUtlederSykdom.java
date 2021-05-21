@@ -16,8 +16,8 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
@@ -25,7 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
 class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomGrunnlagService sykdomGrunnlagService;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     StartpunktUtlederSykdom() {
@@ -34,10 +34,10 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
 
     @Inject
     StartpunktUtlederSykdom(SykdomGrunnlagRepository sykdomGrunnlagRepository,
-                            SykdomVurderingService sykdomVurderingService,
+                            SykdomGrunnlagService sykdomGrunnlagService,
                             @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
@@ -50,8 +50,8 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
 
         var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
-        var utledGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = sykdomVurderingService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
+        var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
+        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         var erIngenEndringIGrunnlaget = sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
         return erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;

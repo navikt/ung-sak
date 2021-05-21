@@ -4,18 +4,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorg.AvklarOmsorgenForDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForSaksbehandlervurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -26,30 +35,45 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
     private HistorikkTjenesteAdapter historikkAdapter;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
 
-    
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+
+
     AvklarOmsorgenForV2() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarOmsorgenForV2(HistorikkTjenesteAdapter historikkAdapter, OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository) {
+    AvklarOmsorgenForV2(HistorikkTjenesteAdapter historikkAdapter, OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         this.historikkAdapter = historikkAdapter;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
-    
+
 
     @Override
-    public OppdateringResultat oppdater(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param) {       
-        // TODO Omsorg: Hvordan håndtere nye vurderinger på utsiden av perioderTilVurdering? Stoppe vurderinger på utsiden av søknadsperiode?
+    public OppdateringResultat oppdater(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param) {
         Long behandlingId = param.getBehandlingId();
-        
+
+        sjekkAtPerioderTilOppdateringErTillatt(dto, param, behandlingId);
+
         // TODO Omsorg: Løkke over endringene slik at vi får bedre historikk=
         lagHistorikkInnslag(param, "Omsorg manuelt behandlet.");
-        
+
         final List<OmsorgenForSaksbehandlervurdering> nyeVurderinger = toOmsorgenForSaksbehandlervurderinger(dto);
         omsorgenForGrunnlagRepository.lagreNyeVurderinger(behandlingId, nyeVurderinger);
 
         return OppdateringResultat.utenOveropp();
+    }
+
+    private void sjekkAtPerioderTilOppdateringErTillatt(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param, Long behandlingId) {
+        VilkårsPerioderTilVurderingTjeneste vilkårsperioderTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType());
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = SykdomUtils.toLocalDateTimeline(vilkårsperioderTjeneste.utled(behandlingId, VilkårType.OMSORGEN_FOR));
+        LocalDateTimeline<Boolean> tidslinjeTilOppdatering = SykdomUtils.toLocalDateTimeline(dto.getOmsorgsperioder().stream().map(p -> new Periode(p.getPeriode().getFom(), p.getPeriode().getTom())).collect(Collectors.toList()));
+
+        LocalDateTimeline<Boolean> oppdateringUtenforSøknadsperiode = SykdomUtils.kunPerioderSomIkkeFinnesI(tidslinjeTilOppdatering, tidslinjeTilVurdering);
+        if (!oppdateringUtenforSøknadsperiode.isEmpty()) {
+            throw new IllegalArgumentException("Oppdatering av omsorgen for utenfor søknadsperiode er ikke tillatt");
+        }
     }
 
     private List<OmsorgenForSaksbehandlervurdering> toOmsorgenForSaksbehandlervurderinger(AvklarOmsorgenForDto dto) {

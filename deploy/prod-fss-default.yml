@@ -189,8 +189,12 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: MOTTAK_SOKNAD_UTBETALING_OMS
+    - name: OMP_DELVIS_FRAVAER
       value: "false"
+    - name: FORMIDLING_RETUR_MALTYPER
+      value: "false"
+    - name: MOTTAK_SOKNAD_UTBETALING_OMS
+      value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
     - name: TOTRINN_TEMP_DEAKTIVERT

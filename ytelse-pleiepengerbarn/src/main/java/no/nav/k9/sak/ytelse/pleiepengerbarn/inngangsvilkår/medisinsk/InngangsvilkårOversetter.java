@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
@@ -21,7 +22,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
 
 public class InngangsvilkårOversetter {
 
-    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(Long behandlingId, DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(VilkårType vilkåret, Long behandlingId, DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
         final Periode vilkårsperiode = new Periode(periode.getFomDato(), periode.getTomDato());
 
 
@@ -39,7 +40,7 @@ public class InngangsvilkårOversetter {
         }
 
         List<InnleggelsesPeriode> relevanteInnleggelsesperioder = List.of();
-        if (grunnlag.getInnleggelser() != null) {
+        if (grunnlag.getInnleggelser() != null && vilkåret != VilkårType.MEDISINSKEVILKÅR_18_ÅR) {
             relevanteInnleggelsesperioder = grunnlag.getInnleggelser()
                 .getPerioder()
                 .stream()
@@ -66,7 +67,9 @@ public class InngangsvilkårOversetter {
             .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
             .collect(Collectors.toList());
 
-        vilkårsGrunnlag.medDiagnoseKilde(DiagnoseKilde.SYKHUSLEGE) // TODO 18-feb
+        final DiagnoseKilde diagnoseKilde = grunnlag.getGodkjenteLegeerklæringer().isEmpty() ? DiagnoseKilde.ANNET : DiagnoseKilde.SYKHUSLEGE;
+        
+        vilkårsGrunnlag.medDiagnoseKilde(diagnoseKilde)
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)
             .medKontinuerligTilsyn(relevantKontinuerligTilsyn)

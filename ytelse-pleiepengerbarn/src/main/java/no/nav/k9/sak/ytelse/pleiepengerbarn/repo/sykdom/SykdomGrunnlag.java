@@ -46,6 +46,14 @@ public class SykdomGrunnlag {
     )
     private List<SykdomVurderingVersjon> vurderinger = new ArrayList<>();
 
+    @OneToMany()
+    @JoinTable(
+        name="SYKDOM_GRUNNLAG_DOKUMENT",
+        joinColumns = @JoinColumn( name="SYKDOM_GRUNNLAG_ID"),
+        inverseJoinColumns = @JoinColumn( name="SYKDOM_DOKUMENT_ID")
+    )
+    private List<SykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
+    
     @OneToOne
     @JoinColumn(name = "SYKDOM_INNLEGGELSER_ID")
     private SykdomInnleggelser innleggelser;
@@ -65,14 +73,20 @@ public class SykdomGrunnlag {
 
     SykdomGrunnlag() {}
 
-    public SykdomGrunnlag(UUID sykdomGrunnlagUUID, List<SykdomSøktPeriode> søktePerioder,
-            List<SykdomRevurderingPeriode> revurderingPerioder, List<SykdomVurderingVersjon> vurderinger,
-            SykdomInnleggelser innleggelser, SykdomDiagnosekoder diagnosekoder, String opprettetAv,
+    public SykdomGrunnlag(UUID sykdomGrunnlagUUID,
+            List<SykdomSøktPeriode> søktePerioder,
+            List<SykdomRevurderingPeriode> revurderingPerioder,
+            List<SykdomVurderingVersjon> vurderinger,
+            List<SykdomDokument> godkjenteLegeerklæringer,
+            SykdomInnleggelser innleggelser,
+            SykdomDiagnosekoder diagnosekoder,
+            String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
         setSøktePerioder(søktePerioder);
         setRevurderingPerioder(revurderingPerioder);
         this.vurderinger = vurderinger;
+        this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
         this.innleggelser = innleggelser;
         this.diagnosekoder = diagnosekoder;
         this.opprettetAv = opprettetAv;
@@ -107,6 +121,13 @@ public class SykdomGrunnlag {
 
     public void setVurderinger(List<SykdomVurderingVersjon> vurderinger) {
         this.vurderinger = vurderinger;
+    }
+    
+    public List<SykdomDokument> getGodkjenteLegeerklæringer() {
+        if (godkjenteLegeerklæringer == null) {
+            return List.of();
+        }
+        return godkjenteLegeerklæringer;
     }
 
     public SykdomInnleggelser getInnleggelser() {

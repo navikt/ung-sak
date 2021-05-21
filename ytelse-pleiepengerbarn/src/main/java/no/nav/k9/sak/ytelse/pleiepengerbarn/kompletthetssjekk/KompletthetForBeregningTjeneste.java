@@ -135,8 +135,9 @@ public class KompletthetForBeregningTjeneste {
         var result = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
         var relevanteInntektsmeldinger = utledRelevanteInntektsmeldinger(inntektsmeldinger, relevantPeriode);
         var tilnternArbeidsforhold = new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId());
-        for (DatoIntervallEntitet periode : vilkårsPerioder) {
-            var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, relevantPeriode.getFomDato());
+        var relevanteVilkårsperioder = vilkårsPerioder.stream().filter(it -> relevantPeriode.overlapper(it.getFomDato(), it.getTomDato())).collect(Collectors.toList());
+        for (DatoIntervallEntitet periode : relevanteVilkårsperioder) {
+            var arbeidsgiverSetMap = finnArbeidsforholdForIdentPåDagFunction.apply(ref, periode.getFomDato());
             utledManglendeInntektsmeldingerPerDag(result, relevanteInntektsmeldinger, periode, tilnternArbeidsforhold, arbeidsgiverSetMap);
         }
         return result;
