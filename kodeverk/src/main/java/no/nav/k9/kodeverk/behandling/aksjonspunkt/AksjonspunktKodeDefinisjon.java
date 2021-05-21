@@ -38,7 +38,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String FORESLÅ_VEDTAK_KODE = "5015";
     public static final String FORESLÅ_VEDTAK_MANUELT_KODE = "5028";
-    public static final String VURDER_MANUELT_BREV_KODE = "5029";
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_OVST_KODE = "6002";
     public static final String OVERSTYRING_AV_OMSORGENFOR_KODE = "6003";
