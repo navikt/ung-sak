@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -38,6 +39,7 @@ public class KravDokumentMedSøktePerioder {
     @JsonProperty("søktePerioder")
     private List<SøktPeriode> søktePerioder;
 
+    @JsonCreator
     public KravDokumentMedSøktePerioder(JournalpostId journalpostId,
                                         LocalDateTime innsendingsTidspunkt,
                                         KravDokumentType type,
