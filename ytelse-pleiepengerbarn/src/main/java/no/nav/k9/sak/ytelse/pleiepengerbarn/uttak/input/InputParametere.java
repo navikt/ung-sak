@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 public class InputParametere {
@@ -30,6 +32,7 @@ public class InputParametere {
     private Set<Inntektsmelding> sakInntektsmeldinger;
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
+    private LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn;
 
     public InputParametere() {
     }
@@ -118,6 +121,15 @@ public class InputParametere {
     public InputParametere medUtvidetPerioderRevurdering(NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder) {
         this.utvidetRevurderingPerioder = utvidetRevurderingPerioder;
         return this;
+    }
+    
+    public InputParametere medUtledetEtablertTilsyn(LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn) {
+        this.utledetEtablertTilsyn = utledetEtablertTilsyn;
+        return this;
+    }
+    
+    public LocalDateTimeline<UtledetEtablertTilsyn> getUtledetEtablertTilsyn() {
+        return utledetEtablertTilsyn;
     }
 
     public NavigableSet<DatoIntervallEntitet> getUtvidetRevurderingPerioder() {
