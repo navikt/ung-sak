@@ -12,6 +12,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakManueltUtleder;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
@@ -49,17 +50,28 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
         return BehandlingType.REVURDERING == behandling.getType() && behandling.erManueltOpprettet();
     }
 
+    private boolean trengerManueltBrev(Behandling behandling) {
+        if (!lansert) {
+            return false;
+        }
+
+        //TODO sjekk mot søknad på saken kan kanskje fjernes når k9-formidlings tjeneste er mer tilpasset behovet
+        if (!harSøknad(behandling.getFagsak())) {
+            return false;
+        }
+        InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
+        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
+    }
+
     private boolean harSøknad(Behandling behandling) {
         var omsorgspengerSøknader = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(), BREVKODER_SØKNAD_OMS, false, DokumentStatus.GYLDIG);
         return !omsorgspengerSøknader.isEmpty();
     }
 
-    private boolean trengerManueltBrev(Behandling behandling) {
-        if (!lansert) {
-            return false;
-        }
-        InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
-        return !informasjonsbehov.getInformasjonsbehov().isEmpty();
+    private boolean harSøknad(Fagsak fagsak) {
+        var dokumenterPåSaken = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(fagsak.getId(), DokumentStatus.GYLDIG);
+        return dokumenterPåSaken.stream()
+            .anyMatch(dok -> BREVKODER_SØKNAD_OMS.contains(dok.getType()));
     }
 
 }
