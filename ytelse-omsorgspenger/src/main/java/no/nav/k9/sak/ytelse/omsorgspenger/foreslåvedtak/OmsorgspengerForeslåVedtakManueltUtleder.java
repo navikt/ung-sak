@@ -37,8 +37,7 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
                                                     @KonfigVerdi(value = "FORMIDLING_RETUR_MALTYPER", defaultVerdi = "true") Boolean lansert) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.formidlingKlient = formidlingKlient;
-        //this.lansert = lansert;
-        this.lansert = false; // FIXME: K9-Formidling feiler ved tilbakekall, Connect to k9-sak:8080 [k9-sak/127.0.0.1] Connection refused
+        this.lansert = lansert;
     }
 
     @Override
