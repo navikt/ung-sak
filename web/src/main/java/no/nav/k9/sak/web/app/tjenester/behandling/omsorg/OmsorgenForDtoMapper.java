@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -67,14 +66,18 @@ class OmsorgenForDtoMapper {
 
         final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
-            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, List.of());
+            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, List.of());
         }
         final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering ;
+        
+        final var omsorgenForListe = toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering);
+        final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT); 
         return new OmsorgenForOversiktDto(
             systemdata.isRegistrertForeldrerelasjon(),
             systemdata.isRegistrertSammeBosted(),
             tvingManuellVurdering,
-            toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering));
+            kanLøseAksjonspunkt,
+            omsorgenForListe);
     }
 
     private LocalDateTimeline<Boolean> lagTidslinjeTilVurdering(Long behandlingId) {
@@ -113,7 +116,7 @@ class OmsorgenForDtoMapper {
 
     List<OmsorgenForDto> toOmsorgenForDtoListe(List<OmsorgenForPeriode> perioder, boolean ikkeVurdertBlirOppfylt, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
-        List omsorgenForDateSegments = perioder.stream().map(p -> new LocalDateSegment(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList());
+        List<LocalDateSegment<OmsorgenForPeriode>> omsorgenForDateSegments = perioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList());
         LocalDateTimeline<OmsorgenForPeriode> omsorgenForTimeline = new LocalDateTimeline<>(omsorgenForDateSegments);
 
         LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = omsorgenForTimeline.combine(tidslinjeTilVurdering, new LocalDateSegmentCombinator<OmsorgenForPeriode, Boolean, OmsorgenForDto>() {

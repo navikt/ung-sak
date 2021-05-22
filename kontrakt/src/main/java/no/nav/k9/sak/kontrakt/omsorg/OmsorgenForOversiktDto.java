@@ -28,16 +28,21 @@ public class OmsorgenForOversiktDto {
     @Valid
     private boolean tvingManuellVurdering;
     
+    @JsonProperty(value = "kanLøseAksjonspunkt")
+    @Valid
+    private boolean kanLøseAksjonspunkt;
+    
     @JsonProperty(value = "omsorgsperioder")
     @Size(max = 1000)
     @Valid
     private List<OmsorgenForDto> omsorgsperioder = new ArrayList<>();
 
     
-    public OmsorgenForOversiktDto(boolean registrertForeldrerelasjon, boolean registrertSammeBosted, boolean tvingManuellVurdering, List<OmsorgenForDto> omsorgsperioder) {
+    public OmsorgenForOversiktDto(boolean registrertForeldrerelasjon, boolean registrertSammeBosted, boolean tvingManuellVurdering, boolean kanLøseAksjonspunkt, List<OmsorgenForDto> omsorgsperioder) {
         this.registrertForeldrerelasjon = registrertForeldrerelasjon;
         this.registrertSammeBosted = registrertSammeBosted;
         this.tvingManuellVurdering = tvingManuellVurdering;
+        this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
         this.omsorgsperioder = omsorgsperioder;
     }
 
@@ -56,6 +61,10 @@ public class OmsorgenForOversiktDto {
     
     public boolean isTvingManuellVurdering() {
         return tvingManuellVurdering;
+    }
+    
+    public boolean isKanLøseAksjonspunkt() {
+        return kanLøseAksjonspunkt;
     }
     
     public List<OmsorgenForDto> getOmsorgsperioder() {
