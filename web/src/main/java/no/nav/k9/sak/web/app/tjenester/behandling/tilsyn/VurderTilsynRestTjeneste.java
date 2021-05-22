@@ -38,7 +38,6 @@ public class VurderTilsynRestTjeneste {
     public static final String BASEPATH = "/behandling/tilsyn";
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
-    private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private BehandlingRepository behandlingRepository;
     private EtablertTilsynNattevåkOgBeredskapMapper etablertTilsynNattevåkOgBeredskapMapper;
 
@@ -48,11 +47,9 @@ public class VurderTilsynRestTjeneste {
 
     @Inject
     public VurderTilsynRestTjeneste(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
-                                    UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                     BehandlingRepository behandlingRepository,
                                     EtablertTilsynNattevåkOgBeredskapMapper etablertTilsynNattevåkOgBeredskapMapper) {
        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
-       this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
        this.behandlingRepository = behandlingRepository;
        this.etablertTilsynNattevåkOgBeredskapMapper = etablertTilsynNattevåkOgBeredskapMapper;
     }
@@ -75,13 +72,10 @@ public class VurderTilsynRestTjeneste {
                                                 @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
                                                     BehandlingUuidDto behandlingUuidDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
-        var perioderFraSøknad = uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId());
         var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
-        if (!perioderFraSøknad.isPresent()) {
-            return null;
-        }
+
         var behandlingRef = BehandlingReferanse.fra(behandling);
-        return etablertTilsynNattevåkOgBeredskapMapper.tilDto(behandlingRef, perioderFraSøknad.get(), unntakEtablertTilsynGrunnlag);
+        return etablertTilsynNattevåkOgBeredskapMapper.tilDto(behandlingRef, unntakEtablertTilsynGrunnlag);
     }
 
 }
