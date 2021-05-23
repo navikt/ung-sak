@@ -34,6 +34,10 @@ public class VurderingBeredskapDto extends BekreftetAksjonspunktDto implements V
     private List<Periode> perioder;
 
 
+    VurderingBeredskapDto() {
+        
+    }
+    
     public VurderingBeredskapDto(String vurderingstekst, Resultat resultat, List<Periode> perioder) {
         this.vurderingstekst = vurderingstekst;
         this.resultat = resultat;
