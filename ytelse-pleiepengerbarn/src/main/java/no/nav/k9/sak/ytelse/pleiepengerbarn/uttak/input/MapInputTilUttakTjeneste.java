@@ -113,7 +113,7 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
-        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse.getPleietrengendeAktørId());
+        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse.getSaksnummer(), referanse.getPleietrengendeAktørId());
 
         var input = new InputParametere()
             .medBehandling(behandling)

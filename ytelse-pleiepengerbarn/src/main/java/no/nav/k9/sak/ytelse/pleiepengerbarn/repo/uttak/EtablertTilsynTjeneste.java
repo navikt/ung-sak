@@ -1,8 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +24,12 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.kontrakt.tilsyn.Kilde;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @Dependent
@@ -65,17 +67,16 @@ public class EtablertTilsynTjeneste  {
     }
     */
     
-    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(AktørId pleietrengende) {
+    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(Saksnummer søkersSaksnummer, AktørId pleietrengende) {
         final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(pleietrengende);
-        return byggTidslinje(tilsynsgrunnlagPåTversAvFagsaker);
+        return byggTidslinje(søkersSaksnummer, tilsynsgrunnlagPåTversAvFagsaker);
     }
     
     
-    private TilsynsgrunnlagPåTversAvFagsaker hentAllePerioderTilVurdering(AktørId pleietrengende) {
+    private List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);
         
-        final var kravDokumenter = new HashSet<KravDokument>();
-        final var perioderFraSøknader = new HashSet<PerioderFraSøknad>();
+        final List<FagsakKravDokument> kravdokumenter = new ArrayList<>();
         for (Fagsak f : fagsaker) {
             final Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId());
             if (behandlingOpt.isEmpty()) {
@@ -90,31 +91,38 @@ public class EtablertTilsynTjeneste  {
             }
             
             @SuppressWarnings("unchecked")
-            final Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> fagsakKravdokumenter = finnVurderSøknadsfristTjeneste(behandlingReferanse).hentPerioderTilVurdering(behandlingReferanse);
-            kravDokumenter.addAll(fagsakKravdokumenter.keySet());
-            
+            final Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokumentListe = finnVurderSøknadsfristTjeneste(behandlingReferanse).hentPerioderTilVurdering(behandlingReferanse);
             final Set<PerioderFraSøknad> fagsakPerioderFraSøknadene = uttakGrunnlagOpt.get().getOppgitteSøknadsperioder().getPerioderFraSøknadene();
-            perioderFraSøknader.addAll(fagsakPerioderFraSøknadene);
+            
+            final List<FagsakKravDokument> fagsakKravdokumenter = toFagsakKravDokumenter(f, kravdokumentListe, fagsakPerioderFraSøknadene);
+            kravdokumenter.addAll(fagsakKravdokumenter);
         }
         
-        return new TilsynsgrunnlagPåTversAvFagsaker(kravDokumenter, perioderFraSøknader);
+        Collections.sort(kravdokumenter);
+        return kravdokumenter;
     }
     
-    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinje(TilsynsgrunnlagPåTversAvFagsaker tilsynsgrunnlagPåTversAvFagsaker) {
-        var kravDokumenterSorted = tilsynsgrunnlagPåTversAvFagsaker.kravDokumenter.stream().sorted(KravDokument::compareTo).collect(Collectors.toCollection(LinkedHashSet::new));
-        var resultatTimeline = new LocalDateTimeline<UtledetEtablertTilsyn>(List.of());
-        for (KravDokument kravDokument : kravDokumenterSorted) {
-            var dokumenter = tilsynsgrunnlagPåTversAvFagsaker.perioderFraSøknader.stream()
+    private List<FagsakKravDokument> toFagsakKravDokumenter(Fagsak f, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokumentListe, Set<PerioderFraSøknad> fagsakPerioderFraSøknadene) {
+        return kravdokumentListe.keySet().stream().map(kd -> new FagsakKravDokument(f, kd, finnPerioderFraSøknad(kd, fagsakPerioderFraSøknadene))).collect(Collectors.toList());
+    }
+
+    private PerioderFraSøknad finnPerioderFraSøknad(KravDokument kravDokument, Set<PerioderFraSøknad> fagsakPerioderFraSøknadene) {
+        final var dokumenter = fagsakPerioderFraSøknadene.stream()
                 .filter(it -> it.getJournalpostId().equals(kravDokument.getJournalpostId()))
                 .collect(Collectors.toSet());
-            if (dokumenter.size() == 1) {
-                var perioderFraSøknad = dokumenter.iterator().next();
-                for (var periode : perioderFraSøknad.getTilsynsordning().stream().map(Tilsynsordning::getPerioder).flatMap(Collection::stream).collect(Collectors.toList())) {
-                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet()))));
-                    resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                }
-            } else {
-                throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + dokumenter);
+        if (dokumenter.size() != 1) {
+            throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + dokumenter);
+        }
+        return dokumenter.iterator().next();
+    }
+
+    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinje(Saksnummer søkersSaksnummer, List<FagsakKravDokument> fagsakKravDokumenter) {
+        var resultatTimeline = new LocalDateTimeline<UtledetEtablertTilsyn>(List.of());
+        for (FagsakKravDokument kravDokument : fagsakKravDokumenter) {
+            for (var periode : kravDokument.perioderFraSøknad.getTilsynsordning().stream().map(Tilsynsordning::getPerioder).flatMap(Collection::stream).collect(Collectors.toList())) {
+                final var kilde = søkersSaksnummer.equals(kravDokument.fagsak.getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+                final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde))));
+                resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
             }
         }
         return resultatTimeline.compress();
@@ -127,13 +135,20 @@ public class EtablertTilsynTjeneste  {
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
-    private static final class TilsynsgrunnlagPåTversAvFagsaker {
-        private final Set<KravDokument> kravDokumenter;
-        private final Set<PerioderFraSøknad> perioderFraSøknader;
+    private static final class FagsakKravDokument implements Comparable<FagsakKravDokument> {
+        private final Fagsak fagsak;
+        private final KravDokument kravDokument;
+        private final PerioderFraSøknad perioderFraSøknad;
         
-        public TilsynsgrunnlagPåTversAvFagsaker(Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknader) {
-            this.kravDokumenter = kravDokumenter;
-            this.perioderFraSøknader = perioderFraSøknader;
+        public FagsakKravDokument(Fagsak fagsak, KravDokument kravDokument, PerioderFraSøknad perioderFraSøknad) {
+            this.fagsak = fagsak;
+            this.kravDokument = kravDokument;
+            this.perioderFraSøknad = perioderFraSøknad;
+        }
+
+        @Override
+        public int compareTo(FagsakKravDokument o) {
+            return kravDokument.compareTo(o.kravDokument);
         }
     }
 }
