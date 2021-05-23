@@ -3,14 +3,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -46,7 +42,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor.regelmod
 @FagsakYtelseTypeRef("PSB")
 @ApplicationScoped
 public class VurderOmsorgenForSteg implements BehandlingSteg {
-    private static final Logger log = LoggerFactory.getLogger(VurderOmsorgenForSteg.class);
 
     public static final VilkårType VILKÅRET = VilkårType.OMSORGEN_FOR;
     private BehandlingRepositoryProvider repositoryProvider;
@@ -73,16 +68,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-
-        final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
-        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
+        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, perioder);
 
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling)) {
-            log.info("Oppretter aksjonspunkt grunnet manuell revurdering.");
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
-        }
-        if (harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
+        if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         }
 
@@ -107,18 +96,10 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
                     grunnlag.getRelasjonMellomSøkerOgPleietrengende() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() == null
                     || grunnlag.getRelasjonMellomSøkerOgPleietrengende().getRelasjonsRolle() != RelasjonsRolle.BARN)) {
-                log.info("Oppretter aksjonspunkt grunnet manglende vurdering av: " + s.getLocalDateInterval());
                 return true;
             }
         }
         return false;
-    }
-
-    private DatoIntervallEntitet bestemPeriodeTilVurdering(final NavigableSet<DatoIntervallEntitet> perioder) {
-        final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-        final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
-        return periodeTilVurdering;
     }
 
     private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
