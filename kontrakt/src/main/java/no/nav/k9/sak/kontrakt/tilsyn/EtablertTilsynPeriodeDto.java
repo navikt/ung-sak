@@ -21,10 +21,15 @@ public class EtablertTilsynPeriodeDto {
     @JsonProperty(value = "tidPerDag")
     @Valid
     private Duration tidPerDag;
+    
+    @JsonProperty(value = "kilde")
+    @Valid
+    private Kilde kilde;
 
-    public EtablertTilsynPeriodeDto(Periode periode, Duration tidPerDag) {
+    public EtablertTilsynPeriodeDto(Periode periode, Duration tidPerDag, Kilde kilde) {
         this.periode = periode;
         this.tidPerDag = tidPerDag;
+        this.kilde = kilde;
     }
 
     public Periode getPeriode() {
@@ -33,5 +38,9 @@ public class EtablertTilsynPeriodeDto {
 
     public Duration getTidPerDag() {
         return tidPerDag;
+    }
+    
+    public Kilde getKilde() {
+        return kilde;
     }
 }
