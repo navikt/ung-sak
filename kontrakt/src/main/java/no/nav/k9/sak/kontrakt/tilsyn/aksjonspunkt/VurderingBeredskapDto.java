@@ -34,7 +34,7 @@ public class VurderingBeredskapDto extends BekreftetAksjonspunktDto implements V
     private List<Periode> perioder;
 
 
-    VurderingBeredskapDto() {
+    protected VurderingBeredskapDto() {
         
     }
     
