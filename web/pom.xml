@@ -80,6 +80,10 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>vedtak</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>hendelsemottak</artifactId>
+        </dependency>
 
         <!-- Ytelsespesifikke moduler -->
         <dependency>

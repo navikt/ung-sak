@@ -51,6 +51,10 @@
             <name>GitHub Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/navikt/k9-sak/</url>
         </repository>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
     </repositories>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -302,6 +306,11 @@
                 <artifactId>mottak</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>hendelsemottak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
@@ -484,6 +493,47 @@
                 <artifactId>kafka-streams</artifactId>
                 <version>2.8.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-streams-avro-serde</artifactId>
+                <version>5.5.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger</groupId>
+                        <artifactId>swagger-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hibernate.validator</groupId>
+                        <artifactId>hibernate-validator</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.sun.activation</groupId>
+                        <artifactId>jakarta.activation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.checkerframework</groupId>
+                        <artifactId>checker-qual</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.jersey.core</groupId>
+                        <artifactId>jersey-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>5.5.0</version>
+            </dependency>
 
             <!-- Transitive avhengighet resolution for å sikre bestemt versjon -->
             <dependency>
@@ -547,7 +597,7 @@
                 <artifactId>javassist</artifactId>
                 <version>3.28.0-GA</version>
             </dependency>
-            
+
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
