@@ -58,7 +58,10 @@ class SøknadDokumentmottaker {
         if (sluttDato == null) {
             sluttDato = startDato;
         }
-        
+        if (sluttDato.isAfter(LocalDate.now().plusYears(2))) {
+            // Hvis dette skulle bli nødvendig i fremtiden kan denne sjekken fjernes.
+            throw new IllegalArgumentException("Fagsak kan ikke være mer enn 2 år inn i fremtiden.");
+        }
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), sluttDato.plusWeeks(25));
         if (fagsak.isPresent()) {
             return fagsak.get();
