@@ -44,7 +44,7 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     public void setup() {
         initMocks(this);
         when(behandling.getFagsak()).thenReturn(fagsak);
-        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(kalkulusTjeneste);
+        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(kalkulusTjeneste, oppdateringjeneste);
     }
 
     @Test

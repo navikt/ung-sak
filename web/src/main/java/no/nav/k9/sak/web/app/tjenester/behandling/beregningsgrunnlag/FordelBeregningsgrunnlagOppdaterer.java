@@ -19,7 +19,7 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBe
 @DtoTilServiceAdapter(dto = FordelBeregningsgrunnlagDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdaterer<FordelBeregningsgrunnlagDtoer> {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste;
 
 
     FordelBeregningsgrunnlagOppdaterer() {
@@ -27,15 +27,15 @@ public class FordelBeregningsgrunnlagOppdaterer implements AksjonspunktOppdatere
     }
 
     @Inject
-    public FordelBeregningsgrunnlagOppdaterer(BeregningTjeneste kalkulusTjeneste) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+    public FordelBeregningsgrunnlagOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste) {
+        this.oppdateringTjeneste = oppdateringTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FordelBeregningsgrunnlagDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
-        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOveropp();
     }

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -21,7 +20,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.FaktaOmBeregningHist
 @DtoTilServiceAdapter(dto = VurderFaktaOmBeregningDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<VurderFaktaOmBeregningDtoer> {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste;
     private FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste;
 
     VurderFaktaOmBeregningOppdaterer() {
@@ -29,8 +28,9 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     }
 
     @Inject
-    public VurderFaktaOmBeregningOppdaterer(BeregningTjeneste kalkulusTjeneste, FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+    public VurderFaktaOmBeregningOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste,
+                                            FaktaOmBeregningHistorikkTjeneste faktaOmBeregningHistorikkTjeneste) {
+        this.oppdateringTjeneste = oppdateringTjeneste;
         this.faktaOmBeregningHistorikkTjeneste = faktaOmBeregningHistorikkTjeneste;
     }
 
@@ -38,7 +38,7 @@ public class VurderFaktaOmBeregningOppdaterer implements AksjonspunktOppdaterer<
     public OppdateringResultat oppdater(VurderFaktaOmBeregningDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
-        var resultatListe = kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        var resultatListe = oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         faktaOmBeregningHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), resultatListe, dtoer.getBegrunnelse());
         return OppdateringResultat.utenOveropp();
     }

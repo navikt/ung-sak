@@ -24,22 +24,22 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegr
 @DtoTilServiceAdapter(dto = FastsettBGTidsbegrensetArbeidsforholdDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettBGTidsbegrensetArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<FastsettBGTidsbegrensetArbeidsforholdDtoer> {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste;
 
     FastsettBGTidsbegrensetArbeidsforholdOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(BeregningTjeneste kalkulusTjeneste) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+    public FastsettBGTidsbegrensetArbeidsforholdOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste) {
+        this.oppdateringjeneste = oppdateringjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBGTidsbegrensetArbeidsforholdDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
-        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
         OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
         Behandling behandling = param.getBehandling();
