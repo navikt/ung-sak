@@ -25,12 +25,15 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerUtvide
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_KS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
+@DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_AO_KODE)
 public class SøknadDokumentValidator implements DokumentValidator {
 
     private static final Map<Ytelse.Type, Brevkode> GYLDIGE_SØKNAD_BREVKODER = Map.of(
         Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN, Brevkode.SØKNAD_OMS_UTVIDETRETT_KS,
+        Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_ALENE_OMSORG, Brevkode.SØKNAD_OMS_UTVIDETRETT_AO,
         Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE, Brevkode.SØKNAD_OMS_UTVIDETRETT_MA);
 
     @Inject

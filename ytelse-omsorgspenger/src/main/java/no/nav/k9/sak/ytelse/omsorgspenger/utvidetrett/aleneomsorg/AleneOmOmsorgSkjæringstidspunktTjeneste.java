@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -17,19 +17,19 @@ import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_MA")
-public class MidlertidigAleneSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
+@FagsakYtelseTypeRef("OMP_AO")
+public class AleneOmOmsorgSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
 
     private Period periodeFør = Period.parse("P12M");
 
-    MidlertidigAleneSkjæringstidspunktTjeneste() {
+    AleneOmOmsorgSkjæringstidspunktTjeneste() {
     }
 
     @Inject
-    MidlertidigAleneSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
+    AleneOmOmsorgSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
                                                SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;

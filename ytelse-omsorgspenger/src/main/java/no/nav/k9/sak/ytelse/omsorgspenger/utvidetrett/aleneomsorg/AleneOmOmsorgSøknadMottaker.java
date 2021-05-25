@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -19,19 +19,19 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @ApplicationScoped
-public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
+public class AleneOmOmsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
 
-    MidlertidigAleneSøknadMottaker() {
+    AleneOmOmsorgSøknadMottaker() {
         // proxy
     }
 
     @Inject
-    public MidlertidigAleneSøknadMottaker(SaksnummerRepository saksnummerRepository,
+    public AleneOmOmsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
                                           FagsakTjeneste fagsakTjeneste) {
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;

@@ -368,6 +368,7 @@ public class BehandlingDtoTjeneste {
                 break;
             case OMSORGSPENGER_KS:
             case OMSORGSPENGER_MA:
+            case OMSORGSPENGER_AO:
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(RammevedtakRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
                 break;

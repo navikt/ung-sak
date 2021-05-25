@@ -13,6 +13,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @ApplicationScoped
 public class UtvidetRettForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 

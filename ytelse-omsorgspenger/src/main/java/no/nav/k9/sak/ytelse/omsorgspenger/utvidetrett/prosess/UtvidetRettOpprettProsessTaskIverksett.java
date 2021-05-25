@@ -21,6 +21,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 public class UtvidetRettOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
