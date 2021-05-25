@@ -14,8 +14,10 @@ import no.nav.k9.felles.integrasjon.saf.Datotype;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
 import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalposttype;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
@@ -51,6 +53,7 @@ public class SykdomsDokumentVedleggHåndterer {
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
             .kanal()
+            .journalposttype()
             .dokumenter(new DokumentInfoResponseProjection()
                 .dokumentInfoId()
                 .tittel()
@@ -67,16 +70,8 @@ public class SykdomsDokumentVedleggHåndterer {
                 .dato()
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        LocalDateTime mottattDato = journalpost.getRelevanteDatoer() == null
-            ? LocalDateTime.now() // TODO: sørge for at alltid er med?
-            : journalpost.getRelevanteDatoer().stream()
-            .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
-            .findFirst()
-            .orElseThrow()
-            .getDato()
-            .toInstant()
-            .atZone(ZoneId.of("Europe/Oslo"))
-            .toLocalDateTime();
+        
+        final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         boolean hoveddokument = true;
@@ -107,5 +102,32 @@ public class SykdomsDokumentVedleggHåndterer {
             hoveddokument = false;
         }
 
+    }
+
+    private LocalDateTime utledMottattDato(Journalpost journalpost) {
+        final LocalDateTime mottattDato;
+        if (journalpost.getJournalposttype() == Journalposttype.I) {
+            mottattDato = journalpost.getRelevanteDatoer() == null
+                ? LocalDateTime.now() // TODO: sørge for at alltid er med?
+                : journalpost.getRelevanteDatoer().stream()
+                .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
+                .findFirst()
+                .orElseThrow()
+                .getDato()
+                .toInstant()
+                .atZone(ZoneId.of("Europe/Oslo"))
+                .toLocalDateTime();
+        } else {
+            mottattDato = journalpost.getRelevanteDatoer()
+                    .stream()
+                    .filter(d -> d.getDatotype() == Datotype.DATO_JOURNALFOERT)
+                    .findFirst()
+                    .orElseThrow()
+                    .getDato()
+                    .toInstant()
+                    .atZone(ZoneId.of("Europe/Oslo"))
+                    .toLocalDateTime();
+        }
+        return mottattDato;
     }
 }
