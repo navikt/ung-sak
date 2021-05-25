@@ -1,7 +1,9 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -64,17 +66,18 @@ public class OmsorgenForTjeneste {
         return resultat;
     }
 
-    LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingskontrollKontekst kontekst, final DatoIntervallEntitet periodeTilVurdering) {
-        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), periodeTilVurdering);
+    LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
+        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(kontekst.getBehandlingId(), kontekst.getAktørId(), perioder);
         final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(kontekst);
-        final var samletOmsorgenForTidslinje = slåSammenGrunnlagFraSystemOgVurdering(periodeTilVurdering, systemgrunnlag, vurdertOmsorgenForTidslinje);
+        final var samletOmsorgenForTidslinje = slåSammenGrunnlagFraSystemOgVurdering(perioder, systemgrunnlag, vurdertOmsorgenForTidslinje);
         return samletOmsorgenForTidslinje;
     }
 
-    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> slåSammenGrunnlagFraSystemOgVurdering(final DatoIntervallEntitet periodeTilVurdering,
+    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> slåSammenGrunnlagFraSystemOgVurdering(final NavigableSet<DatoIntervallEntitet> perioder,
             final OmsorgenForVilkårGrunnlag systemgrunnlag,
             final LocalDateTimeline<OmsorgenForVilkårGrunnlag> vurdertOmsorgenForTidslinje) {
-        return vurdertOmsorgenForTidslinje.combine(new LocalDateSegment<OmsorgenForVilkårGrunnlag>(periodeTilVurdering.toLocalDateInterval(), systemgrunnlag), new LocalDateSegmentCombinator<OmsorgenForVilkårGrunnlag, OmsorgenForVilkårGrunnlag, OmsorgenForVilkårGrunnlag>() {
+        final var systemdatatidslinje = new LocalDateTimeline<OmsorgenForVilkårGrunnlag>(perioder.stream().map(p -> new LocalDateSegment<OmsorgenForVilkårGrunnlag>(p.toLocalDateInterval(), systemgrunnlag)).collect(Collectors.toList()));
+        return vurdertOmsorgenForTidslinje.combine(systemdatatidslinje, new LocalDateSegmentCombinator<OmsorgenForVilkårGrunnlag, OmsorgenForVilkårGrunnlag, OmsorgenForVilkårGrunnlag>() {
             @Override
             public LocalDateSegment<OmsorgenForVilkårGrunnlag> combine(LocalDateInterval datoInterval, LocalDateSegment<OmsorgenForVilkårGrunnlag> datoSegment, LocalDateSegment<OmsorgenForVilkårGrunnlag> datoSegment2) {
                 if (datoSegment == null) {
@@ -108,8 +111,8 @@ public class OmsorgenForTjeneste {
         }
     }
     
-    public OmsorgenForVilkårGrunnlag oversettSystemdataTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, DatoIntervallEntitet periodeTilVurdering) {
-        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periodeTilVurdering).orElseThrow();
+    public OmsorgenForVilkårGrunnlag oversettSystemdataTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, NavigableSet<DatoIntervallEntitet> perioder) {
+        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, omsluttendePeriode(perioder)).orElseThrow();
         final var pleietrengende = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPleietrengendeAktørId();
         
         // Lar denne stå her inntil videre selv om vi ikke bruker den:
@@ -124,7 +127,14 @@ public class OmsorgenForTjeneste {
 
         return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
                 mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
-    } 
+    }
+    
+    private DatoIntervallEntitet omsluttendePeriode(final NavigableSet<DatoIntervallEntitet> perioder) {
+        final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
+        final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
+        final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
+        return periodeTilVurdering;
+    }
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
         return pleietrengendeBostedsadresser.stream()

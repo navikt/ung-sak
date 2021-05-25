@@ -20,8 +20,14 @@ public class VurderingBeredskapDto extends BekreftetAksjonspunktDto {
     private List<VurderingDto> vurderinger;
 
 
-    public VurderingBeredskapDto(List<VurderingDto> vurderinger) {
-        this.vurderinger = vurderinger;
+    protected VurderingBeredskapDto() {
+        
+    }
+    
+    public VurderingBeredskapDto(String vurderingstekst, Resultat resultat, List<Periode> perioder) {
+        this.vurderingstekst = vurderingstekst;
+        this.resultat = resultat;
+        this.perioder = perioder;
     }
 
     public List<VurderingDto> getVurderinger() {

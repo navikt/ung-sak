@@ -1,13 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
-import no.nav.k9.kodeverk.uttak.FraværÅrsak;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -17,7 +10,16 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+
+import no.nav.k9.kodeverk.uttak.FraværÅrsak;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.WrappedOppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class ÅrskvantumTjenesteTest {
 
@@ -27,15 +29,16 @@ public class ÅrskvantumTjenesteTest {
 
     @Test
     public void skal_ta_med_alle_perioder_relevant_for_behandlingen() {
-        var fravær = List.of(new OppgittFraværPeriode(LocalDate.now().minusDays(50), LocalDate.now().minusDays(48), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(3), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT));
+        var jpDummy = new JournalpostId(123L);
+        var fravær = List.of(new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(50), LocalDate.now().minusDays(48), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(3), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT));
 
         var vp = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)),
             DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now()));
 
-        var behandlingFravær = Set.of(new OppgittFraværPeriode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT));
+        var behandlingFravær = Set.of(new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT));
         var vilkårsPerioder = new TreeSet<>(vp);
 
         var filtrertPerioder = tjeneste.utledPerioder(vilkårsPerioder, mapTilWrappedPeriode(fravær), behandlingFravær);
@@ -51,17 +54,18 @@ public class ÅrskvantumTjenesteTest {
 
     @Test
     public void skal_ta_med_alle_perioder_relevant_for_periodene_til_vurdering_og_nullstilling_utenfor() {
-        var fravær = List.of(new OppgittFraværPeriode(LocalDate.now().minusDays(50), LocalDate.now().minusDays(48), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(47), LocalDate.now().minusDays(47), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(3), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT));
+        var jpDummy = new JournalpostId(123L);
+        var fravær = List.of(new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(50), LocalDate.now().minusDays(48), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(47), LocalDate.now().minusDays(47), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(3), LocalDate.now(), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, null, FraværÅrsak.UDEFINERT));
 
         var vp = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)),
             DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now()));
 
-        var behandlingFravær = Set.of(new OppgittFraværPeriode(LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
-            new OppgittFraværPeriode(LocalDate.now().minusDays(47), LocalDate.now().minusDays(47), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT));
+        var behandlingFravær = Set.of(new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(4), LocalDate.now().minusDays(4), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT),
+            new OppgittFraværPeriode(jpDummy, LocalDate.now().minusDays(47), LocalDate.now().minusDays(47), UttakArbeidType.ARBEIDSTAKER, arbeidsgiver, null, Duration.ZERO, FraværÅrsak.UDEFINERT));
         var vilkårsPerioder = new TreeSet<>(vp);
 
         var filtrertPerioder = tjeneste.utledPerioder(vilkårsPerioder, mapTilWrappedPeriode(fravær), behandlingFravær);

@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -69,9 +68,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
-
-        final var periodeTilVurdering = bestemPeriodeTilVurdering(perioder);
-        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, periodeTilVurdering);
+        final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(kontekst, perioder);
 
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || harAksjonspunkt(samletOmsorgenForTidslinje, false)) {
@@ -103,13 +100,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
             }
         }
         return false;
-    }
-
-    private DatoIntervallEntitet bestemPeriodeTilVurdering(final NavigableSet<DatoIntervallEntitet> perioder) {
-        final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-        final var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
-        return periodeTilVurdering;
     }
 
     private Vilkårene oppdaterVilkårene(BehandlingskontrollKontekst kontekst, final List<VilkårData> vilkårData) {
