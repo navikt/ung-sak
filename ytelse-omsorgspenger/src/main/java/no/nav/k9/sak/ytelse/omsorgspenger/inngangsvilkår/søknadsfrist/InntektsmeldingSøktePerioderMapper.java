@@ -29,7 +29,7 @@ public class InntektsmeldingSøktePerioderMapper {
         result.put(new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.INNTEKTSMELDING),
             it.getOppgittFravær()
                 .stream()
-                .map(pa -> new OppgittFraværPeriode(pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag(), FraværÅrsak.UDEFINERT))
+                .map(pa -> new OppgittFraværPeriode(it.getJournalpostId(), pa.getFom(), pa.getTom(), UttakArbeidType.ARBEIDSTAKER, it.getArbeidsgiver(), it.getArbeidsforholdRef(), pa.getVarighetPerDag(), FraværÅrsak.UDEFINERT))
                 .map(op -> new SøktPeriode<>(op.getPeriode(), op.getAktivitetType(), op.getArbeidsgiver(), op.getArbeidsforholdRef(), op))
                 .collect(Collectors.toList()));
     }
