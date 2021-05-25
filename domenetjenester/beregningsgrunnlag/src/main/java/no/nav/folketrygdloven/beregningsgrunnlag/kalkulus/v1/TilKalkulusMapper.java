@@ -285,14 +285,11 @@ public class TilKalkulusMapper {
         if (vilkårsMerknad == null) {
             return null;
         }
-        switch (vilkårsMerknad) {
-            case VM_7847_A:
-                return MidlertidigInaktivType.A;
-            case VM_7847_B:
-                return MidlertidigInaktivType.B;
-            default:
-                return null;
-        }
+        return switch (vilkårsMerknad) {
+            case VM_7847_A -> MidlertidigInaktivType.A;
+            case VM_7847_B -> MidlertidigInaktivType.B;
+            default -> null;
+        };
     }
 
     private static PermisjonDto mapTilPermisjonDto(Permisjon permisjon) {

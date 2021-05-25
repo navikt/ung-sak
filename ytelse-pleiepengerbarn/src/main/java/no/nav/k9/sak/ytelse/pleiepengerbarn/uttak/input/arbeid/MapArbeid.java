@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,10 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -35,7 +40,8 @@ public class MapArbeid {
     public List<Arbeid> map(Set<KravDokument> kravDokumenter,
                             Set<PerioderFraSøknad> perioderFraSøknader,
                             LocalDateTimeline<Boolean> tidslinjeTilVurdering,
-                            Set<Inntektsmelding> sakInntektsmeldinger) {
+                            Set<Inntektsmelding> sakInntektsmeldinger,
+                            Vilkår vilkår) {
 
         final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
@@ -63,6 +69,31 @@ public class MapArbeid {
                 }
             });
 
+        var skjæringstidspunkter = tidslinjeTilVurdering.toSegments()
+            .stream()
+            .map(LocalDateSegment::getFom)
+            .collect(Collectors.toSet());
+
+        var opptjeningsPerioderTilVurdering = vilkår.getPerioder().stream().filter(it -> skjæringstidspunkter.stream().anyMatch(at -> it.getSkjæringstidspunkt().equals(at))).collect(Collectors.toList());
+        if (erInnaktivVedEtEllerFlereSkjæringstidspunkter(skjæringstidspunkter, opptjeningsPerioderTilVurdering)) {
+            var innaktivePerioder = opptjeningsPerioderTilVurdering.stream()
+                .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()))
+                .collect(Collectors.toList());
+
+            var timeline = new LocalDateTimeline<>(innaktivePerioder.stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<WrappedArbeid>(it.getFomDato(), it.getTomDato(), null)).collect(Collectors.toList()));
+
+            for (AktivitetIdentifikator key : arbeidsforhold.keySet()) {
+                var perioder = arbeidsforhold.getOrDefault(key, new LocalDateTimeline<>(List.of()));
+                perioder = perioder.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                arbeidsforhold.put(key, perioder);
+            }
+
+            arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null), new LocalDateTimeline<>(innaktivePerioder.stream()
+                .map(VilkårPeriode::getPeriode)
+                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new WrappedArbeid(new ArbeidPeriode(it, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))
+                .collect(Collectors.toList())));
+        }
+
         return arbeidsforhold.entrySet()
             .stream()
             .map(arbeidPeriodes -> {
@@ -83,6 +114,15 @@ public class MapArbeid {
                 return new Arbeid(mapArbeidsforhold(arbeidPeriodes.getKey()), perioder);
             })
             .collect(Collectors.toList());
+    }
+
+    private boolean erInnaktivVedEtEllerFlereSkjæringstidspunkter(Set<LocalDate> skjæringstidspunkter, List<VilkårPeriode> perioderTilVurdering) {
+
+        if (perioderTilVurdering.size() != skjæringstidspunkter.size()) {
+            throw new IllegalStateException("Fant ikke alle skjæringstidspunkter");
+        }
+
+        return perioderTilVurdering.stream().anyMatch(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()));
     }
 
     private Duration justerIHenholdTilAntallet(long antallLinjerPerArbeidsgiver, Duration duration) {

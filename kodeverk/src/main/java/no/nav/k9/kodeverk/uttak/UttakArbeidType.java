@@ -25,6 +25,7 @@ public enum UttakArbeidType implements Kodeverdi {
     SELVSTENDIG_NÆRINGSDRIVENDE(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE, "Selvstendig næringsdrivende"),
     FRILANSER(AktivitetStatus.FRILANSER, "Frilans"),
 
+    INAKTIV("INAKTIV", "Inaktiv"),
     ANNET("ANNET", "Annet"),
     ;
 
