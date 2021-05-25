@@ -58,8 +58,11 @@ public class BeredskapOgNattevåkOppdaterer {
     }
 
     private static <T> LocalDateSegment<T> siste(LocalDateInterval dateInterval, LocalDateSegment<T> lhs, LocalDateSegment<T> rhs) {
-        T lv = (T)lhs.getValue();
-        T rv = rhs == null ? lv : (T)rhs.getValue();
+        T lv = null;
+        if (lhs != null) {
+            lv = lhs.getValue();
+        }
+        T rv = rhs == null ? lv : rhs.getValue();
         return new LocalDateSegment<>(dateInterval, rv);
     }
 
