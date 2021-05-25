@@ -48,7 +48,9 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
 
 
         if (kanFortsette) {
-            return OppdateringResultat.utenOveropp();
+            return OppdateringResultat.utenTransisjon()
+                .medTotrinn()
+                .build();
         } else {
             var resultat = OppdateringResultat.utenOveropp();
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
