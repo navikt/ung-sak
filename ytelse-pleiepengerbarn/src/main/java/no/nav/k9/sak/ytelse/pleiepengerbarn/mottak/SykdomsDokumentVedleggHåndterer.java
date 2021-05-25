@@ -107,26 +107,22 @@ public class SykdomsDokumentVedleggHåndterer {
     private LocalDateTime utledMottattDato(Journalpost journalpost) {
         final LocalDateTime mottattDato;
         if (journalpost.getJournalposttype() == Journalposttype.I) {
-            mottattDato = journalpost.getRelevanteDatoer()
-                    .stream()
-                    .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
-                    .findFirst()
-                    .orElseThrow()
-                    .getDato()
-                    .toInstant()
-                    .atZone(ZoneId.of("Europe/Oslo"))
-                    .toLocalDateTime();
+            mottattDato = hentRelevantDato(journalpost, Datotype.DATO_REGISTRERT);
         } else {
-            mottattDato = journalpost.getRelevanteDatoer()
-                    .stream()
-                    .filter(d -> d.getDatotype() == Datotype.DATO_JOURNALFOERT)
-                    .findFirst()
-                    .orElseThrow()
-                    .getDato()
-                    .toInstant()
-                    .atZone(ZoneId.of("Europe/Oslo"))
-                    .toLocalDateTime();
+            mottattDato = hentRelevantDato(journalpost, Datotype.DATO_JOURNALFOERT);
         }
         return mottattDato;
+    }
+
+    private LocalDateTime hentRelevantDato(Journalpost journalpost, Datotype datotype) {
+        return journalpost.getRelevanteDatoer()
+                .stream()
+                .filter(d -> d.getDatotype() == datotype)
+                .findFirst()
+                .orElseThrow()
+                .getDato()
+                .toInstant()
+                .atZone(ZoneId.of("Europe/Oslo"))
+                .toLocalDateTime();
     }
 }
