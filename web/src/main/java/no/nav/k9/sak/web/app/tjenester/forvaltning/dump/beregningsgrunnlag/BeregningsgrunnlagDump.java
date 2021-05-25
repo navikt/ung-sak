@@ -36,7 +36,8 @@ public class BeregningsgrunnlagDump implements DebugDumpFagsak {
             + " from gr_beregningsgrunnlag gr "
             + "   inner join bg_perioder bg on gr.bg_grunnlag_id=bg.id"
             + "   inner join bg_periode bgp on bg.id = bgp.id"
-            + "   inner join fagsak f on gr.id = f.id"
+            + "   inner join behandling BH on GR.behandling_id = BH.id"
+            + "   inner join FAGSAK F on BH.fagsak_id = F.id"
             + " where gr.aktiv=true and f.saksnummer=:saksnummer "
             + " order by gr.opprettet_tid";
 
