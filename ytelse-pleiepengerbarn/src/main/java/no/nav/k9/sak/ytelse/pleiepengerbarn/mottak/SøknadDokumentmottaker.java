@@ -54,8 +54,8 @@ class SøknadDokumentmottaker {
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
-    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, @SuppressWarnings("unused") LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), startDato.plusWeeks(25));
+    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), sluttDato.plusWeeks(25));
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
