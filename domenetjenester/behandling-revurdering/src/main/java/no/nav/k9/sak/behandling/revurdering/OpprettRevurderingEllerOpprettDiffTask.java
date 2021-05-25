@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     public static final String TASKNAME = "behandlingskontroll.opprettRevurderingEllerDiff";
+    public static final String BEHANDLING_ÅRSAK = "behandlingArsak";
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -61,8 +62,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         logContext(fagsak);
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
-        // TODO: Trekk ut fra property slik at denne kan brukes til andre ting
-        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON;
+        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
 

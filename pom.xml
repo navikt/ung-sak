@@ -302,6 +302,11 @@
                 <artifactId>mottak</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>hendelsemottak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
@@ -547,7 +552,7 @@
                 <artifactId>javassist</artifactId>
                 <version>3.28.0-GA</version>
             </dependency>
-            
+
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
