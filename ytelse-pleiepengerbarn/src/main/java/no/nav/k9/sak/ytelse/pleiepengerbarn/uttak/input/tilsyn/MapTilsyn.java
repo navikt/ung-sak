@@ -13,7 +13,7 @@ public class MapTilsyn {
 
     public Map<LukketPeriode, Duration> map(LocalDateTimeline<UtledetEtablertTilsyn> etablertTilsyntidslinje) {
         final var result = new HashMap<LukketPeriode, Duration>();
-        for (LocalDateSegment<UtledetEtablertTilsyn> segment : etablertTilsyntidslinje.toSegments()) {
+        for (LocalDateSegment<UtledetEtablertTilsyn> segment : etablertTilsyntidslinje.compress().toSegments()) {
             result.put(new LukketPeriode(segment.getFom(), segment.getTom()), segment.getValue().getVarighet());
         }
 
