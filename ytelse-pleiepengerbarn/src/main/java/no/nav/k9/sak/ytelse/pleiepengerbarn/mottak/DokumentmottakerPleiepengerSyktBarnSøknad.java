@@ -26,6 +26,7 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.type.Journalpost;
 import no.nav.k9.søknad.ytelse.psb.v1.InfoFraPunsj;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
@@ -111,17 +112,21 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
-        Optional<InfoFraPunsj> infoFraPunsj = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj();
-        boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = false;
-        if (infoFraPunsj.isPresent() && infoFraPunsj.get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes() != null) {
-            søknadenInneholderInfomasjonSomIkkeKanPunsjes = true;
+        Optional<Journalpost> journalpost = søknad.getJournalposter()
+            .stream()
+            .filter(j -> j.getJournalpostId().equals(journalpostId.getVerdi()))
+            .findFirst();
+
+        boolean journalpostHarInformasjonSomIkkeKanPunsjes = false;
+        if (journalpost.isPresent() && journalpost.get().getInneholderInfomasjonSomIkkeKanPunsjes() != null) {
+            journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.get().getInneholderInfomasjonSomIkkeKanPunsjes();
         }
 
         sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
             journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             søknad.getMottattDato().toLocalDateTime(),
-            søknadenInneholderInfomasjonSomIkkeKanPunsjes);
+            journalpostHarInformasjonSomIkkeKanPunsjes);
     }
 
     @Override
