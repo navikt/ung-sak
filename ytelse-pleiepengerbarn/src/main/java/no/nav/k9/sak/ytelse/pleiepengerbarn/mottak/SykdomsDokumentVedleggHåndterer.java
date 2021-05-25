@@ -115,6 +115,10 @@ public class SykdomsDokumentVedleggHåndterer {
     }
 
     private LocalDateTime hentRelevantDato(Journalpost journalpost, Datotype datotype) {
+        if (journalpost.getRelevanteDatoer() == null) {
+            // Hack grunnet feil i VTP. Fjernes straks VTP har blitt rettet.
+            return LocalDateTime.now();
+        }
         return journalpost.getRelevanteDatoer()
                 .stream()
                 .filter(d -> d.getDatotype() == datotype)
