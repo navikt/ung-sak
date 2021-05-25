@@ -43,7 +43,7 @@ public class BeregningsgrunnlagOppdateringTjeneste {
                                     BehandlingReferanse ref) {
         NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, false);
         stpTilDtoMap.keySet().forEach(stp -> {
-            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = datoLiggerIVurderingsperiode(perioderSomSkalKunneVurderes, stp);
+            List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes, stp);
             if (vurderingsperioderSomInkludererSTP.size() == 0) {
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                     " listen over vilkårsperioder som er til vurdering " + perioderSomSkalKunneVurderes);
@@ -54,7 +54,7 @@ public class BeregningsgrunnlagOppdateringTjeneste {
         });
     }
 
-    private List<DatoIntervallEntitet> datoLiggerIVurderingsperiode(NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes, LocalDate stp) {
+    private List<DatoIntervallEntitet> finnPerioderSomInkludererDato(NavigableSet<DatoIntervallEntitet> perioderSomSkalKunneVurderes, LocalDate stp) {
         return perioderSomSkalKunneVurderes.stream()
             .filter(periode -> periode.inkluderer(stp))
             .collect(Collectors.toList());
