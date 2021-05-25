@@ -38,10 +38,6 @@ public class EtablertTilsynTjeneste {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
 
-    EtablertTilsynTjeneste() {
-        // CDI
-    }
-
     @Inject
     public EtablertTilsynTjeneste(FagsakRepository fagsakRepository,
                                   BehandlingRepository behandlingRepository,
