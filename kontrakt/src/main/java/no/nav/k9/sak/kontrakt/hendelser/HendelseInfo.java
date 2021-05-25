@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import no.nav.k9.kodeverk.hendelser.HendelseKilde;
 import no.nav.k9.sak.typer.AktørId;
 
 @Valid
@@ -36,14 +35,6 @@ public class HendelseInfo {
     @JsonProperty(value = "opprettet")
     private LocalDateTime opprettet;
 
-    @JsonProperty(value = "endringstype", required = true)
-    @NotNull
-    private Endringstype endringstype;
-
-    @JsonProperty(value = "hendelseKilde", required = true)
-    @NotNull
-    private HendelseKilde hendelseKilde;
-
     public LocalDateTime getOpprettet() {
         return opprettet;
     }
@@ -55,16 +46,6 @@ public class HendelseInfo {
     public String getHendelseId() {
         return hendelseId;
     }
-
-    public Endringstype getEndringstype() {
-        return endringstype;
-    }
-
-    public HendelseKilde getHendelseKilde() {
-        return hendelseKilde;
-    }
-
-
 
     public static class Builder {
         private HendelseInfo mal;
@@ -85,16 +66,6 @@ public class HendelseInfo {
 
         public Builder medOpprettet(LocalDateTime opprettet) {
             mal.opprettet = opprettet;
-            return this;
-        }
-
-        public Builder medHendelseKilde(HendelseKilde hendelseKilde) {
-            mal.hendelseKilde = hendelseKilde;
-            return this;
-        }
-
-        public Builder medEndringstype(Endringstype endringstype) {
-            mal.endringstype = endringstype;
             return this;
         }
 

@@ -23,8 +23,7 @@ public class DødsfallHendelse implements Hendelse {
     @Valid
     private HendelseInfo hendelseInfo;
 
-    @JsonProperty(value = "dødsdato", required = true)
-    @NotNull
+    @JsonProperty(value = "dødsdato")
     @Valid
     private LocalDate dødsdato;
 

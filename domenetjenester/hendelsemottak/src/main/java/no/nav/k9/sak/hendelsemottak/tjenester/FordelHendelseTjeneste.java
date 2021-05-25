@@ -16,7 +16,8 @@ import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTa
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.kontrakt.hendelser.Hendelse;
+import no.nav.k9.sak.historikk.kafka.json.SerialiseringUtil;
+import no.nav.k9.sak.kontrakt.hendelser.DødsfallHendelse;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
@@ -45,8 +46,10 @@ public class FordelHendelseTjeneste {
         return matchendeUtledere.stream().collect(Collectors.toList());
     }
 
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
-        var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelse.getHendelseType())
+    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, HendelseType hendelseType, String payload) {
+        //Hendelse hendelse = SerialiseringUtil.deserialiser(payload, Hendelse.class);
+        DødsfallHendelse hendelse = SerialiseringUtil.deserialiser(payload, DødsfallHendelse.class);
+        var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelseType)
             .stream()
             .map(utleder -> utleder.finnFagsakerTilVurdering(aktørId, hendelse))
             .flatMap(map -> map.entrySet().stream())
@@ -54,8 +57,8 @@ public class FordelHendelseTjeneste {
         return fagsakerMedBehandlingÅrsak;
     }
 
-    public void mottaHendelse(AktørId aktørId, Hendelse hendelse) {
-        var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, hendelse);
+    public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, HendelseType hendelseType, String payload) {
+        var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, hendelseType, payload);
 
         for (Map.Entry<Fagsak, BehandlingÅrsakType> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();
@@ -68,6 +71,8 @@ public class FordelHendelseTjeneste {
 
             fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
         }
+        return kandidaterTilRevurdering;
     }
+
 }
 

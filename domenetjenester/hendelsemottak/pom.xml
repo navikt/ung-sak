@@ -21,35 +21,6 @@
             <artifactId>behandling-revurdering</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kontrakt</artifactId>
-        </dependency>
-
-        <!--Kafka (TODO: Fjernes. finnes allerede i k9-fordel) -->
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-streams</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-streams-avro-serde</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.glassfish.jersey.core</groupId>
-                    <artifactId>jersey-client</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-        </dependency>
-
         <!-- Test avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
@@ -58,27 +29,5 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro-maven-plugin</artifactId>
-                <version>1.10.2</version>
-
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>idl-protocol</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirectory>src/main/resources/avro/leesah</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
