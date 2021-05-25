@@ -107,16 +107,15 @@ public class SykdomsDokumentVedleggHåndterer {
     private LocalDateTime utledMottattDato(Journalpost journalpost) {
         final LocalDateTime mottattDato;
         if (journalpost.getJournalposttype() == Journalposttype.I) {
-            mottattDato = journalpost.getRelevanteDatoer() == null
-                ? LocalDateTime.now() // TODO: sørge for at alltid er med?
-                : journalpost.getRelevanteDatoer().stream()
-                .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
-                .findFirst()
-                .orElseThrow()
-                .getDato()
-                .toInstant()
-                .atZone(ZoneId.of("Europe/Oslo"))
-                .toLocalDateTime();
+            mottattDato = journalpost.getRelevanteDatoer()
+                    .stream()
+                    .filter(d -> d.getDatotype() == Datotype.DATO_REGISTRERT)
+                    .findFirst()
+                    .orElseThrow()
+                    .getDato()
+                    .toInstant()
+                    .atZone(ZoneId.of("Europe/Oslo"))
+                    .toLocalDateTime();
         } else {
             mottattDato = journalpost.getRelevanteDatoer()
                     .stream()
