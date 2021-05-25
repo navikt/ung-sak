@@ -55,12 +55,16 @@ class SøknadDokumentmottaker {
     }
 
     Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
+        if (sluttDato == null) {
+            sluttDato = startDato;
+        }
+        
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), sluttDato.plusWeeks(25));
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato.minusWeeks(25), startDato.plusWeeks(25));
+        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato, sluttDato);
     }
 
     Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, Søknad søknad) {
