@@ -263,8 +263,9 @@ public class Fagsak extends BaseEntitet {
     }
 
     void setPeriode(LocalDate fom, LocalDate tom) {
-        this.periode = DatoIntervallEntitet
-            .fraOgMedTilOgMed(fom == null ? Tid.TIDENES_BEGYNNELSE : fom, tom == null ? Tid.TIDENES_ENDE : tom)
-            .toRange();
+        if ((fom == null || fom.equals(Tid.TIDENES_BEGYNNELSE)) && (tom == null || tom.equals(Tid.TIDENES_ENDE))) {
+            throw new IllegalArgumentException(String.format("Støtter ikke evige saker: [%s, %s]", fom, tom));
+        }
+        this.periode = DatoIntervallEntitet.fra(fom, tom).toRange();
     }
 }
