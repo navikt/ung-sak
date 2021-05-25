@@ -79,7 +79,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         søktePerioder = new SøktePerioder(søknadsperiodeRepository);
 
         vilkårsPeriodisering.put(VilkårType.MEDLEMSKAPSVILKÅRET, maksSøktePeriode);
-        vilkårsPeriodisering.put(VilkårType.OMSORGEN_FOR, maksSøktePeriode);
         vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, PleietrengendeAlderPeriode.under18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
         vilkårsPeriodisering.put(VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(søknadsperiodeRepository, basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter));
     }

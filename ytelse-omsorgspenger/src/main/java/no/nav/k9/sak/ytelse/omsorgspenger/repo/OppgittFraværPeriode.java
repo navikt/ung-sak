@@ -110,12 +110,8 @@ public class OppgittFraværPeriode extends BaseEntitet implements IndexKey, Søk
         this.fraværÅrsak = fraværÅrsak;
     }
 
-    public OppgittFraværPeriode(LocalDate fom, LocalDate tom, UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Duration fraværPerDag, FraværÅrsak fraværÅrsak) {
-        this(null, fom, tom, aktivitetType, arbeidsgiver, arbeidsforholdRef, fraværPerDag, fraværÅrsak);
-    }
-
     public OppgittFraværPeriode(LocalDate fom, LocalDate tom, OppgittFraværPeriode fra) {
-        this(null, fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak());
+        this(fra.getJournalpostId(), fom, tom, fra.getAktivitetType(), fra.getArbeidsgiver(), fra.getArbeidsforholdRef(), fra.getFraværPerDag(), fra.getFraværÅrsak());
     }
 
     public OppgittFraværPeriode(OppgittFraværPeriode periode) {

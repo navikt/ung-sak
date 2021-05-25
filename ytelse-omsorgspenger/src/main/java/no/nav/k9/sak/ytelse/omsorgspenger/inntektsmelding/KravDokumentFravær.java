@@ -37,10 +37,11 @@ public class KravDokumentFravær {
         for (var im : sortedIm) {
             var arbeidsgiver = im.getArbeidsgiver();
             var arbeidsforholdRef = im.getArbeidsforholdRef();
+            var jpId = im.getJournalpostId();
             var gruppe = new AktivitetMedIdentifikatorArbeidsgiverArbeidsforhold(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforholdRef));
             var aktiviteter = mapByAktivitet.getOrDefault(gruppe, new ArrayList<>());
             var liste = im.getOppgittFravær().stream()
-                .map(pa -> new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag(), fraværÅrsak),
+                .map(pa -> new WrappedOppgittFraværPeriode(new OppgittFraværPeriode(jpId, pa.getFom(), pa.getTom(), aktivitetType, arbeidsgiver, arbeidsforholdRef, pa.getVarighetPerDag(), fraværÅrsak),
                     im.getInnsendingstidspunkt(), Utfall.OPPFYLT))
                 .collect(Collectors.toList());
 

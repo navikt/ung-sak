@@ -1,13 +1,10 @@
-package no.nav.k9.sak.domene.behandling.steg.preforeslåvedtak;
-
-import java.util.List;
+package no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
@@ -41,7 +38,7 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!lansert){
+        if (!lansert) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -54,11 +51,7 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat gjenopptaSteg(BehandlingskontrollKontekst kontekst) {
-        if (!lansert){
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-        var maltyper = hentTilgjengeligeMaltyper(kontekst.getBehandlingId());
-        return utledAksjonspunkt(maltyper);
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private void lagTaskForÅTaAvVent(BehandlingskontrollKontekst kontekst) {
@@ -74,19 +67,4 @@ public class VurderManueltBrevSteg implements BehandlingSteg {
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(kontekst.getFagsakId(), kontekst.getBehandlingId(), gruppe);
     }
 
-    private BehandleStegResultat utledAksjonspunkt(Void maltyper) {
-        return trengerFritekstbrev(maltyper)
-            ? BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_MANUELT_BREV))
-            : BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private boolean trengerFritekstbrev(Void maltyper) {
-        //TODO riktig utledning
-        return false;
-    }
-
-    private Void hentTilgjengeligeMaltyper(Long behandlingId) {
-        //TODO kall på k9-formidling
-        return null;
-    }
 }

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.enterprise.context.Dependent;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -28,12 +30,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Bosteder;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
+import no.nav.k9.søknad.ytelse.psb.v1.Nattevåk;
 import no.nav.k9.søknad.ytelse.psb.v1.Omsorg;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
@@ -47,6 +52,7 @@ class SøknadOversetter {
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository;
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
 
     SøknadOversetter() {
         // for CDI proxy
@@ -58,7 +64,8 @@ class SøknadOversetter {
                      UttakRepository uttakRepository,
                      UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                      TpsTjeneste tpsTjeneste,
-                     OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository) {
+                     OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
+                     UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -66,6 +73,7 @@ class SøknadOversetter {
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.tpsTjeneste = tpsTjeneste;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -105,7 +113,7 @@ class SøknadOversetter {
 
         // TODO etter18feb: lagreOpptjeningForSnOgFl(ytelse.getArbeidAktivitet());
 
-        // TODO etter18feb: Beredskap, nattevåk og tilsynsordning
+        lagreBeredskapOgNattevåk(søknad, behandlingId);
 
         // TODO: Hvorfor er getBosteder() noe annet enn getUtenlandsopphold ??
         lagreMedlemskapinfo(ytelse.getBosteder(), behandlingId, mottattDato);
@@ -115,6 +123,69 @@ class SøknadOversetter {
         lagreUttakOgPerioder(søknad, maksSøknadsperiode, journalpostId, behandlingId, fagsakId);
 
         lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
+    }
+
+    private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
+        var ytelse = (PleiepengerSyktBarn) søknad.getYtelse();
+
+        var pleietrengendePersonIdent = søknad.getYtelse().getPleietrengende().getPersonIdent();
+        var søkerPersonIdent = søknad.getSøker().getPersonIdent();
+        var pleietrengendeAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(pleietrengendePersonIdent.getVerdi())).orElseThrow();
+        var søkerAktørId = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(søkerPersonIdent.getVerdi())).orElseThrow();
+
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandlingId);
+        var eksisterendeBeredskap = eksisterendeGrunnlag.map(
+            it -> it.getUnntakEtablertTilsynForPleietrengende().getBeredskap()
+        ).orElse(null);
+        var eksisterendeNattevåk = eksisterendeGrunnlag.map(
+            it -> it.getUnntakEtablertTilsynForPleietrengende().getNattevåk()
+        ).orElse(null);
+
+        var unntakEtablertTilsynBeredskap =
+            tilUnntakEtablertTilsynForPleietrengende(
+                eksisterendeBeredskap,
+                søknad.getMottattDato().toLocalDate(),
+                søkerAktørId,
+                behandlingId,
+                ytelse.getBeredskap());
+        var unntakEtablertTilsynNattevåk =
+            tilUnntakEtablertTilsynForPleietrengende(
+                eksisterendeNattevåk,
+                søknad.getMottattDato().toLocalDate(),
+                søkerAktørId,
+                behandlingId,
+                ytelse.getNattevåk());
+
+        var unntakEtablertTilsynForPleietrengende = new UnntakEtablertTilsynForPleietrengende(
+            pleietrengendeAktørId,
+            unntakEtablertTilsynBeredskap,
+            unntakEtablertTilsynNattevåk
+        );
+        unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, unntakEtablertTilsynForPleietrengende);
+    }
+
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
+        var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
+        beredskap.getPerioder().forEach( (key,value) ->
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+        );
+        var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
+        beredskap.getPerioderSomSkalSlettes().forEach( (key,value) ->
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+        );
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakBeredskap, unntakSomSkalSlettes);
+    }
+
+    private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Nattevåk nattevåk) {
+        var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
+        nattevåk.getPerioder().forEach( (key,value) ->
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+        );
+        var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
+        nattevåk.getPerioderSomSkalSlettes().forEach( (key,value) ->
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+        );
+        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakNattevåk, unntakSomSkalSlettes);
     }
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {

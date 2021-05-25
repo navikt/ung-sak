@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -41,16 +42,24 @@ class MapFraUttaksplan {
         boolean erGradering = false; // setter alltid false (bruker alltid utbetalingsgrad, framfor stillingsprosent
         BigDecimal utbetalingsgrad = data.getUtbetalingsgrad();
 
-        var arb = data.getArbeidsforhold();
-        final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
-        if (arb.getOrganisasjonsnummer() != null) {
-            arbeidsforholdBuilder.medOrgnr(arb.getOrganisasjonsnummer());
-        } else if (arb.getAktørId() != null) {
-            arbeidsforholdBuilder.medAktørId(arb.getAktørId());
+        var type = UttakArbeidType.fraKode(data.getArbeidsforhold().getType());
+        Arbeidsforhold arbeidsforhold = buildArbeidsforhold(type, data);
+        return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, type, erGradering);
+    }
+
+    private static Arbeidsforhold buildArbeidsforhold(UttakArbeidType type, Utbetalingsgrader data) {
+        if (Objects.equals(type, UttakArbeidType.ARBEIDSTAKER)) {
+            var arb = data.getArbeidsforhold();
+            final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
+            if (arb.getOrganisasjonsnummer() != null) {
+                arbeidsforholdBuilder.medOrgnr(arb.getOrganisasjonsnummer());
+            } else if (arb.getAktørId() != null) {
+                arbeidsforholdBuilder.medAktørId(arb.getAktørId());
+            }
+            return arbeidsforholdBuilder.build();
         }
 
-        var arbeidsforhold = arbeidsforholdBuilder.build();
-        return new UttakAktivitet(stillingsgrad, utbetalingsgrad, arbeidsforhold, UttakArbeidType.fraKode(data.getArbeidsforhold().getType()), erGradering);
+        return null;
     }
 
     private static LocalDateTimeline<UttaksperiodeInfo> getTimeline(Uttaksplan uttaksplan) {

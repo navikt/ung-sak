@@ -38,7 +38,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
@@ -66,6 +68,7 @@ public class MapInputTilUttakTjeneste {
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private EtablertTilsynTjeneste tilsynTjeneste;
 
     @Inject
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -75,6 +78,7 @@ public class MapInputTilUttakTjeneste {
                                     BehandlingRepository behandlingRepository,
                                     FagsakRepository fagsakRepository,
                                     InntektArbeidYtelseTjeneste iayTjeneste,
+                                    EtablertTilsynTjeneste tilsynTjeneste,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -84,6 +88,7 @@ public class MapInputTilUttakTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.iayTjeneste = iayTjeneste;
+        this.tilsynTjeneste = tilsynTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
@@ -108,6 +113,7 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
+        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse);
 
         var input = new InputParametere()
             .medBehandling(behandling)
@@ -119,7 +125,8 @@ public class MapInputTilUttakTjeneste {
             .medInntektsmeldinger(sakInntektsmeldinger)
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
-            .medUttaksGrunnlag(uttakGrunnlag);
+            .medUttaksGrunnlag(uttakGrunnlag)
+            .medUtledetEtablertTilsyn(utledetEtablertTilsyn);
 
         return toRequestData(input);
     }
@@ -171,7 +178,7 @@ public class MapInputTilUttakTjeneste {
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(input.getVilkårene());
 
-        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getUtledetEtablertTilsyn());
 
         //TODO: fyll beredskap og nattevåksperioder med data fra aksjonspunkt når det er ferdig
         final Map<LukketPeriode, Utfall> beredskapsperioder = new HashMap<>();

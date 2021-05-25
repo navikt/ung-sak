@@ -54,9 +54,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     FORESLÅ_VEDTAK(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_KODE,
             AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB)),
-    VURDER_MANUELT_BREV(AksjonspunktKodeDefinisjon.VURDER_MANUELT_BREV_KODE,
-        AksjonspunktType.MANUELL, "Vurder manuelt brev", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, EnumSet.of(OMP, PSB)),
     FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
             AksjonspunktType.MANUELL, "Fatter vedtak", Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR,
             SkjermlenkeType.VEDTAK,
@@ -294,6 +291,14 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
             VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+
+    // Gruppe: 92xx - Pleiepenger
+    VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
+        "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, FORBLI, null, EnumSet.of(PSB)),
+    VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
+        "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, FORBLI, null, EnumSet.of(PSB)),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
