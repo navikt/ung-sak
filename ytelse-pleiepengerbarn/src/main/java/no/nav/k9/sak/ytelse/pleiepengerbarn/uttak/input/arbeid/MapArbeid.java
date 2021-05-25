@@ -117,10 +117,11 @@ public class MapArbeid {
     }
 
     private boolean erInnaktivVedEtEllerFlereSkjæringstidspunkter(Set<LocalDate> skjæringstidspunkter, List<VilkårPeriode> perioderTilVurdering) {
-
+        /*
         if (perioderTilVurdering.size() != skjæringstidspunkter.size()) {
             throw new IllegalStateException("Fant ikke alle skjæringstidspunkter");
         }
+        */
 
         return perioderTilVurdering.stream().anyMatch(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()));
     }
