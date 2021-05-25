@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 public class GrunnlagKopiererUtvidetRett implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;

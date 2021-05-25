@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
 import java.util.Map;
 import java.util.NavigableSet;

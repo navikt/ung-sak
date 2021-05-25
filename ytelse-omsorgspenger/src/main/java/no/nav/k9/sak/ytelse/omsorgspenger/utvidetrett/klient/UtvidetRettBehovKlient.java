@@ -1,15 +1,18 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient;
 
-import no.nav.k9.sak.ytelse.omsorgspenger.behov.BehovKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
+import java.util.Map;
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Map;
-import java.util.Optional;
+
+import no.nav.k9.sak.ytelse.omsorgspenger.behov.BehovKlient;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmOmsorg;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
 
 @ApplicationScoped
 public class UtvidetRettBehovKlient implements UtvidetRettKlient {
@@ -17,12 +20,14 @@ public class UtvidetRettBehovKlient implements UtvidetRettKlient {
 
     private static final Map<Class<? extends UtvidetRett>, String> INNVILGET_BEHOV_NAVN = Map.of(
         KroniskSyktBarn.class, "InnvilgetKroniskSyktBarn",
-        MidlertidigAlene.class, "InnvilgetMidlertidigAlene"
+        MidlertidigAlene.class, "InnvilgetMidlertidigAlene",
+        AleneOmOmsorg.class, "InnvilgetAleneOmOmsorg"
     );
 
     private static final Map<Class<? extends UtvidetRett>, String> AVSLÅTT_BEHOV_NAVN = Map.of(
         KroniskSyktBarn.class, "AvslåttKroniskSyktBarn",
-        MidlertidigAlene.class, "AvslåttMidlertidigAlene"
+        MidlertidigAlene.class, "AvslåttMidlertidigAlene",
+        AleneOmOmsorg.class, "AvslåttAleneOmOmsorg"
     );
 
     private BehovKlient behovKlient;

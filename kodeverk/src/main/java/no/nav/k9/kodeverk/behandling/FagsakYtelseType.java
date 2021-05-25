@@ -100,6 +100,18 @@ public enum FagsakYtelseType implements Kodeverdi {
             return false;
         }
     },
+    OMSORGSPENGER_AO("OMP_AO", "Alene om omsorg", "OM", "OMS") {
+        @Override
+        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
+            requireNonNull(pleietrengendeAktørId, "pleietrengende");
+            requireNull(relatertPersonAktørId, "relatertPerson");
+        }
+
+        @Override
+        public boolean vurderÅpneOppgaverFørVedtak() {
+            return false;
+        }
+    },
 
     OPPLÆRINGSPENGER("OLP", "Opplæringspenger", null, "OMS"),
 
@@ -267,6 +279,7 @@ public enum FagsakYtelseType implements Kodeverdi {
         OMSORGSPENGER,
         OMSORGSPENGER_KS,
         OMSORGSPENGER_MA,
+        OMSORGSPENGER_AO,
         FORELDREPENGER,
         ENGANGSTØNAD));
 
@@ -311,7 +324,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     }
 
     public boolean erRammevedtak() {
-        return this == OMSORGSPENGER_KS || this == OMSORGSPENGER_MA;
+        return this == OMSORGSPENGER_KS || this == OMSORGSPENGER_MA || this == OMSORGSPENGER_AO;
     }
 
     @SuppressWarnings("unused")

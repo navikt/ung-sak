@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @BehandlingTypeRef
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 public class InitierPerioderSteg implements BehandlingSteg {
 
     @Inject

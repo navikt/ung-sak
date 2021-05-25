@@ -200,7 +200,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, EnumSet.of(OMP, PSB)),
     OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av OMPorgen for",
             BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT, VilkårType.OMSORGEN_FOR,
-            SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, EnumSet.of(OMP, PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+            SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, EnumSet.of(OMP, PSB, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
     OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
             AksjonspunktType.OVERSTYRING, "Overstyring av beregning", BehandlingStatus.UTREDES, BehandlingStegType.BEREGN_YTELSE, VurderingspunktType.UT,
             UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, EnumSet.of(OMP, PSB)),
@@ -278,7 +278,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, TOTRINN, FORBLI, null, EnumSet.of(PSB)),
     VURDER_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
-            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+            VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
     VURDER_OMSORGEN_FOR_V2(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE_V2,
             AksjonspunktType.MANUELL, "Omsorgen for", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT,
             VilkårType.OMSORGEN_FOR, SkjermlenkeType.FAKTA_OM_OMSORGENFOR, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
@@ -290,7 +290,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ÅRSKVANTUM, TOTRINN, TILBAKE, null, EnumSet.of(OMSORGSPENGER)),
     VURDER_OMS_UTVIDET_RETT(AksjonspunktKodeDefinisjon.VURDER_OMS_UTVIDET_RETT,
             AksjonspunktType.MANUELL, "Utvidet Rett", BehandlingStatus.UTREDES, BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.UT,
-            VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA)),
+            VilkårType.UTVIDETRETT, SkjermlenkeType.FAKTA_OM_UTVIDETRETT, TOTRINN, EnumSet.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO)),
 
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
