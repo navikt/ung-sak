@@ -38,8 +38,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
@@ -113,7 +113,7 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
-        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse.getSaksnummer(), referanse.getPleietrengendeAktørId());
+        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse);
 
         var input = new InputParametere()
             .medBehandling(behandling)

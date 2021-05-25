@@ -47,7 +47,7 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
     }
 
     private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef) {
-        final LocalDateTimeline<UtledetEtablertTilsyn> etablertTilsyntidslinje = etablertTilsynTjeneste.beregnTilsynstidlinje(behandlingRef.getSaksnummer(), behandlingRef.getPleietrengendeAktørId());
+        final LocalDateTimeline<UtledetEtablertTilsyn> etablertTilsyntidslinje = etablertTilsynTjeneste.beregnTilsynstidlinje(behandlingRef);
         return etablertTilsyntidslinje.stream().map(entry -> new EtablertTilsynPeriodeDto(new Periode(entry.getFom(), entry.getTom()), entry.getValue().getVarighet(), entry.getValue().getKilde())).toList();
     }
 

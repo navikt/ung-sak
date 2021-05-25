@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.tilsyn.Kilde;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
@@ -61,14 +62,14 @@ public class EtablertTilsynTjeneste {
     }
     */
 
-    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(Saksnummer søkersSaksnummer, AktørId pleietrengende) {
-        final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(pleietrengende);
-        return byggTidslinje(søkersSaksnummer, tilsynsgrunnlagPåTversAvFagsaker);
+    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(BehandlingReferanse behandlingRef) {
+        final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(behandlingRef.getPleietrengendeAktørId(), behandlingRef.getFagsakPeriode());
+        return byggTidslinje(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
     }
 
 
-    private List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende) {
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);
+    private List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende, DatoIntervallEntitet fagsakPeriode) {
+        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, fagsakPeriode.getFomDato().minusWeeks(25), fagsakPeriode.getTomDato().plusWeeks(25));
 
         final List<FagsakKravDokument> kravdokumenter = new ArrayList<>();
         for (Fagsak f : fagsaker) {
