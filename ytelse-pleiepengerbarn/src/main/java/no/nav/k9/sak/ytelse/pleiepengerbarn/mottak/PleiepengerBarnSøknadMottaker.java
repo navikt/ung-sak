@@ -8,12 +8,10 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("PSB")
@@ -32,12 +30,6 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
     public PleiepengerBarnSøknadMottaker(SaksnummerRepository saksnummerRepository,FagsakTjeneste fagsakTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
-    }
-
-    
-    @Override
-    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, PleiepengerBarnSøknadInnsending søknadInnsending) {
-        throw new IllegalArgumentException("Dette endepunktet er deprecated for PSB: Bruk /fordel/journalposter istedenfor.");
     }
 
     @Override
