@@ -68,7 +68,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
-    private Boolean lansertDelvisFravær;
+    private Boolean lansertFosterbarn;
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -83,7 +83,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
                                         @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator,
-                                        @KonfigVerdi(value = "OMP_DELVIS_FRAVAER", defaultVerdi = "true") Boolean lansertDelvisFravær) {
+                                        @KonfigVerdi(value = "OMP_FOSTERBARN", defaultVerdi = "true") Boolean lansertFosterbarn) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -94,7 +94,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.mapper = mapper;
         this.dokumentValidator = dokumentValidator;
-        this.lansertDelvisFravær = lansertDelvisFravær;
+        this.lansertFosterbarn = lansertFosterbarn;
     }
 
     @Override
@@ -158,11 +158,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     }
 
     private void validerStøttetVariant(OmsorgspengerUtbetaling søknadInnhold) {
-        if (søknadInnhold.getFosterbarn() != null && !søknadInnhold.getFosterbarn().isEmpty()) {
+        if (!lansertFosterbarn && søknadInnhold.getFosterbarn() != null && !søknadInnhold.getFosterbarn().isEmpty()) {
             throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Fosterbarn");
-        }
-        if (!lansertDelvisFravær && søknadInnhold.getFraværsperioder().stream().anyMatch(fp -> fp.getDuration() != null)) {
-            throw new UnsupportedOperationException("Variant ikke støttet ennå for søknad omsorgspenger: Delvis fravær");
         }
     }
 
