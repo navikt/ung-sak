@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.abac.AbacAttributt;
@@ -25,11 +24,13 @@ public class HendelseDto {
     @Valid
     private AktørId aktørId;
 
-    @JsonManagedReference
     @JsonProperty(value = "hendelse", required = true)
     @NotNull
     @Valid
     private Hendelse hendelse;
+
+    HendelseDto() {
+    }
 
     @JsonCreator
     public HendelseDto(@JsonProperty(value = "hendelse", required = true) @NotNull Hendelse hendelse,
@@ -37,6 +38,7 @@ public class HendelseDto {
         this.hendelse = Objects.requireNonNull(hendelse, "hendelse");
         this.aktørId = Objects.requireNonNull(aktørId, "aktørId");
     }
+
 
     @AbacAttributt(value = "aktorId", masker = true)
     public String getAktorId() {

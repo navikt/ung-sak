@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -38,16 +37,14 @@ public enum HendelseType implements Kodeverdi {
         this.kode = kode;
     }
 
-
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static HendelseType fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static HendelseType fraKode(@JsonProperty("kode") String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(HendelseType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent HendelseType: for input " + node);
+            throw new IllegalArgumentException("Ukjent ReferanseType: " + kode);
         }
         return ad;
     }

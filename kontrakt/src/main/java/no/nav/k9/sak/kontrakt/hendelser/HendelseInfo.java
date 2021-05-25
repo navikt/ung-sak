@@ -6,23 +6,24 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.typer.AktørId;
 
-@Valid
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class HendelseInfo {
 
-    @Valid
-    @NotNull
-    @JsonProperty(value = "hendelseId", required = true)
+    @JsonProperty(value = "hendelseId")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String hendelseId;
 
     @JsonProperty(value = "aktørIder")
@@ -31,8 +32,8 @@ public class HendelseInfo {
     @NotNull
     private List<AktørId> aktørIder = new ArrayList<>();
 
-    @JsonInclude(value = JsonInclude.Include.NON_NULL)
-    @JsonProperty(value = "opprettet")
+    @JsonProperty(value = "opprettet", required = true)
+    @NotNull
     private LocalDateTime opprettet;
 
     public LocalDateTime getOpprettet() {
