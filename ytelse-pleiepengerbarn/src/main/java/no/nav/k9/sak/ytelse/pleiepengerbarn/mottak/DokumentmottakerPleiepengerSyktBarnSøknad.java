@@ -114,7 +114,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         Optional<InfoFraPunsj> infoFraPunsj = ((PleiepengerSyktBarn) søknad.getYtelse()).getInfoFraPunsj();
         boolean søknadenInneholderInfomasjonSomIkkeKanPunsjes = false;
         if (infoFraPunsj.isPresent() && infoFraPunsj.get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes() != null) {
-            søknadenInneholderInfomasjonSomIkkeKanPunsjes = true;
+            søknadenInneholderInfomasjonSomIkkeKanPunsjes = infoFraPunsj.get().getSøknadenInneholderInfomasjonSomIkkeKanPunsjes();
         }
 
         sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
