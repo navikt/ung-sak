@@ -38,13 +38,13 @@ public class FastsettBeregningsgrunnlagATFLOppdatererTest {
     private Aksjonspunkt ap;
 
     @Mock
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste;
 
     @BeforeEach
     public void setup() {
         initMocks(this);
         when(behandling.getFagsak()).thenReturn(fagsak);
-        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(kalkulusTjeneste, oppdateringjeneste);
+        oppdaterer = new FastsettBeregningsgrunnlagATFLOppdaterer(oppdateringjeneste);
     }
 
     @Test
