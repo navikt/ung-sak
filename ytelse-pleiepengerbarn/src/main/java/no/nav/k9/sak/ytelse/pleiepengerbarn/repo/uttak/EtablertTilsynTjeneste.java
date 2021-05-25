@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -33,12 +31,12 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @Dependent
-public class EtablertTilsynTjeneste  {
+public class EtablertTilsynTjeneste {
 
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
 
     EtablertTilsynTjeneste() {
         // CDI
@@ -46,16 +44,16 @@ public class EtablertTilsynTjeneste  {
 
     @Inject
     public EtablertTilsynTjeneste(FagsakRepository fagsakRepository,
-            BehandlingRepository behandlingRepository,
-            UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-            @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+                                  BehandlingRepository behandlingRepository,
+                                  UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                  @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
-        this.søknadsfristTjenester = søknadsfristTjenester;
+        this.søknadsfristTjeneste = søknadsfristTjenester;
     }
-    
-    
+
+
     /*
     public List<SøktUttak> beregnTilsynstidlinjeForPerioder(AktørId pleietrengende, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         return beregnTilsynstidlinje(pleietrengende)
@@ -66,16 +64,16 @@ public class EtablertTilsynTjeneste  {
                 .collect(Collectors.toList());
     }
     */
-    
+
     public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(Saksnummer søkersSaksnummer, AktørId pleietrengende) {
         final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(pleietrengende);
         return byggTidslinje(søkersSaksnummer, tilsynsgrunnlagPåTversAvFagsaker);
     }
-    
-    
+
+
     private List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);
-        
+
         final List<FagsakKravDokument> kravdokumenter = new ArrayList<>();
         for (Fagsak f : fagsaker) {
             final Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId());
@@ -84,32 +82,31 @@ public class EtablertTilsynTjeneste  {
             }
             final var behandling = behandlingOpt.get();
             final var behandlingReferanse = BehandlingReferanse.fra(behandling);
-            
+
             final var uttakGrunnlagOpt = uttakPerioderGrunnlagRepository.hentGrunnlag(behandling.getId());
             if (uttakGrunnlagOpt.isEmpty() || uttakGrunnlagOpt.get().getOppgitteSøknadsperioder() == null) {
                 continue;
             }
-            
-            @SuppressWarnings("unchecked")
-            final Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokumentListe = finnVurderSøknadsfristTjeneste(behandlingReferanse).hentPerioderTilVurdering(behandlingReferanse);
+
+            final Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokumentListe = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingReferanse);
             final Set<PerioderFraSøknad> fagsakPerioderFraSøknadene = uttakGrunnlagOpt.get().getOppgitteSøknadsperioder().getPerioderFraSøknadene();
-            
+
             final List<FagsakKravDokument> fagsakKravdokumenter = toFagsakKravDokumenter(f, kravdokumentListe, fagsakPerioderFraSøknadene);
             kravdokumenter.addAll(fagsakKravdokumenter);
         }
-        
+
         Collections.sort(kravdokumenter);
         return kravdokumenter;
     }
-    
+
     private List<FagsakKravDokument> toFagsakKravDokumenter(Fagsak f, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokumentListe, Set<PerioderFraSøknad> fagsakPerioderFraSøknadene) {
         return kravdokumentListe.keySet().stream().map(kd -> new FagsakKravDokument(f, kd, finnPerioderFraSøknad(kd, fagsakPerioderFraSøknadene))).collect(Collectors.toList());
     }
 
     private PerioderFraSøknad finnPerioderFraSøknad(KravDokument kravDokument, Set<PerioderFraSøknad> fagsakPerioderFraSøknadene) {
         final var dokumenter = fagsakPerioderFraSøknadene.stream()
-                .filter(it -> it.getJournalpostId().equals(kravDokument.getJournalpostId()))
-                .collect(Collectors.toSet());
+            .filter(it -> it.getJournalpostId().equals(kravDokument.getJournalpostId()))
+            .collect(Collectors.toSet());
         if (dokumenter.size() != 1) {
             throw new IllegalStateException("Fant " + dokumenter.size() + " for dokumentet : " + dokumenter);
         }
@@ -127,19 +124,12 @@ public class EtablertTilsynTjeneste  {
         }
         return resultatTimeline.compress();
     }
-    
-    @SuppressWarnings("rawtypes")
-    private VurderSøknadsfristTjeneste finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
-        FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
-    }
 
     private static final class FagsakKravDokument implements Comparable<FagsakKravDokument> {
         private final Fagsak fagsak;
         private final KravDokument kravDokument;
         private final PerioderFraSøknad perioderFraSøknad;
-        
+
         public FagsakKravDokument(Fagsak fagsak, KravDokument kravDokument, PerioderFraSøknad perioderFraSøknad) {
             this.fagsak = fagsak;
             this.kravDokument = kravDokument;
