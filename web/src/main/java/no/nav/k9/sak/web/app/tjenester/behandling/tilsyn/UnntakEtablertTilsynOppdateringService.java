@@ -28,8 +28,10 @@ public class UnntakEtablertTilsynOppdateringService {
         var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandlingId);
         var unntakEtablertTilsyn = finnUnntakEtablertTilsyn(vurderingstype, eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende());
 
-        for (VurderingDto vurdering : vurderinger) {
-            unntakEtablertTilsyn = oppdater(unntakEtablertTilsyn, vurdering, behandlingId, søkersAktørId);
+        if (vurderinger != null) {
+            for (VurderingDto vurdering : vurderinger) {
+                unntakEtablertTilsyn = oppdater(unntakEtablertTilsyn, vurdering, behandlingId, søkersAktørId);
+            }
         }
 
         var nyttUnntakEtablertTilsynForPleietrengende = switch(vurderingstype) {
