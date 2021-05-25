@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.hendelsemottak;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,9 +34,12 @@ public class PSBDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
 
     @Override
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
+        List<AktørId> dødsfallAktører = hendelse.getHendelseInfo().getAktørIder();
 
         // TODO - oppdatere logikk iht PSBs behov
-        return fagsakRepository.hentForBruker(aktørId).stream()
+        return dødsfallAktører.stream()
+            .map(aktør -> fagsakRepository.hentForBruker(aktør))
+            .flatMap(Collection::stream)
             .filter(it -> it.getYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN))
             .collect(Collectors.toMap(e -> e, e -> BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER));
     }

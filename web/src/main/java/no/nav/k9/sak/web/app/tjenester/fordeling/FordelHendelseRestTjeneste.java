@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.hendelsemottak.tjenester.FordelHendelseTjeneste;
+import no.nav.k9.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.hendelser.HendelseDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -35,14 +35,14 @@ public class FordelHendelseRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
-    private FordelHendelseTjeneste fordelHendelseTjeneste;
+    private HendelsemottakTjeneste hendelsemottakTjeneste;
 
     public FordelHendelseRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
-    public FordelHendelseRestTjeneste(FordelHendelseTjeneste fordelHendelseTjeneste) {
-        this.fordelHendelseTjeneste = fordelHendelseTjeneste;
+    public FordelHendelseRestTjeneste(HendelsemottakTjeneste hendelsemottakTjeneste) {
+        this.hendelsemottakTjeneste = hendelsemottakTjeneste;
     }
 
 
@@ -54,10 +54,9 @@ public class FordelHendelseRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public List<SaksnummerDto> finnPåvirkedeFagsaker(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HendelseDto dto) {
         var aktørId = dto.getAktørId();
-        var hendelseType = dto.getHendelseType();
-        var payload = dto.getPayload();
+        var hendelse = dto.getHendelse();
 
-        var fagsaker = fordelHendelseTjeneste.finnFagsakerTilVurdering(aktørId, hendelseType, payload).keySet();
+        var fagsaker = hendelsemottakTjeneste.finnFagsakerTilVurdering(aktørId, hendelse).keySet();
         return fagsaker.stream().map(it -> new SaksnummerDto(it.getSaksnummer())).collect(Collectors.toList());
     }
 
@@ -69,10 +68,9 @@ public class FordelHendelseRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public List<SaksnummerDto> innsending(@Parameter(description = "Hendelse innsendt.") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid HendelseDto dto) {
         var aktørId = dto.getAktørId();
-        var hendelseType = dto.getHendelseType();
-        var payload = dto.getPayload();
+        var hendelse = dto.getHendelse();
 
-        var fagsaker = fordelHendelseTjeneste.mottaHendelse(aktørId, hendelseType, payload).keySet();
+        var fagsaker = hendelsemottakTjeneste.mottaHendelse(aktørId, hendelse).keySet();
         return fagsaker.stream().map(it -> new SaksnummerDto(it.getSaksnummer())).collect(Collectors.toList());
     }
 }

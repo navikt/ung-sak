@@ -18,6 +18,8 @@ import no.nav.k9.kodeverk.hendelser.HendelseType;
 @JsonTypeName(Hendelse.DOEDFOEDT_BARN)
 public class DødfødtBarnHendelse implements Hendelse {
 
+    private static final HendelseType HENDELSETYPE_DØDFØDSEL = HendelseType.PDL_DØDFØDSEL;
+
     @JsonProperty(value = "hendelseInfo", required = true)
     @NotNull
     @Valid
@@ -32,7 +34,9 @@ public class DødfødtBarnHendelse implements Hendelse {
     }
 
     @JsonCreator
-    public DødfødtBarnHendelse(@JsonProperty("dødfødselsdato") @Valid LocalDate dødfødselsdato) {
+    public DødfødtBarnHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
+                               @JsonProperty("dødfødselsdato") @Valid LocalDate dødfødselsdato) {
+        this.hendelseInfo = hendelseInfo;
         this.dødfødselsdato = dødfødselsdato;
     }
 
@@ -65,7 +69,7 @@ public class DødfødtBarnHendelse implements Hendelse {
 
     @Override
     public HendelseType getHendelseType() {
-        return HendelseType.PDL_DØDFØDSEL;
+        return HENDELSETYPE_DØDFØDSEL;
     }
 
 }

@@ -22,8 +22,9 @@ public interface Hendelse {
     String FOEDSEL = "FOEDSEL_V1";
     String DOEDSFALL = "DOEDSFALL_V1";
 
-    HendelseInfo getHendelseInfo();
 
     HendelseType getHendelseType();
+
+    HendelseInfo getHendelseInfo();
 
 }

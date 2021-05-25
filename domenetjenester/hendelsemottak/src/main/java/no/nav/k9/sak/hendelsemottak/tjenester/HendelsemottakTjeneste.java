@@ -16,24 +16,23 @@ import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTa
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.historikk.kafka.json.SerialiseringUtil;
-import no.nav.k9.sak.kontrakt.hendelser.DødsfallHendelse;
+import no.nav.k9.sak.kontrakt.hendelser.Hendelse;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
-public class FordelHendelseTjeneste {
+public class HendelsemottakTjeneste {
 
     private Instance<FagsakerTilVurderingUtleder> utledere;
 
     private BehandlingRepository behandlingRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
-    FordelHendelseTjeneste() {
+    HendelsemottakTjeneste() {
         // CDI
     }
 
     @Inject
-    public FordelHendelseTjeneste(@Any Instance<FagsakerTilVurderingUtleder> utledere,
+    public HendelsemottakTjeneste(@Any Instance<FagsakerTilVurderingUtleder> utledere,
                                   BehandlingRepository behandlingRepository,
                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.utledere = utledere;
@@ -46,10 +45,8 @@ public class FordelHendelseTjeneste {
         return matchendeUtledere.stream().collect(Collectors.toList());
     }
 
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, HendelseType hendelseType, String payload) {
-        //Hendelse hendelse = SerialiseringUtil.deserialiser(payload, Hendelse.class);
-        DødsfallHendelse hendelse = SerialiseringUtil.deserialiser(payload, DødsfallHendelse.class);
-        var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelseType)
+    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
+        var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelse.getHendelseType())
             .stream()
             .map(utleder -> utleder.finnFagsakerTilVurdering(aktørId, hendelse))
             .flatMap(map -> map.entrySet().stream())
@@ -57,8 +54,8 @@ public class FordelHendelseTjeneste {
         return fagsakerMedBehandlingÅrsak;
     }
 
-    public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, HendelseType hendelseType, String payload) {
-        var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, hendelseType, payload);
+    public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, Hendelse payload) {
+        var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, payload);
 
         for (Map.Entry<Fagsak, BehandlingÅrsakType> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();
