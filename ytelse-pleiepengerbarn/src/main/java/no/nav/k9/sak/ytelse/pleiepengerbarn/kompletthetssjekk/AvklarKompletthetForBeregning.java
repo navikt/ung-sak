@@ -41,7 +41,7 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             .filter(it -> !it.getValue().isEmpty())
             .allMatch(it -> dto.getPerioder()
                 .stream()
-                .filter(at -> at.getPeriode().overlaps(it.getKey().tilPeriode()))
+                .filter(at -> it.getKey().overlapper(at.getPeriode().getFom(), at.getPeriode().getTom()))
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
