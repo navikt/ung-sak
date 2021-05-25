@@ -9,14 +9,12 @@ import javax.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP_AO")
@@ -37,11 +35,7 @@ public class AleneOmOmsorgSøknadMottaker implements SøknadMottakTjeneste<Innse
         this.saksnummerRepository = saksnummerRepository;
     }
 
-    @Override
-    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, InnsendingInnhold søknadInnsending) {
-        throw new UnsupportedOperationException("Ikke implementert for /innsending grensesnitt, kun journalpostmottak");
-    }
-
+    
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
