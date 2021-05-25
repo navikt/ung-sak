@@ -13,17 +13,17 @@ import java.util.List;
 
 public class BeredskapOgNattevåkOppdaterer {
 
-
     public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, boolean leggTilNyeBeskrivelser) {
-        var beskrivelser = eksisterendeUnntakEtablertTilsyn.getBeskrivelser();
+        List<UnntakEtablertTilsynBeskrivelse> beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
+        if (eksisterendeUnntakEtablertTilsyn != null) {
+            beskrivelser = eksisterendeUnntakEtablertTilsyn.getBeskrivelser();
+        }
         if (leggTilNyeBeskrivelser) {
             beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
         }
         var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId);
 
-        var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn(perioder, beskrivelser);
-
-        return unntakEtablertTilsynForBeredskap;
+        return new UnntakEtablertTilsyn(perioder, beskrivelser);
     }
 
     private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId) {

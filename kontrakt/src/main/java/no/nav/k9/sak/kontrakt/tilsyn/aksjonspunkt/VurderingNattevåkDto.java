@@ -3,11 +3,8 @@ package no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt;
 import com.fasterxml.jackson.annotation.*;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.typer.Periode;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 

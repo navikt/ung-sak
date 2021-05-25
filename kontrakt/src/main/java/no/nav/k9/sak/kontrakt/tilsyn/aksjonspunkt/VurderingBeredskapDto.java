@@ -19,15 +19,8 @@ public class VurderingBeredskapDto extends BekreftetAksjonspunktDto {
     @Valid
     private List<VurderingDto> vurderinger;
 
-
-    protected VurderingBeredskapDto() {
-        
-    }
-    
-    public VurderingBeredskapDto(String vurderingstekst, Resultat resultat, List<Periode> perioder) {
-        this.vurderingstekst = vurderingstekst;
-        this.resultat = resultat;
-        this.perioder = perioder;
+    public VurderingBeredskapDto(List<VurderingDto> vurderinger) {
+        this.vurderinger = vurderinger;
     }
 
     public List<VurderingDto> getVurderinger() {
