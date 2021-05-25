@@ -54,13 +54,20 @@ class SøknadDokumentmottaker {
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
-    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, @SuppressWarnings("unused") LocalDate sluttDato) {
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), startDato.plusWeeks(25));
+    Fagsak finnEllerOpprett(FagsakYtelseType fagsakYtelseType, AktørId brukerIdent, AktørId pleietrengendeAktørId, LocalDate startDato, LocalDate sluttDato) {
+        if (sluttDato == null) {
+            sluttDato = startDato;
+        }
+        if (sluttDato.isAfter(LocalDate.now().plusYears(2))) {
+            // Hvis dette skulle bli nødvendig i fremtiden kan denne sjekken fjernes.
+            throw new IllegalArgumentException("Fagsak kan ikke være mer enn 2 år inn i fremtiden.");
+        }
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(fagsakYtelseType, brukerIdent, pleietrengendeAktørId, null, startDato.minusWeeks(25), sluttDato.plusWeeks(25));
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato);
+        return opprettSakFor(saksnummer, brukerIdent, pleietrengendeAktørId, fagsakYtelseType, startDato, sluttDato);
     }
 
     Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, Søknad søknad) {
@@ -99,8 +106,8 @@ class SøknadDokumentmottaker {
         }
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, null);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
+        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, sluttDato);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }
