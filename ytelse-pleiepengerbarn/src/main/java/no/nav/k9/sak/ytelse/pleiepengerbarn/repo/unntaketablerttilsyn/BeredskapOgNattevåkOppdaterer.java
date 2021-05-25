@@ -11,19 +11,22 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BeredskapOgNattevåkOversetter {
+public class BeredskapOgNattevåkOppdaterer {
 
 
-    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, String vurderingstekst, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes) {
-        var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
-        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId, vurderingstekst);
+    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, boolean leggTilNyeBeskrivelser) {
+        var beskrivelser = eksisterendeUnntakEtablertTilsyn.getBeskrivelser();
+        if (leggTilNyeBeskrivelser) {
+            beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
+        }
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId);
 
         var unntakEtablertTilsynForBeredskap = new UnntakEtablertTilsyn(perioder, beskrivelser);
 
         return unntakEtablertTilsynForBeredskap;
     }
 
-    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId, String vurderingstekst) {
+    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
@@ -36,23 +39,30 @@ public class BeredskapOgNattevåkOversetter {
         ).toList();
 
         var segmenterSomSkalLeggesTil = nyeUnntak.stream().map(periode ->
-            new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new Unntak("", Resultat.IKKE_VURDERT))
+            new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new Unntak(periode.begrunnelse(), periode.resultat()))
         ).toList();
 
         var perioderTidslinje =
             new LocalDateTimeline<>(eksisterendeSegmenter)
                 .disjoint(new LocalDateTimeline<>(segementerSomSkalSlettes))
-                .crossJoin(new LocalDateTimeline<>(segmenterSomSkalLeggesTil));
+                .crossJoin(new LocalDateTimeline<>(segmenterSomSkalLeggesTil), BeredskapOgNattevåkOppdaterer::siste);
 
         return perioderTidslinje.toSegments().stream().map(segment ->
             new UnntakEtablertTilsynPeriode()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                .medBegrunnelse(vurderingstekst)
+                .medBegrunnelse((segment.getValue().begrunnelse()))
                 .medAktørId(aktørId)
                 .medKildeBehandlingId(kildeBehandlingId)
-                .medResultat(Resultat.IKKE_VURDERT)
+                .medResultat(segment.getValue().resultat())
         ).toList();
     }
+
+    private static <T> LocalDateSegment<T> siste(LocalDateInterval dateInterval, LocalDateSegment<T> lhs, LocalDateSegment<T> rhs) {
+        T lv = (T)lhs.getValue();
+        T rv = rhs == null ? lv : (T)rhs.getValue();
+        return new LocalDateSegment<>(dateInterval, rv);
+    }
+
 
     private static List<UnntakEtablertTilsynBeskrivelse> finnUnntakEtablertTilsynBeskrivelser(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, List<Unntaksperiode> nyeUnntak, Long kildeBehandlingId) {
         var beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
@@ -61,10 +71,9 @@ public class BeredskapOgNattevåkOversetter {
         }
         nyeUnntak.forEach(nyttUnntak ->
             beskrivelser.add(new UnntakEtablertTilsynBeskrivelse(
-                eksisterendeUnntakEtablertTilsyn,
                 DatoIntervallEntitet.fraOgMedTilOgMed(nyttUnntak.fom(), nyttUnntak.tom()),
                 mottattDato,
-                nyttUnntak.tilleggsinformasjon(),
+                nyttUnntak.begrunnelse(),
                 søkersAktørId,
                 kildeBehandlingId))
         );

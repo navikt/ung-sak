@@ -15,42 +15,19 @@ import java.util.List;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK)
-public class VurderingNattevåkDto extends BekreftetAksjonspunktDto implements Vurdering {
+public class VurderingNattevåkDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "vurderingstekst")
-    @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @Valid
-    private String vurderingstekst;
-
-    @JsonProperty(value = "resultat")
-    @Valid
-    private Resultat resultat;
-
-    @JsonProperty(value = "nyePerioder")
+    @JsonProperty(value = "vurderinger")
     @Size(max = 1000)
     @Valid
-    private List<Periode> perioder;
+    private List<VurderingDto> vurderinger;
 
-    public VurderingNattevåkDto(String vurderingstekst, Resultat resultat, List<Periode> perioder) {
-        this.vurderingstekst = vurderingstekst;
-        this.resultat = resultat;
-        this.perioder = perioder;
+    public VurderingNattevåkDto(List<VurderingDto> vurderinger) {
+        this.vurderinger = vurderinger;
     }
 
-    @Override
-    public String getVurderingstekst() {
-        return vurderingstekst;
-    }
-
-    @Override
-    public Resultat getResultat() {
-        return resultat;
-    }
-
-    @Override
-    public List<Periode> getPerioder() {
-        return perioder;
+    public List<VurderingDto> getVurderinger() {
+        return vurderinger;
     }
 
 }

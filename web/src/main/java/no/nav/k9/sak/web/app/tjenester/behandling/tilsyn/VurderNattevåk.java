@@ -26,6 +26,6 @@ public class VurderNattevåk implements AksjonspunktOppdaterer<VurderingNattevå
 
     @Override
     public OppdateringResultat oppdater(VurderingNattevåkDto dto, AksjonspunktOppdaterParameter param) {
-        return unntakEtablertTilsynOppdateringService.oppdater(dto, param.getBehandlingId(), param.getAktørId());
+        return unntakEtablertTilsynOppdateringService.oppdater(dto.getVurderinger(), Vurderingstype.NATTEVÅK, param.getBehandlingId(), param.getAktørId());
     }
 }
