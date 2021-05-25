@@ -19,6 +19,10 @@ public class VurderingNattevåkDto extends BekreftetAksjonspunktDto {
     @Valid
     private List<VurderingDto> vurderinger;
 
+    public VurderingNattevåkDto() {
+        //
+    }
+
     public VurderingNattevåkDto(List<VurderingDto> vurderinger) {
         this.vurderinger = vurderinger;
     }

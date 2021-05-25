@@ -24,6 +24,9 @@ public class VurderingDto {
     @Valid
     private Periode periode;
 
+    public VurderingDto() {
+        //
+    }
 
     public VurderingDto(String begrunnelse, Resultat resultat, Periode periode) {
         this.begrunnelse = begrunnelse;

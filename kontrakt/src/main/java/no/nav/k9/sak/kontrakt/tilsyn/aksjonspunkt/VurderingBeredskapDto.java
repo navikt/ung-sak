@@ -19,6 +19,10 @@ public class VurderingBeredskapDto extends BekreftetAksjonspunktDto {
     @Valid
     private List<VurderingDto> vurderinger;
 
+    public VurderingBeredskapDto() {
+        //
+    }
+
     public VurderingBeredskapDto(List<VurderingDto> vurderinger) {
         this.vurderinger = vurderinger;
     }
