@@ -28,7 +28,7 @@
     </modules>
 
     <properties>
-        <java.version>16</java.version> 
+        <java.version>16</java.version>
         <kontrakt.java.version>16</kontrakt.java.version>
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.3.10</version>
+                <version>1.3.11</version>
             </dependency>
 
             <dependency>
