@@ -40,7 +40,7 @@ public class KravDokumentMedSøktePerioder {
     private List<SøktPeriode> søktePerioder;
 
     @JsonCreator
-    public KravDokumentMedSøktePerioder(@JsonProperty("journalpostId") JournalpostId journalpostId,
+    public KravDokumentMedSøktePerioder(@JsonProperty(value = "journalpostId", required = true) JournalpostId journalpostId,
                                         @JsonProperty("innsendingsTidspunkt") LocalDateTime innsendingsTidspunkt,
                                         @JsonProperty("type") KravDokumentType type,
                                         @JsonProperty("søktePerioder") List<SøktPeriode> søktePerioder) {
