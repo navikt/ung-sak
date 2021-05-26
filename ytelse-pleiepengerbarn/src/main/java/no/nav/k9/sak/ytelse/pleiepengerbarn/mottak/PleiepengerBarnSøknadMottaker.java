@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -44,7 +45,12 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
             // Hvis dette skulle bli nødvendig i fremtiden kan denne sjekken fjernes.
             throw new IllegalArgumentException("Fagsak kan ikke være mer enn 2 år inn i fremtiden.");
         }
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, startDato.minusWeeks(25), sluttDato.plusWeeks(25));
+        
+        /*
+         * Flere fagsaker kommer trolig til å komme tilbake igjen etter at alle sakene har blitt flyttet fra Infotrygd. Merk at sjekken
+         * da må gjøres på tvers av alle søkere på den samme pleietrengende for at bruddet i tidslinjen skal gi mening.
+         */
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
