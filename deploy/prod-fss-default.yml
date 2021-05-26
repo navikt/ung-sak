@@ -189,7 +189,7 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_DELVIS_FRAVAER
+    - name: OMP_FOSTERBARN
       value: "false"
     - name: FORMIDLING_RETUR_MALTYPER
       value: "false"

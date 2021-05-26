@@ -38,6 +38,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
@@ -63,6 +66,7 @@ public class MapInputTilUttakTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
@@ -74,6 +78,7 @@ public class MapInputTilUttakTjeneste {
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
                                     PleiebehovResultatRepository pleiebehovResultatRepository,
                                     UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                    UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository,
                                     PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     FagsakRepository fagsakRepository,
@@ -84,6 +89,7 @@ public class MapInputTilUttakTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
@@ -170,7 +176,7 @@ public class MapInputTilUttakTjeneste {
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger());
+        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger(), input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
@@ -180,9 +186,9 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getUtledetEtablertTilsyn());
 
-        //TODO: fyll beredskap og nattevåksperioder med data fra aksjonspunkt når det er ferdig
-        final Map<LukketPeriode, Utfall> beredskapsperioder = new HashMap<>();
-        final Map<LukketPeriode, Utfall> nattevåksperioder = new HashMap<>();
+        var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
+        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynGrunnlag);
+        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynGrunnlag);
 
         return new Uttaksgrunnlag(
             barn,
@@ -198,6 +204,34 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder);
+    }
+
+    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynGrunnlag grunnlag) {
+        if (grunnlag == null || grunnlag.getUnntakEtablertTilsynForPleietrengende() == null || grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap() == null) {
+            return Map.of();
+        }
+        return tilUnntakEtablertTilsynMap(grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap());
+    }
+
+    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynGrunnlag grunnlag) {
+        if (grunnlag == null || grunnlag.getUnntakEtablertTilsynForPleietrengende() == null || grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk() == null) {
+            return Map.of();
+        }
+        return tilUnntakEtablertTilsynMap(grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk());
+    }
+
+    private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn) {
+        var map = new HashMap<LukketPeriode, Utfall>();
+        unntakEtablertTilsyn.getPerioder().forEach(periode -> {
+                var utfall = switch(periode.getResultat()) {
+                    case OPPFYLT -> Utfall.OPPFYLT;
+                    case IKKE_OPPFYLT -> Utfall.IKKE_OPPFYLT;
+                    case IKKE_VURDERT -> throw new IllegalStateException("Skal ikke komme perioder som ikke er vurdert til uttak.");
+                };
+                map.put(new LukketPeriode(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato()), utfall);
+            }
+        );
+        return map;
     }
 
     private void evaluerDokumenter(Set<PerioderFraSøknad> perioderFraSøknader, Set<KravDokument> kravDokumenter) {

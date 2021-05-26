@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alene;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
 import java.util.List;
 
@@ -13,13 +13,13 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 /** Kompletthetsjekk for midlertidig alene. forventer ingen vedlegg her foreløpig, så lar ikke ligge på vent. */
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @ApplicationScoped
-public class MidlertidigAleneKompletthetSjekker implements Kompletthetsjekker {
+public class AleneOmOmsorgKompletthetSjekker implements Kompletthetsjekker {
 
     @Inject
-    public MidlertidigAleneKompletthetSjekker() {
+    public AleneOmOmsorgKompletthetSjekker() {
     }
 
     @Override

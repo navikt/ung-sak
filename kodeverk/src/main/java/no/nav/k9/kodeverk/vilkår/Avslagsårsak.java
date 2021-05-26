@@ -71,10 +71,12 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.",
             Map.of(
                 FagsakYtelseType.PSB, "9-10",
+                FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd",
                 FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd",
                 FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
 
     IKKE_UTVIDETRETT("1072", "Ikke grunnlag for utvidet rett", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd",
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd",
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
     IKKE_UTVIDETRETT_IKKE_KRONISK_SYK("1073", "Ikke kronisk syk eller funksjonshemmet", Map.of(
@@ -84,6 +86,7 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN("1075", "Varigheten er mindre enn seks måneder", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
     IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker regnes ikke som å ha aleneomsorg", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd",
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
 
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",

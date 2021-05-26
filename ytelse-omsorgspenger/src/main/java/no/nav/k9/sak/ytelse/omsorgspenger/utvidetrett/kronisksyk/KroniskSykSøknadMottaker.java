@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
@@ -20,7 +19,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP_KS")
@@ -44,11 +42,6 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
         this.personInfoAdapter = personInfoAdapter;
-    }
-
-    @Override
-    public Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, InnsendingInnhold søknadInnsending) {
-        throw new UnsupportedOperationException("Ikke implementert for /innsending grensesnitt, kun journalpostmottak");
     }
 
     @Override

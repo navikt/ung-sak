@@ -15,6 +15,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @ApplicationScoped
 class UtvidetRettInngangsvilkårUtleder implements VilkårUtleder {

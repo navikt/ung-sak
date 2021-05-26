@@ -22,6 +22,7 @@ import no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt.FellesStartpunktU
 @GrunnlagRef("PersonInformasjon")
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 class StartpunktUtlederUtvidetRettPersonopplysning implements EndringStartpunktUtleder {
 
     private static final StartpunktType DEFAULT_STARTPUNKT = StartpunktType.INIT_PERIODER;

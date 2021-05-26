@@ -38,6 +38,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
@@ -69,6 +70,7 @@ public class RestImplementationClasses {
         classes.add(OmsorgenForRestTjeneste.class);
         classes.add(SøknadsfristRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
+        classes.add(FordelHendelseRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
         classes.add(PerioderTilBehandlingMedKildeRestTjeneste.class);

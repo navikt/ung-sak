@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 @BehandlingStegRef(kode = "VURDER_OMSORG_FOR")
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderOmsorgenForSteg implements BehandlingSteg {

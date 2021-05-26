@@ -21,6 +21,7 @@
         <module>datavarehus</module>
         <module>dokumentarkiv</module>
         <module>dokumentbestiller</module>
+        <module>hendelsemottak</module>
         <module>inngangsvilkar</module>
         <module>arbeidsforhold</module>
         <module>medlem</module>

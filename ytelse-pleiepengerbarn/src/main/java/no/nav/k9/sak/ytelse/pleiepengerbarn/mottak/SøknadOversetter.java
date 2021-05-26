@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -167,25 +168,25 @@ class SøknadOversetter {
     private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Beredskap beredskap) {
         var nyeUnntakBeredskap = new ArrayList<Unntaksperiode>();
         beredskap.getPerioder().forEach( (key,value) ->
-            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
         );
         var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
         beredskap.getPerioderSomSkalSlettes().forEach( (key,value) ->
-            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+            nyeUnntakBeredskap.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null, null))
         );
-        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakBeredskap, unntakSomSkalSlettes);
+        return BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakBeredskap, unntakSomSkalSlettes, true);
     }
 
     private static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, Nattevåk nattevåk) {
         var nyeUnntakNattevåk = new ArrayList<Unntaksperiode>();
         nattevåk.getPerioder().forEach( (key,value) ->
-            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon()))
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), value.getTilleggsinformasjon(), Resultat.IKKE_VURDERT))
         );
         var unntakSomSkalSlettes = new ArrayList<Unntaksperiode>();
         nattevåk.getPerioderSomSkalSlettes().forEach( (key,value) ->
-            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null))
+            nyeUnntakNattevåk.add(new Unntaksperiode(key.getFraOgMed(), key.getTilOgMed(), null, null))
         );
-        return BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, "", nyeUnntakNattevåk, unntakSomSkalSlettes);
+        return BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakNattevåk, unntakSomSkalSlettes, true);
     }
 
     private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {

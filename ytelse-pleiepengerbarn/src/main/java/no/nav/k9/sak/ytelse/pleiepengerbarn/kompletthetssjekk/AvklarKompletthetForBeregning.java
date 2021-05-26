@@ -41,14 +41,16 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             .filter(it -> !it.getValue().isEmpty())
             .allMatch(it -> dto.getPerioder()
                 .stream()
-                .filter(at -> at.getPeriode().overlaps(it.getKey().tilPeriode()))
+                .filter(at -> it.getKey().overlapper(at.getPeriode().getFom(), at.getPeriode().getTom()))
                 .map(KompletthetsPeriode::getKanFortsette)
                 .findFirst()
                 .orElse(false));
 
 
         if (kanFortsette) {
-            return OppdateringResultat.utenOveropp();
+            return OppdateringResultat.utenTransisjon()
+                .medTotrinn()
+                .build();
         } else {
             var resultat = OppdateringResultat.utenOveropp();
             resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere

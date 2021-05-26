@@ -178,6 +178,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         if (erKodeverk(klasse)) {
             return;
         }
+        if (erInterface(klasse)) {
+            return;
+        }
         if (besøkteKlasser.contains(klasse)) {
             return;
         }
@@ -241,6 +244,10 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
 
     private static boolean erKodeverk(Class<?> klasse) {
         return Kodeverdi.class.isAssignableFrom(klasse) || klasse.isEnum();
+    }
+
+    private static boolean erInterface(Class<?> klasse) {
+        return klasse.isInterface();
     }
 
     private static Set<Class<?>> genericTypes(Field field) {

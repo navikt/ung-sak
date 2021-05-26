@@ -51,6 +51,7 @@ public enum VilkårType implements Kodeverdi {
     OMSORGEN_FOR(VilkårTypeKoder.K9_VK_1,
         "Omsorgen for",
             Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-10",
+                FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-10",
                 FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-10",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-10"),
             Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE,
@@ -61,6 +62,7 @@ public enum VilkårType implements Kodeverdi {
         "Aldersvilkåret",
             Map.of(
                 FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-3 første ledd",
+                FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
                 FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
@@ -114,7 +116,8 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT),
 
     UTVIDETRETT(VilkårTypeKoder.K9_VK_9_6, "Utvidet rett",
-            Map.of(FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
+            Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
+                FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
                 FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
             Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR, Avslagsårsak.IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
         Avslagsårsak.IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN),

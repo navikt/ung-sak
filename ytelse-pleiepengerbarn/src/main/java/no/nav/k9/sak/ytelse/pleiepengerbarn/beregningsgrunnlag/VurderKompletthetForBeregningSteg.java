@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -19,6 +20,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -43,6 +46,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
     private PSBKompletthetsjekker kompletthetsjekker;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
@@ -55,12 +59,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     public VurderKompletthetForBeregningSteg(BehandlingRepository behandlingRepository,
                                              BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                              UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
+                                             VilkårResultatRepository vilkårResultatRepository,
                                              @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                              @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.kompletthetsjekker = kompletthetsjekker;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
@@ -89,9 +95,11 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
+        var vilkår = vilkårResultatRepository.hent(ref.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();// Forventer at opptjening eksisterer
+
         var erKomplett = relevanteKompletthetsvurderinger.stream()
             .filter(it -> !it.getValue().isEmpty())
-            .allMatch(it -> erPeriodeKomplettBasertPåArbeid(uttakGrunnlag, vurderteSøknadsperioder, it));
+            .allMatch(it -> erPeriodeKomplettBasertPåArbeid(uttakGrunnlag, vurderteSøknadsperioder, it, vilkår));
 
         if (erKomplett) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -102,14 +110,14 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private boolean erPeriodeKomplettBasertPåArbeid(UttaksPerioderGrunnlag uttakGrunnlag,
                                                     Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> vurderteSøknadsperioder,
-                                                    Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggForPeriode) {
+                                                    Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggForPeriode, Vilkår vilkår) {
 
 
         var perioderFraSøknadene = uttakGrunnlag.getOppgitteSøknadsperioder().getPerioderFraSøknadene();
         var kravDokumenter = vurderteSøknadsperioder.keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(manglendeVedleggForPeriode.getKey().getFomDato(), manglendeVedleggForPeriode.getKey().getTomDato(), true)));
 
-        var arbeidIPeriode = new MapArbeid().map(kravDokumenter, perioderFraSøknadene, timeline, Set.of());
+        var arbeidIPeriode = new MapArbeid().map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), vilkår);
         var manglendeVedlegg = manglendeVedleggForPeriode.getValue();
 
         return manglendeVedlegg.stream()

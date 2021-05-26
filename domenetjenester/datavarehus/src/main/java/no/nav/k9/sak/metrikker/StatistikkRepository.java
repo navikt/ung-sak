@@ -53,6 +53,7 @@ public class StatistikkRepository {
         FagsakYtelseType.OMSORGSPENGER,
         FagsakYtelseType.OMSORGSPENGER_KS,
         FagsakYtelseType.OMSORGSPENGER_MA,
+        FagsakYtelseType.OMSORGSPENGER_AO,
         FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
         .stream().map(k -> k.getKode()).collect(Collectors.toList());
 

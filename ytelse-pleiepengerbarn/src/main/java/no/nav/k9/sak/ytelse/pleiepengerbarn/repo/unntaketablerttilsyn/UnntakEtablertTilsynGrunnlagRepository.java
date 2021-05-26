@@ -32,11 +32,6 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(UnntakEtablertTilsynGrunnlag unntakEtablertTilsynGrunnlag) {
-        entityManager.persist(unntakEtablertTilsynGrunnlag);
-        entityManager.flush();
-    }
-
     public UnntakEtablertTilsynGrunnlag lagre(Long behandlingId, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final Optional<UnntakEtablertTilsynGrunnlag> eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         return lagre(behandlingId, unntakEtablertTilsynForPleietrengende, eksisterendeGrunnlag);
