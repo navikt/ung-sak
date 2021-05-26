@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -28,10 +30,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.opptjening.InntekterDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningerDto;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Path("")
@@ -44,7 +43,6 @@ public class OpptjeningRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private MapOpptjening dtoMapper;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private MapInntekter mapInntekter;
 
     public OpptjeningRestTjeneste() {
@@ -53,11 +51,9 @@ public class OpptjeningRestTjeneste {
 
     @Inject
     public OpptjeningRestTjeneste(BehandlingRepository behandlingRepository,
-                                  SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                   MapInntekter mapInntekter,
                                   MapOpptjening dtoMapper) {
         this.behandlingRepository = behandlingRepository;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.mapInntekter = mapInntekter;
         this.dtoMapper = dtoMapper;
     }
@@ -89,8 +85,7 @@ public class OpptjeningRestTjeneste {
     }
 
     private OpptjeningerDto getOpptjeningerFraBehandling(Behandling behandling) {
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
         return dtoMapper.mapTilOpptjeninger(ref);
     }
 }

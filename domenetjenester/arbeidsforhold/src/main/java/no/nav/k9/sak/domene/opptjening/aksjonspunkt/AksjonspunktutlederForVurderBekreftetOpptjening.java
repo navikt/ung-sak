@@ -82,17 +82,17 @@ public class AksjonspunktutlederForVurderBekreftetOpptjening {
 
             LocalDate skjæringstidspunkt = opptjening.getSkjæringstidspunkt();
             if (finnesDetArbeidsforholdMedStillingsprosentLik0(param.getAktørId(), inntektArbeidYtelseGrunnlag, inntektsmeldinger, opptjeningPeriode, skjæringstidspunkt) == JA) {
-                logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}", behandlingId);
+                logger.info("Utleder AP 5051 fra stillingsprosent 0: behandlingId={}, stp={}", behandlingId, skjæringstidspunkt);
                 return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
             }
 
             if (finnesDetBekreftetFrilans(param.getAktørId(), inntektArbeidYtelseGrunnlag, opptjeningPeriode, skjæringstidspunkt) == JA) {
-                logger.info("Utleder AP 5051 fra bekreftet frilans: behandlingId={}", behandlingId);
+                logger.info("Utleder AP 5051 fra bekreftet frilans: behandlingId={}, stp={}", behandlingId, skjæringstidspunkt);
                 return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
             }
 
             if (finnesDetArbeidsforholdLagtTilAvSaksbehandler(param.getRef(), inntektArbeidYtelseGrunnlag, skjæringstidspunkt) == JA) {
-                logger.info("Utleder AP 5051 fra arbeidsforhold lagt til av saksbehandler: behandlingId={}", behandlingId);
+                logger.info("Utleder AP 5051 fra arbeidsforhold lagt til av saksbehandler: behandlingId={}, stp={}", behandlingId, skjæringstidspunkt);
                 return opprettListeForAksjonspunkt(VURDER_PERIODER_MED_OPPTJENING);
             }
         }

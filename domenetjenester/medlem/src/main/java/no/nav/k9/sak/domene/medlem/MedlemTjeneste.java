@@ -10,17 +10,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
-import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -30,7 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -39,14 +34,8 @@ import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.medlem.impl.HentMedlemskapFraRegister;
 import no.nav.k9.sak.domene.medlem.impl.MedlemResultat;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap;
-import no.nav.k9.sak.kontrakt.medlem.EndringsresultatPersonopplysningerForMedlemskap.EndretAttributt;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.felles.util.Tuple;
 
 @Dependent
 public class MedlemTjeneste {
@@ -62,8 +51,6 @@ public class MedlemTjeneste {
 
     private MedlemskapRepository medlemskapRepository;
     private HentMedlemskapFraRegister hentMedlemskapFraRegister;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private PersonopplysningTjeneste personopplysningTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private UtledVurderingsdatoerForMedlemskapTjeneste utledVurderingsdatoerTjeneste;
     private VurderMedlemskapTjeneste vurderMedlemskapTjeneste;
@@ -75,14 +62,10 @@ public class MedlemTjeneste {
     @Inject
     public MedlemTjeneste(BehandlingRepositoryProvider repositoryProvider,
                           HentMedlemskapFraRegister hentMedlemskapFraRegister,
-                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                          PersonopplysningTjeneste personopplysningTjeneste,
                           UtledVurderingsdatoerForMedlemskapTjeneste utledVurderingsdatoerForMedlemskapTjeneste,
                           VurderMedlemskapTjeneste vurderMedlemskapTjeneste) {
         this.hentMedlemskapFraRegister = hentMedlemskapFraRegister;
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.personopplysningTjeneste = personopplysningTjeneste;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.utledVurderingsdatoerTjeneste = utledVurderingsdatoerForMedlemskapTjeneste;
         this.vurderMedlemskapTjeneste = vurderMedlemskapTjeneste;
@@ -114,40 +97,6 @@ public class MedlemTjeneste {
     public Set<AksjonspunktDefinisjon> utledAksjonspunkterForVurderingsDato(BehandlingReferanse ref, LocalDate dato) {
         final var medlemResultat = vurderMedlemskapTjeneste.vurderMedlemskap(ref, dato);
         return medlemResultat.stream().map(mr -> mapMedlemResulatTilAkDef.get(mr)).collect(Collectors.toSet());
-    }
-
-    /**
-     * Sjekker endringer i personopplysninger som tilsier at bruker 'ikke er'/'skal miste' medlemskap.
-     * Sjekker statsborgerskap (kun mht endring i {@link Region}, ikke land),
-     * {@link PersonstatusType}, og {@link AdresseType}
-     * for intervall { max(seneste vedtatte medlemskapsperiode, skjæringstidspunkt), nå}.
-     * <p>
-     * Metoden gjelder revurdering foreldrepenger
-     */
-    // TODO Diamant (Denne gjelder kun revurdering og foreldrepenger, bør eksponeres som egen tjeneste for behandling type BT004)
-    public EndringsresultatPersonopplysningerForMedlemskap søkerHarEndringerIPersonopplysninger(Behandling revurderingBehandling) {
-
-        EndringsresultatPersonopplysningerForMedlemskap.Builder builder = EndringsresultatPersonopplysningerForMedlemskap.builder();
-        if (revurderingBehandling.erRevurdering()) {
-            AktørId aktørId = revurderingBehandling.getAktørId();
-            Long behandlingId = revurderingBehandling.getId();
-            DatoIntervallEntitet intervall = DatoIntervallEntitet.fraOgMedTilOgMed(finnStartdato(revurderingBehandling), LocalDate.now());
-            Optional<PersonopplysningerAggregat> historikkAggregat = personopplysningTjeneste
-                .hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, intervall);
-
-            historikkAggregat.ifPresent(historikk -> {
-                sjekkEndringer(historikk.getStatsborgerskapFor(aktørId).stream()
-                        .map(e -> new ElementMedGyldighetsintervallWrapper<>(e.getStatsborgerskap(), e.getPeriode())), builder,
-                    EndretAttributt.StatsborgerskapRegion);
-
-                sjekkEndringer(historikk.getPersonstatuserFor(aktørId).stream()
-                    .map(e -> new ElementMedGyldighetsintervallWrapper<>(e.getPersonstatus(), e.getPeriode())), builder, EndretAttributt.Personstatus);
-
-                sjekkEndringer(historikk.getAdresserFor(aktørId).stream()
-                    .map(e -> new ElementMedGyldighetsintervallWrapper<>(e.getAdresseType(), e.getPeriode())), builder, EndretAttributt.Adresse);
-            });
-        }
-        return builder.build();
     }
 
     public Map<LocalDate, VurderMedlemskap> utledVurderingspunkterMedAksjonspunkt(BehandlingReferanse ref) {
@@ -213,56 +162,6 @@ public class MedlemTjeneste {
         return Optional.empty();
     }
 
-    private <T extends Kodeverdi> void sjekkEndringer(Stream<ElementMedGyldighetsintervallWrapper<T>> elementer,
-                                                      EndringsresultatPersonopplysningerForMedlemskap.Builder builder, EndretAttributt endretAttributt) {
-        List<ElementMedGyldighetsintervallWrapper<T>> endringer = elementer
-            .sorted(Comparator.comparing(ElementMedGyldighetsintervallWrapper::sortPeriode))
-            .distinct().collect(Collectors.toList());
-
-        leggTilEndringer(endringer, builder, endretAttributt);
-    }
-
-    private <T extends Kodeverdi> void leggTilEndringer(List<ElementMedGyldighetsintervallWrapper<T>> endringer,
-                                                        EndringsresultatPersonopplysningerForMedlemskap.Builder builder, EndretAttributt endretAttributt) {
-        if (endringer != null && endringer.size() > 1) {
-            for (int i = 0; i < endringer.size() - 1; i++) {
-                String endretFra = endringer.get(i).element.getNavn();
-                String endretTil = endringer.get(i + 1).element.getNavn();
-                DatoIntervallEntitet periode = endringer.get(i + 1).gylidghetsintervall;
-                builder.leggTilEndring(endretAttributt, new Periode(periode.getFomDato(), periode.getTomDato()), endretFra, endretTil);
-            }
-        }
-    }
-
-    private LocalDate finnStartdato(Behandling behandling) {
-        final var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
-        if (vilkårene.isEmpty()) {
-            return LocalDate.now();
-        }
-        Optional<Vilkår> medlemskapsvilkåret = vilkårene.get()
-            .getVilkårene()
-            .stream()
-            .filter(vilkårType -> vilkårType.getVilkårType().equals(VilkårType.MEDLEMSKAPSVILKÅRET))
-            .findFirst();
-
-        LocalDate startDato = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()).getUtledetSkjæringstidspunkt();
-        if (medlemskapsvilkåret.isPresent()) {
-            LocalDate date = medlemskapsvilkåret.get()
-                .getPerioder()
-                .stream()
-                .map(VilkårPeriode::getPeriode)
-                .map(DatoIntervallEntitet::getFomDato)
-                .max(LocalDate::compareTo)
-                .orElse(startDato);
-
-            if (startDato.isBefore(date)) {
-                startDato = date;
-            }
-        }
-
-        return startDato.isAfter(LocalDate.now()) ? LocalDate.now() : startDato;
-    }
-
     public Tuple<Utfall, Avslagsårsak> utledVilkårUtfall(Behandling revurdering) {
         final var vilkårene = vilkårResultatRepository.hent(revurdering.getId());
         Optional<Vilkår> medlemOpt = vilkårene
@@ -292,41 +191,5 @@ public class MedlemTjeneste {
             }
         }
         throw new IllegalStateException("Kan ikke utlede vilkår utfall type når medlemskapsvilkåret ikke finnes");
-    }
-
-    private static final class ElementMedGyldighetsintervallWrapper<T> {
-        private final T element;
-        private final DatoIntervallEntitet gylidghetsintervall;
-
-        private ElementMedGyldighetsintervallWrapper(T element, DatoIntervallEntitet gylidghetsintervall) {
-            Objects.requireNonNull(element);
-            Objects.requireNonNull(gylidghetsintervall);
-            this.element = element;
-            this.gylidghetsintervall = gylidghetsintervall;
-        }
-
-        private static Long sortPeriode(ElementMedGyldighetsintervallWrapper<?> e) {
-            return e.gylidghetsintervall.getFomDato().toEpochDay();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            if (obj instanceof ElementMedGyldighetsintervallWrapper<?>) {
-                ElementMedGyldighetsintervallWrapper<?> other = (ElementMedGyldighetsintervallWrapper<?>) obj;
-                return element.equals(other.element);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(element, gylidghetsintervall);
-        }
     }
 }
