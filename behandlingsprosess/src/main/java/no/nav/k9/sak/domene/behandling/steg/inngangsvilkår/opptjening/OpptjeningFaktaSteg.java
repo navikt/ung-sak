@@ -28,7 +28,6 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurder
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.AksjonspunktutlederForVurderOppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.opptjening.OpptjeningsVilkårTjeneste;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 /**
  * Steg 81 - Kontroller fakta for opptjening
@@ -43,7 +42,6 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
     private AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt;
     private AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet;
     private OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     OpptjeningFaktaSteg() {
         // CDI
@@ -51,22 +49,20 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
 
     @Inject
     public OpptjeningFaktaSteg(BehandlingRepositoryProvider repositoryProvider,
-                                 AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,
-                                 AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt,
-                                 @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste,
-                                 SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                               AksjonspunktutlederForVurderBekreftetOpptjening aksjonspunktutlederBekreftet,
+                               AksjonspunktutlederForVurderOppgittOpptjening aksjonspunktutlederOppgitt,
+                               @FagsakYtelseTypeRef OpptjeningsVilkårTjeneste opptjeningsVilkårTjeneste) {
         this.repositoryProvider = repositoryProvider;
         this.aksjonspunktutlederBekreftet = aksjonspunktutlederBekreftet;
         this.aksjonspunktutlederOppgitt = aksjonspunktutlederOppgitt;
         this.opptjeningsVilkårTjeneste = opptjeningsVilkårTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId));
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
         final var perioderTilVurdering = perioderTilVurdering(ref.getBehandlingId());
         var utfall = Utfall.OPPFYLT;

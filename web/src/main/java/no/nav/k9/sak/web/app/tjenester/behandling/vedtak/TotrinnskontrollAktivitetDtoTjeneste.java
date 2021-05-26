@@ -26,7 +26,6 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAktivitetDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 
@@ -36,7 +35,6 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
     private VirksomhetTjeneste virksomhetTjeneste;
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
     protected TotrinnskontrollAktivitetDtoTjeneste() {
@@ -46,13 +44,11 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
     @Inject
     public TotrinnskontrollAktivitetDtoTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                                 VilkårResultatRepository vilkårResultatRepository,
-                                                SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                                 VirksomhetTjeneste virksomhetTjeneste,
                                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                                 ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.virksomhetTjeneste = virksomhetTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -64,8 +60,7 @@ public class TotrinnskontrollAktivitetDtoTjeneste {
         if (AksjonspunktDefinisjon.VURDER_PERIODER_MED_OPPTJENING.equals(aksjonspunkt.getAksjonspunktDefinisjon())) {
             Long behandlingId = behandling.getId();
             List<OpptjeningsperiodeForSaksbehandling> aktivitetPerioder = new ArrayList<>();
-            LocalDate skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getUtledetSkjæringstidspunkt();
-            BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+            BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling);
             var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
             if (vilkår.isPresent()) {
                 var iayGrunnlag = iayTjeneste.hentGrunnlag(iayGrunnlagUuid.get());
