@@ -49,13 +49,12 @@ public class UnntakEtablertTilsynBeskrivelse extends BaseEntitet implements Inde
         // Hibernate
     }
 
-    public UnntakEtablertTilsynBeskrivelse(UnntakEtablertTilsyn unntakEtablertTilsyn, DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker, Long kildeBehandlingId) {
+    public UnntakEtablertTilsynBeskrivelse(DatoIntervallEntitet periode, LocalDate mottattDato, String tekst, AktørId søker, Long kildeBehandlingId) {
         this.periode = periode;
         this.mottattDato = mottattDato;
         this.tekst = tekst;
         this.søker = søker;
         this.kildeBehandlingId = kildeBehandlingId;
-        this.unntakEtablertTilsyn = unntakEtablertTilsyn;
     }
 
     UnntakEtablertTilsynBeskrivelse(UnntakEtablertTilsynBeskrivelse beskrivelse) {

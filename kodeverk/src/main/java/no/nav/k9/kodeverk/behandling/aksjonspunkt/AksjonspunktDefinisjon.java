@@ -295,10 +295,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe: 92xx - Pleiepenger
     VURDER_NATTEVÅK(AksjonspunktKodeDefinisjon.VURDER_NATTEVÅK, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, FORBLI, null, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
     VURDER_BEREDSKAP(AksjonspunktKodeDefinisjon.VURDER_BEREDSKAP, AksjonspunktType.MANUELL,
         "Vurder nattevåk og beredskap", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_UTTAK,
-        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, FORBLI, null, EnumSet.of(PSB)),
+        VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, TILBAKE, null, EnumSet.of(PSB)),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",

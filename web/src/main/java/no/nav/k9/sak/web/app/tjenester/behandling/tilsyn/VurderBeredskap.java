@@ -27,6 +27,6 @@ public class VurderBeredskap implements AksjonspunktOppdaterer<VurderingBeredska
 
     @Override
     public OppdateringResultat oppdater(VurderingBeredskapDto dto, AksjonspunktOppdaterParameter param) {
-        return unntakEtablertTilsynOppdateringService.oppdater(dto, param.getBehandlingId(), param.getAktørId());
+        return unntakEtablertTilsynOppdateringService.oppdater(dto.getVurderinger(), Vurderingstype.BEREDSKAP, param.getBehandlingId(), param.getAktørId());
     }
 }
