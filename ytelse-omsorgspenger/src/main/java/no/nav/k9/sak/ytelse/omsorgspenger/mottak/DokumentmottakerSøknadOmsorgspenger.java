@@ -206,12 +206,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medOppgittDato(forsendelseMottatt);
         var bosteder = ytelse.getBosteder();
         if (bosteder != null) {
-            var førsteSøkteFraværsdag = finnFørsteSøkteFraværsdag(ytelse, journalpostId, søker);
             bosteder.getPerioder().forEach((periode, opphold) -> {
-                var tidligereOpphold = periode.getFraOgMed().isBefore(førsteSøkteFraværsdag);
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                        .erTidligereOpphold(tidligereOpphold)
                         .medLand(finnLandkode(opphold.getLand().getLandkode()))
                         .medPeriode(
                             Objects.requireNonNull(periode.getFraOgMed()),
@@ -220,16 +217,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
-    }
-
-    private LocalDate finnFørsteSøkteFraværsdag(OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, Søker søker) {
-        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
-        return søktFraværFraSøknad.stream()
-            .map(OppgittFraværPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getFomDato)
-            .sorted()
-            .findFirst()
-            .orElseThrow();
     }
 
     private Språkkode getSpråkValg(Språk språk) {

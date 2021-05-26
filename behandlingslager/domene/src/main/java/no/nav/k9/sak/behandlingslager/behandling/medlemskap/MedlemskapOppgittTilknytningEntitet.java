@@ -83,16 +83,9 @@ public class MedlemskapOppgittTilknytningEntitet extends BaseEntitet {
         return Collections.unmodifiableSet(opphold);
     }
 
-
-    public boolean isOppholdINorgeSistePeriode() {
+    public boolean harMinstEttUtenlandsopphold() {
         return opphold.stream()
-                .noneMatch(o -> !o.getLand().equals(Landkoder.NOR) && o.isTidligereOpphold());
-    }
-
-
-    public boolean isOppholdINorgeNestePeriode() {
-        return opphold.stream()
-                .noneMatch(o -> !o.getLand().equals(Landkoder.NOR) && !o.isTidligereOpphold());
+            .anyMatch(o -> !o.getLand().equals(Landkoder.NOR));
     }
 
 
