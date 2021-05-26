@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,20 +14,33 @@ import java.util.List;
 
 public class BeredskapOgNattevåkOppdaterer {
 
-    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, boolean periodeneKommerFraSøknad) {
-        List<UnntakEtablertTilsynBeskrivelse> beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
-        if (eksisterendeUnntakEtablertTilsyn != null) {
-            beskrivelser = eksisterendeUnntakEtablertTilsyn.getBeskrivelser();
-        }
-        if (periodeneKommerFraSøknad) {
-            beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
-        }
-        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId, periodeneKommerFraSøknad);
+    public static UnntakEtablertTilsyn oppdaterMedPerioderFraSøknad(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Periode> unntakSomSkalSlettes) {
+        nyeUnntak.forEach(unntak -> {
+                if (!unntak.resultat().equals(Resultat.IKKE_VURDERT)) {
+                    throw new IllegalArgumentException("Nye unntak kan bare være IKKE_VURDERT.");
+                }
+            }
+        );
+        var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId);
 
         return new UnntakEtablertTilsyn(perioder, beskrivelser);
     }
 
-    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId, boolean periodeneKommerFraSøknad) {
+    public static UnntakEtablertTilsyn oppdaterMedPerioderFraAksjonspunkt(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> bekreftetUnntaksperioder) {
+        bekreftetUnntaksperioder.forEach(unntak -> {
+                if (unntak.resultat().equals(Resultat.IKKE_VURDERT)) {
+                    throw new IllegalArgumentException("Bekreftede unntak kan ikke være IKKE_VURDERT.");
+                }
+            }
+        );
+        var beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, bekreftetUnntaksperioder, kildeBehandlingId);
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, bekreftetUnntaksperioder, List.of(), søkersAktørId, kildeBehandlingId);
+
+        return new UnntakEtablertTilsyn(perioder, beskrivelser);
+    }
+
+    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Periode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
@@ -35,7 +49,7 @@ public class BeredskapOgNattevåkOppdaterer {
         }
 
         var segementerSomSkalSlettes = unntakSomSkalSlettes.stream().map(periode ->
-            new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new Unntak("", Resultat.IKKE_OPPFYLT))
+            new LocalDateSegment<>(new LocalDateInterval(periode.getFom(), periode.getTom()), new Unntak(null, null))
         ).toList();
 
         var segmenterSomSkalLeggesTil = nyeUnntak.stream().map(periode ->
@@ -50,7 +64,7 @@ public class BeredskapOgNattevåkOppdaterer {
         return perioderTidslinje.toSegments().stream().map(segment ->
             new UnntakEtablertTilsynPeriode()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                .medBegrunnelse(periodeneKommerFraSøknad ? "" : segment.getValue().begrunnelse())
+                .medBegrunnelse(segment.getValue().resultat().equals(Resultat.IKKE_VURDERT) ? "" : segment.getValue().begrunnelse())
                 .medAktørId(aktørId)
                 .medKildeBehandlingId(kildeBehandlingId)
                 .medResultat(segment.getValue().resultat())
@@ -72,13 +86,16 @@ public class BeredskapOgNattevåkOppdaterer {
         if (eksisterendeUnntakEtablertTilsyn != null) {
             beskrivelser.addAll(eksisterendeUnntakEtablertTilsyn.getBeskrivelser());
         }
-        nyeUnntak.forEach(nyttUnntak ->
-            beskrivelser.add(new UnntakEtablertTilsynBeskrivelse(
-                DatoIntervallEntitet.fraOgMedTilOgMed(nyttUnntak.fom(), nyttUnntak.tom()),
-                mottattDato,
-                nyttUnntak.begrunnelse(),
-                søkersAktørId,
-                kildeBehandlingId))
+        nyeUnntak.forEach(nyttUnntak -> {
+                if (nyttUnntak.resultat().equals(Resultat.IKKE_VURDERT)) {
+                    beskrivelser.add(new UnntakEtablertTilsynBeskrivelse(
+                        DatoIntervallEntitet.fraOgMedTilOgMed(nyttUnntak.fom(), nyttUnntak.tom()),
+                        mottattDato,
+                        nyttUnntak.begrunnelse(),
+                        søkersAktørId,
+                        kildeBehandlingId));
+                }
+            }
         );
         return beskrivelser;
     }

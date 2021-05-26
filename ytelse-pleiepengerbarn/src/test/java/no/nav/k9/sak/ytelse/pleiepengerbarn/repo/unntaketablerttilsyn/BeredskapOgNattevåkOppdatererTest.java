@@ -13,14 +13,13 @@ class BeredskapOgNattevåkOppdatererTest {
 
     @Test
     void ingen_nye_perioder_fra_søknad() {
-        var unntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+        var unntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(
             null,
             LocalDate.now(),
             AktørId.dummy(),
             123L,
             List.of(),
-            List.of(),
-            true
+            List.of()
         );
 
         assertThat(unntakEtablertTilsyn.getPerioder()).hasSize(0);
@@ -30,14 +29,13 @@ class BeredskapOgNattevåkOppdatererTest {
 
     @Test
     void en_ny_perioder_fra_søknad() {
-        var unntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+        var unntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(
             null,
             LocalDate.now(),
             AktørId.dummy(),
             123L,
             List.of(new Unntaksperiode(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-31"), "Dette er en test.", Resultat.IKKE_VURDERT)),
-            List.of(),
-            true
+            List.of()
         );
 
         assertThat(unntakEtablertTilsyn.getPerioder()).hasSize(1);
@@ -51,14 +49,13 @@ class BeredskapOgNattevåkOppdatererTest {
 
     @Test
     void oppdatere_periode_i_aksjonspunkt() {
-        var opprinneligUnntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+        var opprinneligUnntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(
             null,
             LocalDate.now(),
             AktørId.dummy(),
             123L,
             List.of(new Unntaksperiode(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-31"), "Dette er en test.", Resultat.IKKE_VURDERT)),
-            List.of(),
-            true
+            List.of()
         );
 
         assertThat(opprinneligUnntakEtablertTilsyn.getPerioder()).hasSize(1);
@@ -69,14 +66,12 @@ class BeredskapOgNattevåkOppdatererTest {
         var nyBeskrivelse = opprinneligUnntakEtablertTilsyn.getBeskrivelser().get(0);
         assertThat(nyBeskrivelse.getTekst()).isEqualTo("Dette er en test.");
 
-        var oppdatertUnntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+        var oppdatertUnntakEtablertTilsyn = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraAksjonspunkt(
             opprinneligUnntakEtablertTilsyn,
             LocalDate.now(),
             AktørId.dummy(),
             123L,
-            List.of(new Unntaksperiode(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-31"), "Nå er det ok.", Resultat.OPPFYLT)),
-            List.of(),
-            false
+            List.of(new Unntaksperiode(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-31"), "Nå er det ok.", Resultat.OPPFYLT))
         );
 
         assertThat(oppdatertUnntakEtablertTilsyn.getPerioder()).hasSize(1);
