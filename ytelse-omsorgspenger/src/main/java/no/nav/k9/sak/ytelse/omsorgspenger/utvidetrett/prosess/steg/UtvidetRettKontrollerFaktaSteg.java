@@ -10,9 +10,10 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
+@BehandlingStegRef(kode = "KOFAK")
 @FagsakYtelseTypeRef("OMP_KS")
 @FagsakYtelseTypeRef("OMP_MA")
-@BehandlingStegRef(kode = "KOFAK")
+@FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef()
 @ApplicationScoped
 public class UtvidetRettKontrollerFaktaSteg implements BehandlingSteg {

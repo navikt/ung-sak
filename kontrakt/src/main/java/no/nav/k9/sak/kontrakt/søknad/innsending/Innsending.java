@@ -22,9 +22,13 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
+/**
+ * Denne klassen er deprecated og brukes kun av Frisinn. Se Innsending/Søknad i k9-format for ny versjon.
+ */
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated
 public class Innsending {
 
     @JsonProperty(value = "saksnummer", required = true)

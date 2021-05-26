@@ -12,7 +12,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 public interface SøknadMottakTjeneste<V extends InnsendingInnhold> {
 
-    Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, V søknad);
+    default Behandling mottaSøknad(Saksnummer saksnummer, JournalpostId journalpostId, V søknad) {
+        throw new IllegalArgumentException("Dette endepunktet er deprecated for alle andre ytelser enn Frisinn: Bruk /fordel/journalposter istedenfor.");
+    }
 
     Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato);
 }

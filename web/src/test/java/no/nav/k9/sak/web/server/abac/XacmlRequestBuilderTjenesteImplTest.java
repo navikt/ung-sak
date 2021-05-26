@@ -26,7 +26,6 @@ import no.nav.k9.felles.sikkerhet.pdp.Xacml10JsonProfile.XacmlResponse;
 import no.nav.k9.felles.sikkerhet.pdp.xacml.Category;
 import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlRequestBuilder;
 import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlResponseWrapper;
-import no.nav.k9.felles.sikkerhet.pdp.xacml.NewXacmlResponseWrapper;
 
 public class XacmlRequestBuilderTjenesteImplTest {
 
@@ -144,6 +143,6 @@ public class XacmlRequestBuilderTjenesteImplTest {
 
     private XacmlResponseWrapper createResponse(String jsonFile) throws Exception {
         var file = new File(getClass().getClassLoader().getResource(jsonFile).getFile());
-        return new NewXacmlResponseWrapper(Xacml10JsonProfile.createMapper().readValue(file, XacmlResponse.class));
+        return new XacmlResponseWrapper(Xacml10JsonProfile.createMapper().readValue(file, XacmlResponse.class));
     }
 }

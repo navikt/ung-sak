@@ -67,7 +67,8 @@
                     <target>${kontrakt.java.version}</target>
                     <encoding>UTF-8</encoding>
                     <release>${kontrakt.java.version}</release>
-                <parameters>true</parameters>
+                    <parameters>true</parameters>
+                    <!-- ikke kompiler denne modulen med enable-preview. skaper trøbbel ved oppgradering av java versjoner der kontraker benyttes av andre -->
                 </configuration>
             </plugin>
 

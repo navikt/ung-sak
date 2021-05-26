@@ -100,7 +100,7 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         return fra(fom, tom);
     }
 
-    private static DatoIntervallEntitet fra(LocalDate fom, LocalDate tom) {
+    public static DatoIntervallEntitet fra(LocalDate fom, LocalDate tom) {
         if (fom != null && tom != null) {
             return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
         } else if (fom != null) {

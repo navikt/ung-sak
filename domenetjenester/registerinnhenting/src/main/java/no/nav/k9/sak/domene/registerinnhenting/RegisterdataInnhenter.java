@@ -70,6 +70,7 @@ public class RegisterdataInnhenter {
     private final Map<FagsakYtelseType, YtelsesspesifikkRelasjonsFilter> barnRelasjonsFilter = Map.of(
         FagsakYtelseType.OMSORGSPENGER_KS, new AlleRelasjonFilter(),
         FagsakYtelseType.OMSORGSPENGER_MA, new AlleRelasjonFilter(),
+        FagsakYtelseType.OMSORGSPENGER_AO, new AlleRelasjonFilter(),
         FagsakYtelseType.PSB, new PleietrengendeRelasjonsFilter(),
         FagsakYtelseType.OMP, new OmsorgspengerRelasjonsFilter());
 

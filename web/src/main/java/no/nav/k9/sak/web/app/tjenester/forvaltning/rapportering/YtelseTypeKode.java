@@ -6,6 +6,7 @@ public enum YtelseTypeKode {
     PSB,
     OMP_KS,
     OMP_MA,
+    OMP_AO,
     FRISINN;
 
 }

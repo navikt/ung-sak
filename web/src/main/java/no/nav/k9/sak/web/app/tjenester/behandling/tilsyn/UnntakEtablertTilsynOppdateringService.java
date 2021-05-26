@@ -1,11 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.tilsyn;
 
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.Vurdering;
+import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.VurderingDto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.BeredskapOgNattevåkOversetter;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.Unntaksperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -26,24 +24,58 @@ public class UnntakEtablertTilsynOppdateringService {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
     }
 
-    public OppdateringResultat oppdater(Vurdering dto, Long behandlingId, AktørId søkersAktørId) {
-        var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandlingId);
+    public OppdateringResultat oppdater(List<VurderingDto> vurderinger, Vurderingstype vurderingstype, Long behandlingId, AktørId søkersAktørId) {
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandlingId);
+        var unntakEtablertTilsyn = finnUnntakEtablertTilsyn(vurderingstype, eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende());
 
-        var perioder = dto.getPerioder().stream().map(periode -> new Unntaksperiode(periode.getFom(), periode.getTom(), dto.getVurderingstekst())).toList();
+        if (vurderinger != null) {
+            for (VurderingDto vurdering : vurderinger) {
+                unntakEtablertTilsyn = oppdater(unntakEtablertTilsyn, vurdering, behandlingId, søkersAktørId);
+            }
+        }
 
-        var unntakEtablertTilsyn = BeredskapOgNattevåkOversetter.tilUnntakEtablertTilsynForPleietrengende(
-            unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
-            LocalDate.now(),
-            søkersAktørId,
-            behandlingId,
-            dto.getVurderingstekst(),
-            perioder,
-            List.of());
+        var nyttUnntakEtablertTilsynForPleietrengende = switch(vurderingstype) {
+            case BEREDSKAP ->
+                new UnntakEtablertTilsynForPleietrengende(
+                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getPleietrengendeAktørId(),
+                    unntakEtablertTilsyn,
+                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()
+                );
+            case NATTEVÅK ->
+                new UnntakEtablertTilsynForPleietrengende(
+                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getPleietrengendeAktørId(),
+                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
+                    unntakEtablertTilsyn
+                );
+        };
 
-        unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().medBeredskap(unntakEtablertTilsyn);
-        unntakEtablertTilsynGrunnlagRepository.lagre(unntakEtablertTilsynGrunnlag);
+        unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, nyttUnntakEtablertTilsynForPleietrengende);
 
         return OppdateringResultat.utenOveropp();
     }
 
+    private UnntakEtablertTilsyn oppdater(UnntakEtablertTilsyn unntakEtablertTilsyn, VurderingDto vurdering, Long behandlingId, AktørId søkersAktørId) {
+        return BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+            unntakEtablertTilsyn,
+            LocalDate.now(),
+            søkersAktørId,
+            behandlingId,
+            List.of(new Unntaksperiode(vurdering.getPeriode().getFom(), vurdering.getPeriode().getTom(), vurdering.getBegrunnelse(), vurdering.getResultat())),
+            List.of(),
+            false
+        );
+    }
+
+    private UnntakEtablertTilsyn finnUnntakEtablertTilsyn(Vurderingstype vurderingstype, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        return switch (vurderingstype) {
+            case BEREDSKAP -> unntakEtablertTilsynForPleietrengende.getBeredskap();
+            case NATTEVÅK -> unntakEtablertTilsynForPleietrengende.getNattevåk();
+        };
+    }
+
+}
+
+enum Vurderingstype {
+    BEREDSKAP,
+    NATTEVÅK
 }

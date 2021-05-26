@@ -63,6 +63,13 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         this.aktørId = that.aktørId;
     }
 
+    public UnntakEtablertTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, Resultat resultat, AktørId aktørId, Long kildeBehandlingId) {
+        this.periode = periode;
+        this.begrunnelse = begrunnelse;
+        this.resultat = resultat;
+        this.aktørId = aktørId;
+        this.kildeBehandlingId = kildeBehandlingId;
+    }
 
     public Long getId() {
         return id;
