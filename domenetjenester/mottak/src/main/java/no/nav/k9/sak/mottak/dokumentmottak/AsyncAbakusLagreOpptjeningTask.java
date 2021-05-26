@@ -1,7 +1,6 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -24,7 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
-import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -68,23 +65,16 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             lagreOppgittOpptjening(input, true);
         } else  {
             JournalpostId journalpostId = new JournalpostId(input.getPropertyValue(JOURNALPOST_ID));
-            Brevkode brevkode = Brevkode.fraKode(input.getPropertyValue(BREVKODER));
 
-            //henter alle som er til BEHANDLER
-            List<MottattDokument> ubehandledeDokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(),
-                List.of(brevkode), true, DokumentStatus.BEHANDLER);
-            if (ubehandledeDokumenter.isEmpty()) {
-                logger.info("Fant ingen ubehandlede søknader om utbetaling av omsorgspenger nå - er allerede håndtert. Avbryter task");
+            var mottattDokument = mottatteDokumentRepository.hentMottattDokument(journalpostId, true).orElseThrow();
+            if (mottattDokument.getStatus() == DokumentStatus.MOTTATT) {
+                throw new IllegalStateException("Utviklerfeil: Kan ikke ha dokumentstatus MOTTATT før lagring til abakus (forventer BEHANDLER)");
+            } else if (mottattDokument.getStatus() != DokumentStatus.BEHANDLER) {
+                logger.warn("Forventet dokumentstatus BEHANDLER, fikk dokumentstatus={}. Forsøker ikke lagre dokument til abakus", mottattDokument.getStatus());
                 return;
             }
+            mottatteDokumentRepository.oppdaterStatus(List.of(mottattDokument), DokumentStatus.GYLDIG);
 
-            MottattDokument førsteUbehandledeDokument = ubehandledeDokumenter.stream()
-                .min(Comparator.comparing(MottattDokument::getMottattTidspunkt)).orElseThrow();
-            if (!førsteUbehandledeDokument.getJournalpostId().equals(journalpostId)) {
-                throw new UnsupportedOperationException("Kan ikke lagre oppgitt opptjening. JournalpostId=" + journalpostId +" " +
-                    "venter på behandling av tidligere journalpostId=" + førsteUbehandledeDokument.getJournalpostId());
-            }
-            mottatteDokumentRepository.oppdaterStatus(List.of(førsteUbehandledeDokument), DokumentStatus.GYLDIG);
             // må gjøres til slutt siden vi har å gjøre med et ikke-tx grensesnitt til abakus
             lagreOppgittOpptjening(input, false);
         }

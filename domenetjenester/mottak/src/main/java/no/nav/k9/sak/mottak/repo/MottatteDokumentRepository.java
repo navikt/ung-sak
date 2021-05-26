@@ -58,6 +58,17 @@ public class MottatteDokumentRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
+    public Optional<MottattDokument> hentMottattDokument(JournalpostId journalpostId, boolean taSkriveLås) {
+        TypedQuery<MottattDokument> query = entityManager.createQuery(
+            "select m from MottattDokument m where m.journalpostId = :param", MottattDokument.class)
+            .setParameter("param", journalpostId)
+            ;
+        if (taSkriveLås) {
+            query.setLockMode(LockModeType.PESSIMISTIC_FORCE_INCREMENT);
+        }
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
     /**
      * Returnerer liste av MottattDokument.
      * NB: Kan returnere samme dokument flere ganger dersom de har ulike eks. mottatt_dato, journalføringsenhet (dersom byttet enhet). Er derfor

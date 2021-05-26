@@ -132,7 +132,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, dokument.getType().getKode());
 
             enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
