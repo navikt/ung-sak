@@ -13,20 +13,20 @@ import java.util.List;
 
 public class BeredskapOgNattevåkOppdaterer {
 
-    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, boolean leggTilNyeBeskrivelser) {
+    public static UnntakEtablertTilsyn tilUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, Long kildeBehandlingId, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, boolean periodeneKommerFraSøknad) {
         List<UnntakEtablertTilsynBeskrivelse> beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             beskrivelser = eksisterendeUnntakEtablertTilsyn.getBeskrivelser();
         }
-        if (leggTilNyeBeskrivelser) {
+        if (periodeneKommerFraSøknad) {
             beskrivelser = finnUnntakEtablertTilsynBeskrivelser(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, nyeUnntak, kildeBehandlingId);
         }
-        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId);
+        var perioder = finnUnntakEtablertTilsynPerioder(eksisterendeUnntakEtablertTilsyn, nyeUnntak, unntakSomSkalSlettes, søkersAktørId, kildeBehandlingId, periodeneKommerFraSøknad);
 
         return new UnntakEtablertTilsyn(perioder, beskrivelser);
     }
 
-    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId) {
+    private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Unntaksperiode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId, boolean periodeneKommerFraSøknad) {
         var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
@@ -50,7 +50,7 @@ public class BeredskapOgNattevåkOppdaterer {
         return perioderTidslinje.toSegments().stream().map(segment ->
             new UnntakEtablertTilsynPeriode()
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                .medBegrunnelse((segment.getValue().begrunnelse()))
+                .medBegrunnelse(periodeneKommerFraSøknad ? "" : segment.getValue().begrunnelse())
                 .medAktørId(aktørId)
                 .medKildeBehandlingId(kildeBehandlingId)
                 .medResultat(segment.getValue().resultat())
