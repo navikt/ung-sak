@@ -82,6 +82,23 @@ public class FagsakTjeneste {
         }
         return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
     }
+    
+    public boolean finnesEnFagsakForMinstEnAvAktørene(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+        final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, null, null, fom, tom);
+        if (!fagSakerPåBruker.isEmpty()) {
+            return true;
+        }
+        final var fagSakerPåPleietrengende = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, fom, tom);
+        if (!fagSakerPåPleietrengende.isEmpty()) {
+            return true;
+        }
+        final var fagSakerPåRelatertPerson = fagsakRepository.finnFagsakRelatertTil(ytelseType, null, relatertPersonAktørId, fom, tom);
+        if (!fagSakerPåRelatertPerson.isEmpty()) {
+            return true;
+        }
+        
+        return false;
+    }
 
     public void oppdaterFagsak(Fagsak fagsak, DatoIntervallEntitet periode) {
         fagsakRepository.oppdaterPeriode(fagsak.getId(), periode.getFomDato(), periode.getTomDato());

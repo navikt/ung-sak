@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.fordeling;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.feil.LogLevel.WARN;
 
@@ -150,6 +151,27 @@ public class FordelRestTjeneste {
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, bruker, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
 
         return fagsak.isPresent() ? new SaksnummerDto(fagsak.get().getSaksnummer().getVerdi()) : null;
+    }
+    
+    @POST
+    @Path("/relatertSak")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(
+            description = "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
+            summary = ("Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part."),
+            tags = "fordel"
+    )
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
+    public boolean finnesEksisterendeFagsakMedEnAvAktørene(@Parameter(description = "Søkeparametere") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid FinnSak finnSakDto) {
+        return fagsakTjeneste.finnesEnFagsakForMinstEnAvAktørene(
+                finnSakDto.getYtelseType(),
+                finnSakDto.getAktørId(),
+                finnSakDto.getPleietrengendeAktørId(),
+                finnSakDto.getRelatertPersonAktørId(),
+                finnSakDto.getPeriode().getFom(),
+                finnSakDto.getPeriode().getTom()
+            );
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
