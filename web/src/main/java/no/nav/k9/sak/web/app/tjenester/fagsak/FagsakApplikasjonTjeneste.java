@@ -139,7 +139,7 @@ public class FagsakApplikasjonTjeneste {
                     f.getYtelseType(),
                     f.getStatus(),
                     new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
-                    bruker,
+                    personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
                     identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
                     identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
                     f.getSkalTilInfotrygd());
