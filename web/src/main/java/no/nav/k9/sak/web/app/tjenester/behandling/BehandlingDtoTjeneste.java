@@ -75,6 +75,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
@@ -313,6 +314,8 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(VilkårRestTjeneste.V3_PATH, "vilkar-v3", uuidQueryParams));
 
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidQueryParams));
+
+        dto.leggTil(getFraMap(SøknadsfristRestTjeneste.SØKNADSFRIST_STATUS_PATH, "soknadsfrist-status", uuidQueryParams));
 
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
