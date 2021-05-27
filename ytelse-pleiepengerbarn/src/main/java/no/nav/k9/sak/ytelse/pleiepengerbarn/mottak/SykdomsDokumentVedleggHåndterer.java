@@ -48,7 +48,7 @@ public class SykdomsDokumentVedleggHåndterer {
         this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
-    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes) {
+    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -70,7 +70,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 .dato()
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        
+
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
@@ -99,7 +99,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 "VL",
                 mottattidspunkt);
             sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
-            
+
             hoveddokument = false;
         }
 

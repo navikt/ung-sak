@@ -27,7 +27,6 @@ import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Journalpost;
-import no.nav.k9.søknad.ytelse.psb.v1.InfoFraPunsj;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
@@ -112,21 +111,39 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
         pleiepengerBarnSoknadOversetter.persister(søknad, journalpostId, behandling);
 
+        for (Journalpost journalpost : søknad.getJournalposter()) {
+            boolean journalpostHarInformasjonSomIkkeKanPunsjes = false;
+            boolean journalpostHarMedisinskeOpplysninger = false;
+            if (journalpost.getInneholderInfomasjonSomIkkeKanPunsjes() != null) {
+                journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.getInneholderInfomasjonSomIkkeKanPunsjes();
+            }
+            if (journalpost.getInneholderMedisinskeOpplysninger() != null) {
+                journalpostHarMedisinskeOpplysninger = journalpost.getInneholderMedisinskeOpplysninger();
+            }
+
+            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+                behandling,
+                journalpostId,
+                behandling.getFagsak().getPleietrengendeAktørId(),
+                søknad.getMottattDato().toLocalDateTime(),
+                journalpostHarInformasjonSomIkkeKanPunsjes,
+                journalpostHarMedisinskeOpplysninger);
+        }
+
+
         Optional<Journalpost> journalpost = søknad.getJournalposter()
             .stream()
             .filter(j -> j.getJournalpostId().equals(journalpostId.getVerdi()))
             .findFirst();
 
-        boolean journalpostHarInformasjonSomIkkeKanPunsjes = false;
-        if (journalpost.isPresent() && journalpost.get().getInneholderInfomasjonSomIkkeKanPunsjes() != null) {
-            journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.get().getInneholderInfomasjonSomIkkeKanPunsjes();
+        if (!journalpost.isPresent()) {
+            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
+                journalpostId,
+                behandling.getFagsak().getPleietrengendeAktørId(),
+                søknad.getMottattDato().toLocalDateTime(),
+                false,
+                false);
         }
-
-        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
-            journalpostId,
-            behandling.getFagsak().getPleietrengendeAktørId(),
-            søknad.getMottattDato().toLocalDateTime(),
-            journalpostHarInformasjonSomIkkeKanPunsjes);
     }
 
     @Override
