@@ -19,6 +19,12 @@ public class UttakAktivitet {
         this.utbetalingsgrad = Objects.requireNonNull(utbetalingsgrad, "utbetalingsgrad");
         this.arbeidsforhold = arbeidsforhold;
         this.type = type;
+        if (type == UttakArbeidType.FRILANSER || type == UttakArbeidType.ARBEIDSTAKER) {
+            Objects.requireNonNull(arbeidsforhold, "Krever arbeidsforhold for type " + type);
+        }
+        if (type == UttakArbeidType.FRILANSER && !arbeidsforhold.erFrilanser() || type != UttakArbeidType.FRILANSER && arbeidsforhold != null && arbeidsforhold.erFrilanser()) {
+            throw new IllegalArgumentException("Mismatch mellom uttakarbeidstype " + type + " og arbeidsforhold.erFrilanser " + arbeidsforhold.erFrilanser());
+        }
     }
 
     public BigDecimal getStillingsgrad() {
@@ -45,15 +51,16 @@ public class UttakAktivitet {
     public String toString() {
         return getClass().getSimpleName() + "<type=" + type + ", arbeid=" + arbeidsforhold + ", utbetalingsgrad=" + utbetalingsgrad + ">";
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-        if(obj==this)return true;
-        if(obj==null || obj.getClass()!=this.getClass())return false;
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
         var other = (UttakAktivitet) obj;
         return Objects.equals(type, other.type)
-                && Objects.equals(arbeidsforhold, other.arbeidsforhold);
+            && Objects.equals(arbeidsforhold, other.arbeidsforhold);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(type, arbeidsforhold);
