@@ -1,0 +1,1 @@
+alter table psb_gr_unntak_etablert_tilsyn add constraint FK_GR_UNNTAK_ETABLERT_TILSYN_1 foreign key (BEHANDLING_ID) references BEHANDLING;
