@@ -20,22 +20,22 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktivitete
 @DtoTilServiceAdapter(dto = AvklarteAktiviteterDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarAktiviteterOppdaterer implements AksjonspunktOppdaterer<AvklarteAktiviteterDtoer> {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste;
 
     AvklarAktiviteterOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarAktiviteterOppdaterer(BeregningTjeneste kalkulusTjeneste) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+    public AvklarAktiviteterOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringjeneste) {
+        this.oppdateringjeneste = oppdateringjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(AvklarteAktiviteterDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
-        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         return OppdateringResultat.utenOveropp();
     }
 

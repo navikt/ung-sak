@@ -19,22 +19,22 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBere
 @DtoTilServiceAdapter(dto = FastsettBruttoBeregningsgrunnlagSNDtoer.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettBruttoBeregningsgrunnlagSNOppdaterer implements AksjonspunktOppdaterer<FastsettBruttoBeregningsgrunnlagSNDtoer> {
 
-    private BeregningTjeneste kalkulusTjeneste;
+    private BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste;
 
     FastsettBruttoBeregningsgrunnlagSNOppdaterer() {
         // CDI
     }
 
     @Inject
-    public FastsettBruttoBeregningsgrunnlagSNOppdaterer(BeregningTjeneste kalkulusTjeneste) {
-        this.kalkulusTjeneste = kalkulusTjeneste;
+    public FastsettBruttoBeregningsgrunnlagSNOppdaterer(BeregningsgrunnlagOppdateringTjeneste oppdateringTjeneste) {
+        this.oppdateringTjeneste = oppdateringTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
-        kalkulusTjeneste.oppdaterBeregningListe(stpTilDtoMap, param.getRef());
+        oppdateringTjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOveropp();
     }
