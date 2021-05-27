@@ -55,14 +55,12 @@ public class UnntakEtablertTilsynOppdateringService {
     }
 
     private UnntakEtablertTilsyn oppdater(UnntakEtablertTilsyn unntakEtablertTilsyn, VurderingDto vurdering, Long behandlingId, AktørId søkersAktørId) {
-        return BeredskapOgNattevåkOppdaterer.tilUnntakEtablertTilsynForPleietrengende(
+        return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraAksjonspunkt(
             unntakEtablertTilsyn,
             LocalDate.now(),
             søkersAktørId,
             behandlingId,
-            List.of(new Unntaksperiode(vurdering.getPeriode().getFom(), vurdering.getPeriode().getTom(), vurdering.getBegrunnelse(), vurdering.getResultat())),
-            List.of(),
-            false
+            List.of(new Unntaksperiode(vurdering.getPeriode().getFom(), vurdering.getPeriode().getTom(), vurdering.getBegrunnelse(), vurdering.getResultat()))
         );
     }
 
