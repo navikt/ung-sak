@@ -27,43 +27,47 @@ public class SykdomDokumentDto {
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String id;
-    
+
     @JsonProperty(value = "type")
     @Valid
     private SykdomDokumentType type;
-    
+
     @JsonProperty(value = "benyttet")
     @Valid
     private boolean benyttet;
-    
+
     @JsonProperty(value = "annenPartErKilde")
     @Valid
     private boolean annenPartErKilde;
-    
+
     @JsonProperty(value = "datert")
     @Valid
     private LocalDate datert;
-    
+
     @JsonProperty(value = "fremhevet")
     @Valid
     private boolean fremhevet;
+
+    @JsonProperty(value = "harInfoSomIkkeKanPunsjes")
+    private boolean harInfoSomIkkeKanPunsjes;
 
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
     private List<ResourceLink> links = new ArrayList<>();
-    
+
     public SykdomDokumentDto(String id, SykdomDokumentType type, boolean benyttet,
-            boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
-            List<ResourceLink> links) {
+                             boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
+                             boolean harInfoSomIkkeKanPunsjes, List<ResourceLink> links) {
         this.id = id;
         this.type = type;
         this.benyttet = benyttet;
         this.annenPartErKilde = annenPartErKilde;
         this.datert = datert;
         this.fremhevet = fremhevet;
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
         this.links = links;
     }
-    
-    
+
+
 }

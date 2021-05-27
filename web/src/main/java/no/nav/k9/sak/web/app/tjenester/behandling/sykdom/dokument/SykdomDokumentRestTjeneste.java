@@ -349,6 +349,7 @@ public class SykdomDokumentRestTjeneste {
             informasjon,
             behandling.getUuid(),
             behandling.getFagsak().getSaksnummer(),
+            false,
             sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
             getCurrentUserId(),
             nå);

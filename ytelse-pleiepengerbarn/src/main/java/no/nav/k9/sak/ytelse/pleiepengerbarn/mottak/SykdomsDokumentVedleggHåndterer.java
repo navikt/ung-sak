@@ -48,7 +48,7 @@ public class SykdomsDokumentVedleggHåndterer {
         this.sykdomVurderingRepository = sykdomVurderingRepository;
     }
 
-    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt) {
+    void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -70,7 +70,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 .dato()
                 .datotype());
         var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        
+
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
@@ -79,7 +79,7 @@ public class SykdomsDokumentVedleggHåndterer {
             final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
                     && journalpost.getKanal() == Kanal.NAV_NO
                     && Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode().equals(dokumentInfo.getBrevkode());
-            final SykdomDokumentType type = erDigitalPleiepengerSyktBarnSøknad ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+            final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
             final LocalDate datert = erDigitalPleiepengerSyktBarnSøknad ? mottattDato.toLocalDate() : null;
             final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
                 type,
@@ -94,11 +94,12 @@ public class SykdomsDokumentVedleggHåndterer {
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
+                harInfoSomIkkeKanPunsjes,
                 sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);
             sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
-            
+
             hoveddokument = false;
         }
 
