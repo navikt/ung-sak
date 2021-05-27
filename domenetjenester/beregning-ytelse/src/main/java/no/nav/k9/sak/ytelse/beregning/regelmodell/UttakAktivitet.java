@@ -19,7 +19,7 @@ public class UttakAktivitet {
         this.utbetalingsgrad = Objects.requireNonNull(utbetalingsgrad, "utbetalingsgrad");
         this.arbeidsforhold = arbeidsforhold;
         this.type = type;
-        if (type == UttakArbeidType.FRILANSER || type == UttakArbeidType.ARBEIDSTAKER) {
+        if (type == UttakArbeidType.FRILANSER) {
             Objects.requireNonNull(arbeidsforhold, "Krever arbeidsforhold for type " + type);
         }
         if (type == UttakArbeidType.FRILANSER && !arbeidsforhold.erFrilanser() || type != UttakArbeidType.FRILANSER && arbeidsforhold != null && arbeidsforhold.erFrilanser()) {
