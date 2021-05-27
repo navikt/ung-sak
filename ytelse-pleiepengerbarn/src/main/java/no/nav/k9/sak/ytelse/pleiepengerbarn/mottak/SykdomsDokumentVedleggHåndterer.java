@@ -79,7 +79,7 @@ public class SykdomsDokumentVedleggHåndterer {
             final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
                     && journalpost.getKanal() == Kanal.NAV_NO
                     && Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode().equals(dokumentInfo.getBrevkode());
-            final SykdomDokumentType type = erDigitalPleiepengerSyktBarnSøknad ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+            final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
             final LocalDate datert = erDigitalPleiepengerSyktBarnSøknad ? mottattDato.toLocalDate() : null;
             final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
                 type,

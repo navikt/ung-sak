@@ -113,7 +113,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
         for (Journalpost journalpost : søknad.getJournalposter()) {
             boolean journalpostHarInformasjonSomIkkeKanPunsjes = false;
-            boolean journalpostHarMedisinskeOpplysninger = false;
+            boolean journalpostHarMedisinskeOpplysninger = true;
             if (journalpost.getInneholderInfomasjonSomIkkeKanPunsjes() != null) {
                 journalpostHarInformasjonSomIkkeKanPunsjes = journalpost.getInneholderInfomasjonSomIkkeKanPunsjes();
             }
@@ -130,7 +130,6 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 journalpostHarMedisinskeOpplysninger);
         }
 
-
         Optional<Journalpost> journalpost = søknad.getJournalposter()
             .stream()
             .filter(j -> j.getJournalpostId().equals(journalpostId.getVerdi()))
@@ -142,7 +141,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),
                 false,
-                false);
+                true);
         }
     }
 
