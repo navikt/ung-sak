@@ -267,7 +267,14 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     /** Hvilke ytelser som skal sjekkes mot overlapp */
     private static final Map<FagsakYtelseType, Set<FagsakYtelseType>> OVERLAPPSJEKK_RELATERT_YTELSE = Map.of(
-        PLEIEPENGER_SYKT_BARN, Set.of(SYKEPENGER),
+        PLEIEPENGER_SYKT_BARN, Set.of(
+            DAGPENGER,
+            SYKEPENGER,
+            PLEIEPENGER_NÆRSTÅENDE,
+            OMSORGSPENGER,
+            OPPLÆRINGSPENGER,
+            FORELDREPENGER,
+            SVANGERSKAPSPENGER),
         OMSORGSPENGER, Set.of(SYKEPENGER)
     );
 
