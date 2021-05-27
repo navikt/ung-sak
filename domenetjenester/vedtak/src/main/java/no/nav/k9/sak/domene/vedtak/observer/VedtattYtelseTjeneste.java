@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
@@ -19,30 +21,34 @@ import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
+import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
-
+    private Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester;
 
     public VedtattYtelseTjeneste() {
     }
 
     @Inject
-    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository, BeregningsresultatRepository beregningsresultatRepository) {
+    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository, BeregningsresultatRepository beregningsresultatRepository,
+                                 @Any Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester) {
         this.vedtakRepository = vedtakRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
+        this.tilleggsopplysningerTjenester = tilleggsopplysningerTjenester;
     }
 
     public Ytelse genererYtelse(Behandling behandling) {
@@ -59,6 +65,9 @@ public class VedtattYtelseTjeneste {
         ytelse.setAktør(aktør);
         ytelse.setType(map(behandling.getFagsakYtelseType()));
         ytelse.setStatus(map(behandling.getFagsak().getStatus()));
+        finnTjeneste(behandling.getFagsakYtelseType())
+            .ifPresent(it -> ytelse.setTilleggsopplysninger(JacksonJsonConfig.toJson(it.generer(behandling),
+                PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
 
         ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));
         ytelse.setAnvist(map(berResultat.orElse(null)));
@@ -136,4 +145,7 @@ public class VedtattYtelseTjeneste {
         return typeKode;
     }
 
+    private Optional<YtelseTilleggsopplysningerTjeneste> finnTjeneste(FagsakYtelseType fagsakYtelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(tilleggsopplysningerTjenester, fagsakYtelseType);
+    }
 }
