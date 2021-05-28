@@ -53,7 +53,7 @@ public interface VilkårsPerioderTilVurderingTjeneste {
      * @param referanse behandlingen
      * @return set med perioder
      */
-    default NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+    default NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         return new TreeSet<>();
     }
 

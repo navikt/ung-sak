@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -19,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -31,6 +34,9 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     public static final String TASKNAME = "behandlingskontroll.opprettRevurderingEllerDiff";
     public static final String BEHANDLING_ÅRSAK = "behandlingArsak";
+    public static final String PERIODE_FOM = "fom";
+    public static final String PERIODE_TOM = "tom";
+
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -63,13 +69,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
+        var periode = utledPeriode(behandlingÅrsakType, prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
                 var origBehandling = sisteVedtak.get();
-                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, periode, origBehandling.getBehandlendeOrganisasjonsEnhet());
                 log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
             } else {
@@ -83,9 +90,34 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
-            BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
+            BehandlingÅrsak.builder(behandlingÅrsakType).medPeriode(periode).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
+        }
+    }
+
+    private DatoIntervallEntitet utledPeriode(BehandlingÅrsakType årsakType, ProsessTaskData prosessTaskData) {
+        if (!BehandlingÅrsakType.G_REGULERING.equals(årsakType)) {
+            return null;
+        }
+
+        var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM));
+        var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM));
+
+        if (fom == null && tom == null) {
+            return null;
+        }
+        validerPeriode(fom, tom);
+
+        return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+    }
+
+    private void validerPeriode(LocalDate fom, LocalDate tom) {
+        if (fom == null && tom != null) {
+            throw new IllegalStateException("Ugyldig datorange, fom er null men ikke tom");
+        }
+        if (tom == null && fom != null) {
+            throw new IllegalStateException("Ugyldig datorange, tom er null men ikke fom");
         }
     }
 

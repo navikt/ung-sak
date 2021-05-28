@@ -16,10 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -115,6 +117,9 @@ public class EndringsresultatSjekker {
 
         // Del 1: Finn diff mellom grunnlagets id før og etter oppdatering
         EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
+        if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.G_REGULERING)) {
+            idSnapshotNå.leggTil(EndringsresultatSnapshot.medSnapshot(BehandlingÅrsak.class, behandlingId));
+        }
         EndringsresultatDiff idDiff = idSnapshotNå.minus(snapshotFør);
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)

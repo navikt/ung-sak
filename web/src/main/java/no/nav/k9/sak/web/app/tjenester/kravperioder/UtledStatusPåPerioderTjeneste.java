@@ -13,6 +13,7 @@ import javax.enterprise.context.Dependent;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Periode;
@@ -30,7 +32,7 @@ public class UtledStatusPåPerioderTjeneste {
     public StatusForPerioderPåBehandling utled(Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                               NavigableSet<DatoIntervallEntitet> revurderingPerioderFraAndreParter) {
+                                               NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
         var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
@@ -54,7 +56,7 @@ public class UtledStatusPåPerioderTjeneste {
             tidslinje = tidslinje.combine(linje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
-            .map(entry -> new LocalDateSegment<>(entry.toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.REVURDERER_ENDRING_FRA_ANNEN_PART))))
+            .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(mapFra(entry.getÅrsak())))))
             .collect(Collectors.toList()));
 
         tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
@@ -132,8 +134,8 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,
-                                                                                                                 Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
-                                                                                                                 NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+                                                                                                                                                  Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
+                                                                                                                                                  NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return kravdokumenterMedPeriode.entrySet()
             .stream()
             .filter(it -> kravdokumenter.stream()
@@ -148,5 +150,15 @@ public class UtledStatusPåPerioderTjeneste {
             .filter(it -> kravdokumenter.stream()
                 .anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .collect(Collectors.toSet());
+    }
+
+    private ÅrsakTilVurdering mapFra(BehandlingÅrsakType type) {
+        if (type == BehandlingÅrsakType.G_REGULERING) {
+            return ÅrsakTilVurdering.G_REGULERING;
+        }
+        if (type == BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) {
+            return ÅrsakTilVurdering.REVURDERER_ENDRING_FRA_ANNEN_PART;
+        }
+        throw new IllegalArgumentException("Ukjent type " + type);
     }
 }

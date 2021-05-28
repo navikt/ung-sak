@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @FagsakYtelseTypeRef
@@ -59,8 +60,12 @@ public class RevurderingTjeneste {
     }
 
     public Behandling opprettAutomatiskRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+        return opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, null, enhet);
+    }
+
+    public Behandling opprettAutomatiskRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, DatoIntervallEntitet periode, OrganisasjonsEnhet enhet) {
         validerTilstand(origBehandling);
-        var revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, false, enhet);
+        var revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, periode, false, enhet);
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedAutomatiskOpprettelse(origBehandling, revurdering);
@@ -69,10 +74,14 @@ public class RevurderingTjeneste {
     }
 
     private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, boolean manueltOpprettet, OrganisasjonsEnhet enhet) {
+        return opprettRevurdering(origBehandling, revurderingsÅrsak, null, manueltOpprettet, enhet);
+    }
+
+    private Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, DatoIntervallEntitet periode, boolean manueltOpprettet, OrganisasjonsEnhet enhet) {
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
         // Opprett revurderingsbehandling
-        Behandling revurdering = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.REVURDERING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
+        Behandling revurdering = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.REVURDERING, revurderingsÅrsak, periode, origBehandling, manueltOpprettet, enhet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
 
