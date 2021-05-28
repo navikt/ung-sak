@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -48,18 +47,21 @@ class MapFraUttaksplan {
     }
 
     private static Arbeidsforhold buildArbeidsforhold(UttakArbeidType type, Utbetalingsgrader data) {
-        if (Objects.equals(type, UttakArbeidType.ARBEIDSTAKER)) {
-            var arb = data.getArbeidsforhold();
-            final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
-            if (arb.getOrganisasjonsnummer() != null) {
-                arbeidsforholdBuilder.medOrgnr(arb.getOrganisasjonsnummer());
-            } else if (arb.getAktørId() != null) {
-                arbeidsforholdBuilder.medAktørId(arb.getAktørId());
-            }
-            return arbeidsforholdBuilder.build();
+        switch (type) {
+            case ARBEIDSTAKER:
+                var arb = data.getArbeidsforhold();
+                final Arbeidsforhold.Builder arbeidsforholdBuilder = Arbeidsforhold.builder();
+                if (arb.getOrganisasjonsnummer() != null) {
+                    arbeidsforholdBuilder.medOrgnr(arb.getOrganisasjonsnummer());
+                } else if (arb.getAktørId() != null) {
+                    arbeidsforholdBuilder.medAktørId(arb.getAktørId());
+                }
+                return arbeidsforholdBuilder.build();
+            case FRILANSER:
+                return Arbeidsforhold.frilansArbeidsforhold();
+            default:
+                return null;
         }
-
-        return null;
     }
 
     private static LocalDateTimeline<UttaksperiodeInfo> getTimeline(Uttaksplan uttaksplan) {
