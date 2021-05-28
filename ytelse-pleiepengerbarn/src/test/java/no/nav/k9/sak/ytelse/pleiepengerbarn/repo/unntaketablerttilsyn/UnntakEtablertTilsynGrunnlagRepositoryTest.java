@@ -12,13 +12,14 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,8 +38,8 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
 
     @Test
     void lagre_og_hent_igjen() {
-        var behandlingId = opprettBehandling(opprettFagsak());
-        var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01", behandlingId);
+        var behandlingId = opprettBehandling(opprettFagsak("101"));
+        var nyttBeredskap = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-01-01/2020-02-01"));
 
         var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
 
@@ -61,8 +62,8 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
 
     @Test
     void lagre_oppdatere_og_hent_igjen() {
-        var behandlingId = opprettBehandling(opprettFagsak());
-        var nyttBeredskap = lagUnntakEtablertTilsyn("2020-01-01", "2020-02-01", behandlingId);
+        var behandlingId = opprettBehandling(opprettFagsak("201"));
+        var nyttBeredskap = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-01-01/2020-02-01"));
 
         var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
 
@@ -82,7 +83,7 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(beredskap.getBeskrivelser().get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-02-01")));
         assertThat(beredskap.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
 
-        var nattevåk = lagUnntakEtablertTilsyn("2020-03-01", "2020-04-01", behandlingId);
+        var nattevåk = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-03-01/2020-04-01"));
 
         uetForPleietrengende.medNattevåk(nattevåk);
         grunnlagRepo.lagre(behandlingId, new UnntakEtablertTilsynForPleietrengende(
@@ -109,13 +110,63 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         assertThat(nyNattevåk.getBeskrivelser().get(0).getKildeBehandlingId()).isEqualTo(behandlingId);
     }
 
-    private UnntakEtablertTilsyn lagUnntakEtablertTilsyn(String fom, String tom, Long kildeBehandlingId) {
-        var perioder = List.of(
-            periode(LocalDate.parse(fom), LocalDate.parse(tom), "DU skal få.", Resultat.OPPFYLT)
-        );
-        var beskrivelser = List.of(
-            beskrivelse("Jeg søker.", LocalDate.parse(fom), LocalDate.parse(tom), kildeBehandlingId)
-        );
+
+    @Test
+    void skal_finne_sist_oppdatert_grunnlag_for_pleietrengende() throws InterruptedException {
+
+        { // sak fra søker 1 for pleietrengende 456
+            var behandlingId = opprettBehandling(opprettFagsak("301"));
+            var nyttBeredskap = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-01-01/2020-01-31"));
+
+            var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
+
+            grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+            var grunnlag = grunnlagRepo.hent(behandlingId);
+        }
+
+        Thread.sleep(100);
+
+        { // sak fra søker 2 for pleietrengende 456
+            var behandlingId = opprettBehandling(opprettFagsak("302"));
+            var nyttBeredskap = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-01-01/2020-01-31"), new Periode("2020-02-01/2020-02-15"));
+
+            var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(456L), nyttBeredskap, null);
+
+            grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+            var grunnlag = grunnlagRepo.hent(behandlingId);
+        }
+
+        Thread.sleep(100);
+
+        { // sak fra søker 3 for pleietrengende 789
+            var behandlingId = opprettBehandling(opprettFagsak("303"));
+            var nyttBeredskap = lagUnntakEtablertTilsyn(behandlingId, new Periode("2020-01-01/2020-01-31"), new Periode("2020-02-01/2020-02-15"));
+
+            var uetForPleietrengende = new UnntakEtablertTilsynForPleietrengende(new AktørId(789L), nyttBeredskap, null);
+
+            grunnlagRepo.lagre(behandlingId, uetForPleietrengende);
+
+            var grunnlag = grunnlagRepo.hent(behandlingId);
+        }
+
+        var andreGrunnlag = grunnlagRepo.hentSisteForPleietrengende(new AktørId(456L));
+
+        System.out.println(andreGrunnlag);
+
+        //TODO: legge til asserts
+    }
+
+
+
+    private UnntakEtablertTilsyn lagUnntakEtablertTilsyn(Long kildeBehandlingId, Periode... søktePerioder) {
+        var perioder = Arrays.stream(søktePerioder).map(periode ->
+            periode(periode.getFom(), periode.getTom(), "DU skal få.", Resultat.OPPFYLT)
+        ).toList();
+        var beskrivelser = Arrays.stream(søktePerioder).map(periode ->
+            beskrivelse("Jeg søker.", periode.getFom(), periode.getTom(), kildeBehandlingId)
+        ).toList();
         return new UnntakEtablertTilsyn(perioder, beskrivelser);
     }
 
@@ -137,8 +188,8 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
             .medKildeBehandlingId(kildeBehandlingId);
     }
 
-    private Fagsak opprettFagsak() {
-        var fagsak = new Fagsak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), new Saksnummer("123"));
+    private Fagsak opprettFagsak(String saksnummer) {
+        var fagsak = new Fagsak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), new Saksnummer(saksnummer));
         fagsakRepo.opprettNy(fagsak);
         return fagsak;
     }
@@ -147,6 +198,5 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
         var behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();
         return behandlingRepo.lagreOgClear(behandling, new BehandlingLås(null));
     }
-
 
 }

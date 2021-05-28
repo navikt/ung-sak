@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.sak.typer.AktørId;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -68,6 +69,31 @@ public class UnntakEtablertTilsynGrunnlagRepository {
         query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+
+    public  Optional<UnntakEtablertTilsynForPleietrengende> hentSisteForPleietrengende(AktørId pleietrengendeAktørId) {
+        var query = entityManager.createQuery("""
+            select
+                p
+            from
+                UnntakEtablertTilsynGrunnlag g JOIN g.unntakEtablertTilsynForPleietrengende p
+            where
+                p.pleietrengendeAktørId = :pleietrengendeAktørId and
+                g.aktiv = true
+            order by
+                p.opprettetTidspunkt desc
+        """, UnntakEtablertTilsynForPleietrengende.class);
+
+        query.setParameter("pleietrengendeAktørId", pleietrengendeAktørId);
+
+        query.setMaxResults(1);
+
+        var resultat = query.getResultList();
+        if (resultat.size() > 0) {
+            return Optional.of(resultat.get(0));
+        }
+        return Optional.empty();
     }
 
 }
