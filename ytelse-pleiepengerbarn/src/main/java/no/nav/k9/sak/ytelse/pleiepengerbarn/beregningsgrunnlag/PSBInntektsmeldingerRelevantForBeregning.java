@@ -29,7 +29,8 @@ public class PSBInntektsmeldingerRelevantForBeregning implements Inntektsmelding
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         for (Inntektsmelding inntektsmelding : sortedIms) {
-            if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)) {
+            if (harIngenInntektsmeldingerForArbeidsforholdIdentifikatoren(inntektsmeldingene, inntektsmelding)
+                && inntektsmelding.getStartDatoPermisjon().isPresent()) {
                 inntektsmeldingene.add(inntektsmelding);
             } else if (harInntektsmeldingSomMatcherArbeidsforhold(inntektsmeldingene, inntektsmelding)
                 && skalErstatteEksisterendeInntektsmelding(inntektsmelding, inntektsmeldingene, vilkårsPeriode)) {
