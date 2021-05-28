@@ -2,8 +2,11 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -26,9 +29,9 @@ import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.felles.type.Journalpost;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
-import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarnValidator;
 
 @ApplicationScoped
@@ -65,7 +68,9 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
         var behandlingId = behandling.getId();
-        for (MottattDokument dokument : dokumenter) {
+
+        var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
+        for (MottattDokument dokument : sorterteDokumenter) {
             Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
@@ -75,6 +80,13 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
+    }
+
+    private LinkedHashSet<MottattDokument> sorterSøknadsdokumenter(Collection<MottattDokument> dokumenter) {
+        return dokumenter
+            .stream()
+            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**

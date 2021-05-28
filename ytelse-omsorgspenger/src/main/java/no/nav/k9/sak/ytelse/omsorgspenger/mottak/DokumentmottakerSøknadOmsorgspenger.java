@@ -3,10 +3,12 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
@@ -102,7 +104,8 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         Long behandlingId = behandling.getId();
         dokumentValidator.validerDokumenter(behandlingId, dokumenter);
 
-        for (MottattDokument dokument : dokumenter) {
+        var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
+        for (MottattDokument dokument : sorterteDokumenter) {
             Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
@@ -114,6 +117,12 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         }
     }
 
+    private LinkedHashSet<MottattDokument> sorterSøknadsdokumenter(Collection<MottattDokument> dokumenter) {
+        return dokumenter
+            .stream()
+            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
