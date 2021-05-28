@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.xml.bind.JAXBElement;
@@ -27,6 +28,7 @@ import no.seres.xsd.nav.inntektsmelding_m._20181211.NaturalytelseDetaljer;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Omsorgspenger;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.OpphoerAvNaturalytelseListe;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Periode;
+import no.seres.xsd.nav.inntektsmelding_m._20181211.PleiepengerPeriodeListe;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Refusjon;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.Skjemainnhold;
 import no.seres.xsd.nav.inntektsmelding_m._20181211.UtsettelseAvForeldrepenger;
@@ -116,6 +118,18 @@ public class MottattDokumentWrapperInntektsmelding extends MottattInntektsmeldin
         var arbeidsforhold = getSkjemaInnhold().getArbeidsforhold();
         if (arbeidsforhold != null) {
             return Optional.ofNullable(arbeidsforhold.getValue()).map(Arbeidsforhold::getFoersteFravaersdag).map(JAXBElement::getValue);
+        }
+        var pleiepengerPerioder = getSkjemaInnhold().getPleiepengerPerioder();
+        if (pleiepengerPerioder != null) {
+            return Optional.ofNullable(pleiepengerPerioder.getValue())
+                .map(PleiepengerPeriodeListe::getPeriode)
+                .orElseGet(List::of)
+                .stream()
+                .map(Periode::getFom)
+                .filter(Objects::nonNull)
+                .map(JAXBElement::getValue)
+                .filter(Objects::nonNull)
+                .min(LocalDate::compareTo);
         }
         return Optional.empty();
     }
