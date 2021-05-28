@@ -61,15 +61,16 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
     }
 
     @Inject
-    public DokumenterMedUstrukturerteDataRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository) {
+    public DokumenterMedUstrukturerteDataRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SafTjeneste safTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.safTjeneste = safTjeneste;
     }
 
     @GET
     @Path(FRITEKSTDOKUMENTER_PATH)
     @Operation(description = "Hent liste over dokumenter flagget med at de inneholder informasjon som ikke er/kan bli punsjet"
-        , tags = "totrinnskontroll"
+        , tags = "vedtak"
         , responses = {
             @ApiResponse(responseCode = "200",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
