@@ -46,13 +46,25 @@ public class SykdomDokumentRepository {
         return dokuments;
     }
 
+    public List<SykdomDokument> hentAlleDokumenterFor(UUID behandlingUUID) {
+        final TypedQuery<SykdomDokument> q = entityManager.createQuery(
+            "SELECT d From SykdomDokument as d "
+                + "where d.behandlingUuid = :behandlingUUID", SykdomDokument.class);
+
+        q.setParameter("behandlingUUID", behandlingUUID);
+
+        List<SykdomDokument> dokuments = q.getResultList();
+
+        return dokuments;
+    }
+
     public List<SykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende)
             .stream()
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
     }
-    
+
     public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS).collect(Collectors.toList());
     }
