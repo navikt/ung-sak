@@ -4,8 +4,15 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.feil.LogLevel.WARN;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
@@ -19,13 +26,25 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Provider;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -46,6 +65,7 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
@@ -61,9 +81,11 @@ import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -82,6 +104,8 @@ public class FordelRestTjeneste {
 
     private SøknadMottakTjenesteContainer søknadMottakere;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private PsbInfotrygdRepository psbInfotrygdRepository;
+    private AktørTjeneste aktørTjeneste;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
@@ -92,14 +116,64 @@ public class FordelRestTjeneste {
                               SafAdapter safAdapter,
                               FagsakTjeneste fagsakTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
-                              SøknadMottakTjenesteContainer søknadMottakere) {
+                              SøknadMottakTjenesteContainer søknadMottakere,
+                              PsbInfotrygdRepository psbInfotrygdRepository,
+                              AktørTjeneste aktørTjeneste) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
+        this.psbInfotrygdRepository= psbInfotrygdRepository;
+        this.aktørTjeneste = aktørTjeneste;
     }
+    
 
+    @POST
+    @Path("/psb-infotrygd/fnr")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Legger til fødselsnumre som skal rutes til Infotrygd for PSB.", summary = ("Legger til fødselsnumre som skal rutes til Infotrygd for PSB."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public Response leggTilPsbInfotrygdPerson(@Parameter(description = "Fødselsnumre (skilt med mellomrom eller linjeskift") @Valid PsbInfotrygdFødselsnumre fødselsnumre) {
+        final StringBuilder sb = new StringBuilder();
+        final var fødselsnummerliste = Arrays.asList(Objects.requireNonNull(fødselsnumre.getFødselsnumre(), "saksnumre").split("\\s+"));
+        for (var fnr : fødselsnummerliste) {
+            try {
+                final AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(fnr)).get();
+                psbInfotrygdRepository.lagre(aktørId);
+            } catch (RuntimeException e) {
+                sb.append("Feil for \"" + fnr + "\": " + e.toString() + "\n");
+            }
+        }
+        
+        if (sb.length() > 0) {
+            return Response.status(400, sb.toString()).build();
+        }
+        return Response.noContent().build();
+    }
+    
+    @POST
+    @Path("/psb-infotrygd/aktoer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Legger til aktør-IDer som skal rutes til Infotrygd for PSB.", summary = ("Legger til fødselsnumre som skal rutes til Infotrygd for PSB."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void leggTilPsbInfotrygdAktør(@Parameter(description = "Liste med aktør-IDer") @Valid AktørListeDto aktører) {
+        for (var aktørId : aktører.getAktører()) {
+            psbInfotrygdRepository.lagre(aktørId);
+        }
+    }
+    
+    @POST
+    @Path("/psb-infotrygd/finnes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personene.", summary = ("Sjekker om PSB-fordeling skal til Infotrygd for minst én av personene."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public boolean sjekkPsbInfotrygdPerson(@Parameter(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personen)") @Valid AktørListeDto aktører) {
+        return aktører.getAktører().stream().map(a -> psbInfotrygdRepository.finnes(a)).anyMatch(v -> v);
+    }
+    
     @POST
     @Path("/fagsak/opprett")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -350,4 +424,79 @@ public class FordelRestTjeneste {
         }
     }
 
+    public static class PsbInfotrygdFødselsnumre implements AbacDto {
+
+        @NotNull
+        @Pattern(regexp = "^[\\p{Alnum}\\s]+$", message = "PsbInfotrygdFødselsnumre [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+        private String fødselsnumre;
+
+        public PsbInfotrygdFødselsnumre() {
+            // empty ctor
+        }
+
+        public PsbInfotrygdFødselsnumre(@NotNull String fødselsnumre) {
+            this.fødselsnumre = fødselsnumre;
+        }
+
+        @NotNull
+        public String getFødselsnumre() {
+            return fødselsnumre;
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            return AbacDataAttributter.opprett();
+        }
+
+        @Provider
+        public static class PsbInfotrygdFødselsnumregMessageBodyReader implements MessageBodyReader<PsbInfotrygdFødselsnumre> {
+
+            @Override
+            public boolean isReadable(Class<?> type, Type genericType,
+                                      Annotation[] annotations, MediaType mediaType) {
+                return (type == PsbInfotrygdFødselsnumre.class);
+            }
+
+            @Override
+            public PsbInfotrygdFødselsnumre readFrom(Class<PsbInfotrygdFødselsnumre> type, Type genericType,
+                                                      Annotation[] annotations, MediaType mediaType,
+                                                      MultivaluedMap<String, String> httpHeaders,
+                                                      InputStream inputStream)
+                    throws IOException, WebApplicationException {
+                var sb = new StringBuilder(200);
+                try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(inputStream))) {
+                    sb.append(br.readLine()).append('\n');
+                }
+
+                return new PsbInfotrygdFødselsnumre(sb.toString());
+
+            }
+        }
+    }
+    
+    @JsonIgnoreProperties(ignoreUnknown = false)
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    public static class AktørListeDto implements AbacDto {
+
+        @JsonProperty(value = "aktører", required = true)
+        @NotNull
+        @Valid
+        @Size(max = 10000)
+        private List<AktørId> aktører;
+
+        public AktørListeDto() {
+            // empty ctor
+        }
+
+        public List<AktørId> getAktører() {
+            return aktører;
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            return AbacDataAttributter.opprett();
+        }
+    }
 }
