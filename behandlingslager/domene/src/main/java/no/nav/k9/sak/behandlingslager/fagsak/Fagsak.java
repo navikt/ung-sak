@@ -82,14 +82,6 @@ public class Fagsak extends BaseEntitet {
         // Hibernate
     }
 
-    private Fagsak(FagsakYtelseType ytelseType, AktørId søker) {
-        this(ytelseType, søker, null);
-    }
-
-    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer) {
-        this(ytelseType, søker, null, null, saksnummer, null, null);
-    }
-
     public Fagsak(FagsakYtelseType ytelseType, AktørId søker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
         Objects.requireNonNull(ytelseType, "ytelseType");
         this.ytelseType = ytelseType;
@@ -102,22 +94,20 @@ public class Fagsak extends BaseEntitet {
         setPeriode(fom, tom);
     }
 
-    public Fagsak(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer) {
-        this(ytelseType, bruker, saksnummer);
-        this.pleietrengendeAktørId = pleietrengende;
-        this.relatertPersonAktørId = relatertPerson;
-    }
-
+    /** Oppretter en default fagsak, med startdato fra i dag. */
+    @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker) {
-        return new Fagsak(ytelseType, bruker);
+        return new Fagsak(ytelseType, bruker, null, null, null, LocalDate.now(), null);
     }
 
+    /** Oppretter en default fagsak, med startdato fra i dag. */
+    @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer) {
-        return new Fagsak(ytelseType, bruker, saksnummer);
+        return new Fagsak(ytelseType, bruker, null, null, saksnummer, LocalDate.now(), null);
     }
 
-    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer) {
-        return new Fagsak(ytelseType, bruker, pleietrengende, relatertPerson, saksnummer);
+    public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+        return new Fagsak(ytelseType, bruker, null, null, saksnummer, fom, tom);
     }
 
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPerson, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
@@ -263,8 +253,8 @@ public class Fagsak extends BaseEntitet {
     }
 
     void setPeriode(LocalDate fom, LocalDate tom) {
-        if ((fom == null || fom.equals(Tid.TIDENES_BEGYNNELSE)) && (tom == null || tom.equals(Tid.TIDENES_ENDE))) {
-            throw new IllegalArgumentException(String.format("Støtter ikke evige saker: [%s, %s]", fom, tom));
+        if ((fom == null || fom.equals(Tid.TIDENES_BEGYNNELSE))) {
+            throw new IllegalArgumentException(String.format("Alle saker må angi en startdato: [%s, %s]", fom, tom));
         }
         this.periode = DatoIntervallEntitet.fra(fom, tom).toRange();
     }
