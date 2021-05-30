@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -40,6 +43,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private ProsessTriggereRepository prosessTriggereRepository;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
 
@@ -51,12 +55,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     public OpprettRevurderingEllerOpprettDiffTask(FagsakRepository fagsakRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   BehandlingLåsRepository behandlingLåsRepository,
+                                                  ProsessTriggereRepository prosessTriggereRepository,
                                                   FagsakLåsRepository fagsakLåsRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
     }
@@ -76,7 +82,10 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
                 var origBehandling = sisteVedtak.get();
-                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, periode, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                if (periode != null) {
+                    prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(behandlingÅrsakType, periode)));
+                }
                 log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
             } else {
@@ -90,14 +99,20 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
-            BehandlingÅrsak.builder(behandlingÅrsakType).medPeriode(periode).buildFor(behandling);
+            BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
+
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
+
+            // Legger til sist, ønsker diffen denne gir for å sette startpunkt
+            if (periode != null) {
+                prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(behandlingÅrsakType, periode)));
+            }
         }
     }
 
     private DatoIntervallEntitet utledPeriode(BehandlingÅrsakType årsakType, ProsessTaskData prosessTaskData) {
-        if (!BehandlingÅrsakType.G_REGULERING.equals(årsakType)) {
+        if (!BehandlingÅrsakType.RE_SATS_REGULERING.equals(årsakType)) {
             return null;
         }
 

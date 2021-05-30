@@ -153,7 +153,7 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private ÅrsakTilVurdering mapFra(BehandlingÅrsakType type) {
-        if (type == BehandlingÅrsakType.G_REGULERING) {
+        if (type == BehandlingÅrsakType.RE_SATS_REGULERING) {
             return ÅrsakTilVurdering.G_REGULERING;
         }
         if (type == BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) {

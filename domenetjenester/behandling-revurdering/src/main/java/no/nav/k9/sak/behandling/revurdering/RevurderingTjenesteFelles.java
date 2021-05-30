@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
 public class RevurderingTjenesteFelles {
@@ -42,17 +41,7 @@ public class RevurderingTjenesteFelles {
                                           Behandling opprinneligBehandling,
                                           boolean manueltOpprettet,
                                           OrganisasjonsEnhet enhet) {
-        return opprettNyBehandling(behandlingType, nyBehandlingÅrsakType, null, opprinneligBehandling, manueltOpprettet, enhet);
-    }
-
-    public Behandling opprettNyBehandling(BehandlingType behandlingType,
-                                          BehandlingÅrsakType nyBehandlingÅrsakType,
-                                          DatoIntervallEntitet periode,
-                                          Behandling opprinneligBehandling,
-                                          boolean manueltOpprettet,
-                                          OrganisasjonsEnhet enhet) {
         BehandlingÅrsak.Builder nyBehandlingÅrsak = BehandlingÅrsak.builder(nyBehandlingÅrsakType)
-            .medPeriode(periode)
             .medManueltOpprettet(manueltOpprettet);
         return Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlendeEnhet(enhet)

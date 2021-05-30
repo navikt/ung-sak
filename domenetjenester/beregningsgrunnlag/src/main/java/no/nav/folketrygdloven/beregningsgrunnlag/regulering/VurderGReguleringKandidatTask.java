@@ -56,7 +56,7 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
             log.info("Fagsaken skal g-reguleres");
             var data = new ProsessTaskData(BEHANDLINGSKONTROLL_OPPRETT_REVURDERING_ELLER_DIFF_TASK);
             data.setFagsakId(prosessTaskData.getFagsakId());
-            data.setProperty(BEHANDLING_ARSAK, BehandlingÅrsakType.G_REGULERING.getKode());
+            data.setProperty(BEHANDLING_ARSAK, BehandlingÅrsakType.RE_SATS_REGULERING.getKode());
             data.setProperty(PERIODE_FOM, prosessTaskData.getPropertyValue(PERIODE_FOM));
             data.setProperty(PERIODE_TOM, prosessTaskData.getPropertyValue(PERIODE_TOM));
 

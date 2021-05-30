@@ -64,8 +64,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
 
     RE_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK", "Endring fra annen omsorgsperson"),
 
-    G_REGULERING("G_REGULERING", "G-regulering"),
-
     // Unntaksbehandling
     UNNT_GENERELL("UNNT_GENERELL", "Manuell saksbehandling"),
 

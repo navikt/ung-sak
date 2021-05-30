@@ -16,12 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -36,6 +34,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
+import no.nav.k9.sak.trigger.ProsessTriggere;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 
 @Dependent
 public class EndringsresultatSjekker {
@@ -47,6 +47,7 @@ public class EndringsresultatSjekker {
     private Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
+    private ProsessTriggereRepository prosessTriggereRepository;
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
@@ -65,6 +66,7 @@ public class EndringsresultatSjekker {
                                    @Any Instance<EndringStartpunktUtleder> startpunktUtledere,
                                    @Any Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                   ProsessTriggereRepository prosessTriggereRepository,
                                    BehandlingRepositoryProvider provider) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.medlemTjeneste = medlemTjeneste;
@@ -72,6 +74,7 @@ public class EndringsresultatSjekker {
         this.startpunktUtledere = startpunktUtledere;
         this.søknadsDokumentTjenester = søknadsDokumentTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
         this.opptjeningRepository = provider.getOpptjeningRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.behandlingRepository = provider.getBehandlingRepository();
@@ -86,6 +89,7 @@ public class EndringsresultatSjekker {
         EndringsresultatSnapshot snapshot = EndringsresultatSnapshot.opprett();
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(medlemTjeneste.finnAktivGrunnlagId(behandlingId));
+        snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId));
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (inkludererBeregning(behandling)) {
@@ -117,9 +121,6 @@ public class EndringsresultatSjekker {
 
         // Del 1: Finn diff mellom grunnlagets id før og etter oppdatering
         EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
-        if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.G_REGULERING)) {
-            idSnapshotNå.leggTil(EndringsresultatSnapshot.medSnapshot(BehandlingÅrsak.class, behandlingId));
-        }
         EndringsresultatDiff idDiff = idSnapshotNå.minus(snapshotFør);
 
         // Del 2: Transformer diff på grunnlagets id til diff på grunnlagets sporede endringer (@ChangeTracked)
@@ -134,6 +135,10 @@ public class EndringsresultatSjekker {
             idDiff.hentDelresultat(MedlemskapAggregat.class)
                 .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> medlemTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
         });
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, ProsessTriggere.class, behandling.getFagsakYtelseType())
+            .flatMap(u -> idDiff.hentDelresultat(ProsessTriggere.class))
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> prosessTriggereRepository.diffResultat(idEndring, kunSporedeEndringer)));
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             if (inkludererBeregning(behandling)) {

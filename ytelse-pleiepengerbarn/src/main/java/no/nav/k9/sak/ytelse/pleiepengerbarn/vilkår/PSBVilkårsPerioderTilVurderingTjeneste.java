@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,7 +21,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
@@ -38,6 +36,9 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
+import no.nav.k9.sak.trigger.ProsessTriggere;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -60,6 +61,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
+    private ProsessTriggereRepository prosessTriggereRepository;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
@@ -72,6 +74,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
+                                                  ProsessTriggereRepository prosessTriggereRepository,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter) {
@@ -80,6 +83,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
@@ -109,11 +113,12 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             var berørtePerioder = utledUtvidetPeriode(referanse);
             perioderTilVurdering.addAll(berørtePerioder);
         }
-        perioderTilVurdering.addAll(behandling.getBehandlingÅrsaker()
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingId);
+        perioderTilVurdering.addAll(prosessTriggere.map(ProsessTriggere::getTriggere)
+            .orElseGet(Set::of)
             .stream()
-            .map(BehandlingÅrsak::getPeriode)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList()));
+            .map(Trigger::getPeriode)
+            .collect(Collectors.toSet()));
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
@@ -188,11 +193,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                 .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
                 .collect(Collectors.toSet()));
         }
-        periodeMedÅrsaks.addAll(behandling.getBehandlingÅrsaker()
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
+        periodeMedÅrsaks.addAll(prosessTriggere.map(ProsessTriggere::getTriggere)
+            .orElseGet(Set::of)
             .stream()
-            .filter(it -> Objects.nonNull(it.getPeriode()))
-            .map(it -> new PeriodeMedÅrsak(it.getPeriode(), it.getBehandlingÅrsakType()))
+            .map(it -> new PeriodeMedÅrsak(it.getPeriode(), it.getÅrsak()))
             .collect(Collectors.toSet()));
+
         return periodeMedÅrsaks;
     }
 

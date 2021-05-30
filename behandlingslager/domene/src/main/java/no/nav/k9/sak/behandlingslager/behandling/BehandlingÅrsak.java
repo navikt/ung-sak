@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,7 +18,6 @@ import javax.persistence.Version;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.kodeverk.BehandlingÅrsakKodeverdiConverter;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "BehandlingÅrsak")
 @Table(name = "BEHANDLING_ARSAK")
@@ -37,9 +35,6 @@ public class BehandlingÅrsak extends BaseEntitet {
     @Column(name="behandling_arsak_type", nullable = false)
     private BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.UDEFINERT;
 
-    @Embedded
-    private DatoIntervallEntitet periode;
-
     @Column(name = "manuelt_opprettet", nullable = false)
     private boolean manueltOpprettet = false;
 
@@ -53,10 +48,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
     public BehandlingÅrsakType getBehandlingÅrsakType() {
         return behandlingÅrsakType;
-    }
-
-    public DatoIntervallEntitet getPeriode() {
-        return periode;
     }
 
     public boolean erManueltOpprettet() {
@@ -75,7 +66,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
         private List<BehandlingÅrsakType> behandlingÅrsakTyper;
         private boolean manueltOpprettet;
-        private DatoIntervallEntitet periode;
 
         public Builder(List<BehandlingÅrsakType> behandlingÅrsakTyper) {
             Objects.requireNonNull(behandlingÅrsakTyper, "behandlingÅrsakTyper");
@@ -84,11 +74,6 @@ public class BehandlingÅrsak extends BaseEntitet {
 
         public Builder medManueltOpprettet(boolean manueltOpprettet) {
             this.manueltOpprettet = manueltOpprettet;
-            return this;
-        }
-
-        public Builder medPeriode(DatoIntervallEntitet periode) {
-            this.periode = periode;
             return this;
         }
 
@@ -104,13 +89,11 @@ public class BehandlingÅrsak extends BaseEntitet {
                     // Oppdater eksisterende (UPDATE)
                     BehandlingÅrsak årsak = eksisterende.get();
                     årsak.manueltOpprettet = this.manueltOpprettet;
-                    årsak.periode = this.periode;
                 } else {
                     // Opprett ny (INSERT)
                     BehandlingÅrsak behandlingÅrsak = new BehandlingÅrsak();
                     behandlingÅrsak.behandlingÅrsakType = årsakType;
                     behandlingÅrsak.manueltOpprettet = this.manueltOpprettet;
-                    behandlingÅrsak.periode = this.periode;
                     nyeÅrsaker.add(behandlingÅrsak);
                 }
             }
