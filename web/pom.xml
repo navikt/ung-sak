@@ -146,7 +146,7 @@
             <artifactId>k9-ldap-klient</artifactId>
         </dependency>
 
-        <!-- REST +  -->
+        <!-- REST + -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
@@ -156,8 +156,12 @@
             <artifactId>jersey-cdi1x-servlet</artifactId>
         </dependency>
         <dependency>
-             <groupId>org.glassfish.jersey.media</groupId>
+            <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-bean-validation</artifactId>
         </dependency>
 
         <!-- CDI -->
@@ -276,6 +280,23 @@
             <artifactId>swagger-ui</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-testutilities</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles.sikkerhet</groupId>
+            <artifactId>k9-felles-sikkerhet-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -302,23 +323,6 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>swagger-ui</artifactId>
                 <version>${swagger-ui.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.k9.felles</groupId>
-                <artifactId>k9-felles-testutilities</artifactId>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.felles</groupId>
-                <artifactId>felles-sikkerhet-testutilities</artifactId>
-                <scope>test</scope>
             </dependency>
 
         </dependencies>
@@ -379,18 +383,18 @@
                 </executions>
             </plugin>
             <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-							<mainClass>no.nav.k9.sak.web.server.jetty.JettyServer</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+                            <mainClass>no.nav.k9.sak.web.server.jetty.JettyServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

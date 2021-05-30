@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
@@ -51,6 +52,8 @@ public class ApplicationConfig extends ResourceConfig {
         } catch (OpenApiConfigurationException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+
+        property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 
         register(OpenApiResource.class);
 

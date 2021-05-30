@@ -100,12 +100,6 @@
                 <groupId>no.nav.k9.felles.sikkerhet</groupId>
                 <artifactId>k9-felles-sikkerhet</artifactId>
                 <version>${felles.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.json</groupId>
-                        <artifactId>javax.json-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.felles.oidc-token</groupId>
