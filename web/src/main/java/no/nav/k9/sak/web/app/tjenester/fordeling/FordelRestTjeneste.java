@@ -28,7 +28,6 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -40,11 +39,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -67,6 +62,7 @@ import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
@@ -158,7 +154,7 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Legger til aktør-IDer som skal rutes til Infotrygd for PSB.", summary = ("Legger til fødselsnumre som skal rutes til Infotrygd for PSB."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void leggTilPsbInfotrygdAktør(@Parameter(description = "Liste med aktør-IDer") @Valid AktørListeDto aktører) {
+    public void leggTilPsbInfotrygdAktør(@Parameter(description = "Liste med aktør-IDer") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
         for (var aktørId : aktører.getAktører()) {
             psbInfotrygdRepository.lagre(aktørId);
         }
@@ -170,7 +166,7 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personene.", summary = ("Sjekker om PSB-fordeling skal til Infotrygd for minst én av personene."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public boolean sjekkPsbInfotrygdPerson(@Parameter(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personen)") @Valid AktørListeDto aktører) {
+    public boolean sjekkPsbInfotrygdPerson(@Parameter(description = "Sjekker om PSB-fordeling skal til Infotrygd for minst én av personen)") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
         return aktører.getAktører().stream().map(a -> psbInfotrygdRepository.finnes(a)).anyMatch(v -> v);
     }
     
@@ -472,31 +468,6 @@ public class FordelRestTjeneste {
                 return new PsbInfotrygdFødselsnumre(sb.toString());
 
             }
-        }
-    }
-    
-    @JsonIgnoreProperties(ignoreUnknown = false)
-    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-    @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static class AktørListeDto implements AbacDto {
-
-        @JsonProperty(value = "aktører", required = true)
-        @NotNull
-        @Valid
-        @Size(max = 10000)
-        private List<AktørId> aktører;
-
-        public AktørListeDto() {
-            // empty ctor
-        }
-
-        public List<AktørId> getAktører() {
-            return aktører;
-        }
-
-        @Override
-        public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett();
         }
     }
 }
