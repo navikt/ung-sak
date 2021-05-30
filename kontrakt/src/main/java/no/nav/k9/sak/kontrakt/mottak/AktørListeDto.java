@@ -27,6 +27,10 @@ public class AktørListeDto {
     public AktørListeDto() {
         // empty ctor
     }
+    
+    public AktørListeDto(List<AktørId> aktører) {
+        this.aktører = aktører;
+    }
 
     public List<AktørId> getAktører() {
         return aktører;
