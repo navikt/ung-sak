@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -125,9 +124,6 @@ public class SykdomsDokumentVedleggHåndterer {
                 .filter(d -> d.getDatotype() == datotype)
                 .findFirst()
                 .orElseThrow()
-                .getDato()
-                .toInstant()
-                .atZone(ZoneId.of("Europe/Oslo"))
-                .toLocalDateTime();
+                .getDato();
     }
 }
