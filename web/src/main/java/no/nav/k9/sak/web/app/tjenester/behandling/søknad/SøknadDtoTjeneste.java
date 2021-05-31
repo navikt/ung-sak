@@ -183,26 +183,13 @@ public class SøknadDtoTjeneste {
 
     private static OppgittTilknytningDto mapFra(MedlemskapOppgittTilknytningEntitet oppgittTilknytning) {
         if (oppgittTilknytning != null) {
-            return new OppgittTilknytningDto(
-                oppgittTilknytning.isOppholdNå(),
-                oppgittTilknytning.isOppholdINorgeSistePeriode(),
-                oppgittTilknytning.isOppholdINorgeNestePeriode(),
-                mapFør(oppgittTilknytning.getOpphold()),
-                mapEtter(oppgittTilknytning.getOpphold()));
+            return new OppgittTilknytningDto(mapOpphold(oppgittTilknytning.getOpphold()));
         }
         return null;
     }
 
-    private static List<UtlandsoppholdDto> mapFør(Set<MedlemskapOppgittLandOppholdEntitet> opphold) {
+    private static List<UtlandsoppholdDto> mapOpphold(Set<MedlemskapOppgittLandOppholdEntitet> opphold) {
         return mapFraMedlemskapOppgttLandOpphold(opphold.stream()
-            .filter(o -> o.isTidligereOpphold())
-            .filter(o -> !o.getLand().equals(Landkoder.NOR))
-            .collect(Collectors.toList()));
-    }
-
-    private static List<UtlandsoppholdDto> mapEtter(Set<MedlemskapOppgittLandOppholdEntitet> utlandsopphold) {
-        return mapFraMedlemskapOppgttLandOpphold(utlandsopphold.stream()
-            .filter(o -> !o.isTidligereOpphold())
             .filter(o -> !o.getLand().equals(Landkoder.NOR))
             .collect(Collectors.toList()));
     }

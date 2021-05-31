@@ -767,14 +767,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder();
         }
         MedlemskapOppgittLandOppholdEntitet oppholdNorgeSistePeriode = new MedlemskapOppgittLandOppholdEntitet.Builder()
-            .erTidligereOpphold(true)
             .medLand(Landkoder.NOR)
             .medPeriode(
                 LocalDate.now().minusYears(1),
                 LocalDate.now())
             .build();
         MedlemskapOppgittLandOppholdEntitet oppholdNorgeNestePeriode = new MedlemskapOppgittLandOppholdEntitet.Builder()
-            .erTidligereOpphold(false)
             .medLand(Landkoder.NOR)
             .medPeriode(
                 LocalDate.now(),

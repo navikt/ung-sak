@@ -162,7 +162,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         validerStøttetVariant(søknadInnhold);
 
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
-        lagreMedlemskapinfo(behandlingId, søknadInnhold, journalpostId, forsendelseMottatt, søker);
+        lagreMedlemskapinfo(behandlingId, søknadInnhold, forsendelseMottatt);
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
     }
 
@@ -210,17 +210,14 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
-    private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, LocalDate forsendelseMottatt, Søker søker) {
+    private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
         var bosteder = ytelse.getBosteder();
         if (bosteder != null) {
-            var førsteSøkteFraværsdag = finnFørsteSøkteFraværsdag(ytelse, journalpostId, søker);
             bosteder.getPerioder().forEach((periode, opphold) -> {
-                var tidligereOpphold = periode.getFraOgMed().isBefore(førsteSøkteFraværsdag);
                 oppgittTilknytningBuilder
                     .leggTilOpphold(new MedlemskapOppgittLandOppholdEntitet.Builder()
-                        .erTidligereOpphold(tidligereOpphold)
                         .medLand(finnLandkode(opphold.getLand().getLandkode()))
                         .medPeriode(
                             Objects.requireNonNull(periode.getFraOgMed()),
@@ -229,16 +226,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             });
         }
         medlemskapRepository.lagreOppgittTilkytning(behandlingId, oppgittTilknytningBuilder.build());
-    }
-
-    private LocalDate finnFørsteSøkteFraværsdag(OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, Søker søker) {
-        var søktFraværFraSøknad = mapper.map(ytelse, søker, journalpostId);
-        return søktFraværFraSøknad.stream()
-            .map(OppgittFraværPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getFomDato)
-            .sorted()
-            .findFirst()
-            .orElseThrow();
     }
 
     private Språkkode getSpråkValg(Språk språk) {

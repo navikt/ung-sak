@@ -8,12 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.medlem.MedlemskapDekningType;
@@ -28,8 +23,6 @@ import no.nav.k9.sak.domene.medlem.MedlemskapPerioderTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 
 public class AvklarOmErBosatt {
-    //Setter den til 364 for å unngå skuddårproblemer, (365 og 366 blir da "større" enn et år)
-    private static final int ANTALL_DAGER_I_ÅRET = 364;
 
     private PersonopplysningTjeneste personopplysningTjeneste;
     private MedlemskapRepository medlemskapRepository;
@@ -45,9 +38,7 @@ public class AvklarOmErBosatt {
 
     public Optional<MedlemResultat> utled(Behandling behandling, LocalDate vurderingsdato) {
         Long behandlingId = behandling.getId();
-        if (søkerHarSkalOppholdeSegIUtlandetImerEnn12M(behandlingId, vurderingsdato)) {
-            return Optional.of(MedlemResultat.AVKLAR_OM_ER_BOSATT);
-        } else if (harBrukerTilknytningHjemland(behandlingId) == NEI) {
+        if (harBrukerOppgittTilknytningHjemland(behandlingId) == NEI) {
             return Optional.of(MedlemResultat.AVKLAR_OM_ER_BOSATT);
         } else if (harBrukerUtenlandskPostadresseITps(behandling, vurderingsdato) == NEI) {
             return Optional.empty();
@@ -57,41 +48,6 @@ public class AvklarOmErBosatt {
             } else {
                 return Optional.empty();
             }
-        }
-    }
-
-    private boolean søkerHarSkalOppholdeSegIUtlandetImerEnn12M(Long behandlingId, LocalDate vurderingsdato) {
-        final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
-        var medlemskapOppgittTilknytningEntitet = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning);
-        if (medlemskapOppgittTilknytningEntitet.isEmpty()) {
-            return false;
-        }
-        final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet.get();
-
-        List<LocalDateSegment<Boolean>> fremtidigeOpphold = oppgittTilknytning.getOpphold()
-            .stream()
-            .filter(opphold -> !opphold.isTidligereOpphold()
-                && !opphold.getLand().equals(Landkoder.NOR))
-            .map(o -> finnSegment(vurderingsdato, o.getPeriodeFom(), o.getPeriodeTom()))
-            .collect(Collectors.toList());
-
-        LocalDateTimeline<Boolean> fremtidigePerioder = new LocalDateTimeline<>(fremtidigeOpphold,
-            StandardCombinators::alwaysTrueForMatch).compress();
-
-        return fremtidigePerioder.getDatoIntervaller()
-            .stream()
-            .anyMatch(this::periodeLengreEnn12M);
-    }
-
-    private boolean periodeLengreEnn12M(LocalDateInterval localDateInterval) {
-        return localDateInterval.days() >= ANTALL_DAGER_I_ÅRET;
-    }
-
-    private LocalDateSegment<Boolean> finnSegment(LocalDate skjæringsdato, LocalDate fom, LocalDate tom) {
-        if (skjæringsdato.isAfter(fom) && skjæringsdato.isBefore(tom)) {
-            return new LocalDateSegment<>(skjæringsdato, tom, true);
-        } else {
-            return new LocalDateSegment<>(fom, tom, true);
         }
     }
 
@@ -105,8 +61,7 @@ public class AvklarOmErBosatt {
         return NEI;
     }
 
-    //TODO(OJR) må denne endres?
-    private Utfall harBrukerTilknytningHjemland(Long behandlingId) {
+    private Utfall harBrukerOppgittTilknytningHjemland(Long behandlingId) {
         final Optional<MedlemskapAggregat> medlemskapAggregat = medlemskapRepository.hentMedlemskap(behandlingId);
         var medlemskapOppgittTilknytningEntitet = medlemskapAggregat.flatMap(MedlemskapAggregat::getOppgittTilknytning);
         if (medlemskapOppgittTilknytningEntitet.isEmpty()) {
@@ -114,10 +69,7 @@ public class AvklarOmErBosatt {
         }
         final MedlemskapOppgittTilknytningEntitet oppgittTilknytning = medlemskapOppgittTilknytningEntitet
             .orElseThrow(IllegalStateException::new);
-
-        if (!oppgittTilknytning.isOppholdINorgeSistePeriode())
-            return NEI;
-        if (!oppgittTilknytning.isOppholdINorgeNestePeriode())
+        if (oppgittTilknytning.harMinstEttUtenlandsopphold())
             return NEI;
 
         return JA;
