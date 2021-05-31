@@ -67,12 +67,17 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
         var søknad = søknadRepository.hentSøknad(behandling);
         var maksdato = getMaksDato(fagsak);
         var søknadFom = søknad.getMottattDato();
-        if (maksdato.isAfter(søknadFom)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksdato);
+        var mindato = getMinDato(søknadFom);
+        if (maksdato.isAfter(mindato)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
         } else {
-            log.warn("maksdato [{}] er før søknadsdato[{}], har ingen periode å vurdere", maksdato, søknadFom);
-            return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, søknadFom);
+            log.warn("maksdato [{}] er før mindato[{}], søknadsdato[{}], har ingen periode å vurdere", maksdato, mindato, søknadFom);
+            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, søknadFom);
         }
+    }
+
+    private LocalDate getMinDato(LocalDate søknadFom) {
+        return søknadFom.minusMonths(3).withDayOfMonth(1); // tar fra start av måned 3 mnd før for sikkerhetsskyld
     }
 
     private LocalDate getMaksDato(Fagsak fagsak) {
