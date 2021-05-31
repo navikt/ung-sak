@@ -41,6 +41,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
@@ -56,6 +57,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
+    private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -68,11 +70,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
+                                                  RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
@@ -97,10 +101,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var perioderTilVurdering = new TreeSet<>(perioder);
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var berørtePerioder = utledUtvidetPeriode(BehandlingReferanse.fra(behandling));
+            var berørtePerioder = utledUtvidetPeriode(referanse);
             perioderTilVurdering.addAll(berørtePerioder);
         }
+
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
         return vilkår.getPerioder()
             .stream()
