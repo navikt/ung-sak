@@ -42,9 +42,13 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Dependent
 public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(BeregningsgrunnlagTjeneste.class);
 
     private Instance<KalkulusApiTjeneste> kalkulusTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -188,11 +192,22 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         } else {
             return beregningsgrunnlag.get().getBeregningsgrunnlagListe()
                 .stream()
-                .filter(bg -> bg.getBeregningsgrunnlag() != null)
+                .filter(this::harBeregningsgrunnlagOgStp)
                 .map(BeregningsgrunnlagPrReferanse::getBeregningsgrunnlag)
                 .sorted(Comparator.comparing(BeregningsgrunnlagDto::getSkjæringstidspunkt))
                 .collect(Collectors.toList());
         }
+    }
+
+    private boolean harBeregningsgrunnlagOgStp(BeregningsgrunnlagPrReferanse<BeregningsgrunnlagDto> bg) {
+        if (bg.getBeregningsgrunnlag() == null) {
+            return false;
+        }
+        if (bg.getBeregningsgrunnlag().getSkjæringstidspunkt() == null) {
+            log.info("Mottok beregningsgrunnlag uten stp for referanse {}", bg.getEksternReferanse());
+            return false;
+        }
+        return true;
     }
 
     @Override
