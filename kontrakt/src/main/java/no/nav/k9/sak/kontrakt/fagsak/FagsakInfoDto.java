@@ -30,6 +30,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class FagsakInfoDto {
 
     @JsonProperty(value = "saksnummer", required = true)
+    @Valid
     @NotNull
     private Saksnummer saksnummer;
 
