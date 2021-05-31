@@ -44,9 +44,6 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForId((UUID) grunnlagId1);
-        if (sykdomGrunnlag.isEmpty()) {
-            return StartpunktType.UDEFINERT;
-        }
 
         var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
