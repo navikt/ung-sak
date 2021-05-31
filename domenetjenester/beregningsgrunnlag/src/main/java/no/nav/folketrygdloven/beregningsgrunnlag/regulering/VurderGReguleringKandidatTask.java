@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false) // Trenger ikke blokkere andre tasks på saken
 @ProsessTask(VurderGReguleringKandidatTask.TASKTYPE)
 @ApplicationScoped
 public class VurderGReguleringKandidatTask extends FagsakProsessTask {
