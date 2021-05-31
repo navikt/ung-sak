@@ -33,6 +33,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.Periode;
@@ -57,6 +58,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
+
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
@@ -107,6 +109,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             perioderTilVurdering.addAll(berørtePerioder);
         }
 
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
         return vilkår.getPerioder()
@@ -171,12 +174,18 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+    public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+        var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            return utledUtvidetPeriode(referanse);
+            periodeMedÅrsaks.addAll(utledUtvidetPeriode(referanse)
+                .stream()
+                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+                .collect(Collectors.toSet()));
         }
-        return new TreeSet<>();
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+
+        return periodeMedÅrsaks;
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
