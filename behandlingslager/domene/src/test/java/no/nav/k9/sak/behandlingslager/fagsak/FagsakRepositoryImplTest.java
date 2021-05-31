@@ -95,7 +95,7 @@ public class FagsakRepositoryImplTest {
         // Opprett fagsaker
         Fagsak[] fagsaker = {
                 new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("200"), fom, tom),
-                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("201"), null, fom.minusDays(1)),
+                new Fagsak(ytelseType, aktørIdSøker1, aktørIdPleietrengende, null, new Saksnummer("201"), fom.minusDays(1000L), fom.minusDays(1)),
                 new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("202"), fom, tom),
                 new Fagsak(ytelseType, aktørIdSøker2, aktørIdPleietrengende, null, new Saksnummer("203"), tom.plusDays(1), null),
                 new Fagsak(ytelseType, aktørIdSøker2, null, relatertPersonAktørId, new Saksnummer("205"), tom.plusDays(1), null)
