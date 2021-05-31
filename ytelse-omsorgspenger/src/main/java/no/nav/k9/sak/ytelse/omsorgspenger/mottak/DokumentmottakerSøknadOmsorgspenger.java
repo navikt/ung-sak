@@ -153,7 +153,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         validerStøttetVariant(søknadInnhold);
 
         lagreSøknad(behandlingId, journalpostId, søknad, søknadInnhold);
-        lagreMedlemskapinfo(behandlingId, søknadInnhold, journalpostId, forsendelseMottatt, søker);
+        lagreMedlemskapinfo(behandlingId, søknadInnhold, forsendelseMottatt);
         lagreUttakOgUtvidPeriode(behandling, journalpostId, søknadInnhold, søker);
     }
 
@@ -201,7 +201,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
     }
 
-    private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, JournalpostId journalpostId, LocalDate forsendelseMottatt, Søker søker) {
+    private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, LocalDate forsendelseMottatt) {
         final MedlemskapOppgittTilknytningEntitet.Builder oppgittTilknytningBuilder = new MedlemskapOppgittTilknytningEntitet.Builder()
             .medOppgittDato(forsendelseMottatt);
         var bosteder = ytelse.getBosteder();
