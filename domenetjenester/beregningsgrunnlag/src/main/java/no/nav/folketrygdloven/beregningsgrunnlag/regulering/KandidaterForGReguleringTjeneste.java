@@ -33,7 +33,7 @@ public class KandidaterForGReguleringTjeneste {
             .getPerioder()
             .stream()
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .anyMatch(it -> periode.overlapper(it.getPeriode()));
+            .anyMatch(it -> periode.overlapper(it.getPeriode().getFomDato(), it.getFom())); // FOM må være i perioden
 
         // TODO: Utvide med tjeneste mot kalkulus for å sjekke om DETTE grunnlaget skal revurderes
 
