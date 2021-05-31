@@ -1,7 +1,5 @@
 package no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,7 +17,6 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class AvklarMedisinskeOpplysningerDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "ikkeVentPåGodkjentLegeerklæring", required = false)
-    @NotNull
     private Boolean ikkeVentPåGodkjentLegeerklæring;
 
     public AvklarMedisinskeOpplysningerDto(String begrunnelse, boolean ikkeVentPåGodkjentLegeerklæring) {
