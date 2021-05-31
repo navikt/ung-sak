@@ -19,6 +19,7 @@ import javax.persistence.Table;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -48,6 +49,7 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
 
     /** @deprecated overlater til skjermbilde og saksbehandler å vurdere periodens relasjon til medlemskapsvilkåret */
     @Deprecated(forRemoval = true)
+    @DiffIgnore
     @Column(name = "tidligere_opphold", nullable = false)
     private boolean tidligereOpphold;
 
@@ -113,8 +115,7 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
         }
         MedlemskapOppgittLandOppholdEntitet other = (MedlemskapOppgittLandOppholdEntitet) obj;
         return Objects.equals(this.getLand(), other.getLand())
-                && Objects.equals(this.periode, other.periode)
-                && Objects.equals(this.tidligereOpphold, other.tidligereOpphold);
+                && Objects.equals(this.periode, other.periode);
     }
 
 
