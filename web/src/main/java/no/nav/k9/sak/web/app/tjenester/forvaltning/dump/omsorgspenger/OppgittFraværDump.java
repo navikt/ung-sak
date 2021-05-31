@@ -30,29 +30,30 @@ public class OppgittFraværDump implements DebugDumpFagsak {
 
     @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
-        var sql = ""
-            + "select f.saksnummer"
-            + ", f.id as fagsak_id"
-            + ", gr.behandling_id"
-            + ", b.behandling_status"
-            + ", b.behandling_resultat_type"
-            + ", omp.fom"
-            + ", omp.tom"
-            + ", omp.fravaer_per_dag"
-            + ", omp.aktivitet_type"
-            + ", omp.arbeidsgiver_aktor_id"
-            + ", omp.arbeidsgiver_orgnr"
-            + ", cast(omp.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id"
-            + ", omp.journalpost_id"
-            + ", omp.fravaer_arsak"
-            + ", replace(cast(omp.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
-            + " from "
-            + " gr_omp_aktivitet gr"
-            + " inner join behandling b on b.id=gr.behandling_id and gr.aktiv=true"
-            + " inner join fagsak f on f.id=b.fagsak_id"
-            + " inner join omp_oppgitt_fravaer_periode omp on omp.fravaer_id=gr.fravaer_id"
-            + " where f.saksnummer=:saksnummer"
-            + " order by 1, 2, 3, omp.opprettet_tid;";
+        var sql = """
+                   select f.saksnummer
+                    f.id as fagsak_id
+                    gr.behandling_id
+                    b.behandling_status
+                    b.behandling_resultat_type
+                    omp.fom
+                    omp.tom
+                    omp.fravaer_per_dag
+                    omp.aktivitet_type
+                    omp.arbeidsgiver_aktor_id
+                    omp.arbeidsgiver_orgnr
+                    cast(omp.arbeidsforhold_intern_id as varchar) arbeidsforhold_intern_id
+                    omp.journalpost_id
+                    omp.fravaer_arsak
+                    replace(cast(omp.opprettet_tid as varchar), ' ', 'T') opprettet_tid
+                    from
+                    gr_omp_aktivitet gr
+                    inner join behandling b on b.id=gr.behandling_id and gr.aktiv=true
+                    inner join fagsak f on f.id=b.fagsak_id
+                    inner join omp_oppgitt_fravaer_periode omp on omp.fravaer_id=gr.fravaer_id
+                    where f.saksnummer=:saksnummer
+                    order by 1, 2, 3, omp.opprettet_tid
+                """;
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
