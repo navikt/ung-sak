@@ -17,6 +17,10 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.repo.MottattDokument;
 import no.nav.k9.sak.mottak.repo.MottatteDokumentRepository;
+import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
+import no.nav.k9.sak.trigger.ProsessTriggere;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -26,17 +30,37 @@ public class RevurderingPerioderTjeneste {
     private final LRUCache<Saksnummer, List<InntektsmeldingMedPerioder>> cache = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    ;
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
     public RevurderingPerioderTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
-                                       InntektArbeidYtelseTjeneste iayTjeneste) {
+                                       InntektArbeidYtelseTjeneste iayTjeneste,
+                                       ProsessTriggereRepository prosessTriggereRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     RevurderingPerioderTjeneste() {
         // CDI
+    }
+
+    public Set<DatoIntervallEntitet> utledPerioderFraProsessTriggere(BehandlingReferanse referanse) {
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
+        return prosessTriggere.map(ProsessTriggere::getTriggere)
+            .orElseGet(Set::of)
+            .stream()
+            .map(Trigger::getPeriode)
+            .collect(Collectors.toSet());
+    }
+
+    public Set<PeriodeMedÅrsak> utledPerioderFraProsessTriggereMedÅrsak(BehandlingReferanse referanse) {
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
+        return prosessTriggere.map(ProsessTriggere::getTriggere)
+            .orElseGet(Set::of)
+            .stream()
+            .map(it -> new PeriodeMedÅrsak(it.getPeriode(), it.getÅrsak()))
+            .collect(Collectors.toSet());
     }
 
     public Set<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse) {

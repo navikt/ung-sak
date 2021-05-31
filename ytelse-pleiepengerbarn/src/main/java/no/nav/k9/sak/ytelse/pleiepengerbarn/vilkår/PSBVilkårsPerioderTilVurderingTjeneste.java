@@ -36,9 +36,6 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
-import no.nav.k9.sak.trigger.ProsessTriggere;
-import no.nav.k9.sak.trigger.ProsessTriggereRepository;
-import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -61,7 +58,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private SøknadsperiodeRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
-    private ProsessTriggereRepository prosessTriggereRepository;
+
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
     PSBVilkårsPerioderTilVurderingTjeneste() {
@@ -74,7 +71,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
-                                                  ProsessTriggereRepository prosessTriggereRepository,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter) {
@@ -83,7 +79,6 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
-        this.prosessTriggereRepository = prosessTriggereRepository;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
@@ -113,13 +108,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             var berørtePerioder = utledUtvidetPeriode(referanse);
             perioderTilVurdering.addAll(berørtePerioder);
         }
-        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingId);
-        perioderTilVurdering.addAll(prosessTriggere.map(ProsessTriggere::getTriggere)
-            .orElseGet(Set::of)
-            .stream()
-            .map(Trigger::getPeriode)
-            .collect(Collectors.toSet()));
 
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
         return vilkår.getPerioder()
@@ -193,12 +183,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                 .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
                 .collect(Collectors.toSet()));
         }
-        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
-        periodeMedÅrsaks.addAll(prosessTriggere.map(ProsessTriggere::getTriggere)
-            .orElseGet(Set::of)
-            .stream()
-            .map(it -> new PeriodeMedÅrsak(it.getPeriode(), it.getÅrsak()))
-            .collect(Collectors.toSet()));
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
 
         return periodeMedÅrsaks;
     }
