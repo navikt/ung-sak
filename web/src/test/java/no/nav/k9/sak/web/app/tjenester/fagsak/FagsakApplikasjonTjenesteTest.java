@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +39,7 @@ public class FagsakApplikasjonTjenesteTest {
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
+    private PsbInfotrygdRepository psbInfotrygdRepository;
 
     @BeforeEach
     public void oppsett() {
@@ -44,14 +47,16 @@ public class FagsakApplikasjonTjenesteTest {
         fagsakRepository = mock(FagsakRepository.class);
         behandlingRepository = mock(BehandlingRepository.class);
         personinfoAdapter = mock(PersoninfoAdapter.class);
+        psbInfotrygdRepository = mock(PsbInfotrygdRepository.class);
 
         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste = mock(ProsesseringAsynkTjeneste.class);
 
         BehandlingRepositoryProvider repositoryProvider = mock(BehandlingRepositoryProvider.class);
         when(repositoryProvider.getFagsakRepository()).thenReturn(fagsakRepository);
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
+        when(psbInfotrygdRepository.finnes(any())).thenReturn(false);
 
-        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste, personinfoAdapter);
+        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste, personinfoAdapter, psbInfotrygdRepository);
     }
 
     @Test

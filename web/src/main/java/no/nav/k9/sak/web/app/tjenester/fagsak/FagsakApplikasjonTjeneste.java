@@ -17,6 +17,7 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
+import no.nav.k9.sak.behandlingslager.aktør.Aktør;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -31,16 +32,20 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class FagsakApplikasjonTjeneste {
     private static FagsakProsessTaskFeil FEIL = FeilFactory.create(FagsakProsessTaskFeil.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(FagsakApplikasjonTjeneste.class);
     private FagsakRepository fagsakRepository;
 
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
+    private PsbInfotrygdRepository psbInfotrygdRepository;
 
     private Predicate<String> predikatErFnr = søkestreng -> søkestreng.matches("\\d{11}");
 
@@ -51,11 +56,13 @@ public class FagsakApplikasjonTjeneste {
     @Inject
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                                     TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter) {
+                                     TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter,
+                                     PsbInfotrygdRepository psbInfotrygdRepository) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.personinfoAdapter = personinfoAdapter;
+        this.psbInfotrygdRepository = psbInfotrygdRepository;
     }
 
     public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
@@ -134,18 +141,33 @@ public class FagsakApplikasjonTjeneste {
 
         var fagsaker = fagsakRepository.finnFagsakRelatertTilEnAvAktører(ytelseType, brukerAktørId, pleietrengendeAktørIder, relatertAnnenPartAktørIder, fom, tom);
         return fagsaker.stream()
-            .map(f -> {
-                return new FagsakInfoDto(f.getSaksnummer(),
-                    f.getYtelseType(),
-                    f.getStatus(),
-                    new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
-                    personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
-                    identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
-                    identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
-                    f.getSkalTilInfotrygd());
-            })
+            .map(f -> new FagsakInfoDto(f.getSaksnummer(),
+                f.getYtelseType(),
+                f.getStatus(),
+                new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
+                personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
+                identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
+                identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
+                skalTilInfotrygd(f, brukerAktørId, pleietrengendeAktørIder)))
             .collect(Collectors.toList());
+    }
 
+    private boolean skalTilInfotrygd(Fagsak fagsak, AktørId brukerAktørId, Set<AktørId> pleietrengendeaktørIder) {
+        if (FagsakYtelseType.PLEIEPENGER_SYKT_BARN != fagsak.getYtelseType() || fagsak.getSkalTilInfotrygd()) {
+            return fagsak.getSkalTilInfotrygd();
+        } else {
+            if (psbInfotrygdRepository.finnes(brukerAktørId)) {
+                LOG.info("Skal til Infotrygd ettersom søker er i unntaksliste.");
+                return true;
+            }
+            for (AktørId aktørId : pleietrengendeaktørIder) {
+                if (psbInfotrygdRepository.finnes(aktørId)) {
+                    LOG.info("Skal til Infotrygd ettersom pleietrengende er i unntaksliste.");
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     public FagsakSamlingForBruker hentSaker(String søkestreng) {
