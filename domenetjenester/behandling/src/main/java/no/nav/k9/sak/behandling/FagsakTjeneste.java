@@ -84,17 +84,23 @@ public class FagsakTjeneste {
     }
     
     public boolean finnesEnFagsakForMinstEnAvAktørene(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
-        final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, null, null, fom, tom);
-        if (!fagSakerPåBruker.isEmpty()) {
-            return true;
+        if (bruker != null) {
+            final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, null, null, fom, tom);
+            if (!fagSakerPåBruker.isEmpty()) {
+                return true;
+            }
         }
-        final var fagSakerPåPleietrengende = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, fom, tom);
-        if (!fagSakerPåPleietrengende.isEmpty()) {
-            return true;
+        if (pleietrengende != null) {
+            final var fagSakerPåPleietrengende = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, fom, tom);
+            if (!fagSakerPåPleietrengende.isEmpty()) {
+                return true;
+            }
         }
-        final var fagSakerPåRelatertPerson = fagsakRepository.finnFagsakRelatertTil(ytelseType, null, relatertPersonAktørId, fom, tom);
-        if (!fagSakerPåRelatertPerson.isEmpty()) {
-            return true;
+        if (relatertPersonAktørId != null) {
+            final var fagSakerPåRelatertPerson = fagsakRepository.finnFagsakRelatertTil(ytelseType, null, relatertPersonAktørId, fom, tom);
+            if (!fagSakerPåRelatertPerson.isEmpty()) {
+                return true;
+            }
         }
         
         return false;
