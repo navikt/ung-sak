@@ -79,7 +79,7 @@ public class UttakRestKlient {
     @Inject
     public UttakRestKlient(OidcRestClient restKlient,
             @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint,
-            @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "") String psbUttakToken) {
+            @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.psbUttakToken = psbUttakToken;
