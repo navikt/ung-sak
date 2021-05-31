@@ -31,15 +31,19 @@ public class BeregningsgrunnlagDump implements DebugDumpFagsak {
 
     @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
-        var sql = "select"
-            + " gr.behandling_id, bgp.skjaeringstidspunkt, cast(bgp.ekstern_referanse as varchar) ekstern_referanse"
-            + " from gr_beregningsgrunnlag gr "
-            + "   inner join bg_perioder bg on gr.bg_grunnlag_id=bg.id"
-            + "   inner join bg_periode bgp on bg.id = bgp.bg_grunnlag_id"
-            + "   inner join behandling BH on GR.behandling_id = BH.id"
-            + "   inner join FAGSAK F on BH.fagsak_id = F.id"
-            + " where gr.aktiv=true and f.saksnummer=:saksnummer "
-            + " order by gr.opprettet_tid";
+        var sql = """
+                 select
+                   gr.behandling_id
+                   , bgp.skjaeringstidspunkt
+                   , cast(bgp.ekstern_referanse as varchar) ekstern_referanse
+                  from gr_beregningsgrunnlag gr
+                    inner join bg_perioder bg on gr.bg_grunnlag_id=bg.id
+                    inner join bg_periode bgp on bg.id = bgp.bg_grunnlag_id
+                    inner join behandling BH on GR.behandling_id = BH.id
+                    inner join FAGSAK F on BH.fagsak_id = F.id
+                   where gr.aktiv=true and f.saksnummer=:saksnummer
+                   order by gr.opprettet_tid
+                """;
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
