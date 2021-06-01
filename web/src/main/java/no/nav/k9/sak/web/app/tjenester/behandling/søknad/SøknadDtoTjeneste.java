@@ -125,9 +125,8 @@ public class SøknadDtoTjeneste {
 
         return finnSisteFagsakPå(ytelsetype, aktørId, List.of(pleietrengendeAktør))
             .map(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
-            .filter(Optional::isPresent)
             .map(behandling ->
-                new LocalDateTimeline<>(getTjeneste(ytelsetype).hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.get()))
+                new LocalDateTimeline<>(getTjeneste(ytelsetype).hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.orElseThrow()))
                     .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
                     .map(dato -> new LocalDateSegment<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList()))
                     .compress().toSegments().stream()
