@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -122,23 +123,27 @@ public class SøknadDtoTjeneste {
         AktørId aktørId = finnAktørId(ident);
         AktørId pleietrengendeAktør = finnAktørId(pleietrengendeAktørIdent);
 
-        var fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTilEnAvAktører(ytelsetype, aktørId, List.of(pleietrengendeAktør), Collections.emptyList(), null, null);
-        Optional<LocalDate> sisteFomDato = fagsaker.stream().map(fagsak1 -> fagsak1.getPeriode().getFomDato()).max(LocalDate::compareTo);
-        if (sisteFomDato.isPresent()) {
-            Optional<Fagsak> fagsakOpt = fagsaker.stream().collect(Collectors.groupingBy(fagsak -> fagsak.getPeriode().getFomDato())).get(sisteFomDato.get()).stream().findFirst();
-            if (fagsakOpt.isPresent()) {
-                Fagsak fagsak = fagsakOpt.get();
-                Optional<Behandling> behandling = repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId());
-                if (behandling.isPresent()) {
-                    return new LocalDateTimeline<>(getTjeneste(ytelsetype).hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.get()))
-                        .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
-                        .map(l -> new LocalDateSegment<>(l.toLocalDateInterval(), true)).collect(Collectors.toList()))
-                        .compress().toSegments().stream()
-                        .map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
-                }
-            }
+        return finnSisteFagsakPå(ytelsetype, aktørId, List.of(pleietrengendeAktør))
+            .map(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
+            .filter(Optional::isPresent)
+            .map(behandling ->
+                new LocalDateTimeline<>(getTjeneste(ytelsetype).hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.get()))
+                    .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
+                    .map(dato -> new LocalDateSegment<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList()))
+                    .compress().toSegments().stream()
+                    .map(segment -> new Periode(segment.getFom(), segment.getTom())).collect(Collectors.toList())
+            )
+            .orElse(Collections.emptyList());
+    }
+
+
+    private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, Collection<AktørId> pleietrengendeAktørId) {
+        List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTilEnAvAktører(ytelseType, bruker, pleietrengendeAktørId, Collections.emptyList(), null, null);
+        if (fagsaker.isEmpty()) {
+            return Optional.empty();
         }
-        return Collections.emptyList();
+        Optional<LocalDate> sisteFomDato = fagsaker.stream().map(f -> f.getPeriode().getFomDato()).max(LocalDate::compareTo);
+        return fagsaker.stream().collect(Collectors.groupingBy(f -> f.getPeriode().getFomDato())).get(sisteFomDato.get()).stream().findFirst();
     }
 
     private AktørId finnAktørId(PersonIdent bruker) {
