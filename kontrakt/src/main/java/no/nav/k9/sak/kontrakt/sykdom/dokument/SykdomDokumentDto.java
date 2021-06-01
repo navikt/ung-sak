@@ -48,9 +48,6 @@ public class SykdomDokumentDto {
     @Valid
     private boolean fremhevet;
 
-    @JsonProperty(value = "harInfoSomIkkeKanPunsjes")
-    private boolean harInfoSomIkkeKanPunsjes;
-
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -58,14 +55,13 @@ public class SykdomDokumentDto {
 
     public SykdomDokumentDto(String id, SykdomDokumentType type, boolean benyttet,
                              boolean annenPartErKilde, LocalDate datert, boolean fremhevet,
-                             boolean harInfoSomIkkeKanPunsjes, List<ResourceLink> links) {
+                             List<ResourceLink> links) {
         this.id = id;
         this.type = type;
         this.benyttet = benyttet;
         this.annenPartErKilde = annenPartErKilde;
         this.datert = datert;
         this.fremhevet = fremhevet;
-        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
         this.links = links;
     }
 
