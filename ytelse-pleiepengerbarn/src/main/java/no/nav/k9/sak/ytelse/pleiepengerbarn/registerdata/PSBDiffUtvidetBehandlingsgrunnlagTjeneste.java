@@ -55,9 +55,6 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
 
     private DiffResult diffSykdom(BehandlingReferanse ref, EndringsresultatDiff idEndring) {
         var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForId((UUID) idEndring.getGrunnlagId1());
-        if (sykdomGrunnlag.isEmpty()) {
-            return SykdomDiffResult.ingenDiff();
-        }
 
         var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
