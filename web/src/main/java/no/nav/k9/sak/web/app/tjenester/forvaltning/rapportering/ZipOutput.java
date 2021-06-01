@@ -12,6 +12,7 @@ import javax.ws.rs.core.StreamingOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 class ZipOutput {
+
     private void addToZip(ZipOutputStream zipOut, DumpOutput dump) {
         var zipEntry = new ZipEntry(dump.getPath());
         try {
