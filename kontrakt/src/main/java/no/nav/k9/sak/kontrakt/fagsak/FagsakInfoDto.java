@@ -1,12 +1,10 @@
 package no.nav.k9.sak.kontrakt.fagsak;
 
-import java.util.List;
 import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -64,11 +62,6 @@ public class FagsakInfoDto {
     @Valid
     private PersonIdent relatertPersonAktørId;
 
-    @JsonProperty(value = "perioder", required = false)
-    @Size(max = 1000)
-    @Valid
-    private List<Periode> perioder;
-
     public FagsakInfoDto() {
         //
     }
@@ -80,8 +73,7 @@ public class FagsakInfoDto {
                          PersonIdent person,
                          PersonIdent pleietrengendeAktørId,
                          PersonIdent relatertPersonAktørId,
-                         Boolean skalBehandlesAvInfotrygd,
-                         List<Periode> perioder) {
+                         Boolean skalBehandlesAvInfotrygd) {
         this.saksnummer = saksnummer;
         this.ytelseType = ytelseType.getKode();
         this.status = status == null ? null : status.getKode();
@@ -90,7 +82,6 @@ public class FagsakInfoDto {
         this.pleietrengendeAktørId = pleietrengendeAktørId;
         this.relatertPersonAktørId = relatertPersonAktørId;
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
-        this.perioder = perioder;
     }
 
     @Override
@@ -108,12 +99,7 @@ public class FagsakInfoDto {
             && Objects.equals(person, other.person)
             && Objects.equals(gyldigPeriode, other.gyldigPeriode)
             && Objects.equals(pleietrengendeAktørId, other.pleietrengendeAktørId)
-            && Objects.equals(relatertPersonAktørId, other.relatertPersonAktørId)
-            && Objects.equals(perioder, other.perioder);
-    }
-
-    public List<Periode> getPerioder() {
-        return perioder;
+            && Objects.equals(relatertPersonAktørId, other.relatertPersonAktørId);
     }
 
     public Saksnummer getSaksnummer() {
@@ -150,7 +136,7 @@ public class FagsakInfoDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer, ytelseType, person, gyldigPeriode, pleietrengendeAktørId, relatertPersonAktørId, perioder);
+        return Objects.hash(saksnummer, ytelseType, person, gyldigPeriode, pleietrengendeAktørId, relatertPersonAktørId);
     }
 
     @Override

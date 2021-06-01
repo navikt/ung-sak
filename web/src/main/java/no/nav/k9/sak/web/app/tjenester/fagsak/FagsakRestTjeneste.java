@@ -42,7 +42,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -240,17 +239,6 @@ public class FagsakRestTjeneste {
             matchFagsak.getPleietrengendeIdenter(),
             matchFagsak.getRelatertPersonIdenter());
         return fagsaker;
-    }
-
-    @POST
-    @Path(PERIODE_PATH)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Søk etter saker på ytelse, bruker, og pleieptrengende", tags = "fagsak", summary = ("Finne siste fagsak og legger ved søknadsperioder"))
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public FagsakInfoDto hentSøknadsperioderPåFagsak(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchFagsakAttributter.class) MatchFagsak matchFagsak) {
-        return fagsakApplikasjonTjeneste.hentSøknadsperioder(FagsakYtelseType.PSB, matchFagsak.getBruker(), matchFagsak.getPleietrengendeIdenter());
     }
 
     private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {

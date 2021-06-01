@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.fagsak;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -14,18 +13,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -33,22 +26,17 @@ import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto;
-import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 @ApplicationScoped
 public class FagsakApplikasjonTjeneste {
     private static FagsakProsessTaskFeil FEIL = FeilFactory.create(FagsakProsessTaskFeil.class);
 
     private FagsakRepository fagsakRepository;
-    private BehandlingRepository behandlingRepository;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste;
 
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
@@ -64,15 +52,12 @@ public class FagsakApplikasjonTjeneste {
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                      TpsTjeneste tpsTjeneste,
-                                     PersoninfoAdapter personinfoAdapter,
-                                     BehandlingRepository behandlingRepository,
-                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste) {
+                                     PersoninfoAdapter personinfoAdapter
+                                     ) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.personinfoAdapter = personinfoAdapter;
-        this.behandlingRepository = behandlingRepository;
-        this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
     }
 
     public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
@@ -159,47 +144,11 @@ public class FagsakApplikasjonTjeneste {
                     personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
                     identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
                     identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
-                    f.getSkalTilInfotrygd(),
-                    Collections.emptyList());
+                    f.getSkalTilInfotrygd()
+                );
             })
             .collect(Collectors.toList());
 
-    }
-
-    public FagsakInfoDto hentSøknadsperioder(FagsakYtelseType ytelseType, PersonIdent personIdent, List<PersonIdent> pleietrengendeIdenter) {
-        AktørId aktørId = finnAktørId(personIdent);
-        if ((pleietrengendeIdenter.size() != 1)) {
-            throw new IllegalStateException("Søtter bare ett barn");
-        }
-        AktørId pleietrengendeAktør = finnAktørId(pleietrengendeIdenter.get(0));
-        var fagsaker = fagsakRepository.finnFagsakRelatertTilEnAvAktører(ytelseType, aktørId, List.of(pleietrengendeAktør), Collections.emptyList(), null, null);
-        Optional<LocalDate> sisteFomDato = fagsaker.stream().map(fagsak1 -> fagsak1.getPeriode().getFomDato()).max(LocalDate::compareTo);
-        if (sisteFomDato.isPresent()) {
-            Optional<Fagsak> fagsakOpt = fagsaker.stream().collect(Collectors.groupingBy(fagsak -> fagsak.getPeriode().getFomDato())).get(sisteFomDato.get()).stream().findFirst();
-            if (fagsakOpt.isPresent()) {
-                Fagsak fagsak = fagsakOpt.get();
-                Optional<Behandling> behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
-                if (behandling.isPresent()) {
-                    List<Periode> søknadsperioder = new LocalDateTimeline<>(vurderSøknadsfristTjeneste.hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.get()))
-                        .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
-                        .map(l -> new LocalDateSegment<>(l.toLocalDateInterval(), true)).collect(Collectors.toList()))
-                        .compress().toSegments().stream()
-                        .map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
-
-                   return new FagsakInfoDto(
-                        fagsak.getSaksnummer(),
-                        ytelseType,
-                        fagsak.getStatus(),
-                        new Periode(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato()),
-                        personinfoAdapter.hentIdentForAktørId(fagsak.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
-                        null,
-                        null,
-                        fagsak.getSkalTilInfotrygd(),
-                        søknadsperioder);
-                }
-            }
-        }
-        return null;
     }
 
     public FagsakSamlingForBruker hentSaker(String søkestreng) {

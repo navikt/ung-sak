@@ -21,12 +21,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
 public class FagsakApplikasjonTjenesteTest {
 
@@ -39,7 +37,6 @@ public class FagsakApplikasjonTjenesteTest {
     private BehandlingRepository behandlingRepository;
     private TpsTjeneste tpsTjeneste;
     private PersoninfoAdapter personinfoAdapter;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> vurderSøknadsfristTjeneste;
 
     @BeforeEach
     public void oppsett() {
@@ -47,7 +44,6 @@ public class FagsakApplikasjonTjenesteTest {
         fagsakRepository = mock(FagsakRepository.class);
         behandlingRepository = mock(BehandlingRepository.class);
         personinfoAdapter = mock(PersoninfoAdapter.class);
-        vurderSøknadsfristTjeneste = mock(VurderSøknadsfristTjeneste.class);
 
         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste = mock(ProsesseringAsynkTjeneste.class);
 
@@ -55,7 +51,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(repositoryProvider.getFagsakRepository()).thenReturn(fagsakRepository);
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
 
-        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste, personinfoAdapter, behandlingRepository, vurderSøknadsfristTjeneste);
+        tjeneste = new FagsakApplikasjonTjeneste(repositoryProvider, prosesseringAsynkTjeneste, tpsTjeneste, personinfoAdapter);
     }
 
     @Test

@@ -1,7 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 
+import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,17 +11,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittTilknytningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
@@ -32,12 +41,16 @@ import no.nav.k9.sak.kontrakt.søknad.ManglendeVedleggDto;
 import no.nav.k9.sak.kontrakt.søknad.OppgittTilknytningDto;
 import no.nav.k9.sak.kontrakt.søknad.SøknadDto;
 import no.nav.k9.sak.kontrakt.søknad.UtlandsoppholdDto;
+import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -47,6 +60,7 @@ public class SøknadDtoTjeneste {
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private MedlemTjeneste medlemTjeneste;
     private PersoninfoAdapter personinfoAdapter;
+    private Instance<VurderSøknadsfristTjeneste<SøktPeriodeData>> vurderSøknadsfristTjeneste;
 
     protected SøknadDtoTjeneste() {
         // for CDI proxy
@@ -57,12 +71,15 @@ public class SøknadDtoTjeneste {
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              PersoninfoAdapter personinfoAdapter,
                              ArbeidsgiverTjeneste arbeidsgiverTjeneste,
-                             MedlemTjeneste medlemTjeneste) {
+                             MedlemTjeneste medlemTjeneste,
+                             @Any Instance<VurderSøknadsfristTjeneste<SøktPeriodeData>> vurderSøknadsfristTjeneste) {
+
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
+        this.vurderSøknadsfristTjeneste = vurderSøknadsfristTjeneste;
     }
 
     public Optional<SøknadDto> mapFra(Behandling behandling) {
@@ -99,6 +116,41 @@ public class SøknadDtoTjeneste {
         dto.setAngittePersoner(mapAngittePersoner(søknad.getAngittePersoner()));
 
         return Optional.of(dto);
+    }
+
+    public List<Periode> hentSøknadperioderPåFagsak(FagsakYtelseType ytelsetype, PersonIdent ident, PersonIdent pleietrengendeAktørIdent) {
+        AktørId aktørId = finnAktørId(ident);
+        AktørId pleietrengendeAktør = finnAktørId(pleietrengendeAktørIdent);
+
+        var fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTilEnAvAktører(ytelsetype, aktørId, List.of(pleietrengendeAktør), Collections.emptyList(), null, null);
+        Optional<LocalDate> sisteFomDato = fagsaker.stream().map(fagsak1 -> fagsak1.getPeriode().getFomDato()).max(LocalDate::compareTo);
+        if (sisteFomDato.isPresent()) {
+            Optional<Fagsak> fagsakOpt = fagsaker.stream().collect(Collectors.groupingBy(fagsak -> fagsak.getPeriode().getFomDato())).get(sisteFomDato.get()).stream().findFirst();
+            if (fagsakOpt.isPresent()) {
+                Fagsak fagsak = fagsakOpt.get();
+                Optional<Behandling> behandling = repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId());
+                if (behandling.isPresent()) {
+                    return new LocalDateTimeline<>(getTjeneste(ytelsetype).hentPerioderTilVurdering(BehandlingReferanse.fra(behandling.get()))
+                        .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
+                        .map(l -> new LocalDateSegment<>(l.toLocalDateInterval(), true)).collect(Collectors.toList()))
+                        .compress().toSegments().stream()
+                        .map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private AktørId finnAktørId(PersonIdent bruker) {
+        if (bruker == null)
+            return null;
+        return bruker.erAktørId()
+            ? new AktørId(bruker.getAktørId())
+            : personinfoAdapter.hentAktørIdForPersonIdent(bruker).orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for bruker"));
+    }
+
+    private VurderSøknadsfristTjeneste<SøktPeriodeData> getTjeneste(FagsakYtelseType ytelseType) {
+        return FagsakYtelseTypeRef.Lookup.find(vurderSøknadsfristTjeneste, ytelseType).orElseThrow(() -> new UnsupportedOperationException("Har ikke " + VurderSøknadsfristTjeneste.class.getSimpleName() + " for " + ytelseType));
     }
 
     private List<AngittPersonDto> mapAngittePersoner(Set<SøknadAngittPersonEntitet> angittePersoner) {
