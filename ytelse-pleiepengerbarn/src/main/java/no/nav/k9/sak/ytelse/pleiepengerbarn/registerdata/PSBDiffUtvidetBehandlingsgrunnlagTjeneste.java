@@ -17,6 +17,7 @@ import no.nav.k9.sak.domene.registerinnhenting.DiffUtvidetBehandlingsgrunnlagTje
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -44,7 +45,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
 
     @Override
     public void leggTilSnapshot(BehandlingReferanse ref, EndringsresultatSnapshot snapshot) {
-        snapshot.leggTil(sykdomGrunnlagRepository.finnAktivGrunnlagId(ref.getBehandlingUuid()));
+        snapshot.leggTil(EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, UUID.randomUUID())); // For å tvinge frem at det alltid er endring
     }
 
     @Override
@@ -54,7 +55,8 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     }
 
     private DiffResult diffSykdom(BehandlingReferanse ref, EndringsresultatDiff idEndring) {
-        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForId((UUID) idEndring.getGrunnlagId1());
+        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
+            .map(SykdomGrunnlagBehandling::getGrunnlag);
 
         var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
