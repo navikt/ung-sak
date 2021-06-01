@@ -51,7 +51,9 @@ public class FagsakApplikasjonTjeneste {
     @Inject
     public FagsakApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
-                                     TpsTjeneste tpsTjeneste, PersoninfoAdapter personinfoAdapter) {
+                                     TpsTjeneste tpsTjeneste,
+                                     PersoninfoAdapter personinfoAdapter
+                                     ) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
@@ -142,7 +144,8 @@ public class FagsakApplikasjonTjeneste {
                     personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
                     identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
                     identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
-                    f.getSkalTilInfotrygd());
+                    f.getSkalTilInfotrygd()
+                );
             })
             .collect(Collectors.toList());
 

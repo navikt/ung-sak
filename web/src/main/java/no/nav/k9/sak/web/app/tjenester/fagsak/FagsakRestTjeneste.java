@@ -78,6 +78,7 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
     public static final String MATCH_PATH = PATH + "/match";
+    public static final String PERIODE_PATH = PATH + "/perioder";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
