@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm
+      http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+
+    <sequence-generator name="SEQ_PROSESS_TRIGGERE" allocation-size="50" sequence-name="SEQ_PROSESS_TRIGGERE"/>
+    <sequence-generator name="SEQ_PT_TRIGGERE" allocation-size="50" sequence-name="SEQ_PT_TRIGGERE"/>
+    <sequence-generator name="SEQ_PT_TRIGGER" allocation-size="50" sequence-name="SEQ_PT_TRIGGER"/>
+
+    <entity class="no.nav.k9.sak.trigger.ProsessTriggere"/>
+    <entity class="no.nav.k9.sak.trigger.Triggere"/>
+    <entity class="no.nav.k9.sak.trigger.Trigger"/>
+
+</entity-mappings>
