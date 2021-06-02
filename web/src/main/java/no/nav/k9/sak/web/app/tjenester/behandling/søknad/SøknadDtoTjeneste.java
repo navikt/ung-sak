@@ -14,10 +14,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -142,21 +141,11 @@ public class SøknadDtoTjeneste {
         LocalDateTimeline<Boolean> resultat = LocalDateTimeline.EMPTY_TIMELINE;
 
         for (LocalDateTimeline<Boolean> localDateSegments : tidslinjer) {
-            resultat = localDateSegments.combine(resultat, SøknadDtoTjeneste::merge, JoinStyle.CROSS_JOIN);
+            resultat = localDateSegments.combine(resultat, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
         }
         return resultat
             .compress().toSegments().stream()
             .map(segment -> new Periode(segment.getFom(), segment.getTom())).collect(Collectors.toList());
-    }
-
-    private static LocalDateSegment<Boolean> merge(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
-
-        if (lhs != null && rhs != null) {
-            return new LocalDateSegment<>(di, true);
-        } else if (lhs == null && rhs != null) {
-            return rhs;
-        }
-        return lhs;
     }
 
     private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, Collection<AktørId> pleietrengendeAktørId) {
