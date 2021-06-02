@@ -1,5 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
+import static no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.UtvidetRettIverksettTask.periodeForVedtak;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -8,13 +17,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.typer.Periode;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.UtvidetRettIverksettTask.periodeForVedtak;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PeriodeForVedtakTest {
 
@@ -61,14 +63,14 @@ public class PeriodeForVedtakTest {
 
     @Test
     public void ugyldig_vedtaksperiode() {
-        var periode = new Periode(LocalDate.parse("2021-04-09"), Tid.TIDENES_ENDE);
+        var periode = new Periode(Tid.TIDENES_BEGYNNELSE, LocalDate.parse("2021-04-09"));
 
         var samletVilkårsresultat = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode.getFom(), periode.getTom(), VilkårUtfallSamlet.fra(List.of(oppfylt())))
         ));
 
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, true));
-        assertEquals("Ugyldig periode for vedtak om utvidet rett. Periode<fom=2021-04-09, tom=9999-12-31>", exception.getMessage());
+        assertEquals("Ugyldig periode for vedtak om utvidet rett. fom=-4712-01-01, tom=2021-04-09", exception.getMessage());
     }
 
     @Test
