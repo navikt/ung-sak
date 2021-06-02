@@ -18,8 +18,6 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
@@ -42,7 +40,6 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         Tid.TIDENES_ENDE);
     public static final String TASKTYPE = "iverksetteVedtak.sendUtvidetRett";
 
-    private SøknadRepository søknadRepository;
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private UtvidetRettKlient utvidetRettKlient;
@@ -51,11 +48,9 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     }
 
     @Inject
-    public UtvidetRettIverksettTask(SøknadRepository søknadRepository,
-                                    VilkårTjeneste vilkårTjeneste,
+    public UtvidetRettIverksettTask(VilkårTjeneste vilkårTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     UtvidetRettKlient utvidetRettKlient) {
-        this.søknadRepository = søknadRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.utvidetRettKlient = utvidetRettKlient;
@@ -68,38 +63,37 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
 
-        var søknad = søknadRepository.hentSøknad(behandling);
         var samletVilkårsresultat = vilkårTjeneste.samletVilkårsresultat(behandlingId);
 
         var utfall = behandling.getBehandlingResultatType();
 
         if (utfall == BehandlingResultatType.INNVILGET || utfall == BehandlingResultatType.INNVILGET_ENDRING) {
-            var iverksett = mapIverksett(behandling, søknad, periodeForVedtak(samletVilkårsresultat, true));
+            var iverksett = mapIverksett(behandling, periodeForVedtak(samletVilkårsresultat, true));
             utvidetRettKlient.innvilget(iverksett);
         } else if (utfall == BehandlingResultatType.AVSLÅTT) {
-            var iverksett = mapIverksett(behandling, søknad, periodeForVedtak(samletVilkårsresultat, false));
+            var iverksett = mapIverksett(behandling, periodeForVedtak(samletVilkårsresultat, false));
             utvidetRettKlient.avslått(iverksett);
         } else {
             throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=[" + utfall + "]");
         }
     }
 
-    private UtvidetRett mapIverksett(Behandling behandling, SøknadEntitet søknad, Periode periode) {
+    private UtvidetRett mapIverksett(Behandling behandling, Periode periode) {
         var ytelseType = behandling.getFagsakYtelseType();
 
         switch (ytelseType) {
             case OMSORGSPENGER_KS:
-                return mapKroniskSyktBarn(behandling, søknad, periode);
+                return mapKroniskSyktBarn(behandling, periode);
             case OMSORGSPENGER_MA:
-                return mapMidlertidigAlene(behandling, søknad, periode);
+                return mapMidlertidigAlene(behandling, periode);
             case OMSORGSPENGER_AO:
-                return mapAleneOmOmsorg(behandling, søknad, periode);
+                return mapAleneOmOmsorg(behandling, periode);
             default:
                 throw new UnsupportedOperationException("Støtter ikke ytelseType=[" + ytelseType + "]");
         }
     }
 
-    private UtvidetRett mapAleneOmOmsorg(Behandling behandling, SøknadEntitet søknad, Periode periode) {
+    private UtvidetRett mapAleneOmOmsorg(Behandling behandling, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -113,7 +107,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setPeriode(periode);
     }
 
-    private UtvidetRett mapMidlertidigAlene(Behandling behandling, SøknadEntitet søknad, Periode periode) {
+    private UtvidetRett mapMidlertidigAlene(Behandling behandling, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdAnnenForelder = behandling.getFagsak().getRelatertPersonAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -127,7 +121,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             .setPeriode(periode);
     }
 
-    private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, SøknadEntitet søknad, Periode periode) {
+    private KroniskSyktBarn mapKroniskSyktBarn(Behandling behandling, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
@@ -164,10 +158,9 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     }
 
     private static Periode gyldigPeriode(LocalDate fom, LocalDate tom) {
-        var periode = new Periode(fom, tom);
-        if (UGYLDIGE_DATOER_FOR_PERIODE.contains(fom) || UGYLDIGE_DATOER_FOR_PERIODE.contains(tom)) {
-            throw new IllegalStateException("Ugyldig periode for vedtak om utvidet rett. " + periode);
+        if (fom == null || UGYLDIGE_DATOER_FOR_PERIODE.contains(fom)) {
+            throw new IllegalStateException("Ugyldig periode for vedtak om utvidet rett. fom=" + fom + ", tom=" + tom);
         }
-        return periode;
+        return new Periode(fom, tom);
     }
 }
