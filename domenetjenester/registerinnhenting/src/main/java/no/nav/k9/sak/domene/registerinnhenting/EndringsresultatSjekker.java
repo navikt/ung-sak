@@ -108,6 +108,10 @@ public class EndringsresultatSjekker {
         var utvidetBehandlingsgrunnlagTjeneste = DiffUtvidetBehandlingsgrunnlagTjeneste.finnTjeneste(behandling.getFagsakYtelseType());
         utvidetBehandlingsgrunnlagTjeneste.ifPresent(diffUtvidetBehandlingsgrunnlagTjeneste -> diffUtvidetBehandlingsgrunnlagTjeneste.leggTilSnapshot(BehandlingReferanse.fra(behandling), snapshot));
 
+        if (utvidetBehandlingsgrunnlagTjeneste.isEmpty()) {
+            log.info("Fant ingen utvidetbehandlingsgrunnlagtjeneste for ytelse {}", behandling.getFagsakYtelseType());
+        }
+
         return snapshot;
     }
 
