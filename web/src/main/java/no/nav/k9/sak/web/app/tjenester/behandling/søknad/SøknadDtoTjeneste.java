@@ -14,8 +14,10 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -124,16 +126,38 @@ public class SøknadDtoTjeneste {
             .map(behandling ->
                 {
                     BehandlingReferanse referanse = BehandlingReferanse.fra(behandling.orElseThrow());
-                    return new LocalDateTimeline<>(provider.finnVurderSøknadsfristTjeneste(referanse).hentPerioderTilVurdering(referanse)
+
+                    List<LocalDateTimeline<Boolean>> tidslinjer = provider.finnVurderSøknadsfristTjeneste(referanse).hentPerioderTilVurdering(referanse)
                         .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
-                        .map(dato -> new LocalDateSegment<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList()))
-                        .compress().toSegments().stream()
-                        .map(segment -> new Periode(segment.getFom(), segment.getTom())).collect(Collectors.toList());
+                        .map(dato -> new LocalDateTimeline<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList());
+
+                    return slårSammenPerioderMedHensynTilOverlapp(tidslinjer);
                 }
             )
             .orElse(Collections.emptyList());
     }
 
+    static List<Periode> slårSammenPerioderMedHensynTilOverlapp(List<LocalDateTimeline<Boolean>> tidslinjer) {
+        @SuppressWarnings("unchecked")
+        LocalDateTimeline<Boolean> resultat = LocalDateTimeline.EMPTY_TIMELINE;
+
+        for (LocalDateTimeline<Boolean> localDateSegments : tidslinjer) {
+            resultat = localDateSegments.combine(resultat, SøknadDtoTjeneste::merge, JoinStyle.CROSS_JOIN);
+        }
+        return resultat
+            .compress().toSegments().stream()
+            .map(segment -> new Periode(segment.getFom(), segment.getTom())).collect(Collectors.toList());
+    }
+
+    private static LocalDateSegment<Boolean> merge(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+
+        if (lhs != null && rhs != null) {
+            return new LocalDateSegment<>(di, true);
+        } else if (lhs == null && rhs != null) {
+            return rhs;
+        }
+        return lhs;
+    }
 
     private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, Collection<AktørId> pleietrengendeAktørId) {
         List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTilEnAvAktører(ytelseType, bruker, pleietrengendeAktørId, Collections.emptyList(), null, null);
