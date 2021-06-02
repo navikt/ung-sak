@@ -16,7 +16,7 @@ public interface ÅrskvantumKlient {
 
     void settUttaksplanTilManueltBekreftet(UUID behandlingUUID);
 
-    void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene);
+    void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene, int antallDager);
 
     void slettUttaksplan(UUID behandlingUUID);
 
