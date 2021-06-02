@@ -416,16 +416,6 @@ public class BehandlingDtoTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .collect(Collectors.toList());
 
-        // uttaksplaner link inkl
-        var link = BehandlingDtoUtil.buildLink(UttakRestTjeneste.UTTAKSPLANER, "uttak-uttaksplaner", HttpMethod.GET, ub -> {
-            ub.addParameter(BehandlingUuidDto.NAME, behandlingUuid.toString());
-            for (var s : andreSaker) {
-                ub.addParameter("saksnummer", s.getVerdi());
-            }
-        });
-
-        dto.leggTil(link);
-
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", behandlingUuidQueryParams));
         dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", behandlingUuidQueryParams));
     }
