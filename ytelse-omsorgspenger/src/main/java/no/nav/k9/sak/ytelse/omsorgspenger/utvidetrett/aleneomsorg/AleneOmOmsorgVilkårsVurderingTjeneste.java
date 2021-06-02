@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -31,7 +32,6 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
-    private PersoninfoAdapter personinfoAdapter;
 
     AleneOmOmsorgVilkårsVurderingTjeneste() {
         // for proxy
@@ -39,10 +39,8 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
 
     @Inject
     public AleneOmOmsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
-                                                 PersoninfoAdapter personinfoAdapter,
                                                  SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.personinfoAdapter = personinfoAdapter;
         this.søknadRepository = søknadRepository;
     }
 
@@ -80,9 +78,8 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
         return søknadFom.minusMonths(3).withDayOfMonth(1); // tar fra start av måned 3 mnd før for sikkerhetsskyld
     }
 
-    private LocalDate getMaksDato(Fagsak fagsak) {
-        var personinfo = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId()).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
-        var maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // siste dag året fyller 18
+    private LocalDate getMaksDato(@SuppressWarnings("unused") Fagsak fagsak) {
+        var maksdato = Tid.TIDENES_ENDE;
         return maksdato;
     }
 
