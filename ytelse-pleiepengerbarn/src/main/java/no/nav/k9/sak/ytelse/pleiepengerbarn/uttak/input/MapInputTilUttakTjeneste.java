@@ -35,6 +35,8 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
@@ -73,6 +75,7 @@ public class MapInputTilUttakTjeneste {
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private EtablertTilsynTjeneste tilsynTjeneste;
+    private PleietrengendeKravprioritet pleietrengendeKravprioritet;
 
     @Inject
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -84,6 +87,7 @@ public class MapInputTilUttakTjeneste {
                                     FagsakRepository fagsakRepository,
                                     InntektArbeidYtelseTjeneste iayTjeneste,
                                     EtablertTilsynTjeneste tilsynTjeneste,
+                                    PleietrengendeKravprioritet pleietrengendeKravprioritet,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -95,6 +99,7 @@ public class MapInputTilUttakTjeneste {
         this.fagsakRepository = fagsakRepository;
         this.iayTjeneste = iayTjeneste;
         this.tilsynTjeneste = tilsynTjeneste;
+        this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
@@ -120,6 +125,7 @@ public class MapInputTilUttakTjeneste {
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
         final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse);
+        final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getPleietrengendeAktørId());
 
         var input = new InputParametere()
             .medBehandling(behandling)
@@ -132,7 +138,9 @@ public class MapInputTilUttakTjeneste {
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
             .medUttaksGrunnlag(uttakGrunnlag)
-            .medUtledetEtablertTilsyn(utledetEtablertTilsyn);
+            .medUtledetEtablertTilsyn(utledetEtablertTilsyn)
+            .medKravprioritet(kravprioritet)
+            ;
 
         return toRequestData(input);
     }
@@ -189,6 +197,7 @@ public class MapInputTilUttakTjeneste {
         var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynGrunnlag);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynGrunnlag);
+        final Map<LukketPeriode, List<Saksnummer>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
 
         return new Uttaksgrunnlag(
             barn,
@@ -204,6 +213,14 @@ public class MapInputTilUttakTjeneste {
             tilsynsperioder,
             beredskapsperioder,
             nattevåksperioder);
+    }
+    
+    public Map<LukketPeriode, List<Saksnummer>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+        final Map<LukketPeriode, List<Saksnummer>> resultat = new HashMap<>();
+        kravprioritet.forEach(s -> {
+            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer()).collect(Collectors.toList()));
+        });
+        return resultat;
     }
 
     private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynGrunnlag grunnlag) {
@@ -302,5 +319,5 @@ public class MapInputTilUttakTjeneste {
         }
         return Utfall.valueOf(vp.getGjeldendeUtfall().getKode());
     }
-
+    
 }

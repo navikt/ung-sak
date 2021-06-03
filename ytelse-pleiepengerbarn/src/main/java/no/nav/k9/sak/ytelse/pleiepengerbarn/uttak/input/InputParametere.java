@@ -15,6 +15,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
@@ -33,6 +34,7 @@ public class InputParametere {
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
     private LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn;
+    private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
 
     public InputParametere() {
     }
@@ -134,5 +136,14 @@ public class InputParametere {
 
     public NavigableSet<DatoIntervallEntitet> getUtvidetRevurderingPerioder() {
         return utvidetRevurderingPerioder;
+    }
+    
+    public InputParametere medKravprioritet(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+        this.kravprioritet = kravprioritet;
+        return this;
+    }
+    
+    public LocalDateTimeline<List<Kravprioritet>> getKravprioritet() {
+        return kravprioritet;
     }
 }
