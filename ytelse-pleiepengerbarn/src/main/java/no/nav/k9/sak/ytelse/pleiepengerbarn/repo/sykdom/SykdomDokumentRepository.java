@@ -89,7 +89,6 @@ public class SykdomDokumentRepository {
 
         entityManager.persist(dokumentInformasjon);
         entityManager.flush();
-        entityManager.getTransaction().commit();
     }
 
     public SykdomInnleggelser hentInnleggelse(AktørId pleietrengende) {
