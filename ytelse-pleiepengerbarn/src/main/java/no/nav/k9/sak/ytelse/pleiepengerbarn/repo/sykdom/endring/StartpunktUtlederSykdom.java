@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -25,6 +28,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 @GrunnlagRef("SykdomGrunnlag")
 @FagsakYtelseTypeRef("PSB")
 class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
+
+    private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederSykdom.class);
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
@@ -52,7 +57,11 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
         var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         var erIngenEndringIGrunnlaget = sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
-        return erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;
+        var startpunktType = erIngenEndringIGrunnlaget ? StartpunktType.UDEFINERT : StartpunktType.INNGANGSVILKÅR_MEDISINSK;
+
+        log.info("Kjører diff av sykdom, funnet følgende resultat = {}", startpunktType);
+
+        return startpunktType;
     }
 
     private List<Periode> utledVurderingsperiode(Long behandlingId) {

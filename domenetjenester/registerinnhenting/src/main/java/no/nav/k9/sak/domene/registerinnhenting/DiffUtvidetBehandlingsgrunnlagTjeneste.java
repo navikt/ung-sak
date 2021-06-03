@@ -16,5 +16,5 @@ public interface DiffUtvidetBehandlingsgrunnlagTjeneste {
 
     public void leggTilSnapshot(BehandlingReferanse ref, EndringsresultatSnapshot snapshot);
 
-    public void leggTilDiffResultat(BehandlingReferanse ref, EndringsresultatDiff sporedeEndringerDiff);
+    public void leggTilDiffResultat(BehandlingReferanse ref, EndringsresultatDiff idDiff, EndringsresultatDiff sporedeEndringerDiff);
 }
