@@ -19,10 +19,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
@@ -67,29 +67,27 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {
         var fagsak = behandling.getFagsak();
         var søknad = søknadRepository.hentSøknad(behandling);
-        var maksdato = getMaksDato(fagsak);
-        var søknadFom = søknad.getMottattDato();
-        var mindato = getMinDato(søknadFom, fagsak);
-        if (maksdato.isAfter(mindato)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
-        } else {
-            log.warn("maksdato [{}] er før mindato[{}], søknadsdato[{}], har ingen periode å vurdere", maksdato, mindato, søknadFom);
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, søknadFom);
-        }
+        AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
+        return utledPeriode(søknad.getSøknadsperiode(), barnAktørId);
     }
 
-    private LocalDate getMinDato(LocalDate søknadFom, Fagsak fagsak) {
-        var barninfo = personinfoAdapter.hentKjerneinformasjon(fagsak.getPleietrengendeAktørId());
+    DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, AktørId barnAktørId) {
+        var søknadFom = periode.getFomDato();
+        var barninfo = personinfoAdapter.hentKjerneinformasjon(barnAktørId);
+
         // ikke åpne fagsaken før barnets fødselsdato
         var fødselsdato = barninfo.getFødselsdato();
         // 1. jan minst 3 år før søknad sendt inn (spesielle særtilfeller tillater at et går an å sette tilbake it itid
         var fristFørSøknadsdato = søknadFom.minusYears(3).withMonth(1).withDayOfMonth(1);
-        return Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get(); // tar seneste av de 2
-    }
 
-    private LocalDate getMaksDato(@SuppressWarnings("unused") Fagsak fagsak) {
+        var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
         var maksdato = Tid.TIDENES_ENDE;
-        return maksdato;
+        if (maksdato.isAfter(mindato)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
+        } else {
+            log.warn("maksdato [{}] er før mindato[{}], søknadsperiode fom[{}], har ingen periode å vurdere", maksdato, mindato, søknadFom);
+            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, søknadFom);
+        }
     }
 
     @Override
