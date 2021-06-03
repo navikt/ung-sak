@@ -62,7 +62,7 @@ public class GReguleringRepository {
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", periode.getFomDato());
         query.setParameter("tom", periode.getTomDato());
-        ;
+
 
         return Integer.toUnsignedLong(query.executeUpdate());
     }

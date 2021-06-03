@@ -74,6 +74,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
         var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
+        @SuppressWarnings("unchecked")
         Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
@@ -90,6 +91,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         }
 
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
+        @SuppressWarnings("unchecked")
         Map<KravDokument, List<SøktPeriode<?>>> kravdokMedFravær = finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
 
         return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
@@ -187,6 +189,7 @@ public class DefaultOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         return tilkjentYtelseTimeline.compress();
     }
 
+    @SuppressWarnings("rawtypes")
     private VurderSøknadsfristTjeneste finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)

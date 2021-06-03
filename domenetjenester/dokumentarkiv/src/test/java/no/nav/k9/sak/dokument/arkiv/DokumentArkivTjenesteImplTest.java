@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -243,7 +241,4 @@ public class DokumentArkivTjenesteImplTest {
             List.of(byggDokumentInfo(arkivFilType, variantFormat, Brevkode.UDEFINERT)));
     }
 
-    private Date toDate(LocalDateTime dateTime) {
-        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
 }

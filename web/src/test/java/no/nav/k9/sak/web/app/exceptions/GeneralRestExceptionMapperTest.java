@@ -25,6 +25,7 @@ public class GeneralRestExceptionMapperTest {
     public void skalMappeManglerTilgangFeil() {
         Feil manglerTilgangFeil = TestFeil.FACTORY.manglerTilgangFeil();
 
+        @SuppressWarnings("resource")
         Response response = new ManglerTilgangExceptionMapper().toResponse((ManglerTilgangException) manglerTilgangFeil.toException());
 
         assertThat(response.getStatus()).isEqualTo(403);
@@ -39,7 +40,8 @@ public class GeneralRestExceptionMapperTest {
     public void skalMappeFunksjonellFeil() {
         Feil funksjonellFeil = TestFeil.FACTORY.funksjonellFeil();
 
-        Response response = new VLExceptionMapper().toResponse((VLException) funksjonellFeil.toException());
+        @SuppressWarnings("resource")
+        Response response = new VLExceptionMapper().toResponse(funksjonellFeil.toException());
 
         assertThat(response.getEntity()).isInstanceOf(FeilDto.class);
         FeilDto feilDto = (FeilDto) response.getEntity();
@@ -53,6 +55,7 @@ public class GeneralRestExceptionMapperTest {
     public void skalMappeVLException() {
         VLException vlException = TestFeil.FACTORY.tekniskFeil().toException();
 
+        @SuppressWarnings("resource")
         Response response = new VLExceptionMapper().toResponse(vlException);
 
         assertThat(response.getEntity()).isInstanceOf(FeilDto.class);
@@ -66,6 +69,7 @@ public class GeneralRestExceptionMapperTest {
     public void skalMappeGenerellFeil() {
         String feilmelding = "en helt generell feil";
 
+        @SuppressWarnings("resource")
         Response response = new ThrowableExceptionMapper().toResponse(new RuntimeException(feilmelding));
 
         assertThat(response.getStatus()).isEqualTo(500);

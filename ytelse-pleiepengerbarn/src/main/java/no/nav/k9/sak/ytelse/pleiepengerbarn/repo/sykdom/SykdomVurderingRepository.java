@@ -161,7 +161,7 @@ public class SykdomVurderingRepository {
             return List.of();
         }
         final var versjonBruktIGrunnlag = versjonBruktIGrunnlagOpt.get();
-        
+
         final TypedQuery<SykdomVurdering> q2 = entityManager.createQuery(
                 "SELECT v " +
                 "From SykdomVurdering as v " +
@@ -169,7 +169,7 @@ public class SykdomVurderingRepository {
                 , SykdomVurdering.class);
             q2.setParameter("vurderingId", vurderingId);
         final var sykdomVurdering = q2.getResultList().stream().findFirst().get();
-        
+
         return sykdomVurdering.getSykdomVurderingVersjoner().stream()
                 .filter(vv -> vv.getVersjon() <= versjonBruktIGrunnlag.getVersjon())
                 .collect(Collectors.toList());
@@ -191,7 +191,7 @@ public class SykdomVurderingRepository {
             , SykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
         q.setParameter("behandlingUuid", behandlingUuid);
-        return (Collection<SykdomVurderingVersjon>) q.getResultList();
+        return q.getResultList();
     }
 
     public Collection<SykdomVurderingVersjon> hentSisteVurderingerFor(SykdomVurderingType sykdomVurderingType,
@@ -211,7 +211,7 @@ public class SykdomVurderingRepository {
             , SykdomVurderingVersjon.class);
         q.setParameter("sykdomVurderingType", sykdomVurderingType);
         q.setParameter("aktørId", pleietrengende);
-        return (Collection<SykdomVurderingVersjon>) q.getResultList();
+        return q.getResultList();
     }
 
 
