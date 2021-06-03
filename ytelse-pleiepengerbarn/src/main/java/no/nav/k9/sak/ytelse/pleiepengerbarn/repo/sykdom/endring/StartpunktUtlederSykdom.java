@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.endring;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -21,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 
@@ -50,7 +50,8 @@ class StartpunktUtlederSykdom implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForId((UUID) grunnlagId1);
+        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
+            .map(SykdomGrunnlagBehandling::getGrunnlag);
 
         List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref.getBehandlingId());
         var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
