@@ -92,27 +92,36 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkårene.get(), perioder);
+            return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkårene.get(), vilkårType, perioder);
         }
         return utledPeriode(behandlingId, vilkårType);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkår vilkår, Set<DatoIntervallEntitet> perioder) {
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType, Set<DatoIntervallEntitet> perioder) {
         var perioderTilVurdering = new TreeSet<>(perioder);
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
             var berørtePerioder = utledUtvidetPeriode(referanse);
-            perioderTilVurdering.addAll(berørtePerioder);
+
+            var periodes = utledVurderingsperiode(vilkårene);
+            var berørteSykdomsPerioder = periodes.stream()
+                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+                .filter(it -> berørtePerioder.stream().anyMatch(it::overlapper))
+                .collect(Collectors.toCollection(TreeSet::new));
+
+            perioderTilVurdering.addAll(berørteSykdomsPerioder);
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
-        return vilkår.getPerioder()
+        return vilkårene.getVilkår(vilkårType)
+            .orElseThrow()
+            .getPerioder()
             .stream()
             .map(VilkårPeriode::getPeriode)
             .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(datoIntervallEntitet::overlapper))
@@ -145,10 +154,9 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var ekstraPerioder = utvidedePerioder.stream()
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new));
 
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
-            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
+            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR, ekstraPerioder);
         }
         return ekstraPerioder;
     }
