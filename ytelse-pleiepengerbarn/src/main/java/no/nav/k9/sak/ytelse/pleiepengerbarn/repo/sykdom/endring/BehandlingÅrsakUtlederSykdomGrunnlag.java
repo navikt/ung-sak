@@ -24,7 +24,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 
 @ApplicationScoped
 @GrunnlagRef("SykdomGrunnlag")
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef("PSB")
 class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
