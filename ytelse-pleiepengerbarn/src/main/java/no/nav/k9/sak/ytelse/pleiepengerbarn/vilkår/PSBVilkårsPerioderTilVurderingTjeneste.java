@@ -93,7 +93,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-        if (vilkårene.isPresent()) {
+        if (vilkårene.isPresent() && vilkårene.get().getVilkår(vilkårType).isPresent()) {
             return utledVilkårsPerioderFraPerioderTilVurdering(behandlingId, vilkårene.get(), vilkårType, perioder);
         }
         return utledPeriode(behandlingId, vilkårType);
@@ -155,7 +155,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new));
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
-        if (vilkårene.isPresent()) {
+        if (vilkårene.isPresent() && vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).isPresent()) {
             return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR, ekstraPerioder);
         }
         return ekstraPerioder;
