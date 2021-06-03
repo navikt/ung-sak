@@ -124,7 +124,7 @@ public class VilkårRestTjeneste {
 
     private NavigableSet<DatoIntervallEntitet> utledPeriodeTilVurdering(Behandling behandling, VilkårType vilkårType) {
         if (vilkårType.equals(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)) {
-            return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling), true);
+            return beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling), false);
         }
         return getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), vilkårType);
     }
