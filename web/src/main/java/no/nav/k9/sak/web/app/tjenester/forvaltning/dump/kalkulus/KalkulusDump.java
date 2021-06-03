@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.kalkulus;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -40,10 +39,8 @@ public class KalkulusDump implements DebugDumpBehandling {
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
-        try (var runner = ContainerContextRunner.createRunner()) {
-
-            var data = runner.submit(behandling, () -> tjeneste.hentBeregningsgrunnlagForGui(ref))
-                .get(20, TimeUnit.SECONDS);
+        try {
+            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentBeregningsgrunnlagForGui(ref));
 
             if (data.isEmpty()) {
                 return List.of();
