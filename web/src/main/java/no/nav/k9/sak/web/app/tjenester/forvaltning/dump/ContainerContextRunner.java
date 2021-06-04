@@ -53,16 +53,10 @@ public class ContainerContextRunner {
 
     @Transactional
     private <T> T submit(Callable<T> call) throws Exception {
-
         var containerLogin = new ContainerLogin(tokenProvider);
-        try {
-            containerLogin.login();
-
-            var result = call.call();
-            return result;
-        } finally {
-            containerLogin.logout();
-        }
+        containerLogin.login();
+        var result = call.call();
+        return result;
     }
 
     public static <T> T doRun(Behandling behandling, Callable<T> call) {
