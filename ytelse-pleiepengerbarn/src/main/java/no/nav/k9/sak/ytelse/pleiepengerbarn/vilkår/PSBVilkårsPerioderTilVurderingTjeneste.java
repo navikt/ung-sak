@@ -115,7 +115,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getPeriode)
-            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(datoIntervallEntitet::overlapper))
+            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(it -> datoIntervallEntitet.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -206,8 +206,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {
-        return behandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)
-            && behandling.getOriginalBehandlingId().isPresent();
+        return behandling.getOriginalBehandlingId().isPresent();
     }
 
     @Override
