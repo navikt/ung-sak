@@ -40,9 +40,9 @@ public class AksjonspunktRestTjenesteDump implements DebugDumpBehandling {
 
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
-        try (var runner = ContainerContextRunner.createRunner()) {
-            var data = runner.submit(behandling, () -> dumpAksjonspunkter(behandling)).get(20, TimeUnit.SECONDS);
-            return data;
+
+        try {
+            return ContainerContextRunner.doRun(behandling, () -> dumpAksjonspunkter(behandling));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

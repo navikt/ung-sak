@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.vilkår;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -39,8 +38,8 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
 
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
-        try (var runner = ContainerContextRunner.createRunner()) {
-            var data = runner.submit(behandling, () -> dumpVilkår(behandling)).get(20, TimeUnit.SECONDS);
+        try {
+            var data = ContainerContextRunner.doRun(behandling, () -> dumpVilkår(behandling));
             return data;
         } catch (Exception e) {
             StringWriter sw = new StringWriter();

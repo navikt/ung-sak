@@ -1,9 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.control.ActivateRequestContext;
@@ -42,32 +44,6 @@ public class ContainerContextRunner implements AutoCloseable {
         this.tokenProvider = tokenProvider;
     }
 
-    public <T> Future<T> submit(Behandling behandling, Callable<T> call) {
-        final var fagsakId = behandling.getFagsakId();
-        final var saksnummer = behandling.getFagsak().getSaksnummer();
-        final var behandlingId = behandling.getId();
-
-        var future = EXECUTOR.submit(() -> {
-            LOG_CONTEXT.add("fagsak", fagsakId);
-            LOG_CONTEXT.add("saksnummer", saksnummer);
-            LOG_CONTEXT.add("behandling", behandlingId);
-
-            var containerLogin = new ContainerLogin(tokenProvider);
-            try {
-                containerLogin.login();
-                var result = call.call();
-                return result;
-            } finally {
-                containerLogin.logout();
-                LOG_CONTEXT.remove("behandling");
-                LOG_CONTEXT.remove("fagsak");
-                LOG_CONTEXT.remove("saksnummer");
-            }
-
-        });
-        return future;
-    }
-
     public static ContainerContextRunner createRunner() {
         return CDI.current().select(ContainerContextRunner.class).get();
     }
@@ -76,4 +52,41 @@ public class ContainerContextRunner implements AutoCloseable {
     public void close() throws Exception {
         CDI.current().destroy(this);
     }
+
+    private <T> T submit(Callable<T> call) throws Exception {
+        var containerLogin = new ContainerLogin(tokenProvider);
+        try {
+            containerLogin.login();
+            var result = call.call();
+            return result;
+        } finally {
+            containerLogin.logout();
+        }
+    }
+
+    public static <T> T doRun(Behandling behandling, Callable<T> call) {
+        final var fagsakId = behandling.getFagsakId();
+        final var saksnummer = behandling.getFagsak().getSaksnummer();
+        final var behandlingId = behandling.getId();
+
+        try {
+            var future = EXECUTOR.submit((() -> {
+                try (var runner = ContainerContextRunner.createRunner()) {
+                    LOG_CONTEXT.add("fagsak", fagsakId);
+                    LOG_CONTEXT.add("saksnummer", saksnummer);
+                    LOG_CONTEXT.add("behandling", behandlingId);
+                    return runner.submit(call);
+                } finally {
+                    LOG_CONTEXT.remove("behandling");
+                    LOG_CONTEXT.remove("fagsak");
+                    LOG_CONTEXT.remove("saksnummer");
+                }
+            }));
+
+            return future.get(20, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }
