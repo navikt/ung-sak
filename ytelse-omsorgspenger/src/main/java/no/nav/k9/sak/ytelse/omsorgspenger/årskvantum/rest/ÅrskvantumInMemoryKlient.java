@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.RequestScoped;
@@ -32,7 +33,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene, int antallDager) {
+    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene, Optional<Integer> antallDager) {
 
     }
 
