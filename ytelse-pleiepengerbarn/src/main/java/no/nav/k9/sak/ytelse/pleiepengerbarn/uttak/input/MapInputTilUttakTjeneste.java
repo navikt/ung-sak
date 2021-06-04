@@ -37,7 +37,6 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -199,7 +198,7 @@ public class MapInputTilUttakTjeneste {
         var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynGrunnlag);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynGrunnlag);
-        final Map<LukketPeriode, List<Saksnummer>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
+        final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
 
         return new Uttaksgrunnlag(
             barn,
@@ -214,13 +213,14 @@ public class MapInputTilUttakTjeneste {
             inngangsvilkår,
             tilsynsperioder,
             beredskapsperioder,
-            nattevåksperioder);
+            nattevåksperioder,
+            kravprioritet);
     }
     
-    public Map<LukketPeriode, List<Saksnummer>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
-        final Map<LukketPeriode, List<Saksnummer>> resultat = new HashMap<>();
+    public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
-            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer()).collect(Collectors.toList()));
+            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getSaksnummer().getVerdi()).collect(Collectors.toList()));
         });
         return resultat;
     }
