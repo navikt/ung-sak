@@ -19,6 +19,7 @@ import javax.persistence.Table;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -45,7 +46,10 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
     })
     private DatoIntervallEntitet periode;
 
-    
+
+    /** @deprecated overlater til skjermbilde og saksbehandler å vurdere periodens relasjon til medlemskapsvilkåret */
+    @Deprecated(forRemoval = true)
+    @DiffIgnore
     @Column(name = "tidligere_opphold", nullable = false)
     private boolean tidligereOpphold;
 
@@ -63,7 +67,6 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
             utlandsopphold.getPeriodeFom(),
             utlandsopphold.getPeriodeTom()
                 );
-        this.tidligereOpphold = utlandsopphold.isTidligereOpphold();
 
         // kopier ikke oppgitt tilknytning. Det settes p.t. separat i builder (setOppgittTilknytning) for å knytte til OppgittTilknytningEntitet
     }
@@ -90,21 +93,12 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
         return periode != null ? periode.getTomDato() : null;
     }
 
-
-    public boolean isTidligereOpphold() {
-        return tidligereOpphold;
-    }
-
     void setLand(Landkoder land) {
         this.land = land == null ? Landkoder.UDEFINERT : land;
     }
 
     void setPeriode(LocalDate periodeFom, LocalDate periodeTom) {
         this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeFom, periodeTom);
-    }
-
-    void setTidligereOpphold(boolean tidligereOpphold) {
-        this.tidligereOpphold = tidligereOpphold;
     }
 
     void setOppgittTilknytning(MedlemskapOppgittTilknytningEntitet oppgittTilknytning) {
@@ -121,8 +115,7 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
         }
         MedlemskapOppgittLandOppholdEntitet other = (MedlemskapOppgittLandOppholdEntitet) obj;
         return Objects.equals(this.getLand(), other.getLand())
-                && Objects.equals(this.periode, other.periode)
-                && Objects.equals(this.tidligereOpphold, other.isTidligereOpphold());
+                && Objects.equals(this.periode, other.periode);
     }
 
 
@@ -153,11 +146,6 @@ public class MedlemskapOppgittLandOppholdEntitet extends BaseEntitet implements 
 
         public Builder medPeriode(LocalDate periodeStartdato, LocalDate periodeSluttdato) {
             oppholdMal.periode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeStartdato, periodeSluttdato);
-            return this;
-        }
-
-        public Builder erTidligereOpphold(boolean tidligereOpphold) {
-            oppholdMal.tidligereOpphold = tidligereOpphold;
             return this;
         }
 

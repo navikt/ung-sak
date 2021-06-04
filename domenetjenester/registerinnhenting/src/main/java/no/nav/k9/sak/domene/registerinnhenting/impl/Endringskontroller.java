@@ -80,6 +80,7 @@ public class Endringskontroller {
             .utledStartpunktForDiffBehandlingsgrunnlag(ref, endringsresultat);
 
         if (startpunkt == null || startpunkt.equals(StartpunktType.UDEFINERT)) {
+            LOGGER.info("Fant ingen endringer ved diff av grunnlag");
             return; // Ingen detekterte endringer - ingen tilbakespoling
         }
 

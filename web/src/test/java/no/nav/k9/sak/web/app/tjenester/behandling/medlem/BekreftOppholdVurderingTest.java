@@ -30,7 +30,6 @@ import no.nav.k9.sak.domene.medlem.MedlemskapAksjonspunktTjeneste;
 import no.nav.k9.sak.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.k9.sak.domene.medlem.VurderMedlemskapTjeneste;
 import no.nav.k9.sak.domene.medlem.impl.HentMedlemskapFraRegister;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medlem.BekreftLovligOppholdVurderingDto;
@@ -51,14 +50,12 @@ public class BekreftOppholdVurderingTest {
 
     private BehandlingRepositoryProvider repositoryProvider ;
     private HistorikkInnslagTekstBuilder tekstBuilder ;
-    private PersonopplysningTjeneste personopplysningTjeneste ;
     private LocalDate now = LocalDate.now();
 
     @BeforeEach
     public void setup(){
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         tekstBuilder = new HistorikkInnslagTekstBuilder();
-        personopplysningTjeneste = mock(PersonopplysningTjeneste.class);
         now = LocalDate.now();
     }
 

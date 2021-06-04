@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.*;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -20,12 +23,19 @@ public class AvklarÅrskvantumDokDto extends BekreftetAksjonspunktDto {
     @NotNull
     private Boolean innvilgePeriodene;
 
+    @JsonProperty(value = "antallDager")
+    @Min(0)
+    @Max(Integer.MAX_VALUE)
+    private Integer antallDager;
+
     @JsonCreator
     public AvklarÅrskvantumDokDto(@JsonProperty(value = "begrunnelse", required = true) @NotNull String begrunnelse,
                                   @JsonProperty(value = "innvilgePeriodene", required = true) @NotNull Boolean innvilgePeriodene,
+                                  @JsonProperty(value = "antallDager") Integer antallDager,
                                   @JsonProperty(value = "fortsettBehandling", required = true) @NotNull Boolean fortsettBehandling) {
         super(begrunnelse);
         this.innvilgePeriodene = innvilgePeriodene;
+        this.antallDager = antallDager;
         this.fortsettBehandling = fortsettBehandling;
     }
 
@@ -35,6 +45,10 @@ public class AvklarÅrskvantumDokDto extends BekreftetAksjonspunktDto {
 
     public Boolean getinnvilgePeriodene() {
         return innvilgePeriodene;
+    }
+
+    public Optional<Integer> getAntallDager() {
+        return Optional.ofNullable(antallDager);
     }
 
     public Boolean getfortsettBehandling() {

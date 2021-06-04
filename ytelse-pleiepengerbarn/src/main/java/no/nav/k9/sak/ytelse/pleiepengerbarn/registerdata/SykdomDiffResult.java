@@ -23,10 +23,6 @@ public class SykdomDiffResult extends DiffResult {
         this.grunnlagSammenlikningsresultat = grunnlagSammenlikningsresultat;
     }
 
-    public static DiffResult ingenDiff() {
-        return new SykdomDiffResult(null);
-    }
-
     @Override
     public Map<Node, Pair> getLeafDifferences() {
         if (areDifferent()) {
@@ -45,5 +41,14 @@ public class SykdomDiffResult extends DiffResult {
     @Override
     public boolean areDifferent() {
         return grunnlagSammenlikningsresultat != null && !grunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return "SykdomDiffResult{" +
+            "isEmpty=" + isEmpty() +
+            ", areDifferent=" + areDifferent() +
+            ", diffPerioder=" + (grunnlagSammenlikningsresultat != null ? grunnlagSammenlikningsresultat.getDiffPerioder().toString() : "[]") +
+            "}";
     }
 }

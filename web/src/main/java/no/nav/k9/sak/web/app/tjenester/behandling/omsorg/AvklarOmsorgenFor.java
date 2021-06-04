@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarOmsorgenForDto;
 import no.nav.k9.sak.typer.Periode;
@@ -34,6 +35,7 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
     private HistorikkTjenesteAdapter historikkAdapter;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
+    private PersoninfoAdapter personinfoAdapter;
 
     AvklarOmsorgenFor() {
         // for CDI proxy
@@ -42,9 +44,11 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
     @Inject
     AvklarOmsorgenFor(VilkårResultatRepository vilkårResultatRepository,
                       BehandlingRepository behandlingRepository,
+                      PersoninfoAdapter personinfoAdapter,
                       HistorikkTjenesteAdapter historikkAdapter) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
+        this.personinfoAdapter = personinfoAdapter;
         this.historikkAdapter = historikkAdapter;
     }
 
@@ -73,7 +77,12 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
             var fagsakPeriode = new LocalDateInterval(fagsak.getPeriode().getFomDato(), fagsak.getPeriode().getTomDato());
             var angittPeriode = new LocalDateInterval(periode.getFom(), periode.getTom());
             if (!fagsakPeriode.contains(angittPeriode)) {
-                throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
+                var barninfo = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId()).orElseThrow(() -> new IllegalStateException("Mangler person info for barn"));
+                if (angittPeriode.getFomDato().isBefore(barninfo.getFødselsdato())) {
+                    throw new IllegalArgumentException("Kan ikke sette angitt periode for omsorg før fødseldato barn: " + barninfo.getFødselsdato());
+                } else {
+                    throw new IllegalArgumentException("Angitt periode må være i det minste innenfor fagsakens periode. angitt=" + angittPeriode + ", fagsakPeriode=" + fagsakPeriode);
+                }
             }
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
         }

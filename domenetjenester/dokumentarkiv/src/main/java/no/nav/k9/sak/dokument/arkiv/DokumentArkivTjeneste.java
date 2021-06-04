@@ -3,7 +3,6 @@ package no.nav.k9.sak.dokument.arkiv;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,12 +16,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.k9.kodeverk.dokument.VariantFormat;
-import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.BrukerResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.Datotype;
@@ -32,13 +25,20 @@ import no.nav.k9.felles.integrasjon.saf.DokumentoversiktFagsakQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.DokumentoversiktResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.FagsakInput;
+import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
 import no.nav.k9.felles.integrasjon.saf.Journalpost;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.RelevantDato;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.dokument.ArkivFilType;
+import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.k9.kodeverk.dokument.VariantFormat;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {
@@ -176,7 +176,7 @@ public class DokumentArkivTjeneste {
     private Optional<LocalDateTime> hentRelevantDato(Journalpost journalpost, Datotype datotype) {
         return Optional.ofNullable(journalpost.getRelevanteDatoer()).orElse(List.of()).stream()
             .filter(it -> it.getDatotype().equals(datotype))
-            .map(it -> it.getDato().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+            .map(RelevantDato::getDato)
             .findFirst();
     }
 

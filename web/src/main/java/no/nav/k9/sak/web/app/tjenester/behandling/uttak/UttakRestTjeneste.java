@@ -1,35 +1,33 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.sak.domene.uttak.UttakTjeneste;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.kontrakt.uttak.FastsattUttakDto;
-import no.nav.k9.sak.kontrakt.uttak.OppgittUttakDto;
-import no.nav.k9.sak.kontrakt.uttak.UttaksplanDto;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.uttak.FastsattUttakDto;
+import no.nav.k9.sak.kontrakt.uttak.OppgittUttakDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
 @Transactional
@@ -39,12 +37,8 @@ public class UttakRestTjeneste {
 
     static final String BASE_PATH = "/behandling/uttak";
 
-    public static final String UTTAKSPLANER = BASE_PATH + "/uttaksplaner";
     public static final String UTTAK_OPPGITT = BASE_PATH + "/oppgitt";
     public static final String UTTAK_FASTSATT = BASE_PATH + "/fastsatt";
-
-    private UttakTjeneste uttakTjeneste;
-
 
     private MapUttak mapUttak;
 
@@ -53,8 +47,7 @@ public class UttakRestTjeneste {
     }
 
     @Inject
-    public UttakRestTjeneste(UttakTjeneste uttakTjeneste, MapUttak mapOppgittUttak) {
-        this.uttakTjeneste = uttakTjeneste;
+    public UttakRestTjeneste(MapUttak mapOppgittUttak) {
         this.mapUttak = mapOppgittUttak;
     }
 
@@ -65,7 +58,7 @@ public class UttakRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(UTTAK_OPPGITT)
     @Operation(description = "Hent oppgitt uttak for behandling", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Oppgitt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OppgittUttakDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer Oppgitt uttak fra søknad, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OppgittUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -81,36 +74,13 @@ public class UttakRestTjeneste {
     @Path(UTTAK_FASTSATT)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent Fastsatt uttak for behandling", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer uttak fastsatt av saksbehandler (fakta avklart før vurdering av uttak), null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer uttak fastsatt av saksbehandler (fakta avklart før vurdering av uttak), null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public FastsattUttakDto getFastsattUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
         return mapUttak.mapFastsattUttak(behandlingId);
-    }
-
-    /**
-     * Hent uttaksplan for angitt behandling og andre parters relevante saker. Sender inn saksnummer så de vil avsjekkes mot Abac enkelt istdf.
-     * å slå opp her.
-     */
-    @GET
-    @Path(UTTAKSPLANER)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Hent uttaksplaner", tags = "behandling - uttak", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer Uttaksplaner, tom liste hvis ikke finnes noe. Dette er faktisk uttaksplan fastsatt og vurdert.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanDto.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public UttaksplanDto getUttaksplaner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)  @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
-                                         @QueryParam("saksnummer") @Parameter(description = "Saksnummer for tilknyttede saker") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) List<SaksnummerDto> andreParterSaker) {
-        UUID behandlingId = behandlingIdDto.getBehandlingUuid();
-        List<Saksnummer> andrePartersSaknummer = andreParterSaker == null ? Collections.emptyList() : andreParterSaker.stream().map(SaksnummerDto::getVerdi).collect(Collectors.toList());
-
-        String uttaksplanBehandling = uttakTjeneste.hentUttaksplanerRaw(behandlingId);
-        String andreParterUttaksplaner = uttakTjeneste.hentUttaksplanerRaw(andrePartersSaknummer);
-
-        return new UttaksplanDto(uttaksplanBehandling, andreParterUttaksplaner);
     }
 
 }

@@ -23,6 +23,7 @@ public class SøknadsfristTjenesteProvider {
         this.søknadsfristTjenester = søknadsfristTjenester;
     }
 
+    @SuppressWarnings("unchecked")
     public VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
         return (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType)

@@ -5,8 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.Tuple;
 
@@ -84,6 +86,42 @@ public class CsvOutput {
         }
 
         return Optional.of(dumpAsCsv(true, results, path, toCsv));
+    }
+
+    /** Muliggjør mer effektiv bruk av minne enn å ta en Liste av tuple. */
+    public static Optional<DumpOutput> dumpResultSetToCsv(String path, Stream<Tuple> results) {
+
+        class CsvCollector implements Consumer<Tuple> {
+            private Tuple firstRow;
+            private Map<String, Function<Tuple, ?>> toCsv = new LinkedHashMap<>();
+            private StringBuilder sb = new StringBuilder(100000);
+
+            @Override
+            public void accept(Tuple t) {
+                if (firstRow == null) {
+                    // header row
+                    firstRow = t;
+                    int col = 0;
+                    for (var c : firstRow.getElements()) {
+                        int thisCol = col++;
+                        toCsv.put(Optional.ofNullable(c.getAlias()).orElse("col-" + thisCol), r -> r.get(thisCol));
+                    }
+                    sb.append(csvHeader(toCsv));
+                } else {
+                    // data row
+                    sb.append(csvValueRow(t, toCsv)).append('\n');
+                }
+            }
+        }
+
+        var collector = new CsvCollector();
+        results.forEach(collector);
+
+        if (collector.firstRow == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(new DumpOutput(path, collector.sb.toString()));
+        }
     }
 
 }

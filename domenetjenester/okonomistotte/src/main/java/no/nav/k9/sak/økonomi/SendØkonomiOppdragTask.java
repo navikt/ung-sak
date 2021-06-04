@@ -12,18 +12,18 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.domene.uttak.rest.JsonMapper;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
+import no.nav.k9.sak.økonomi.tilkjentytelse.JsonMapper;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 
 @ApplicationScoped
 @ProsessTask(SendØkonomiOppdragTask.TASKTYPE)

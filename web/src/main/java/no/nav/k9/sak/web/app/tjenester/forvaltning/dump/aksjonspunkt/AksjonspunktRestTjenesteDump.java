@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.aksjonspunkt;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 
 @ApplicationScoped
@@ -24,6 +26,8 @@ public class AksjonspunktRestTjenesteDump implements DebugDumpBehandling {
     private AksjonspunktRestTjeneste restTjeneste;
 
     private ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
+
+    private String relativePath = "rest/aksjonpunkter";
 
     AksjonspunktRestTjenesteDump() {
         // for proxy
@@ -36,7 +40,19 @@ public class AksjonspunktRestTjenesteDump implements DebugDumpBehandling {
 
     @Override
     public List<DumpOutput> dump(Behandling behandling) {
-        String relativePath = "rest/aksjonpunkter";
+
+        try {
+            return ContainerContextRunner.doRun(behandling, () -> dumpAksjonspunkter(behandling));
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            return List.of(new DumpOutput(relativePath + "-rest-tjenese-ERROR.txt", sw.toString()));
+        }
+
+    }
+
+    private List<DumpOutput> dumpAksjonspunkter(Behandling behandling) {
         try (var response = restTjeneste.getAksjonspunkter(new BehandlingUuidDto(behandling.getUuid()));) {
             var entity = response.getEntity();
             if (entity != null) {
@@ -51,7 +67,6 @@ public class AksjonspunktRestTjenesteDump implements DebugDumpBehandling {
             e.printStackTrace(pw);
             return List.of(new DumpOutput(relativePath + "-ERROR.txt", sw.toString()));
         }
-
     }
 
 }

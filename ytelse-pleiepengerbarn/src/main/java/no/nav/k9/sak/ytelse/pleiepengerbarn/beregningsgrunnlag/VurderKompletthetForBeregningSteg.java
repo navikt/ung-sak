@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -126,6 +127,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
         return arbeidIPeriode.stream()
+            .filter(it -> UttakArbeidType.ARBEIDSTAKER.equals(UttakArbeidType.fraKode(it.getArbeidsforhold().getType())))
             .anyMatch(it -> harFravær(it.getPerioder()) && utledIdentifikator(it).equals(at.getArbeidsgiver())) || arbeidIPeriode.stream()
             .noneMatch(it -> utledIdentifikator(it).equals(at.getArbeidsgiver()));
     }

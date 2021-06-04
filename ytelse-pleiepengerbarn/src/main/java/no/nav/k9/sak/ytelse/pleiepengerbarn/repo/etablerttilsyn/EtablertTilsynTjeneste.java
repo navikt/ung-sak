@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +29,14 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt.UtledetEtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 
 @Dependent
 public class EtablertTilsynTjeneste {
@@ -38,33 +45,36 @@ public class EtablertTilsynTjeneste {
     private BehandlingRepository behandlingRepository;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
+    private EtablertTilsynRepository etablertTilsynRepository;
 
     @Inject
     public EtablertTilsynTjeneste(FagsakRepository fagsakRepository,
                                   BehandlingRepository behandlingRepository,
                                   UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
-                                  @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester) {
+                                  @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjenester,
+                                  EtablertTilsynRepository etablertTilsynRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.uttakPerioderGrunnlagRepository = uttakPerioderGrunnlagRepository;
         this.søknadsfristTjeneste = søknadsfristTjenester;
+        this.etablertTilsynRepository = etablertTilsynRepository;
     }
 
-
-    /*
-    public List<SøktUttak> beregnTilsynstidlinjeForPerioder(AktørId pleietrengende, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        return beregnTilsynstidlinje(pleietrengende)
-                .intersection(tidslinjeTilVurdering)
-                .toSegments()
-                .stream()
-                .map(it -> new SøktUttak(new LukketPeriode(it.getFom(), it.getTom()), it.getValue().getPeriode().getTimerPleieAvBarnetPerDag()))
-                .collect(Collectors.toList());
-    }
-    */
 
     public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(BehandlingReferanse behandlingRef) {
         final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(behandlingRef.getPleietrengendeAktørId(), behandlingRef.getFagsakPeriode());
         return byggTidslinje(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
+    }
+    
+    public void opprettGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
+        final LocalDateTimeline<UtledetEtablertTilsyn> tilsynstidslinje = beregnTilsynstidlinje(behandlingRef);
+        
+        final List<EtablertTilsynPeriode> tilsynsperioder = tilsynstidslinje.stream()
+            .map(s -> new EtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getVarighet(), s.getValue().getJournalpostId()))
+            .collect(Collectors.toList());
+        
+        final EtablertTilsyn etablertTilsyn = new EtablertTilsyn(tilsynsperioder);
+        etablertTilsynRepository.lagre(behandlingRef.getBehandlingId(), etablertTilsyn);
     }
 
 
@@ -115,7 +125,7 @@ public class EtablertTilsynTjeneste {
         for (FagsakKravDokument kravDokument : fagsakKravDokumenter) {
             for (var periode : kravDokument.perioderFraSøknad.getTilsynsordning().stream().map(Tilsynsordning::getPerioder).flatMap(Collection::stream).collect(Collectors.toList())) {
                 final var kilde = søkersSaksnummer.equals(kravDokument.fagsak.getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
-                final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde))));
+                final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.kravDokument.getJournalpostId()))));
                 resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
             }
         }

@@ -142,6 +142,13 @@ public class VilkårBuilder {
         return this;
     }
 
+    public boolean harDataPåPeriode(DatoIntervallEntitet periode) {
+        return vilkårTidslinje.intersection(periode.toLocalDateInterval())
+            .toSegments()
+            .stream()
+            .anyMatch(it -> Objects.nonNull(it.getValue()));
+    }
+
     public VilkårBuilder tilbakestill(DatoIntervallEntitet periode) {
         validerBuilder();
 

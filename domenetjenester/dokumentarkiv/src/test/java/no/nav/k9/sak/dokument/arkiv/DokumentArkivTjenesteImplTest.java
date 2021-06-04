@@ -8,21 +8,12 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.felles.integrasjon.saf.Arkivsaksystem;
 import no.nav.k9.felles.integrasjon.saf.AvsenderMottaker;
 import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerIdType;
@@ -35,18 +26,25 @@ import no.nav.k9.felles.integrasjon.saf.DokumentoversiktFagsakQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.DokumentoversiktResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.Dokumentstatus;
 import no.nav.k9.felles.integrasjon.saf.Dokumentvariant;
+import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
 import no.nav.k9.felles.integrasjon.saf.Journalpost;
 import no.nav.k9.felles.integrasjon.saf.Journalposttype;
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedlegg;
 import no.nav.k9.felles.integrasjon.saf.RelevantDato;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.integrasjon.saf.Sak;
 import no.nav.k9.felles.integrasjon.saf.SkjermingType;
 import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.felles.integrasjon.saf.Variantformat;
-import no.nav.k9.felles.integrasjon.saf.HentDokumentQuery;
-import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.kodeverk.dokument.ArkivFilType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 public class DokumentArkivTjenesteImplTest {
 
@@ -205,21 +203,21 @@ public class DokumentArkivTjenesteImplTest {
         journalpost.setKanal(Kanal.ALTINN);
         journalpost.setTema(Tema.AAP);
         journalpost.setBehandlingstema("behandlingstema");
-        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, new Date(), "fagsakId", "fagsaksystem"));
+        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem"));
         journalpost.setBruker(new Bruker("id", BrukerIdType.AKTOERID));
         journalpost.setAvsenderMottaker(new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn", "Land", true));
         journalpost.setJournalfoerendeEnhet("journalstatus");
         journalpost.setDokumenter(dokumentInfoer);
         journalpost.setRelevanteDatoer(List.of(
-            new RelevantDato(toDate(journalførtTid), Datotype.DATO_JOURNALFOERT),
-            new RelevantDato(toDate(registrertTid), Datotype.DATO_REGISTRERT)));
+            new RelevantDato(journalførtTid, Datotype.DATO_JOURNALFOERT),
+            new RelevantDato(registrertTid, Datotype.DATO_REGISTRERT)));
         journalpost.setEksternReferanseId("eksternReferanseId");
 
         return journalpost;
     }
 
     private DokumentInfo byggDokumentInfo(ArkivFilType arkivFilType, Variantformat variantFormat, Brevkode brevkode) {
-        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(), Dokumentstatus.FERDIGSTILT, new Date(), "origJpId", SkjermingType.POL.name(),
+        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(), Dokumentstatus.FERDIGSTILT, LocalDateTime.now(), "origJpId", SkjermingType.POL.name(),
             List.of(new LogiskVedlegg("id", "tittel")),
             List.of(new Dokumentvariant(variantFormat, "filnavn", "fluuid", arkivFilType.name(), true, SkjermingType.POL)));
     }
@@ -243,7 +241,4 @@ public class DokumentArkivTjenesteImplTest {
             List.of(byggDokumentInfo(arkivFilType, variantFormat, Brevkode.UDEFINERT)));
     }
 
-    private Date toDate(LocalDateTime dateTime) {
-        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
 }

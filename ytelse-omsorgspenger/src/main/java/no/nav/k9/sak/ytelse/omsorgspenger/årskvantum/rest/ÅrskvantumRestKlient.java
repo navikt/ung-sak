@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,9 +91,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene) {
+    public void innvilgeEllerAvslåPeriodeneManuelt(UUID behandlingUUID, boolean innvilgePeriodene, Optional<Integer> antallDager) {
         try {
-            var request = new ManuellVurderingRequest(behandlingUUID.toString(), innvilgePeriodene);
+            var request = new ManuellVurderingRequest(behandlingUUID.toString(), innvilgePeriodene, antallDager.orElse(null));
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/innvilgEllerAvslaa");
             restKlient.patch(endpoint, request);
         } catch (Exception e) {

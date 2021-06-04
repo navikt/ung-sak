@@ -12,25 +12,28 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @RequestScoped
 public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AleneOmOmsorgVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
+
     private PersoninfoAdapter personinfoAdapter;
 
     AleneOmOmsorgVilkårsVurderingTjeneste() {
@@ -65,20 +68,23 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
     private DatoIntervallEntitet utledPeriode(Behandling behandling) {
         var fagsak = behandling.getFagsak();
         var søknad = søknadRepository.hentSøknad(behandling);
-        var maksdato = getMaksDato(fagsak);
-        var søknadFom = søknad.getMottattDato();
-        if (maksdato.isAfter(søknadFom)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, maksdato);
-        } else {
-            log.warn("maksdato [{}] er før søknadsdato[{}], har ingen periode å vurdere", maksdato, søknadFom);
-            return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, søknadFom);
-        }
+        AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
+        var maksPeriode = utledMaksPeriode(søknad.getSøknadsperiode(), barnAktørId);
+        var søknadsperiode = søknad.getSøknadsperiode();
+        return maksPeriode.overlapp(søknadsperiode);
     }
 
-    private LocalDate getMaksDato(Fagsak fagsak) {
-        var personinfo = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId()).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
-        var maksdato = personinfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31); // siste dag året fyller 18
-        return maksdato;
+    DatoIntervallEntitet utledMaksPeriode(DatoIntervallEntitet periode, AktørId barnAktørId) {
+        var barninfo = personinfoAdapter.hentKjerneinformasjon(barnAktørId);
+
+        // ikke åpne fagsaken før barnets fødselsdato
+        var fødselsdato = barninfo.getFødselsdato();
+        // 1. jan minst 3 år før søknad sendt inn (spesielle særtilfeller tillater at et går an å sette tilbake it itid
+        var fristFørSøknadsdato = periode.getFomDato().minusYears(3).withMonth(1).withDayOfMonth(1);
+
+        var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
+        var maksdato = Tid.TIDENES_ENDE;
+        return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
     }
 
     @Override

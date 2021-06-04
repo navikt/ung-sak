@@ -37,13 +37,14 @@ public class AvklarÅrskvantumDok implements AksjonspunktOppdaterer<AvklarÅrskv
     public OppdateringResultat oppdater(AvklarÅrskvantumDokDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
         var innvilgePeriodene = dto.getinnvilgePeriodene();
+        var antallDager = dto.getAntallDager();
         Long behandlingId = param.getBehandlingId();
         var manuellVurderingString = innvilgePeriodene ? "innvilget" : "avslått";
 
         if (fortsettBehandling) {
             //Bekreft uttaksplan og fortsett behandling
             opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Uavklarte perioder er " + manuellVurderingString);
-            årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene);
+            årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene, antallDager);
         }
 
         return OppdateringResultat.utenOveropp();

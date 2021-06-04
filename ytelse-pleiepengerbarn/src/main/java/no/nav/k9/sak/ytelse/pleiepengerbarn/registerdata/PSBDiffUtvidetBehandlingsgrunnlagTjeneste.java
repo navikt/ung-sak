@@ -17,6 +17,7 @@ import no.nav.k9.sak.domene.registerinnhenting.DiffUtvidetBehandlingsgrunnlagTje
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
@@ -44,25 +45,24 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
 
     @Override
     public void leggTilSnapshot(BehandlingReferanse ref, EndringsresultatSnapshot snapshot) {
-        snapshot.leggTil(sykdomGrunnlagRepository.finnAktivGrunnlagId(ref.getBehandlingUuid()));
+        var uuid = UUID.randomUUID();
+        snapshot.leggTil(EndringsresultatSnapshot.medSnapshot(SykdomGrunnlag.class, uuid)); // For å tvinge frem at det alltid er endring
     }
 
     @Override
-    public void leggTilDiffResultat(BehandlingReferanse ref, EndringsresultatDiff sporedeEndringerDiff) {
-        sporedeEndringerDiff.hentDelresultat(SykdomGrunnlag.class)
+    public void leggTilDiffResultat(BehandlingReferanse ref, EndringsresultatDiff idDiff, EndringsresultatDiff sporedeEndringerDiff) {
+        idDiff.hentDelresultat(SykdomGrunnlag.class)
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> diffSykdom(ref, idEndring)));
     }
 
     private DiffResult diffSykdom(BehandlingReferanse ref, EndringsresultatDiff idEndring) {
-        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForId((UUID) idEndring.getGrunnlagId1());
-        if (sykdomGrunnlag.isEmpty()) {
-            return SykdomDiffResult.ingenDiff();
-        }
-
+        var sykdomGrunnlag = sykdomGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
+            .map(SykdomGrunnlagBehandling::getGrunnlag);
         var perioder = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
-        var utledGrunnlag = sykdomGrunnlagService.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
+        var manglendeOmsorgenForPerioder = sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(ref.getBehandlingId());
+        var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder, manglendeOmsorgenForPerioder);
+        var sykdomGrunnlagSammenlikningsresultat = sykdomGrunnlagService.sammenlignGrunnlag(sykdomGrunnlag, utledetGrunnlag);
 
         return new SykdomDiffResult(sykdomGrunnlagSammenlikningsresultat);
     }

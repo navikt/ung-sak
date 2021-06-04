@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
         this.entityManager = entityManager;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<DumpOutput> generer(FagsakYtelseType ytelseType, DatoIntervallEntitet periode) {
         String sql = """
@@ -74,18 +76,15 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("ytelseType", ytelseType.getKode())
             .setParameter("fom", periode.getFomDato())
-            .setParameter("tom", periode.getTomDato()); // tar alt overlappende
+            .setParameter("tom", periode.getTomDato()) // tar alt overlappende
+            .setHint("javax.persistence.query.timeout", 1 * 90 * 1000) // 1:30 min
+        ;
         String path = "utbetaling-per-bruker.csv";
 
-        @SuppressWarnings("unchecked")
-        List<Tuple> results = query.getResultList();
-
-        if (results.isEmpty()) {
-            return List.of();
+        try (Stream<Tuple> stream = query.getResultStream()) {
+            return CsvOutput.dumpResultSetToCsv(path, stream)
+                .map(v -> List.of(v)).orElse(List.of());
         }
-
-        return CsvOutput.dumpResultSetToCsv(path, results)
-            .map(v -> List.of(v)).orElse(List.of());
 
     }
 

@@ -13,6 +13,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
@@ -26,6 +27,7 @@ public class VurderUttakSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UttakTjeneste uttakTjeneste;
+    private EtablertTilsynTjeneste etablertTilsynTjeneste;
 
     VurderUttakSteg() {
         // for proxy
@@ -34,10 +36,12 @@ public class VurderUttakSteg implements BehandlingSteg {
     @Inject
     public VurderUttakSteg(BehandlingRepository behandlingRepository,
                            MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                           UttakTjeneste uttakTjeneste) {
+                           UttakTjeneste uttakTjeneste,
+                           EtablertTilsynTjeneste etablertTilsynTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
+        this.etablertTilsynTjeneste = etablertTilsynTjeneste;
     }
 
     @Override
@@ -45,6 +49,8 @@ public class VurderUttakSteg implements BehandlingSteg {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
+        
+        etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
         final Uttaksgrunnlag request = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
         uttakTjeneste.opprettUttaksplan(request);

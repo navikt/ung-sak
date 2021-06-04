@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -70,7 +71,7 @@ public class SendVedtaksbrevFrisinnTest {
 
     @BeforeEach
     public void oppsett() {
-        fagsak = new Fagsak(FagsakYtelseType.FRISINN, AktørId.dummy(), mock(Saksnummer.class));
+        fagsak = Fagsak.opprettNy(FagsakYtelseType.FRISINN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
         var fagsakRepository = mock(FagsakRepository.class);
         when(fagsakRepository.hentSakGittSaksnummer(any())).thenReturn(Optional.ofNullable(fagsak));
 

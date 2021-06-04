@@ -33,6 +33,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.typer.Periode;
@@ -41,6 +42,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 @FagsakYtelseTypeRef("PSB")
 @BehandlingTypeRef
@@ -57,6 +59,8 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private BehandlingRepository behandlingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
 
+    private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
+
     PSBVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
@@ -68,11 +72,13 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   BehandlingRepository behandlingRepository,
                                                   SykdomGrunnlagService sykdomGrunnlagService,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
+                                                  RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter) {
         this.vilkårUtleder = vilkårUtleder;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.behandlingRepository = behandlingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         var maksSøktePeriode = new MaksSøktePeriode(this.søknadsperiodeRepository);
         this.vilkårResultatRepository = vilkårResultatRepository;
 
@@ -97,15 +103,19 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var perioderTilVurdering = new TreeSet<>(perioder);
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var berørtePerioder = utledUtvidetPeriode(BehandlingReferanse.fra(behandling));
+            var berørtePerioder = utledUtvidetPeriode(referanse);
             perioderTilVurdering.addAll(berørtePerioder);
         }
+
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse));
 
         return vilkår.getPerioder()
             .stream()
             .map(VilkårPeriode::getPeriode)
-            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(datoIntervallEntitet::overlapper))
+            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(it -> datoIntervallEntitet.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -164,12 +174,18 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledRevurderingPerioder(BehandlingReferanse referanse) {
+    public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+        var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            return utledUtvidetPeriode(referanse);
+            periodeMedÅrsaks.addAll(utledUtvidetPeriode(referanse)
+                .stream()
+                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+                .collect(Collectors.toSet()));
         }
-        return new TreeSet<>();
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+
+        return periodeMedÅrsaks;
     }
 
     private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
@@ -190,8 +206,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     }
 
     private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {
-        return behandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON)
-            && behandling.getOriginalBehandlingId().isPresent();
+        return behandling.getOriginalBehandlingId().isPresent();
     }
 
     @Override
