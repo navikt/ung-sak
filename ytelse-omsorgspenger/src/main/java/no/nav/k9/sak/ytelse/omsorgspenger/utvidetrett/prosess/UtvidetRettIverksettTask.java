@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -34,7 +38,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
 @ProsessTask(UtvidetRettIverksettTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class UtvidetRettIverksettTask extends BehandlingProsessTask {
-
+    private static final Logger log = LoggerFactory.getLogger(UtvidetRettIverksettTask.class);
     private static final Set<LocalDate> UGYLDIGE_DATOER_FOR_PERIODE = Set.of(
         Tid.TIDENES_BEGYNNELSE,
         Tid.TIDENES_ENDE);
@@ -139,22 +143,39 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var oppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.OPPFYLT);
         var ikkeOppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.IKKE_OPPFYLT);
 
-        if (innvilget && oppfyltePerioder.size() == 1) {
-            return oppfyltePerioder.get(0);
-        } else if (!innvilget && ikkeOppfyltePerioder.size() == 1 && oppfyltePerioder.isEmpty()) {
-            return ikkeOppfyltePerioder.get(0);
+        List<Periode> oppfyltKomprimert = komprimer(oppfyltePerioder);
+        List<Periode> ikkeOppfyltKomprimert = komprimer(ikkeOppfyltePerioder);
+        if (innvilget && oppfyltKomprimert.size() == 1) {
+            return oppfyltKomprimert.get(0);
+        } else if (!innvilget && ikkeOppfyltKomprimert.size() == 1 && oppfyltePerioder.isEmpty()) {
+            return ikkeOppfyltKomprimert.get(0);
         } else {
             throw new IllegalStateException(
-                String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder=%s", innvilget, oppfyltePerioder, ikkeOppfyltePerioder));
+                String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], %sOppfyltePerioder=%s, %sIkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
+                    innvilget,
+                    oppfyltKomprimert.size() != oppfyltePerioder.size() && !oppfyltKomprimert.isEmpty() ? "OppfyltePerioder/KOMPRIMERT=" + oppfyltKomprimert + ", " : "",
+                    oppfyltePerioder,
+                    ikkeOppfyltKomprimert.size() != ikkeOppfyltePerioder.size() && !ikkeOppfyltKomprimert.isEmpty() ? "IkkeOppfyltePerioder/KOMPRIMERT=" + ikkeOppfyltKomprimert + ", " : "",
+                    ikkeOppfyltePerioder,
+                    samletVilkårsresultat));
         }
     }
 
+    private static List<Periode> komprimer(List<Periode> perioder) {
+
+        var segmenter = perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE)).collect(Collectors.toList());
+        var komprimertSegmenter = new LocalDateTimeline<Boolean>(segmenter).compress().toSegments();
+        return komprimertSegmenter.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+
+    }
+
     private static List<Periode> perioderMedUtfall(LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat, Utfall utfall) {
-        return samletVilkårsresultat
+        List<Periode> perioder = samletVilkårsresultat
             .stream()
             .filter(sv -> sv.getValue().getSamletUtfall() == utfall)
             .map(seg -> gyldigPeriode(seg.getFom(), seg.getTom()))
             .collect(Collectors.toList());
+        return perioder;
     }
 
     private static Periode gyldigPeriode(LocalDate fom, LocalDate tom) {

@@ -135,4 +135,15 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
         return new Periode(getFomDato(), getTomDato());
     }
 
+    public DatoIntervallEntitet overlapp(DatoIntervallEntitet annen) {
+        if (!overlapper(annen)) {
+            return null;
+        } else {
+            // ta siste fom, første tom
+            return DatoIntervallEntitet.fra(
+                fomDato.isAfter(annen.fomDato) ? fomDato : annen.fomDato,
+                tomDato.isBefore(annen.tomDato) ? tomDato : annen.tomDato);
+        }
+    }
+
 }
