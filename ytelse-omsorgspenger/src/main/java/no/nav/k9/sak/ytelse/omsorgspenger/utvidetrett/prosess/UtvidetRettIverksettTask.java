@@ -139,13 +139,22 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var oppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.OPPFYLT);
         var ikkeOppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.IKKE_OPPFYLT);
 
-        if (innvilget && oppfyltePerioder.size() == 1) {
-            return oppfyltePerioder.get(0);
-        } else if (!innvilget && ikkeOppfyltePerioder.size() == 1 && oppfyltePerioder.isEmpty()) {
-            return ikkeOppfyltePerioder.get(0);
+        if (innvilget) {
+            if (oppfyltePerioder.size() == 1/* kun en oppfylt periode */) {
+                return oppfyltePerioder.get(0);
+            } else {
+                throw new IllegalStateException(
+                    String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
+                        innvilget, oppfyltePerioder, ikkeOppfyltePerioder, samletVilkårsresultat));
+            }
         } else {
-            throw new IllegalStateException(
-                String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder=%s", innvilget, oppfyltePerioder, ikkeOppfyltePerioder));
+            if (ikkeOppfyltePerioder.size() == 1 && oppfyltePerioder.isEmpty() /* kun en ikke oppfylt periode */ ) {
+                return ikkeOppfyltePerioder.get(0);
+            } else {
+                throw new IllegalStateException(
+                    String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
+                        innvilget, oppfyltePerioder, ikkeOppfyltePerioder, samletVilkårsresultat));
+            }
         }
     }
 
