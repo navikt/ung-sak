@@ -49,17 +49,7 @@ create index IDX_GR_ETABLERT_TILSYN_1
     on GR_ETABLERT_TILSYN (BEHANDLING_ID);
 create index IDX_GR_ETABLERT_TILSYN_2
     on GR_ETABLERT_TILSYN (ETABLERT_TILSYN_ID);
-CREATE UNIQUE INDEX UIDX_GR_ETABLERT_TILSYN_01
-    ON GR_ETABLERT_TILSYN (
-                     (CASE
-                          WHEN AKTIV = true
-                              THEN BEHANDLING_ID
-                          ELSE NULL END),
-                     (CASE
-                          WHEN AKTIV = true
-                              THEN AKTIV
-                          ELSE NULL END)
-        );
+CREATE UNIQUE INDEX UIDX_GR_ETABLERT_TILSYN_01 ON GR_ETABLERT_TILSYN (BEHANDLING_ID) WHERE (AKTIV = TRUE);
 
 create sequence if not exists SEQ_GR_ETABLERT_TILSYN increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_ETABLERT_TILSYN increment by 50 minvalue 1000000;
