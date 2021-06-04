@@ -71,7 +71,8 @@ class VilkårDtoMapper {
     }
 
     private static VilkårMedPerioderDto mapVilkår(Vilkår vilkår, boolean medVilkårkjøring, Behandling behandling, Map<VilkårType, Set<DatoIntervallEntitet>> aktuelleVilkårsperioder) {
-        var vilkårsPerioder = vilkår.getPerioder().stream().map(it -> mapTilPeriode(medVilkårkjøring, it, aktuelleVilkårsperioder.get(vilkår.getVilkårType()), vilkår.getVilkårType())).collect(Collectors.toList());
+        var vilkårsPerioder = vilkår.getPerioder().stream().map(it -> mapTilPeriode(medVilkårkjøring, it, aktuelleVilkårsperioder.get(vilkår.getVilkårType()), vilkår.getVilkårType()))
+            .collect(Collectors.toList());
         var vilkårMedPerioderDto = new VilkårMedPerioderDto(vilkår.getVilkårType(), vilkårsPerioder);
         vilkårMedPerioderDto.setLovReferanse(vilkår.getVilkårType().getLovReferanse(behandling.getFagsakYtelseType()));
         vilkårMedPerioderDto.setOverstyrbar(erOverstyrbar(vilkår, behandling));

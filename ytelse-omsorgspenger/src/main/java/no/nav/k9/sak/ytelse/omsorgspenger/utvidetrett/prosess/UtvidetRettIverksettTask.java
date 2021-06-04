@@ -72,10 +72,14 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var utfall = behandling.getBehandlingResultatType();
 
         if (utfall == BehandlingResultatType.INNVILGET || utfall == BehandlingResultatType.INNVILGET_ENDRING) {
-            var iverksett = mapIverksett(behandling, periodeForVedtak(samletVilkårsresultat, true));
+            Periode vedtakperiode = periodeForVedtak(samletVilkårsresultat, true);
+            log.info("Innvilger rammevedtak for periode: {}", vedtakperiode);
+            var iverksett = mapIverksett(behandling, vedtakperiode);
             utvidetRettKlient.innvilget(iverksett);
         } else if (utfall == BehandlingResultatType.AVSLÅTT) {
-            var iverksett = mapIverksett(behandling, periodeForVedtak(samletVilkårsresultat, false));
+            Periode avslagperiode = periodeForVedtak(samletVilkårsresultat, false);
+            log.info("Avslår rammevedtak for periode: {}", avslagperiode);
+            var iverksett = mapIverksett(behandling, avslagperiode);
             utvidetRettKlient.avslått(iverksett);
         } else {
             throw new IllegalStateException("Forventet ikke behandling med behandlingResultatType=[" + utfall + "]");
