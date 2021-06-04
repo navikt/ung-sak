@@ -30,7 +30,9 @@ public class PeriodeForVedtakTest {
 
         assertEquals(periode, periodeForVedtak(samletVilkårsresultat, true));
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, false));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>], IkkeOppfyltePerioder=[]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>], IkkeOppfyltePerioder=[]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2021-12-31 [1]> = [[2021-01-01, 2021-12-31]]",
+            exception.getMessage());
     }
 
     @Test
@@ -43,7 +45,9 @@ public class PeriodeForVedtakTest {
 
         assertEquals(periode, periodeForVedtak(samletVilkårsresultat, false));
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, true));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2021-12-31 [1]> = [[2021-01-01, 2021-12-31]]",
+            exception.getMessage());
     }
 
     @Test
@@ -58,7 +62,9 @@ public class PeriodeForVedtakTest {
 
         assertEquals(innvilgetPeriode, periodeForVedtak(samletVilkårsresultat, true));
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, false));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>], IkkeOppfyltePerioder=[Periode<fom=2022-01-01, tom=2022-12-31>]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>], IkkeOppfyltePerioder=[Periode<fom=2022-01-01, tom=2022-12-31>]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2022-12-31 [2]> = [[2021-01-01, 2021-12-31],[2022-01-01, 2022-12-31]]",
+            exception.getMessage());
     }
 
     @Test
@@ -84,9 +90,13 @@ public class PeriodeForVedtakTest {
         ));
 
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, true));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>], IkkeOppfyltePerioder=[]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>], IkkeOppfyltePerioder=[]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2022-12-31 [2]> = [[2021-01-01, 2021-12-31],[2022-05-01, 2022-12-31]]",
+            exception.getMessage());
         exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, false));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>], IkkeOppfyltePerioder=[]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>], IkkeOppfyltePerioder=[]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2022-12-31 [2]> = [[2021-01-01, 2021-12-31],[2022-05-01, 2022-12-31]]",
+            exception.getMessage());
 
     }
 
@@ -101,9 +111,13 @@ public class PeriodeForVedtakTest {
         ));
 
         var exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, true));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[true], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2022-12-31 [2]> = [[2021-01-01, 2021-12-31],[2022-05-01, 2022-12-31]]",
+            exception.getMessage());
         exception = assertThrows(IllegalStateException.class, () -> periodeForVedtak(samletVilkårsresultat, false));
-        assertEquals("Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>]", exception.getMessage());
+        assertEquals(
+            "Uventet samlet vilkårsresultat. Innvilget=[false], OppfyltePerioder=[], IkkeOppfyltePerioder=[Periode<fom=2021-01-01, tom=2021-12-31>, Periode<fom=2022-05-01, tom=2022-12-31>]; samletVilkårResultat=LocalDateTimeline<2021-01-01, 2022-12-31 [2]> = [[2021-01-01, 2021-12-31],[2022-05-01, 2022-12-31]]",
+            exception.getMessage());
     }
 
     private static VilkårUtfallSamlet.VilkårUtfall oppfylt() {

@@ -144,27 +144,25 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var ikkeOppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.IKKE_OPPFYLT);
 
         List<Periode> oppfyltKomprimert = komprimer(oppfyltePerioder);
-        if (innvilget) {
-            if (oppfyltKomprimert.size() == 1/* kun en oppfylt periode støtter her */) {
-                return oppfyltKomprimert.get(0);
-            } else {
-                throw new IllegalStateException(
-                    String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder/KOMPRIMERT=%s, OppfyltePerioder=%s, IkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
-                        innvilget, oppfyltKomprimert, oppfyltePerioder, ikkeOppfyltePerioder, samletVilkårsresultat));
-            }
+        List<Periode> ikkeOppfyltKomprimert = komprimer(ikkeOppfyltePerioder);
+        if (innvilget && oppfyltKomprimert.size() == 1) {
+            return oppfyltKomprimert.get(0);
+        } else if (!innvilget && ikkeOppfyltKomprimert.size() == 1 && oppfyltePerioder.isEmpty()) {
+            return ikkeOppfyltKomprimert.get(0);
         } else {
-            List<Periode> ikkeOppfyltKomprimert = komprimer(oppfyltePerioder);
-            if (ikkeOppfyltKomprimert.size() == 1 && oppfyltKomprimert.isEmpty() /* kun en ikke oppfylt periode støtter her */ ) {
-                return ikkeOppfyltKomprimert.get(0);
-            } else {
-                throw new IllegalStateException(
-                    String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], OppfyltePerioder=%s, IkkeOppfyltePerioder/KOMPRIMERT=%s, IkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
-                        innvilget, oppfyltePerioder, ikkeOppfyltKomprimert, ikkeOppfyltePerioder, samletVilkårsresultat));
-            }
+            throw new IllegalStateException(
+                String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], %sOppfyltePerioder=%s, %sIkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
+                    innvilget,
+                    oppfyltKomprimert.size() != oppfyltePerioder.size() && !oppfyltKomprimert.isEmpty() ? "OppfyltePerioder/KOMPRIMERT=" + oppfyltKomprimert + ", " : "",
+                    oppfyltePerioder,
+                    ikkeOppfyltKomprimert.size() != ikkeOppfyltePerioder.size() && !ikkeOppfyltKomprimert.isEmpty() ? "IkkeOppfyltePerioder/KOMPRIMERT=" + ikkeOppfyltKomprimert + ", " : "",
+                    ikkeOppfyltePerioder,
+                    samletVilkårsresultat));
         }
     }
 
     private static List<Periode> komprimer(List<Periode> perioder) {
+
         var segmenter = perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE)).collect(Collectors.toList());
         var komprimertSegmenter = new LocalDateTimeline<Boolean>(segmenter).compress().toSegments();
         return komprimertSegmenter.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
