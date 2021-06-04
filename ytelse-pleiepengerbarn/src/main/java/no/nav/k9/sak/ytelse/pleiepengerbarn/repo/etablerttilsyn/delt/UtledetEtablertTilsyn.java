@@ -1,19 +1,22 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt;
 
 import java.time.Duration;
 import java.util.Objects;
 
 import no.nav.k9.sak.kontrakt.tilsyn.Kilde;
+import no.nav.k9.sak.typer.JournalpostId;
 
 public class UtledetEtablertTilsyn {
 
     private Duration varighet;
     private Kilde kilde;
+    private JournalpostId journalpostId;
 
 
-    public UtledetEtablertTilsyn(Duration varighet, Kilde kilde) {
+    public UtledetEtablertTilsyn(Duration varighet, Kilde kilde, JournalpostId journalpostId) {
         this.varighet = varighet;
         this.kilde = kilde;
+        this.journalpostId = journalpostId;
     }
 
     public Duration getVarighet() {
@@ -22,6 +25,10 @@ public class UtledetEtablertTilsyn {
 
     public Kilde getKilde() {
         return kilde;
+    }
+    
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
     }
 
     @Override
