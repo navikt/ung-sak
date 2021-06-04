@@ -126,7 +126,7 @@ public class PostSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             for (VilkårPeriode avslåttPeriode : avslåttePerioder) {
                 if (vilkårBuilder.harDataPåPeriode(avslåttPeriode.getPeriode())) {
-                    vilkårBuilder = vilkårBuilder.klippBortPeriode(avslåttPeriode.getPeriode());
+                    vilkårBuilder = vilkårBuilder.tilbakestill(avslåttPeriode.getPeriode());
                 }
             }
             for (VilkårPeriode innvilgetPeriode : innvilgedePerioder) {
