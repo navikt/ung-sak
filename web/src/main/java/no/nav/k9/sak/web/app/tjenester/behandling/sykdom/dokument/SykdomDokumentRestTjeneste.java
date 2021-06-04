@@ -147,7 +147,12 @@ public class SykdomDokumentRestTjeneste {
 
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final SykdomInnleggelser innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+        final SykdomInnleggelser innleggelser;
+        if (behandling.getStatus().erFerdigbehandletStatus() || behandling.getStatus().equals(BehandlingStatus.FATTER_VEDTAK)) {
+            innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getUuid());
+        } else {
+            innleggelser = sykdomDokumentRepository.hentInnleggelse(behandling.getFagsak().getPleietrengendeAktørId());
+        }
 
         return sykdomDokumentOversiktMapper.toSykdomInnleggelseDto(innleggelser, behandling);
     }
