@@ -7,6 +7,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -46,8 +47,8 @@ public class AvklarÅrskvantumDokDto extends BekreftetAksjonspunktDto {
         return innvilgePeriodene;
     }
 
-    public Integer getAntallDager() {
-        return antallDager;
+    public Optional<Integer> getAntallDager() {
+        return Optional.ofNullable(antallDager);
     }
 
     public Boolean getfortsettBehandling() {
