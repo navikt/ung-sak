@@ -156,7 +156,33 @@ public class VilkårBuilder {
         return this;
     }
 
+    /**
+     * Fjerner perioden og flytter skjæringstidspunktet uten å endre på vurderingsstatus for nærliggendeperioder
+     *
+     * @param periode perioden som skal fjernes
+     * @return builderen
+     */
+    public VilkårBuilder klippBortPeriode(DatoIntervallEntitet periode) {
+        validerBuilder();
+
+        tilbakestill(new TreeSet<>(Set.of(periode)));
+        return this;
+    }
+
     public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder) {
+        validerBuilder();
+        klippBortPerioder(perioder);
+        this.tilbakestiltePerioder.addAll(perioder);
+        return this;
+    }
+
+    /**
+     * Fjerner periodene og flytter skjæringstidspunktet uten å endre på vurderingsstatus for nærliggendeperioder
+     *
+     * @param perioder periodene som skal fjernes
+     * @return builderen
+     */
+    public VilkårBuilder klippBortPerioder(NavigableSet<DatoIntervallEntitet> perioder) {
         validerBuilder();
         for (DatoIntervallEntitet periode : perioder) {
             var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
@@ -164,7 +190,6 @@ public class VilkårBuilder {
 
             this.vilkårTidslinje = vilkårTidslinje.combine(periodeTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        this.tilbakestiltePerioder.addAll(perioder);
         return this;
     }
 
