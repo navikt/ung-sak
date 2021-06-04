@@ -16,9 +16,9 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 
 public class InputParametere {
@@ -33,7 +33,7 @@ public class InputParametere {
     private Set<Inntektsmelding> sakInntektsmeldinger;
     private Set<Saksnummer> relaterteSaker;
     private NavigableSet<DatoIntervallEntitet> utvidetRevurderingPerioder;
-    private LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn;
+    private List<EtablertTilsynPeriode> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
 
     public InputParametere() {
@@ -125,13 +125,13 @@ public class InputParametere {
         return this;
     }
     
-    public InputParametere medUtledetEtablertTilsyn(LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn) {
-        this.utledetEtablertTilsyn = utledetEtablertTilsyn;
+    public InputParametere medEtablertTilsynPerioder(List<EtablertTilsynPeriode> utledetEtablertTilsyn) {
+        this.etablertTilsynPerioder = utledetEtablertTilsyn;
         return this;
     }
     
-    public LocalDateTimeline<UtledetEtablertTilsyn> getUtledetEtablertTilsyn() {
-        return utledetEtablertTilsyn;
+    public List<EtablertTilsynPeriode> getEtablertTilsynPerioder() {
+        return etablertTilsynPerioder;
     }
 
     public NavigableSet<DatoIntervallEntitet> getUtvidetRevurderingPerioder() {

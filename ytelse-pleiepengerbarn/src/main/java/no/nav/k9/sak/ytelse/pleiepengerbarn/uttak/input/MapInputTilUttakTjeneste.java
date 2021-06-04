@@ -37,15 +37,16 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
@@ -74,8 +75,8 @@ public class MapInputTilUttakTjeneste {
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private EtablertTilsynTjeneste tilsynTjeneste;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
+    private EtablertTilsynRepository etablertTilsynRepository;
 
     @Inject
     public MapInputTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -86,8 +87,8 @@ public class MapInputTilUttakTjeneste {
                                     BehandlingRepository behandlingRepository,
                                     FagsakRepository fagsakRepository,
                                     InntektArbeidYtelseTjeneste iayTjeneste,
-                                    EtablertTilsynTjeneste tilsynTjeneste,
                                     PleietrengendeKravprioritet pleietrengendeKravprioritet,
+                                    EtablertTilsynRepository etablertTilsynRepository,
                                     @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
                                     @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -98,8 +99,8 @@ public class MapInputTilUttakTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.iayTjeneste = iayTjeneste;
-        this.tilsynTjeneste = tilsynTjeneste;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
+        this.etablertTilsynRepository = etablertTilsynRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
@@ -124,7 +125,8 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
-        final LocalDateTimeline<UtledetEtablertTilsyn> utledetEtablertTilsyn = tilsynTjeneste.beregnTilsynstidlinje(referanse);
+        
+        final List<EtablertTilsynPeriode> etablertTilsynPerioder = etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder();
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getPleietrengendeAktørId());
 
         var input = new InputParametere()
@@ -138,7 +140,7 @@ public class MapInputTilUttakTjeneste {
             .medPersonopplysninger(personopplysningerAggregat)
             .medRelaterteSaker(relaterteFagsaker)
             .medUttaksGrunnlag(uttakGrunnlag)
-            .medUtledetEtablertTilsyn(utledetEtablertTilsyn)
+            .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
             ;
 
@@ -192,7 +194,7 @@ public class MapInputTilUttakTjeneste {
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(input.getVilkårene());
 
-        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getUtledetEtablertTilsyn());
+        final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
 
         var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynGrunnlag);
