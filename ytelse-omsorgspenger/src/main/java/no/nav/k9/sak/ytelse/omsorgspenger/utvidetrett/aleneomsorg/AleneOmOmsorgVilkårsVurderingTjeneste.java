@@ -28,6 +28,7 @@ import no.nav.k9.sak.typer.AktørId;
 @BehandlingTypeRef
 @RequestScoped
 public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AleneOmOmsorgVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
@@ -68,26 +69,22 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
         var fagsak = behandling.getFagsak();
         var søknad = søknadRepository.hentSøknad(behandling);
         AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
-        return utledPeriode(søknad.getSøknadsperiode(), barnAktørId);
+        var maksPeriode = utledMaksPeriode(søknad.getSøknadsperiode(), barnAktørId);
+        var søknadsperiode = søknad.getSøknadsperiode();
+        return maksPeriode.overlapp(søknadsperiode);
     }
 
-    DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, AktørId barnAktørId) {
-        var søknadFom = periode.getFomDato();
+    DatoIntervallEntitet utledMaksPeriode(DatoIntervallEntitet periode, AktørId barnAktørId) {
         var barninfo = personinfoAdapter.hentKjerneinformasjon(barnAktørId);
 
         // ikke åpne fagsaken før barnets fødselsdato
         var fødselsdato = barninfo.getFødselsdato();
         // 1. jan minst 3 år før søknad sendt inn (spesielle særtilfeller tillater at et går an å sette tilbake it itid
-        var fristFørSøknadsdato = søknadFom.minusYears(3).withMonth(1).withDayOfMonth(1);
+        var fristFørSøknadsdato = periode.getFomDato().minusYears(3).withMonth(1).withDayOfMonth(1);
 
         var mindato = Set.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
         var maksdato = Tid.TIDENES_ENDE;
-        if (maksdato.isAfter(mindato)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
-        } else {
-            log.warn("maksdato [{}] er før mindato[{}], søknadsperiode fom[{}], har ingen periode å vurdere", maksdato, mindato, søknadFom);
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, søknadFom);
-        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
     }
 
     @Override

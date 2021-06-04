@@ -50,7 +50,7 @@ public class AleneOmOmsorgSøknadMottaker implements SøknadMottakTjeneste<Innse
         }
 
         var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        var fagsakPeriode = vilkårsVurderingTjeneste.utledPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
+        var fagsakPeriode = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
 
         return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato());
     }
