@@ -7,11 +7,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.control.ActivateRequestContext;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+
+import org.jboss.weld.context.RequestContext;
+import org.jboss.weld.context.unbound.UnboundLiteral;
 
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.loginmodule.ContainerLogin;
@@ -23,10 +25,8 @@ import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
  * Kjører et kall på en egen tråd med ContainerLogin. Kan benyttes til å kalle med system kontekst videre internt.
  * NB: ikke bruk som convenience utenfor dump.
  */
-@Dependent
-@ActivateRequestContext
-@Transactional
-public class ContainerContextRunner implements AutoCloseable {
+@ApplicationScoped
+public class ContainerContextRunner {
 
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
 
@@ -39,6 +39,9 @@ public class ContainerContextRunner implements AutoCloseable {
 
     private ContextTokenProvider tokenProvider;
 
+    protected ContainerContextRunner() {
+    }
+
     @Inject
     public ContainerContextRunner(ContextTokenProvider tokenProvider) {
         this.tokenProvider = tokenProvider;
@@ -48,15 +51,13 @@ public class ContainerContextRunner implements AutoCloseable {
         return CDI.current().select(ContainerContextRunner.class).get();
     }
 
-    @Override
-    public void close() throws Exception {
-        CDI.current().destroy(this);
-    }
-
+    @Transactional
     private <T> T submit(Callable<T> call) throws Exception {
+
         var containerLogin = new ContainerLogin(tokenProvider);
         try {
             containerLogin.login();
+
             var result = call.call();
             return result;
         } finally {
@@ -71,16 +72,22 @@ public class ContainerContextRunner implements AutoCloseable {
 
         try {
             var future = EXECUTOR.submit((() -> {
-                try (var runner = ContainerContextRunner.createRunner()) {
+                T result;
+                var requestContext = CDI.current().select(RequestContext.class, UnboundLiteral.INSTANCE).get();
+                requestContext.activate();
+                var runner = ContainerContextRunner.createRunner();
+                try {
                     LOG_CONTEXT.add("fagsak", fagsakId);
                     LOG_CONTEXT.add("saksnummer", saksnummer);
                     LOG_CONTEXT.add("behandling", behandlingId);
-                    return runner.submit(call);
+                    result = runner.submit(call);
                 } finally {
                     LOG_CONTEXT.remove("behandling");
                     LOG_CONTEXT.remove("fagsak");
                     LOG_CONTEXT.remove("saksnummer");
+                    requestContext.deactivate();
                 }
+                return result;
             }));
 
             return future.get(20, TimeUnit.SECONDS);
