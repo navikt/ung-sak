@@ -259,10 +259,22 @@ public class VilkårTjeneste {
             return LocalDateTimeline.EMPTY_TIMELINE;
         }
         var maksPeriode = DatoIntervallEntitet.minmax(allePerioder);
-        var timelinePerVilkår = vilkårene.get().getVilkårTidslinjer(maksPeriode);
+        return samleVilkårUtfall(vilkårene.get(), maksPeriode);
+    }
+
+    LocalDateTimeline<VilkårUtfallSamlet> samleVilkårUtfall(Vilkårene vilkårene, DatoIntervallEntitet maksPeriode) {
+        var timelinePerVilkår = vilkårene.getVilkårTidslinjer(maksPeriode);
         Set<VilkårType> alleForventedeVilkårTyper = timelinePerVilkår.keySet();
-        var samletUtfall = samletVilkårUtfall(timelinePerVilkår, alleForventedeVilkårTyper);
-        log.info("forventendeVilkårTyper=%s, maksPeriode=%s, timelinePerVilkår=%s, samletUtfall=%s", alleForventedeVilkårTyper, maksPeriode, timelinePerVilkår, samletUtfall);
+        var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
+
+        for (var e : timelinePerVilkår.entrySet()) {
+            LocalDateTimeline<VilkårUtfall> utfallTimeline = e.getValue().mapValue(v -> new VilkårUtfall(e.getKey(), v.getAvslagsårsak(), v.getUtfall()));
+            timeline = timeline.crossJoin(utfallTimeline.compress(), StandardCombinators::allValues);
+        }
+
+        var samletUtfall = timeline.mapValue(v -> VilkårUtfallSamlet.fra(v))
+            .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(alleForventedeVilkårTyper));
+        log.info("forventendeVilkårTyper={}, maksPeriode={}, timelinePerVilkår={}, samletUtfall={}", alleForventedeVilkårTyper, maksPeriode, timelinePerVilkår, samletUtfall);
 
         return samletUtfall;
     }

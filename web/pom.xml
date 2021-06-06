@@ -129,12 +129,6 @@
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-util</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>ca.szc.thirdparty.nl.jworks.markdown_to_asciidoc</groupId>
-                    <artifactId>markdown_to_asciidoc</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

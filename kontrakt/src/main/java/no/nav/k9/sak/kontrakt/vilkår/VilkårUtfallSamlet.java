@@ -36,7 +36,7 @@ public class VilkårUtfallSamlet {
     private Utfall samletUtfall;
 
     public static VilkårUtfallSamlet fra(List<VilkårUtfall> vilkårUtfall) {
-        var samletUtfall = Utfall.ranger(vilkårUtfall.stream().map(VilkårUtfall::getVilkårStatus).collect(Collectors.toList()));
+        var samletUtfall = Utfall.ranger(vilkårUtfall.stream().map(VilkårUtfall::getVilkårUtfall).collect(Collectors.toList()));
         return new VilkårUtfallSamlet(samletUtfall, vilkårUtfall);
     }
 
@@ -93,7 +93,7 @@ public class VilkårUtfallSamlet {
             this.avslagsårsak = avslagsårsak;
         }
 
-        public Utfall getVilkårStatus() {
+        public Utfall getVilkårUtfall() {
             return vilkårUtfall;
         }
 
