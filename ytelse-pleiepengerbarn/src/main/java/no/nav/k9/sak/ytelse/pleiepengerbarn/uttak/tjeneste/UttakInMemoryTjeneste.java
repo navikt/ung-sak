@@ -84,6 +84,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             _100,
             mapUtbetalingsgrader(periode, input),
             _100,
+            null,
             Set.of(),
             mapInngangsvilkår(input.getInngangsvilkår()),
             _100,
