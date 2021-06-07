@@ -26,7 +26,6 @@ public class FødselHendelse implements Hendelse {
     private HendelseInfo hendelseInfo;
 
     @JsonProperty(value = "fødselsdato", required = true)
-    @NotNull
     @Valid
     private LocalDate fødselsdato;
 
