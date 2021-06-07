@@ -39,13 +39,13 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårRe
 import no.nav.k9.sak.inngangsvilkår.opptjeningsperiode.regelmodell.RegelFastsettOpptjeningsperiode;
 import no.nav.k9.felles.util.Tuple;
 
-class VilkårVurdering {
+class VilkårTestVurdering {
 
-    private static final Logger log = LoggerFactory.getLogger(VilkårVurdering.class);
-    public static final BiConsumer<VilkårResultat, Object> DO_NOTHING = (res, obj) -> {
+    private static final Logger log = LoggerFactory.getLogger(VilkårTestVurdering.class);
+    public static final BiConsumer<VilkårTestResultat, Object> DO_NOTHING = (res, obj) -> {
     };
 
-    void vurderVilkår(ErrorCollector collector, VilkårType vilkår, BiConsumer<VilkårResultat, Object> extraDataValidering) {
+    void vurderVilkår(ErrorCollector collector, VilkårType vilkår, BiConsumer<VilkårTestResultat, Object> extraDataValidering) {
         var files = listAllFiles(vilkår);
         vurderCaser(collector, vilkår, extraDataValidering, files);
     }
@@ -61,13 +61,13 @@ class VilkårVurdering {
         vurderVilkår(collector, vilkår, DO_NOTHING);
     }
 
-    private void vurderCaser(ErrorCollector collector, VilkårType vilkår, BiConsumer<VilkårResultat, Object> extraDataValidering, Collection<File> files) {
+    private void vurderCaser(ErrorCollector collector, VilkårType vilkår, BiConsumer<VilkårTestResultat, Object> extraDataValidering, Collection<File> files) {
         if (files != null) {
             final List<File> inputFiler = listInputFiles(files);
             log.info("Sjekker " + vilkår.getKode() + ", fant " + inputFiler.size() + " testcaser.");
 
             final Tuple<Tuple<Class<Object>, Object>, RuleService<Object>> vilkårRegel = getVilkårImplementasjon(vilkår);
-            final ObjectMapper mapper = JsonUtil.getObjectMapper();
+            final ObjectMapper mapper = InngangsvilkårTestJsonUtil.getObjectMapper();
             for (File inputFile : inputFiler) {
                 vurderCase(collector, extraDataValidering, files, vilkårRegel, mapper, inputFile);
             }
@@ -77,11 +77,11 @@ class VilkårVurdering {
     }
 
     public static List<File> listInputFiles(Collection<File> files) {
-        return files.stream().filter(it -> it.getName().endsWith(JsonUtil.INPUT_SUFFIX)).collect(Collectors.toList());
+        return files.stream().filter(it -> it.getName().endsWith(InngangsvilkårTestJsonUtil.INPUT_SUFFIX)).collect(Collectors.toList());
     }
 
     public void vurderCase(ErrorCollector collector,
-                           BiConsumer<VilkårResultat, Object> extraDataValidering,
+                           BiConsumer<VilkårTestResultat, Object> extraDataValidering,
                            Collection<File> files,
                            final Tuple<Tuple<Class<Object>, Object>,
                            RuleService<Object>> vilkårRegel,
@@ -97,7 +97,7 @@ class VilkårVurdering {
     }
 
     public void vurderCase(ErrorCollector collector,
-                           BiConsumer<VilkårResultat, Object> extraDataValidering,
+                           BiConsumer<VilkårTestResultat, Object> extraDataValidering,
                            final Tuple<Tuple<Class<Object>, Object>, RuleService<Object>> vilkårRegel,
                            final ObjectMapper mapper,
                            File inputFile,
@@ -108,9 +108,9 @@ class VilkårVurdering {
         final Object input = mapper.readValue(inputFile, vilkårObjectClasses.getElement1());
 
         if (outputFile!=null) {
-            final VilkårResultat vilkårResultat = mapper.readValue(outputFile, VilkårResultat.class);
+            var vilkårTestResultat = mapper.readValue(outputFile, VilkårTestResultat.class);
 
-            settFunksjonellTidTilKjøretidspunkt(vilkårResultat);
+            settFunksjonellTidTilKjøretidspunkt(vilkårTestResultat);
 
             final Evaluation evaluer;
             final Object resultatObject = vilkårObjectClasses.getElement2();
@@ -120,12 +120,12 @@ class VilkårVurdering {
                 evaluer = vilkårRegel.getElement2().evaluer(input, resultatObject);
             }
 
-            final EvaluationSummary evaluationSummary = new EvaluationSummary(evaluer);
-            log.info("Vurderer " + vilkårResultat);
+            var evaluationSummary = new EvaluationSummary(evaluer);
+            log.info("Vurderer " + vilkårTestResultat);
 
             collector.checkThat("Vurdering av " + inputFile.getName() + " ga ikke forventet resultat.",
-                getVilkårUtfallType(evaluationSummary), equalTo(vilkårResultat.getUtfall()));
-            extraDataValidering.accept(vilkårResultat, resultatObject);
+                getVilkårUtfallType(evaluationSummary), equalTo(vilkårTestResultat.getUtfall()));
+            extraDataValidering.accept(vilkårTestResultat, resultatObject);
         } else {
             log.warn("Fant ikke output for evaluering av " + inputFile.getName());
             collector.addError(new FileNotFoundException("Fant ikke output for evaluering av " + inputFile.getName()));
@@ -133,14 +133,14 @@ class VilkårVurdering {
         System.setProperty("funksjonelt.tidsoffset.offset", "P0D");
     }
 
-    private void settFunksjonellTidTilKjøretidspunkt(VilkårResultat vilkårResultat) {
-        final Period periode = Period.between(LocalDate.now(), vilkårResultat.getKjøreTidspunkt());
+    private void settFunksjonellTidTilKjøretidspunkt(VilkårTestResultat vilkårTestResultat) {
+        final Period periode = Period.between(LocalDate.now(), vilkårTestResultat.getKjøreTidspunkt());
         System.setProperty("funksjonelt.tidsoffset.offset", periode.toString());
     }
 
     public static Optional<File> finnOutputFil(Collection<File> files, File inputFile) {
         return files.stream()
-            .filter(it -> it.getName().endsWith(inputFile.getName().replace(JsonUtil.INPUT_SUFFIX, JsonUtil.OUTPUT_SUFFIX)))
+            .filter(it -> it.getName().endsWith(inputFile.getName().replace(InngangsvilkårTestJsonUtil.INPUT_SUFFIX, InngangsvilkårTestJsonUtil.OUTPUT_SUFFIX)))
             .findAny(); // Skal bare være en
     }
 

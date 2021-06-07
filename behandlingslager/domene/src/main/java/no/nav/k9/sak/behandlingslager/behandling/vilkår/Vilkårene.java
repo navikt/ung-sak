@@ -30,6 +30,7 @@ import org.hibernate.annotations.BatchSize;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -178,5 +179,20 @@ public class Vilkårene extends BaseEntitet {
             .map(iv -> new LocalDateSegment<>(iv, true))
             .toList();
         return new LocalDateTimeline<>(segmenter, (iv, v1, v2) -> new LocalDateSegment<>(iv, true));
+    }
+
+    public LocalDateTimeline<List<Resultat>> getAlleVilkårTidslinjeResultater(DatoIntervallEntitet maksPeriode) {
+        var vilkårTidslinjer = getVilkårTidslinjer(maksPeriode);
+        LocalDateTimeline<List<Resultat>> resultat = new LocalDateTimeline<>(Set.of());
+
+        for (var entry : vilkårTidslinjer.entrySet()) {
+            var type = entry.getKey();
+            LocalDateTimeline<Resultat> tidslinje = entry.getValue().mapValue(vp -> new Resultat(type, vp.getGjeldendeUtfall()));
+            resultat = resultat.crossJoin(tidslinje, StandardCombinators::allValues);
+        }
+        return resultat;
+    }
+
+    public record Resultat(VilkårType type, Utfall utfall) {
     }
 }

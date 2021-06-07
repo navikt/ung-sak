@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public final class JsonUtil {
+public final class InngangsvilkårTestJsonUtil {
 
     public static final String INPUT_SUFFIX = "-input.json";
     public static final String OUTPUT_SUFFIX = "-output.json";
 
-    private JsonUtil() {
+    private InngangsvilkårTestJsonUtil() {
     }
 
     public static ObjectMapper getObjectMapper() {
