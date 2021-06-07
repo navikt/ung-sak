@@ -21,9 +21,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Utfall implements Kodeverdi {
+    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt", 0),
+    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert", 1),
     OPPFYLT("OPPFYLT", "Oppfylt", 2),
-    IKKE_OPPFYLT("IKKE_OPPFYLT", "Ikke oppfylt", 1),
-    IKKE_VURDERT("IKKE_VURDERT", "Ikke vurdert", 3),
     IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant", 4),
     UDEFINERT("-", "Ikke definert", Integer.MAX_VALUE),
     ;

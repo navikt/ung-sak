@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -157,7 +156,7 @@ public class Vilkårene extends BaseEntitet {
     }
 
     public Map<VilkårType, Set<Avslagsårsak>> getVilkårMedAvslagsårsaker() {
-        Map<VilkårType, Set<Avslagsårsak>> result = new HashMap<>();
+        Map<VilkårType, Set<Avslagsårsak>> result = new EnumMap<>(VilkårType.class);
         for (Vilkår vilkår : vilkårne) {
             var avslagsårsaker = vilkår.getPerioder().stream()
                 .map(VilkårPeriode::getAvslagsårsak)
@@ -169,5 +168,15 @@ public class Vilkårene extends BaseEntitet {
             }
         }
         return result;
+    }
+
+    public LocalDateTimeline<Boolean> getAlleIntervaller() {
+        // returnere alle intervaller (ukomprimert)
+        var segmenter = getVilkårene().stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .map(v -> v.getPeriode().toLocalDateInterval())
+            .map(iv -> new LocalDateSegment<>(iv, true))
+            .toList();
+        return new LocalDateTimeline<>(segmenter, (iv, v1, v2) -> new LocalDateSegment<>(iv, true));
     }
 }
