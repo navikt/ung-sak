@@ -87,9 +87,9 @@ public class EtablertTilsynTjeneste {
     }
     
     public LocalDateTimeline<Boolean> finnForskjellerSidenForrigeBehandling(BehandlingReferanse behandlingRef) {
-        final var behandlingOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandlingRef.getFagsakId());
+        final var behandlingOpt = behandlingRef.getOriginalBehandlingId();
         final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt
-                .map(behandling -> etablertTilsynRepository.hentHvisEksisterer(behandling.getId()).orElse(null))
+                .map(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId).orElse(null))
                 .map(g -> g.getEtablertTilsyn())
                 .orElse(new EtablertTilsyn(List.of()));
         final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
