@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,9 +13,12 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -66,7 +70,7 @@ public class EtablertTilsynTjeneste {
         return byggTidslinje(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
     }
     
-    public void opprettGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
+    public EtablertTilsyn utledGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
         final LocalDateTimeline<UtledetEtablertTilsyn> tilsynstidslinje = beregnTilsynstidlinje(behandlingRef);
         
         final List<EtablertTilsynPeriode> tilsynsperioder = tilsynstidslinje.stream()
@@ -74,9 +78,45 @@ public class EtablertTilsynTjeneste {
             .collect(Collectors.toList());
         
         final EtablertTilsyn etablertTilsyn = new EtablertTilsyn(tilsynsperioder);
+        return etablertTilsyn;
+    }
+    
+    public void opprettGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
+        final EtablertTilsyn etablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
         etablertTilsynRepository.lagre(behandlingRef.getBehandlingId(), etablertTilsyn);
     }
+    
+    public LocalDateTimeline<Boolean> finnForskjellerSidenForrigeBehandling(BehandlingReferanse behandlingRef) {
+        final var behandlingOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandlingRef.getFagsakId());
+        final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt
+                .map(behandling -> etablertTilsynRepository.hentHvisEksisterer(behandling.getId()).orElse(null))
+                .map(g -> g.getEtablertTilsyn())
+                .orElse(new EtablertTilsyn(List.of()));
+        final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
+        
+        final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
+        final LocalDateTimeline<Duration> nyBehandlingEtablertTilsynTidslinje = tilTidslinje(nyBehandlingtablertTilsyn);
+        
+        return forrigeBehandlingEtablertTilsynTidslinje.combine(nyBehandlingEtablertTilsynTidslinje, new LocalDateSegmentCombinator<Duration, Duration, Boolean>() {
+            @Override
+            public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval,
+                    LocalDateSegment<Duration> datoSegment, LocalDateSegment<Duration> datoSegment2) {
+                if (datoSegment == null || datoSegment2 == null || !datoSegment.getValue().equals(datoSegment2.getValue())) {
+                    return new LocalDateSegment<>(datoInterval, Boolean.TRUE);
+                }
+                return null;
+            }
+        }, JoinStyle.CROSS_JOIN);
+    }
 
+    private LocalDateTimeline<Duration> tilTidslinje(final EtablertTilsyn forrigeBehandlingEtablertTilsyn) {
+         return new LocalDateTimeline<>(
+            forrigeBehandlingEtablertTilsyn.getPerioder()
+            .stream()
+            .map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getVarighet()))
+            .collect(Collectors.toList())
+        );
+    }
 
     private List<FagsakKravDokument> hentAllePerioderTilVurdering(AktørId pleietrengende, DatoIntervallEntitet fagsakPeriode) {
         final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, fagsakPeriode.getFomDato().minusWeeks(25), fagsakPeriode.getTomDato().plusWeeks(25));
