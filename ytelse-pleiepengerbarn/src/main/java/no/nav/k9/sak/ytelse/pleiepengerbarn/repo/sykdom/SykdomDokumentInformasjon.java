@@ -37,6 +37,9 @@ public class SykdomDokumentInformasjon {
     @Convert(converter = SykdomDokumentTypeConverter.class)
     private SykdomDokumentType type;
 
+    @Column(name = "har_info_som_ikke_kan_punsjes")
+    private boolean harInfoSomIkkeKanPunsjes;
+
     @Column(name = "DATERT", nullable = true)
     private LocalDate datert;
 
@@ -57,6 +60,7 @@ public class SykdomDokumentInformasjon {
 
     public SykdomDokumentInformasjon(
             SykdomDokumentType type,
+            boolean harInfoSomIkkeKanPunsjes,
             LocalDate datert,
             LocalDateTime mottatt,
             Long versjon,
@@ -66,19 +70,22 @@ public class SykdomDokumentInformasjon {
         this.datert = datert;
         this.mottatt = mottatt;
         this.versjon = versjon;
+        this.harInfoSomIkkeKanPunsjes = harInfoSomIkkeKanPunsjes;
         this.opprettetAv = Objects.requireNonNull(opprettetAv, "opprettetAv");
         this.opprettetTidspunkt = Objects.requireNonNull(opprettetTidspunkt, "opprettetTidspunkt");
     }
 
     public SykdomDokumentInformasjon(
-        SykdomDokument dokument,
-        SykdomDokumentType type,
-        LocalDate datert,
-        LocalDateTime mottatt,
-        Long versjon,
-        String opprettetAv,
-        LocalDateTime opprettetTidspunkt) {
-        this(type, datert, mottatt, versjon, opprettetAv, opprettetTidspunkt);
+            SykdomDokument dokument,
+            SykdomDokumentType type,
+            boolean harInfoSomIkkeKanPunsjes,
+            LocalDate datert,
+            LocalDateTime mottatt,
+            Long versjon,
+            String opprettetAv,
+            LocalDateTime opprettetTidspunkt
+            ) {
+        this(type, harInfoSomIkkeKanPunsjes, datert, mottatt, versjon,  opprettetAv, opprettetTidspunkt);
         this.dokument = dokument;
     }
 
@@ -108,6 +115,10 @@ public class SykdomDokumentInformasjon {
 
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
+    }
+
+    public boolean isHarInfoSomIkkeKanPunsjes() {
+        return harInfoSomIkkeKanPunsjes;
     }
 
     public void setDokument(SykdomDokument dokument) {

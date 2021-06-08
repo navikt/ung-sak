@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -128,8 +129,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
         return arbeidIPeriode.stream()
             .filter(it -> UttakArbeidType.ARBEIDSTAKER.equals(UttakArbeidType.fraKode(it.getArbeidsforhold().getType())))
-            .anyMatch(it -> harFravær(it.getPerioder()) && utledIdentifikator(it).equals(at.getArbeidsgiver())) || arbeidIPeriode.stream()
-            .noneMatch(it -> utledIdentifikator(it).equals(at.getArbeidsgiver()));
+            .anyMatch(it -> harFravær(it.getPerioder()) && Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it))) || arbeidIPeriode.stream()
+            .noneMatch(it -> Objects.equals(at.getArbeidsgiver(), utledIdentifikator(it)));
     }
 
     private String utledIdentifikator(Arbeid it) {
@@ -138,7 +139,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         } else if (it.getArbeidsforhold().getAktørId() != null) {
             return it.getArbeidsforhold().getAktørId();
         }
-        throw new IllegalStateException("Fravær for arbeidsforhold mangler identifikator");
+        return null;
     }
 
     private boolean harFravær(Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder) {

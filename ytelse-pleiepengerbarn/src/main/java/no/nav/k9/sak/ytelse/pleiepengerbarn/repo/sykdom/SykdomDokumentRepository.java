@@ -52,7 +52,7 @@ public class SykdomDokumentRepository {
             .filter(d -> d.getType().isRelevantForSykdom())
             .collect(Collectors.toList());
     }
-    
+
     public List<SykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
         return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS).collect(Collectors.toList());
     }
