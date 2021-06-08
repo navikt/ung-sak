@@ -128,17 +128,26 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private boolean harFraværFraArbeidsgiverIPerioden(List<Arbeid> arbeidIPeriode, ManglendeVedlegg at) {
         return arbeidIPeriode.stream()
             .filter(it -> UttakArbeidType.ARBEIDSTAKER.equals(UttakArbeidType.fraKode(it.getArbeidsforhold().getType())))
+            .filter(it -> getIdent(it) != null)
             .anyMatch(it -> harFravær(it.getPerioder()) && utledIdentifikator(it).equals(at.getArbeidsgiver())) || arbeidIPeriode.stream()
             .noneMatch(it -> utledIdentifikator(it).equals(at.getArbeidsgiver()));
     }
 
     private String utledIdentifikator(Arbeid it) {
+        var ident = getIdent(it);
+        if (ident != null) {
+            return ident;
+        }
+        throw new IllegalStateException("Fravær for arbeidsforhold mangler identifikator, " + it.getArbeidsforhold().getType());
+    }
+
+    private String getIdent(Arbeid it) {
         if (it.getArbeidsforhold().getOrganisasjonsnummer() != null) {
             return it.getArbeidsforhold().getOrganisasjonsnummer();
         } else if (it.getArbeidsforhold().getAktørId() != null) {
             return it.getArbeidsforhold().getAktørId();
         }
-        throw new IllegalStateException("Fravær for arbeidsforhold mangler identifikator");
+        return null;
     }
 
     private boolean harFravær(Map<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder) {
