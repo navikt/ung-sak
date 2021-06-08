@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,14 +18,13 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -34,6 +35,7 @@ import no.nav.k9.sak.kompletthet.KompletthetResultat;
 import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 
@@ -52,6 +54,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private KompletthetsjekkerFelles fellesUtil;
     private SøknadRepository søknadRepository;
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     PSBKompletthetsjekker() {
         // CDI
@@ -62,12 +65,14 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
                                  InntektsmeldingTjeneste inntektsmeldingTjeneste,
                                  KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                  KompletthetsjekkerFelles fellesUtil,
-                                 SøknadRepository søknadRepository) {
+                                 SøknadRepository søknadRepository,
+                                 @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.kompletthetssjekkerSøknad = kompletthetssjekkerSøknad;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.fellesUtil = fellesUtil;
         this.søknadRepository = søknadRepository;
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
     @Override
@@ -82,12 +87,19 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         if (BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus())) {
             return KompletthetResultat.oppfylt();
         }
+        // Utled vilkårsperioder
+        TreeSet<DatoIntervallEntitet> vilkårsPerioder = utledVilkårsperioderRelevantForBehandling(ref);
+
+        if (vilkårsPerioder.isEmpty()) {
+            return KompletthetResultat.oppfylt();
+        }
         // Kalles fra VurderKompletthetSteg (en gang) som setter autopunkt 7003 + fra KompletthetsKontroller (dokument på åpen behandling,
         // hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         var ventefrister = new ArrayList<LocalDateTime>();
-        var result = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraRegister(ref);
-        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : result.entrySet()) {
+        var utledet = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraRegister(ref);
+        List<Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>>> relevanteKompletthetsvurderinger = utledRelevanteKompletthetsvurderinger(vilkårsPerioder, utledet);
+        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : relevanteKompletthetsvurderinger) {
             var manglendeInntektsmeldinger = entry.getValue()
                 .stream()
                 .filter(it -> DokumentTypeId.INNTEKTSMELDING.equals(it.getDokumentType()))
@@ -100,6 +112,13 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             }
         }
         return utledKompletthetResultat(ventefrister);
+    }
+
+    private TreeSet<DatoIntervallEntitet> utledVilkårsperioderRelevantForBehandling(BehandlingReferanse ref) {
+        return perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .stream()
+            .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private KompletthetResultat utledKompletthetResultat(List<LocalDateTime> ventefrister) {
@@ -142,29 +161,6 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
         return kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
     }
 
-    DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
-        return utledRelevantPeriode(tidslinje, periode, true);
-    }
-
-    private DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode, boolean justerStart) {
-        DatoIntervallEntitet orginalRelevantPeriode = periode;
-        if (justerStart) {
-            orginalRelevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4));
-        }
-
-        if (tidslinje.isEmpty()) {
-            return orginalRelevantPeriode;
-        }
-        var intersection = tidslinje.intersection(new LocalDateInterval(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4)));
-        var relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(intersection.getMinLocalDate().minusWeeks(4), intersection.getMaxLocalDate().plusWeeks(4));
-
-        if (orginalRelevantPeriode.equals(relevantPeriode)) {
-            return relevantPeriode;
-        }
-
-        return utledRelevantPeriode(tidslinje, relevantPeriode, false);
-    }
-
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
         return inntektsmeldingTjeneste
@@ -178,11 +174,20 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     public KompletthetResultat vurderEtterlysningInntektsmelding(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
 
+        // Utled vilkårsperioder
+        TreeSet<DatoIntervallEntitet> vilkårsPerioder = utledVilkårsperioderRelevantForBehandling(ref);
+
+        if (vilkårsPerioder.isEmpty()) {
+            return KompletthetResultat.oppfylt();
+        }
+
         var result = new ArrayList<LocalDateTime>();
         // Kalles fra KOARB (flere ganger) som setter autopunkt 7030 + fra KompletthetsKontroller (dokument på åpen behandling, hendelser)
         // KompletthetsKontroller vil ikke røre åpne autopunkt, men kan ellers sette på vent med 7009.
         var utledet = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
-        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : utledet.entrySet()) {
+        List<Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>>> relevanteKompletthetsvurderinger = utledRelevanteKompletthetsvurderinger(vilkårsPerioder, utledet);
+
+        for (Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> entry : relevanteKompletthetsvurderinger) {
             var manglendeInntektsmeldinger = entry.getValue();
             if (!manglendeInntektsmeldinger.isEmpty()) {
                 loggManglendeInntektsmeldinger(behandlingId, manglendeInntektsmeldinger);
@@ -195,6 +200,14 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
             .min(LocalDateTime::compareTo)
             .map(frist -> KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK))
             .orElse(KompletthetResultat.oppfylt()); // Konvensjon for å sikre framdrift i prosessen
+    }
+
+    private List<Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>>> utledRelevanteKompletthetsvurderinger(TreeSet<DatoIntervallEntitet> vilkårsPerioder, Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledet) {
+        var relevanteKompletthetsvurderinger = utledet.entrySet()
+            .stream()
+            .filter(it -> vilkårsPerioder.contains(it.getKey()))
+            .collect(Collectors.toList());
+        return relevanteKompletthetsvurderinger;
     }
 
     private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, List<ManglendeVedlegg> manglendeInntektsmeldinger) {

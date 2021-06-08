@@ -93,7 +93,8 @@ public class KompletthetsjekkerTest {
             inntektsmeldingTjeneste,
             new KompletthetForBeregningTjeneste(perioderTilVurderingTjeneste, new PSBInntektsmeldingerRelevantForBeregning(), arbeidsforholdTjeneste, inntektArbeidYtelseTjeneste),
             kompletthetsjekkerFelles,
-            søknadRepository);
+            søknadRepository,
+            perioderTilVurderingTjeneste);
     }
 
     public void setEntityManager(EntityManager entityManager) {
