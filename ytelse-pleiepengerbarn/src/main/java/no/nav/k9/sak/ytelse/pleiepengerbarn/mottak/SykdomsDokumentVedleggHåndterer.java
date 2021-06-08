@@ -82,6 +82,7 @@ public class SykdomsDokumentVedleggHåndterer {
             final LocalDate datert = erDigitalPleiepengerSyktBarnSøknad ? mottattDato.toLocalDate() : null;
             final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
                 type,
+                harInfoSomIkkeKanPunsjes,
                 datert,
                 mottattDato,
                 0L,
@@ -93,7 +94,6 @@ public class SykdomsDokumentVedleggHåndterer {
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
-                harInfoSomIkkeKanPunsjes,
                 sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);

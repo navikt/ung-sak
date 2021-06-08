@@ -284,16 +284,16 @@ public class SykdomDokumentRestTjeneste {
         final var dokument = sykdomDokumentRepository.hentDokument(Long.valueOf(sykdomDokumentEndringDto.getId()), behandling.getFagsak().getPleietrengendeAktørId()).get();
         SykdomDokumentInformasjon gmlInformasjon = dokument.getInformasjon();
         verifiserKanEndreType(sykdomDokumentEndringDto, behandling, gmlInformasjon);
-                
+
         dokument.setInformasjon(new SykdomDokumentInformasjon(
             dokument,
             sykdomDokumentEndringDto.getType(),
+            gmlInformasjon.isHarInfoSomIkkeKanPunsjes(),
             sykdomDokumentEndringDto.getDatert(),
             gmlInformasjon.getMottattTidspunkt(),
             gmlInformasjon.getVersjon()+1,
             getCurrentUserId(),
-            LocalDateTime.now()
-            ));
+            LocalDateTime.now()));
 
         sykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
@@ -304,7 +304,7 @@ public class SykdomDokumentRestTjeneste {
         final boolean harBlittEndret = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
         final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
-        
+
         if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
             throw new IllegalStateException("Det må minst være én godkjent legeerklæring på barnet når dette var tilfellet for en tidligere behandling.");
         }
@@ -343,6 +343,7 @@ public class SykdomDokumentRestTjeneste {
         final LocalDateTime nå = LocalDateTime.now();
         final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
             SykdomDokumentType.UKLASSIFISERT,
+            false,
             nå.toLocalDate(),
             nå,
             0L,
@@ -354,7 +355,6 @@ public class SykdomDokumentRestTjeneste {
             informasjon,
             behandling.getUuid(),
             behandling.getFagsak().getSaksnummer(),
-            false,
             sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
             getCurrentUserId(),
             nå);
