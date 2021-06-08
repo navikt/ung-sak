@@ -200,7 +200,8 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     private void sendEtterlysningForManglendeInntektsmeldinger(BehandlingReferanse ref, List<ManglendeVedlegg> manglendeInntektsmeldinger) {
         var arbeidsgiverIdenterSomSkalMottaEtterlysning = manglendeInntektsmeldinger.stream()
             .filter(a -> !a.getBrukerHarSagtAtIkkeKommer())
-            .map(ManglendeVedlegg::getArbeidsgiver);
+            .map(ManglendeVedlegg::getArbeidsgiver)
+            .distinct();
 
         arbeidsgiverIdenterSomSkalMottaEtterlysning.forEach(a -> {
                 var idType = (OrganisasjonsNummerValidator.erGyldig(a) || OrgNummer.erKunstig(a)) ? IdType.ORGNR : IdType.AKTØRID;
