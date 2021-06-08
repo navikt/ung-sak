@@ -35,7 +35,6 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
     private static final Logger log = LoggerFactory.getLogger(AleneOmOmsorgVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
-    private SøknadRepository søknadRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private PersoninfoAdapter personinfoAdapter;
@@ -54,7 +53,6 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
-        this.søknadRepository = søknadRepository;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
     }
 
