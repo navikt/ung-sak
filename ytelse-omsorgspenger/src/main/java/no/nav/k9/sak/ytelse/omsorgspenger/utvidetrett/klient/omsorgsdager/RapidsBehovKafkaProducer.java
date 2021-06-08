@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.behov;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.omsorgsdager;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -20,18 +20,18 @@ import java.util.Properties;
 import java.util.UUID;
 
 @ApplicationScoped
-public class BehovKafkaProducer extends BehovKlient {
+public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
     private static final String BEHOVSSEKVENS_ID = "behovssekvens_id";
-    private static final Logger LOG = LoggerFactory.getLogger(BehovKafkaProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RapidsBehovKafkaProducer.class);
 
     private String clientId;
     private String topic;
     private Producer<String, String> producer;
 
-    BehovKafkaProducer() {}
+    RapidsBehovKafkaProducer() {}
 
     @Inject
-    public BehovKafkaProducer(
+    public RapidsBehovKafkaProducer(
         @KonfigVerdi(value = "kafka.behov.topic", defaultVerdi = "k9-rapid-v2", required = false) String topic,
         @KonfigVerdi("bootstrap.servers") String bootstrapServers,
         @KonfigVerdi("systembruker.username") String username,
@@ -52,7 +52,7 @@ public class BehovKafkaProducer extends BehovKlient {
             var metadata = producer.send(new ProducerRecord<>(topic, behovssekvensId, behovssekvens)).get();
             LOG.info("Sendt OK clientId={}, topic={}, offset={}, partition={}", clientId, metadata.topic(), metadata.offset(), metadata.partition());
         } catch (Exception e) {
-            throw new BehovKafkaException(String.format("Oppsto feil når clientId=%s skulle sende behov på topic=%s", clientId, topic), e);
+            throw new RapidsBehovKafkaException(String.format("Oppsto feil når clientId=%s skulle sende behov på topic=%s", clientId, topic), e);
         } finally {
             MDC.remove(BEHOVSSEKVENS_ID);
         }

@@ -179,4 +179,5 @@ public class Vilkårene extends BaseEntitet {
             .toList();
         return new LocalDateTimeline<>(segmenter, (iv, v1, v2) -> new LocalDateSegment<>(iv, true));
     }
+
 }

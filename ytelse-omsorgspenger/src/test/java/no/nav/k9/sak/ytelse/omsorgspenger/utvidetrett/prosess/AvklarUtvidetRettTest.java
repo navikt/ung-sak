@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.util.NavigableSet;
 import java.util.Optional;
 
 import javax.enterprise.inject.Any;
@@ -19,12 +18,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -33,7 +29,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -51,12 +46,6 @@ public class AvklarUtvidetRettTest {
 
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
-    @Inject
-    private BehandlingRepository behandlingRepository;
-
-    @Inject
-    private VilkårTjeneste vilkårTjeneste;
 
     @Inject
     private EntityManager entityManager;
@@ -93,14 +82,6 @@ public class AvklarUtvidetRettTest {
         assertThat(v3.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p3).toLocalDateInterval());
         assertThat(v3.getVilkårTimeline(VT).toSegments()).allSatisfy(s -> assertThat(s.getValue().getUtfall()).isEqualTo(Utfall.OPPFYLT));
 
-    }
-
-    @SuppressWarnings("unused")
-    private void hoppTilbake(Behandling behandling) {
-        var ref = BehandlingReferanse.fra(behandling);
-        var kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling));
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VT, false);
-        vilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, VT, perioderTilVurdering);
     }
 
     private Vilkårene simulerAksjonspunktOppdatering(Behandling behandling,

@@ -2,7 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.auto;
 
 import java.time.LocalDate;
 
-public class VilkårResultat {
+public class VilkårTestResultat {
 
     private Long id;
     private LocalDate kjøreTidspunkt;
@@ -13,10 +13,10 @@ public class VilkårResultat {
     private LocalDate opptjeningTom;
     private String opptjentTid;
 
-    public VilkårResultat() {
+    public VilkårTestResultat() {
     }
 
-    public VilkårResultat(Long id, LocalDate kjøreTidspunkt, String vilkarType, String utfall, String avslagKode, LocalDate opptjeningFom, LocalDate opptjeningTom, String opptjentTid) {
+    public VilkårTestResultat(Long id, LocalDate kjøreTidspunkt, String vilkarType, String utfall, String avslagKode, LocalDate opptjeningFom, LocalDate opptjeningTom, String opptjentTid) {
         this.id = id;
         this.kjøreTidspunkt = kjøreTidspunkt;
         this.vilkarType = vilkarType;

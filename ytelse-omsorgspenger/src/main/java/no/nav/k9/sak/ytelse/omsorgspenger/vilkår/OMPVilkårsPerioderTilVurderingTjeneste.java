@@ -193,8 +193,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return 0;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkår) {
-        return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
+    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkårType) {
+        return vilkårsPeriodisering.getOrDefault(vilkårType, søktePerioder).utledPeriode(behandlingId);
     }
 
     @Override
