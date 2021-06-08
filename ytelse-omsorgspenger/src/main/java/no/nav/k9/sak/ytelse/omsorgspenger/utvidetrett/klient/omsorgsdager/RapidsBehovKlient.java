@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.omsorgspenger.behov;
+package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.omsorgsdager;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +11,7 @@ import no.nav.k9.felles.log.mdc.MDCOperations;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class BehovKlient {
+public abstract class RapidsBehovKlient {
     private static final ObjectMapper OBJECT_MAPPER = Json.getObjectMapper();
     private static final ULID ulid = new ULID();
 

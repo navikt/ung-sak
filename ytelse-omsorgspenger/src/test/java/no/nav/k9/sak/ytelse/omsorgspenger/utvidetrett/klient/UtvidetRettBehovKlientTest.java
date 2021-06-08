@@ -6,8 +6,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.omsorgspenger.behov.BehovKlient;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.*;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.omsorgsdager.RapidsBehovKlient;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
@@ -94,7 +95,7 @@ public class UtvidetRettBehovKlientTest {
         "{\"saksnummer\":\"ENSAK124\",\"behandlingId\":\"b684c176-7147-11eb-9439-0242ac130002\",\"tidspunkt\":\"2021-02-17T13:57:00.684Z\",\"søker\":{\"aktørId\":\"29099011111\"},\"annenForelder\":{\"aktørId\":\"01011811111\"},\"periode\":{\"fom\":\"2022-01-01\",\"tom\":\"2022-12-31\"},\"versjon\":\"1.0.0\"}"
     );
 
-    private static class TestBehovKlient extends BehovKlient {
+    private static class TestBehovKlient extends RapidsBehovKlient {
         private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
         public String forrigeBehovNavn;
         public String forrigeBehovInput;
