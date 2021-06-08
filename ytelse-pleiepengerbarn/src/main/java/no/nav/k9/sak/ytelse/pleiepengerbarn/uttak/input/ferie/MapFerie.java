@@ -26,9 +26,9 @@ public class MapFerie {
                 .collect(Collectors.toSet());
             if (dokumenter.size() == 1) {
                 var perioderFraSøknad = dokumenter.iterator().next();
+                resultatTimeline = tilbakestillAllFerieSomOverlapperMedSøktPeriode(resultatTimeline, perioderFraSøknad);
                 for (FeriePeriode feriePeriode : perioderFraSøknad.getFerie()) {
                     var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(feriePeriode.getPeriode().getFomDato(), feriePeriode.getPeriode().getTomDato(), true)));
-                    resultatTimeline = tilbakestillAllFerieSomOverlapperMedSøktPeriode(resultatTimeline, perioderFraSøknad);
                     resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                 }
             } else {
