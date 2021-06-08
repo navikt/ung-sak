@@ -138,7 +138,7 @@ class SøknadOversetter {
     private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
         final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(ytelse.getEndringsperiode());
-        final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide);
+        final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
         return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
     }
 
@@ -154,7 +154,7 @@ class SøknadOversetter {
                 perioder.stream()
                 .map(p -> new LocalDateSegment<>(p.getFraOgMed(), p.getTilOgMed(), Boolean.TRUE))
                 .collect(Collectors.toList())
-                );
+                ).compress();
     }
 
     private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
