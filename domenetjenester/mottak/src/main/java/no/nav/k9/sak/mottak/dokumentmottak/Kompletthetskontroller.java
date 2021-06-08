@@ -1,17 +1,13 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_KOMPLETT_OPPDATERING;
-
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -23,7 +19,6 @@ import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
@@ -72,16 +67,11 @@ public class Kompletthetskontroller {
         preconditionIkkeAksepterKobling(behandling);
 
         // Vurder kompletthet etter at dokument knyttet til behandling
-        var kompletthetResultat = vurderBehandlingKomplett(behandling);
-        if (!kompletthetResultat.erOppfylt()) {
-            settPåVent(behandling, kompletthetResultat);
+        spolKomplettBehandlingTilStartpunkt(behandling, grunnlagSnapshot);
+        if (kompletthetModell.erKompletthetssjekkPassert(behandlingId)) {
+            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         } else {
-            spolKomplettBehandlingTilStartpunkt(behandling, grunnlagSnapshot);
-            if (kompletthetModell.erKompletthetssjekkPassert(behandlingId)) {
-                behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
-            } else {
-                behandlingProsesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
-            }
+            behandlingProsesseringTjeneste.opprettTasksForFortsettBehandling(behandling);
         }
     }
 
@@ -95,19 +85,6 @@ public class Kompletthetskontroller {
             Set<String> treeAmigos = Set.of(StartBehandlingTask.TASKTYPE, FortsettBehandlingTask.TASKTYPE, GjenopptaBehandlingTask.TASKTYPE);
             behandlingProsesseringTjeneste.feilPågåendeTaskHvisFremtidigTaskEksisterer(behandling, treeAmigos);
         }
-    }
-
-    private void settPåVent(Behandling behandling, KompletthetResultat kompletthetResultat) {
-        if (kompletthetResultat.erFristUtløpt() || behandling.isBehandlingPåVent()) {
-            // Tidsfrist for kompletthetssjekk er utløpt, skal derfor ikke settes på vent på nytt
-            return;
-        }
-        // TODO (JOL): Logikken nå reflekterer det som lå i EndrKontroll. Avklar om andre autopunkt skal erstattes med det under.
-        // Settes på vent til behandlig er komplett
-        behandlingProsesseringTjeneste.settBehandlingPåVent(behandling, AUTO_VENT_KOMPLETT_OPPDATERING,
-            kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak(), kompletthetResultat.getVenteårsakVariant());
-        dokumentmottakerFelles.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling,
-            HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
     }
 
     public void vurderKompletthetForKøetBehandling(Behandling behandling) {
@@ -137,14 +114,6 @@ public class Kompletthetskontroller {
             EndringsresultatDiff diff = behandlingProsesseringTjeneste.finnGrunnlagsEndring(behandling, grunnlagSnapshot);
             behandlingProsesseringTjeneste.reposisjonerBehandlingVedEndringer(behandling, diff);
         }
-    }
-
-    private KompletthetResultat vurderBehandlingKomplett(Behandling behandling) {
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
-        var åpneAksjonspunkter = behandling.getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT).stream()
-            .map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList());
-        var kompletthetResultat = kompletthetModell.vurderKompletthet(ref, åpneAksjonspunkter);
-        return kompletthetResultat;
     }
 
 }
