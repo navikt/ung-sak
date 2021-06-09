@@ -124,7 +124,7 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
-        
+
         final List<EtablertTilsynPeriode> etablertTilsynPerioder = etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder();
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getPleietrengendeAktørId());
 
@@ -189,7 +189,7 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
-        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(input.getVilkårene());
 
@@ -216,7 +216,7 @@ public class MapInputTilUttakTjeneste {
             nattevåksperioder,
             kravprioritet);
     }
-    
+
     public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
         final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
@@ -321,5 +321,5 @@ public class MapInputTilUttakTjeneste {
         }
         return Utfall.valueOf(vp.getGjeldendeUtfall().getKode());
     }
-    
+
 }
