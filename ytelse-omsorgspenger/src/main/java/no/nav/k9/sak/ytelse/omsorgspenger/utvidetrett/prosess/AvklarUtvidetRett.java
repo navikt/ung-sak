@@ -1,12 +1,15 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -21,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -64,36 +68,40 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         var vilkårResultatBuilder = param.getVilkårResultatBuilder();
+        var periode = dto.getPeriode();
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
 
-        var periode = dto.getPeriode();
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var originalVilkårTidslinje = vilkårene.getVilkårTimeline(vilkårType);
 
-        var timeline = vilkårene.getVilkårTimeline(vilkårType);
+        // TODO: håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
+
         boolean erAvslag = dto.getAvslagsårsak() != null;
-        if (erAvslag || erÅpenPeriode(periode)) {
-            // overskriver hele vilkårperioden
-            // TODO: bør mulig avgrense fra søknad#mottattdato / søknadsperiode#fom i forbindelse med endringer?
-            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, timeline.getMinLocalDate(), timeline.getMaxLocalDate(), dto.getAvslagsårsak());
-            vilkårResultatBuilder.leggTil(vilkårBuilder);
-        } else {
-            var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
-            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, DatoIntervallEntitet.fraOgMed(søknadsperiode.getFomDato()));
+        var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
 
-            var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), dto.getAvslagsårsak());
-            vilkårResultatBuilder.leggTil(vilkårBuilder);
+        var perioder = new MinMaxPerioder(søknadsperiode, periode, originalVilkårTidslinje);
+        if (periode != null) {
+            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, perioder.tilDatoIntervall());
         }
 
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+
+        LocalDate maksVilkårTom = originalVilkårTidslinje.getMaxLocalDate(); // siste dato vi trenger å overskrive til
+
+        if (erAvslag) {
+            // overskriver per nå hele vilkårperioden
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, perioder.minFom(), maksVilkårTom, dto.getAvslagsårsak());
+        } else if (perioder.erÅpenPeriode(periode)) {
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, perioder.minFom(), maksVilkårTom, null /* avslagsårsak kan bare være null her */);
+        } else {
+            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
+        }
+
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
 
         return OppdateringResultat.utenOveropp();
-    }
-
-    private boolean erÅpenPeriode(Periode periode) {
-        return periode == null || !new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {
@@ -127,5 +135,32 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         historikkAdapter.tekstBuilder()
             .medBegrunnelse(begrunnelse, erBegrunnelseForAksjonspunktEndret)
             .medSkjermlenke(skjermlenkeType);
+    }
+
+    record MinMaxPerioder(DatoIntervallEntitet søknadsperiode,
+                          Periode angittPeriode,
+                          LocalDateTimeline<VilkårPeriode> vilkårTimeline) {
+
+        LocalDate minFom() {
+            var fom = Stream.of(søknadsperiode.getFomDato(), angittPeriode.getFom(), vilkårTimeline.getMinLocalDate()).sorted(Comparator.nullsLast(Comparator.naturalOrder())).findFirst().get();
+            return fom;
+        }
+
+        DatoIntervallEntitet tilDatoIntervall() {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(minFom(), maxTom());
+        }
+
+        LocalDate maxTom() {
+            var tom = Stream.of(søknadsperiode.getTomDato(), angittPeriode.getTom(), vilkårTimeline.getMaxLocalDate()).sorted(Comparator.nullsLast(Comparator.reverseOrder())).findFirst().get();
+            return tom;
+        }
+
+        boolean erÅpenPeriode(Periode periode) {
+            return periode == null || !erLukketPeriode(periode);
+        }
+
+        boolean erLukketPeriode(Periode periode) {
+            return periode != null && new LocalDateInterval(periode.getFom(), periode.getTom()).isClosedInterval();
+        }
     }
 }
