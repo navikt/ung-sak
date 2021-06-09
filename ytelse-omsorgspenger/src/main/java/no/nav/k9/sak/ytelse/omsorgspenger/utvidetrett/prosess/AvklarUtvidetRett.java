@@ -99,7 +99,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }
 
-        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatBuilder.leggTil(vilkårBuilder); // lagres utenfor
 
         return OppdateringResultat.utenOveropp();
     }
@@ -142,17 +142,25 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
                           LocalDateTimeline<VilkårPeriode> vilkårTimeline) {
 
         LocalDate minFom() {
-            var fom = Stream.of(søknadsperiode.getFomDato(), angittPeriode.getFom(), vilkårTimeline.getMinLocalDate()).sorted(Comparator.nullsLast(Comparator.naturalOrder())).findFirst().get();
+            var fom = Stream.of(
+                søknadsperiode == null ? null : søknadsperiode.getFomDato(),
+                angittPeriode == null ? null : angittPeriode.getFom(),
+                vilkårTimeline.getMinLocalDate())
+                .sorted(Comparator.nullsLast(Comparator.naturalOrder())).findFirst().get();
             return fom;
+        }
+
+        LocalDate maxTom() {
+            var tom = Stream.of(
+                søknadsperiode == null ? null : søknadsperiode.getTomDato(),
+                angittPeriode == null ? null : angittPeriode.getTom(),
+                vilkårTimeline.getMaxLocalDate())
+                .sorted(Comparator.nullsLast(Comparator.reverseOrder())).findFirst().get();
+            return tom;
         }
 
         DatoIntervallEntitet tilDatoIntervall() {
             return DatoIntervallEntitet.fraOgMedTilOgMed(minFom(), maxTom());
-        }
-
-        LocalDate maxTom() {
-            var tom = Stream.of(søknadsperiode.getTomDato(), angittPeriode.getTom(), vilkårTimeline.getMaxLocalDate()).sorted(Comparator.nullsLast(Comparator.reverseOrder())).findFirst().get();
-            return tom;
         }
 
         boolean erÅpenPeriode(Periode periode) {
