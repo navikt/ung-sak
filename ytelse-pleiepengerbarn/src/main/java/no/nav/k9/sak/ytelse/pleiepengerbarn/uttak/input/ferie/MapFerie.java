@@ -30,7 +30,8 @@ public class MapFerie {
             if (dokumenter.size() == 1) {
                 var søknadsperioder = kravDokumenter.get(kravDokument);
                 var perioderFraSøknad = dokumenter.iterator().next();
-                resultatTimeline = tilbakestillAllFerieSomOverlapperMedSøktPeriode(resultatTimeline, søknadsperioder);
+                //TODO: fikse håndtering ferie for behandling er som er endringssøknad
+                //resultatTimeline = tilbakestillAllFerieSomOverlapperMedSøktPeriode(resultatTimeline, søknadsperioder);
                 for (FeriePeriode feriePeriode : perioderFraSøknad.getFerie()) {
                     var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(feriePeriode.getPeriode().getFomDato(), feriePeriode.getPeriode().getTomDato(), true)));
                     resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
