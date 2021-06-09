@@ -121,11 +121,10 @@ public class SøknadDtoTjeneste {
         AktørId pleietrengendeAktør = finnAktørId(pleietrengendeAktørIdent);
 
         return finnSisteFagsakPå(ytelsetype, aktørId, List.of(pleietrengendeAktør))
-            .map(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
+            .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
             .map(behandling ->
                 {
-                    BehandlingReferanse referanse = BehandlingReferanse.fra(behandling.orElseThrow());
-
+                    BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
                     List<LocalDateTimeline<Boolean>> tidslinjer = provider.finnVurderSøknadsfristTjeneste(referanse).hentPerioderTilVurdering(referanse)
                         .values().stream().flatMap(p -> p.stream().map(SøktPeriode::getPeriode))
                         .map(dato -> new LocalDateTimeline<>(dato.toLocalDateInterval(), true)).collect(Collectors.toList());
