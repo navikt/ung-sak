@@ -28,7 +28,7 @@ import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmOmsorg;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmsorg;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.Person;
@@ -95,18 +95,18 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
             case OMSORGSPENGER_MA:
                 return mapMidlertidigAlene(behandling, periode);
             case OMSORGSPENGER_AO:
-                return mapAleneOmOmsorg(behandling, periode);
+                return mapAleneOmsorg(behandling, periode);
             default:
                 throw new UnsupportedOperationException("Støtter ikke ytelseType=[" + ytelseType + "]");
         }
     }
 
-    private UtvidetRett mapAleneOmOmsorg(Behandling behandling, Periode periode) {
+    private UtvidetRett mapAleneOmsorg(Behandling behandling, Periode periode) {
         var aktørIdSøker = behandling.getAktørId();
         var aktørIdBarn = behandling.getFagsak().getPleietrengendeAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
 
-        return new AleneOmOmsorg()
+        return new AleneOmsorg()
             .setSaksnummer(saksnummer)
             .setBehandlingUuid(behandling.getUuid())
             .setTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))

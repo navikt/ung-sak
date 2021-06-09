@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmOmsorg;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmsorg;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.MidlertidigAlene;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
@@ -21,13 +21,13 @@ public class UtvidetRettBehovKlient implements UtvidetRettKlient {
     private static final Map<Class<? extends UtvidetRett>, String> INNVILGET_BEHOV_NAVN = Map.of(
         KroniskSyktBarn.class, "InnvilgetKroniskSyktBarn",
         MidlertidigAlene.class, "InnvilgetMidlertidigAlene",
-        AleneOmOmsorg.class, "InnvilgetAleneOmOmsorg"
+        AleneOmsorg.class, "InnvilgetAleneOmsorg"
     );
 
     private static final Map<Class<? extends UtvidetRett>, String> AVSLÅTT_BEHOV_NAVN = Map.of(
         KroniskSyktBarn.class, "AvslåttKroniskSyktBarn",
         MidlertidigAlene.class, "AvslåttMidlertidigAlene",
-        AleneOmOmsorg.class, "AvslåttAleneOmOmsorg"
+        AleneOmsorg.class, "AvslåttAleneOmsorg"
     );
 
     private RapidsBehovKlient rapidsBehovKlient;

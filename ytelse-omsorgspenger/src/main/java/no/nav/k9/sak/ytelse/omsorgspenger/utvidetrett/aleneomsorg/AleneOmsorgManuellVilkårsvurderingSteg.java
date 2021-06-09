@@ -27,7 +27,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 @BehandlingStegRef(kode = "MANUELL_VILKÅRSVURDERING")
 @BehandlingTypeRef
 @ApplicationScoped
-public class AleneOmOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg {
+public class AleneOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg {
 
     private AksjonspunktDefinisjon aksjonspunktDef = AksjonspunktDefinisjon.VURDER_OMS_UTVIDET_RETT;
     private final VilkårType vilkårType = VilkårType.UTVIDETRETT;
@@ -37,12 +37,12 @@ public class AleneOmOmsorgManuellVilkårsvurderingSteg implements BehandlingSteg
     private SøknadRepository søknadRepository;
     private VilkårTjeneste vilkårTjeneste;
 
-    public AleneOmOmsorgManuellVilkårsvurderingSteg() {
+    public AleneOmsorgManuellVilkårsvurderingSteg() {
         // CDO
     }
 
     @Inject
-    public AleneOmOmsorgManuellVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
+    public AleneOmsorgManuellVilkårsvurderingSteg(BehandlingRepository behandlingRepository,
                                                        SøknadRepository søknadRepository,
                                                        VilkårTjeneste vilkårTjeneste,
                                                        VilkårResultatRepository vilkårResultatRepository) {
