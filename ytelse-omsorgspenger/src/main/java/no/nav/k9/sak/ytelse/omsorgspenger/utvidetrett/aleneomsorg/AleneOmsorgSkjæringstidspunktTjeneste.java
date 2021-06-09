@@ -18,18 +18,18 @@ import no.nav.k9.sak.typer.Periode;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef("OMP_AO")
-public class AleneOmOmsorgSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
+public class AleneOmsorgSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
 
     private Period periodeFør = Period.parse("P12M");
 
-    AleneOmOmsorgSkjæringstidspunktTjeneste() {
+    AleneOmsorgSkjæringstidspunktTjeneste() {
     }
 
     @Inject
-    AleneOmOmsorgSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
+    AleneOmsorgSkjæringstidspunktTjeneste(BehandlingRepository behandlingRepository,
                                                SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;

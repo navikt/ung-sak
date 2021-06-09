@@ -17,7 +17,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class AleneOmOmsorg implements UtvidetRett {
+public class AleneOmsorg implements UtvidetRett {
 
     @JsonProperty(value = "saksnummer", required = true)
     @Valid
@@ -55,11 +55,11 @@ public class AleneOmOmsorg implements UtvidetRett {
     @JsonProperty(value = "versjon", required = true)
     public final String versjon = "1.0.0";
 
-    public AleneOmOmsorg() {
+    public AleneOmsorg() {
     }
 
     @JsonCreator
-    public AleneOmOmsorg(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
+    public AleneOmsorg(@JsonProperty(value = "saksnummer", required = true) @Valid @NotNull Saksnummer saksnummer,
                             @JsonProperty(value = "behandlingId", required = true) @Valid @NotNull UUID behandlingUuid,
                             @JsonProperty(value = "tidspunkt", required = true) @Valid @NotNull ZonedDateTime tidspunkt,
                             @JsonProperty(value = "søker", required = true) @Valid @NotNull Person søker,
@@ -77,7 +77,7 @@ public class AleneOmOmsorg implements UtvidetRett {
         return saksnummer;
     }
 
-    public AleneOmOmsorg setSaksnummer(Saksnummer saksnummer) {
+    public AleneOmsorg setSaksnummer(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
         return this;
     }
@@ -86,7 +86,7 @@ public class AleneOmOmsorg implements UtvidetRett {
         return behandlingUuid;
     }
 
-    public AleneOmOmsorg setBehandlingUuid(UUID behandlingUuid) {
+    public AleneOmsorg setBehandlingUuid(UUID behandlingUuid) {
         this.behandlingUuid = behandlingUuid;
         return this;
     }
@@ -95,7 +95,7 @@ public class AleneOmOmsorg implements UtvidetRett {
         return tidspunkt;
     }
 
-    public AleneOmOmsorg setTidspunkt(ZonedDateTime tidspunkt) {
+    public AleneOmsorg setTidspunkt(ZonedDateTime tidspunkt) {
         this.tidspunkt = tidspunkt;
         return this;
     }
@@ -104,12 +104,12 @@ public class AleneOmOmsorg implements UtvidetRett {
         return søker;
     }
 
-    public AleneOmOmsorg setSøker(Person søker) {
+    public AleneOmsorg setSøker(Person søker) {
         this.søker = søker;
         return this;
     }
 
-    public AleneOmOmsorg setBarn(Person barn) {
+    public AleneOmsorg setBarn(Person barn) {
         this.barn = barn;
         return this;
     }
@@ -118,7 +118,7 @@ public class AleneOmOmsorg implements UtvidetRett {
         return barn;
     }
 
-    public AleneOmOmsorg setPeriode(Periode periode) {
+    public AleneOmsorg setPeriode(Periode periode) {
         this.periode = periode;
         return this;
     }

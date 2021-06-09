@@ -16,10 +16,10 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @ApplicationScoped
-public class AleneOmOmsorgKompletthetSjekker implements Kompletthetsjekker {
+public class AleneOmsorgKompletthetSjekker implements Kompletthetsjekker {
 
     @Inject
-    public AleneOmOmsorgKompletthetSjekker() {
+    public AleneOmsorgKompletthetSjekker() {
     }
 
     @Override
