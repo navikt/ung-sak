@@ -4,9 +4,11 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -21,11 +23,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
-import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker;
 import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
+import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstid;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.ArbeidstidInfo;
 import no.nav.k9.søknad.ytelse.psb.v1.tilsyn.TilsynPeriodeInfo;
@@ -141,14 +143,36 @@ class MapSøknadUttakPerioder {
         return null;
     }
 
-    private Collection<FeriePeriode> mapFerie(LovbestemtFerie input) {
+    private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
         if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return List.of();
         }
+        
+        final Set<FeriePeriode> samledeFerieperioder = new HashSet<>();
 
-        return input.getPerioder().keySet().stream()
-            .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed())))
-            .collect(Collectors.toSet());
+        /*
+         * Legger denne først og bruker ikke Stream.concat for å sikre rekkefølge.
+         */
+        input.getPerioder()
+                .keySet()
+                .stream()
+                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), true))
+                .forEach(f -> samledeFerieperioder.add(f));
+        
+        input.getPerioderSomSkalSlettes().keySet()
+                .stream()
+                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), false))
+                .forEach(f -> samledeFerieperioder.add(f));
+        
+        /*
+         * XXX: Dette er en hack. Vi bør endre til at man for søknadsperioder alltid sender inn en komplett liste med både ferieperioder
+         *      man skal ha ... og hvilke som skal fjernes.
+         */
+        søknadsperioder.stream()
+                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), false))
+                .forEach(f -> samledeFerieperioder.add(f));
+
+        return samledeFerieperioder;
     }
 
     private Collection<UttakPeriode> mapUttak(Uttak uttak) {
@@ -165,7 +189,7 @@ class MapSøknadUttakPerioder {
         var arbeidperioder = mapOppgittArbeidstid(ytelse.getArbeidstid());
         var tilsynsordning = mapOppgittTilsynsordning(ytelse.getTilsynsordning());
         var uttaksperioder = mapUttak(ytelse.getUttak());
-        var ferie = mapFerie(ytelse.getLovbestemtFerie());
+        var ferie = mapFerie(ytelse.getSøknadsperiodeList(), ytelse.getLovbestemtFerie());
 
         return new PerioderFraSøknad(journalpostId, uttaksperioder, arbeidperioder, tilsynsordning, ferie);
     }

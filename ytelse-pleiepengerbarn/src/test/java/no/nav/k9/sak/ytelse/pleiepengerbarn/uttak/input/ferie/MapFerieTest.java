@@ -60,7 +60,7 @@ class MapFerieTest {
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(),
             List.of(),
-            List.of(new FeriePeriode(periodeTilVurdering))));
+            List.of(new FeriePeriode(periodeTilVurdering, true))));
 
         var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
@@ -87,7 +87,7 @@ class MapFerieTest {
                 List.of(new UttakPeriode(periodeDel1, Duration.ZERO)),
                 List.of(),
                 List.of(),
-                List.of(new FeriePeriode(feriePeriode))),
+                List.of(new FeriePeriode(feriePeriode, true))),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
                 List.of(),
