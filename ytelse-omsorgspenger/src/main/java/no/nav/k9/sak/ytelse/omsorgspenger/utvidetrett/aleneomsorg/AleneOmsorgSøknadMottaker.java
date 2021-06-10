@@ -20,19 +20,19 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @FagsakYtelseTypeRef("OMP_AO")
 @ApplicationScoped
-public class AleneOmOmsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
+public class AleneOmsorgSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-    private AleneOmOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
+    private AleneOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
 
-    AleneOmOmsorgSøknadMottaker() {
+    AleneOmsorgSøknadMottaker() {
         // proxy
     }
 
     @Inject
-    public AleneOmOmsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
-                                       @Any AleneOmOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
+    public AleneOmsorgSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                                       @Any AleneOmsorgVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
                                        FagsakTjeneste fagsakTjeneste) {
         this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;

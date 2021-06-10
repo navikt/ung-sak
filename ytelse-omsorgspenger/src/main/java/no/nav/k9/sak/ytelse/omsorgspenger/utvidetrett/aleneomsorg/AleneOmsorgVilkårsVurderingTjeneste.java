@@ -30,9 +30,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 @FagsakYtelseTypeRef("OMP_AO")
 @BehandlingTypeRef
 @RequestScoped
-public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+public class AleneOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AleneOmOmsorgVilkårsVurderingTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(AleneOmsorgVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -41,12 +41,12 @@ public class AleneOmOmsorgVilkårsVurderingTjeneste implements VilkårsPerioderT
 
     private UtvidetRettSøknadPerioder søktePerioder;
 
-    AleneOmOmsorgVilkårsVurderingTjeneste() {
+    AleneOmsorgVilkårsVurderingTjeneste() {
         // for proxy
     }
 
     @Inject
-    public AleneOmOmsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
+    public AleneOmsorgVilkårsVurderingTjeneste(BehandlingRepository behandlingRepository,
                                                  VilkårResultatRepository vilkårResultatRepository,
                                                  PersoninfoAdapter personinfoAdapter,
                                                  SøknadRepository søknadRepository) {
