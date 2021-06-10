@@ -1,0 +1,1 @@
+ALTER TABLE UP_FERIE_PERIODE ADD COLUMN skal_ha_ferie boolean DEFAULT true NOT NULL;

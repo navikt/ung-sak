@@ -28,12 +28,9 @@ public class MapFerie {
                 .filter(it -> it.getJournalpostId().equals(kravDokument.getJournalpostId()))
                 .collect(Collectors.toSet());
             if (dokumenter.size() == 1) {
-                var søknadsperioder = kravDokumenter.get(kravDokument);
                 var perioderFraSøknad = dokumenter.iterator().next();
-                //TODO: fikse håndtering ferie for behandling er som er endringssøknad
-                //resultatTimeline = tilbakestillAllFerieSomOverlapperMedSøktPeriode(resultatTimeline, søknadsperioder);
                 for (FeriePeriode feriePeriode : perioderFraSøknad.getFerie()) {
-                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(feriePeriode.getPeriode().getFomDato(), feriePeriode.getPeriode().getTomDato(), true)));
+                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(feriePeriode.getPeriode().getFomDato(), feriePeriode.getPeriode().getTomDato(), feriePeriode.isSkalHaFerie())));
                     resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                 }
             } else {
@@ -48,10 +45,5 @@ public class MapFerie {
             .filter(LocalDateSegment::getValue)
             .map(it -> new LukketPeriode(it.getFom(), it.getTom()))
             .collect(Collectors.toList());
-    }
-
-    private LocalDateTimeline<Boolean> tilbakestillAllFerieSomOverlapperMedSøktPeriode(LocalDateTimeline<Boolean> resultatTimeline, List<VurdertSøktPeriode<Søknadsperiode>> perioderFraSøknad) {
-        var søknadsperioder = new LocalDateTimeline<>(perioderFraSøknad.stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), false)).collect(Collectors.toList()));
-        return resultatTimeline.combine(søknadsperioder, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 }
