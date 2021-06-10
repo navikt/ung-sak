@@ -33,6 +33,5 @@ public class RyddRegisterData {
 
     private void nullstillRegisterdata(Behandling behandling) {
         medlemskapRepository.slettAvklarteMedlemskapsdata(behandling.getId(), kontekst.getSkriveLås());
-        behandling.nullstillToTrinnsBehandling();
     }
 }

@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -36,6 +35,9 @@ public class FeriePeriode extends BaseEntitet implements IndexKey {
         @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
     private DatoIntervallEntitet periode;
+    
+    @Column(name = "skal_ha_ferie")
+    private boolean skalHaFerie;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -44,12 +46,13 @@ public class FeriePeriode extends BaseEntitet implements IndexKey {
     FeriePeriode() {
     }
 
-    public FeriePeriode(DatoIntervallEntitet periode) {
+    public FeriePeriode(DatoIntervallEntitet periode, boolean skalHaFerie) {
         this.periode = periode;
+        this.skalHaFerie = skalHaFerie;
     }
 
-    public FeriePeriode(LocalDate fom, LocalDate tom) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+    public FeriePeriode(LocalDate fom, LocalDate tom, boolean skalHaFerie) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), skalHaFerie);
     }
 
     public FeriePeriode(FeriePeriode feriePeriode) {
@@ -59,6 +62,10 @@ public class FeriePeriode extends BaseEntitet implements IndexKey {
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
+    
+    public boolean isSkalHaFerie() {
+        return skalHaFerie;
+    }
 
     @Override
     public String getIndexKey() {
@@ -66,16 +73,31 @@ public class FeriePeriode extends BaseEntitet implements IndexKey {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof FeriePeriode)) return false;
-        FeriePeriode that = (FeriePeriode) o;
-        return Objects.equals(periode, that.periode);
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((periode == null) ? 0 : periode.hashCode());
+        result = prime * result + (skalHaFerie ? 1231 : 1237);
+        return result;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(periode);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        FeriePeriode other = (FeriePeriode) obj;
+        if (periode == null) {
+            if (other.periode != null)
+                return false;
+        } else if (!periode.equals(other.periode))
+            return false;
+        if (skalHaFerie != other.skalHaFerie)
+            return false;
+        return true;
     }
 
     @Override

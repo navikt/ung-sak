@@ -191,8 +191,8 @@ spec:
     # Feature-flag
     - name: OMP_FOSTERBARN
       value: "false"
-    - name: FORMIDLING_RETUR_MALTYPER
-      value: "true"
+    - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
+      value: "false"
     - name: MOTTAK_SOKNAD_UTBETALING_OMS
       value: "true"
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG

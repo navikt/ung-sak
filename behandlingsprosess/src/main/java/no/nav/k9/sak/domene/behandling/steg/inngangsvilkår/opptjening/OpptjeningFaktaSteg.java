@@ -85,7 +85,7 @@ public class OpptjeningFaktaSteg implements BehandlingSteg {
 
         List<AksjonspunktResultat> resultatRegister = aksjonspunktutlederBekreftet.utledAksjonspunkterFor(new AksjonspunktUtlederInput(ref));
         if (!resultatRegister.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatOppgitt);
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(resultatRegister);
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();

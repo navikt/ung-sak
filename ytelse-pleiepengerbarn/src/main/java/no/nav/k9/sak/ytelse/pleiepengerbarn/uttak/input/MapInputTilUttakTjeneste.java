@@ -16,7 +16,6 @@ import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -37,6 +36,7 @@ import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
@@ -73,6 +73,7 @@ public class MapInputTilUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
     private EtablertTilsynRepository etablertTilsynRepository;
@@ -85,6 +86,7 @@ public class MapInputTilUttakTjeneste {
                                     PersonopplysningTjeneste personopplysningTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     FagsakRepository fagsakRepository,
+                                    KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                     InntektArbeidYtelseTjeneste iayTjeneste,
                                     PleietrengendeKravprioritet pleietrengendeKravprioritet,
                                     EtablertTilsynRepository etablertTilsynRepository,
@@ -97,6 +99,7 @@ public class MapInputTilUttakTjeneste {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.etablertTilsynRepository = etablertTilsynRepository;
@@ -124,7 +127,7 @@ public class MapInputTilUttakTjeneste {
             .stream().map(Fagsak::getSaksnummer)
             .filter(it -> !fagsak.getSaksnummer().equals(it))
             .collect(Collectors.toSet());
-        
+
         final List<EtablertTilsynPeriode> etablertTilsynPerioder = etablertTilsynRepository.hent(referanse.getBehandlingId()).getEtablertTilsyn().getPerioder();
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getPleietrengendeAktørId());
 
@@ -185,11 +188,11 @@ public class MapInputTilUttakTjeneste {
         final List<SøktUttak> søktUttak = new MapUttak().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
 
         // TODO: Se kommentarer/TODOs under denne:
-        final List<Arbeid> arbeid = new MapArbeid().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger(), input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+        final List<Arbeid> arbeid = new MapArbeid(kompletthetForBeregningTjeneste).map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering, input.getSakInntektsmeldinger(), input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
 
         final Map<LukketPeriode, Pleiebehov> pleiebehov = toPleiebehov(input.getPleiebehov());
 
-        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(kravDokumenter, perioderFraSøknader, tidslinjeTilVurdering);
+        final List<LukketPeriode> lovbestemtFerie = new MapFerie().map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         final HashMap<String, List<Vilkårsperiode>> inngangsvilkår = toInngangsvilkår(input.getVilkårene());
 
@@ -216,7 +219,7 @@ public class MapInputTilUttakTjeneste {
             nattevåksperioder,
             kravprioritet);
     }
-    
+
     public Map<LukketPeriode, List<String>> mapKravprioritetsliste(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
         final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
@@ -270,13 +273,7 @@ public class MapInputTilUttakTjeneste {
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
             .collect(Collectors.toList()));
 
-        var utvidetePerioder = new LocalDateTimeline<>(input.getUtvidetRevurderingPerioder()
-            .stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-            .collect(Collectors.toList()));
-        timeline = timeline.combine(utvidetePerioder, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
-        return new ArrayList<>(timeline.toSegments());
+        return new ArrayList<>(timeline.compress().toSegments());
     }
 
     private Map<LukketPeriode, Pleiebehov> toPleiebehov(List<EtablertPleieperiode> pleiebehov) {
@@ -321,5 +318,5 @@ public class MapInputTilUttakTjeneste {
         }
         return Utfall.valueOf(vp.getGjeldendeUtfall().getKode());
     }
-    
+
 }

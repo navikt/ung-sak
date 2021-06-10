@@ -30,7 +30,7 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårRe
 @EnableRuleMigrationSupport
 public class InngangsvilkårAutoTest {
 
-    private static final ObjectMapper OM = JsonUtil.getObjectMapper();
+    private static final ObjectMapper OM = InngangsvilkårTestJsonUtil.getObjectMapper();
     private static final List<VilkårType> VILKÅR = Arrays.asList(
         VilkårType.MEDLEMSKAPSVILKÅRET,
         VilkårType.OPPTJENINGSPERIODEVILKÅR,
@@ -39,10 +39,10 @@ public class InngangsvilkårAutoTest {
     public static Stream<Arguments> provideArguments(){
         List<Arguments> params = new ArrayList<>();
         for(var v : VILKÅR){
-            var files = VilkårVurdering.listAllFiles(v);
-            var inputFiles = VilkårVurdering.listInputFiles(files);
+            var files = VilkårTestVurdering.listAllFiles(v);
+            var inputFiles = VilkårTestVurdering.listInputFiles(files);
             for (var in : inputFiles) {
-                var out = VilkårVurdering.finnOutputFil(files, in);
+                var out = VilkårTestVurdering.finnOutputFil(files, in);
                 params.add(Arguments.of( v, in, out.orElse(null) ));
             }
         }
@@ -58,7 +58,7 @@ public class InngangsvilkårAutoTest {
 
         switch (v) {
             case MEDLEMSKAPSVILKÅRET:
-                vurderVilkår(VilkårVurdering.DO_NOTHING, v, in, out);
+                vurderVilkår(VilkårTestVurdering.DO_NOTHING, v, in, out);
                 return;
             case OPPTJENINGSPERIODEVILKÅR:
                 fastsettOpptjeningsPeriode(v, in, out);
@@ -72,15 +72,15 @@ public class InngangsvilkårAutoTest {
 
     }
 
-    private void vurderVilkår(BiConsumer<VilkårResultat, Object> ekstraSjekk, VilkårType v, File in, File out) throws IOException {
+    private void vurderVilkår(BiConsumer<VilkårTestResultat, Object> ekstraSjekk, VilkårType v, File in, File out) throws IOException {
 
-        new VilkårVurdering().vurderCase(collector, ekstraSjekk, VilkårVurdering.getVilkårImplementasjon(v), OM, in, out);
+        new VilkårTestVurdering().vurderCase(collector, ekstraSjekk, VilkårTestVurdering.getVilkårImplementasjon(v), OM, in, out);
 
     }
 
     public void vurderOpptjening( VilkårType v, File in, File out) throws IOException {
 
-        final BiConsumer<VilkårResultat, Object> extraDataSjekk = (resultat, extra) -> {
+        final BiConsumer<VilkårTestResultat, Object> extraDataSjekk = (resultat, extra) -> {
 
             collector.checkThat("Avvik i opptjeningstid for " + resultat,  ((OpptjeningsvilkårResultat) extra).getResultatOpptjent(), equalTo(Period.parse(resultat.getOpptjentTid())));
 
@@ -91,7 +91,7 @@ public class InngangsvilkårAutoTest {
 
     public void fastsettOpptjeningsPeriode( VilkårType v, File in, File out) throws IOException  {
 
-        final BiConsumer<VilkårResultat, Object> extraDataSjekk = (resultat, extra) -> {
+        final BiConsumer<VilkårTestResultat, Object> extraDataSjekk = (resultat, extra) -> {
 
             collector.checkThat("Avvik i opptjeningstid for " + resultat, ((OpptjeningsPeriode) extra).getOpptjeningsperiodeFom(), equalTo(resultat.getOpptjeningFom()));
 

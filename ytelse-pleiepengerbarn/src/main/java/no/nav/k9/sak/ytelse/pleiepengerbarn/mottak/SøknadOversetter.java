@@ -2,11 +2,16 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -21,9 +26,9 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
+import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForGrunnlagRepository;
@@ -31,7 +36,11 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg.OmsorgenForPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.BeredskapOgNattevåkOppdaterer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.Unntaksperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.personopplysninger.Barn;
@@ -83,6 +92,7 @@ class SøknadOversetter {
 
         PleiepengerSyktBarn ytelse = søknad.getYtelse();
         var maksSøknadsperiode = ytelse.getSøknadsperiode();
+        final List<Periode> søknadsperioder = hentAlleSøknadsperioder(ytelse);
 
         // TODO: Stopp barn som mangler norskIdentitetsnummer i k9-punsj ... eller støtt fødselsdato her?
 
@@ -105,8 +115,7 @@ class SøknadOversetter {
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
 
-        var søknadsperiode = new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(maksSøknadsperiode.getFraOgMed(), maksSøknadsperiode.getTilOgMed()));
-        søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperiode));
+        lagreSøknadsperioder(søknadsperioder, journalpostId, behandlingId);
 
         // Utgår for K9-ytelsene?
         // .medBegrunnelseForSenInnsending(wrapper.getBegrunnelseForSenSoeknad())
@@ -123,7 +132,29 @@ class SøknadOversetter {
 
         lagreUttakOgPerioder(søknad, maksSøknadsperiode, journalpostId, behandlingId, fagsakId);
 
-        lagreOmsorg(ytelse.getOmsorg(), maksSøknadsperiode, behandling);
+        lagreOmsorg(ytelse.getOmsorg(), søknadsperioder, behandling);
+    }
+    
+    private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
+        final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
+        final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(ytelse.getEndringsperiode());
+        final LocalDateTimeline<Boolean> søknadsperioder = kompletteSøknadsperioderTidslinje.union(endringssøknadsperioderTidslinje, StandardCombinators::coalesceLeftHandSide).compress();
+        return søknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).collect(Collectors.toList());
+    }
+
+    private void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
+        final Søknadsperiode[] søknadsperioderArray = søknadsperioder.stream()
+                .map(s -> new Søknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed())))
+                .toArray(Søknadsperiode[]::new);
+        søknadsperiodeRepository.lagre(behandlingId, new Søknadsperioder(journalpostId, søknadsperioderArray));
+    }
+
+    private LocalDateTimeline<Boolean> tilTidslinje(List<Periode> perioder) {
+        return new LocalDateTimeline<>(
+                perioder.stream()
+                .map(p -> new LocalDateSegment<>(p.getFraOgMed(), p.getTilOgMed(), Boolean.TRUE))
+                .collect(Collectors.toList())
+                ).compress();
     }
 
     private void lagreBeredskapOgNattevåk(Søknad søknad, final Long behandlingId) {
@@ -189,12 +220,14 @@ class SøknadOversetter {
         return BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraSøknad(eksisterendeUnntakEtablertTilsyn, mottattDato, søkersAktørId, kildeBehandlingId, nyeUnntakNattevåk, unntakSomSkalSlettes);
     }
 
-    private void lagreOmsorg(Omsorg omsorg, Periode periode, Behandling behandling) {
-        final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
-            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
-            BarnRelasjon.of(omsorg.getRelasjonTilBarnet().isPresent() ? omsorg.getRelasjonTilBarnet().get().getRolle() : null),
-            omsorg.getBeskrivelseAvOmsorgsrollen().isPresent() ? omsorg.getBeskrivelseAvOmsorgsrollen().get() : null);
-        omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
+    private void lagreOmsorg(Omsorg omsorg, List<Periode> søknadsperioder, Behandling behandling) {
+        for (var periode : søknadsperioder) {
+            final OmsorgenForPeriode omsorgForPeriode = OmsorgenForPeriode.nyPeriodeFraSøker(
+                DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()),
+                BarnRelasjon.of(omsorg.getRelasjonTilBarnet().isPresent() ? omsorg.getRelasjonTilBarnet().get().getRolle() : null),
+                omsorg.getBeskrivelseAvOmsorgsrollen().isPresent() ? omsorg.getBeskrivelseAvOmsorgsrollen().get() : null);
+            omsorgenForGrunnlagRepository.lagre(behandling.getId(), omsorgForPeriode);
+        }
     }
 
     private void lagreUttakOgPerioder(Søknad soknad, Periode maksSøknadsperiode, JournalpostId journalpostId, final Long behandlingId, Long fagsakId) {

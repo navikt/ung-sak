@@ -6,16 +6,20 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -31,7 +35,8 @@ class MapFerieTest {
         var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));
 
         var journalpostId = new JournalpostId(1L);
-        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD));
+        var kravDokumenter = Map.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD),
+            List.of(new VurdertSøktPeriode<>(periodeTilVurdering, Utfall.OPPFYLT, new Søknadsperiode(periodeTilVurdering))));
         var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(),
@@ -49,12 +54,13 @@ class MapFerieTest {
         var tidlinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato(), true)));
 
         var journalpostId = new JournalpostId(1L);
-        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD));
+        var kravDokumenter = Map.of(new KravDokument(journalpostId, LocalDateTime.now(), KravDokumentType.SØKNAD),
+            List.of(new VurdertSøktPeriode<>(periodeTilVurdering, Utfall.OPPFYLT, new Søknadsperiode(periodeTilVurdering))));
         var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(),
             List.of(),
-            List.of(new FeriePeriode(periodeTilVurdering))));
+            List.of(new FeriePeriode(periodeTilVurdering, true))));
 
         var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
@@ -70,15 +76,18 @@ class MapFerieTest {
 
         var journalpostId = new JournalpostId(1L);
         var journalpostId1 = new JournalpostId(2L);
-        var kravDokumenter = Set.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD), new KravDokument(journalpostId1, LocalDateTime.now(), KravDokumentType.SØKNAD));
         var periodeDel1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now().minusDays(30));
         var periodeDel2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
+        var kravDokumenter = Map.of(new KravDokument(journalpostId, LocalDateTime.now().minusDays(1), KravDokumentType.SØKNAD),
+            List.of(new VurdertSøktPeriode<>(periodeDel1, Utfall.OPPFYLT, new Søknadsperiode(periodeDel1))),
+            new KravDokument(journalpostId1, LocalDateTime.now(), KravDokumentType.SØKNAD),
+            List.of(new VurdertSøktPeriode<>(periodeDel2, Utfall.OPPFYLT, new Søknadsperiode(periodeDel2))));
         var feriePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeDel1.getFomDato(), periodeDel1.getFomDato().plusDays(3));
         var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
                 List.of(new UttakPeriode(periodeDel1, Duration.ZERO)),
                 List.of(),
                 List.of(),
-                List.of(new FeriePeriode(feriePeriode))),
+                List.of(new FeriePeriode(feriePeriode, true))),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
                 List.of(),

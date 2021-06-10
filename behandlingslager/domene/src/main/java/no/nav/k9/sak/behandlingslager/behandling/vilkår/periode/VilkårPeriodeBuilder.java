@@ -30,6 +30,10 @@ public class VilkårPeriodeBuilder {
         return medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
 
+    public VilkårPeriodeBuilder medPeriode(String isoFom, String isoTom) {
+        return medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.parse(isoFom), LocalDate.parse(isoTom)));
+    }
+
     public VilkårPeriodeBuilder medAvslagsårsak(Avslagsårsak avslagsårsak) {
         this.entitet.setAvslagsårsak(avslagsårsak);
         return this;

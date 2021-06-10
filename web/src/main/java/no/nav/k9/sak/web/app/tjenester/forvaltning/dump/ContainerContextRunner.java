@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -7,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -25,7 +26,7 @@ import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
  * Kjører et kall på en egen tråd med ContainerLogin. Kan benyttes til å kalle med system kontekst videre internt.
  * NB: ikke bruk som convenience utenfor dump.
  */
-@ApplicationScoped
+@Dependent
 public class ContainerContextRunner {
 
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
@@ -37,14 +38,11 @@ public class ContainerContextRunner {
         return t;
     });
 
-    private ContextTokenProvider tokenProvider;
-
-    protected ContainerContextRunner() {
-    }
+    private final ContextTokenProvider tokenProvider;
 
     @Inject
     public ContainerContextRunner(ContextTokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+        this.tokenProvider = Objects.requireNonNull(tokenProvider);
     }
 
     public static ContainerContextRunner createRunner() {
@@ -53,16 +51,10 @@ public class ContainerContextRunner {
 
     @Transactional
     private <T> T submit(Callable<T> call) throws Exception {
-
         var containerLogin = new ContainerLogin(tokenProvider);
-        try {
-            containerLogin.login();
-
-            var result = call.call();
-            return result;
-        } finally {
-            containerLogin.logout();
-        }
+        containerLogin.login();
+        var result = call.call();
+        return result;
     }
 
     public static <T> T doRun(Behandling behandling, Callable<T> call) {
@@ -85,6 +77,7 @@ public class ContainerContextRunner {
                     LOG_CONTEXT.remove("behandling");
                     LOG_CONTEXT.remove("fagsak");
                     LOG_CONTEXT.remove("saksnummer");
+                    CDI.current().destroy(runner);
                     requestContext.deactivate();
                 }
                 return result;
