@@ -33,13 +33,13 @@ public class AvklartSøknadsfristResultat extends BaseEntitet {
     @ChangeTracked
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "overstyrt_dokument_holder", updatable = false, unique = true)
+    @JoinColumn(name = "overstyrt_id", updatable = false, unique = true)
     private KravDokumentHolder overstyrtHolder;
 
     @ChangeTracked
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "avklart_dokument_holder", updatable = false, unique = true)
+    @JoinColumn(name = "avklart_id", updatable = false, unique = true)
     private KravDokumentHolder avklartHolder;
 
     @Column(name = "aktiv", nullable = false)
