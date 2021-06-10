@@ -190,7 +190,7 @@ spec:
     # Feature-flag
     - name: OMP_FOSTERBARN
       value: "true"
-    - name: FORMIDLING_RETUR_MALTYPER
+    - name: AUTOMATISK_VEDTAK_OMP_SOKNAD
       value: "true"
     - name: MOTTAK_SOKNAD_UTBETALING_OMS
       value: "true"
