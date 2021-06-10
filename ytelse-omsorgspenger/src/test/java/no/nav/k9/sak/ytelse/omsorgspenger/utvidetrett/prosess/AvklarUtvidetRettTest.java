@@ -56,7 +56,7 @@ public class AvklarUtvidetRettTest {
         LocalDate søknadTom = date("2021-11-16");
         Periode p0 = new Periode(søknadFom, søknadTom);
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER_MA);
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER_AO);
         scenario.medSøknad().medSøknadsperiode(søknadFom, søknadTom);
         scenario.leggTilVilkår(VT, Utfall.IKKE_VURDERT, new Periode(søknadFom, søknadTom));
         scenario.leggTilVilkår(VilkårType.OMSORGEN_FOR, Utfall.OPPFYLT, new Periode(søknadFom, null));
