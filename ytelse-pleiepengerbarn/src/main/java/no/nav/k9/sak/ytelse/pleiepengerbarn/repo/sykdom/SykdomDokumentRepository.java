@@ -46,7 +46,7 @@ public class SykdomDokumentRepository {
         return dokuments;
     }
 
-    public List<SykdomDokument> hentAlleDokumenterFor(UUID behandlingUUID) {
+    public List<SykdomDokument> hentNyeDokumenterFor(UUID behandlingUUID) {
         final TypedQuery<SykdomDokument> q = entityManager.createQuery(
             "SELECT d From SykdomDokument as d "
                 + "where d.behandlingUuid = :behandlingUUID", SykdomDokument.class);

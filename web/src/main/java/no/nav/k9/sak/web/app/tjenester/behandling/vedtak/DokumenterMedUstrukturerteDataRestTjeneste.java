@@ -90,7 +90,7 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
             return Collections.emptyList();
         }
 
-        List<SykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentAlleDokumenterFor(behandlingUuid.getBehandlingUuid());
+        List<SykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentNyeDokumenterFor(behandlingUuid.getBehandlingUuid());
 
         return sykdomDokumenter.stream()
             .filter(SykdomDokument::isHarInfoSomIkkeKanPunsjes)

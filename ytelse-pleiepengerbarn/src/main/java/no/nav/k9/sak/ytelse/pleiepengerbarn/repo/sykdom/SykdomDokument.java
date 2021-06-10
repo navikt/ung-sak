@@ -183,4 +183,8 @@ public class SykdomDokument {
     public LocalDateTime getEndretTidspunkt() {
         return informasjon.getOpprettetTidspunkt();
     }
+
+    public boolean isHarInfoSomIkkeKanPunsjes() {
+        return informasjon.isHarInfoSomIkkeKanPunsjes();
+    }
 }
