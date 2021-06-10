@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -23,25 +22,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 public class VurderManueltBrevSteg implements BehandlingSteg {
 
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    private Boolean lansert;
 
     VurderManueltBrevSteg() {
         //for CDI proxy
     }
 
     @Inject
-    public VurderManueltBrevSteg(FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                 @KonfigVerdi(value = "FORMIDLING_RETUR_MALTYPER", defaultVerdi = "true") Boolean lansert) {
+    public VurderManueltBrevSteg(FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.lansert = lansert;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!lansert) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
         //opprett task for å umiddelbart fortesette behandlingen etter at den settes på vent (se under)
         lagTaskForÅTaAvVent(kontekst);
         //settes på vent for å tvinge avslutning av transaksjon

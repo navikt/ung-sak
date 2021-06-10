@@ -24,7 +24,7 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
     private static final List<Brevkode> BREVKODER_SØKNAD_OMS = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
 
     private K9FormidlingKlient formidlingKlient;
-    private Boolean lansert;
+    private Boolean automatiskVedtakForSøknader;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     OmsorgspengerForeslåVedtakManueltUtleder() {
@@ -34,10 +34,10 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
     @Inject
     public OmsorgspengerForeslåVedtakManueltUtleder(MottatteDokumentRepository mottatteDokumentRepository,
                                                     K9FormidlingKlient formidlingKlient,
-                                                    @KonfigVerdi(value = "FORMIDLING_RETUR_MALTYPER", defaultVerdi = "true") Boolean lansert) {
+                                                    @KonfigVerdi(value = "AUTOMATISK_VEDTAK_OMP_SOKNAD", defaultVerdi = "true") Boolean automatiskVedtakForSøknader) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.formidlingKlient = formidlingKlient;
-        this.lansert = lansert;
+        this.automatiskVedtakForSøknader = automatiskVedtakForSøknader;
     }
 
     @Override
@@ -50,15 +50,16 @@ public class OmsorgspengerForeslåVedtakManueltUtleder implements ForeslåVedtak
     }
 
     private boolean trengerManueltBrev(Behandling behandling) {
-        if (!lansert) {
-            return false;
-        }
-
         InformasjonsbehovListeDto informasjonsbehov = formidlingKlient.hentInformasjonsbehov(behandling.getUuid(), behandling.getFagsakYtelseType());
         return !informasjonsbehov.getInformasjonsbehov().isEmpty();
     }
 
     private boolean harSøknad(Behandling behandling) {
+        if (automatiskVedtakForSøknader) {
+            // Behandling skal ikke lenger opprette 5028 for å holde igjen behandlinger med søknad.
+            // Skal bare opprette 5028 dersom respons fra formidling-tjenesten tilsier dette
+            return false;
+        }
         var omsorgspengerSøknader = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(), behandling.getId(), BREVKODER_SØKNAD_OMS, false, DokumentStatus.GYLDIG);
         return !omsorgspengerSøknader.isEmpty();
     }
