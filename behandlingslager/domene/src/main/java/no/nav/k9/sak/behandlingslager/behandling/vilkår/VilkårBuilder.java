@@ -260,7 +260,7 @@ public class VilkårBuilder {
         if (!vilkårTidslinje.isContinuous()) {
             kobleSammenMellomliggendeVilkårsPerioder();
         }
-        if (fagsakTidslinje != null && !VilkårType.MEDLEMSKAPSVILKÅRET.equals(vilkåret.getVilkårType())) {
+        if (fagsakTidslinje != null) {
             var tidslinjeSomFaltBort = vilkårTidslinje.disjoint(fagsakTidslinje);
             vilkårTidslinje = vilkårTidslinje.intersection(fagsakTidslinje);
             var periodeneSomFaltBort = tidslinjeSomFaltBort.toSegments()
