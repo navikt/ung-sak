@@ -51,11 +51,12 @@ public class AvklarUtvidetRettTest {
     private EntityManager entityManager;
 
     @Test
-    void reset_vilkår_perioder() throws Exception {
+    void test_reset_vilkår_perioder() throws Exception {
         LocalDate søknadFom = date("2021-04-09");
         LocalDate søknadTom = date("2021-11-16");
+        Periode p0 = new Periode(søknadFom, søknadTom);
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER_MA);
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER_AO);
         scenario.medSøknad().medSøknadsperiode(søknadFom, søknadTom);
         scenario.leggTilVilkår(VT, Utfall.IKKE_VURDERT, new Periode(søknadFom, søknadTom));
         scenario.leggTilVilkår(VilkårType.OMSORGEN_FOR, Utfall.OPPFYLT, new Periode(søknadFom, null));
@@ -66,21 +67,21 @@ public class AvklarUtvidetRettTest {
 
         Periode p1 = periode("2021-11-18", "2021-12-31");
         var v1 = simulerAksjonspunktOppdatering(behandling, ap, p1, null);
-        assertThat(v1.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p1).toLocalDateInterval());
         assertThat(v1.getVilkårTimeline(VT).toSegments()).allSatisfy(s -> assertThat(s.getValue().getUtfall()).isEqualTo(Utfall.OPPFYLT));
+        assertThat(v1.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p1).toLocalDateInterval());
 
         // <-- vanligvis skjer et tilbakehopp her før overskriving med ny periode
 
         var v2 = simulerAksjonspunktOppdatering(behandling, ap, null, AVSLAG);
-        assertThat(v2.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p1).toLocalDateInterval());
         assertThat(v2.getVilkårTimeline(VT).toSegments()).allSatisfy(s -> assertThat(s.getValue().getUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT));
+        assertThat(v2.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p0).toLocalDateInterval());
 
         // <-- vanligvis skjer et tilbakehopp her før overskriving med ny periode
 
         Periode p3 = periode("2021-11-19", "2021-12-31");
         var v3 = simulerAksjonspunktOppdatering(behandling, ap, p3, null);
-        assertThat(v3.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p3).toLocalDateInterval());
         assertThat(v3.getVilkårTimeline(VT).toSegments()).allSatisfy(s -> assertThat(s.getValue().getUtfall()).isEqualTo(Utfall.OPPFYLT));
+        assertThat(v3.getVilkårTimeline(VT).getLocalDateIntervals()).containsOnly(DatoIntervallEntitet.fra(p3).toLocalDateInterval());
 
     }
 
