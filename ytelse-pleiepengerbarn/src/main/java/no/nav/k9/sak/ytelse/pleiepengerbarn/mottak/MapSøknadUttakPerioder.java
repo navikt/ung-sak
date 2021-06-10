@@ -10,6 +10,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -147,32 +152,29 @@ class MapSøknadUttakPerioder {
         if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
             return List.of();
         }
-        
-        final Set<FeriePeriode> samledeFerieperioder = new HashSet<>();
 
-        /*
-         * Legger denne først og bruker ikke Stream.concat for å sikre rekkefølge.
-         */
-        input.getPerioder()
-                .keySet()
-                .stream()
-                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), true))
-                .forEach(f -> samledeFerieperioder.add(f));
-        
-        input.getPerioderSomSkalSlettes().keySet()
-                .stream()
-                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), false))
-                .forEach(f -> samledeFerieperioder.add(f));
+        LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder().keySet(), true);
         
         /*
          * XXX: Dette er en hack. Vi bør endre til at man for søknadsperioder alltid sender inn en komplett liste med både ferieperioder
          *      man skal ha ... og hvilke som skal fjernes.
          */
-        søknadsperioder.stream()
-                .map(entry -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(entry.getFraOgMed(), entry.getTilOgMed()), false))
-                .forEach(f -> samledeFerieperioder.add(f));
+        ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(input.getPerioderSomSkalSlettes().keySet(), false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
+        ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(søknadsperioder, false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
+        
+        return ferieTidslinje
+                .compress()
+                .stream()
+                .map(s -> new FeriePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+                .collect(Collectors.toList());
+    }
 
-        return samledeFerieperioder;
+    private LocalDateTimeline<Boolean> toFerieTidslinje(Collection<Periode> perioder, boolean skalHaFerie) {
+         return new LocalDateTimeline<>(perioder
+                .stream()
+                .map(entry -> new LocalDateSegment<>(entry.getFraOgMed(), entry.getTilOgMed(), skalHaFerie))
+                .collect(Collectors.toList())
+                );
     }
 
     private Collection<UttakPeriode> mapUttak(Uttak uttak) {
