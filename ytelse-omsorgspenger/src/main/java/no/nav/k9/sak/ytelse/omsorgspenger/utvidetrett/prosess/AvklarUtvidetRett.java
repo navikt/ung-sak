@@ -80,20 +80,21 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         boolean erAvslag = dto.getAvslagsårsak() != null;
         var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
 
-        var perioder = new MinMaxPerioder(søknadsperiode, periode, originalVilkårTidslinje);
-        if (periode != null) {
-            vilkårResultatBuilder.slettVilkårPerioder(vilkårType, perioder.tilDatoIntervall());
-        }
+        var minMaxPerioder = new MinMaxPerioder(søknadsperiode, periode, originalVilkårTidslinje);
 
+        vilkårResultatBuilder.slettVilkårPerioder(vilkårType, minMaxPerioder.tilDatoIntervall());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
 
-        LocalDate maksVilkårTom = originalVilkårTidslinje.getMaxLocalDate(); // siste dato vi trenger å overskrive til
+        LocalDate minFom = minMaxPerioder.minFom();
+        LocalDate maksTom = minMaxPerioder.maxTom(); // siste dato vi trenger å overskrive til
 
         if (erAvslag) {
-            // overskriver per nå hele vilkårperioden
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, perioder.minFom(), maksVilkårTom, dto.getAvslagsårsak());
-        } else if (perioder.erÅpenPeriode(periode)) {
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, perioder.minFom(), maksVilkårTom, null /* avslagsårsak kan bare være null her */);
+            // overskriver per nå hele søknadsperioden
+            var avslagFom = søknadsperiode == null ? minFom : søknadsperiode.getFomDato();
+            var avslagTom = søknadsperiode == null ? maksTom : søknadsperiode.getTomDato();
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, avslagFom, avslagTom, dto.getAvslagsårsak());
+        } else if (minMaxPerioder.erÅpenPeriode(periode)) {
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, null /* avslagsårsak kan bare være null her */);
         } else {
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
