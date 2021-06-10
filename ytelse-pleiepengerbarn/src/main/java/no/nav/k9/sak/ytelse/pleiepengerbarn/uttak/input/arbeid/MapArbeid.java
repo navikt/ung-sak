@@ -57,8 +57,10 @@ public class MapArbeid {
             var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger);
             final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
-            var vilkårPeriode = vilkår.finnPeriodeForSkjæringstidspunkt(periode.getFomDato());
-            if (erInnaktivVedPerioden(List.of(vilkårPeriode))) {
+            var vilkårPerioder = vilkår.getPerioder().stream()
+                .filter(it -> it.getPeriode().overlapper(periode))
+                .collect(Collectors.toList());
+            if (erInnaktivVedPerioden(vilkårPerioder)) {
                 arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null),
                     new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new WrappedArbeid(new ArbeidPeriode(periode, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))));
             } else {
@@ -145,6 +147,9 @@ public class MapArbeid {
     }
 
     private boolean erInnaktivVedPerioden(List<VilkårPeriode> perioderTilVurdering) {
+        if (perioderTilVurdering.size() > 1) {
+            throw new IllegalStateException("Forventer at perioden bare overlapper med en vurdering");
+        }
         return perioderTilVurdering.stream().anyMatch(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()));
     }
 
