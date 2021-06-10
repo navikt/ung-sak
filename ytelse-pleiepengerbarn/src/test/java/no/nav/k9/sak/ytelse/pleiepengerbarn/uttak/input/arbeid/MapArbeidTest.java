@@ -28,6 +28,8 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBInntektsmeldingerRelevantForBeregning;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -38,7 +40,8 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 
 class MapArbeidTest {
 
-    private MapArbeid mapper = new MapArbeid();
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste = new KompletthetForBeregningTjeneste(null, new PSBInntektsmeldingerRelevantForBeregning(), null, null);
+    private MapArbeid mapper = new MapArbeid(kompletthetForBeregningTjeneste);
 
     @Test
     void skal_mappe_arbeid_innenfor_periode_til_vurdering() {

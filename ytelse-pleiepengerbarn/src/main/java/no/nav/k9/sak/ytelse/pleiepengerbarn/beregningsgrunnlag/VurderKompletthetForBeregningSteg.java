@@ -31,6 +31,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.PSBKompletthetsjekker;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
@@ -50,6 +51,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PSBKompletthetsjekker kompletthetsjekker;
+    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
 
@@ -63,7 +65,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                                              UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository,
                                              VilkårResultatRepository vilkårResultatRepository,
                                              @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
-                                             @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker) {
+                                             @BehandlingTypeRef @FagsakYtelseTypeRef("PSB") PSBKompletthetsjekker kompletthetsjekker, KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -71,6 +73,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kompletthetsjekker = kompletthetsjekker;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
     }
 
     @Override
@@ -119,7 +122,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
         var kravDokumenter = vurderteSøknadsperioder.keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(manglendeVedleggForPeriode.getKey().getFomDato(), manglendeVedleggForPeriode.getKey().getTomDato(), true)));
 
-        var arbeidIPeriode = new MapArbeid().map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), vilkår);
+        var arbeidIPeriode = new MapArbeid(kompletthetForBeregningTjeneste).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), vilkår);
         var manglendeVedlegg = manglendeVedleggForPeriode.getValue();
 
         return manglendeVedlegg.stream()
