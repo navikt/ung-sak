@@ -115,6 +115,7 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getVarigEndring(),
             oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNyIArbeidslivet(),
+            oppgittEgenNæring.getBegrunnelse(),
             oppgittEgenNæring.getBruttoInntekt());
     }
 
