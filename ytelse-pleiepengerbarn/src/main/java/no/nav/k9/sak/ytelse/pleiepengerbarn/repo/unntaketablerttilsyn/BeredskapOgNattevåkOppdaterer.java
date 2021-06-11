@@ -41,19 +41,24 @@ public class BeredskapOgNattevåkOppdaterer {
     }
 
     private static List<UnntakEtablertTilsynPeriode> finnUnntakEtablertTilsynPerioder(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, List<Unntaksperiode> nyeUnntak, List<Periode> unntakSomSkalSlettes, AktørId aktørId, Long kildeBehandlingId) {
-        var eksisterendeSegmenter = new ArrayList<LocalDateSegment<Unntak>>();
+        var eksisterendeSegmenter = new ArrayList<LocalDateSegment<UnntakEtablertTilsynPeriode>>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
             eksisterendeUnntakEtablertTilsyn.getPerioder().forEach(periode ->
-                eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new Unntak(periode.getBegrunnelse(), periode.getResultat())))
+                eksisterendeSegmenter.add(new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), periode))
             );
         }
 
         var segementerSomSkalSlettes = unntakSomSkalSlettes.stream().map(periode ->
-            new LocalDateSegment<>(new LocalDateInterval(periode.getFom(), periode.getTom()), new Unntak(null, null))
+            new LocalDateSegment<>(new LocalDateInterval(periode.getFom(), periode.getTom()), null)
         ).toList();
 
         var segmenterSomSkalLeggesTil = nyeUnntak.stream().map(periode ->
-            new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new Unntak(periode.begrunnelse(), periode.resultat()))
+            new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new UnntakEtablertTilsynPeriode()
+                    .medBegrunnelse(periode.begrunnelse())
+                    .medResultat(periode.resultat())
+                    .medAktørId(aktørId)
+                    .medKildeBehandlingId(kildeBehandlingId)
+                    )
         ).toList();
 
         var perioderTidslinje =
@@ -62,12 +67,11 @@ public class BeredskapOgNattevåkOppdaterer {
                 .crossJoin(new LocalDateTimeline<>(segmenterSomSkalLeggesTil), BeredskapOgNattevåkOppdaterer::siste);
 
         return perioderTidslinje.toSegments().stream().map(segment ->
-            new UnntakEtablertTilsynPeriode()
+            new UnntakEtablertTilsynPeriode(segment.getValue())
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
+                /*
                 .medBegrunnelse(segment.getValue().resultat().equals(Resultat.IKKE_VURDERT) ? "" : segment.getValue().begrunnelse())
-                .medAktørId(aktørId)
-                .medKildeBehandlingId(kildeBehandlingId)
-                .medResultat(segment.getValue().resultat())
+                */
         ).toList();
     }
 
