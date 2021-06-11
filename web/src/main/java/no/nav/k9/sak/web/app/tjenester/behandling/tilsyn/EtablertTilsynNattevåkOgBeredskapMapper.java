@@ -21,7 +21,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTj
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynBeskrivelse;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynPeriode;
 
 @Dependent
@@ -35,9 +35,9 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
     }
 
     public EtablertTilsynNattevåkOgBeredskapDto tilDto(BehandlingReferanse behandlingRef,
-                                                       UnntakEtablertTilsynGrunnlag unntakEtablertTilsynGrunnlag) {
-        var beredskap = unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap();
-        var nattevåk = unntakEtablertTilsynGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk();
+            UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        var beredskap = unntakEtablertTilsynForPleietrengende.getBeredskap();
+        var nattevåk = unntakEtablertTilsynForPleietrengende.getNattevåk();
 
         return new EtablertTilsynNattevåkOgBeredskapDto(
             tilEtablertTilsyn(behandlingRef),

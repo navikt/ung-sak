@@ -25,6 +25,9 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "nattevaak_id", nullable = true, updatable = false, unique = true)
     private UnntakEtablertTilsyn nattevåk;
+    
+    @Column(name = "aktiv", nullable = false)
+    private boolean aktiv = true;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -70,6 +73,10 @@ public class UnntakEtablertTilsynForPleietrengende extends BaseEntitet {
     public UnntakEtablertTilsynForPleietrengende medNattevåk(UnntakEtablertTilsyn nattevåk) {
         this.nattevåk = nattevåk;
         return this;
+    }
+    
+    void setAktiv(boolean aktiv) {
+        this.aktiv = aktiv;
     }
 
     @Override

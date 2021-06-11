@@ -43,7 +43,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
@@ -198,9 +198,9 @@ public class MapInputTilUttakTjeneste {
 
         final Map<LukketPeriode, Duration> tilsynsperioder = new MapTilsyn().map(input.getEtablertTilsynPerioder());
 
-        var unntakEtablertTilsynGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandling.getId());
-        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynGrunnlag);
-        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynGrunnlag);
+        var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId()).map(g -> g.getUnntakEtablertTilsynForPleietrengende()).orElse(null);
+        var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende);
+        var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
 
         return new Uttaksgrunnlag(
@@ -228,18 +228,18 @@ public class MapInputTilUttakTjeneste {
         return resultat;
     }
 
-    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynGrunnlag grunnlag) {
-        if (grunnlag == null || grunnlag.getUnntakEtablertTilsynForPleietrengende() == null || grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap() == null) {
+    private Map<LukketPeriode, Utfall> tilBeredskap(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getBeredskap() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(grunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap());
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getBeredskap());
     }
 
-    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynGrunnlag grunnlag) {
-        if (grunnlag == null || grunnlag.getUnntakEtablertTilsynForPleietrengende() == null || grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk() == null) {
+    private Map<LukketPeriode, Utfall> tilNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
+        if (unntakEtablertTilsynForPleietrengende == null || unntakEtablertTilsynForPleietrengende.getNattevåk() == null) {
             return Map.of();
         }
-        return tilUnntakEtablertTilsynMap(grunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk());
+        return tilUnntakEtablertTilsynMap(unntakEtablertTilsynForPleietrengende.getNattevåk());
     }
 
     private Map<LukketPeriode, Utfall> tilUnntakEtablertTilsynMap(UnntakEtablertTilsyn unntakEtablertTilsyn) {

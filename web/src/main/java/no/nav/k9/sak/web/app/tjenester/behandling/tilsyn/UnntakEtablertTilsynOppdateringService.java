@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.tilsyn;
 
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt.VurderingDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.*;
@@ -14,19 +15,22 @@ import java.util.List;
 public class UnntakEtablertTilsynOppdateringService {
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
+    private BehandlingRepository behandlingRepository;
 
     public UnntakEtablertTilsynOppdateringService() {
         // CDI
     }
 
     @Inject
-    public UnntakEtablertTilsynOppdateringService(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository) {
+    public UnntakEtablertTilsynOppdateringService(UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository, BehandlingRepository behandlingRepository) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public OppdateringResultat oppdater(List<VurderingDto> vurderinger, Vurderingstype vurderingstype, Long behandlingId, AktørId søkersAktørId) {
-        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hent(behandlingId);
-        var unntakEtablertTilsyn = finnUnntakEtablertTilsyn(vurderingstype, eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende());
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElseThrow();
+        var unntakEtablertTilsyn = finnUnntakEtablertTilsyn(vurderingstype, eksisterendeGrunnlag);
 
         if (vurderinger != null) {
             for (VurderingDto vurdering : vurderinger) {
@@ -37,14 +41,14 @@ public class UnntakEtablertTilsynOppdateringService {
         var nyttUnntakEtablertTilsynForPleietrengende = switch(vurderingstype) {
             case BEREDSKAP ->
                 new UnntakEtablertTilsynForPleietrengende(
-                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getPleietrengendeAktørId(),
+                    eksisterendeGrunnlag.getPleietrengendeAktørId(),
                     unntakEtablertTilsyn,
-                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getNattevåk()
+                    eksisterendeGrunnlag.getNattevåk()
                 );
             case NATTEVÅK ->
                 new UnntakEtablertTilsynForPleietrengende(
-                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getPleietrengendeAktørId(),
-                    eksisterendeGrunnlag.getUnntakEtablertTilsynForPleietrengende().getBeredskap(),
+                    eksisterendeGrunnlag.getPleietrengendeAktørId(),
+                    eksisterendeGrunnlag.getBeredskap(),
                     unntakEtablertTilsyn
                 );
         };
