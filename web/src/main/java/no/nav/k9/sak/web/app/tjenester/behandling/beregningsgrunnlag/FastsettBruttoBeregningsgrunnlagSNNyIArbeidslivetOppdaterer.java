@@ -33,7 +33,7 @@ public class FastsettBruttoBeregningsgrunnlagSNNyIArbeidslivetOppdaterer impleme
     @Override
     public OppdateringResultat oppdater(FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
-            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), MapDtoTilRequest::map));
+            .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto -> MapDtoTilRequest.map(dto, dtoer.getBegrunnelse())));
         oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
         // TODO FIKS HISTORIKK
         return OppdateringResultat.utenOveropp();
