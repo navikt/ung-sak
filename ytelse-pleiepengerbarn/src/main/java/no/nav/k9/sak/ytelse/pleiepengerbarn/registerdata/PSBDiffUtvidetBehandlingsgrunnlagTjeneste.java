@@ -17,7 +17,7 @@ import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.domene.registerinnhenting.DiffUtvidetBehandlingsgrunnlagTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
@@ -31,7 +31,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
 
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
-    private EtablertTilsynTjeneste etablertTilsynTjeneste;
+    private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     PSBDiffUtvidetBehandlingsgrunnlagTjeneste() {
@@ -41,11 +41,11 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     @Inject
     public PSBDiffUtvidetBehandlingsgrunnlagTjeneste(SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                      SykdomGrunnlagService sykdomGrunnlagService,
-                                                     EtablertTilsynTjeneste etablertTilsynTjeneste,
+                                                     ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                      @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
-        this.etablertTilsynTjeneste = etablertTilsynTjeneste;
+        this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
@@ -69,11 +69,7 @@ public class PSBDiffUtvidetBehandlingsgrunnlagTjeneste implements DiffUtvidetBeh
     }
 
     private LocalDateTimeline<Boolean> diffEtablertTilsyn(BehandlingReferanse referanse) {
-        LocalDateTimeline<Boolean> resultat = etablertTilsynTjeneste.finnForskjellerSidenForrigeBehandling(referanse);
-        resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
-        //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
-        resultat = resultat.intersection(SykdomUtils.toLocalDateTimeline(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
-        return resultat;
+        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringer(referanse);
     }
 
     private SykdomGrunnlagSammenlikningsresultat diffSykdomsOpplysninger(BehandlingReferanse ref) {

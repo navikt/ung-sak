@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
@@ -37,6 +39,7 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
     private SykdomGrunnlagRepository sykdomGrunnlagRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
     private SykdomGrunnlagService sykdomGrunnlagService;
+    private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
 
     VurderOmPSBVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -47,13 +50,15 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
                                                        VilkårResultatRepository vilkårResultatRepository,
                                                        SykdomGrunnlagRepository sykdomGrunnlagRepository,
                                                        SykdomVurderingRepository sykdomVurderingRepository,
-                                                       SykdomGrunnlagService sykdomGrunnlagService) {
+                                                       SykdomGrunnlagService sykdomGrunnlagService,
+                                                       ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
     }
 
     @Override
@@ -67,22 +72,28 @@ public class VurderOmPSBVedtakPåvirkerAndreSakerTjeneste implements VurderOmVed
         var result = new ArrayList<Saksnummer>();
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
             if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
-                SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentSisteBehandling(kandidatsaksnummer)
-                    .flatMap(uuid -> sykdomGrunnlagRepository.hentGrunnlagForBehandling(uuid))
-                    .orElseThrow();
-                var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
-                var vurderingsperioder = utledVurderingsperiode(behandling);
-                var manglendeOmsorgenForPerioder = sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(behandling.getId());
-                var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
-                final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
-
-                if (!endringerISøktePerioder.isEmpty()) {
+                var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
+                var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
+                boolean skalRevurderesPgaSykdom = vurderBehovForRevurderingPgaSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
+                if (skalRevurderesPgaSykdom || erEndringPåEtablertTilsynTjeneste.erUhåndterteEndringer(BehandlingReferanse.fra(sisteBehandlingPåKandidat))) {
                     result.add(kandidatsaksnummer);
                 }
             }
         }
 
         return result;
+    }
+
+    private boolean vurderBehovForRevurderingPgaSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
+        SykdomGrunnlagBehandling kandidatSykdomBehandling = sykdomGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid())
+            .orElseThrow();
+        var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
+        var vurderingsperioder = utledVurderingsperiode(behandling);
+        var manglendeOmsorgenForPerioder = sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(behandling.getId());
+        var utledetGrunnlag = sykdomGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sykdomGrunnlagService.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlag()), utledetGrunnlag).getDiffPerioder();
+
+        return !endringerISøktePerioder.isEmpty();
     }
 
     private List<Periode> utledVurderingsperiode(Behandling behandling) {
