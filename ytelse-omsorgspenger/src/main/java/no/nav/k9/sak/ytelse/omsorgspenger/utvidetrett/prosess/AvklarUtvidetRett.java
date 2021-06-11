@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -41,6 +42,9 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadRepository søknadRepository;
 
+    // TODO:fjern flagg når avklart at ny håndtering fungerer også godt for Kronisk syk/Midlertidig Alene
+    private boolean enableNyAvklarUtvidetRett;
+
     AvklarUtvidetRett() {
         // for CDI proxy
     }
@@ -49,11 +53,13 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     AvklarUtvidetRett(HistorikkTjenesteAdapter historikkAdapter,
                       VilkårResultatRepository vilkårResultatRepository,
                       SøknadRepository søknadRepository,
-                      BehandlingRepository behandlingRepository) {
+                      BehandlingRepository behandlingRepository,
+                      @KonfigVerdi(value = "ENABLE_NY_AVKLAR_UTVIDET_RETT", defaultVerdi = "true") boolean enableNyAvklarUtvidetRett) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
         this.behandlingRepository = behandlingRepository;
+        this.enableNyAvklarUtvidetRett = enableNyAvklarUtvidetRett;
     }
 
     @Override
@@ -62,7 +68,8 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var fagsak = behandling.getFagsak();
 
-        if (fagsak.getYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO) {
+        if (enableNyAvklarUtvidetRett
+            || fagsak.getYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO) {
             // ny håndtering - sletter hele periodene først (tar først på OMS_AO venter med andre rammevedtak)
             var avklarV2 = new AvklarUtvidetRettV2(historikkAdapter, vilkårResultatRepository, søknadRepository, behandlingRepository);
             return avklarV2.oppdater(dto, param);

@@ -207,6 +207,8 @@ spec:
       value: "true"
     - name: VURDER_SOKNADSFRIST
       value: "true"
+    - name: ENABLE_NY_AVKLAR_UTVIDET_RETT
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
