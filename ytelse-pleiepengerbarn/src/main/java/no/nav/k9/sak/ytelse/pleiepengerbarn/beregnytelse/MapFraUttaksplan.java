@@ -56,6 +56,7 @@ class MapFraUttaksplan {
                 } else if (arb.getAktørId() != null) {
                     arbeidsforholdBuilder.medAktørId(arb.getAktørId());
                 }
+                arbeidsforholdBuilder.medArbeidsforholdId(arb.getArbeidsforholdId());
                 return arbeidsforholdBuilder.build();
             case FRILANSER:
                 return Arbeidsforhold.frilansArbeidsforhold();
