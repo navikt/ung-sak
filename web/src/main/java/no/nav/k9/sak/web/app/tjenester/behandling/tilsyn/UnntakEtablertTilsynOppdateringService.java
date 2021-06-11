@@ -28,8 +28,12 @@ public class UnntakEtablertTilsynOppdateringService {
     }
 
     public OppdateringResultat oppdater(List<VurderingDto> vurderinger, Vurderingstype vurderingstype, Long behandlingId, AktørId søkersAktørId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId()).orElseThrow();
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return oppdater(vurderinger, vurderingstype, behandlingId, søkersAktørId, behandling.getFagsak().getPleietrengendeAktørId());
+    }
+    
+    OppdateringResultat oppdater(List<VurderingDto> vurderinger, Vurderingstype vurderingstype, Long behandlingId, AktørId søkersAktørId, AktørId pleietrengende) {
+        var eksisterendeGrunnlag = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(pleietrengende).orElseThrow();
         var unntakEtablertTilsyn = finnUnntakEtablertTilsyn(vurderingstype, eksisterendeGrunnlag);
 
         if (vurderinger != null) {
