@@ -119,11 +119,10 @@ public class KompletthetForBeregningTjeneste {
         }
 
         var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-        var vilkår = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         var uttakGrunnlag = uttakPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(ref);
 
-        var input = new InputForKompletthetsvurdering(skipVurderingMotArbeid, vilkår.orElse(null), uttakGrunnlag.orElse(null), vurderteSøknadsperioder);
+        var input = new InputForKompletthetsvurdering(skipVurderingMotArbeid, uttakGrunnlag.orElse(null), vurderteSøknadsperioder);
 
         var tidslinje = new LocalDateTimeline<>(vilkårsPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
@@ -204,7 +203,7 @@ public class KompletthetForBeregningTjeneste {
         var kravDokumenter = input.getVurderteSøknadsperioder().keySet();
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), true)));
 
-        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), input.getVilkår());
+        var arbeidIPeriode = new MapArbeid(this).map(kravDokumenter, perioderFraSøknadene, timeline, Set.of(), null);
 
         return manglendeVedlegg.stream()
             .noneMatch(at -> harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, at));

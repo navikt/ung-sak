@@ -57,9 +57,9 @@ public class MapArbeid {
             var identifikatorerFraInntektsmelding = utledRelevanteKeys(periode, sakInntektsmeldinger);
             final Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold = new HashMap<>();
 
-            var vilkårPerioder = vilkår.getPerioder().stream()
+            List<VilkårPeriode> vilkårPerioder = vilkår != null ? vilkår.getPerioder().stream()
                 .filter(it -> it.getPeriode().overlapper(periode))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : List.of();
             if (erInnaktivVedPerioden(vilkårPerioder)) {
                 arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null),
                     new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new WrappedArbeid(new ArbeidPeriode(periode, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))));
