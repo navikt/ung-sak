@@ -70,7 +70,7 @@ public class KompletthetForBeregningRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public KompletthetsVurderingDto utledStatusForKompletthet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse.fra(behandling));
+        var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAllePåkrevdeVedleggFraGrunnlag(BehandlingReferanse.fra(behandling));
         var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
 
         var status = manglendeVedleggForPeriode.entrySet()
