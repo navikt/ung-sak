@@ -99,7 +99,7 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
                 hentTittel(d.getJournalpostId()),
                 d.getType(),
                 d.getDatert(),
-                Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.toString(), "" + d.getId()))))
+                Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.getBehandlingUuid().toString(), "" + d.getId()))))
             .collect(Collectors.toList());
     }
 
