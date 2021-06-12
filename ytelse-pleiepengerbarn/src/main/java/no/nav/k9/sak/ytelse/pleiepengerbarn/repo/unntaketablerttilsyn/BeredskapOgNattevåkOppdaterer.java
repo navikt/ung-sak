@@ -54,7 +54,9 @@ public class BeredskapOgNattevåkOppdaterer {
 
         var segmenterSomSkalLeggesTil = nyeUnntak.stream().map(periode ->
             new LocalDateSegment<>(new LocalDateInterval(periode.fom(), periode.tom()), new UnntakEtablertTilsynPeriode()
-                    .medBegrunnelse(periode.begrunnelse())
+                    // XXX: Nullstilles slik fordi feltet "begrunnelse" er brukt både til begrunnelse fra søker og vurderingstekst fra saksbehandler.
+                    .medBegrunnelse(periode.resultat().equals(Resultat.IKKE_VURDERT) ? "" : periode.begrunnelse()) 
+                    //.medBegrunnelse(periode.begrunnelse())
                     .medResultat(periode.resultat())
                     .medAktørId(aktørId)
                     .medKildeBehandlingId(kildeBehandlingId)
@@ -69,9 +71,6 @@ public class BeredskapOgNattevåkOppdaterer {
         return perioderTidslinje.toSegments().stream().map(segment ->
             new UnntakEtablertTilsynPeriode(segment.getValue())
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-                /*
-                .medBegrunnelse(segment.getValue().resultat().equals(Resultat.IKKE_VURDERT) ? "" : segment.getValue().begrunnelse())
-                */
         ).toList();
     }
 
