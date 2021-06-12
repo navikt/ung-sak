@@ -4,14 +4,11 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -149,17 +146,15 @@ class MapSøknadUttakPerioder {
     }
 
     private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {
-        if (input == null || input.getPerioder() == null || input.getPerioder().isEmpty()) {
-            return List.of();
-        }
-
         LocalDateTimeline<Boolean> ferieTidslinje = toFerieTidslinje(input.getPerioder().keySet(), true);
         
         /*
          * XXX: Dette er en hack. Vi bør endre til at man for søknadsperioder alltid sender inn en komplett liste med både ferieperioder
          *      man skal ha ... og hvilke som skal fjernes.
          */
-        ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(input.getPerioderSomSkalSlettes().keySet(), false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
+        if (input.getPerioderSomSkalSlettes() != null) {
+            ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(input.getPerioderSomSkalSlettes().keySet(), false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
+        }
         ferieTidslinje = ferieTidslinje.combine(toFerieTidslinje(søknadsperioder, false), StandardCombinators::coalesceLeftHandSide, JoinStyle.CROSS_JOIN);
         
         return ferieTidslinje
