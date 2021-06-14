@@ -81,7 +81,7 @@ public class KompletthetForBeregningTjeneste {
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraRegister(BehandlingReferanse ref) {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraRegisterFunction(arbeidsforholdTjeneste);
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false);
     }
 
     /**
@@ -95,14 +95,14 @@ public class KompletthetForBeregningTjeneste {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true);
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref) {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false);
     }
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
