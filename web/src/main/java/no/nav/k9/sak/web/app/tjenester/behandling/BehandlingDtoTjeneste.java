@@ -308,6 +308,8 @@ public class BehandlingDtoTjeneste {
         leggTilYtelsespesifikkResourceLinks(behandling, dto);
 
         dto.leggTil(get(FagsakRestTjeneste.PATH, "fagsak", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
+        dto.leggTil(getFraMap(FagsakRestTjeneste.RELATERTE_SAKER_PATH, "fagsak-relaterte-saker", uuidQueryParams));
+
         dto.leggTil(get(HistorikkRestTjeneste.PATH, "historikk", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
 
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));

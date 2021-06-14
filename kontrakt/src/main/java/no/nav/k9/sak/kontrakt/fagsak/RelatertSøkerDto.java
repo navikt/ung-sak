@@ -19,7 +19,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
-public class RelatertSøkerDTO {
+public class RelatertSøkerDto {
 
     @JsonProperty(value = "søkerIdent", required = true)
     @Valid
@@ -34,11 +34,11 @@ public class RelatertSøkerDTO {
     @Valid
     private Saksnummer saksnummer;
 
-    protected RelatertSøkerDTO() {
+    protected RelatertSøkerDto() {
         //
     }
 
-    public RelatertSøkerDTO(
+    public RelatertSøkerDto(
             @Valid @NotNull PersonIdent søkerIdent,
             @Valid @NotNull String søkerNavn,
             @Valid @NotNull Saksnummer saksnummer) {

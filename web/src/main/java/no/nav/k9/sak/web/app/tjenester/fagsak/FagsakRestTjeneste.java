@@ -63,7 +63,8 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.fagsak.FagsakDto;
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto;
 import no.nav.k9.sak.kontrakt.fagsak.MatchFagsak;
-import no.nav.k9.sak.kontrakt.fagsak.RelatertSøkerDTO;
+import no.nav.k9.sak.kontrakt.fagsak.RelatertSakDto;
+import no.nav.k9.sak.kontrakt.fagsak.RelatertSøkerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
@@ -85,7 +86,7 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
     public static final String MATCH_PATH = PATH + "/match";
-    public static final String RELATERTE_PSB_SAKER_PATH = PATH + "/pleiepengesakerpasammebarn";
+    public static final String RELATERTE_SAKER_PATH = PATH + "/relatertesaker";
     public static final String PERIODE_PATH = PATH + "/perioder";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
@@ -257,31 +258,31 @@ public class FagsakRestTjeneste {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(RELATERTE_PSB_SAKER_PATH)
-    @Operation(description = "Hent liste over saket tilknyttet en pleietrengende (pt hardkodet til PSB)"
+    @Path(RELATERTE_SAKER_PATH)
+    @Operation(description = "Hent liste over saket tilknyttet en pleietrengende"
         , tags = "fagsak"
         , responses = {
         @ApiResponse(responseCode = "200",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                schema = @Schema(implementation = RelatertSøkerDTO.class)))
+                schema = @Schema(implementation = RelatertSakDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public List<RelatertSøkerDTO> hentRelatertePSBSaker(
+    public RelatertSakDto hentRelaterteSaker(
             @QueryParam(BehandlingUuidDto.NAME)
             @Parameter(description = BehandlingUuidDto.DESC)
             @NotNull
             @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid()); //TODO: utvide for andre ytelsestyper
+        List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(), behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
 
-        return fagsaker.stream()
-            .filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
+        return new RelatertSakDto(fagsaker.stream()
+            //.filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
             .map(f -> {
                 Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(f.getAktørId());
-                return new RelatertSøkerDTO(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer());
-            }).collect(Collectors.toList());
+                return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer());
+            }).collect(Collectors.toList()));
     }
 
     private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {

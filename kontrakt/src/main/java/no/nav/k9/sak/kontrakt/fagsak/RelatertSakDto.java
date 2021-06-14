@@ -22,34 +22,21 @@ import no.nav.k9.sak.typer.PersonIdent;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
-public class RelaterteSakerDTO {
-
-    @JsonProperty(value = "ytelseType", required = true)
-    @Valid
-    @NotNull
-    private FagsakYtelseType ytelseType;
-
-    @JsonProperty(value = "bruker", required = false)
-    @Valid
-    private PersonIdent pleietrengendeIdent;
+public class RelatertSakDto {
 
     @JsonInclude(value = Include.NON_ABSENT)
-    @JsonProperty(value = "pleietrengendeIdenter", required = false)
+    @JsonProperty(value = "relaterteSøkere", required = false)
     @Size(max = 20)
     @Valid
-    private List<RelatertSøkerDTO> relaterteSøkere;
+    private List<RelatertSøkerDto> relaterteSøkere;
 
 
-    protected RelaterteSakerDTO() {
+    protected RelatertSakDto() {
         //
     }
 
-    public RelaterteSakerDTO(
-            @Valid @NotNull FagsakYtelseType ytelseType,
-            @Valid @NotNull PersonIdent pleietrengendeIdent,
-            @Valid @NotNull List<RelatertSøkerDTO> relaterteSøkere) {
-        this.ytelseType = ytelseType;
-        this.pleietrengendeIdent = pleietrengendeIdent;
+    public RelatertSakDto(
+            @Valid @NotNull List<RelatertSøkerDto> relaterteSøkere) {
         this.relaterteSøkere = relaterteSøkere;
     }
 }
