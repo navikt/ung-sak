@@ -278,7 +278,7 @@ public class FagsakRestTjeneste {
         List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(), behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
 
         return new RelatertSakDto(fagsaker.stream()
-            //.filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
+            .filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
             .map(f -> {
                 Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(f.getAktørId());
                 return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer());

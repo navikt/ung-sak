@@ -2,6 +2,8 @@ package no.nav.k9.sak.kontrakt.fagsak;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -22,11 +24,14 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class RelatertSøkerDto {
 
     @JsonProperty(value = "søkerIdent", required = true)
+    @NotNull
     @Valid
     private PersonIdent søkerIdent;
 
     @JsonProperty(value = "søkerNavn", required = true)
-    @Valid
+    @NotNull
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String søkerNavn;
 
     @JsonProperty(value = "saksnummer", required = true)
