@@ -96,25 +96,10 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
             .filter(SykdomDokument::isHarInfoSomIkkeKanPunsjes)
             .map(d -> new DokumentMedUstrukturerteDataDto(
                 "" + d.getId(),
-                hentTittel(d.getJournalpostId()),
                 d.getType(),
                 d.getDatert(),
                 Arrays.asList(linkForGetDokumentinnhold(behandlingUuid.getBehandlingUuid().toString(), "" + d.getId()))))
             .collect(Collectors.toList());
-    }
-
-    private String hentTittel(JournalpostId journalpostId) {
-        var query = new JournalpostQueryRequest();
-        query.setJournalpostId(journalpostId.getVerdi());
-        var projection = new JournalpostResponseProjection()
-            .kanal()
-            .journalposttype()
-            .dokumenter(new DokumentInfoResponseProjection()
-                .dokumentInfoId()
-                .tittel());
-        var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-
-        return journalpost.getTittel();
     }
 
     private ResourceLink linkForGetDokumentinnhold(String behandlingUuid, String sykdomDokumentId) {

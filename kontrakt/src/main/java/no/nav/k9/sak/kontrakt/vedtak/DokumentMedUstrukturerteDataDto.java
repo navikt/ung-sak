@@ -29,10 +29,6 @@ public class DokumentMedUstrukturerteDataDto {
     @Valid
     private String id;
 
-    @JsonProperty(value = "tittel")
-    @Valid
-    private String tittel;
-
     @JsonProperty(value = "type")
     @Valid
     private SykdomDokumentType type;
@@ -48,12 +44,10 @@ public class DokumentMedUstrukturerteDataDto {
 
     public DokumentMedUstrukturerteDataDto(
             String id,
-            String tittel,
             SykdomDokumentType type,
             LocalDate datert,
             List<ResourceLink> links) {
         this.id = id;
-        this.tittel = tittel;
         this.type = type;
         this.datert = datert;
         this.links = links;
