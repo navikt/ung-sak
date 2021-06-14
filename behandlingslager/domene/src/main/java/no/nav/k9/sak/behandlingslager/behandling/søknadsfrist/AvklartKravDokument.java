@@ -42,6 +42,9 @@ public class AvklartKravDokument extends BaseEntitet implements IndexKey {
     @Column(name = "godkjent_fra_dato")
     private LocalDate godkjentFraDato;
 
+    @Column(name = "begrunnelse")
+    private String begrunnelse;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
