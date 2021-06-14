@@ -42,21 +42,29 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingOpprettingDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.behandling.SakRettigheterDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.fagsak.FagsakDto;
 import no.nav.k9.sak.kontrakt.fagsak.FagsakInfoDto;
 import no.nav.k9.sak.kontrakt.fagsak.MatchFagsak;
+import no.nav.k9.sak.kontrakt.fagsak.RelatertSakDto;
+import no.nav.k9.sak.kontrakt.fagsak.RelatertSøkerDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.person.PersonDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
@@ -78,6 +86,7 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
     public static final String MATCH_PATH = PATH + "/match";
+    public static final String RELATERTE_SAKER_PATH = PATH + "/relatertesaker";
     public static final String PERIODE_PATH = PATH + "/perioder";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
@@ -86,16 +95,22 @@ public class FagsakRestTjeneste {
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
+    private PersoninfoAdapter personinfoAdapter;
+    private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste, PersoninfoAdapter personinfoAdapter, BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
+        this.personinfoAdapter = personinfoAdapter;
+        this.behandlingRepository = behandlingRepository;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @GET
@@ -239,6 +254,35 @@ public class FagsakRestTjeneste {
             matchFagsak.getPleietrengendeIdenter(),
             matchFagsak.getRelatertPersonIdenter());
         return fagsaker;
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(RELATERTE_SAKER_PATH)
+    @Operation(description = "Hent liste over saket tilknyttet en pleietrengende"
+        , tags = "fagsak"
+        , responses = {
+        @ApiResponse(responseCode = "200",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = RelatertSakDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public RelatertSakDto hentRelaterteSaker(
+            @QueryParam(BehandlingUuidDto.NAME)
+            @Parameter(description = BehandlingUuidDto.DESC)
+            @NotNull
+            @Valid
+            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+            BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid()); //TODO: utvide for andre ytelsestyper
+        List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(), behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
+
+        return new RelatertSakDto(fagsaker.stream()
+            .filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
+            .map(f -> {
+                Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(f.getAktørId());
+                return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer());
+            }).collect(Collectors.toList()));
     }
 
     private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {
