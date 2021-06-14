@@ -87,23 +87,6 @@ public class Kompletthetskontroller {
         }
     }
 
-    public void vurderKompletthetForKøetBehandling(Behandling behandling) {
-        List<AksjonspunktDefinisjon> autoPunkter = kompletthetModell.rangerKompletthetsfunksjonerKnyttetTilAutopunkt(behandling.getFagsakYtelseType(),
-            behandling.getType());
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
-        for (AksjonspunktDefinisjon autopunkt : autoPunkter) {
-            KompletthetResultat kompletthetResultat = kompletthetModell.vurderKompletthet(ref, autopunkt);
-            if (!kompletthetResultat.erOppfylt()) {
-                // Et av kompletthetskriteriene er ikke oppfylt, og evt. brev er sendt ut. Logger historikk og avbryter
-                if (!kompletthetResultat.erFristUtløpt()) {
-                    dokumentmottakerFelles.opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling,
-                        HistorikkinnslagType.BEH_VENT, kompletthetResultat.getVentefrist(), kompletthetResultat.getVenteårsak());
-                }
-                return;
-            }
-        }
-    }
-
     private void spolKomplettBehandlingTilStartpunkt(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
         // Behandling er komplett - nullstill venting
         if (behandling.isBehandlingPåVent()) {

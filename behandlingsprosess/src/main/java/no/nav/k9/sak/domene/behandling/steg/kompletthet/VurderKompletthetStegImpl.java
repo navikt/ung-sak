@@ -39,9 +39,9 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
     @Inject
     public VurderKompletthetStegImpl(@Any Instance<Kompletthetsjekker> kompletthetsjekker,
-                                       BehandlingRepositoryProvider provider,
-                                       VurderKompletthetStegFelles vurderKompletthetStegFelles,
-                                       SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                     BehandlingRepositoryProvider provider,
+                                     VurderKompletthetStegFelles vurderKompletthetStegFelles,
+                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
         this.kompletthetsjekkerInstances = kompletthetsjekker;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = provider.getBehandlingRepository();

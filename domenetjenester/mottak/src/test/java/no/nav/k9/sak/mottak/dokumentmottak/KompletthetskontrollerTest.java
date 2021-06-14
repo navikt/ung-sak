@@ -164,43 +164,6 @@ public class KompletthetskontrollerTest {
         verify(behandlingProsesseringTjeneste).opprettTasksForFortsettBehandling(behandling);
     }
 
-    @Test
-    public void skal_opprette_historikkinnslag_for_tidlig_mottatt_søknad() {
-        // Arrange
-        LocalDateTime frist = LocalDateTime.now().minusSeconds(30);
-        when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.FOR_TIDLIG_SOKNAD));
-        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
-
-        // Act
-        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        kompletthetskontroller.vurderKompletthetForKøetBehandling(behandling);
-
-        // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
-            Venteårsak.FOR_TIDLIG_SOKNAD);
-    }
-
-    @Test
-    public void skal_opprette_historikkinnslag_ikke_komplett() {
-        // Arrange
-        LocalDateTime frist = LocalDateTime.now();
-        when(kompletthetsjekker.vurderSøknadMottattForTidlig(any())).thenReturn(KompletthetResultat.oppfylt());
-        when(kompletthetsjekker.vurderForsendelseKomplett(any())).thenReturn(KompletthetResultat.ikkeOppfylt(frist, Venteårsak.AVV_DOK));
-        when(kompletthetsjekker.vurderEtterlysningInntektsmelding(any())).thenReturn(KompletthetResultat.oppfylt());
-        when(behandlingskontrollTjeneste.inneholderSteg(any(), any(), any())).thenReturn(true);
-        mottatteDokumentTjeneste.persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-
-        // Act
-        kompletthetskontroller.vurderKompletthetForKøetBehandling(behandling);
-
-        // Assert
-        verify(mottatteDokumentTjeneste).persisterInntektsmeldingForBehandling(behandling, List.of(mottattDokument));
-        verify(dokumentmottakerFelles).opprettHistorikkinnslagForVenteFristRelaterteInnslag(behandling, HistorikkinnslagType.BEH_VENT, frist,
-            Venteårsak.AVV_DOK);
-    }
-
     @ApplicationScoped
     @FagsakYtelseTypeRef("OBSOLETE")
     @BehandlingTypeRef
