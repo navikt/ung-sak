@@ -36,6 +36,8 @@ class MapUttakTest {
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(),
             List.of(),
+            List.of(),
+            List.of(),
             List.of()));
 
         var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
@@ -57,6 +59,8 @@ class MapUttakTest {
         var timerPleieAvBarnetPerDag1 = Duration.ofHours(4);
         var perioderFraSøknader = Set.of(new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(periodeDel1, timerPleieAvBarnetPerDag), new UttakPeriode(periodeDel2, timerPleieAvBarnetPerDag1)),
+            List.of(),
+            List.of(),
             List.of(),
             List.of(),
             List.of()));
@@ -86,9 +90,13 @@ class MapUttakTest {
             List.of(new UttakPeriode(periodeDel1, varighet)),
             List.of(),
             List.of(),
+            List.of(),
+            List.of(),
             List.of()),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
+                List.of(),
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of()));
