@@ -182,13 +182,6 @@ public class MapArbeid {
             .collect(Collectors.toSet());
     }
 
-    private boolean erInnaktivVedPerioden(List<VilkårPeriode> perioderTilVurdering) {
-        if (perioderTilVurdering.size() > 1) {
-            throw new IllegalStateException("Forventer at perioden bare overlapper med en vurdering");
-        }
-        return perioderTilVurdering.stream().anyMatch(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()));
-    }
-
     private Duration justerIHenholdTilAntallet(long antallLinjerPerArbeidsgiver, Duration duration) {
         if (Duration.ZERO.equals(duration) || antallLinjerPerArbeidsgiver == 0 || antallLinjerPerArbeidsgiver == 1) {
             return duration;
