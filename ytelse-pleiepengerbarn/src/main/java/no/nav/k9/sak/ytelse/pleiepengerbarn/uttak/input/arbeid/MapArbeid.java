@@ -63,8 +63,8 @@ public class MapArbeid {
                 .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()))
                 .collect(Collectors.toList()) : List.of();
 
-            var midlertidigInaktivPeriode = new HashSet<DatoIntervallEntitet>();
-            mapInaktivePerioder(arbeidsforhold, vilkårPerioder, midlertidigInaktivPeriode);
+            var midlertidigInaktivPeriode = mapInaktivePerioder(arbeidsforhold, vilkårPerioder);
+
             kravDokumenter.stream()
                 .sorted(KravDokument::compareTo)
                 .forEachOrdered(at -> prosesserDokument(perioderFraSøknader, periode, identifikatorerFraInntektsmelding, arbeidsforhold, midlertidigInaktivPeriode, at));
@@ -81,13 +81,17 @@ public class MapArbeid {
             .collect(Collectors.toList());
     }
 
-    private void mapInaktivePerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, List<VilkårPeriode> vilkårPerioder, HashSet<DatoIntervallEntitet> midlertidigInaktivPeriode) {
+    private HashSet<DatoIntervallEntitet> mapInaktivePerioder(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, List<VilkårPeriode> vilkårPerioder) {
+        var midlertidigInaktivPeriode = new HashSet<DatoIntervallEntitet>();
+
         for (VilkårPeriode vilkårPeriode : vilkårPerioder) {
             var vp = vilkårPeriode.getPeriode();
             arbeidsforhold.put(new AktivitetIdentifikator(UttakArbeidType.INAKTIV, null, null),
                 new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, UttakArbeidType.INAKTIV, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))))));
             midlertidigInaktivPeriode.add(vp);
         }
+
+        return midlertidigInaktivPeriode;
     }
 
     private void prosesserDokument(Set<PerioderFraSøknad> perioderFraSøknader, DatoIntervallEntitet periode, Set<AktivitetIdentifikator> identifikatorerFraInntektsmelding, Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashSet<DatoIntervallEntitet> midlertidigInaktivPeriode, KravDokument at) {
