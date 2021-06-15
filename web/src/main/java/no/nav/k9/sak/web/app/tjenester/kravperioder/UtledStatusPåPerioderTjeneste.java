@@ -13,6 +13,7 @@ import javax.enterprise.context.Dependent;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
@@ -133,7 +134,19 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private List<LocalDateSegment<ÅrsakerTilVurdering>> tilSegments(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> entry, ÅrsakTilVurdering årsakTilVurdering) {
-        return entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(årsakTilVurdering)))).collect(Collectors.toList());
+        var tidslinjer = entry.getValue()
+            .stream()
+            .map(it -> new LocalDateTimeline<>(List.of(new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(årsakTilVurdering))))))
+            .collect(Collectors.toList());
+
+        var tidslinjen = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
+        for (LocalDateTimeline<ÅrsakerTilVurdering> tidslinje : tidslinjer) {
+            tidslinjen = tidslinjen.combine(tidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return tidslinjen.compress()
+            .toSegments()
+            .stream()
+            .toList();
     }
 
     private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,
