@@ -17,8 +17,8 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -35,6 +35,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt.UtledetEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
@@ -69,34 +70,32 @@ public class EtablertTilsynTjeneste {
         final var tilsynsgrunnlagPåTversAvFagsaker = hentAllePerioderTilVurdering(behandlingRef.getPleietrengendeAktørId(), behandlingRef.getFagsakPeriode());
         return byggTidslinje(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
     }
-    
+
     public EtablertTilsyn utledGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
         final LocalDateTimeline<UtledetEtablertTilsyn> tilsynstidslinje = beregnTilsynstidlinje(behandlingRef);
-        
+
         final List<EtablertTilsynPeriode> tilsynsperioder = tilsynstidslinje.stream()
             .map(s -> new EtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getVarighet(), s.getValue().getJournalpostId()))
             .collect(Collectors.toList());
-        
-        final EtablertTilsyn etablertTilsyn = new EtablertTilsyn(tilsynsperioder);
-        return etablertTilsyn;
+
+        return new EtablertTilsyn(tilsynsperioder);
     }
-    
+
     public void opprettGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
         final EtablertTilsyn etablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
         etablertTilsynRepository.lagre(behandlingRef.getBehandlingId(), etablertTilsyn);
     }
-    
+
     public LocalDateTimeline<Boolean> finnForskjellerSidenForrigeBehandling(BehandlingReferanse behandlingRef) {
         final var behandlingOpt = behandlingRef.getOriginalBehandlingId();
-        final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt
-                .map(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId).orElse(null))
-                .map(g -> g.getEtablertTilsyn())
+        final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt.flatMap(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId))
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
                 .orElse(new EtablertTilsyn(List.of()));
         final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
-        
+
         final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
         final LocalDateTimeline<Duration> nyBehandlingEtablertTilsynTidslinje = tilTidslinje(nyBehandlingtablertTilsyn);
-        
+
         return forrigeBehandlingEtablertTilsynTidslinje.combine(nyBehandlingEtablertTilsynTidslinje, new LocalDateSegmentCombinator<Duration, Duration, Boolean>() {
             @Override
             public LocalDateSegment<Boolean> combine(LocalDateInterval datoInterval,
