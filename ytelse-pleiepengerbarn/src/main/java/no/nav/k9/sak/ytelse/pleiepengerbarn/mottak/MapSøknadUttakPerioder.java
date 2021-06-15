@@ -19,14 +19,18 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.BeredskapPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.NattevåkPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.Tilsynsordning;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.TilsynsordningPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.ytelse.psb.v1.Beredskap;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
+import no.nav.k9.søknad.ytelse.psb.v1.Nattevåk;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 import no.nav.k9.søknad.ytelse.psb.v1.Uttak;
 import no.nav.k9.søknad.ytelse.psb.v1.arbeidstid.Arbeidstaker;
@@ -171,6 +175,42 @@ class MapSøknadUttakPerioder {
                 .collect(Collectors.toList())
                 );
     }
+    
+    private List<BeredskapPeriode> mapBeredskap(Beredskap beredskap) {
+        final List<BeredskapPeriode> beredskapsperioder = beredskap.getPerioder()
+                .entrySet()
+                .stream()
+                .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
+                .collect(Collectors.toList());
+        
+        if (beredskap.getPerioderSomSkalSlettes() != null) {
+            beredskapsperioder.addAll(beredskap.getPerioderSomSkalSlettes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> new BeredskapPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
+                    .collect(Collectors.toList()));
+        }
+        
+        return beredskapsperioder;
+    }
+    
+    private List<NattevåkPeriode> mapNattevåk(Nattevåk nattevåk) {
+        final List<NattevåkPeriode> nattevåkperioder = nattevåk.getPerioder()
+                .entrySet()
+                .stream()
+                .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), true, entry.getValue().getTilleggsinformasjon()))
+                .collect(Collectors.toList());
+        
+        if (nattevåk.getPerioderSomSkalSlettes() != null) {
+            nattevåkperioder.addAll(nattevåk.getPerioderSomSkalSlettes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> new NattevåkPeriode(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), false, entry.getValue().getTilleggsinformasjon()))
+                    .collect(Collectors.toList()));
+        }
+        
+        return nattevåkperioder;
+    }
 
     private Collection<UttakPeriode> mapUttak(Uttak uttak) {
         if (uttak == null || uttak.getPerioder() == null) {
@@ -187,8 +227,10 @@ class MapSøknadUttakPerioder {
         var tilsynsordning = mapOppgittTilsynsordning(ytelse.getTilsynsordning());
         var uttaksperioder = mapUttak(ytelse.getUttak());
         var ferie = mapFerie(ytelse.getSøknadsperiodeList(), ytelse.getLovbestemtFerie());
+        var beredskap = mapBeredskap(ytelse.getBeredskap());
+        var nattevåk = mapNattevåk(ytelse.getNattevåk());
 
-        return new PerioderFraSøknad(journalpostId, uttaksperioder, arbeidperioder, tilsynsordning, ferie);
+        return new PerioderFraSøknad(journalpostId, uttaksperioder, arbeidperioder, tilsynsordning, ferie, beredskap, nattevåk);
     }
 
 }

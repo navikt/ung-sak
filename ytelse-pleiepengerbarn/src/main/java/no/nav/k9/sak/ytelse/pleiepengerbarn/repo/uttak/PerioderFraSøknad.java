@@ -69,6 +69,18 @@ public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
     @JoinColumn(name = "holder_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<FeriePeriode> ferie;
+    
+    @ChangeTracked
+    @BatchSize(size = 20)
+    @JoinColumn(name = "holder_id", nullable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    private Set<BeredskapPeriode> beredskap;
+    
+    @ChangeTracked
+    @BatchSize(size = 20)
+    @JoinColumn(name = "holder_id", nullable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    private Set<NattevåkPeriode> nattevåk;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -96,18 +108,30 @@ public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
             .stream()
             .map(FeriePeriode::new)
             .collect(Collectors.toSet());
+        this.beredskap = periode.getBeredskap()
+                .stream()
+                .map(BeredskapPeriode::new)
+                .collect(Collectors.toSet());
+        this.nattevåk = periode.getNattevåk()
+                .stream()
+                .map(NattevåkPeriode::new)
+                .collect(Collectors.toSet());
     }
 
     public PerioderFraSøknad(JournalpostId journalpostId,
                              Collection<UttakPeriode> uttakPerioder,
                              Collection<ArbeidPeriode> arbeidPerioder,
                              Collection<Tilsynsordning> tilsynsorning,
-                             Collection<FeriePeriode> ferie) {
+                             Collection<FeriePeriode> ferie,
+                             Collection<BeredskapPeriode> beredskap,
+                             Collection<NattevåkPeriode> nattevåk) {
         this.journalpostId = journalpostId;
         this.uttakPerioder = new LinkedHashSet<>(Objects.requireNonNull(uttakPerioder));
         this.arbeidPerioder = new LinkedHashSet<>(Objects.requireNonNull(arbeidPerioder));
         this.tilsynsordning = new LinkedHashSet<>(Objects.requireNonNull(tilsynsorning));
         this.ferie = new LinkedHashSet<>(Objects.requireNonNull(ferie));
+        this.beredskap = new LinkedHashSet<>(Objects.requireNonNull(beredskap));
+        this.nattevåk = new LinkedHashSet<>(Objects.requireNonNull(nattevåk));
     }
 
     public Long getId() {
@@ -132,6 +156,14 @@ public class PerioderFraSøknad extends BaseEntitet implements IndexKey {
 
     public Set<FeriePeriode> getFerie() {
         return Collections.unmodifiableSet(ferie);
+    }
+    
+    public Set<BeredskapPeriode> getBeredskap() {
+        return Collections.unmodifiableSet(beredskap);
+    }
+    
+    public Set<NattevåkPeriode> getNattevåk() {
+        return Collections.unmodifiableSet(nattevåk);
     }
 
     public DatoIntervallEntitet utledSøktPeriode() {

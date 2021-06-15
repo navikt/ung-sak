@@ -56,6 +56,8 @@ class MapArbeidTest {
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
             List.of(),
+            List.of(),
+            List.of(),
             List.of()));
 
         var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, Set.of(), opprettVilkår(tidlinjeTilVurdering));
@@ -83,6 +85,8 @@ class MapArbeidTest {
             List.of(new UttakPeriode(periodeDel1, timerPleieAvBarnetPerDag), new UttakPeriode(periodeDel2, timerPleieAvBarnetPerDag1)),
             List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1)),
                 new ArbeidPeriode(arbeidsperiode1, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(7))),
+            List.of(),
+            List.of(),
             List.of(),
             List.of()));
 
@@ -112,10 +116,14 @@ class MapArbeidTest {
                 List.of(new UttakPeriode(periodeDel1, varighet)),
                 List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
                 List.of(),
+                List.of(),
+                List.of(),
                 List.of()),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
                 List.of(new ArbeidPeriode(arbeidsperiode1, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(7))),
+                List.of(),
+                List.of(),
                 List.of(),
                 List.of()));
 
@@ -145,10 +153,14 @@ class MapArbeidTest {
                 List.of(new UttakPeriode(periodeDel1, varighet)),
                 List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
                 List.of(),
+                List.of(),
+                List.of(),
                 List.of()),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
                 List.of(new ArbeidPeriode(arbeidsperiode1, UttakArbeidType.ARBEIDSTAKER, Arbeidsgiver.virksomhet(arbeidsgiverOrgnr), InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(7))),
+                List.of(),
+                List.of(),
                 List.of(),
                 List.of()));
 
@@ -179,10 +191,14 @@ class MapArbeidTest {
                 List.of(new UttakPeriode(periodeDel1, varighet)),
                 List.of(new ArbeidPeriode(arbeidsperiode, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(1))),
                 List.of(),
+                List.of(),
+                List.of(),
                 List.of()),
             new PerioderFraSøknad(journalpostId1,
                 List.of(new UttakPeriode(periodeDel2, Duration.ZERO)),
                 List.of(new ArbeidPeriode(arbeidsperiode1, UttakArbeidType.ARBEIDSTAKER, virksomhet, InternArbeidsforholdRef.nullRef(), Duration.ofHours(8), Duration.ofHours(7))),
+                List.of(),
+                List.of(),
                 List.of(),
                 List.of()));
 
