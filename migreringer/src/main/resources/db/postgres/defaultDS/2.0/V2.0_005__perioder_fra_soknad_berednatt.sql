@@ -1,4 +1,4 @@
-create table if not exists UP_BEREDKSAP_PERIODE
+create table if not exists UP_BEREDSKAP_PERIODE
 (
     ID               BIGINT                                 NOT NULL PRIMARY KEY,
     HOLDER_ID        BIGINT REFERENCES UP_SOEKNAD_PERIODER (id),
