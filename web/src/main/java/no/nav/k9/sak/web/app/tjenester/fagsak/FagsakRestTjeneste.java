@@ -275,6 +275,9 @@ public class FagsakRestTjeneste {
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid()); //TODO: utvide for andre ytelsestyper
+        if (behandling.getFagsak().getPleietrengendeAktørId() == null) {
+            return new RelatertSakDto(List.of());
+        }
         List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(), behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
 
         return new RelatertSakDto(fagsaker.stream()
